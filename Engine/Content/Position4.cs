@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -130,7 +130,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position4 operator /(float scale, Position4 value)
         {
-            return scale / (Vector4)value;
+            return Vector4.Divide(new(scale), value);
         }
         /// <inheritdoc/>
         public static Position4 operator /(Position4 value, Position4 scale)
@@ -140,22 +140,22 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position4 operator +(Position4 value, float scalar)
         {
-            return (Vector4)value + scalar;
+            return Vector4.Add(value, new(scalar));
         }
         /// <inheritdoc/>
         public static Position4 operator +(float scalar, Position4 value)
         {
-            return scalar + (Vector4)value;
+            return Vector4.Add(new(scalar), value);
         }
         /// <inheritdoc/>
         public static Position4 operator -(Position4 value, float scalar)
         {
-            return (Vector4)value - scalar;
+            return Vector4.Subtract(value, new(scalar));
         }
         /// <inheritdoc/>
         public static Position4 operator -(float scalar, Position4 value)
         {
-            return scalar - (Vector4)value;
+            return Vector4.Subtract(new(scalar), value);
         }
 
         /// <inheritdoc/>
@@ -198,10 +198,10 @@ namespace Engine.Content
         public readonly bool Equals(ref Position4 other)
         {
             return
-                MathUtil.NearEqual(other.X, X) &&
-                MathUtil.NearEqual(other.Y, Y) &&
-                MathUtil.NearEqual(other.Z, Z) &&
-                MathUtil.NearEqual(other.W, W);
+                Helper.NearEqual(other.X, X) &&
+                Helper.NearEqual(other.Y, Y) &&
+                Helper.NearEqual(other.Z, Z) &&
+                Helper.NearEqual(other.W, W);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()

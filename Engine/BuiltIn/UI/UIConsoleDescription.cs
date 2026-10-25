@@ -1,6 +1,7 @@
 ﻿using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -26,7 +27,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default console description
         /// </summary>
         /// <param name="backgroundColor">Background color</param>
-        public static UIConsoleDescription Default(Color4 backgroundColor)
+        public static UIConsoleDescription Default(Vector4 backgroundColor)
         {
             return new()
             {

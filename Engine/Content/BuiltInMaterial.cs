@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Content
 {
@@ -10,15 +10,15 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Color3 AmbientColor { get; set; }
+        public Vector3 AmbientColor { get; set; }
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor { get; set; }
+        public Vector4 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color3 SpecularColor { get; set; }
+        public Vector3 SpecularColor { get; set; }
         /// <summary>
         /// Shininess factor
         /// </summary>

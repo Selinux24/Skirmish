@@ -1,5 +1,5 @@
 ﻿using Engine;
-using SharpDX;
+using System.Numerics;
 
 namespace IntermediateSamples.SceneTransforms
 {
@@ -29,7 +29,7 @@ namespace IntermediateSamples.SceneTransforms
 
             Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-            if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
+            if (Helper.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
             {
                 Active = false;
 

@@ -2,11 +2,12 @@
 using Engine.Common;
 using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Content
 {
@@ -43,7 +44,7 @@ namespace EngineTests.Content
         {
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Matrix.Identity);
+            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Matrix4x4.Identity);
             subMeshcontent.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {
@@ -55,7 +56,7 @@ namespace EngineTests.Content
 
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points = res["default"].First().Value.GetPoints();
-            var bounds = BoundingBox.FromPoints([.. points]);
+            var bounds = BoundingBox.CreateFromPoints([.. points]);
 
             Assert.AreEqual(cubeMedium, bounds);
         }
@@ -71,9 +72,9 @@ namespace EngineTests.Content
 
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Matrix.Scaling(2));
+            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Matrix4x4.CreateScale(2));
             subMeshcontent1.SetVertices(data);
-            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Matrix.Scaling(0.5f));
+            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Matrix4x4.CreateScale(0.5f));
             subMeshcontent2.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {
@@ -88,8 +89,8 @@ namespace EngineTests.Content
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points1 = res["default"]["defaultMat1"].GetPoints();
             var points2 = res["default"]["defaultMat2"].GetPoints();
-            var bounds1 = BoundingBox.FromPoints([.. points1]);
-            var bounds2 = BoundingBox.FromPoints([.. points2]);
+            var bounds1 = BoundingBox.CreateFromPoints([.. points1]);
+            var bounds2 = BoundingBox.CreateFromPoints([.. points2]);
 
             Assert.AreEqual(cubeBig, bounds1);
             Assert.AreEqual(cubeSmall, bounds2);
@@ -98,7 +99,7 @@ namespace EngineTests.Content
             Assert.IsNotNull(dd);
 
             var points = dd.GetPoints();
-            var bounds = BoundingBox.FromPoints([.. points]);
+            var bounds = BoundingBox.CreateFromPoints([.. points]);
             Assert.AreEqual(cubeBig, bounds);
         }
     }

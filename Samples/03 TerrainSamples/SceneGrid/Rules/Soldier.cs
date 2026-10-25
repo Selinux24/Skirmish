@@ -589,7 +589,7 @@ namespace TerrainSamples.SceneGrid.Rules
         }
         private void AnimateLib(string animation)
         {
-            Logger.WriteDebug(this, animation);
+            Game.Logger.WriteDebug(this, animation);
         }
 
         public override string ToString()

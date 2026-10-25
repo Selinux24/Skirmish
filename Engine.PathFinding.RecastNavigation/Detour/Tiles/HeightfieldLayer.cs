@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -125,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 Connections = cons,
             };
         }
-     
+
         /// <summary>
         /// Copies height and area from compact heightfield. 
         /// </summary>

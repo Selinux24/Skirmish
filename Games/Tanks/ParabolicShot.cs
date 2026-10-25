@@ -1,6 +1,6 @@
 ﻿using Engine;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace Tanks
 {
@@ -80,7 +80,7 @@ namespace Tanks
         public float GetTimeOfFlight(Vector3 shooterPosition, Vector3 targetPosition)
         {
             float h = shooterPosition.Y - targetPosition.Y;
-            if (MathUtil.IsZero(h))
+            if (Helper.IsZero(h))
             {
                 return 2f * verticalVelocity / g;
             }

@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding
 {
@@ -82,7 +82,7 @@ namespace Engine.PathFinding
             }
             else
             {
-                this.normals.AddRange(Helper.CreateArray(positions.Count(), Vector3.Up));
+                this.normals.AddRange(Helper.CreateArray(positions.Count(), Vector3Extensions.Up));
             }
         }
 
@@ -141,7 +141,7 @@ namespace Engine.PathFinding
                 return;
             }
 
-            Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
+            Game.Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
 
             var lPositions = new List<Vector3>();
             var lNormals = new List<Vector3>();

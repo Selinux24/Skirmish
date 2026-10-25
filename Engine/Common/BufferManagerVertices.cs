@@ -11,7 +11,7 @@ namespace Engine.Common
     /// Constructor
     /// </remarks>
     public class BufferManagerVertices<T>(bool dynamic) : IEngineVertexBufferDescriptor
-        where T : struct, IVertexData
+        where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Data list
@@ -20,7 +20,7 @@ namespace Engine.Common
         /// <summary>
         /// Data stride
         /// </summary>
-        private readonly int stride = default(T).GetStride();
+        private readonly uint stride = default(T).GetStride();
         /// <summary>
         /// Input element list
         /// </summary>
@@ -35,13 +35,13 @@ namespace Engine.Common
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; private set; } = 0;
+        public uint AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
         public bool Allocated { get; private set; } = false;
         /// <inheritdoc/>
-        public int Allocations { get; private set; } = 0;
+        public uint Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -56,14 +56,14 @@ namespace Engine.Common
         public BufferDescriptor InstancingDescriptor { get; set; } = null;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public uint GetStride()
         {
             return stride;
         }
         /// <inheritdoc/>
-        public int SizeInBytes()
+        public uint SizeInBytes()
         {
-            return data.Count * stride;
+            return (uint)data.Count * stride;
         }
         /// <inheritdoc/>
         public EngineInputElement[] GetInput(bool instanced)
@@ -100,7 +100,7 @@ namespace Engine.Common
             }
 
             //Get the input element list from the vertex data
-            var inputs = default(T).GetInput(BufferIndex);
+            var inputs = default(T).GetInput((uint)BufferIndex);
 
             //Adds the input list
             input.AddRange(inputs);
@@ -128,10 +128,10 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<T> vertices)
         {
-            int offset;
+            uint offset;
 
             //Store current data index as descriptor offset
-            offset = data.Count;
+            offset = (uint)data.Count;
             //Add items to data list
             data.AddRange(vertices);
 
@@ -139,7 +139,7 @@ namespace Engine.Common
             descriptor.Id = id;
             descriptor.BufferDescriptionIndex = bufferDescriptionIndex;
             descriptor.BufferOffset = offset;
-            descriptor.Count = vertices.Count();
+            descriptor.Count = (uint)vertices.Count();
 
             vertexDescriptors.Add(descriptor);
         }
@@ -149,7 +149,7 @@ namespace Engine.Common
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                data.RemoveRange((int)descriptor.BufferOffset, (int)descriptor.Count);
             }
 
             //Remove descriptor

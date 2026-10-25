@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     [Flags]
     public enum EngineBinds

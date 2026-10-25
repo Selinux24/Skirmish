@@ -1,6 +1,6 @@
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Physics.Colliders
 {
@@ -26,10 +26,10 @@ namespace Engine.Physics.Colliders
         {
             this.triangle = triangle;
 
-            vertices = triangle.GetVertices().ToArray();
+            vertices = [.. triangle.GetVertices()];
 
-            boundingBox = SharpDXExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = SharpDXExtensions.BoundingSphereFromPoints(vertices);
+            boundingBox = BoundingBoxExtensions.BoundingBoxFromPoints(vertices);
+            boundingSphere = BoundingSphereExtensions.BoundingSphereFromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 
@@ -59,7 +59,7 @@ namespace Engine.Physics.Colliders
 
             var trn = RigidBody.Transform;
             var verts = vertices.ToArray();
-            Vector3.TransformCoordinate(verts, ref trn, verts);
+            Vector3Extensions.TransformCoordinate(verts, ref trn, verts);
             return verts;
         }
 

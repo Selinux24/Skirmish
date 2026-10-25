@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Water
@@ -61,13 +61,13 @@ namespace Engine.BuiltIn.Drawers.Water
             /// Water color
             /// </summary>
             [FieldOffset(16)]
-            public Color4 WaterColor;
+            public Vector4 WaterColor;
 
             /// <summary>
             /// Base color
             /// </summary>
             [FieldOffset(32)]
-            public Color3 BaseColor;
+            public Vector3 BaseColor;
 
             /// <summary>
             /// Steps
@@ -86,9 +86,9 @@ namespace Engine.BuiltIn.Drawers.Water
             public uint ColorIterations;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerWater>();
+                return (uint)Marshal.SizeOf<PerWater>();
             }
         }
 

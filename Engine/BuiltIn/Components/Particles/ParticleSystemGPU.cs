@@ -3,8 +3,8 @@ using Engine.BuiltIn.Drawers.Particles;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -16,7 +16,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Assigned buffer slot
         /// </summary>
-        public static int BufferSlot { get; set; } = 0;
+        public static uint BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Emitter initialization buffer
@@ -63,9 +63,9 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Active particle count
         /// </summary>
-        public int ActiveParticles { get; }
+        public uint ActiveParticles { get; }
         /// <inheritdoc/>
-        public int MaxConcurrentParticles { get; private set; }
+        public uint MaxConcurrentParticles { get; private set; }
         /// <summary>
         /// Time to end
         /// </summary>
@@ -100,7 +100,7 @@ namespace Engine.BuiltIn.Components.Particles
             var textureCount = (uint)imgContent.Count;
 
             emitter.UpdateBounds(pParameters);
-            int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            uint maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
             var res = new ParticleSystemGpu
@@ -169,9 +169,9 @@ namespace Engine.BuiltIn.Components.Particles
         /// </summary>
         /// <returns>Returns the estimated buffer length</returns>
         /// <remarks>The maximum length of the buffer is 5000</remarks>
-        protected int GetBufferLength()
+        protected uint GetBufferLength()
         {
-            int length = (int)(MaxConcurrentParticles * (MathUtil.IsZero(Emitter.Duration) ? 60 : Emitter.Duration));
+            uint length = (uint)(MaxConcurrentParticles * (Helper.IsZero(Emitter.Duration) ? 60 : Emitter.Duration));
 
             return Math.Min(length, 5000);
         }
@@ -200,7 +200,7 @@ namespace Engine.BuiltIn.Components.Particles
 
             particleStreamOut = BuiltInShaders.GetDrawer<BuiltInStreamOut>();
             var streamoutVsSignature = particleStreamOut.GetVertexShader().Shader.GetShaderBytecode();
-            int length = GetBufferLength();
+            uint length = GetBufferLength();
             drawingBuffer = new EngineVertexBuffer<VertexGpuParticle>(graphics, $"{Name}_SO1", length, VertexBufferParams.StreamOut);
             drawingBuffer.CreateInputLayout($"{Name}_SO1_IL", streamoutVsSignature, BufferSlot);
             streamOutBuffer = new EngineVertexBuffer<VertexGpuParticle>(graphics, $"{Name}_SO2", length, VertexBufferParams.StreamOut);

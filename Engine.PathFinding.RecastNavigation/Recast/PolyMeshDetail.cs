@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -38,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return null;
             }
 
-            var orig = mesh.Bounds.Minimum;
+            var orig = mesh.Bounds.Min;
             int heightSearchRadius = Math.Max(1, (int)MathF.Ceiling(mesh.MaxEdgeError));
 
             var (bounds, _, _) = mesh.FindBounds(chf);

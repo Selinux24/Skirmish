@@ -1,6 +1,7 @@
 ﻿using Engine.BuiltIn.Drawers.Foliage;
-using SharpDX;
 using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -69,7 +70,7 @@ namespace Engine.BuiltIn.Components.Foliage
             /// <summary>
             /// Tint color
             /// </summary>
-            public Color4 TintColor { get; set; } = Color4.White;
+            public Color4 TintColor { get; set; } = new Color4(1f, 1f, 1f, 1f);
         }
 
         /// <summary>

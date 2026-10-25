@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -23,24 +23,24 @@ namespace Engine
         /// </summary>
         /// <param name="name">Transform name</param>
         /// <returns>Return the world transform of the specified transform name</returns>
-        Matrix GetWorldTransformByName(string name);
+        Matrix4x4 GetWorldTransformByName(string name);
         /// <summary>
         /// Gets the local transform by transform name
         /// </summary>
         /// <param name="name">Transform name</param>
         /// <returns>Return the local transform of the specified transform name</returns>
-        Matrix GetLocalTransformByName(string name);
+        Matrix4x4 GetLocalTransformByName(string name);
         /// <summary>
         /// Gets the pose transform by transform name
         /// </summary>
         /// <param name="name">Transform name</param>
         /// <returns>Return the pose transform of the specified transform name</returns>
-        Matrix GetPoseTransformByName(string name);
+        Matrix4x4 GetPoseTransformByName(string name);
         /// <summary>
         /// Gets the final transform by transform name
         /// </summary>
         /// <param name="name">Transform name</param>
         /// <returns>Return the final transform of the specified transform name</returns>
-        Matrix GetPartTransformByName(string name);
+        Matrix4x4 GetPartTransformByName(string name);
     }
 }

@@ -5,11 +5,14 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneAnimationParts
 {
+    using Color = System.Drawing.Color;
+
     class AnimationPartsScene : Scene
     {
         private const string resourcesLeopardFolder = "Common/Leopard/";
@@ -26,12 +29,12 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Color sphTrisColor = new(Color.Red.ToColor3(), 0.25f);
-        private readonly Color sphLinesColor = new(Color.Red.ToColor3(), 1f);
-        private readonly Color boxTrisColor = new(Color.Green.ToColor3(), 0.25f);
-        private readonly Color boxLinesColor = new(Color.Green.ToColor3(), 1f);
-        private readonly Color obbTrisColor = new(Color.Blue.ToColor3(), 0.25f);
-        private readonly Color obbLinesColor = new(Color.Blue.ToColor3(), 1f);
+        private readonly Vector4 sphTrisColor = new(Color.Red.RGB(), 0.25f);
+        private readonly Vector4 sphLinesColor = new(Color.Red.RGB(), 1f);
+        private readonly Vector4 boxTrisColor = new(Color.Green.RGB(), 0.25f);
+        private readonly Vector4 boxLinesColor = new(Color.Green.RGB(), 1f);
+        private readonly Vector4 obbTrisColor = new(Color.Blue.RGB(), 0.25f);
+        private readonly Vector4 obbLinesColor = new(Color.Blue.RGB(), 1f);
 
         private Model tank;
 
@@ -48,7 +51,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
         }
 
         public override void Initialize()
@@ -70,13 +73,13 @@ namespace IntermediateSamples.SceneAnimationParts
         {
             var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new(0.35f, 0.35f, 0.35f, 1f));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
@@ -145,7 +148,7 @@ namespace IntermediateSamples.SceneAnimationParts
             float l = 100f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
@@ -185,7 +188,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
             BoundingBox bbox = tank.GetBoundingBox();
-            float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
+            float playerHeight = bbox.Max.Y - bbox.Min.Y;
             Vector3 lookDir = Vector3.Normalize(new Vector3(0, playerHeight, -playerHeight * 2f)) * 50;
 
             Camera.NearPlaneDistance = 0.1f;

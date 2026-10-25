@@ -1,9 +1,9 @@
-﻿using SharpDX.DXGI;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Vortice.DXGI;
 
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
     /// <summary>
     /// DDS Header
@@ -19,7 +19,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Size of DDS Header
         /// </summary>
-        public readonly static int StructSize = Marshal.SizeOf(new DdsHeader());
+        public readonly static uint StructSize = (uint)Marshal.SizeOf(new DdsHeader());
 
         /// <summary>
         /// Gets info from byte data
@@ -29,7 +29,7 @@ namespace Engine.Helpers.DDS
         /// <param name="header10">Resulting Header DX10</param>
         /// <param name="offset">Resulting Offset</param>
         /// <returns>Returns true if the byte data contains a DDS Header</returns>
-        public static bool GetInfo(byte[] data, out DdsHeader header, out DdsHeaderDX10? header10, out int offset)
+        public static bool GetInfo(byte[] data, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset)
         {
             // Validate DDS file in memory
             header = new DdsHeader();
@@ -60,7 +60,7 @@ namespace Engine.Helpers.DDS
             // Check for DX10 extension
             if (header.PixelFormat.IsDX10())
             {
-                var h10Offset = 4 + StructSize + DdsHeaderDX10.StructSize;
+                uint h10Offset = 4 + StructSize + DdsHeaderDX10.StructSize;
 
                 // Must be long enough for both headers and magic value
                 if (data.Length < h10Offset)
@@ -88,7 +88,7 @@ namespace Engine.Helpers.DDS
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the file contains a DDS Header</returns>
-        public static bool GetInfo(string filename, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer)
+        public static bool GetInfo(string filename, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer)
         {
             buffer = File.ReadAllBytes(filename);
             return GetInfo(buffer, out header, out header10, out offset);
@@ -102,7 +102,7 @@ namespace Engine.Helpers.DDS
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the stream contains a DDS Header</returns>
-        public static bool GetInfo(MemoryStream stream, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer)
+        public static bool GetInfo(MemoryStream stream, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer)
         {
             buffer = stream.GetBuffer();
             return GetInfo(buffer, out header, out header10, out offset);
@@ -118,7 +118,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        public static bool ValidateTexture(DdsHeader header, DdsHeaderDX10? header10, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
+        public static bool ValidateTexture(DdsHeader header, DdsHeaderDX10? header10, out uint depth, out Format format, out TextureDimension resDim, out uint arraySize, out bool isCubeMap)
         {
             if (header10.HasValue)
             {
@@ -139,7 +139,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeader header, out uint depth, out Format format, out TextureDimension resDim, out uint arraySize, out bool isCubeMap)
         {
             depth = 0;
             resDim = TextureDimension.Unknown;
@@ -187,7 +187,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DdsHeaderDX10 header, DdsFlagTypes flags, out int depth, out Format format, out TextureDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeaderDX10 header, DdsFlagTypes flags, out uint depth, out Format format, out TextureDimension resDim, out uint arraySize, out bool isCubeMap)
         {
             depth = 0;
             format = Format.Unknown;
@@ -252,7 +252,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Struct size (Must be 124)
         /// </summary>
-        public int Size;
+        public uint Size;
         /// <summary>
         /// Flags to indicate which members contain valid data.
         /// </summary>
@@ -260,28 +260,28 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Surface height (in pixels).
         /// </summary>
-        public int Height;
+        public uint Height;
         /// <summary>
         /// Surface width (in pixels).
         /// </summary>
-        public int Width;
+        public uint Width;
         /// <summary>
         /// The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
         /// </summary>
-        public int PitchOrLinearSize;
+        public uint PitchOrLinearSize;
         /// <summary>
         /// Depth of a volume texture (in pixels), otherwise unused.
         /// </summary>
-        public int Depth;
+        public uint Depth;
         /// <summary>
         /// Number of mipmap levels, otherwise unused.
         /// </summary>
-        public int MipMapCount;
+        public uint MipMapCount;
         /// <summary>
         /// Unused.
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
-        public int[] Reserved1;
+        public uint[] Reserved1;
         /// <summary>
         /// The pixel format
         /// </summary>
@@ -297,14 +297,14 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Unused.
         /// </summary>
-        public int Caps3;
+        public uint Caps3;
         /// <summary>
         /// Unused.
         /// </summary>
-        public int Caps4;
+        public uint Caps4;
         /// <summary>
         /// Unused.
         /// </summary>
-        public int Reserved2;
+        public uint Reserved2;
     }
 }

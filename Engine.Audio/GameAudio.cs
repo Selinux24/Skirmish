@@ -1,15 +1,10 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Multimedia;
+using Vortice.XAPO;
+using Vortice.XAudio2;
 
 namespace Engine.Audio
 {
-    using SharpDX.Multimedia;
-    using SharpDX.X3DAudio;
-    using SharpDX.XAudio2;
-    using SharpDX.XAudio2.Fx;
-    using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
-    using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
-
     /// <summary>
     /// Game audio
     /// </summary>
@@ -27,15 +22,11 @@ namespace Engine.Audio
         /// <summary>
         /// Device
         /// </summary>
-        private readonly XAudio2 device;
+        private readonly IXAudio2 device;
         /// <summary>
         /// 3D audio instance
         /// </summary>
         private X3DAudio x3DInstance = null;
-        /// <summary>
-        /// Mastering limiter
-        /// </summary>
-        private MasteringLimiter masteringLimiter = null;
         /// <summary>
         /// Mastering limiter flag
         /// </summary>
@@ -44,15 +35,17 @@ namespace Engine.Audio
         /// Audio speakers
         /// </summary>
         private readonly GameAudioSpeakers speakers;
+        private uint operationSet = 0;
+        private bool operationSetActive = false;
 
         /// <summary>
         /// Mastering voice
         /// </summary>
-        public MasteringVoice MasteringVoice { get; private set; }
+        public IXAudio2MasteringVoice MasteringVoice { get; private set; }
         /// <inheritdoc/>
-        public int InputSampleRate { get; private set; }
+        public uint InputSampleRate { get; private set; }
         /// <inheritdoc/>
-        public int InputChannelCount { get; private set; }
+        public uint InputChannelCount { get; private set; }
         /// <inheritdoc/>
         public bool UseRedirectToLFE
         {
@@ -67,13 +60,11 @@ namespace Engine.Audio
         {
             get
             {
-                MasteringVoice.GetVolume(out float masterVolume);
-                return masterVolume;
+                return MasteringVoice.Volume;
             }
             set
             {
-                float masterVolume = MathUtil.Clamp(value, 0.0f, 1.0f);
-                MasteringVoice.SetVolume(masterVolume);
+                MasteringVoice.Volume = Math.Clamp(value, 0.0f, 1.0f);
             }
         }
         /// <inheritdoc/>
@@ -97,6 +88,14 @@ namespace Engine.Audio
                 }
             }
         }
+        /// <inheritdoc/>
+        public uint OperationSet
+        {
+            get
+            {
+                return operationSetActive ? operationSet : XAudio2.CommitNow;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -108,43 +107,25 @@ namespace Engine.Audio
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAudio(int sampleRate)
+        public GameAudio(uint sampleRate)
         {
-            XAudio2Flags audio2Flags;
-#if DEBUG
-            audio2Flags = XAudio2Flags.DebugEngine;
-#else
-            audio2Flags = XAudio2Flags.None;
-#endif
-            device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, XAudio2Version.Default);
+            XAudio2.XAudio2Create(ProcessorSpecifier.DefaultProcessor, out device);
             device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new()
             {
-                TraceMask = (int)(LogType.Errors | LogType.Warnings),
-                BreakMask = (int)LogType.Errors,
+                TraceMask = LogType.Errors | LogType.Warnings,
+                BreakMask = LogType.Errors,
             };
-            device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            device.SetDebugConfiguration(debugConfiguration);
 #endif
 
-            MasteringVoice = new MasteringVoice(device, 2, sampleRate);
+            MasteringVoice = device.CreateMasteringVoice(2, sampleRate);
 
-            if (device.Version == XAudio2Version.Version27)
-            {
-                var details = MasteringVoice.VoiceDetails;
-                InputSampleRate = details.InputSampleRate;
-                InputChannelCount = details.InputChannelCount;
-                int channelMask = MasteringVoice.ChannelMask;
-                speakers = (GameAudioSpeakers)channelMask;
-            }
-            else
-            {
-                MasteringVoice.GetVoiceDetails(out var details);
-                InputSampleRate = details.InputSampleRate;
-                InputChannelCount = details.InputChannelCount;
-                MasteringVoice.GetChannelMask(out int channelMask);
-                speakers = (GameAudioSpeakers)channelMask;
-            }
+            var details = MasteringVoice.VoiceDetails;
+            InputSampleRate = details.InputSampleRate;
+            InputChannelCount = details.InputChannels;
+            speakers = (GameAudioSpeakers)MasteringVoice.ChannelMask;
 
             if (speakers == GameAudioSpeakers.None)
             {
@@ -179,24 +160,12 @@ namespace Engine.Audio
             {
                 x3DInstance = null;
 
-                if (MasteringVoice?.IsDisposed != true)
-                {
-                    MasteringVoice?.DestroyVoice();
-                    MasteringVoice?.Dispose();
-                    MasteringVoice = null;
-                }
+                MasteringVoice?.DestroyVoice();
+                MasteringVoice?.Dispose();
+                MasteringVoice = null;
 
-                if (masteringLimiter?.IsDisposed != true)
-                {
-                    masteringLimiter?.Dispose();
-                    masteringLimiter = null;
-                }
-
-                if (device?.IsDisposed != true)
-                {
-                    device?.StopEngine();
-                    device?.Dispose();
-                }
+                device?.StopEngine();
+                device?.Dispose();
             }
         }
 
@@ -218,16 +187,16 @@ namespace Engine.Audio
         }
 
         /// <inheritdoc/>
-        public void SetMasteringLimit(int release, int loudness)
+        public void SetMasteringLimit(uint release, uint loudness)
         {
-            if (release < MasteringLimiter.MinimumRelease || release > MasteringLimiter.MaximumRelease)
+            if (release < XAPO.MinRelease || release > XAPO.MaxRelease)
             {
-                throw new ArgumentOutOfRangeException(nameof(release), $"Must be a value between {MasteringLimiter.MinimumRelease} and {MasteringLimiter.MaximumRelease}");
+                throw new ArgumentOutOfRangeException(nameof(release), $"Must be a value between {XAPO.MinRelease} and {XAPO.MaxRelease}");
             }
 
-            if (loudness < MasteringLimiter.MinimumLoudness || loudness > MasteringLimiter.MaximumLoudness)
+            if (loudness < XAPO.MinLoudness || loudness > XAPO.MaxLoudness)
             {
-                throw new ArgumentOutOfRangeException(nameof(loudness), $"Must be a value between {MasteringLimiter.MinimumLoudness} and {MasteringLimiter.MaximumLoudness}");
+                throw new ArgumentOutOfRangeException(nameof(loudness), $"Must be a value between {XAPO.MinLoudness} and {XAPO.MaxLoudness}");
             }
 
             if (useMasteringLimiter)
@@ -246,13 +215,16 @@ namespace Engine.Audio
         /// </summary>
         private void EnableMasteringLimiter()
         {
-            if (masteringLimiter == null)
-            {
-                masteringLimiter = new MasteringLimiter(device);
-                MasteringVoice.SetEffectChain(new EffectDescriptor(masteringLimiter));
-            }
+            Guid clsidLimiter = XAPO.CLSID_FXMasteringLimiter;
+            var limiterEffect = XAPO.CreateFX(clsidLimiter);
 
-            MasteringVoice?.EnableEffect(0);
+            EffectDescriptor descriptor = new(limiterEffect)
+            {
+                InitialState = true,
+                OutputChannelCount = InputChannelCount,
+            };
+
+            MasteringVoice?.SetEffectChain(descriptor);
         }
         /// <summary>
         /// Disables the mastering limiter
@@ -268,25 +240,16 @@ namespace Engine.Audio
         /// <param name="waveFormat">Wave format</param>
         /// <param name="useFilter">Use filters</param>
         /// <returns>Returns the souce voice</returns>
-        public SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
+        public IXAudio2SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
         {
             if (useFilter)
             {
-                return new SourceVoice(device, waveFormat, VoiceFlags.UseFilter, XAudio2.MaximumFilterFrequency);
+                return device.CreateSourceVoice(waveFormat, VoiceFlags.UseFilter, XAudio2.MaximumFilterFrequency);
             }
             else
             {
-                return new SourceVoice(device, waveFormat);
+                return device.CreateSourceVoice(waveFormat);
             }
-        }
-        /// <summary>
-        /// Creates a reverb effect
-        /// </summary>
-        /// <param name="isUsingDebuging">Use debug</param>
-        /// <returns>Returns the reverb effect</returns>
-        private Reverb CreateReverb(bool isUsingDebuging = false)
-        {
-            return new Reverb(device, isUsingDebuging);
         }
         /// <summary>
         /// Creates a submix voice
@@ -294,17 +257,17 @@ namespace Engine.Audio
         /// <param name="inputChannelCount">Input channels</param>
         /// <param name="inputSampleRate">Input sample rate</param>
         /// <returns>Returns the submix voice</returns>
-        private SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
+        private IXAudio2SubmixVoice CreatesSubmixVoice(uint inputChannelCount, uint inputSampleRate)
         {
-            return new SubmixVoice(device, inputChannelCount, inputSampleRate);
+            return device.CreateSubmixVoice(inputChannelCount, inputSampleRate);
         }
         /// <summary>
         /// Creates a new reverb voice
         /// </summary>
-        public SubmixVoice CreateReverbVoice()
+        public IXAudio2SubmixVoice CreateReverbVoice()
         {
             // Create reverb effect
-            using var reverbEffect = CreateReverb();
+            using var reverbEffect = XAPO.CreateFX(XAPO.CLSID_FXReverb);
 
             // Create a submix voice
             var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
@@ -341,6 +304,26 @@ namespace Engine.Audio
             x3DInstance ??= new X3DAudio((Speakers)speakers, X3DAudio.SpeedOfSound);
 
             x3DInstance.Calculate(listener, emitter, flags, dspSettings);
+        }
+
+        /// <inheritdoc/>
+        public uint StartOperationSet()
+        {
+            if (operationSetActive) return operationSet;
+
+            operationSet++;
+            operationSetActive = true;
+
+            return operationSet;
+        }
+        /// <inheritdoc/>
+        public void CommitOperation(uint operationSet)
+        {
+            if (!operationSetActive) return;
+
+            device.CommitChanges(operationSet);
+
+            operationSetActive = false;
         }
     }
 }

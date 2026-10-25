@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -8,16 +9,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public readonly struct ObstacleOrientedBox : IObstacle
     {
-        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
+        static readonly Vector3 epsilon = Vector3Extensions.Up * 0.0001f;
 
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix
         /// </summary>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
-        private static float GetYRotation(Matrix transform)
+        private static float GetYRotation(Matrix4x4 transform)
         {
-            if (transform.Decompose(out _, out var rotation, out _))
+            if (Matrix4x4.Decompose(transform, out _, out var rotation, out _))
             {
                 return GetYRotation(rotation);
             }
@@ -33,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            if (MathUtil.IsZero(rotation.Angle))
+            if (Helper.IsZero(rotation.GetAngle()))
             {
                 return 0f;
             }
@@ -41,14 +42,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Validates the angle and axis
             var yRotation = 0f;
 
-            if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
+            if (Vector3Extensions.NearEqual(rotation.GetAxis(), Vector3Extensions.Up, epsilon))
             {
-                yRotation = rotation.Angle;
+                yRotation = rotation.GetAngle();
             }
 
-            if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
+            if (Vector3Extensions.NearEqual(rotation.GetAxis(), Vector3Extensions.Down, epsilon))
             {
-                yRotation = -rotation.Angle;
+                yRotation = -rotation.GetAngle();
             }
 
             return yRotation;

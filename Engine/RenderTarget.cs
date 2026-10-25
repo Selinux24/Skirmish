@@ -1,6 +1,6 @@
-﻿using SharpDX.DXGI;
-using System;
+﻿using System;
 using System.Linq;
+using Vortice.DXGI;
 
 namespace Engine
 {
@@ -27,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Buffer count
         /// </summary>
-        public int BufferCount { get; protected set; }
+        public uint BufferCount { get; protected set; }
         /// <summary>
         /// Use samples if available
         /// </summary>
@@ -54,7 +54,7 @@ namespace Engine
         /// <param name="format">Format</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <param name="count">Buffer count</param>
-        public RenderTarget(Game game, string name, Format format, bool useSamples, int count)
+        public RenderTarget(Game game, string name, Format format, bool useSamples, uint count)
         {
             Game = game;
             Name = name;
@@ -104,8 +104,8 @@ namespace Engine
         /// </summary>
         private void CreateTargets()
         {
-            int width = Game.Form.RenderWidth;
-            int height = Game.Form.RenderHeight;
+            uint width = Game.Form.RenderWidth;
+            uint height = Game.Form.RenderHeight;
 
             var rt = Game.Graphics.CreateRenderTargetTexture(
                 Name,

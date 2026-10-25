@@ -1,11 +1,10 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Models;
 using Engine.PathFinding;
-using SharpDX;
+using System.Numerics;
 
 namespace TerrainSamples.SceneRts.AI.Agents
 {
-    using Engine.BuiltIn.Components.Models;
-    using System.Threading.Tasks;
     using TerrainSamples.SceneRts.AI.Behaviors;
     using TerrainSamples.SceneRts.Controllers;
 
@@ -99,10 +98,7 @@ namespace TerrainSamples.SceneRts.AI.Agents
                 SceneObject.Visible = false;
             }
 
-            if (model != null)
-            {
-                model.TextureIndex = 2;
-            }
+            model?.TextureIndex = 2;
 
             base.FireDestroyed(active, passive);
         }

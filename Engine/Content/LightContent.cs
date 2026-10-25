@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -19,15 +19,15 @@ namespace Engine.Content
         /// <summary>
         /// Initial light transform
         /// </summary>
-        public Matrix Transform
+        public Matrix4x4 Transform
         {
             get
             {
-                return Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Scale, Vector3.Zero, Rotation, Position);
+                return Matrix4x4Extensions.Transformation(Vector3.Zero, Quaternion.Identity, Scale, Vector3.Zero, Rotation, Position);
             }
             set
             {
-                value.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+                Matrix4x4.Decompose(value, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
                 Position = translation;
                 Rotation = rotation;
@@ -49,7 +49,7 @@ namespace Engine.Content
         /// <summary>
         /// Light color
         /// </summary>
-        public Color3 Color { get; set; } = Color3.White;
+        public Vector3 Color { get; set; } = Vector3.One;
         /// <summary>
         /// Constant attenuation
         /// </summary>
@@ -77,7 +77,7 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
-            Vector3 direction = Vector3.TransformNormal(Vector3.Up, Matrix.RotationQuaternion(Rotation));
+            Vector3 direction = Vector3.TransformNormal(Vector3Extensions.Up, Matrix4x4.CreateFromQuaternion(Rotation));
             float radius = GetRadius(QuadraticAttenuation, 0.5f);
             float intensity = ConstantAttenuation * radius;
 

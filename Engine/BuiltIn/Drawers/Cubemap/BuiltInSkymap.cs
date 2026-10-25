@@ -31,9 +31,9 @@ namespace Engine.BuiltIn.Drawers.Cubemap
             public float TextureIndex;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerCube>();
+                return (uint)Marshal.SizeOf<PerCube>();
             }
         }
 

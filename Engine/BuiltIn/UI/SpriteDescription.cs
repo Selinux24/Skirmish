@@ -1,5 +1,5 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="baseColor">Base color</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public static SpriteDescription Default(Color4 baseColor, float width = 0, float height = 0)
+        public static SpriteDescription Default(Vector4 baseColor, float width = 0, float height = 0)
         {
             return new()
             {
@@ -47,7 +47,7 @@ namespace Engine.BuiltIn.UI
             return new()
             {
                 Textures = [fileName],
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
                 Width = width,
                 Height = height,
             };
@@ -69,7 +69,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="baseColor">Base color</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public static SpriteDescription Background(Color4 baseColor, float width = 0, float height = 0)
+        public static SpriteDescription Background(Vector4 baseColor, float width = 0, float height = 0)
         {
             var desc = Default(baseColor, width, height);
             desc.FitParent = true;
@@ -91,19 +91,19 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// First color
         /// </summary>
-        public Color4 Color1 { get; set; }
+        public Vector4 Color1 { get; set; }
         /// <summary>
         /// Second color
         /// </summary>
-        public Color4 Color2 { get; set; }
+        public Vector4 Color2 { get; set; }
         /// <summary>
         /// Third color
         /// </summary>
-        public Color4 Color3 { get; set; }
+        public Vector4 Color3 { get; set; }
         /// <summary>
         /// Fourth color
         /// </summary>
-        public Color4 Color4 { get; set; }
+        public Vector4 Color4 { get; set; }
         /// <summary>
         /// First percentage
         /// </summary>

@@ -1,9 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
-    using SamplerState = SharpDX.Direct3D11.SamplerState;
+    using SamplerState = Vortice.Direct3D11.ID3D11SamplerState;
 
     /// <summary>
     /// Engine sampler state
@@ -59,7 +59,7 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="maxAnisotropic">Maximum anisotropic</param>
         /// <returns>Creates the anisotropic sampler state</returns>
-        public static EngineSamplerState Anisotropic(Graphics graphics, string name, int maxAnisotropic)
+        public static EngineSamplerState Anisotropic(Graphics graphics, string name, uint maxAnisotropic)
         {
             var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.Anisotropic;
@@ -81,7 +81,7 @@ namespace Engine.Common
             desc.Filter = Filter.ComparisonMinMagMipLinear;
             desc.AddressU = TextureAddressMode.Border;
             desc.AddressV = TextureAddressMode.Border;
-            desc.BorderColor = Color4.White;
+            desc.BorderColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
             desc.ComparisonFunction = Comparison.LessEqual;
 
             return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualBorder)}", desc);

@@ -20,7 +20,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
+            Game.Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
 
             foreach (var mesh in GetValues())
             {

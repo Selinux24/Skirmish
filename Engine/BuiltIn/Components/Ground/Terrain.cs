@@ -4,10 +4,10 @@ using Engine.BuiltIn.Drawers.Deferred;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
@@ -204,7 +204,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var meshState = new BuiltInDrawerMeshState
             {
-                Local = Matrix.Identity,
+                Local = Matrix4x4.Identity,
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 
@@ -266,7 +266,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             return new BuiltInTerrainState
             {
-                TintColor = Color.White,
+                TintColor = Vector4.One,
                 MaterialIndex = terrainMaterial.ResourceIndex,
                 Mode = terrainMode,
                 TextureResolution = textureResolution,

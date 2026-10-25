@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.UI
 {
@@ -46,11 +46,11 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        public Color4 BaseColor { get; set; } = UIConfiguration.BaseColor;
+        public Vector4 BaseColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Vector4 TintColor { get; set; } = Vector4.One;
         /// <summary>
         /// Events enabled
         /// </summary>

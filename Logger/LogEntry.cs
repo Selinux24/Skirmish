@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine
+namespace Logger
 {
     /// <summary>
     /// Log entry

@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.DXGI;
+    using Vortice.DXGI;
 
     /// <summary>
     /// Initializes a new instance of the Direct3D11 InputElement struct.
@@ -14,7 +14,7 @@ namespace Engine.Common
     /// <param name="slot">An integer value that identifies the input-assembler.</param>
     /// <param name="slotClass">Identifies the input data class for a single input slot.</param>
     /// <param name="stepRate">The number of instances to draw using the same per-instance data before advancing in the buffer by one element.</param>
-    public struct EngineInputElement(string name, int index, Format format, int offset, int slot, EngineInputClassification slotClass, int stepRate) : IEquatable<EngineInputElement>
+    public struct EngineInputElement(string name, uint index, Format format, uint offset, uint slot, EngineInputClassification slotClass, uint stepRate) : IEquatable<EngineInputElement>
     {
         /// <summary>
         /// The HLSL semantic associated with this element in a shader input-signature.
@@ -27,7 +27,7 @@ namespace Engine.Common
         /// have four components each with the semantic name matrix , however each of the
         /// four component would have different semantic indices (0, 1, 2, and 3).
         /// </summary>
-        public int SemanticIndex { get; set; } = index;
+        public uint SemanticIndex { get; set; } = index;
         /// <summary>
         /// The data type of the element data. See SharpDX.DXGI.Format.
         /// </summary>
@@ -36,13 +36,13 @@ namespace Engine.Common
         /// An integer value that identifies the input-assembler (see input slot). Valid
         /// values are between 0 and 15, defined in D3D11.h.
         /// </summary>
-        public int Slot { get; set; } = slot;
+        public uint Slot { get; set; } = slot;
         /// <summary>
         /// Optional. Offset (in bytes) between each element. Use D3D11_APPEND_ALIGNED_ELEMENT
         /// for convenience to define the current element directly after the previous one,
         /// including any packing if necessary.
         /// </summary>
-        public int AlignedByteOffset { get; set; } = offset;
+        public uint AlignedByteOffset { get; set; } = offset;
         /// <summary>
         /// Identifies the input data class for a single input slot (see SharpDX.Direct3D11.InputClassification).
         /// </summary>
@@ -52,7 +52,7 @@ namespace Engine.Common
         /// in the buffer by one element. This value must be 0 for an element that contains
         /// per-vertex data (the slot class is set to D3D11_INPUT_PER_VERTEX_DATA).
         /// </summary>
-        public int InstanceDataStepRate { get; set; } = stepRate;
+        public uint InstanceDataStepRate { get; set; } = stepRate;
 
         /// <inheritdoc/>
         public readonly bool Equals(EngineInputElement other)

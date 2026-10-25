@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Transforms
         /// </summary>
-        public Matrix[] Transforms { get; set; } = [];
+        public Matrix4x4[] Transforms { get; set; } = [];
         /// <summary>
         /// Transform names
         /// </summary>

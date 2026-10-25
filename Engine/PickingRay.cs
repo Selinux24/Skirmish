@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -165,7 +166,7 @@ namespace Engine
             return
                 Start == other.Start &&
                 Direction == other.Direction &&
-                MathUtil.NearEqual(RayLength, other.RayLength) &&
+                Helper.NearEqual(RayLength, other.RayLength) &&
                 RayPickingParams == other.RayPickingParams;
         }
         /// <inheritdoc/>

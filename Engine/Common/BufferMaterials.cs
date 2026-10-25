@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -40,19 +40,19 @@ namespace Engine.Common
         /// <summary>
         /// Material block 5 - Diffuse color
         /// </summary>
-        public Color4 Diffuse;
+        public Vector4 Diffuse;
         /// <summary>
         /// Material block 6 - Emissive color
         /// </summary>
-        public Color4 Emissive;
+        public Vector4 Emissive;
         /// <summary>
         /// Material block 7 - Ambient color
         /// </summary>
-        public Color4 Ambient;
+        public Vector4 Ambient;
         /// <summary>
         /// Material block 8 - Specular color
         /// </summary>
-        public Color4 Specular;
+        public Vector4 Specular;
 
         /// <summary>
         /// Packs current instance into a Vector4 array
@@ -76,14 +76,14 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
 #if DEBUG
-            int size = Marshal.SizeOf<BufferMaterials>();
+            uint size = (uint)Marshal.SizeOf<BufferMaterials>();
             if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf<BufferMaterials>();
+            return (uint)Marshal.SizeOf<BufferMaterials>();
 #endif
         }
     };

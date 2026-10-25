@@ -5,12 +5,15 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneMixamo
 {
+    using Color = System.Drawing.Color;
+
     public class MixamoScene : Scene
     {
         private const string resourcesAsphaltFolder = "Common/Asphalt/";
@@ -43,7 +46,7 @@ namespace IntermediateSamples.SceneMixamo
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
         }
 
         public override void Initialize()
@@ -67,17 +70,17 @@ namespace IntermediateSamples.SceneMixamo
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
 
             title.Text = "Mixamo Model";
             runtime.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -111,7 +114,7 @@ namespace IntermediateSamples.SceneMixamo
             float l = 100f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
@@ -189,7 +192,7 @@ namespace IntermediateSamples.SceneMixamo
                     StartsVisible = false,
                 });
 
-            model.Manipulator.SetTransform(modelInitPosition, 0, MathUtil.DegreesToRadians(-90), 0, 0.1f);
+            model.Manipulator.SetTransform(modelInitPosition, 0, Helper.DegreesToRadians(-90), 0, 0.1f);
 
             var pDefault = new AnimationPath();
             pDefault.AddLoop("rumba");

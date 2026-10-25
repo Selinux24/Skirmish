@@ -2,10 +2,11 @@
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PhysicsTests
 {
@@ -15,7 +16,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {
             var box = new BoxCollider(extents);
             var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
@@ -23,7 +24,7 @@ namespace Engine.PhysicsTests
 
             return box;
         }
-        static ConvexMeshCollider FromBox(Vector3 extents, Matrix transform)
+        static ConvexMeshCollider FromBox(Vector3 extents, Matrix4x4 transform)
         {
             var tris = Triangle.ComputeTriangleList(new BoundingBox(-extents, extents));
             var box = new ConvexMeshCollider(tris);
@@ -49,8 +50,8 @@ namespace Engine.PhysicsTests
             //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
             //var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
 
-            var boxTrn1 = Matrix.Translation(new Vector3(0, 0, 0));
-            var boxTrn2 = Matrix.Translation(new Vector3(2, 0, 0));
+            var boxTrn1 = Matrix4x4.CreateTranslation(new Vector3(0, 0, 0));
+            var boxTrn2 = Matrix4x4.CreateTranslation(new Vector3(2, 0, 0));
 
             var box1 = FromAABB(Vector3.One, boxTrn1);
             var box2 = FromAABB(Vector3.One, boxTrn2);

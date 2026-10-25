@@ -1,11 +1,12 @@
 ﻿using Engine.Animation;
 using Engine.Common;
 using Engine.Content.Persistence;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.Content
 {
@@ -196,7 +197,7 @@ namespace Engine.Content
                 textured = false;
             }
 
-            SubMeshContent geo = new(topology, materialName, textured, false, Matrix.Identity);
+            SubMeshContent geo = new(topology, materialName, textured, false, Matrix4x4.Identity);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
@@ -469,11 +470,11 @@ namespace Engine.Content
             if (skinningContent != null)
             {
                 //Filter content by existing joints
-                animationContent[animationLib] = content.Where(a => SkinHasJointData(a.JointName)).ToArray();
+                animationContent[animationLib] = [.. content.Where(a => SkinHasJointData(a.JointName))];
             }
             else
             {
-                animationContent[animationLib] = content.ToArray();
+                animationContent[animationLib] = [.. content];
             }
         }
         /// <summary>
@@ -757,7 +758,7 @@ namespace Engine.Content
 
             if (!matDict.TryAdd(materialName, meshContent))
             {
-                Logger.WriteWarning(this, $"{materialName} already exists for {meshName}");
+                Game.Logger.WriteWarning(this, $"{materialName} already exists for {meshName}");
 
                 return;
             }
@@ -811,7 +812,7 @@ namespace Engine.Content
                 }
                 else
                 {
-                    joint.Offset = Matrix.Identity;
+                    joint.Offset = Matrix4x4.Identity;
                 }
             }
 
@@ -833,10 +834,7 @@ namespace Engine.Content
         /// <returns>Returns the skin name list</returns>
         private string[] GetControllerSkins()
         {
-            return controllerContent.Values
-                .Select(item => item.Skin)
-                .Distinct()
-                .ToArray();
+            return [.. controllerContent.Values.Select(item => item.Skin).Distinct()];
         }
         /// <summary>
         /// Get controller for mesh by mesh name
@@ -1080,7 +1078,7 @@ namespace Engine.Content
         /// <returns>Returns triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            return geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles())).ToArray();
+            return [.. geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles()))];
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name
@@ -1477,10 +1475,7 @@ namespace Engine.Content
         private Triangle[] GetHullMesh(string meshName)
         {
             //Extract hull geometry
-            return geometryContent[meshName]
-                .Where(g => g.Value.IsHull)
-                .SelectMany(material => material.Value.GetTriangles())
-                .ToArray();
+            return [.. geometryContent[meshName].Where(g => g.Value.IsHull).SelectMany(material => material.Value.GetTriangles())];
         }
         /// <summary>
         /// Marks hull flag for all the geometry contained into the model

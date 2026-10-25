@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {

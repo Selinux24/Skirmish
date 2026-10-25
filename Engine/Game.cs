@@ -1,12 +1,13 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
-using SharpDX.DXGI;
+using Logger;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.DXGI;
 
 namespace Engine
 {
@@ -186,10 +187,7 @@ namespace Engine
             }
             set
             {
-                if (Input != null)
-                {
-                    Input.VisibleMouse = value;
-                }
+                Input?.VisibleMouse = value;
             }
         }
         /// <summary>
@@ -210,10 +208,7 @@ namespace Engine
             }
             set
             {
-                if (Input != null)
-                {
-                    Input.LockMouse = value;
-                }
+                Input?.LockMouse = value;
             }
         }
         /// <summary>
@@ -224,6 +219,10 @@ namespace Engine
         /// Game status
         /// </summary>
         public GameStatus GameStatus { get; set; } = new();
+        /// <summary>
+        /// Logger instance
+        /// </summary>
+        public static readonly Log Logger = new();
 
         /// <summary>
         /// Game status collected event
@@ -236,24 +235,19 @@ namespace Engine
         /// <returns>Returns current desktop mode description</returns>
         private static OutputDescription1 GetDesktopMode()
         {
-            using var factory = new Factory1();
-            using var factory5 = factory.QueryInterface<Factory5>();
-            using var adapter = factory5.GetAdapter1(0);
-            using var adapter4 = adapter.QueryInterface<Adapter4>();
-            using var adapterOutput = adapter4.GetOutput(0);
-            using var adapterOutput6 = adapterOutput.QueryInterface<Output6>();
-            return adapterOutput6.Description1;
-        }
-        /// <summary>
-        /// Gets the log level base on frame time
-        /// </summary>
-        /// <param name="frameTime">Frame time</param>
-        /// <returns>Returns the log level</returns>
-        private static LogLevel EvaluateTime(long frameTime)
-        {
-            if (frameTime > 500) return LogLevel.Warning;
-            if (frameTime > 30) return LogLevel.Information;
-            else return LogLevel.Debug;
+            using var factory = DXGI.CreateDXGIFactory1<IDXGIFactory1>();
+            using var factory5 = factory.QueryInterface<IDXGIFactory5>();
+            factory5.EnumAdapters1(0, out var adapter);
+            using (adapter)
+            {
+                using var adapter4 = adapter.QueryInterface<IDXGIAdapter4>();
+                adapter4.EnumOutputs(0, out var adapterOutput);
+                using (adapterOutput)
+                {
+                    using var adapterOutput6 = adapterOutput.QueryInterface<IDXGIOutput6>();
+                    return adapterOutput6.Description1;
+                }
+            }
         }
 
         /// <summary>
@@ -263,7 +257,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, true, 0, 0, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -277,7 +271,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, screenWidth, screenHeight, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -291,7 +285,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -304,7 +298,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, screenSize.X, screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -317,7 +311,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, (int)screenSize.X, (int)screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -332,7 +326,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, int refreshRate, int multiSampling)
+        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, uint refreshRate, uint multiSampling)
         {
             Name = name;
 
@@ -600,7 +594,7 @@ namespace Engine
             scenes.ForEach(s => s.Active = false);
 
             //Copy collection for disposing
-            List<Scene> toDispose = new(scenes);
+            List<Scene> toDispose = [.. scenes];
 
             //Clear scene collection
             scenes.Clear();
@@ -785,7 +779,7 @@ namespace Engine
             frameSW.Stop();
             GameStatus.Add("TOTAL", frameSW);
 
-            LogLevel level = EvaluateTime(frameSW.ElapsedMilliseconds);
+            var level = Log.EvaluateTime(frameSW.ElapsedMilliseconds);
             Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {frameSW.ElapsedMilliseconds} milliseconds ####");
 
             if (!integratingResources && (!resourceRequests.IsEmpty || ResourceManager.HasRequests))

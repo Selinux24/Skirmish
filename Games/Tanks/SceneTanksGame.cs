@@ -11,14 +11,17 @@ using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Tanks
 {
+    using Color = System.Drawing.Color;
+
     /// <summary>
     /// Tanks game scene
     /// </summary>
@@ -44,8 +47,8 @@ namespace Tanks
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
-        private readonly Color gameMessageForeColor = Color.Yellow;
-        private readonly Color gameMessageShadowColor = Color.Yellow * 0.5f;
+        private readonly Vector4 gameMessageForeColor = Color.Yellow.RGBA();
+        private readonly Vector4 gameMessageShadowColor = Color.Yellow.RGBA() * 0.5f;
         private UITextArea gameKeyHelp;
 
         private UIPanel dialog;
@@ -84,9 +87,9 @@ namespace Tanks
         private UITextArea keyPitchDownText;
 
         private UIProgressBar pbFire;
-        private readonly Color4 pbFireBaseColor = Color.Yellow;
-        private readonly Color4 pbFireHBaseColor = Color.Red;
-        private readonly Color4 pbFireProgressColor = new(Color.Yellow.ToColor3(), 0.9f);
+        private readonly Vector4 pbFireBaseColor = Color.Yellow.RGBA();
+        private readonly Vector4 pbFireHBaseColor = Color.Red.RGBA();
+        private readonly Vector4 pbFireProgressColor = new(Color.Yellow.RGB(), 0.9f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -102,13 +105,13 @@ namespace Tanks
         private float terrainTop;
         private readonly float terrainHeight = 100;
         private readonly float terrainSize = 1024;
-        private readonly int mapSize = 256;
+        private readonly uint mapSize = 256;
         private ModelInstanced tanks;
         private readonly string tankBarrelPart = "Barrel-mesh";
         private readonly string tankTurretPart = "Turret-mesh";
         private readonly string tankHullPart = "Hull-mesh";
-        private readonly float maxBarrelPitch = MathUtil.DegreesToRadians(85);
-        private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
+        private readonly float maxBarrelPitch = Helper.DegreesToRadians(85);
+        private readonly float minBarrelPitch = Helper.DegreesToRadians(-5);
         private Model projectile;
 
         private readonly List<ModelInstanced> treeModels = [];
@@ -119,8 +122,8 @@ namespace Tanks
         private ParticleManager particleManager = null;
         private readonly float explosionDurationSeconds = 0.5f;
         private readonly float shotDurationSeconds = 0.2f;
-        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
-        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
+        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow.RGB(), Color.Yellow.RGB());
+        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow.RGB(), Color.Yellow.RGB());
 
         private bool shooting = false;
         private bool gameEnding = false;
@@ -156,7 +159,7 @@ namespace Tanks
         }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
 
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -200,21 +203,21 @@ namespace Tanks
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color.Black.RGBA() * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
             loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            loadingText.TextForeColor = Color.Yellow;
-            loadingText.TextShadowColor = Color.Orange;
+            loadingText.TextForeColor = Color.Yellow.RGBA();
+            loadingText.TextShadowColor = Color.Orange.RGBA();
             loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
             loadingText.TextVerticalAlign = TextVerticalAlign.Middle;
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
             loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            loadingBar.ProgressColor = Color.CornflowerBlue;
-            loadingBar.BaseColor = Color.Yellow;
-            loadingBar.Caption.TextForeColor = Color.Black;
+            loadingBar.ProgressColor = Color.CornflowerBlue.RGBA();
+            loadingBar.BaseColor = Color.Yellow.RGBA();
+            loadingBar.Caption.TextForeColor = Color.Black.RGBA();
             loadingBar.Caption.Text = "0%";
             loadingBar.ProgressValue = 0;
             loadingBar.Visible = false;
@@ -228,7 +231,7 @@ namespace Tanks
 
             UpdateLayoutLoadingUI();
 
-            fadePanel.BaseColor = Color.Black;
+            fadePanel.BaseColor = Color.Black.RGBA();
             fadePanel.Visible = true;
 
             await Task.Delay(1000);
@@ -296,7 +299,7 @@ namespace Tanks
             gameMessage.Visible = false;
 
             gameKeyHelp = await AddComponentUI<UITextArea, UITextAreaDescription>("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            gameKeyHelp.TextForeColor = Color.Yellow;
+            gameKeyHelp.TextForeColor = Color.Yellow.RGBA();
             gameKeyHelp.Text = "Press space to begin a new game, or escape to exit";
             gameKeyHelp.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameKeyHelp.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -305,14 +308,14 @@ namespace Tanks
         }
         private async Task InitializeUIModalDialog()
         {
-            var descPan = UIPanelDescription.Default(Color.DarkGreen);
+            var descPan = UIPanelDescription.Default(Color.DarkGreen.RGBA());
             descPan.BlendMode = BlendModes.OpaqueTransparent;
             dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
             var font = FontDescription.FromFile(fontFilename, 20, true);
 
-            Color4 releasedColor = new((Color.DarkGray * 0.6666f).ToColor3(), 1f);
-            Color4 pressedColor = new((Color.DarkGray * 0.7777f).ToColor3(), 1f);
+            Vector4 releasedColor = new((Color.DarkGray.RGB() * 0.6666f), 1f);
+            Vector4 pressedColor = new((Color.DarkGray.RGB() * 0.7777f), 1f);
             var descButton = UIButtonDescription.DefaultTwoStateButton(font, releasedColor, pressedColor);
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -352,9 +355,9 @@ namespace Tanks
             player1Points.Visible = false;
 
             player1Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
-            player1Life.ProgressColor = Color.DarkRed;
+            player1Life.ProgressColor = Color.DarkRed.RGBA();
             player1Life.BaseColor = player1Status.Color;
-            player1Life.Caption.TextForeColor = Color.White;
+            player1Life.Caption.TextForeColor = Color.White.RGBA();
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
@@ -373,28 +376,28 @@ namespace Tanks
             player2Points.Visible = false;
 
             player2Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
-            player2Life.ProgressColor = Color.DarkRed;
+            player2Life.ProgressColor = Color.DarkRed.RGBA();
             player2Life.BaseColor = player2Status.Color;
-            player2Life.Caption.TextForeColor = Color.White;
+            player2Life.Caption.TextForeColor = Color.White.RGBA();
             player2Life.Caption.Text = "0%";
             player2Life.Visible = false;
         }
         private async Task InitializeUITurn()
         {
             turnText = await AddComponentUI<UITextArea, UITextAreaDescription>("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true));
-            turnText.TextForeColor = Color.Yellow;
-            turnText.TextShadowColor = Color.Yellow * 0.5f;
+            turnText.TextForeColor = Color.Yellow.RGBA();
+            turnText.TextShadowColor = Color.Yellow.RGBA() * 0.5f;
             turnText.TextHorizontalAlign = TextHorizontalAlign.Center;
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
             gameIcon = await AddComponentUI<Sprite, SpriteDescription>("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"));
-            gameIcon.BaseColor = Color.Yellow;
+            gameIcon.BaseColor = Color.Yellow.RGBA();
             gameIcon.Visible = false;
             uiTweener.TweenRotateBounce(gameIcon, -0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await AddComponentUI<Sprite, SpriteDescription>("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"));
-            playerTurnMarker.BaseColor = Color.Turquoise;
+            playerTurnMarker.BaseColor = Color.Turquoise.RGBA();
             playerTurnMarker.Visible = false;
             uiTweener.TweenScaleBounce(playerTurnMarker, 1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
@@ -404,48 +407,48 @@ namespace Tanks
             int layerSprites = layerPanel + 1;
             int layerKeys = layerSprites + 1;
 
-            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
+            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color.Black.RGBA() * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
             keyRotate = await AddComponentUI<Sprite, SpriteDescription>("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), layerSprites);
-            keyRotate.BaseColor = Color.Turquoise;
+            keyRotate.BaseColor = Color.Turquoise.RGBA();
             keyRotate.Visible = false;
 
             keyMove = await AddComponentUI<Sprite, SpriteDescription>("KeyMove", "KeyMove", SpriteDescription.Default("Resources/Move.png"), layerSprites);
-            keyMove.BaseColor = Color.Turquoise;
+            keyMove.BaseColor = Color.Turquoise.RGBA();
             keyMove.Visible = false;
 
             KeyPitch = await AddComponentUI<Sprite, SpriteDescription>("KeyPitch", "KeyPitch", SpriteDescription.Default("Resources/Pitch.png"), layerSprites);
-            KeyPitch.BaseColor = Color.Turquoise;
+            KeyPitch.BaseColor = Color.Turquoise.RGBA();
             KeyPitch.Visible = false;
 
             keyRotateLeftText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyRotateLeftText.TextForeColor = Color.Yellow;
+            keyRotateLeftText.TextForeColor = Color.Yellow.RGBA();
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Visible = false;
 
             keyRotateRightText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyRotateRightText.TextForeColor = Color.Yellow;
+            keyRotateRightText.TextForeColor = Color.Yellow.RGBA();
             keyRotateRightText.Text = "D";
             keyRotateRightText.Visible = false;
 
             keyMoveForwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyMoveForwardText.TextForeColor = Color.Yellow;
+            keyMoveForwardText.TextForeColor = Color.Yellow.RGBA();
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Visible = false;
 
             keyMoveBackwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyMoveBackwardText.TextForeColor = Color.Yellow;
+            keyMoveBackwardText.TextForeColor = Color.Yellow.RGBA();
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Visible = false;
 
             keyPitchUpText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyPitchUpText.TextForeColor = Color.Yellow;
+            keyPitchUpText.TextForeColor = Color.Yellow.RGBA();
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Visible = false;
 
             keyPitchDownText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyPitchDownText.TextForeColor = Color.Yellow;
+            keyPitchDownText.TextForeColor = Color.Yellow.RGBA();
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Visible = false;
         }
@@ -458,7 +461,7 @@ namespace Tanks
             pbFire.Visible = false;
 
             fireKeyText = await AddComponentUI<UITextArea, UITextAreaDescription>("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
-            fireKeyText.TextForeColor = Color.Yellow;
+            fireKeyText.TextForeColor = Color.Yellow.RGBA();
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.TextHorizontalAlign = TextHorizontalAlign.Center;
             fireKeyText.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -476,22 +479,22 @@ namespace Tanks
             miniMapBackground.Visible = false;
 
             miniMapTank1 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
-            miniMapTank1.BaseColor = Color.Blue;
+            miniMapTank1.BaseColor = Color.Blue.RGBA();
             miniMapTank1.Visible = false;
 
             miniMapTank2 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
-            miniMapTank2.BaseColor = Color.Red;
+            miniMapTank2.BaseColor = Color.Red.RGBA();
             miniMapTank2.Visible = false;
 
             windVelocity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("WindVelocity", "WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
             windVelocity.Caption.Text = "Wind velocity";
-            windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
-            windVelocity.BaseColor = Color.DeepSkyBlue;
-            windVelocity.ProgressColor = new Color4(Color.DarkBlue.ToColor3(), 0.5f);
+            windVelocity.Caption.TextForeColor = Color.Yellow.RGBA() * 0.85f;
+            windVelocity.BaseColor = Color.DeepSkyBlue.RGBA();
+            windVelocity.ProgressColor = new(Color.DarkBlue.RGB(), 0.5f);
             windVelocity.Visible = false;
 
             windDirectionArrow = await AddComponentUI<Sprite, SpriteDescription>("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), layerMarkers);
-            windDirectionArrow.BaseColor = Color.Green;
+            windDirectionArrow.BaseColor = Color.Green.RGBA();
             windDirectionArrow.Visible = false;
         }
         private async Task InitializeUIShotPath()
@@ -502,10 +505,10 @@ namespace Tanks
                 var trajectoryMarker = await AddComponentUI<Sprite, SpriteDescription>($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("Resources/Dot_w.png"));
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
-                trajectoryMarker.BaseColor = Color.Transparent;
+                trajectoryMarker.BaseColor = Color.Transparent.RGBA();
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
-                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
+                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, Helper.TwoPi, 1000, ScaleFuncs.Linear);
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
@@ -563,11 +566,11 @@ namespace Tanks
 
             terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", groundDesc);
 
-            terrainTop = terrain.GetBoundingBox().Maximum.Y;
+            terrainTop = terrain.GetBoundingBox().Max.Y;
         }
         private async Task InitializeModelsTrees()
         {
-            int instances = Helper.RandomGenerator.Next(200, 5000) / 3;
+            uint instances = (uint)Helper.RandomGenerator.Next(200, 5000) / 3;
 
             for (int i = 0; i < 3; i++)
             {
@@ -593,7 +596,7 @@ namespace Tanks
         {
             var sphereDesc = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 5, 5);
             var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseColor = Color.Black;
+            material.DiffuseColor = Color.Black.RGBA();
 
             var content = new ModelDescription
             {
@@ -642,7 +645,7 @@ namespace Tanks
             desc.BlendMode = BlendModes.OpaqueAlpha;
 
             decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
-            decalDrawer.TintColor = new Color(90, 77, 72, 170);
+            decalDrawer.TintColor = Color.FromArgb(170, 90, 77, 72).RGBA();
         }
         private async Task InitializeAudio()
         {
@@ -657,7 +660,7 @@ namespace Tanks
 
             for (int i = 0; i < 8; i++)
             {
-                var light = new SceneLightPoint($"Explosion_{i}", true, Color3.Black, Color3.Black, false, lightDesc);
+                var light = new SceneLightPoint($"Explosion_{i}", true, Color.Black.RGB(), Color.Black.RGB(), false, lightDesc);
 
                 pointLights.Add(light);
             }
@@ -855,18 +858,18 @@ namespace Tanks
             uiTweener.Show(loadingBar, 500);
 
             var bbox = terrain.GetBoundingBox();
-            var min = bbox.Minimum.XZ();
-            var max = bbox.Maximum.XZ();
+            var min = bbox.Min.XZ();
+            var max = bbox.Max.XZ();
             var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
 
-            int totalTrees = treeModels.Sum(t => t.InstanceCount);
+            uint totalTrees = (uint)treeModels.Sum(t => t.InstanceCount);
 
             Task.Run(() =>
             {
-                int progressCount = 0;
+                uint progressCount = 0;
                 foreach (var treeModel in treeModels)
                 {
-                    progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees, (float progress) =>
+                    progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees, progress =>
                     {
                         loadingBar.ProgressValue = MathF.Max(loadingBar.ProgressValue, progress);
                         loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
@@ -877,16 +880,16 @@ namespace Tanks
                 return startGame();
             }).ConfigureAwait(false);
         }
-        private int PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, int trees, int total, Action<float> callback)
+        private uint PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, uint trees, uint total, Action<float> callback)
         {
-            int count = trees;
+            uint count = trees;
 
-            int treeCount = tree.InstanceCount;
+            uint treeCount = tree.InstanceCount;
             while (treeCount > 0)
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
-                var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = Helper.RandomGenerator.NextFloat(2.5f, 5f);
+                var rot = Helper.RandomGenerator.NextSingle(0, Helper.TwoPi);
+                var scale = Helper.RandomGenerator.NextSingle(2.5f, 5f);
 
                 if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
@@ -894,7 +897,7 @@ namespace Tanks
                 }
 
                 var pos = result.Position;
-                if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextFloat(0, 1) < 0.95f)
+                if (sph.Contains(pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
                 {
                     continue;
                 }
@@ -903,7 +906,7 @@ namespace Tanks
 
                 callback.Invoke(count++ / (float)total);
 
-                tree[treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
+                tree[(int)treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
             }
 
             return count;
@@ -914,18 +917,18 @@ namespace Tanks
             treeModels.ForEach(t => t.Visible = true);
 
             var p1 = new Vector3(-140, 100, 0);
-            var n1 = Vector3.Up;
+            var n1 = Vector3Extensions.Up;
             var p2 = new Vector3(+140, 100, 0);
-            var n2 = Vector3.Up;
+            var n2 = Vector3Extensions.Up;
 
             if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
-                p1 = r1.Position - (Vector3.Up * 0.1f);
+                p1 = r1.Position - (Vector3Extensions.Up * 0.1f);
                 n1 = r1.Primitive.Normal;
             }
             if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
-                p2 = r2.Position - (Vector3.Up * 0.1f);
+                p2 = r2.Position - (Vector3Extensions.Up * 0.1f);
                 n2 = r2.Primitive.Normal;
             }
 
@@ -949,8 +952,8 @@ namespace Tanks
         }
         private void PrepareLighting()
         {
-            GameEnvironment.Background = Color.Gray;
-            Lights.EnableFog(300, 1000, Color.Gray);
+            GameEnvironment.Background = Color.Gray.RGBA();
+            Lights.EnableFog(300, 1000, Color.Gray.RGBA());
         }
 
         private void LoadNewGame()
@@ -1020,8 +1023,8 @@ namespace Tanks
                 CurrentLife = 100,
                 MaxMove = 25,
                 CurrentMove = 25,
-                Color = Color.Blue,
-                TintColor = new Color(0.5f, 0.5f, 1f, 1f),
+                Color = Color.Blue.RGBA(),
+                TintColor = new(0.5f, 0.5f, 1f, 1f),
             };
 
             player2Status = new PlayerStatus
@@ -1032,8 +1035,8 @@ namespace Tanks
                 CurrentLife = 100,
                 MaxMove = 25,
                 CurrentMove = 25,
-                Color = Color.Red,
-                TintColor = new Color(1f, 0.5f, 0.5f, 1f),
+                Color = Color.Red.RGBA(),
+                TintColor = new(1f, 0.5f, 0.5f, 1f),
             };
         }
         private void UpdateGameControls(bool visible)
@@ -1231,7 +1234,7 @@ You will lost all the game progress.",
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
-                pbFire.BaseColor = pbFire.ProgressValue < 0.75f ? pbFireBaseColor : Color4.Lerp(pbFireBaseColor, pbFireHBaseColor, (pbFire.ProgressValue - 0.75f) / 0.25f);
+                pbFire.BaseColor = pbFire.ProgressValue < 0.75f ? pbFireBaseColor : Vector4.Lerp(pbFireBaseColor, pbFireHBaseColor, (pbFire.ProgressValue - 0.75f) / 0.25f);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Space))
@@ -1306,14 +1309,14 @@ You will lost all the game progress.",
                 return;
             }
 
-            var ray = new PickingRay(nextPosition, Vector3.Down);
+            var ray = new PickingRay(nextPosition, Vector3Extensions.Down);
 
             if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= radius)
             {
                 var pos = nextPosition;
                 var vw = nextInterest;
 
-                float y = MathUtil.Lerp(pos.Y, cRes.Position.Y + radius, 0.5f);
+                float y = float.Lerp(pos.Y, cRes.Position.Y + radius, 0.5f);
                 vw.Y -= pos.Y - y;
                 pos.Y = y;
 
@@ -1345,7 +1348,7 @@ You will lost all the game progress.",
             }
 
             boundsDrawer.Clear();
-            boundsDrawer.SetPrimitives(Color.Red, lines);
+            boundsDrawer.SetPrimitives(Color.Red.RGBA(), lines);
         }
 
         private void UpdateTurnStatus()
@@ -1360,7 +1363,7 @@ You will lost all the game progress.",
             else
             {
                 playerTurnMarker.Left = Game.Form.RenderCenter.X + 120;
-                playerTurnMarker.Rotation = MathUtil.Pi;
+                playerTurnMarker.Rotation = Helper.Pi;
             }
         }
         private void UpdatePlayersStatus()
@@ -1402,10 +1405,10 @@ You will lost all the game progress.",
             Vector3 interest = tanks[0].Manipulator.Position + (distV * dist * 0.5f);
 
             // Perpendicular to diff
-            Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3.Up, diffV));
+            Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3Extensions.Up, diffV));
             float y = MathF.Max(100f, dist * 0.5f);
             float z = MathF.Max(200f, dist);
-            Vector3 position = interest + (perp * z) + (Vector3.Up * y);
+            Vector3 position = interest + (perp * z) + (Vector3Extensions.Up * y);
 
             if (firstUpdate)
             {
@@ -1453,12 +1456,13 @@ You will lost all the game progress.",
                 dist += sampleDist;
 
                 // Test the individual marker visibility against camera
-                if (Camera.Frustum.Contains(markerPos) == ContainmentType.Disjoint)
+                if (Camera.Frustum.Contains(ref markerPos) == ContainmentType.Disjoint)
                 {
                     continue;
                 }
 
-                var screenPos = Vector3.Project(markerPos,
+                var screenPos = Vector3Extensions.Project(
+                    markerPos,
                     Game.Graphics.Viewport.X,
                     Game.Graphics.Viewport.Y,
                     Game.Graphics.Viewport.Width,
@@ -1481,7 +1485,7 @@ You will lost all the game progress.",
         {
             if (FindTopGroundPosition<Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
             {
-                model.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
+                model.Manipulator.SetPosition(r.Position - (Vector3Extensions.Up * 0.1f));
                 model.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
             }
         }
@@ -1489,8 +1493,8 @@ You will lost all the game progress.",
         {
             var barrelTransform = model.GetWorldTransformByName(tankBarrelPart);
 
-            var dir = barrelTransform.Forward;
-            var pos = barrelTransform.TranslationVector + (dir * 15f);
+            var dir = barrelTransform.GetForward();
+            var pos = barrelTransform.Translation + (dir * 15f);
 
             return (pos, dir);
         }
@@ -1499,7 +1503,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
 
             //Extract single pitch angle from quaternion
-            float sAngle = barrelManipulator.Rotation.Angle;
+            float sAngle = barrelManipulator.Rotation.GetAngle();
             if (barrelManipulator.Rotation.X < 0)
             {
                 sAngle *= -1f;
@@ -1524,14 +1528,14 @@ You will lost all the game progress.",
             var barrelTransform = model.GetPartTransformByName(tankTurretPart);
 
             //Gets the position and direction of the barrel
-            var barrelDir = barrelTransform.Forward;
-            var barrelPos = barrelTransform.TranslationVector;
+            var barrelDir = barrelTransform.GetForward();
+            var barrelPos = barrelTransform.Translation;
 
             //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
             var newDir = Vector3.Normalize(barrelPos - position);
 
-            var angle = Helper.AngleSigned(barrelDir, newDir);
-            if (MathUtil.IsZero(angle))
+            var angle = Vector3Extensions.AngleSigned(barrelDir, newDir);
+            if (Helper.IsZero(angle))
             {
                 return;
             }
@@ -1540,27 +1544,27 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
             var localPos = barrelManipulator.Position;
             var c = Vector3.Cross(barrelDir, newDir);
-            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix.RotationAxis(c, angle));
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4.CreateFromAxisAngle(c, angle));
 
             //Apply de local delta
-            barrelManipulator.RotateTo(localPos + localDir, Vector3.Up, Axis.Y, 0.01f);
+            barrelManipulator.RotateTo(localPos + localDir, Vector3Extensions.Up, Axis.Y, 0.01f);
         }
         private void PaintMinimap()
         {
             // Set wind velocity and direction
             windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
-            windDirectionArrow.Rotation = Helper.AngleSigned(Vector2.UnitY, windDirection);
+            windDirectionArrow.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, windDirection);
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            RectangleF terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
+            Rect terrainRect = new(bbox.Min.X, bbox.Min.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
             Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
             Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
 
             // Get the mini map rectangle
-            RectangleF miniMapRect = miniMapBackground.GetRenderArea(false);
+            Rect miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
             Vector2 markerBounds1 = new(miniMapTank1.Width, miniMapTank1.Height);
@@ -1585,8 +1589,8 @@ You will lost all the game progress.",
             miniMapTank2.SetPosition(mt2Position);
 
             // Set marker rotation
-            miniMapTank1.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ()));
-            miniMapTank2.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
+            miniMapTank1.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ()));
+            miniMapTank2.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
         }
 
         private void Shoot(float shotForce)
@@ -1625,7 +1629,7 @@ You will lost all the game progress.",
 
             // Test if projectile is under the terrain box
             var terrainBox = terrain.GetBoundingBox();
-            if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
+            if (projVolume.Center.Y + projVolume.Radius < terrainBox.Min.Y)
             {
                 ResolveShot(false, null, null);
 
@@ -1644,7 +1648,7 @@ You will lost all the game progress.",
             shot = null;
             shooting = false;
 
-            Vector3 outPosition = Vector3.Up * (terrainTop + 1);
+            Vector3 outPosition = Vector3Extensions.Up * (terrainTop + 1);
             projectile.Manipulator.SetPosition(outPosition);
             projectile.Visible = false;
 
@@ -1654,7 +1658,7 @@ You will lost all the game progress.",
             if (impact)
             {
                 ShooterStatus.Points += impactDamage * 100;
-                TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - impactDamage, 0, TargetStatus.MaxLife);
+                TargetStatus.CurrentLife = Math.Clamp(TargetStatus.CurrentLife - impactDamage, 0, TargetStatus.MaxLife);
 
                 if (impactPosition.HasValue)
                 {
@@ -1853,7 +1857,7 @@ You will lost all the game progress.",
                 ShooterStatus.NewTurn();
                 TargetStatus.NewTurn();
 
-                currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
+                currentWindVelocity = Helper.RandomGenerator.NextSingle(0f, maxWindVelocity);
                 windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
 
                 Parallel.ForEach(particleManager.ParticleSystems, p =>
@@ -1867,7 +1871,7 @@ You will lost all the game progress.",
 
         private void AddExplosionSystem(Vector3 position)
         {
-            Vector3 velocity = Vector3.Up;
+            Vector3 velocity = Vector3Extensions.Up;
             float duration = explosionDurationSeconds;
             float rate = 0.01f;
 
@@ -1926,9 +1930,9 @@ You will lost all the game progress.",
         }
         private void AddSmokePlumeSystem(Vector3 position)
         {
-            Vector3 velocity = Vector3.Up;
-            float duration = Helper.RandomGenerator.NextFloat(10, 30);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            Vector3 velocity = Vector3Extensions.Up;
+            float duration = Helper.RandomGenerator.NextSingle(10, 30);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             LightQueue.QueueLight(Game.GameTime, position, lightExplosion, duration);
 
@@ -1957,7 +1961,7 @@ You will lost all the game progress.",
         }
         private void AddCrater(Vector3 position, Vector3 normal)
         {
-            var rnd = Helper.RandomGenerator.NextFloat(10f, 30f);
+            var rnd = Helper.RandomGenerator.NextSingle(10f, 30f);
 
             decalDrawer.AddDecal(position + (normal * 0.2f), normal, Vector2.One * rnd, float.PositiveInfinity);
         }

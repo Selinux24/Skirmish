@@ -1,4 +1,4 @@
-﻿using SharpDX.DXGI;
+﻿using Vortice.DXGI;
 
 namespace Engine.Helpers
 {

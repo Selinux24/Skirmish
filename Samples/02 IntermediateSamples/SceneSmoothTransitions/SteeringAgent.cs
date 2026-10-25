@@ -1,7 +1,7 @@
 ﻿using Engine;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
@@ -34,7 +34,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 var distance = force.Length();
                 if (distance < ArrivalRadius)
                 {
-                    desiredSpeed = MathUtil.Lerp(0, MaxSpeed, distance / ArrivalRadius);
+                    desiredSpeed = float.Lerp(0, MaxSpeed, distance / ArrivalRadius);
                 }
             }
 

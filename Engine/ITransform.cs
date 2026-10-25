@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -52,10 +52,10 @@ namespace Engine
         /// <summary>
         /// Gets the local transform
         /// </summary>
-        Matrix LocalTransform { get; }
+        Matrix4x4 LocalTransform { get; }
         /// <summary>
         /// Gets the global transform
         /// </summary>
-        Matrix GlobalTransform { get; }
+        Matrix4x4 GlobalTransform { get; }
     }
 }

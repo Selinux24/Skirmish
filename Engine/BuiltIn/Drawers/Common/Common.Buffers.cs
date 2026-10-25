@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Common
@@ -13,7 +13,7 @@ namespace Engine.BuiltIn.Drawers.Common
         {
             return new PerMeshSingle
             {
-                Local = Matrix.Transpose(state.Local),
+                Local = Matrix4x4.Transpose(state.Local),
             };
         }
 
@@ -21,12 +21,12 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Local transform
         /// </summary>
         [FieldOffset(0)]
-        public Matrix Local;
+        public Matrix4x4 Local;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSingle));
+            return (uint)Marshal.SizeOf<PerMeshSingle>();
         }
     }
 
@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.Drawers.Common
         {
             return new PerMeshSkinned
             {
-                Local = Matrix.Transpose(state.Local),
+                Local = Matrix4x4.Transpose(state.Local),
                 AnimationOffset = state.AnimationOffset1,
                 AnimationOffset2 = state.AnimationOffset2,
                 AnimationInterpolation = state.AnimationInterpolationAmount,
@@ -51,7 +51,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Local transform
         /// </summary>
         [FieldOffset(0)]
-        public Matrix Local;
+        public Matrix4x4 Local;
 
         /// <summary>
         /// Animation offset 1
@@ -70,9 +70,9 @@ namespace Engine.BuiltIn.Drawers.Common
         public float AnimationInterpolation;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSkinned));
+            return (uint)Marshal.SizeOf<PerMeshSkinned>();
         }
     }
 
@@ -95,7 +95,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Color4 TintColor;
+        public Vector4 TintColor;
 
         /// <summary>
         /// Material index
@@ -104,9 +104,9 @@ namespace Engine.BuiltIn.Drawers.Common
         public uint MaterialIndex;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMaterialColor));
+            return (uint)Marshal.SizeOf<PerMaterialColor>();
         }
     }
 
@@ -130,7 +130,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Color4 TintColor;
+        public Vector4 TintColor;
 
         /// <summary>
         /// Material index
@@ -144,9 +144,9 @@ namespace Engine.BuiltIn.Drawers.Common
         public uint TextureIndex;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMaterialTexture));
+            return (uint)Marshal.SizeOf<PerMaterialTexture>();
         }
     }
 
@@ -171,9 +171,9 @@ namespace Engine.BuiltIn.Drawers.Common
         public uint Channel;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerFramePositionTexture));
+            return (uint)Marshal.SizeOf<PerFramePositionTexture>();
         }
     }
 
@@ -201,7 +201,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Color4 TintColor;
+        public Vector4 TintColor;
 
         /// <summary>
         /// Scattering coefficients
@@ -236,9 +236,9 @@ namespace Engine.BuiltIn.Drawers.Common
         public float Slope2;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerTerrain));
+            return (uint)Marshal.SizeOf<PerTerrain>();
         }
     }
 }

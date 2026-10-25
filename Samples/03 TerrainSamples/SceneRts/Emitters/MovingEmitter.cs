@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Particles;
-using SharpDX;
+using System.Numerics;
 
 namespace TerrainSamples.SceneRts.Emitters
 {

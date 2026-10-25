@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -156,7 +156,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return ns;
         }
-       
+
         /// <summary>
         /// Samples velocity adaptive
         /// </summary>
@@ -195,9 +195,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int ndivs = m_params.AdaptiveDivs;
             int nrings = m_params.AdaptiveRings;
 
-            int nd = MathUtil.Clamp(ndivs, 1, DT_MAX_PATTERN_DIVS);
-            int nr = MathUtil.Clamp(nrings, 1, DT_MAX_PATTERN_RINGS);
-            float da = 1.0f / nd * MathUtil.TwoPi;
+            int nd = Math.Clamp(ndivs, 1, DT_MAX_PATTERN_DIVS);
+            int nr = Math.Clamp(nrings, 1, DT_MAX_PATTERN_RINGS);
+            float da = 1.0f / nd * Helper.TwoPi;
             float ca = MathF.Cos(da);
             float sa = MathF.Sin(da);
 
@@ -245,7 +245,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            return pat.Take(npat).ToArray();
+            return [.. pat.Take(npat)];
         }
         /// <summary>
         /// Samples the specified pattern
@@ -312,7 +312,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return res;
         }
-       
+
         /// <summary>
         /// Prepares the obstacles for the query
         /// </summary>
@@ -338,8 +338,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 Vector3 pb = cir.P;
 
                 Vector3 orig = Vector3.Zero;
-                cir.Dp = pb - pa;
-                cir.Dp.Normalize();
+                cir.Dp = Vector3.Normalize(pb - pa);
                 Vector3 dv = cir.DVel - dvel;
 
                 float a = Utils.TriArea2D(orig, cir.Dp, dv);
@@ -375,7 +374,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 seg.Touch = Utils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out _) < 0.0001f;
             }
         }
-    
+
         /// <summary>
         /// Calculate the collision penalty for a given velocity vector
         /// </summary>
@@ -441,7 +440,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 vab -= cir.Vel;
 
                 // Side
-                side += MathUtil.Clamp(MathF.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
+                side += Math.Clamp(MathF.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
                 nside++;
 
                 if (!SweepCircleCircle2D(req.Pos, req.Rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))

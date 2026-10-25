@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using RasterizerState2 = SharpDX.Direct3D11.RasterizerState2;
+    using RasterizerState2 = Vortice.Direct3D11.ID3D11RasterizerState2;
 
     /// <summary>
     /// Engine rasterizer state

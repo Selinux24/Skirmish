@@ -1,5 +1,5 @@
 ﻿using Engine;
-using SharpDX;
+using System.Numerics;
 
 namespace TerrainSamples.SceneRts.AI
 {
@@ -81,8 +81,8 @@ namespace TerrainSamples.SceneRts.AI
                 if (distance <= Range)
                 {
                     lastAttackTime = 0;
-                    var dmg = Helper.RandomGenerator.NextFloat(0, Damage);
-                    if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { dmg *= 2f; } //Critic
+                    var dmg = Helper.RandomGenerator.NextSingle(0, Damage);
+                    if (Helper.RandomGenerator.NextSingle(0, 1) > 0.9f) { dmg *= 2f; } //Critic
 
                     return dmg;
                 }

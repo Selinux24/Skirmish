@@ -1,9 +1,10 @@
-﻿using Engine.Content;
+﻿using Engine;
+using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 
 namespace EngineTests.Content
 {
@@ -14,9 +15,9 @@ namespace EngineTests.Content
     {
         public TestContext TestContext { get; set; }
 
-        static RotationQ rotarion0 = RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(0));
-        static RotationQ rotarion33 = RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(33));
-        static RotationQ rotarion90 = RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(90));
+        static RotationQ rotarion0 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(0));
+        static RotationQ rotarion33 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(33));
+        static RotationQ rotarion90 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(90));
 
         static readonly string rotationString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", 0.1f, 0.2f, 0.3f, 0.4f);
 
@@ -128,8 +129,8 @@ namespace EngineTests.Content
             expected = new Quaternion(1, 2, 3, 4) * 2;
             Assert.AreEqual(expected, res);
 
-            res = 2 * new RotationQ(1, 2, 3, 4);
-            expected = 2 * new Quaternion(1, 2, 3, 4);
+            res = new RotationQ(1, 2, 3, 4) * 2;
+            expected = new Quaternion(1, 2, 3, 4) * 2;
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]

@@ -12,11 +12,11 @@ namespace Engine
         /// <summary>
         /// Input sample rate
         /// </summary>
-        public int InputSampleRate { get; }
+        public uint InputSampleRate { get; }
         /// <summary>
         /// Output channels
         /// </summary>
-        public int InputChannelCount { get; }
+        public uint InputChannelCount { get; }
         /// <summary>
         /// Use redirect to LFE
         /// </summary>
@@ -31,6 +31,11 @@ namespace Engine
         /// Gets or sets whether the master voice uses a limiter or not
         /// </summary>
         bool UseMasteringLimiter { get; set; }
+        /// <summary>
+        /// Gets the operation set Id
+        /// </summary>
+        /// <remarks>Returns the commit now Id if not operation set is active</remarks>
+        uint OperationSet { get; }
 
         /// <summary>
         /// Creates a new effect
@@ -53,6 +58,17 @@ namespace Engine
         /// </summary>
         /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
         /// <param name="loudness">Threshold of the limiter</param>
-        void SetMasteringLimit(int release, int loudness);
+        void SetMasteringLimit(uint release, uint loudness);
+
+        /// <summary>
+        /// Starts a new operation Set
+        /// </summary>
+        /// <returns>Returns the operation set Id</returns>
+        uint StartOperationSet();
+        /// <summary>
+        /// Commits the specified operation set
+        /// </summary>
+        /// <param name="operationSet">Operation set</param>
+        void CommitOperation(uint operationSet);
     }
 }

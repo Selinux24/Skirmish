@@ -2,12 +2,12 @@
 using Engine.Collections.Generic;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
@@ -196,7 +196,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    TintColor = Color4.White,
+                    TintColor = new(1f, 1f, 1f, 1f),
                     Material = material,
                     TextureIndex = 0,
                     UseAnisotropic = true,
@@ -331,7 +331,7 @@ namespace Engine.BuiltIn.Components.Ground
             GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
 
             // Retrieve lights from content
-            Lights = content.CreateLights().ToArray();
+            Lights = [.. content.CreateLights()];
 
             await IntializePatches();
         }
@@ -361,7 +361,7 @@ namespace Engine.BuiltIn.Components.Ground
             {
                 if (!Helper.Retry(() => patchDictionary.TryAdd(taskResult.Id, taskResult.Patch), 10))
                 {
-                    Logger.WriteWarning(nameof(Scenery), $"The node {taskResult.Id} has no created patch.");
+                    Game.Logger.WriteWarning(nameof(Scenery), $"The node {taskResult.Id} has no created patch.");
                 }
             }
 
@@ -369,7 +369,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var taskDuration = TimeSpan.FromMilliseconds(taskResults.Sum(p => p.Duration.TotalMilliseconds));
             var maxTaskDuration = TimeSpan.FromMilliseconds(taskResults.Max(p => p.Duration.TotalMilliseconds));
-            Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Count()} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
+            Game.Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Count()} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
         }
 
         /// <inheritdoc/>
@@ -412,7 +412,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             base.Update(context);
 
-            visibleNodes = GroundPickingQuadtree.FindNodesInVolume((IntersectionVolumeFrustum)Scene.Camera.Frustum).ToArray();
+            visibleNodes = [.. GroundPickingQuadtree.FindNodesInVolume((IntersectionVolumeFrustum)Scene.Camera.Frustum)];
             if (visibleNodes.Length == 0)
             {
                 return;
@@ -428,7 +428,7 @@ namespace Engine.BuiltIn.Components.Ground
                     continue;
                 }
 
-                Logger.WriteTrace(this, $"Loading node {node.Id} patch.");
+                Game.Logger.WriteTrace(this, $"Loading node {node.Id} patch.");
 
                 // Reserve position
                 patchDictionary.TryAdd(node.Id, null);
@@ -456,10 +456,10 @@ namespace Engine.BuiltIn.Components.Ground
             {
                 if (!patchDictionary.ContainsKey(nodeId))
                 {
-                    Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} without assigned patch. No draw method called");
+                    Game.Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} without assigned patch. No draw method called");
                 }
 
-                Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
+                Game.Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
 
                 drawn = (patchDictionary[nodeId]?.DrawSceneryShadows(context) ?? false) || drawn;
             }
@@ -481,12 +481,12 @@ namespace Engine.BuiltIn.Components.Ground
             {
                 if (!patchDictionary.ContainsKey(nodeId))
                 {
-                    Logger.WriteWarning(this, $"Scenery Draw {nodeId} without assigned patch. No draw method called");
+                    Game.Logger.WriteWarning(this, $"Scenery Draw {nodeId} without assigned patch. No draw method called");
 
                     continue;
                 }
 
-                Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
+                Game.Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
                 drawn = (patchDictionary[nodeId]?.DrawScenery(context, BlendMode) ?? false) || drawn;
             }
@@ -508,13 +508,13 @@ namespace Engine.BuiltIn.Components.Ground
             const string loadTaskName = nameof(LoadPatches);
 
             // Fire and forget
-            Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
+            Game.Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
 
             var loadGroup = LoadResourceGroup<SceneryPatchTask>.FromTasks(taskList, LoadPatchesCompleted, null, $"{loadTaskName}");
 
             Scene.LoadResources(loadGroup);
 
-            Logger.WriteTrace(this, $"{loadTaskName} End.");
+            Game.Logger.WriteTrace(this, $"{loadTaskName} End.");
         }
         /// <summary>
         /// Load patches callback
@@ -536,7 +536,7 @@ namespace Engine.BuiltIn.Components.Ground
                         //None
                     }
 
-                    Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
+                    Game.Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
                 }
             }
         }
@@ -544,7 +544,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <inheritdoc/>
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            return patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? []).ToArray();
+            return [.. patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? [])];
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

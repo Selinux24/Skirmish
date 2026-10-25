@@ -1,11 +1,11 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.UI
 {
@@ -39,7 +39,7 @@ namespace Engine.UI
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
             {
-                Logger.WriteWarning(nameof(FontMap<T>), $"Font resource not found: {fontFileName}");
+                Game.Logger.WriteWarning(nameof(FontMap<>), $"Font resource not found: {fontFileName}");
                 return null;
             }
 
@@ -140,7 +140,7 @@ namespace Engine.UI
             var fontFamily = Game.Fonts.FindFonts(fontFamilies);
             if (string.IsNullOrEmpty(fontFamily))
             {
-                Logger.WriteWarning(nameof(FontMap<T>), $"Font familiy not found in the graphic context: {fontFamilies}");
+                Game.Logger.WriteWarning(nameof(FontMap<>), $"Font familiy not found in the graphic context: {fontFamilies}");
 
                 return null;
             }
@@ -179,12 +179,12 @@ namespace Engine.UI
 
             if (!float.TryParse(xValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
             {
-                Logger.WriteWarning(nameof(FontMap<T>), $"Bad coordinate descriptor for X value. Single spected: {xValue}");
+                Game.Logger.WriteWarning(nameof(FontMap<>), $"Bad coordinate descriptor for X value. Single spected: {xValue}");
             }
 
             if (!float.TryParse(yValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
             {
-                Logger.WriteWarning(nameof(FontMap<T>), $"Bad coordinate descriptor for Y value. Single spected: {yValue}");
+                Game.Logger.WriteWarning(nameof(FontMap<>), $"Bad coordinate descriptor for Y value. Single spected: {yValue}");
             }
 
             return new Vector2(x, y);
@@ -491,7 +491,7 @@ namespace Engine.UI
         /// <param name="indexList">Index list to fill</param>
         private void MapChar(
             FontMapChar chr,
-            Color4 color,
+            Vector4 color,
             ref Vector2 pos,
             ref FontMapSentenceDescriptor<T> desc)
         {

@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -34,7 +34,7 @@ namespace Engine.Content
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor { get; set; }
+        public Vector4 DiffuseColor { get; set; }
         /// <summary>
         /// Emissive texture name
         /// </summary>
@@ -42,7 +42,7 @@ namespace Engine.Content
         /// <summary>
         /// Emissive color
         /// </summary>
-        public Color3 EmissiveColor { get; set; }
+        public Vector3 EmissiveColor { get; set; }
         /// <summary>
         /// Ambient texture name
         /// </summary>
@@ -50,7 +50,7 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Color3 AmbientColor { get; set; }
+        public Vector3 AmbientColor { get; set; }
         /// <summary>
         /// Specular texture name
         /// </summary>
@@ -58,7 +58,7 @@ namespace Engine.Content
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color3 SpecularColor { get; set; }
+        public Vector3 SpecularColor { get; set; }
         /// <summary>
         /// Shininess factor
         /// </summary>

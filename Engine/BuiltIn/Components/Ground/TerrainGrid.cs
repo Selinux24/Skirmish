@@ -1,11 +1,12 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Collections.Generic;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Ground
 {
@@ -140,8 +141,8 @@ namespace Engine.BuiltIn.Components.Ground
                 }
             }
 
-            var bbox = SharpDXExtensions.BoundingBoxFromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
-            var items = vertices.Select(v => (SharpDXExtensions.BoundingBoxFromPoints(v.GetVertices().ToArray()), v));
+            var bbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. vertices.SelectMany(v => v.GetVertices()).Distinct()]);
+            var items = vertices.Select(v => (BoundingBoxExtensions.BoundingBoxFromPoints([.. v.GetVertices()]), v));
             res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, new(LODLevels, false, 0));
 
             //Populate nodes dictionary
@@ -191,17 +192,11 @@ namespace Engine.BuiltIn.Components.Ground
                     }
                 }
 
-                if (dictVB != null)
-                {
-                    dictVB.Clear();
-                    dictVB = null;
-                }
+                dictVB?.Clear();
+                dictVB = null;
 
-                if (dictIB != null)
-                {
-                    dictIB.Clear();
-                    dictIB = null;
-                }
+                dictIB?.Clear();
+                dictIB = null;
 
                 drawingQuadTree = null;
 
@@ -398,7 +393,7 @@ namespace Engine.BuiltIn.Components.Ground
         private static bool DrawNodeList(IEngineDeviceContext dc, IDrawer drawer, TerrainGridNode[] nodeList)
         {
             int instanceCount = 0;
-            int primitiveCount = 0;
+            uint primitiveCount = 0;
 
             for (int i = 0; i < nodeList.Length; i++)
             {

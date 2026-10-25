@@ -1,8 +1,10 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -41,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Scene world matrix
         /// </summary>
-        private readonly Matrix world = Matrix.Identity;
+        private readonly Matrix4x4 world = Matrix4x4.Identity;
         /// <summary>
         /// Scene mode
         /// </summary>
@@ -115,7 +117,7 @@ namespace Engine
 
                 var form = Game.Form;
                 Camera = Camera.CreateFree(
-                    Vector3.ForwardLH * -10f,
+                    Vector3Extensions.ForwardLH * -10f,
                     Vector3.Zero,
                     form.RenderWidth,
                     form.RenderHeight);
@@ -190,7 +192,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Logger.WriteError(this, $"{nameof(Scene)} => Updating error: {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"{nameof(Scene)} => Updating error: {ex.Message}", ex);
 
                 throw;
             }
@@ -203,13 +205,13 @@ namespace Engine
         {
             try
             {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
+                Game.Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
 
                 Renderer?.Draw(gameTime);
             }
             catch (EngineException ex)
             {
-                Logger.WriteError(this, $"{nameof(Scene)} => Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"{nameof(Scene)} => Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
 
                 throw;
             }
@@ -307,7 +309,7 @@ namespace Engine
         /// </summary>
         public virtual void GameGraphicsResized()
         {
-            Logger.WriteTrace(this, $"{nameof(Scene)} => Graphics resized.");
+            Game.Logger.WriteTrace(this, $"{nameof(Scene)} => Graphics resized.");
         }
 
         /// <summary>
@@ -584,7 +586,7 @@ namespace Engine
                 return new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
             }
 
-            BoundingBox = Helper.MergeBoundingBox(boxes);
+            BoundingBox = BoundingBoxExtensions.MergeBoundingBox(boxes);
 
             return BoundingBox.Value;
         }
@@ -634,8 +636,8 @@ namespace Engine
             var nVector = new Vector3(mouseX, mouseY, nDistance);
             var fVector = new Vector3(mouseX, mouseY, fDistance);
 
-            var nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-            var fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var nPoint = Vector3Extensions.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var fPoint = Vector3Extensions.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new PickingRay(nPoint, Vector3.Normalize(fPoint - nPoint), pickingParams);
         }
@@ -690,9 +692,9 @@ namespace Engine
         {
             var bbox = GetBoundingBox(SceneObjectUsages.Ground);
 
-            float maxY = bbox.Maximum.Y + 1.0f;
+            float maxY = bbox.Max.Y + 1.0f;
 
-            return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
+            return new PickingRay(new Vector3(x, maxY, z), Vector3Extensions.Down, pickingParams);
         }
 
         /// <summary>
@@ -806,12 +808,12 @@ namespace Engine
                 Active = Active,
                 Order = Order,
                 SceneMode = sceneMode,
-                GroundBoundingBoxMin = BoundingBox?.Minimum,
-                GroundBoundingBoxMax = BoundingBox?.Maximum,
+                GroundBoundingBoxMin = BoundingBox?.Min,
+                GroundBoundingBoxMax = BoundingBox?.Max,
                 GameEnvironment = GameEnvironment.GetState(),
                 SceneLights = Lights.GetState(),
                 Camera = Camera.GetState(),
-                Components = Components.Get<IHasGameState>().Select(c => c.GetState()).OfType<ISceneObjectState>().ToArray(),
+                Components = [.. Components.Get<IHasGameState>().Select(c => c.GetState()).OfType<ISceneObjectState>()],
             };
         }
         /// <inheritdoc/>

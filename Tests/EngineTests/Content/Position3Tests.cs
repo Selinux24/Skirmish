@@ -1,9 +1,9 @@
 ﻿using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 
 namespace EngineTests.Content
 {

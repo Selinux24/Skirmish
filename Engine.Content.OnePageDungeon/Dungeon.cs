@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.Content.OnePageDungeon
 {
@@ -104,9 +103,9 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Gets the rectangle
         /// </summary>
-        public RectangleF GetRectangle()
+        public Vortice.Mathematics.Rect GetRectangle()
         {
-            return new RectangleF(X, Y, W, H);
+            return new Vortice.Mathematics.Rect(X, Y, W, H);
         }
         /// <inheritdoc/>
         public override string ToString()

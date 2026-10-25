@@ -1,11 +1,14 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Matrix = Matrix4x4;
+
     /// <summary>
     /// 3D Line
     /// </summary>
@@ -44,8 +47,8 @@ namespace Engine
             }
 
             return new(
-                Vector3.TransformCoordinate(line.Point1, transform),
-                Vector3.TransformCoordinate(line.Point2, transform));
+                Vector3.Transform(line.Point1, transform),
+                Vector3.Transform(line.Point2, transform));
         }
         /// <summary>
         /// Transform line list coordinates
@@ -243,7 +246,7 @@ namespace Engine
 
             for (int i = 0; i < segments; ++i)
             {
-                float a = i / (float)segments * MathUtil.TwoPi;
+                float a = i / (float)segments * Helper.TwoPi;
                 dir[i * 2 + 0] = MathF.Cos(a);
                 dir[i * 2 + 1] = MathF.Sin(a);
             }
@@ -274,12 +277,12 @@ namespace Engine
         {
             List<Line3D> lines = [];
 
-            var p = transform.TranslationVector;
+            var p = transform.Translation;
 
-            var up = p + (transform.Up * size);
-            var forward = p + (transform.Forward * size);
-            var left = p + (transform.Left * size);
-            var right = p + (transform.Right * size);
+            var up = p + (transform.GetUp() * size);
+            var forward = p + (transform.GetForward() * size);
+            var left = p + (transform.GetLeft() * size);
+            var right = p + (transform.GetRight() * size);
 
             var c1 = (forward * 0.8f) + (left * 0.2f);
             var c2 = (forward * 0.8f) + (right * 0.2f);
@@ -365,7 +368,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, float edgeSize)
         {
-            return CreateArrow(point, direction, Vector3.Up, edgeSize);
+            return CreateArrow(point, direction, Vector3Extensions.Up, edgeSize);
         }
         public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, Vector3 up, float edgeSize)
         {
@@ -501,7 +504,7 @@ namespace Engine
             yield return Point2;
         }
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
             return 2;
         }

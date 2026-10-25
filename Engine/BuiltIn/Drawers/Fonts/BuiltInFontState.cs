@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        public Rectangle ClippingRectangle { get; set; }
+        public Rect ClippingRectangle { get; set; }
         /// <summary>
         /// Font texture
         /// </summary>

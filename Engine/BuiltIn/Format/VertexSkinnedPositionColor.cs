@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -19,14 +19,14 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new ("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, slot, EngineInputClassification.PerVertexData, 0),
-                new ("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 40, slot, EngineInputClassification.PerVertexData, 0 ),
+                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("COLOR", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("WEIGHTS", 0, Vortice.DXGI.Format.R32G32B32_Float, 28, slot, EngineInputClassification.PerVertexData, 0),
+                new ("BONEINDICES", 0, Vortice.DXGI.Format.R8G8B8A8_UInt, 40, slot, EngineInputClassification.PerVertexData, 0 ),
             ];
         }
         /// <summary>
@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.Format
                 var v = vArray[index];
 
                 var p = v.Position ?? Vector3.Zero;
-                var c = v.Color ?? Color4.White;
+                var c = v.Color ?? new(1, 1, 1, 1);
 
                 var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
                 int vwCount = vw?.Length ?? 0;
@@ -84,7 +84,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Color4 Color;
+        public Vector4 Color;
         /// <summary>
         /// Weight 1
         /// </summary>
@@ -136,7 +136,7 @@ namespace Engine.BuiltIn.Format
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
             else if (channel == VertexDataChannels.Weights)
             {
                 float[] weights = (float[])(object)value;
@@ -158,12 +158,12 @@ namespace Engine.BuiltIn.Format
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexSkinnedPositionColor>();
+            return (uint)Marshal.SizeOf<VertexSkinnedPositionColor>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

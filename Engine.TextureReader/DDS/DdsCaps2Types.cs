@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
     /// <summary>
     /// DDS Caps2

@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-    using SharpDX.DXGI;
+    using Vortice.DXGI;
 
     /// <summary>
     /// Drawing methods of buffer manager
@@ -24,13 +24,13 @@ namespace Engine
 
             if (!bufferManager.Initilialized)
             {
-                Logger.WriteWarning(game, "Attempt to set vertex buffers to Input Assembler with no initialized manager");
+                Game.Logger.WriteWarning(game, "Attempt to set vertex buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
             if (bufferManager.HasVertexBufferDescriptorsDirty())
             {
-                Logger.WriteWarning(game, "Attempt to set vertex buffers to Input Assembler with dirty descriptors");
+                Game.Logger.WriteWarning(game, "Attempt to set vertex buffers to Input Assembler with dirty descriptors");
                 return false;
             }
 
@@ -67,14 +67,14 @@ namespace Engine
 
             if (!bufferManager.Initilialized)
             {
-                Logger.WriteWarning(game, "Attempt to set technique to Input Assembler with no initialized manager");
+                Game.Logger.WriteWarning(game, "Attempt to set technique to Input Assembler with no initialized manager");
                 return false;
             }
 
-            var vertexBufferDescriptor = bufferManager.GetVertexBufferDescriptor(descriptor.BufferDescriptionIndex);
+            var vertexBufferDescriptor = bufferManager.GetVertexBufferDescriptor((int)descriptor.BufferDescriptionIndex);
             if (vertexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning(game, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Game.Logger.WriteWarning(game, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
@@ -114,18 +114,18 @@ namespace Engine
 
             if (!bufferManager.Initilialized)
             {
-                Logger.WriteWarning(game, "Attempt to set index buffers to Input Assembler with no initialized manager");
+                Game.Logger.WriteWarning(game, "Attempt to set index buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
-            var indexBufferDescriptor = bufferManager.GetIndexBufferDescriptor(descriptor.BufferDescriptionIndex);
+            var indexBufferDescriptor = bufferManager.GetIndexBufferDescriptor((int)descriptor.BufferDescriptionIndex);
             if (indexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning(game, $"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Game.Logger.WriteWarning(game, $"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
-            dc.IASetIndexBuffer(bufferManager.GetIndexBuffer(descriptor.BufferDescriptionIndex), Format.R32_UInt, 0);
+            dc.IASetIndexBuffer(bufferManager.GetIndexBuffer((int)descriptor.BufferDescriptionIndex), Format.R32_UInt, 0);
 
             return true;
         }
@@ -138,7 +138,7 @@ namespace Engine
         /// <param name="data">Instancig data</param>
         /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
         public static bool WriteInstancingData<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
-            where T : struct
+            where T : unmanaged
         {
             var bufferManager = game.BufferManager;
 
@@ -156,7 +156,7 @@ namespace Engine
         /// <param name="data">Data to write</param>
         /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
         public static bool WriteVertexBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, bool discard = true)
-            where T : struct
+            where T : unmanaged
         {
             var bufferManager = game.BufferManager;
 
@@ -193,7 +193,7 @@ namespace Engine
         /// <param name="buffers">Buffer list</param>
         /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
         private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
-            where T : struct
+            where T : unmanaged
         {
             if (!game.ValidateWriteBuffer(dc, descriptor, bufferDescriptors, buffers, out var buffer))
             {
@@ -207,7 +207,7 @@ namespace Engine
 
             if (!dc.IsImmediateContext)
             {
-                Logger.WriteWarning(game, $"Invalid WriteNoOverwriteBuffer action into deferred dc: {dc}. WriteDiscardBuffer action performed instead.");
+                Game.Logger.WriteWarning(game, $"Invalid WriteNoOverwriteBuffer action into deferred dc: {dc}. WriteDiscardBuffer action performed instead.");
             }
 
             return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
@@ -238,14 +238,14 @@ namespace Engine
 
             if (!bufferManager.Initilialized)
             {
-                Logger.WriteWarning(game, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
+                Game.Logger.WriteWarning(game, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
                 return false;
             }
 
             var bufferDescriptor = bufferDescriptors[descriptor.BufferDescriptionIndex];
             if (bufferDescriptor.Dirty)
             {
-                Logger.WriteWarning(game, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Game.Logger.WriteWarning(game, $"Attempt to write data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 

@@ -1,8 +1,9 @@
 ﻿using AISamples.Common.Primitives;
-using SharpDX;
+using Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common
 {
@@ -16,7 +17,7 @@ namespace AISamples.Common
             var d = s2.P2;
 
             float bot = (d.Y - c.Y) * (b.X - a.X) - (d.X - c.X) * (b.Y - a.Y);
-            if (MathUtil.IsZero(bot))
+            if (Helper.IsZero(bot))
             {
                 position = Vector3.Zero;
                 distance = float.MaxValue;
@@ -41,7 +42,7 @@ namespace AISamples.Common
                 return false;
             }
 
-            position = new Vector3(MathUtil.Lerp(a.X, b.X, t), 0f, MathUtil.Lerp(a.Y, b.Y, t));
+            position = new Vector3(float.Lerp(a.X, b.X, t), 0f, float.Lerp(a.Y, b.Y, t));
             distance = t;
             return true;
         }
@@ -83,7 +84,7 @@ namespace AISamples.Common
         {
             var center = points.Aggregate((a, b) => a + b) / points.Length;
 
-            return points.Select(p => center + (p - center) * factor).ToArray();
+            return [.. points.Select(p => center + (p - center) * factor)];
         }
 
         public static Segment2[] Divide(Segment2 segment, float dashSize, float gapSize)

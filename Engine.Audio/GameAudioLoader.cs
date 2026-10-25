@@ -8,7 +8,7 @@ namespace Engine.Audio
     public class GameAudioLoader : IGameAudioLoader
     {
         /// <inheritdoc/>
-        public Func<IGameAudio> GetDelegate(int sampleRate)
+        public Func<IGameAudio> GetDelegate(uint sampleRate)
         {
             return () => { return new GameAudio(sampleRate); };
         }

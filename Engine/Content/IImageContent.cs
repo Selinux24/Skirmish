@@ -36,7 +36,7 @@ namespace Engine.Content
 
             string errorMessage = $"Texture cannot be requested: {this}";
 
-            Logger.WriteError(nameof(DrawingData), errorMessage);
+            Game.Logger.WriteError(nameof(DrawingData), errorMessage);
 
             throw new EngineException(errorMessage);
         }

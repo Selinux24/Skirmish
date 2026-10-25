@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -40,7 +40,7 @@ namespace Engine.Physics
         /// Resets the object state
         /// </summary>
         /// <param name="transform">Transform</param>
-        void Reset(Matrix transform);
+        void Reset(Matrix4x4 transform);
         /// <summary>
         /// Resets the object state
         /// </summary>

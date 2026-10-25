@@ -137,7 +137,7 @@ namespace Engine.PathFinding.AStar
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GridFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GridFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -157,7 +157,7 @@ namespace Engine.PathFinding.AStar
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GridFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GridFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -179,7 +179,7 @@ namespace Engine.PathFinding.AStar
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GridFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GridFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }
@@ -201,7 +201,7 @@ namespace Engine.PathFinding.AStar
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GridFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GridFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }

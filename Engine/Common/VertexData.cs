@@ -1,11 +1,13 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Common
 {
+    using Matrix = Matrix4x4;
+
     /// <summary>
     /// Vertex helper
     /// </summary>
@@ -43,7 +45,7 @@ namespace Engine.Common
         /// <summary>
         /// Color
         /// </summary>
-        public Color4? Color { get; set; }
+        public Vector4? Color { get; set; }
 
         /// <summary>
         /// Apply weighted transforms to the vertext data
@@ -84,7 +86,7 @@ namespace Engine.Common
                 var boneTransform = transforms[index];
                 if (!boneTransform.IsIdentity)
                 {
-                    Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
+                    p = Vector3.Transform(position, boneTransform);
                 }
 
                 t += p * weight;
@@ -108,7 +110,7 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
@@ -134,7 +136,7 @@ namespace Engine.Common
 
             if (result.Position.HasValue)
             {
-                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
+                result.Position = Vector3.Transform(result.Position.Value, transform);
             }
 
             if (result.Normal.HasValue)
@@ -198,7 +200,7 @@ namespace Engine.Common
             if (result.HasChannel(VertexDataChannels.Position))
             {
                 var position = result.GetChannelValue<Vector3>(VertexDataChannels.Position);
-                result.SetChannelValue(VertexDataChannels.Position, Vector3.TransformCoordinate(position, transform));
+                result.SetChannelValue(VertexDataChannels.Position, Vector3.Transform(position, transform));
             }
 
             if (result.HasChannel(VertexDataChannels.Normal))
@@ -268,7 +270,7 @@ namespace Engine.Common
             return [Position.Value];
         }
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
             return 1;
         }

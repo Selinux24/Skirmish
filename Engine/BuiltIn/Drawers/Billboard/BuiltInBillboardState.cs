@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Billboard
 {

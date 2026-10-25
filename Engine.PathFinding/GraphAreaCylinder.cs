@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {

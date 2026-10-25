@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Deferred
@@ -15,11 +15,11 @@ namespace Engine.BuiltIn.Drawers.Deferred
         [StructLayout(LayoutKind.Explicit, Size = 64)]
         struct PerLight : IBufferData
         {
-            public static PerLight Build(Matrix local)
+            public static PerLight Build(Matrix4x4 local)
             {
                 return new PerLight
                 {
-                    Local = Matrix.Transpose(local),
+                    Local = Matrix4x4.Transpose(local),
                 };
             }
 
@@ -27,12 +27,12 @@ namespace Engine.BuiltIn.Drawers.Deferred
             /// Local transform
             /// </summary>
             [FieldOffset(0)]
-            public Matrix Local;
+            public Matrix4x4 Local;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerLight>();
+                return (uint)Marshal.SizeOf<PerLight>();
             }
         }
 

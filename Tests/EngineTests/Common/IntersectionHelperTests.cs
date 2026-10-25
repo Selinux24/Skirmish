@@ -2,9 +2,10 @@
 using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Common
 {
@@ -83,16 +84,16 @@ namespace EngineTests.Common
 
 
             bbox1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
-            bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3.Left, (Vector3.One * 0.5f) + Vector3.Left);
-            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3.Left * 3), Vector3.One * 0.5f + (Vector3.Left * 3));
+            bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3Extensions.Left, (Vector3.One * 0.5f) + Vector3Extensions.Left);
+            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3Extensions.Left * 3), Vector3.One * 0.5f + (Vector3Extensions.Left * 3));
             bbox4 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
             bbox5 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
 
-            box1 = new IntersectionVolumeAxisAlignedBox(bbox1.Minimum, bbox1.Maximum);
-            box2 = new IntersectionVolumeAxisAlignedBox(bbox2.Minimum, bbox2.Maximum);
-            box3 = new IntersectionVolumeAxisAlignedBox(bbox3.Minimum, bbox3.Maximum);
-            box4 = new IntersectionVolumeAxisAlignedBox(bbox4.Minimum, bbox4.Maximum);
-            box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Minimum, bbox5.Maximum);
+            box1 = new IntersectionVolumeAxisAlignedBox(bbox1.Min, bbox1.Max);
+            box2 = new IntersectionVolumeAxisAlignedBox(bbox2.Min, bbox2.Max);
+            box3 = new IntersectionVolumeAxisAlignedBox(bbox3.Min, bbox3.Max);
+            box4 = new IntersectionVolumeAxisAlignedBox(bbox4.Min, bbox4.Max);
+            box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Min, bbox5.Max);
 
 
             tmesh1 = [.. Triangle.ComputeTriangleList(box1)];
@@ -107,7 +108,7 @@ namespace EngineTests.Common
             mesh4 = new IntersectionVolumeMesh(tmesh4);
             mesh5 = new IntersectionVolumeMesh(tmesh5);
 
-            var bsph1_1 = BoundingSphere.FromBox(bbox1);
+            var bsph1_1 = BoundingSphere.CreateFromBoundingBox(bbox1);
             bsph1_1.Radius *= 0.5f;
             sph1_1 = new IntersectionVolumeSphere(bsph1_1);
 
@@ -136,18 +137,18 @@ namespace EngineTests.Common
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Box)).Returns(box5);
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Mesh)).Returns(mesh5);
 
-            var proj = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, 1f);
-            var view1 = Matrix.LookAtLH(new Vector3(-1, 0, 0), Vector3.Zero, Vector3.Up);
-            var view2 = Matrix.LookAtLH(new Vector3(+1, 0, 0), Vector3.Zero, Vector3.Up);
-            var view3 = Matrix.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3.Up);
+            var proj = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(Helper.PiOver2, 1f, 0.1f, 1f);
+            var view1 = Matrix4x4.CreateLookAtLeftHanded(new Vector3(-1, 0, 0), Vector3.Zero, Vector3Extensions.Up);
+            var view2 = Matrix4x4.CreateLookAtLeftHanded(new Vector3(+1, 0, 0), Vector3.Zero, Vector3Extensions.Up);
+            var view3 = Matrix4x4.CreateLookAtLeftHanded(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3Extensions.Up);
 
             bfrustum1 = new BoundingFrustum(view1 * proj);
             bfrustum2 = new BoundingFrustum(view2 * proj);
             bfrustum3 = new BoundingFrustum(view3 * proj);
 
-            frustum1 = new IntersectionVolumeFrustum(bfrustum1.Matrix);
-            frustum2 = new IntersectionVolumeFrustum(bfrustum2.Matrix);
-            frustum3 = new IntersectionVolumeFrustum(bfrustum3.Matrix);
+            frustum1 = new IntersectionVolumeFrustum(view1 * proj);
+            frustum2 = new IntersectionVolumeFrustum(view2 * proj);
+            frustum3 = new IntersectionVolumeFrustum(view3 * proj);
         }
 
         [TestInitialize]

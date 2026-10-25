@@ -43,7 +43,7 @@ namespace Engine.Common
         /// <summary>
         /// The number of elements allocated for the buffer.
         /// </summary>
-        private static int bufferElements = 0;
+        private static uint bufferElements = 0;
 
         /// <summary>
         /// Counters summary
@@ -83,7 +83,7 @@ namespace Engine.Common
         /// <summary>
         /// Number of elements allocated for the buffer.
         /// </summary>
-        public static int BufferElements { get; } = bufferElements;
+        public static uint BufferElements { get; } = bufferElements;
 
         /// <summary>
         /// Statistics keys
@@ -246,7 +246,7 @@ namespace Engine.Common
         /// <param name="binding">Binding flags</param>
         /// <param name="sizeInBytes">Size in bytes</param>
         /// <param name="length">Number of elements</param>
-        public static void RegBuffer(string name, int usage, int binding, long sizeInBytes, int length)
+        public static void RegBuffer(string name, int usage, int binding, uint sizeInBytes, uint length)
         {
             Buffers++;
 
@@ -272,7 +272,7 @@ namespace Engine.Common
         /// <param name="binding">Binding flags</param>
         /// <param name="sizeInBytes">Size in bytes</param>
         /// <param name="length">Number of elements</param>
-        public static void RegBuffer<T>(string name, int usage, int binding, long sizeInBytes, int length)
+        public static void RegBuffer<T>(string name, int usage, int binding, uint sizeInBytes, uint length)
         {
             Buffers++;
 

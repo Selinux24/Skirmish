@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.UI
 {
@@ -52,8 +51,8 @@ namespace Engine.UI
         public readonly bool Equals(Spacing other)
         {
             return
-                MathUtil.NearEqual(other.Horizontal, Horizontal) &&
-                MathUtil.NearEqual(other.Vertical, Vertical);
+                Helper.NearEqual(other.Horizontal, Horizontal) &&
+                Helper.NearEqual(other.Vertical, Vertical);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -64,7 +64,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return verts;
         }
-        
+
         /// <summary>
         /// Returns portal points between two polygons.
         /// </summary>

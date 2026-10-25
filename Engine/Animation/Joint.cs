@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Animation
 {
@@ -14,7 +14,7 @@ namespace Engine.Animation
     /// <param name="parent">Parent joint</param>
     /// <param name="local">Local transform</param>
     /// <param name="global">Global transform</param>
-    public sealed class Joint(string name, string bone, Joint parent, Matrix local, Matrix global) : IEquatable<Joint>
+    public sealed class Joint(string name, string bone, Joint parent, Matrix4x4 local, Matrix4x4 global) : IEquatable<Joint>
     {
         /// <summary>
         /// Name
@@ -35,15 +35,15 @@ namespace Engine.Animation
         /// <summary>
         /// Inverse bind matrix
         /// </summary>
-        public Matrix Offset { get; set; }
+        public Matrix4x4 Offset { get; set; }
         /// <summary>
         /// Local transform matrix
         /// </summary>
-        public Matrix LocalTransform { get; set; } = local;
+        public Matrix4x4 LocalTransform { get; set; } = local;
         /// <summary>
         /// World transform matrix
         /// </summary>
-        public Matrix GlobalTransform { get; set; } = global;
+        public Matrix4x4 GlobalTransform { get; set; } = global;
 
         /// <summary>
         /// Finds a joint by name recursively

@@ -4,11 +4,13 @@ using Engine.BuiltIn.UI;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneStart
 {
+    using Color = System.Drawing.Color;
+
     class StartScene : Scene
     {
         private const int layerHUD = 99;
@@ -27,10 +29,10 @@ namespace AISamples.SceneStart
         private readonly string resourcesFolder = "SceneStart";
         private readonly string titleFonts = "Gill Sans MT, Verdana, Consolas";
         private readonly string buttonFonts = "Gill Sans MT, Consolas";
-        private readonly Color sceneButtonColor = Color.WhiteSmoke;
-        private readonly Color sceneButtonTextColor = Color.Black;
-        private readonly Color exitButtonColor = Color.White;
-        private readonly Color exitButtonTextColor = Color.Black;
+        private readonly Vector4 sceneButtonColor = Color.WhiteSmoke.RGBA();
+        private readonly Vector4 sceneButtonTextColor = Color.Black.RGBA();
+        private readonly Vector4 exitButtonColor = Color.White.RGBA();
+        private readonly Vector4 exitButtonTextColor = Color.Black.RGBA();
 
         private bool sceneReady = false;
 
@@ -39,7 +41,7 @@ namespace AISamples.SceneStart
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
         }
 
         public override void Initialize()
@@ -84,8 +86,8 @@ namespace AISamples.SceneStart
                 Textures = ["background.jpg"],
                 Width = Game.Form.RenderWidth,
                 Height = Game.Form.RenderHeight,
-                BaseColor = Color.White,
-                TintColor = Color.White,
+                BaseColor = Color.White.RGBA(),
+                TintColor = Color.White.RGBA(),
             };
             background = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", backGroundDesc, LayerUI - 1);
         }
@@ -98,8 +100,8 @@ namespace AISamples.SceneStart
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.ContentPath = resourcesFolder;
-            titleDesc.TextForeColor = Color.White;
-            titleDesc.TextShadowColor = new Color4(Color.White.RGB(), 0.25f);
+            titleDesc.TextForeColor = Color.White.RGBA();
+            titleDesc.TextShadowColor = new(Color.White.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -119,8 +121,8 @@ namespace AISamples.SceneStart
             startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 35;
-            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = sceneButtonTextColor;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -136,8 +138,8 @@ namespace AISamples.SceneStart
             exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 35;
-            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextForeColor = exitButtonTextColor;
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -179,7 +181,7 @@ namespace AISamples.SceneStart
 
             UpdateLayout();
 
-            uiTweener.ScaleColor(background, Color.White, Color.LightPink, 1000);
+            uiTweener.ScaleColor(background, Color.White.RGBA(), Color.LightPink.RGBA(), 1000);
 
             sceneReady = true;
         }

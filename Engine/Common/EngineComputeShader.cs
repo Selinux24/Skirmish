@@ -1,12 +1,12 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Compute shader description
     /// </summary>
-    public class EngineComputeShader : EngineShader<ComputeShader>
+    public class EngineComputeShader : EngineShader<ID3D11ComputeShader>
     {
         /// <summary>
         /// Constructor
@@ -14,6 +14,6 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="computeShader">Compute shader</param>
         /// <param name="byteCode">Shader byte code</param>
-        internal EngineComputeShader(string name, ComputeShader computeShader, byte[] byteCode) : base(name, computeShader, byteCode) { }
+        internal EngineComputeShader(string name, ID3D11ComputeShader computeShader, byte[] byteCode) : base(name, computeShader, byteCode) { }
     }
 }

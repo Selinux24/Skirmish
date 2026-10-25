@@ -2,11 +2,13 @@
 using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.Physics;
-using SharpDX;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Color = System.Drawing.Color;
+
     class ColliderData(RigidBodyState rbState, Model model)
     {
         private readonly RigidBodyState rbState = rbState;
@@ -41,7 +43,7 @@ namespace PhysicsSamples.ScenePhysics
 
         public void SetLines(GeometryColorDrawer<Line3D> lineDrawer)
         {
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
+            lineDrawer.SetPrimitives(Vector4Extensions.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
         }
 
         public void Reset()

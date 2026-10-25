@@ -17,11 +17,11 @@ namespace Engine.Common
         /// <summary>
         /// Offset in the final graphics buffer
         /// </summary>
-        public int BufferOffset { get; set; } = -1;
+        public uint BufferOffset { get; set; } = 0;
         /// <summary>
         /// Item Count
         /// </summary>
-        public int Count { get; set; } = 0;
+        public uint Count { get; set; } = 0;
         /// <summary>
         /// Gets wheter the descriptor is ready for use or not
         /// </summary>

@@ -1,11 +1,11 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.Common
 {
-    using DXComparison = SharpDX.Direct3D11.Comparison;
-    using DXFilter = SharpDX.Direct3D11.Filter;
-    using DXSampleStateDescription = SharpDX.Direct3D11.SamplerStateDescription;
-    using DXTextureAddressMode = SharpDX.Direct3D11.TextureAddressMode;
+    using DXComparison = Vortice.Direct3D11.ComparisonFunction;
+    using DXFilter = Vortice.Direct3D11.Filter;
+    using DXSampleStateDescription = Vortice.Direct3D11.SamplerDescription;
+    using DXTextureAddressMode = Vortice.Direct3D11.TextureAddressMode;
 
     /// <summary>
     /// Sampler state description
@@ -20,12 +20,12 @@ namespace Engine.Common
                 AddressU = (DXTextureAddressMode)obj.AddressU,
                 AddressV = (DXTextureAddressMode)obj.AddressV,
                 AddressW = (DXTextureAddressMode)obj.AddressW,
-                MipLodBias = obj.MipLodBias,
-                MaximumAnisotropy = obj.MaximumAnisotropy,
-                ComparisonFunction = (DXComparison)obj.ComparisonFunction,
+                MipLODBias = obj.MipLodBias,
+                MaxAnisotropy = obj.MaximumAnisotropy,
+                ComparisonFunc = (DXComparison)obj.ComparisonFunction,
                 BorderColor = obj.BorderColor,
-                MinimumLod = obj.MinimumLod,
-                MaximumLod = obj.MaximumLod,
+                MinLOD = obj.MinimumLod,
+                MaxLOD = obj.MaximumLod,
             };
         }
         public static explicit operator EngineSamplerStateDescription(DXSampleStateDescription obj)
@@ -36,12 +36,12 @@ namespace Engine.Common
                 AddressU = (TextureAddressMode)obj.AddressU,
                 AddressV = (TextureAddressMode)obj.AddressV,
                 AddressW = (TextureAddressMode)obj.AddressW,
-                MipLodBias = obj.MipLodBias,
-                MaximumAnisotropy = obj.MaximumAnisotropy,
-                ComparisonFunction = (Comparison)obj.ComparisonFunction,
+                MipLodBias = obj.MipLODBias,
+                MaximumAnisotropy = obj.MaxAnisotropy,
+                ComparisonFunction = (Comparison)obj.ComparisonFunc,
                 BorderColor = obj.BorderColor,
-                MinimumLod = obj.MinimumLod,
-                MaximumLod = obj.MaximumLod,
+                MinimumLod = obj.MinLOD,
+                MaximumLod = obj.MaxLOD,
             };
         }
 
@@ -51,7 +51,7 @@ namespace Engine.Common
         /// <returns></returns>
         public static EngineSamplerStateDescription Default()
         {
-            return (EngineSamplerStateDescription)DXSampleStateDescription.Default();
+            return (EngineSamplerStateDescription)DXSampleStateDescription.PointClamp;
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Engine.Common
         /// Clamping value used if D3D11_FILTER_ANISOTROPIC or D3D11_FILTER_COMPARISON_ANISOTROPIC
         /// is specified in Filter. Valid values are between 1 and 16.
         /// </summary>
-        public int MaximumAnisotropy { get; set; }
+        public uint MaximumAnisotropy { get; set; }
         /// <summary>
         /// A function that compares sampled data against existing sampled data. The function
         /// options are listed in SharpDX.Direct3D11.Comparison.

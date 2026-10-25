@@ -1,11 +1,12 @@
 ﻿using Engine.Animation;
 using Engine.BuiltIn.Drawers;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -65,7 +66,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -205,7 +206,7 @@ namespace Engine.BuiltIn.Components.Models
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.");
+                Game.Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.");
 
                 var localTransform = GetPartTransformByName(meshName);
 
@@ -231,11 +232,11 @@ namespace Engine.BuiltIn.Components.Models
                     Material = meshMaterial,
                     UseAnisotropic = false,
                     TextureIndex = TextureIndex,
-                    TintColor = Color4.White,
+                    TintColor = new(1f, 1f, 1f, 1f),
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.{materialName}.");
+                Game.Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.{materialName}.");
                 if (drawer.Draw(dc, [mesh]))
                 {
                     count += mesh.Count;
@@ -269,14 +270,14 @@ namespace Engine.BuiltIn.Components.Models
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.");
+                Game.Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.");
 
                 var localTransform = GetPartTransformByName(meshName);
 
                 bool draw = context.ValidateDraw(BlendMode, meshMaterial.Material.IsTransparent);
                 if (!draw)
                 {
-                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
+                    Game.Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
                     continue;
                 }
 
@@ -304,7 +305,7 @@ namespace Engine.BuiltIn.Components.Models
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName}.");
+                Game.Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName}.");
                 if (drawer.Draw(dc, [mesh]))
                 {
                     count += mesh.Count;
@@ -337,15 +338,12 @@ namespace Engine.BuiltIn.Components.Models
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"Model Name: {Name} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"Model Name: {Name} - Sets a null manipulator. Discarded.");
 
                 return;
             }
 
-            if (Manipulator != null)
-            {
-                Manipulator.Updated -= ManipulatorUpdated;
-            }
+            Manipulator?.Updated -= ManipulatorUpdated;
 
             Manipulator = manipulator;
             Manipulator.Updated += ManipulatorUpdated;
@@ -368,28 +366,28 @@ namespace Engine.BuiltIn.Components.Models
             return partHelper.GetModelPartByName(name);
         }
         /// <inheritdoc/>
-        public Matrix GetLocalTransformByName(string name)
+        public Matrix4x4 GetLocalTransformByName(string name)
         {
-            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix.Identity;
+            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix4x4.Identity;
 
             return localTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetWorldTransformByName(string name)
+        public Matrix4x4 GetWorldTransformByName(string name)
         {
-            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix.Identity;
+            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix4x4.Identity;
 
             return worldTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetPoseTransformByName(string name)
+        public Matrix4x4 GetPoseTransformByName(string name)
         {
-            return partHelper.GetPoseTransformByName(name) ?? Matrix.Identity;
+            return partHelper.GetPoseTransformByName(name) ?? Matrix4x4.Identity;
         }
         /// <inheritdoc/>
-        public Matrix GetPartTransformByName(string name)
+        public Matrix4x4 GetPartTransformByName(string name)
         {
-            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix.Identity;
+            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix4x4.Identity;
 
             return partTransform * Manipulator.GlobalTransform;
         }
@@ -399,7 +397,7 @@ namespace Engine.BuiltIn.Components.Models
         /// </summary>
         public void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
+            Game.Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
             geometryHelper.Invalidate();
             boundsHelper.Invalidate(Manipulator);

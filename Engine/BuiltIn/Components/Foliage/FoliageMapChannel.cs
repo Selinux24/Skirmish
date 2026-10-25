@@ -1,7 +1,8 @@
 ﻿using Engine.BuiltIn.Drawers.Foliage;
 using Engine.Common;
-using SharpDX;
 using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {

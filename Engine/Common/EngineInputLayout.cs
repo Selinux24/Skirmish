@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Input layout
@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal input layout
         /// </summary>
-        private readonly InputLayout inputLayout;
+        private readonly ID3D11InputLayout inputLayout;
 
         /// <summary>
         /// Name
@@ -22,7 +22,7 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        internal EngineInputLayout(string name, InputLayout inputLayout)
+        internal EngineInputLayout(string name, ID3D11InputLayout inputLayout)
         {
             Name = name;
             this.inputLayout = inputLayout ?? throw new ArgumentNullException(nameof(inputLayout));
@@ -60,7 +60,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the internal input layout
         /// </summary>
-        internal InputLayout GetInputLayout()
+        internal ID3D11InputLayout GetInputLayout()
         {
             return inputLayout;
         }

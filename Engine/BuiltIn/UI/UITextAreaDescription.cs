@@ -1,5 +1,5 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -97,11 +97,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Color4 TextShadowColor { get; set; } = Color.Transparent;
+        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
         /// <summary>
         /// Shadow position delta
         /// </summary>
@@ -125,11 +125,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Scroll bar base color
         /// </summary>
-        public Color4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
+        public Vector4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// Scroll bar marker color
         /// </summary>
-        public Color4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
+        public Vector4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
         /// <summary>
         /// Scroll bar marker size
         /// </summary>

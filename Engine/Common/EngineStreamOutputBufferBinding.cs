@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Properties defining the way a buffer is bound to the pipeline as a target for stream output operations.
@@ -12,7 +12,7 @@ namespace Engine.Common
     /// <param name="name">Name</param>
     /// <param name="buffer">The buffer being bound.</param>
     /// <param name="offset">The offset to the first vertex (in bytes).</param>
-    public struct EngineStreamOutputBufferBinding(string name, EngineBuffer buffer, int offset)
+    public struct EngineStreamOutputBufferBinding(string name, EngineBuffer buffer, uint offset)
     {
         /// <summary>
         /// Name
@@ -25,14 +25,14 @@ namespace Engine.Common
         /// <summary>
         /// Gets or sets the offset from the start of the buffer of the first vertex to use (in bytes).
         /// </summary>
-        public int Offset { get; set; } = offset;
+        public uint Offset { get; set; } = offset;
 
         /// <summary>
         /// Gets the stream output buffer binding
         /// </summary>
-        internal readonly StreamOutputBufferBinding GetStreamOutputBufferBinding()
+        internal readonly (ID3D11Buffer Buffer, uint Offset) GetStreamOutputBufferBinding()
         {
-            return new StreamOutputBufferBinding(Buffer?.GetBuffer(), Offset);
+            return new (Buffer?.GetBuffer(), Offset);
         }
     }
 }

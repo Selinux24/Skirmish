@@ -1,12 +1,12 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Hull shader description
     /// </summary>
-    public class EngineHullShader : EngineShader<HullShader>
+    public class EngineHullShader : EngineShader<ID3D11HullShader>
     {
         /// <summary>
         /// Constructor
@@ -14,6 +14,6 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="hullShader">Hull shader</param>
         /// <param name="byteCode">Shader byte code</param>
-        internal EngineHullShader(string name, HullShader hullShader, byte[] byteCode) : base(name, hullShader, byteCode) { }
+        internal EngineHullShader(string name, ID3D11HullShader hullShader, byte[] byteCode) : base(name, hullShader, byteCode) { }
     }
 }

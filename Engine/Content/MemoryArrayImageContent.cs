@@ -1,8 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.Content
 {
@@ -20,7 +20,7 @@ namespace Engine.Content
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle;
+        private readonly RectI cropRectangle;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -37,10 +37,10 @@ namespace Engine.Content
         /// </summary>
         /// <param name="streams">Texture streams</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public MemoryArrayImageContent(IEnumerable<MemoryStream> streams, Rectangle? cropRectangle = null)
+        public MemoryArrayImageContent(IEnumerable<MemoryStream> streams, RectI? cropRectangle = null)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams), "A stream array must be specified.");
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
 
             if (!streams.Any(s => s != null))
             {
@@ -53,7 +53,7 @@ namespace Engine.Content
         {
             Name = name;
 
-            if (cropRectangle == Rectangle.Empty)
+            if (cropRectangle == RectI.Empty)
             {
                 return game.Graphics.LoadTextureArray($"{name}_{GetResourceKey()}", streams, mipAutogen, dynamic);
             }

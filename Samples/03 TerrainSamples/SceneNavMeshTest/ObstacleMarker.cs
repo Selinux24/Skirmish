@@ -1,5 +1,6 @@
 ﻿using Engine;
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {

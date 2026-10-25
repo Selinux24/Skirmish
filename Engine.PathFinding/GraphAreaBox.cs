@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
@@ -32,8 +33,8 @@ namespace Engine.PathFinding
         /// </summary>
         public GraphAreaBox(BoundingBox box) : base()
         {
-            BMin = box.Minimum;
-            BMax = box.Maximum;
+            BMin = box.Min;
+            BMax = box.Max;
         }
 
         /// <inheritdoc/>

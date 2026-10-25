@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
@@ -12,7 +13,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <summary>
         /// Total cascades
         /// </summary>
-        public int TotalCascades { get; private set; }
+        public uint TotalCascades { get; private set; }
 
         private int shadowMapSize;
         private float[] shadowCascades;
@@ -24,8 +25,8 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         private float[] cascadeBoundRadius;
 
         private Vector3 lightPosition = Vector3.Zero;
-        private Matrix worldToShadowSpace = Matrix.Identity;
-        private Matrix[] worldToCascadeProj;
+        private Matrix4x4 worldToShadowSpace = Matrix4x4.Identity;
+        private Matrix4x4[] worldToCascadeProj;
 
         private Vector4 toCascadeOffsetX;
         private Vector4 toCascadeOffsetY;
@@ -116,8 +117,8 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             // Find the view matrix
             lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
             var lookAt = lightPosition + lightDirection * camera.FarPlaneDistance;
-            var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
-            var shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
+            var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3Extensions.Left));
+            var shadowView = Matrix4x4.CreateLookAtLeftHanded(lightPosition, lookAt, up);
 
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(
@@ -130,7 +131,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             shadowBoundRadius = MathF.Max(shadowBoundRadius, boundingSphere.Radius);
 
             // Find the projection matrix
-            var shadowProj = Matrix.OrthoLH(
+            var shadowProj = Matrix4x4.CreateOrthographicLeftHanded(
                 shadowBoundRadius,
                 shadowBoundRadius,
                 -shadowBoundRadius,
@@ -157,9 +158,9 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// </summary>
         /// <param name="camera">Camera</param>
         /// <param name="shadowView">Shadow view</param>
-        private void UpdateAntiFlicker(Camera camera, Matrix shadowView)
+        private void UpdateAntiFlicker(Camera camera, Matrix4x4 shadowView)
         {
-            var shadowViewInv = Matrix.Invert(shadowView);
+            Matrix4x4.Invert(shadowView, out var shadowViewInv);
 
             // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
@@ -186,7 +187,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// To avoid anti flickering we need to make the transformation invariant to camera rotation and translation.
         /// By encapsulating the cascade frustum with a sphere we achive the rotation invariance.
         /// </remarks>
-        private void UpdateCascadesAntiFlicker(Camera camera, Matrix shadowView, Matrix shadowViewInv, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
+        private void UpdateCascadesAntiFlicker(Camera camera, Matrix4x4 shadowView, Matrix4x4 shadowViewInv, int cascadeIdx, out Matrix4x4 cascadeTrans, out Matrix4x4 cascadeScale)
         {
             // Extract the bounding box
             ExtractFrustumBoundSphere(
@@ -208,16 +209,16 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             }
 
             // Get the cascade center in shadow space
-            var cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
+            var cascadeCenterShadowSpace = Vector3.Transform(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
 
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
             toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-            cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+            cascadeTrans = Matrix4x4.CreateTranslation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
 
             // Update the scale from shadow to cascade space
             toCascadeScale[cascadeIdx] = shadowBoundRadius / cascadeBoundRadius[cascadeIdx];
-            cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+            cascadeScale = Matrix4x4.CreateScale(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
         }
         /// <summary>
         /// Updates the matrix set, the cheaper option
@@ -246,7 +247,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <remarks>
         /// Since we don't care about flickering we can make the cascade fit tightly around the frustum
         /// </remarks>
-        private void UpdateCascadesSimple(Camera camera, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
+        private void UpdateCascadesSimple(Camera camera, int cascadeIdx, out Matrix4x4 cascadeTrans, out Matrix4x4 cascadeScale)
         {
             // Extract the bounding box
             ExtractFrustumPoints(
@@ -260,7 +261,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             var max = new Vector3(float.MinValue);
             for (int i = 0; i < frustumPoints.Length; i++)
             {
-                var pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
+                var pointInShadowSpace = Vector3.Transform(frustumPoints[i], worldToShadowSpace);
 
                 for (int j = 0; j < 3; j++)
                 {
@@ -280,11 +281,11 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
             toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-            cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+            cascadeTrans = Matrix4x4.CreateTranslation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
 
             // Update the scale from shadow to cascade space
             toCascadeScale[cascadeIdx] = 2f / MathF.Max(max.X - min.X, max.Y - min.Y);
-            cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+            cascadeScale = Matrix4x4.CreateScale(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
 
             shadowCascades = cascades;
 
-            TotalCascades = cascades.Length;
+            TotalCascades = (uint)cascades.Length;
 
             var ranges = new List<float>(cascades);
             ranges.Insert(0, 1);
@@ -313,7 +314,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
 
             cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
             cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
-            worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
+            worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix4x4.Identity);
         }
 
         /// <summary>
@@ -324,13 +325,13 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <param name="newCenter">New bounding sphere center</param>
         /// <param name="offset">Resulting offset</param>
         /// <returns>Returns true if the cascade needs update</returns>
-        private bool CascadeNeedsUpdate(Matrix shadowView, int cascadeIdx, Vector3 newCenter, out Vector3 offset)
+        private bool CascadeNeedsUpdate(Matrix4x4 shadowView, int cascadeIdx, Vector3 newCenter, out Vector3 offset)
         {
             offset = Vector3.Zero;
 
             // Find the offset between the new and old bound ceter
-            var oldCenterInCascade = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], shadowView);
-            var newCenterInCascade = Vector3.TransformCoordinate(newCenter, shadowView);
+            var oldCenterInCascade = Vector3.Transform(cascadeBoundCenter[cascadeIdx], shadowView);
+            var newCenterInCascade = Vector3.Transform(newCenter, shadowView);
             var centerDiff = newCenterInCascade - oldCenterInCascade;
 
             // Find the pixel size based on the diameters and map pixel size
@@ -355,7 +356,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// Gets the world to shadow space matrix
         /// </summary>
         /// <returns>Returns the world to shadow space matrix</returns>
-        public Matrix GetWorldToShadowSpace()
+        public Matrix4x4 GetWorldToShadowSpace()
         {
             return worldToShadowSpace;
         }
@@ -363,7 +364,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// Gets the world to cascade projection matrix
         /// </summary>
         /// <returns>Returns the world to cascade projection matrix</returns>
-        public Matrix[] GetWorldToCascadeProj()
+        public Matrix4x4[] GetWorldToCascadeProj()
         {
             return worldToCascadeProj;
         }

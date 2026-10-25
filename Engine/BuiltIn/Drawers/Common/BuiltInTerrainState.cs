@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color TintColor { get; set; }
+        public Vector4 TintColor { get; set; }
         /// <summary>
         /// Scattering coefficients
         /// </summary>

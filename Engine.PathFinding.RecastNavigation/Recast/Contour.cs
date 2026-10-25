@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -212,7 +213,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (!triRes || tris.Length <= 0)
             {
                 // Bad triangulation, should not happen.
-                Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
+                Game.Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
             }
 
             return tris;
@@ -236,7 +237,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];
-                center += v.Position;
+                center.Add(v.Position);
             }
 
             Vector3 res = new(center.X, center.Y, center.Z);

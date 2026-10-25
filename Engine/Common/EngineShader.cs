@@ -2,12 +2,12 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Generic shader description
     /// </summary>
-    public class EngineShader<T> : IEngineShader where T : DeviceChild
+    public class EngineShader<T> : IEngineShader where T : ID3D11DeviceChild
     {
         /// <summary>
         /// Generic shader

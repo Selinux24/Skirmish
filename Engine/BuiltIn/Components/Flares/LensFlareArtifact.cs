@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Flares
 {
@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.Components.Flares
     /// <param name="scale">Relative scale</param>
     /// <param name="color">Color</param>
     /// <param name="texture">Texture name</param>
-    public class LensFlareArtifact(float distance, float scale, Color color, string texture)
+    public class LensFlareArtifact(float distance, float scale, Vector4 color, string texture)
     {
         /// <summary>
         /// Distance from light source along light ray
@@ -25,7 +25,7 @@ namespace Engine.BuiltIn.Components.Flares
         /// <summary>
         /// Color
         /// </summary>
-        public Color Color { get; set; } = color;
+        public Vector4 Color { get; set; } = color;
         /// <summary>
         /// Texture
         /// </summary>

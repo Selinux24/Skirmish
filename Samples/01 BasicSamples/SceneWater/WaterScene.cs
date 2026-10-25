@@ -4,8 +4,9 @@ using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Components.Water;
 using Engine.Tween;
-using SharpDX;
 using System;
+using System.Drawing;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneWater
@@ -52,7 +53,7 @@ namespace BasicSamples.SceneWater
         {
             base.Initialize();
 
-            Lights.BaseFogColor = Color.White;
+            Lights.BaseFogColor = Color.White.RGBA();
 
             Renderer.PostProcessingObjectsEffects.AddBloomLow();
 
@@ -87,18 +88,18 @@ namespace BasicSamples.SceneWater
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 4.7f, new Color( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 2.7f, new Color( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 1.7f, new Color(200,  50,  50), resourceFlare2String),
+                    new (-0.7f, 4.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 2.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 1.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
 
-                    new ( 0.1f, 1.6f, new Color( 25,  25,  25), resourceFlare3String),
-                    new ( 0.3f, 1.7f, new Color(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 1.9f, new Color( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 2.4f, new Color( 50, 200, 200), resourceFlare2String),
+                    new ( 0.1f, 1.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare3String),
+                    new ( 0.3f, 1.7f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 1.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 2.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
 
-                    new ( 1.2f, 3.0f, new Color(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 4.5f, new Color( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 6.4f, new Color( 25,  50, 100), resourceFlare3String),
+                    new ( 1.2f, 3.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 4.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 6.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
                 ]
             };
 
@@ -152,7 +153,7 @@ namespace BasicSamples.SceneWater
             };
             var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
-            groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
+            groundDesc.Heightmap.Transform = Matrix4x4.CreateTranslation(0, -terrainHeight * 0.99f, 0);
 
             await AddComponentGround<Scenery, SceneryDescription>("SeaBottom", "Sea Bottom", groundDesc);
         }
@@ -223,8 +224,8 @@ namespace BasicSamples.SceneWater
 
         private void ToggleFog()
         {
-            Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? fogStart : 0f;
-            Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? fogRange : 0f;
+            Lights.FogStart = Helper.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = Helper.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
     }
 }

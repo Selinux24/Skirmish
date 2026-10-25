@@ -20,7 +20,7 @@ namespace Engine
         /// <summary>
         /// Gets the maximum number of concurrent particles at the same time
         /// </summary>
-        int MaxConcurrentParticles { get; }
+        uint MaxConcurrentParticles { get; }
         /// <summary>
         /// Gets the particle emitter reference
         /// </summary>

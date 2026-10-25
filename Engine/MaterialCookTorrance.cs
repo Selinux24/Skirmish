@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine
 {
@@ -65,19 +65,19 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor { get; set; }
+        public Vector4 DiffuseColor { get; set; }
         /// <summary>
         /// Emissive color
         /// </summary>
-        public Color3 EmissiveColor { get; set; }
+        public Vector3 EmissiveColor { get; set; }
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Color3 AmbientColor { get; set; }
+        public Vector3 AmbientColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color3 SpecularColor { get; set; }
+        public Vector3 SpecularColor { get; set; }
         /// <summary>
         /// Metallic
         /// </summary>
@@ -102,9 +102,9 @@ namespace Engine
                 Block3 = Vector4.Zero,
                 Block4 = Vector4.Zero,
                 Diffuse = DiffuseColor,
-                Emissive = new Color4(EmissiveColor, 0),
-                Ambient = new Color4(AmbientColor, 0),
-                Specular = new Color4(SpecularColor, 0),
+                Emissive = new Vector4(EmissiveColor, 0),
+                Ambient = new Vector4(AmbientColor, 0),
+                Specular = new Vector4(SpecularColor, 0),
             };
         }
         /// <inheritdoc/>
@@ -116,8 +116,8 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                MathUtil.NearEqual(Metallic, other.Metallic) &&
-                MathUtil.NearEqual(Roughness, other.Roughness);
+                Helper.NearEqual(Metallic, other.Metallic) &&
+                Helper.NearEqual(Roughness, other.Roughness);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

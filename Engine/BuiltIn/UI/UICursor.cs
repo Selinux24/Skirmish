@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -70,7 +70,8 @@ namespace Engine.BuiltIn.UI
 
             if (Game.Input.LockMouse)
             {
-                cursorSprite.SetPosition(Game.Form.RenderCenter + centerDelta + Delta);
+                var rc = Game.Form.RenderCenter;
+                cursorSprite.SetPosition(new Vector2(rc.X, rc.Y) + centerDelta + Delta);
             }
             else
             {

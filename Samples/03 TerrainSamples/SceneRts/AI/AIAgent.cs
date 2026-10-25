@@ -1,13 +1,13 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
-using SharpDX;
 using System;
 using System.Threading.Tasks;
+using Engine.BuiltIn.Components.Models;
 
 namespace TerrainSamples.SceneRts.AI
 {
-    using Engine.BuiltIn.Components.Models;
+    using System.Numerics;
     using TerrainSamples.SceneRts.AI.Behaviors;
 
     /// <summary>
@@ -408,7 +408,7 @@ namespace TerrainSamples.SceneRts.AI
             var s = p1 - p2;
             if (s.Length() < Stats.SightDistance)
             {
-                float a = Helper.Angle(s, Manipulator.Forward);
+                float a = Vector3Extensions.Angle(s, Manipulator.Forward);
                 if (a < Stats.SightAngle)
                 {
                     return true;
@@ -483,13 +483,13 @@ namespace TerrainSamples.SceneRts.AI
         /// <param name="damage">Damage amount</param>
         public virtual void GetDamage(AIAgent attacker, float damage)
         {
-            if (EnemyOnAttackRange(attacker) && AttackBehavior.Target == null)
+            if (EnemyOnAttackRange(attacker) && AttackBehavior.Target is null)
             {
                 AttackBehavior.SetTarget(attacker);
                 ChangeState(AIStates.Attacking);
             }
 
-            Stats.Life -= Helper.RandomGenerator.NextFloat(0, damage);
+            Stats.Life -= Helper.RandomGenerator.NextSingle(0, damage);
 
             Stats.PrimaryWeapon?.Delay(damage * 0.1f);
             Stats.SecondaryWeapon?.Delay(damage * 0.1f);
@@ -525,7 +525,7 @@ namespace TerrainSamples.SceneRts.AI
             {
                 try
                 {
-                    Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
+                    Game.Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
 
                     var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
                     if (path != null)
@@ -537,7 +537,7 @@ namespace TerrainSamples.SceneRts.AI
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, $"FindPathAsync failed: {ex.Message}");
+                    Game.Logger.WriteError(this, $"FindPathAsync failed: {ex.Message}");
                 }
             });
         }

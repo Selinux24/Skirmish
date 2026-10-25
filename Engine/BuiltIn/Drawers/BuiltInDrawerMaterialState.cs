@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers
 {
@@ -17,7 +17,7 @@ namespace Engine.BuiltIn.Drawers
                 Material = null,
                 UseAnisotropic = false,
                 TextureIndex = 0,
-                TintColor = Color4.White,
+                TintColor = new(1f, 1f, 1f, 1f),
             };
         }
 
@@ -34,6 +34,6 @@ namespace Engine.BuiltIn.Drawers
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; }
+        public Vector4 TintColor { get; set; }
     }
 }

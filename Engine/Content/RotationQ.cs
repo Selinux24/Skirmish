@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -127,11 +127,6 @@ namespace Engine.Content
             return -(Quaternion)value;
         }
         /// <inheritdoc/>
-        public static RotationQ operator *(float scale, RotationQ value)
-        {
-            return scale * (Quaternion)value;
-        }
-        /// <inheritdoc/>
         public static RotationQ operator *(RotationQ value, float scale)
         {
             return (Quaternion)value * scale;
@@ -181,7 +176,7 @@ namespace Engine.Content
 
         public readonly bool Equals(ref RotationQ other)
         {
-            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z) && MathUtil.NearEqual(other.W, W);
+            return Helper.NearEqual(other.X, X) && Helper.NearEqual(other.Y, Y) && Helper.NearEqual(other.Z, Z) && Helper.NearEqual(other.W, W);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()

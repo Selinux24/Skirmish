@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -18,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Node Bounds
         /// </summary>
-        public RectangleF Bounds { get; set; }
+        public Rect Bounds { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance

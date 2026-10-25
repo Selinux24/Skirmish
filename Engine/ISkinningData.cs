@@ -1,11 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
     using Engine.Animation;
     using Engine.Content.Persistence;
+    using System.Numerics;
 
     /// <summary>
     /// Skinning data interface
@@ -71,21 +71,21 @@ namespace Engine
         /// Gets the base pose transformation list
         /// </summary>
         /// <returns>Returns the base transformation list</returns>
-        IEnumerable<Matrix> GetPoseBase();
+        IEnumerable<Matrix4x4> GetPoseBase();
         /// <summary>
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
         /// <param name="clipName">Clip name</param>
         /// <returns>Returns the resulting transform list</returns>
-        IEnumerable<Matrix> GetPoseAtTime(float time, string clipName);
+        IEnumerable<Matrix4x4> GetPoseAtTime(float time, string clipName);
         /// <summary>
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
         /// <param name="clipIndex">Clip index</param>
         /// <returns>Returns the resulting transform list</returns>
-        IEnumerable<Matrix> GetPoseAtTime(float time, int clipIndex);
+        IEnumerable<Matrix4x4> GetPoseAtTime(float time, int clipIndex);
         /// <summary>
         /// Gets the transform list of the pose's combination at specified time
         /// </summary>
@@ -96,7 +96,7 @@ namespace Engine
         /// <param name="offset2">Time offset from second clip</param>
         /// <param name="factor">Interpolation factor</param>
         /// <returns>Returns the resulting transform list</returns>
-        IEnumerable<Matrix> GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor);
+        IEnumerable<Matrix4x4> GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor);
         /// <summary>
         /// Gets the transform list of the pose's combination at specified time
         /// </summary>
@@ -107,7 +107,7 @@ namespace Engine
         /// <param name="offset2">Time offset from second clip</param>
         /// <param name="factor">Interpolation factor</param>
         /// <returns>Returns the resulting transform list</returns>
-        IEnumerable<Matrix> GetPoseAtTime(float time, int clipIndex1, int clipIndex2, float offset1, float offset2, float factor);
+        IEnumerable<Matrix4x4> GetPoseAtTime(float time, int clipIndex1, int clipIndex2, float offset1, float offset2, float factor);
 
         /// <summary>
         /// Packs current instance into a Vector4 array

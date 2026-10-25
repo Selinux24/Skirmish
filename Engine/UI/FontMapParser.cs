@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Engine.UI
@@ -31,7 +31,7 @@ namespace Engine.UI
         /// <param name="defaultForeColor">Default fore color</param>
         /// <param name="defaultShadowColor">Default shadow color</param>
         /// <returns>Returns the parsed text struct</returns>
-        public static FontMapParsedSentence ParseSentence(string text, Color4 defaultForeColor, Color4 defaultShadowColor)
+        public static FontMapParsedSentence ParseSentence(string text, Vector4 defaultForeColor, Vector4 defaultShadowColor)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -39,11 +39,11 @@ namespace Engine.UI
             }
 
             var sentenceParts = new List<string>();
-            var colorParts = new List<Color4[]>();
-            var shadowColorParts = new List<Color4[]>();
+            var colorParts = new List<Vector4[]>();
+            var shadowColorParts = new List<Vector4[]>();
 
             //Find lines
-            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = text.Split([Environment.NewLine], StringSplitOptions.None);
 
             for (int l = 0; l < lines.Length; l++)
             {
@@ -80,8 +80,8 @@ namespace Engine.UI
                     }
 
                     sentenceParts.Add(" ");
-                    colorParts.Add([Color.Transparent]);
-                    shadowColorParts.Add([Color.Transparent]);
+                    colorParts.Add([Vector4.Zero]);
+                    shadowColorParts.Add([Vector4.Zero]);
                 }
 
                 if (lastLine)
@@ -90,8 +90,8 @@ namespace Engine.UI
                 }
 
                 sentenceParts.Add(Environment.NewLine);
-                colorParts.Add([Color.Transparent]);
-                shadowColorParts.Add([Color.Transparent]);
+                colorParts.Add([Vector4.Zero]);
+                shadowColorParts.Add([Vector4.Zero]);
             }
 
             return new()
@@ -111,10 +111,10 @@ namespace Engine.UI
         /// <param name="parsedString">Returns the parsed line</param>
         /// <param name="foreColors">Returns a fore color by character list</param>
         /// <param name="shadowColors">Returns a shadow color by character list</param>
-        private static void ParseLine(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string parsedString, out IEnumerable<Color4> foreColors, out IEnumerable<Color4> shadowColors)
+        private static void ParseLine(string text, Vector4 defaultForeColor, Vector4 defaultShadowColor, out string parsedString, out IEnumerable<Vector4> foreColors, out IEnumerable<Vector4> shadowColors)
         {
-            var foreColorValues = new Dictionary<int, Color4>();
-            var shadowColorValues = new Dictionary<int, Color4>();
+            var foreColorValues = new Dictionary<int, Vector4>();
+            var shadowColorValues = new Dictionary<int, Vector4>();
             int deletedSize = 0;
 
             parsedString = colorRegex.Replace(
@@ -137,8 +137,8 @@ namespace Engine.UI
                     return string.Empty;
                 });
 
-            var foreColorsByChar = new List<Color4>();
-            var shadowColorsByChar = new List<Color4>();
+            var foreColorsByChar = new List<Vector4>();
+            var shadowColorsByChar = new List<Vector4>();
 
             // Fill result
             var currentForeColor = defaultForeColor;
@@ -168,7 +168,7 @@ namespace Engine.UI
         /// <param name="match">Match</param>
         /// <param name="foreColor">Returns the fore color value if any</param>
         /// <param name="shadowColor">Returns the shadow color value if any</param>
-        private static void ReadMatch(Match match, out Color4? foreColor, out Color4? shadowColor)
+        private static void ReadMatch(Match match, out Vector4? foreColor, out Vector4? shadowColor)
         {
             foreColor = null;
             shadowColor = null;
@@ -193,7 +193,7 @@ namespace Engine.UI
                         float r = float.Parse(vR);
                         float g = float.Parse(vG);
                         float b = float.Parse(vB);
-                        foreColor = new Color4(r, g, b, a);
+                        foreColor = new(r, g, b, a);
                     }
                     else if (gr.Value == "A")
                     {
@@ -201,7 +201,7 @@ namespace Engine.UI
                         int r = int.Parse(vR);
                         int g = int.Parse(vG);
                         int b = int.Parse(vB);
-                        foreColor = new Color(r, g, b, a);
+                        foreColor = new(r, g, b, a);
                     }
                 }
 
@@ -218,7 +218,7 @@ namespace Engine.UI
                         float r = float.Parse(vR);
                         float g = float.Parse(vG);
                         float b = float.Parse(vB);
-                        shadowColor = new Color4(r, g, b, a);
+                        shadowColor = new(r, g, b, a);
                     }
                     else if (gr.Value == "A")
                     {
@@ -226,7 +226,7 @@ namespace Engine.UI
                         int r = int.Parse(vR);
                         int g = int.Parse(vG);
                         int b = int.Parse(vB);
-                        shadowColor = new Color(r, g, b, a);
+                        shadowColor = new(r, g, b, a);
                     }
                 }
             }

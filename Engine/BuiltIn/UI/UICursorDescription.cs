@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -16,7 +16,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="centered">Pointer positon is in the texture center</param>
         public static UICursorDescription Default(string texture, float width, float height, bool centered = false)
         {
-            return Default(texture, width, height, centered, Vector2.Zero, Color.White);
+            return Default(texture, width, height, centered, Vector2.Zero, Vector4.One);
         }
         /// <summary>
         /// Gets the default cursor description
@@ -28,7 +28,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="delta">Position delta from texture to pointer position</param>
         public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta)
         {
-            return Default(texture, width, height, centered, delta, Color.White);
+            return Default(texture, width, height, centered, delta, Vector4.One);
         }
         /// <summary>
         /// Gets the default cursor description
@@ -38,7 +38,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="height">Height</param>
         /// <param name="centered">Pointer positon is in the texture center</param>
         /// <param name="baseColor">Base color</param>
-        public static UICursorDescription Default(string texture, float width, float height, bool centered, Color4 baseColor)
+        public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector4 baseColor)
         {
             return Default(texture, width, height, centered, Vector2.Zero, baseColor);
         }
@@ -51,7 +51,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="centered">Pointer positon is in the texture center</param>
         /// <param name="delta">Position delta from texture to pointer position</param>
         /// <param name="baseColor">Base color</param>
-        public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta, Color4 baseColor)
+        public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta, Vector4 baseColor)
         {
             return new()
             {

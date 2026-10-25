@@ -1,5 +1,5 @@
 ﻿using Engine;
-using SharpDX;
+using System.Numerics;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
@@ -51,8 +51,10 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                 viewTarget = NextCheckPoint.Value;
             }
 
-            model.GetModelPartByName("Turret-mesh").Manipulator.RotateTo(viewTarget, Vector3.Up, Axis.Y, 0.01f);
-            model.GetModelPartByName("Barrel-mesh").Manipulator.RotateTo(viewTarget + (model.GetBoundingBox().Height * 0.5f), Vector3.Up, Axis.X, 0.01f);
+            var barrelTarget = Vector3Extensions.Sum(viewTarget, model.GetBoundingBox().Height * 0.5f);
+
+            model.GetModelPartByName("Turret-mesh").Manipulator.RotateTo(viewTarget, Vector3Extensions.Up, Axis.Y, 0.01f);
+            model.GetModelPartByName("Barrel-mesh").Manipulator.RotateTo(barrelTarget, Vector3Extensions.Up, Axis.X, 0.01f);
 
             base.Task(gameTime);
         }

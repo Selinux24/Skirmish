@@ -7,15 +7,18 @@ using Engine.Common;
 using Engine.Content;
 using Engine.Physics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Color = System.Drawing.Color;
+
     class PhysicsScene : Scene
     {
         private const float floorSize = 100f;
@@ -46,7 +49,7 @@ namespace PhysicsSamples.ScenePhysics
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
         }
 
         public override void Initialize()
@@ -91,9 +94,9 @@ namespace PhysicsSamples.ScenePhysics
             var defaultFont18 = FontDescription.FromFamily("Arial", 18);
             var defaultFont11 = FontDescription.FromFamily("Arial", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
 
             title.Text = "Physics test";
             runtimeText.Text = "";
@@ -131,7 +134,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeJoint()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White.RGB();
 
             int slices = 16;
             int stacks = 8;
@@ -146,13 +149,13 @@ namespace PhysicsSamples.ScenePhysics
             var jsphere1Model = await AddComponent<Model, ModelDescription>("jsphere1", "jsphere1", desc);
             var jsphere2Model = await AddComponent<Model, ModelDescription>("jsphere2", "jsphere2", desc);
 
-            jsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkSlateGray, 10f);
-            jsphere2Model.TintColor = Color4.AdjustSaturation(Color.SaddleBrown, 10f);
+            jsphere1Model.TintColor = Vector4Extensions.AdjustSaturation(Color.DarkSlateGray.RGBA(), 10f);
+            jsphere2Model.TintColor = Vector4Extensions.AdjustSaturation(Color.SaddleBrown.RGBA(), 10f);
 
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Matrix.Translation(new Vector3(-15, 10, 0)),
+                InitialTransform = Matrix4x4.CreateTranslation(new Vector3(-15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -160,7 +163,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Matrix.Translation(new Vector3(-20, 10, 0)),
+                InitialTransform = Matrix4x4.CreateTranslation(new Vector3(-20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -175,8 +178,8 @@ namespace PhysicsSamples.ScenePhysics
             colliders.Add(jsphere1);
             colliders.Add(jsphere2);
 
-            var endPointOne = new BodyEndPoint(jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
-            var endPointTwo = new BodyEndPoint(jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
+            var endPointOne = new BodyEndPoint(jsphere1.PhysicsObject.RigidBody, Vector3Extensions.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(jsphere2.PhysicsObject.RigidBody, Vector3Extensions.Up * 0.5f);
             joint = new Joint(endPointOne, endPointTwo, 2f);
 
             contactGenerators.Add(joint);
@@ -184,7 +187,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeRod()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White.RGB();
 
             int slices = 16;
             int stacks = 8;
@@ -199,13 +202,13 @@ namespace PhysicsSamples.ScenePhysics
             var rsphere1Model = await AddComponent<Model, ModelDescription>("rsphere1", "rsphere1", desc);
             var rsphere2Model = await AddComponent<Model, ModelDescription>("rsphere2", "rsphere2", desc);
 
-            rsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkCyan, 10f);
-            rsphere2Model.TintColor = Color4.AdjustSaturation(Color.AntiqueWhite, 10f);
+            rsphere1Model.TintColor = Vector4Extensions.AdjustSaturation(Color.DarkCyan.RGBA(), 10f);
+            rsphere2Model.TintColor = Vector4Extensions.AdjustSaturation(Color.AntiqueWhite.RGBA(), 10f);
 
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Matrix.Translation(new Vector3(15, 10, 0)),
+                InitialTransform = Matrix4x4.CreateTranslation(new Vector3(15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -213,7 +216,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Matrix.Translation(new Vector3(20, 10, 0)),
+                InitialTransform = Matrix4x4.CreateTranslation(new Vector3(20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -228,8 +231,8 @@ namespace PhysicsSamples.ScenePhysics
             colliders.Add(rsphere1);
             colliders.Add(rsphere2);
 
-            var endPointOne = new BodyEndPoint(rsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
-            var endPointTwo = new BodyEndPoint(rsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
+            var endPointOne = new BodyEndPoint(rsphere1.PhysicsObject.RigidBody, Vector3Extensions.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(rsphere2.PhysicsObject.RigidBody, Vector3Extensions.Up * 0.5f);
             rod = new Rod(endPointOne, endPointTwo, 2f, 0.0001f);
 
             contactGenerators.Add(rod);
@@ -238,7 +241,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task CreateCollider(string componentName, int index, ColliderTypes colliderType, GeometryDescriptor geo, IEnumerable<Line3D> wired)
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White.RGB();
 
             var desc = new ModelDescription()
             {
@@ -247,12 +250,12 @@ namespace PhysicsSamples.ScenePhysics
             };
 
             var model = await AddComponent<Model, ModelDescription>(componentName, componentName, desc);
-            model.TintColor = Helper.IntToCol(index * 10, 255);
+            model.TintColor = ColorExtensions.IntToCol(index * 10, 255);
 
             var rbState = new RigidBodyState
             {
                 Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * (10f + (index * 2f))),
+                InitialTransform = Matrix4x4.CreateTranslation(Vector3Extensions.Up * (10f + (index * 2f))),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -267,7 +270,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeSpheres()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White.RGB();
 
             int slices = 16;
             int stacks = 16;
@@ -296,7 +299,9 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeFrustums()
         {
-            var bFrustum = BoundingFrustum.FromCamera(Vector3.Zero, Vector3.Down, Vector3.ForwardLH, MathUtil.PiOverFour, 2, 4, 1);
+            var view = Matrix4x4.CreateLookAtLeftHanded(Vector3.Zero, Vector3Extensions.Down, Vector3Extensions.ForwardLH);
+            var proj = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(Helper.PiOver4, 1, 2, 4);
+            var bFrustum = new BoundingFrustum(view * proj);
             var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);
             var wired = Line3D.CreateFrustum(bFrustum);
 
@@ -376,7 +381,7 @@ namespace PhysicsSamples.ScenePhysics
                 var exList = res.GetExceptions();
                 foreach (var ex in exList)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 Game.Exit();
@@ -528,7 +533,7 @@ namespace PhysicsSamples.ScenePhysics
 
             var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
             var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
-            lineDrawer.AddPrimitives(Color4.White, [lJoint, rJoint]);
+            lineDrawer.AddPrimitives(Color.White.RGBA(), [lJoint, rJoint]);
         }
         private void UpdateText()
         {

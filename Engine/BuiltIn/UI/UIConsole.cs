@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
 using System.Threading.Tasks;
 
@@ -129,7 +129,7 @@ namespace Engine.BuiltIn.UI
             elapsedSinceLastUpdate += context.GameTime.ElapsedSeconds;
             if (elapsedSinceLastUpdate > UpdateInterval.TotalSeconds)
             {
-                string text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                string text = Game.Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
                 if (!string.IsNullOrWhiteSpace(text))
                 {
                     textArea.Text = text;
@@ -146,10 +146,10 @@ namespace Engine.BuiltIn.UI
             var defColor = textArea.TextForeColor;
             var logColor = logEntry.LogLevel switch
             {
-                LogLevel.Debug => (Color4)Color.White,
-                LogLevel.Information => (Color4)Color.Blue,
-                LogLevel.Warning => (Color4)Color.Yellow,
-                LogLevel.Error => (Color4)Color.Red,
+                LogLevel.Debug => System.Drawing.Color.White.RGBA(),
+                LogLevel.Information => System.Drawing.Color.Blue.RGBA(),
+                LogLevel.Warning => System.Drawing.Color.Yellow.RGBA(),
+                LogLevel.Error => System.Drawing.Color.Red.RGBA(),
                 _ => textArea.TextForeColor,
             };
             return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{Environment.NewLine}";

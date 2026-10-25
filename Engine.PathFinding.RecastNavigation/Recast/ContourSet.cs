@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -623,7 +623,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 if (regions[cont.RegionId].Outline != null)
                 {
-                    Logger.WriteWarning(this, $"Multiple outlines for region {cont.RegionId}");
+                    Game.Logger.WriteWarning(this, $"Multiple outlines for region {cont.RegionId}");
                 }
 
                 regions[cont.RegionId].Outline = cont;
@@ -680,7 +680,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     // The region does not have an outline.
                     // This can happen if the contour becames selfoverlapping because of too aggressive simplification settings.
-                    Logger.WriteWarning(this, $"Bad outline for region {i}, contour simplification is likely too aggressive.");
+                    Game.Logger.WriteWarning(this, $"Bad outline for region {i}, contour simplification is likely too aggressive.");
                 }
             }
         }

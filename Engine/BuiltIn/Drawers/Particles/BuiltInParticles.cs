@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Particles
@@ -113,9 +113,9 @@ namespace Engine.BuiltIn.Drawers.Particles
             public Vector4 MaxColor;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerEmitter>();
+                return (uint)Marshal.SizeOf<PerEmitter>();
             }
         }
 

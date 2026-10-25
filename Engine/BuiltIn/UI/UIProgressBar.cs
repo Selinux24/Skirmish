@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -23,7 +23,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Base color
         /// </summary>
-        private Color4 baseColor;
+        private Vector4 baseColor;
         /// <summary>
         /// Alpha component
         /// </summary>
@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the progress color
         /// </summary>
-        public Color4 ProgressColor
+        public Vector4 ProgressColor
         {
             get
             {
@@ -52,7 +52,7 @@ namespace Engine.BuiltIn.UI
             }
         }
         /// <inheritdoc/>
-        public override Color4 BaseColor
+        public override Vector4 BaseColor
         {
             get
             {

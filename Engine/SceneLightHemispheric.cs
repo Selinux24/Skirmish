@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -7,13 +7,13 @@ namespace Engine
     /// </summary>
     public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
-        private static readonly Color3 ambientDown = new(0.0f, 0.0f, 0.0f);
-        private static readonly Color3 ambientUp = new(0.1f, 0.1f, 0.1f);
+        private static readonly Vector3 ambientDown = new(0.0f, 0.0f, 0.0f);
+        private static readonly Vector3 ambientUp = new(0.1f, 0.1f, 0.1f);
 
         /// <inheritdoc/>
-        public Color3 AmbientDown { get; set; } = ambientDown;
+        public Vector3 AmbientDown { get; set; } = ambientDown;
         /// <inheritdoc/>
-        public Color3 AmbientUp { get; set; } = ambientUp;
+        public Vector3 AmbientUp { get; set; } = ambientUp;
 
         /// <summary>
         /// Constructor
@@ -38,7 +38,7 @@ namespace Engine
         /// <param name="ambientDown">Ambient down color contribution</param>
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color3 ambientDown, Color3 ambientUp, bool enabled)
+        public SceneLightHemispheric(string name, Vector3 ambientDown, Vector3 ambientUp, bool enabled)
             : this(name, ambientDown, 1f, ambientUp, 1f, enabled)
         {
 
@@ -52,8 +52,8 @@ namespace Engine
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="brightnessUp">Brightness up</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color3 ambientDown, float brightnessDown, Color3 ambientUp, float brightnessUp, bool enabled)
-            : base(name, false, Color3.Black, Color3.Black, enabled)
+        public SceneLightHemispheric(string name, Vector3 ambientDown, float brightnessDown, Vector3 ambientUp, float brightnessUp, bool enabled)
+            : base(name, false, Vector3.Zero, Vector3.Zero, enabled)
         {
             AmbientDown = ambientDown * brightnessDown;
             AmbientUp = ambientUp * brightnessUp;
@@ -71,7 +71,7 @@ namespace Engine
         {
             ShadowMapIndex = assignedShadowMap;
             ShadowMapCount = 1;
-            FromLightVP = [Matrix.Identity];
+            FromLightVP = [Matrix4x4.Identity];
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()

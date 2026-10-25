@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
             /// Backcolor
             /// </summary>
             [FieldOffset(64)]
-            public Color4 BackColor;
+            public Vector4 BackColor;
 
             /// <summary>
             /// Light direction
@@ -90,9 +90,9 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
             public uint Samples;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerObject>();
+                return (uint)Marshal.SizeOf<PerObject>();
             }
         }
 

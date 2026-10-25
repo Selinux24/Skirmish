@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -92,12 +92,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator +(Position3 value, float scalar)
         {
-            return (Vector3)value + scalar;
+            return Vector3.Add(value, new(scalar));
         }
         /// <inheritdoc/>
         public static Position3 operator +(float scalar, Position3 value)
         {
-            return scalar + (Vector3)value;
+            return Vector3.Add(new(scalar), value);
         }
         /// <inheritdoc/>
         public static Position3 operator -(Position3 left, Position3 right)
@@ -112,12 +112,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator -(Position3 value, float scalar)
         {
-            return (Vector3)value - scalar;
+            return Vector3.Subtract(value, new(scalar));
         }
         /// <inheritdoc/>
         public static Position3 operator -(float scalar, Position3 value)
         {
-            return scalar - (Vector3)value;
+            return Vector3.Subtract(new(scalar), value);
         }
         /// <inheritdoc/>
         public static Position3 operator *(Position3 left, Position3 right)
@@ -142,7 +142,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator /(float scale, Position3 value)
         {
-            return scale / (Vector3)value;
+            return Vector3.Divide(new(scale), value);
         }
         /// <inheritdoc/>
         public static Position3 operator /(Position3 value, Position3 scale)
@@ -189,7 +189,7 @@ namespace Engine.Content
 
         public readonly bool Equals(ref Position3 other)
         {
-            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
+            return Helper.NearEqual(other.X, X) && Helper.NearEqual(other.Y, Y) && Helper.NearEqual(other.Z, Z);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()

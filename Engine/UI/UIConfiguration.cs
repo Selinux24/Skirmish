@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.UI
 {
@@ -10,31 +10,31 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        public static Color4 BaseColor { get; set; } = Color.CornflowerBlue;
+        public static Vector4 BaseColor { get; set; } = System.Drawing.Color.CornflowerBlue.RGBA();
         /// <summary>
         /// Control fore color
         /// </summary>
-        public static Color4 ForeColor { get; set; } = Color.DeepSkyBlue;
+        public static Vector4 ForeColor { get; set; } = System.Drawing.Color.DeepSkyBlue.RGBA();
         /// <summary>
         /// Control highlight color
         /// </summary>
-        public static Color4 HighlightColor { get; set; } = Color.LightBlue;
+        public static Vector4 HighlightColor { get; set; } = System.Drawing.Color.LightBlue.RGBA();
         /// <summary>
         /// Control shadow color
         /// </summary>
-        public static Color4 ShadowColor { get; set; } = Color.DarkBlue;
+        public static Vector4 ShadowColor { get; set; } = System.Drawing.Color.DarkBlue.RGBA();
         /// <summary>
         /// Text color
         /// </summary>
-        public static Color4 TextColor { get; set; } = Color.LightGray;
+        public static Vector4 TextColor { get; set; } = System.Drawing.Color.LightGray.RGBA();
         /// <summary>
         /// Highlight text color
         /// </summary>
-        public static Color4 HighlightTextColor { get; set; } = Color.Yellow;
+        public static Vector4 HighlightTextColor { get; set; } = System.Drawing.Color.Yellow.RGBA();
         /// <summary>
         /// Text background color
         /// </summary>
-        public static Color4 TextBackgroundColor { get; set; } = new Color4(0, 0, 0, 0.75f);
+        public static Vector4 TextBackgroundColor { get; set; } = new Vector4(0, 0, 0, 0.75f);
         /// <summary>
         /// Default Font
         /// </summary>

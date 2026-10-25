@@ -1,7 +1,7 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {

@@ -1,6 +1,6 @@
 ﻿using Engine.BuiltIn.UI;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Flares
 {
@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Components.Flares
         /// <summary>
         /// Color
         /// </summary>
-        public Color Color { get; set; }
+        public Vector4 Color { get; set; }
 
         /// <summary>
         /// Destructor

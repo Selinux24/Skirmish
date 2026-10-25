@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -19,12 +19,12 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("COLOR", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
         /// <summary>
@@ -33,7 +33,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, Color4 color)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, Vector4 color)
         {
             var vArray = vertices.ToArray();
 
@@ -52,7 +52,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Color4> colors)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector4> colors)
         {
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
@@ -85,7 +85,7 @@ namespace Engine.BuiltIn.Format
                 res[index] = new VertexPositionColor
                 {
                     Position = v.Position ?? Vector3.Zero,
-                    Color = v.Color ?? Color4.White,
+                    Color = v.Color ?? Vector4.One,
                 };
             });
 
@@ -99,7 +99,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Color4 Color;
+        public Vector4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -119,17 +119,17 @@ namespace Engine.BuiltIn.Format
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexPositionColor>();
+            return (uint)Marshal.SizeOf<VertexPositionColor>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

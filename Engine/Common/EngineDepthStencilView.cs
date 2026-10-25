@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Depth stencil view
@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal depth stencil view
         /// </summary>
-        private DepthStencilView dsv = null;
+        private ID3D11DepthStencilView dsv = null;
 
         /// <summary>
         /// Name
@@ -24,7 +24,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="view">Depth stencil view</param>
-        internal EngineDepthStencilView(string name, DepthStencilView view)
+        internal EngineDepthStencilView(string name, ID3D11DepthStencilView view)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A depth stencil view name must be specified.");
             dsv = view ?? throw new ArgumentNullException(nameof(view), "A depth stencil view must be specified.");
@@ -64,7 +64,7 @@ namespace Engine.Common
         /// Gets the depth stencil
         /// </summary>
         /// <returns></returns>
-        internal DepthStencilView GetDepthStencil()
+        internal ID3D11DepthStencilView GetDepthStencil()
         {
             return dsv;
         }

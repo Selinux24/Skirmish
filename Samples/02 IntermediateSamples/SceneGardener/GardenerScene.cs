@@ -7,13 +7,17 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneGardener
 {
+    using Color = System.Drawing.Color;
+
     public class GardenerScene : Scene
     {
         private const int dirtInstances = 3;
@@ -59,18 +63,18 @@ TAB - Change control between Camera and Agent
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Color gbLinesColor = new(Color.Cyan.ToColor3(), 0.5f);
-        private readonly Color grTrisColor = new(Color.Blue.ToColor3(), 0.15f);
-        private readonly Color grLinesColor = new(Color.Blue.ToColor3(), 0.5f);
-        private readonly Color fTrisColor = new(Color.Green.ToColor3(), 0.15f);
-        private readonly Color empTrisColor = new(Color.Orange.ToColor3(), 0.15f);
-        private readonly Color errTrisColor = new(Color.Red.ToColor3(), 0.15f);
-        private readonly Color frTrisColor = new(Color.White.ToColor3(), 0.15f);
-        private readonly Color frLinesColor = new(Color.White.ToColor3(), 0.5f);
-        private readonly Color crStartTrisColor = new(Color.IndianRed.ToColor3(), 0.15f);
-        private readonly Color crStartLinesColor = new(Color.IndianRed.ToColor3(), 1f);
-        private readonly Color crEndTrisColor = new(Color.WhiteSmoke.ToColor3(), 0.15f);
-        private readonly Color crEndLinesColor = new(Color.WhiteSmoke.ToColor3(), 1f);
+        private readonly Vector4 gbLinesColor = new(Color.Cyan.RGB(), 0.5f);
+        private readonly Vector4 grTrisColor = new(Color.Blue.RGB(), 0.15f);
+        private readonly Vector4 grLinesColor = new(Color.Blue.RGB(), 0.5f);
+        private readonly Vector4 fTrisColor = new(Color.Green.RGB(), 0.15f);
+        private readonly Vector4 empTrisColor = new(Color.Orange.RGB(), 0.15f);
+        private readonly Vector4 errTrisColor = new(Color.Red.RGB(), 0.15f);
+        private readonly Vector4 frTrisColor = new(Color.White.RGB(), 0.15f);
+        private readonly Vector4 frLinesColor = new(Color.White.RGB(), 0.5f);
+        private readonly Vector4 crStartTrisColor = new(Color.IndianRed.RGB(), 0.15f);
+        private readonly Vector4 crStartLinesColor = new(Color.IndianRed.RGB(), 1f);
+        private readonly Vector4 crEndTrisColor = new(Color.WhiteSmoke.RGB(), 0.15f);
+        private readonly Vector4 crEndLinesColor = new(Color.WhiteSmoke.RGB(), 1f);
 
         private bool showHelp = false;
         private bool freeCamera = true;
@@ -83,7 +87,7 @@ TAB - Change control between Camera and Agent
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
         }
 
         public override void Initialize()
@@ -107,19 +111,19 @@ TAB - Change control between Camera and Agent
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 128 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 128 });
 
             title.Text = "Gardener";
             runtime.Text = "";
             help.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -169,7 +173,7 @@ TAB - Change control between Camera and Agent
         }
         private async Task InitializeDirt()
         {
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceString + resourceDirtDiffuseString;
@@ -200,7 +204,7 @@ TAB - Change control between Camera and Agent
         }
         private async Task InitializeFoliageMap()
         {
-            var geo = GeometryUtil.CreatePlane(l * dirtInstances, h + 0.1f, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l * dirtInstances, h + 0.1f, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceFoliageString + resourceFoliageMap;
@@ -215,7 +219,7 @@ TAB - Change control between Camera and Agent
             };
 
             map = await AddComponentEffect<Model, ModelDescription>("Map", "Map", desc);
-            map.TintColor = new Color4(1f, 1f, 1f, 0.1f);
+            map.TintColor = new(1f, 1f, 1f, 0.1f);
         }
         private async Task InitializeGrass()
         {
@@ -493,11 +497,11 @@ TAB - Change control between Camera and Agent
 
             if (Game.Input.ShiftPressed)
             {
-                pov.Manipulator.SetPosition(r.PickingResult.Position + (povHeight * 0.5f));
+                pov.Manipulator.SetPosition(Vector3Extensions.Sum(r.PickingResult.Position, povHeight * 0.5f));
             }
             else
             {
-                pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
+                pov.Manipulator.LookAt(Vector3Extensions.Sum(r.PickingResult.Position, povHeight * 0.5f));
             }
         }
         private void UpdateHelp()
@@ -518,8 +522,8 @@ TAB - Change control between Camera and Agent
             var position = pov.Manipulator.Position;
             var interest = position - pov.Manipulator.Forward;
 
-            var proj = Matrix.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
-            var view = Matrix.LookAtLH(position, interest, Vector3.Up);
+            var proj = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
+            var view = Matrix4x4.CreateLookAtLeftHanded(position, interest, Vector3Extensions.Up);
             var frustum = new BoundingFrustum(view * proj);
 
             grass.PointOfView = position;
@@ -531,7 +535,7 @@ TAB - Change control between Camera and Agent
             DrawCircle(position, grassStartRadius, crStartLinesColor, crStartTrisColor);
             DrawCircle(position, grassEndRadius, crEndLinesColor, crEndTrisColor);
         }
-        private void DrawFrustum(BoundingFrustum frustum, Color4 lColor, Color4 tColor)
+        private void DrawFrustum(BoundingFrustum frustum, Vector4 lColor, Vector4 tColor)
         {
             var corners = frustum.GetCorners();
             var topQuad = Flatten([corners[2], corners[1], corners[5], corners[6]]);
@@ -542,7 +546,7 @@ TAB - Change control between Camera and Agent
             itemLines.SetPrimitives(lColor, lines);
             itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
-        private void DrawCircle(Vector3 position, float r, Color4 lColor, Color4 tColor)
+        private void DrawCircle(Vector3 position, float r, Vector4 lColor, Vector4 tColor)
         {
             if (r <= 0)
             {
@@ -557,7 +561,7 @@ TAB - Change control between Camera and Agent
             itemLines.SetPrimitives(lColor, lines);
             itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
-        private void DrawGardenerNodes(Color4 lColor, Color4 tColor, Color4 fColor, Color4 empColor, Color4 errColor)
+        private void DrawGardenerNodes(Vector4 lColor, Vector4 tColor, Vector4 fColor, Vector4 empColor, Vector4 errColor)
         {
             itemLines.Clear(lColor);
             itemTris.Clear(tColor);
@@ -603,10 +607,10 @@ TAB - Change control between Camera and Agent
                 }
             }
         }
-        private void DrawGardenerBounds(Color4 lColor)
+        private void DrawGardenerBounds(Vector4 lColor)
         {
             var bbox = grass.GetPlantingBounds();
-            bbox.Minimum = new Vector3(bbox.Minimum.X, h, bbox.Minimum.Z);
+            bbox.Min = new Vector3(bbox.Min.X, h, bbox.Min.Z);
 
             var lines = Line3D.CreateBox(bbox);
             itemLines.SetPrimitives(lColor, lines);

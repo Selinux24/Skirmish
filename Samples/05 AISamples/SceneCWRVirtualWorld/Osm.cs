@@ -1,11 +1,11 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Primitives;
 using Engine;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace AISamples.SceneCWRVirtualWorld
@@ -87,7 +87,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             var deltaLon = maxLon - minLon;
             var deltaLat = maxLat - minLat;
-            var ar = deltaLon / deltaLat * MathF.Cos(MathUtil.DegreesToRadians(maxLat));
+            var ar = deltaLon / deltaLat * MathF.Cos(Helper.DegreesToRadians(maxLat));
             float height = deltaLat * 111000;
             float width = height * ar;
             height *= scale;

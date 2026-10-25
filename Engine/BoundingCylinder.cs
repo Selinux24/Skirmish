@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -127,13 +128,13 @@ namespace Engine
                 return ContainmentType.Disjoint;
             }
 
-            if (MathUtil.NearEqual(distance, Radius))
+            if (Helper.NearEqual(distance, Radius))
             {
                 // The point is into the cylinder radius, and between cap and base distances.
                 return ContainmentType.Intersects;
             }
 
-            if (MathUtil.NearEqual(distOnAxis, hh))
+            if (Helper.NearEqual(distOnAxis, hh))
             {
                 // The point is in the cap or base.
                 return ContainmentType.Intersects;
@@ -168,8 +169,8 @@ namespace Engine
         {
             return
                 left.Center == right.Center &&
-                MathUtil.NearEqual(left.Radius, right.Radius) &&
-                MathUtil.NearEqual(left.Height, right.Height);
+                Helper.NearEqual(left.Radius, right.Radius) &&
+                Helper.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
         public static bool operator !=(BoundingCylinder left, BoundingCylinder right)

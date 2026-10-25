@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Decals
@@ -17,7 +17,7 @@ namespace Engine.BuiltIn.Drawers.Decals
         [StructLayout(LayoutKind.Explicit, Size = 32)]
         struct PerDecal : IBufferData
         {
-            public static PerDecal Build(bool rotation, uint textureCount, Color4 tintColor)
+            public static PerDecal Build(bool rotation, uint textureCount, Vector4 tintColor)
             {
                 return new PerDecal
                 {
@@ -42,12 +42,12 @@ namespace Engine.BuiltIn.Drawers.Decals
             /// Tint color
             /// </summary>
             [FieldOffset(16)]
-            public Color4 TintColor;
+            public Vector4 TintColor;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerDecal>();
+                return (uint)Marshal.SizeOf<PerDecal>();
             }
         }
 
@@ -78,7 +78,7 @@ namespace Engine.BuiltIn.Drawers.Decals
         /// <param name="textureCount">Texture count</param>
         /// <param name="tintColor">Tint color</param>
         /// <param name="textures">Texture array</param>
-        public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
+        public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Vector4 tintColor, EngineShaderResourceView textures)
         {
             dc.UpdateConstantBuffer(cbPerDecal, PerDecal.Build(rotation, textureCount, tintColor));
 

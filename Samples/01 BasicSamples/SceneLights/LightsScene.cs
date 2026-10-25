@@ -4,9 +4,10 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneLights
@@ -83,7 +84,7 @@ namespace BasicSamples.SceneLights
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -146,11 +147,11 @@ namespace BasicSamples.SceneLights
             var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
-            geo.Transform(Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f));
+            geo.Transform(Matrix4x4.CreateRotationX(Helper.PiOver2) * Matrix4x4.CreateTranslation(Vector3Extensions.ForwardLH * 0.5f));
 
             var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {
-                v.Color = Color.Gray;
+                v.Color = Color.Gray.RGBA();
                 return v;
             });
 
@@ -175,12 +176,12 @@ namespace BasicSamples.SceneLights
             Lights.FillLight.CastShadow = false;
 
             var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
-            Lights.Add(new SceneLightPoint("Point1", true, Color3.White, Color3.White, true, pointDesc));
+            Lights.Add(new SceneLightPoint("Point1", true, Color.White.RGB(), Color.White.RGB(), true, pointDesc));
 
-            var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
-            Lights.Add(new SceneLightSpot("Spot1", true, Color3.White, Color3.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot2", true, Color3.White, Color3.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot3", true, Color3.White, Color3.White, true, spotDesc));
+            var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3Extensions.Down, 50, 25, 25);
+            Lights.Add(new SceneLightSpot("Spot1", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot2", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot3", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
 
             await Task.CompletedTask;
         }
@@ -200,8 +201,8 @@ namespace BasicSamples.SceneLights
         {
             int width = (int)(Game.Form.RenderWidth * 0.33f);
             int height = (int)(Game.Form.RenderHeight * 0.33f);
-            int smLeft = Game.Form.RenderWidth - width;
-            int smTop = Game.Form.RenderHeight - height;
+            int smLeft = (int)Game.Form.RenderWidth - width;
+            int smTop = (int)Game.Form.RenderHeight - height;
 
             var desc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
             desc.StartsVisible = false;
@@ -301,7 +302,7 @@ namespace BasicSamples.SceneLights
             float r = 10.0f;
             float hv = 1.0f;
             float av = 0.5f;
-            float s = MathUtil.Pi;
+            float s = Helper.Pi;
 
             position.X = r * MathF.Cos(av * Game.GameTime.TotalSeconds);
             position.Y = hv * MathF.Sin(av * Game.GameTime.TotalSeconds);
@@ -389,7 +390,7 @@ namespace BasicSamples.SceneLights
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor, 0.25f);
+                    var color = new Vector4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -398,7 +399,7 @@ namespace BasicSamples.SceneLights
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor, 0.25f);
+                    var color = new Vector4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 
@@ -408,8 +409,8 @@ namespace BasicSamples.SceneLights
 
             if (drawCullVolumes)
             {
-                var spotColor = new Color4(Color.Red.RGB(), 0.50f);
-                var pointColor = new Color4(Color.Green.RGB(), 0.50f);
+                var spotColor = new Vector4(Color.Red.RGB(), 0.50f);
+                var pointColor = new Vector4(Color.Green.RGB(), 0.50f);
 
                 foreach (var spot in Lights.SpotLights)
                 {

@@ -64,7 +64,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 if (BestIndex == -1)
                 {
-                    Logger.WriteWarning(this, $"Failed to find merge points for {Outline} and {hole.Contour}.");
+                    Game.Logger.WriteWarning(this, $"Failed to find merge points for {Outline} and {hole.Contour}.");
                 }
                 else
                 {

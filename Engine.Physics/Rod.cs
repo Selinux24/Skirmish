@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -58,7 +58,7 @@ namespace Engine.Physics
             var positionTwoWorld = Two.PositionWorld;
 
             float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (MathUtil.NearEqual(Length - distance, Tolerance))
+            if (Helper.NearEqual(Length - distance, Tolerance))
             {
                 // Valid rod
                 return false;

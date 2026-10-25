@@ -3,8 +3,8 @@ using Engine.BuiltIn.Drawers.Particles;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -16,7 +16,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Assigned buffer slot
         /// </summary>
-        public static int BufferSlot { get; set; } = 0;
+        public static uint BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Particle list
@@ -33,7 +33,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Current particle index to update data
         /// </summary>
-        private int currentParticleIndex = 0;
+        private uint currentParticleIndex = 0;
         /// <summary>
         /// Time to next particle emission
         /// </summary>
@@ -63,9 +63,9 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Active particle count
         /// </summary>
-        public int ActiveParticles { get; private set; }
+        public uint ActiveParticles { get; private set; }
         /// <inheritdoc/>
-        public int MaxConcurrentParticles { get; private set; }
+        public uint MaxConcurrentParticles { get; private set; }
         /// <summary>
         /// Time to end
         /// </summary>
@@ -100,7 +100,7 @@ namespace Engine.BuiltIn.Components.Particles
             var textureCount = (uint)imgContent.Count;
 
             emitter.UpdateBounds(pParameters);
-            int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            uint maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
             var vParticles = new VertexCpuParticle[maxConcurrentParticles];
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
@@ -200,7 +200,7 @@ namespace Engine.BuiltIn.Components.Particles
 
             if (updateParticles)
             {
-                Logger.WriteTrace(this, $"{Name} - updateParticles WriteDiscardBuffer");
+                Game.Logger.WriteTrace(this, $"{Name} - updateParticles WriteDiscardBuffer");
                 buffer.Write(dc, particles);
                 updateParticles = false;
             }
@@ -247,7 +247,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// </summary>
         private void AddParticle()
         {
-            int nextFreeParticle = currentParticleIndex + 1;
+            uint nextFreeParticle = currentParticleIndex + 1;
 
             if (ActiveParticles < nextFreeParticle)
             {
@@ -261,9 +261,9 @@ namespace Engine.BuiltIn.Components.Particles
 
             Vector3 velocity = Emitter.CalcInitialVelocity(
                 parameters,
-                Helper.RandomGenerator.NextFloat(0, 1),
-                Helper.RandomGenerator.NextFloat(0, 1),
-                Helper.RandomGenerator.NextFloat(0, 1));
+                Helper.RandomGenerator.NextSingle(0, 1),
+                Helper.RandomGenerator.NextSingle(0, 1),
+                Helper.RandomGenerator.NextSingle(0, 1));
 
             Vector4 randomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One);
 

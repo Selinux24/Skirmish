@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Skies
 {
@@ -31,7 +31,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Color3 CloudBaseColor { get; set; }
+        public Vector3 CloudBaseColor { get; set; }
         /// <summary>
         /// Clouds quad size
         /// </summary>
@@ -84,7 +84,7 @@ namespace Engine.BuiltIn.Components.Skies
 
             MaxBrightness = 0.75f;
             MinBrightness = 0.15f;
-            CloudBaseColor = Color3.White;
+            CloudBaseColor = new(1f, 1f, 1f);
             Size = 100;
             Repeat = 2;
             PlaneWidth = 50;

@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Physics
 {
@@ -39,29 +40,30 @@ namespace Engine.Physics
             }
         }
         /// <inheritdoc/>
-        public Matrix RotationScale
+        public Matrix4x4 RotationScale
         {
             get
             {
                 if (!HasTransform)
                 {
-                    return Matrix.Identity;
+                    return Matrix4x4.Identity;
                 }
 
-                return Matrix.RotationQuaternion(RigidBody.Rotation);
+                return Matrix4x4.CreateFromQuaternion(RigidBody.Rotation);
             }
         }
         /// <inheritdoc/>
-        public Matrix RotationScaleInverse
+        public Matrix4x4 RotationScaleInverse
         {
             get
             {
                 if (!HasTransform)
                 {
-                    return Matrix.Identity;
+                    return Matrix4x4.Identity;
                 }
 
-                return Matrix.Invert(RotationScale);
+                Matrix4x4.Invert(RotationScale, out var inv);
+                return inv;
             }
         }
         /// <inheritdoc/>
@@ -69,7 +71,7 @@ namespace Engine.Physics
         {
             get
             {
-                return !(RigidBody?.Transform ?? Matrix.Identity).IsIdentity;
+                return !(RigidBody?.Transform ?? Matrix4x4.Identity).IsIdentity;
             }
         }
 

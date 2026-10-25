@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -22,9 +22,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the bounds rectangle
         /// </summary>
-        public readonly Rectangle GetRectangle()
+        public readonly RectI GetRectangle()
         {
-            return new Rectangle(Min.X, Min.Y, Max.X - Min.X, Max.Y - Min.Y);
+            return new RectI(Min.X, Min.Y, Max.X - Min.X, Max.Y - Min.Y);
         }
     }
 }

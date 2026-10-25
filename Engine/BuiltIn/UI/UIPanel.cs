@@ -1,8 +1,9 @@
 ﻿using Engine.UI;
-using SharpDX;
 using System;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -57,7 +58,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                verticalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumVerticalOffset());
+                verticalScrollOffset = Math.Clamp(value, 0f, this.GetMaximumVerticalOffset());
                 verticalScrollPosition = this.ConvertVerticalOffsetToPosition(verticalScrollOffset);
             }
         }
@@ -70,7 +71,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                verticalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                verticalScrollPosition = Math.Clamp(value, 0f, 1f);
                 verticalScrollOffset = this.ConvertVerticalPositionToOffset(verticalScrollPosition);
             }
         }
@@ -85,7 +86,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
+                horizontalScrollOffset = Math.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
                 horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
             }
         }
@@ -98,7 +99,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                horizontalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                horizontalScrollPosition = Math.Clamp(value, 0f, 1f);
                 horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
             }
         }
@@ -202,20 +203,20 @@ namespace Engine.BuiltIn.UI
         }
 
         /// <inheritdoc/>
-        public override RectangleF GetControlArea()
+        public override Rect GetControlArea()
         {
-            RectangleF rect = RectangleF.Empty;
+            Rect rect = Rect.Empty;
 
             foreach (var item in Children)
             {
-                if (rect == RectangleF.Empty)
+                if (rect == Rect.Empty)
                 {
                     rect = item.GetControlArea();
 
                     continue;
                 }
 
-                rect = RectangleF.Union(rect, item.GetControlArea());
+                rect = Rect.Union(rect, item.GetControlArea());
             }
 
             return rect;

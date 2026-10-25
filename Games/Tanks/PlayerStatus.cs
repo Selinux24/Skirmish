@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Tanks
 {
@@ -34,11 +34,11 @@ namespace Tanks
         /// <summary>
         /// Player color
         /// </summary>
-        public Color Color { get; set; }
+        public Vector4 Color { get; set; }
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color TintColor { get; set; }
+        public Vector4 TintColor { get; set; }
         /// <summary>
         /// Health
         /// </summary>

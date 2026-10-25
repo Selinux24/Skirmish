@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -25,11 +26,11 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public Color4 Background { get; set; } = Color.Black.ToColor4();
+        public Vector4 Background { get; set; } = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// Gravity
         /// </summary>
-        public Vector3 Gravity { get; set; } = new Vector3(0, -9.8f, 0);
+        public Vector3 Gravity { get; set; } = new Vector3(0f, -9.8f, 0f);
 
         /// <summary>
         /// Maximum distance for high level of detail models
@@ -77,7 +78,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(lodDistanceHigh, value))
+                if (!Helper.NearEqual(lodDistanceHigh, value))
                 {
                     lodDistanceHigh = value;
 
@@ -96,7 +97,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(lodDistanceMedium, value))
+                if (!Helper.NearEqual(lodDistanceMedium, value))
                 {
                     lodDistanceMedium = value;
 
@@ -115,7 +116,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(lodDistanceLow, value))
+                if (!Helper.NearEqual(lodDistanceLow, value))
                 {
                     lodDistanceLow = value;
 
@@ -134,7 +135,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(lodDistanceMinimum, value))
+                if (!Helper.NearEqual(lodDistanceMinimum, value))
                 {
                     lodDistanceMinimum = value;
 
@@ -153,7 +154,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(shadowRadiusDistanceThreshold, value))
+                if (!Helper.NearEqual(shadowRadiusDistanceThreshold, value))
                 {
                     shadowRadiusDistanceThreshold = value;
 
@@ -173,7 +174,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(shadowDistanceHigh, value))
+                if (!Helper.NearEqual(shadowDistanceHigh, value))
                 {
                     shadowDistanceHigh = value;
 
@@ -192,7 +193,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(shadowDistanceMedium, value))
+                if (!Helper.NearEqual(shadowDistanceMedium, value))
                 {
                     shadowDistanceMedium = value;
 
@@ -211,7 +212,7 @@ namespace Engine
             }
             set
             {
-                if (!MathUtil.NearEqual(shadowDistanceLow, value))
+                if (!Helper.NearEqual(shadowDistanceLow, value))
                 {
                     shadowDistanceLow = value;
 
@@ -270,9 +271,9 @@ namespace Engine
         /// <param name="coarseBoundingSphere">Coarse bounding sphere</param>
         /// <param name="localTransform">Local transform</param>
         /// <returns>Returns the level of detail</returns>
-        public LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform)
+        public LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix4x4 localTransform)
         {
-            Vector3 position = localTransform.TranslationVector;
+            Vector3 position = localTransform.Translation;
             float radius = 0f;
 
             if (coarseBoundingSphere.HasValue)

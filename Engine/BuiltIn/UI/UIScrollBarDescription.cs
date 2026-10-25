@@ -1,5 +1,5 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -26,7 +26,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="markerColor">Marker color</param>
         /// <param name="markerSize">Marker size</param>
         /// <param name="scrollMode">Scroll mode</param>
-        public static UIScrollBarDescription Default(Color4 baseColor, Color4 markerColor, float markerSize, ScrollModes scrollMode = ScrollModes.Vertical)
+        public static UIScrollBarDescription Default(Vector4 baseColor, Vector4 markerColor, float markerSize, ScrollModes scrollMode = ScrollModes.Vertical)
         {
             return new()
             {
@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Scroll marker color
         /// </summary>
-        public Color4 MarkerColor { get; set; } = UIConfiguration.HighlightColor;
+        public Vector4 MarkerColor { get; set; } = UIConfiguration.HighlightColor;
         /// <summary>
         /// Scroll marker size
         /// </summary>

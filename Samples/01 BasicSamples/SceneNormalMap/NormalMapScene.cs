@@ -4,8 +4,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.UI;
-using SharpDX;
+using System.Drawing;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
@@ -68,7 +68,7 @@ namespace BasicSamples.SceneNormalMap
             {
                 Font = defaultFont18,
                 Text = "Tiled Wall Test Scene",
-                TextForeColor = Color.White,
+                TextForeColor = Color.White.RGBA(),
             };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
@@ -77,12 +77,12 @@ namespace BasicSamples.SceneNormalMap
             {
                 Font = defaultFont12,
                 MaxTextLength = 256,
-                TextForeColor = Color.Yellow,
+                TextForeColor = Color.Yellow.RGBA(),
             };
 
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", runtimeDesc);
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("BackPanel", "BackPanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDungeonWall()
@@ -148,11 +148,11 @@ namespace BasicSamples.SceneNormalMap
         }
         private void StartEnvironment()
         {
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
 
             var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
 
-            pointLight = new SceneLightPoint("light", false, Color3.White, Color3.White, true, desc);
+            pointLight = new SceneLightPoint("light", false, Color.White.RGB(), Color.White.RGB(), true, desc);
 
             Lights.Add(pointLight);
         }

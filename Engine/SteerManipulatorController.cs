@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -59,7 +59,7 @@ namespace Engine
             // A vector pointing from the location to the target
             var desired = next - position;
             float dToNext = desired.Length();
-            if (MathUtil.IsZero(dToNext))
+            if (Helper.IsZero(dToNext))
             {
                 return;
             }

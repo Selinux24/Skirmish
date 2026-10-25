@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Description of a vertex element in a vertex buffer in an output slot.
@@ -9,11 +9,11 @@ namespace Engine.Common
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public struct EngineStreamOutputElement(string semanticName, int semanticIndex, byte startComponent, byte componentCount, byte outputSlot)
+    public struct EngineStreamOutputElement(string semanticName, uint semanticIndex, byte startComponent, byte componentCount, byte outputSlot)
     {
-        public static explicit operator StreamOutputElement(EngineStreamOutputElement obj)
+        public static explicit operator SODeclarationEntry(EngineStreamOutputElement obj)
         {
-            return new StreamOutputElement
+            return new SODeclarationEntry
             {
                 Stream = obj.Stream,
                 SemanticName = obj.SemanticName,
@@ -23,7 +23,7 @@ namespace Engine.Common
                 OutputSlot = obj.OutputSlot,
             };
         }
-        public static explicit operator EngineStreamOutputElement(StreamOutputElement obj)
+        public static explicit operator EngineStreamOutputElement(SODeclarationEntry obj)
         {
             return new EngineStreamOutputElement
             {
@@ -39,7 +39,7 @@ namespace Engine.Common
         /// <summary>
         /// Zero-based, stream number.
         /// </summary>
-        public int Stream { get; set; } = 0;
+        public uint Stream { get; set; } = 0;
         /// <summary>
         /// Type of output element; possible values include: "POSITION", "NORMAL", or "TEXCOORD0".
         /// Note that if SemanticName is null then ComponentCount can be greater than 4 and the described entry will be a gap in the stream out where no data will be written.
@@ -49,7 +49,7 @@ namespace Engine.Common
         /// Output element's zero-based index.
         /// Should be used if, for example, you have more than one texture coordinate stored in each vertex.
         /// </summary>
-        public int SemanticIndex { get; set; } = semanticIndex;
+        public uint SemanticIndex { get; set; } = semanticIndex;
         /// <summary>
         /// Which component of the entry to begin writing out to. Valid values are 0 to 3.
         /// For example, if you only wish to output to the y and z components of a position, then StartComponent should be 1 and ComponentCount should be 2.

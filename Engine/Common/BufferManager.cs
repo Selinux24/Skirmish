@@ -198,7 +198,7 @@ namespace Engine.Common
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Loading Group {grId} => Error creating buffers: {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"Loading Group {grId} => Error creating buffers: {ex.Message}", ex);
 
                 throw;
             }
@@ -218,7 +218,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Creating {reservedSlots} reserved buffer descriptors");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Creating {reservedSlots} reserved buffer descriptors");
 
             for (int i = 0; i < reservedSlots; i++)
             {
@@ -236,12 +236,12 @@ namespace Engine.Common
                 descriptor.Allocate();
 
                 string name = GetVertexBufferName(descriptor, true);
-                Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.SizeInBytes()}");
+                Game.Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.SizeInBytes()}");
 
                 vertexBufferDescriptors.Add(descriptor);
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Reserved buffer descriptors created");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Reserved buffer descriptors created");
         }
         /// <summary>
         /// Do descriptor request processing
@@ -259,19 +259,19 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Processing descriptor requests: {toAssign.Length}");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Processing descriptor requests: {toAssign.Length}");
 
             foreach (var request in toAssign)
             {
-                Logger.WriteTrace(this, $"Loading Group {grId} => Processing {request}");
+                Game.Logger.WriteTrace(this, $"Loading Group {grId} => Processing {request}");
 
                 request.Process(this);
 
-                Logger.WriteTrace(this, $"Loading Group {grId} => Processed {request}");
+                Game.Logger.WriteTrace(this, $"Loading Group {grId} => Processed {request}");
             }
 
             //Replaces the bag
-            requestedDescriptors = new(requestedDescriptors.Where(r => r?.Processed != ProcessedStages.Processed));
+            requestedDescriptors = [.. requestedDescriptors.Where(r => r?.Processed != ProcessedStages.Processed)];
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Ins[{dirtyList.Length}]");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Ins[{dirtyList.Length}]");
 
             foreach (var descriptor in dirtyList)
             {
@@ -307,7 +307,7 @@ namespace Engine.Common
 
                     oldBufferToDispose?.Dispose();
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name}. Size {descriptor.Instances}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -321,7 +321,7 @@ namespace Engine.Common
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(new(buffer, descriptor.GetStride(), 0));
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Created {name} and binding. Size {descriptor.Instances}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -343,7 +343,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Vtx[{dirtyList.Length}]");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Vtx[{dirtyList.Length}]");
 
             foreach (var descriptor in dirtyList)
             {
@@ -359,7 +359,7 @@ namespace Engine.Common
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = new(buffer, descriptor.GetStride(), 0);
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name} and binding. Size {descriptor.SizeInBytes()}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name} and binding. Size {descriptor.SizeInBytes()}");
 
                     oldBufferToDispose?.Dispose();
                 }
@@ -377,7 +377,7 @@ namespace Engine.Common
 
                     descriptor.AddInputs();
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Created {name} and binding. Size {descriptor.SizeInBytes()}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Created {name} and binding. Size {descriptor.SizeInBytes()}");
                 }
 
                 if (descriptor.InstancingDescriptor != null)
@@ -406,7 +406,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(this, $"Loading Group {grId} => Idx[{dirtyList.Length}]");
+            Game.Logger.WriteTrace(this, $"Loading Group {grId} => Idx[{dirtyList.Length}]");
 
             foreach (var descriptor in dirtyList)
             {
@@ -423,7 +423,7 @@ namespace Engine.Common
 
                     oldBufferToDispose?.Dispose();
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name}. Size {descriptor.SizeInBytes()}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Reallocated {name}. Size {descriptor.SizeInBytes()}");
                 }
                 else
                 {
@@ -435,7 +435,7 @@ namespace Engine.Common
 
                     indexBuffers.Add(buffer);
 
-                    Logger.WriteTrace(this, $"Loading Group {grId} => Created {name}. Size {descriptor.SizeInBytes()}");
+                    Game.Logger.WriteTrace(this, $"Loading Group {grId} => Created {name}. Size {descriptor.SizeInBytes()}");
                 }
 
                 //Updates the allocated buffer size
@@ -615,21 +615,21 @@ namespace Engine.Common
         /// </summary>
         public IEngineInstancingBufferDescriptor[] GetInstancingBufferDescriptors()
         {
-            return instancingBufferDescriptors.OfType<IEngineInstancingBufferDescriptor>().ToArray();
+            return [.. instancingBufferDescriptors.OfType<IEngineInstancingBufferDescriptor>()];
         }
         /// <summary>
         /// Gets vertex buffer descriptors
         /// </summary>
         public IEngineVertexBufferDescriptor[] GetVertexBufferDescriptors()
         {
-            return vertexBufferDescriptors.OfType<IEngineVertexBufferDescriptor>().ToArray();
+            return [.. vertexBufferDescriptors.OfType<IEngineVertexBufferDescriptor>()];
         }
         /// <summary>
         /// Gets index buffer descriptors
         /// </summary>
         public IEngineIndexBufferDescriptor[] GetIndexBufferDescriptors()
         {
-            return indexBufferDescriptors.OfType<IEngineIndexBufferDescriptor>().ToArray();
+            return [.. indexBufferDescriptors.OfType<IEngineIndexBufferDescriptor>()];
         }
 
         /// <summary>
@@ -671,12 +671,12 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="dynamic">Add to dynamic buffers</param>
         /// <param name="instances">Number of instances</param>
-        public BufferDescriptor AddInstancingData<T>(string id, bool dynamic, int instances)
-            where T : struct, IInstacingData
+        public BufferDescriptor AddInstancingData<T>(string id, bool dynamic, uint instances)
+            where T : unmanaged, IInstacingData
         {
             var request = new BufferDescriptorAddInstancingRequest<T>(id, dynamic, instances);
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddInstancingData {request}.");
+            Game.Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddInstancingData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -691,11 +691,11 @@ namespace Engine.Common
         /// <param name="data">Vertex list</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         public BufferDescriptor AddVertexData<T>(string id, bool dynamic, IEnumerable<T> data, BufferDescriptor instancingBuffer = null)
-            where T : struct, IVertexData
+            where T : unmanaged, IVertexData
         {
             var request = new BufferDescriptorAddVerticesRequest<T>(id, dynamic, data, instancingBuffer);
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddVertexData {request}.");
+            Game.Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddVertexData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -711,7 +711,7 @@ namespace Engine.Common
         {
             var request = new BufferDescriptorAddIndicesRequest(id, dynamic, data);
 
-            Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddIndexData {request}.");
+            Game.Logger.WriteTrace(this, $"Loading Group {id ?? NoIdString} => AddIndexData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -769,7 +769,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Instancing buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        public int AddInstancingBufferDescription<T>(BufferManagerInstances<T> description) where T : struct, IInstacingData
+        public int AddInstancingBufferDescription<T>(BufferManagerInstances<T> description) where T : unmanaged, IInstacingData
         {
             int index = instancingBufferDescriptors.Count;
 

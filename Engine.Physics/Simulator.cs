@@ -1,8 +1,8 @@
 ﻿using Engine.Collections.Generic;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.Physics
 {
@@ -84,7 +84,7 @@ namespace Engine.Physics
 
             // Gets the simulation elapsed time
             float time = gameTime.ElapsedSeconds * Velocity / iterations;
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return;
             }

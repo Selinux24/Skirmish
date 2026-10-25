@@ -15,20 +15,23 @@ using Engine.Content.FmtCollada;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using TerrainSamples.SceneRts.AI;
 using TerrainSamples.SceneRts.AI.Agents;
 using TerrainSamples.SceneRts.Controllers;
 using TerrainSamples.SceneRts.Emitters;
 using TerrainSamples.SceneStart;
+using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneRts
 {
+    using Color = System.Drawing.Color;
+
     public class RtsScene : WalkableScene
     {
         private const string resourceTarjetFile = "Common/UI/Cursor/target.png";
@@ -135,17 +138,17 @@ namespace TerrainSamples.SceneRts
         private ModelInstanced rocks = null;
         private ModelInstanced tree1 = null;
         private ModelInstanced tree2 = null;
-        private readonly Color4 objColor = Color.Magenta;
+        private readonly Vector4 objColor = Color.Magenta.RGBA();
         private bool objNotSet = true;
 
         private Model helicopter = null;
         private readonly HeliManipulatorController helicopterController = null;
-        private readonly Vector3 helicopterHeightOffset = Vector3.Up * 15f;
-        private readonly Color4 curvesColor = Color.Red;
-        private readonly Color4 pointsColor = Color.Blue;
-        private readonly Color4 segmentsColor = new(Color.Cyan.ToColor3(), 0.8f);
-        private readonly Color4 hAxisColor = Color.YellowGreen;
-        private readonly Color4 wAxisColor = Color.White;
+        private readonly Vector3 helicopterHeightOffset = Vector3Extensions.Up * 15f;
+        private readonly Vector4 curvesColor = Color.Red.RGBA();
+        private readonly Vector4 pointsColor = Color.Blue.RGBA();
+        private readonly Vector4 segmentsColor = new(Color.Cyan.RGB(), 0.8f);
+        private readonly Vector4 hAxisColor = Color.YellowGreen.RGBA();
+        private readonly Vector4 wAxisColor = Color.White.RGBA();
 
         private GeometryColorDrawer<Line3D> staticObjLineDrawer = null;
         private GeometryColorDrawer<Line3D> movingObjLineDrawer = null;
@@ -233,25 +236,25 @@ namespace TerrainSamples.SceneRts
             var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
             var defaultFont10 = FontDescription.FromFamily(fontFamily, 10);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            counters1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow, MaxTextLength = 256 });
-            counters2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow, MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            counters1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow.RGBA(), MaxTextLength = 256 });
+            counters2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow.RGBA(), MaxTextLength = 256 });
 
             title.Text = "Terrain collision and trajectories test";
             stats.Text = "";
             counters1.Text = "";
             counters2.Text = "";
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Back Pannel", "Back Pannel", spDesc, LayerUI - 1);
 
             var spbDesc = new UIProgressBarDescription()
             {
                 Width = 50,
                 Height = 5,
-                BaseColor = Color.Red,
-                ProgressColor = Color.Green,
+                BaseColor = Color.Red.RGBA(),
+                ProgressColor = Color.Green.RGBA(),
             };
 
             hProgressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("HelicopterProgressBar", "HelicopterProgressBar", spbDesc, LayerEffects);
@@ -278,9 +281,9 @@ namespace TerrainSamples.SceneRts
             };
             cursor3D = await AddComponentCursor<Model, ModelDescription>("Cursor3D", "Cursor3D", c3DDesc);
 
-            var c2DDesc = UICursorDescription.Default(resourceTarjetFile, 16, 16, true, Color.Red);
+            var c2DDesc = UICursorDescription.Default(resourceTarjetFile, 16, 16, true, Color.Red.RGBA());
             cursor2D = await AddComponentCursor<UICursor, UICursorDescription>("Cursor2D", "Cursor2D", c2DDesc);
-            cursor2D.BaseColor = Color.Red;
+            cursor2D.BaseColor = Color.Red.RGBA();
             cursor2D.Visible = false;
 
             sw.Stop();
@@ -363,8 +366,8 @@ namespace TerrainSamples.SceneRts
 
             int width = 300;
             int height = 300;
-            int smLeft = Game.Form.RenderWidth - width;
-            int smTop = Game.Form.RenderHeight - height;
+            int smLeft = (int)Game.Form.RenderWidth - width;
+            int smTop = (int)Game.Form.RenderHeight - height;
 
             var smDesc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
             smDesc.DeferredEnabled = false;
@@ -506,18 +509,18 @@ namespace TerrainSamples.SceneRts
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare1File),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlareFlare2File),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -577,8 +580,8 @@ namespace TerrainSamples.SceneRts
             var tankbbox = tankP1.GetBoundingBox(true);
 
             // Initialize dust generation relative positions
-            tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
-            tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
+            tankLeftCat = new Vector3(tankbbox.Max.X, tankbbox.Min.Y, tankbbox.Max.Z);
+            tankRightCat = new Vector3(tankbbox.Min.X, tankbbox.Min.Y, tankbbox.Max.Z);
 
             // Initialize agent
             tankAgentType = new GraphAgentType()
@@ -933,14 +936,14 @@ namespace TerrainSamples.SceneRts
 
                 float scale = i switch
                 {
-                    < 5 => posRnd.NextFloat(2f, 5f),
-                    < 30 => posRnd.NextFloat(0.5f, 2f),
-                    _ => posRnd.NextFloat(0.1f, 0.2f)
+                    < 5 => posRnd.NextSingle(2f, 5f),
+                    < 30 => posRnd.NextSingle(0.5f, 2f),
+                    _ => posRnd.NextSingle(0.1f, 0.2f)
                 };
 
                 rocks[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi),
+                    posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi),
                     scale);
             }
             rocks.Visible = true;
@@ -963,8 +966,8 @@ namespace TerrainSamples.SceneRts
 
                 tree1[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
-                    posRnd.NextFloat(0.25f, 0.75f));
+                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0.25f, 0.75f));
             }
             tree1.Visible = true;
 
@@ -984,8 +987,8 @@ namespace TerrainSamples.SceneRts
 
                 tree2[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
-                    posRnd.NextFloat(0.25f, 0.75f));
+                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0.25f, 0.75f));
             }
             tree2.Visible = true;
         }
@@ -1003,7 +1006,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
             {
                 garage.Manipulator.SetPosition(r.Position);
-                garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                garage.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
             }
             garage.Visible = true;
             garage.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1013,7 +1016,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
             {
                 building.Manipulator.SetPosition(r.Position);
-                building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                building.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
             }
             building.Visible = true;
             building.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1039,7 +1042,7 @@ namespace TerrainSamples.SceneRts
 
                 obeliskInstance.Manipulator.SetPosition(r.Position);
                 obeliskInstance.Manipulator.SetScaling(1.5f);
-                obeliskInstance.Manipulator.SetTransform(r.Position, MathUtil.PiOverFour, 0, 0, 1.5f);
+                obeliskInstance.Manipulator.SetTransform(r.Position, Helper.PiOver4, 0, 0, 1.5f);
             }
             obelisk.Visible = true;
         }
@@ -1271,13 +1274,13 @@ namespace TerrainSamples.SceneRts
             var bbox = terrain.GetBoundingBox();
 
             float sep = 2.1f;
-            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
+            for (float x = bbox.Min.X + 1; x < bbox.Max.X - 1; x += sep)
             {
-                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
+                for (float z = bbox.Min.Z + 1; z < bbox.Max.Z - 1; z += sep)
                 {
                     if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
+                        oks.Add(new Line3D(r.Position, r.Position + Vector3Extensions.Up));
                     }
                     else
                     {
@@ -1288,15 +1291,15 @@ namespace TerrainSamples.SceneRts
 
             if (oks.Count > 0)
             {
-                terrainLineDrawer.AddPrimitives(Color.Green, [.. oks]);
+                terrainLineDrawer.AddPrimitives(Color.Green.RGBA(), [.. oks]);
             }
             if (errs.Count > 0)
             {
-                terrainLineDrawer.AddPrimitives(Color.Red, [.. errs]);
+                terrainLineDrawer.AddPrimitives(Color.Red.RGBA(), [.. errs]);
             }
 
             // Axis
-            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix4x4.Identity, 20f));
             curveLineDrawer.Visible = false;
         }
         private void BeginToggleGarageLights()
@@ -1702,8 +1705,8 @@ namespace TerrainSamples.SceneRts
             SetStatsScreenPosition(tankP1Agent, 4, t1ProgressBar);
             SetStatsScreenPosition(tankP2Agent, 4, t2ProgressBar);
 
-            DEBUGDrawTankPath(tankP1Agent, Color.Yellow, Color.GreenYellow);
-            DEBUGDrawTankPath(tankP2Agent, Color.Firebrick, Color.Coral);
+            DEBUGDrawTankPath(tankP1Agent, Color.Yellow.RGBA(), Color.GreenYellow.RGBA());
+            DEBUGDrawTankPath(tankP2Agent, Color.Firebrick.RGBA(), Color.Coral.RGBA());
         }
         private void UpdateHelicopter()
         {
@@ -1730,7 +1733,10 @@ namespace TerrainSamples.SceneRts
 
             if (curveLineDrawer.Visible)
             {
-                Matrix rot = Matrix.RotationQuaternion(helicopter.Manipulator.Rotation) * Matrix.Translation(helicopter.Manipulator.Position);
+                Matrix4x4 rot =
+                    Matrix4x4.CreateFromQuaternion(helicopter.Manipulator.Rotation) *
+                    Matrix4x4.CreateTranslation(helicopter.Manipulator.Position);
+
                 curveLineDrawer.SetPrimitives(hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
@@ -1782,7 +1788,7 @@ namespace TerrainSamples.SceneRts
                 var result = FindPath(tankAgentType, t1Position, r.PickingResult.Position);
                 if (result != null)
                 {
-                    DEBUGDrawPath(result.Positions, Color.Red);
+                    DEBUGDrawPath(result.Positions, Color.Red.RGBA());
                 }
             }
         }
@@ -1891,7 +1897,7 @@ namespace TerrainSamples.SceneRts
             else
             {
                 cPoints[0] = helicopter.Manipulator.Position;
-                cPoints[1] = helicopter.Manipulator.Position + (Vector3.Up * 5f) + (helicopter.Manipulator.Forward * 10f);
+                cPoints[1] = helicopter.Manipulator.Position + (Vector3Extensions.Up * 5f) + (helicopter.Manipulator.Forward * 10f);
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
@@ -1930,7 +1936,7 @@ namespace TerrainSamples.SceneRts
                 soundEffectsManager.PlayTank2Moving(tankP2);
             }
 
-            if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f && (e.Active == tankP1Agent || e.Active == tankP2Agent))
+            if (Helper.RandomGenerator.NextSingle(0, 1) > 0.8f && (e.Active == tankP1Agent || e.Active == tankP2Agent))
             {
                 AddDustSystem(e.Active, tankLeftCat);
                 AddDustSystem(e.Active, tankRightCat);
@@ -2004,7 +2010,7 @@ namespace TerrainSamples.SceneRts
 
         private void AddExplosionSystem(AIAgent agent, Vector3 random)
         {
-            Vector3 velocity = Vector3.Up;
+            Vector3 velocity = Vector3Extensions.Up;
             float duration = 0.5f;
             float rate = 0.1f;
 
@@ -2021,7 +2027,7 @@ namespace TerrainSamples.SceneRts
         }
         private void AddExplosionSystem(AIAgent agent)
         {
-            Vector3 velocity = Vector3.Up;
+            Vector3 velocity = Vector3Extensions.Up;
             float duration = 0.5f;
             float rate = 0.1f;
 
@@ -2061,14 +2067,14 @@ namespace TerrainSamples.SceneRts
                 plumeSmoke = pManager.GetParticleSystem("plumeSmoke");
             }
 
-            float duration = Helper.RandomGenerator.NextFloat(6, 36);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextSingle(6, 36);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             if (plumeFire == null)
             {
                 var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3.Up,
+                    Velocity = Vector3Extensions.Up,
                     Duration = duration,
                     EmissionRate = rate * 0.5f,
                     InfiniteDuration = false,
@@ -2086,7 +2092,7 @@ namespace TerrainSamples.SceneRts
             {
                 var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3.Up,
+                    Velocity = Vector3Extensions.Up,
                     Duration = duration + (duration * 0.1f),
                     EmissionRate = rate,
                     InfiniteDuration = false,
@@ -2111,15 +2117,15 @@ namespace TerrainSamples.SceneRts
                 smoke = pManager.GetParticleSystem(smokeSystemName);
             }
 
-            float duration = Helper.RandomGenerator.NextFloat(5, 15);
+            float duration = Helper.RandomGenerator.NextSingle(5, 15);
 
             if (smoke == null)
             {
                 var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3.Up,
+                    Velocity = Vector3Extensions.Up,
                     Duration = duration + (duration * 0.1f),
-                    EmissionRate = Helper.RandomGenerator.NextFloat(0.1f, 1f),
+                    EmissionRate = Helper.RandomGenerator.NextSingle(0.1f, 1f),
                     InfiniteDuration = false,
                     MaximumDistance = 500f,
                 };
@@ -2167,11 +2173,11 @@ namespace TerrainSamples.SceneRts
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Primitive).ToArray();
 
-                terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCross(positions, 1f));
-                terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateTriangle(triangles));
+                terrainPointDrawer.SetPrimitives(Color.Magenta.RGBA(), Line3D.CreateCross(positions, 1f));
+                terrainPointDrawer.SetPrimitives(Color.DarkCyan.RGBA(), Line3D.CreateTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[^1]));
+                    terrainPointDrawer.SetPrimitives(Color.Cyan.RGBA(), new Line3D(positions[0], positions[^1]));
                 }
             }
         }
@@ -2197,7 +2203,7 @@ namespace TerrainSamples.SceneRts
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
-        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color pathColor)
+        private void DEBUGDrawPath(IEnumerable<Vector3> path, Vector4 pathColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2220,13 +2226,13 @@ namespace TerrainSamples.SceneRts
                 terrainPointDrawer.SetPrimitives(pathColor, lines);
             }
         }
-        private void DEBUGDrawArrow(Vector3 from, Vector3 direction, Color arrowColor)
+        private void DEBUGDrawArrow(Vector3 from, Vector3 direction, Vector4 arrowColor)
         {
             terrainPointDrawer.Clear(arrowColor);
             var arrow = Line3D.CreateArrow(from, from + direction, 10f);
             terrainPointDrawer.SetPrimitives(arrowColor, arrow);
         }
-        private void DEBUGDrawTankPath(TankAIAgent tank, Color pathColor, Color arrowColor)
+        private void DEBUGDrawTankPath(TankAIAgent tank, Vector4 pathColor, Vector4 arrowColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2267,7 +2273,7 @@ namespace TerrainSamples.SceneRts
 
                 foreach (var node in nodes)
                 {
-                    var color = Helper.IntToCol(node.Id, 128);
+                    var color = ColorExtensions.IntToCol(node.Id, 128);
                     terrainGraphDrawer.AddPrimitives(color, node.Triangles);
                 }
             }
@@ -2284,7 +2290,7 @@ namespace TerrainSamples.SceneRts
 
                     var node = nodes.ToArray()[graphIndex];
 
-                    var color = Helper.IntToCol(node.Id, 128);
+                    var color = ColorExtensions.IntToCol(node.Id, 128);
                     terrainGraphDrawer.SetPrimitives(color, node.Triangles);
                 }
             }
@@ -2302,14 +2308,14 @@ namespace TerrainSamples.SceneRts
             {
                 var lines = spot.GetVolume(10);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new(point.DiffuseColor, 0.15f), lines);
             }
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
@@ -2327,7 +2333,7 @@ namespace TerrainSamples.SceneRts
                 Lights.SpotLights.Select(l => l.BoundingSphere)
                 .Concat(Lights.PointLights.Select(l => l.BoundingSphere));
 
-            lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), Line3D.CreateSpheres(spheres, 10, 10));
+            lightsVolumeDrawer.AddPrimitives(new(Color.Red.RGB(), 0.55f), Line3D.CreateSpheres(spheres, 10, 10));
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
@@ -2372,12 +2378,12 @@ namespace TerrainSamples.SceneRts
             var hsph = helicopter.GetBoundingSphere();
             var t1sph = tankP1.GetBoundingSphere();
             var t2sph = tankP2.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateSpheres([hsph, t1sph, t2sph], 50, 20));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.RGB(), 0.55f), Line3D.CreateSpheres([hsph, t1sph, t2sph], 50, 20));
 
             var hbox = helicopter.GetOrientedBoundingBox();
             var t1box = tankP1.GetOrientedBoundingBox();
             var t2box = tankP2.GetOrientedBoundingBox();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateBoxes([hbox, t1box, t2box]));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.RGB(), 0.55f), Line3D.CreateBoxes([hbox, t1box, t2box]));
         }
     }
 }

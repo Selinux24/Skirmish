@@ -21,7 +21,7 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.Physics.GJK
 {
@@ -94,7 +94,7 @@ namespace Engine.Physics.GJK
             B = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(B.Point, SearchDir);
-            if (!MathUtil.IsZero(d) && d < 0)
+            if (!Helper.IsZero(d) && d < 0)
             {
                 // We didn't reach the origin, won't enclose it
                 return false;
@@ -102,16 +102,16 @@ namespace Engine.Physics.GJK
 
             // Search perpendicular to line segment towards origin
             SearchDir = Vector3.Cross(Vector3.Cross(C.Point - B.Point, -B.Point), C.Point - B.Point);
-            if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
+            if (Vector3Extensions.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
             {
                 // Origin is on this line segment, apparently any normal search vector will do?
 
                 // Normal with x-axis
-                SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.Right);
-                if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
+                SearchDir = Vector3.Cross(C.Point - B.Point, Vector3Extensions.Right);
+                if (Vector3Extensions.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
                 {
                     // Normal with z-axis
-                    SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.BackwardLH);
+                    SearchDir = Vector3.Cross(C.Point - B.Point, Vector3Extensions.BackwardLH);
                 }
             }
 
@@ -131,7 +131,7 @@ namespace Engine.Physics.GJK
             A = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(A.Point, SearchDir);
-            if (!MathUtil.IsZero(d) && d < 0)
+            if (!Helper.IsZero(d) && d < 0)
             {
                 return false;
             }

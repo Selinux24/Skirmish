@@ -1,10 +1,10 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Shadows;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
@@ -18,7 +18,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
     /// <param name="width">Width</param>
     /// <param name="height">Height</param>
     /// <param name="arraySize">Array size</param>
-    public abstract class ShadowMap(Scene scene, string name, int width, int height, int arraySize) : IShadowMap
+    public abstract class ShadowMap(Scene scene, string name, uint width, uint height, uint arraySize) : IShadowMap
     {
         /// <summary>
         /// Scene
@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
 
             //Set shadow map depth map without render target
             dc.SetRenderTargets(
-                null, false, Color.Transparent,
+                null, false, new(0),
                 DepthMap.ElementAtOrDefault(LightSource?.ShadowMapIndex ?? -1), true, false,
                 true);
         }

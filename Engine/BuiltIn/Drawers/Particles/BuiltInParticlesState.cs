@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
@@ -62,11 +62,11 @@ namespace Engine.BuiltIn.Drawers.Particles
         /// <summary>
         /// Minimum color
         /// </summary>
-        public Color4 MinColor { get; set; }
+        public Vector4 MinColor { get; set; }
         /// <summary>
         /// Maximum color
         /// </summary>
-        public Color4 MaxColor { get; set; }
+        public Vector4 MaxColor { get; set; }
         /// <summary>
         /// Use texture rotation
         /// </summary>

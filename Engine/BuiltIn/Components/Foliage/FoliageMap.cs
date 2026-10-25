@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.IO;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -18,7 +18,7 @@ namespace Engine.BuiltIn.Components.Foliage
         {
             var bitmap = Game.Images.FromStream(data);
 
-            var colors = new Color4[bitmap.Height + 1, bitmap.Width + 1];
+            var colors = new Vector4[bitmap.Height + 1, bitmap.Width + 1];
 
             for (int w = 0; w < bitmap.Width + 1; w++)
             {
@@ -53,7 +53,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <summary>
         /// Channle data
         /// </summary>
-        private Color4[,] m_Data;
+        private Vector4[,] m_Data;
         /// <summary>
         /// Maximum X value
         /// </summary>
@@ -67,7 +67,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// Constructor
         /// </summary>
         /// <param name="data">Channel data</param>
-        FoliageMap(Color4[,] data)
+        FoliageMap(Vector4[,] data)
         {
             m_Data = data;
 
@@ -108,7 +108,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="x">X coordinate from 0 to 1</param>
         /// <param name="y">Y coordinate from 0 to 1</param>
         /// <returns>Returns the pixel color</returns>
-        public Color4 Get(float x, float y)
+        public Vector4 Get(float x, float y)
         {
             if (m_Data != null)
             {
@@ -118,7 +118,7 @@ namespace Engine.BuiltIn.Components.Foliage
                 return m_Data[(int)pX, (int)pZ];
             }
 
-            return Color4.Black;
+            return new(0f, 0f, 0f, 1f);
         }
         /// <summary>
         /// Gets the pixel data by absolute coordinates
@@ -126,14 +126,14 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="x">X coordinate from 0 to maximum X pixel count (MaxX)</param>
         /// <param name="y">Y coordinate from 0 to maximum Y pixel count (MaxY)</param>
         /// <returns>Returns the pixel color</returns>
-        public Color4 GetAbsolute(int x, int y)
+        public Vector4 GetAbsolute(int x, int y)
         {
             if (m_Data != null)
             {
                 return m_Data[x, y];
             }
 
-            return Color4.Black;
+            return new(0f, 0f, 0f, 1f);
         }
         /// <summary>
         /// Gets the pixel data by relative coordinates
@@ -142,7 +142,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="min">Source minimum dimensions</param>
         /// <param name="max">Source maximum dimensions</param>
         /// <returns>Returns the pixel color</returns>
-        public Color4 GetRelative(Vector3 pos, Vector2 min, Vector2 max)
+        public Vector4 GetRelative(Vector3 pos, Vector2 min, Vector2 max)
         {
             if (m_Data != null)
             {
@@ -152,7 +152,7 @@ namespace Engine.BuiltIn.Components.Foliage
                 return m_Data[(int)x, (int)z];
             }
 
-            return Color4.Black;
+            return new(0f, 0f, 0f, 1f);
         }
     }
 }

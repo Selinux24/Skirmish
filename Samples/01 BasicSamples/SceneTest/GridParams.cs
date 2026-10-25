@@ -1,5 +1,6 @@
-﻿using SharpDX;
+﻿using Engine;
 using System;
+using System.Numerics;
 
 namespace BasicSamples.SceneTest
 {
@@ -22,26 +23,26 @@ namespace BasicSamples.SceneTest
 
             if ((i % RowSize) < ZRowCount)
             {
-                float rx = (i % ZRowCount < ZCount ? -AreaSize - (Sx / 2f) : AreaSize + (Sx / 2f)) + prnd.NextFloat(-1f, 1f);
+                float rx = (i % ZRowCount < ZCount ? -AreaSize - (Sx / 2f) : AreaSize + (Sx / 2f)) + prnd.NextSingle(-1f, 1f);
                 float dz = i % ZRowCount < ZCount ? -(Sz / 2f) : (Sz / 2f);
 
                 float x = rx + delta.X;
                 float y = height;
                 float z = (i % ZCount * Sz) - AreaSize + delta.Z + dz;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
+                float angle = Helper.Pi * prnd.Next(0, 2);
 
                 return (new(x, y, z), angle);
             }
             else
             {
                 int ci = i - ZRowCount;
-                float rz = (ci % XRowCount < XCount ? -AreaSize - (Sz / 2f) : AreaSize + (Sz / 2f)) + prnd.NextFloat(-1f, 1f);
+                float rz = (ci % XRowCount < XCount ? -AreaSize - (Sz / 2f) : AreaSize + (Sz / 2f)) + prnd.NextSingle(-1f, 1f);
                 float dx = ci % XRowCount < XCount ? (Sx / 2f) : -(Sx / 2f);
 
                 float x = (ci % XCount * Sx) - AreaSize + delta.X + dx;
                 float y = height;
                 float z = rz + delta.Z;
-                float angle = MathUtil.Pi * prnd.Next(0, 2);
+                float angle = Helper.Pi * prnd.Next(0, 2);
 
                 return (new(x, y, z), angle);
             }

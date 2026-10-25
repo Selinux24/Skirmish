@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -12,6 +11,7 @@ namespace Engine.Content.FmtObj.Fmt
     using Engine;
     using Engine.Content;
     using Engine.Content.Persistence;
+    using System.Numerics;
 
     /// <summary>
     /// Loader for .obj files
@@ -31,7 +31,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="transform">Transform</param>
         /// <param name="materials">Resulting material list</param>
         /// <returns>Returns a list of model contents</returns>
-        private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out List<Material> materials)
+        private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix4x4 transform, out List<Material> materials)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (!modelList.Any())
@@ -197,7 +197,7 @@ namespace Engine.Content.FmtObj.Fmt
             }
             else
             {
-                matContent.DiffuseColor = new Color4(mat.Kd, 1f);
+                matContent.DiffuseColor = new Vector4(mat.Kd, 1f);
             }
 
             if (mat.MapKs != null)

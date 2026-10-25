@@ -9,18 +9,21 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace AISamples.Common
 {
+    using Color = System.Drawing.Color;
+
     class World(Graph graph, float height)
     {
-        private static readonly Color4 roadColor = new(0.3f, 0.3f, 0.3f, 1f);
-        private static readonly Color4 roadMarksColor = new(0.9f, 0.9f, 0.9f, 1f);
+        private static readonly Vector4 roadColor = new(0.3f, 0.3f, 0.3f, 1f);
+        private static readonly Vector4 roadMarksColor = new(0.9f, 0.9f, 0.9f, 1f);
         private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
         private const string matDiffuseName = "diffuse";
@@ -66,14 +69,14 @@ namespace AISamples.Common
         private const float carMaxReverseSpeed = 0.2f;
         private float carScale = 1f;
         private Car bestCar = null;
-        private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
-        private readonly Color4 carColor = new Color(252, 222, 200, 255);
+        private readonly Vector4 bestCarColor = Vector4Extensions.FromRgba(252, 212, 32, 255);
+        private readonly Vector4 carColor = Vector4Extensions.FromRgba(252, 222, 200, 255);
 
         public const int MaxCarInstances = 500;
         private ModelInstanced carDrawer = null;
 
-        private readonly Color4 carSensorColor = Color.YellowGreen;
-        private readonly Color4 carSensorContactColor = Color.OrangeRed;
+        private readonly Vector4 carSensorColor = Color.YellowGreen.RGBA();
+        private readonly Vector4 carSensorContactColor = Color.OrangeRed.RGBA();
         private GeometryColorDrawer<Triangle> carSensorDrawer = null;
 
         public Graph Graph { get => graph; }
@@ -226,7 +229,7 @@ namespace AISamples.Common
             });
 
             buildings.Clear();
-            buildings.AddRange(buildingBases.Select(b => new Building(b, Helper.RandomGenerator.NextFloat(buildingHeightMin, buildingHeightMax))));
+            buildings.AddRange(buildingBases.Select(b => new Building(b, Helper.RandomGenerator.NextSingle(buildingHeightMin, buildingHeightMax))));
         }
         private void GenerateTrees(Segment2[] segments)
         {
@@ -250,8 +253,8 @@ namespace AISamples.Common
             int treeCount = 0;
             while (treeCount < 100)
             {
-                var x = rnd.NextFloat(areaSize.Left, areaSize.Right);
-                var y = rnd.NextFloat(areaSize.Top, areaSize.Bottom);
+                var x = rnd.NextSingle(areaSize.Left, areaSize.Right);
+                var y = rnd.NextSingle(areaSize.Top, areaSize.Bottom);
                 var p = new Vector2(x, y);
 
                 bool keep = illegalPolys.Any(poly => poly.ContainsPoint(p) || poly.DistanceToPoint(p) < treeRadius);
@@ -291,7 +294,7 @@ namespace AISamples.Common
 
             laneGuides.AddRange(Polygon.Union([.. tmpEnvelopes.Select(e => e.GetPolygon())]));
         }
-        private RectangleF GetWorldSize()
+        private Rect GetWorldSize()
         {
             Vector2[] points =
             [
@@ -309,7 +312,7 @@ namespace AISamples.Common
                 max.Y = Math.Max(max.Y, p.Y);
             }
 
-            return new RectangleF(min.X, min.Y, max.X - min.X, max.Y - min.Y);
+            return new Rect(min.X, min.Y, max.X - min.X, max.Y - min.Y);
         }
 
         public IEnumerable<Task> Initialize(Scene scene)
@@ -386,7 +389,7 @@ namespace AISamples.Common
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = materialB,
-                TintColor = Color.White,
+                TintColor = Color.White.RGBA(),
                 StartsVisible = false,
             };
 
@@ -438,7 +441,7 @@ namespace AISamples.Common
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = material3d,
-                TintColor = Color4.White,
+                TintColor = Color.White.RGBA(),
                 StartsVisible = false,
             };
 
@@ -509,17 +512,17 @@ namespace AISamples.Common
         }
         private void UpdateCars(IGameTime gameTime)
         {
-            int maxCarCount = carDrawer.InstanceCount;
+            uint maxCarCount = carDrawer.InstanceCount;
             var road = roadBorders.ToArray();
 
             for (int i = 0; i < maxCarCount; i++)
             {
                 if (i >= cars.Count || cars[i].Damaged)
                 {
-                    if (carDrawer[i].TintColor != Color.Black)
+                    if (carDrawer[i].TintColor != Color.Black.RGBA())
                     {
-                        carDrawer[i].Manipulator.SetTransform(Matrix.Translation(Vector3.One * 10000000f));
-                        carDrawer[i].TintColor = Color.Black;
+                        carDrawer[i].Manipulator.SetTransform(Matrix4x4.CreateTranslation(Vector3.One * 10000000f));
+                        carDrawer[i].TintColor = Color.Black.RGBA();
                     }
 
                     continue;
@@ -571,7 +574,7 @@ namespace AISamples.Common
 
             carSensorDrawer.Visible = true;
         }
-        private IEnumerable<(Color4, Triangle)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
+        private IEnumerable<(Vector4, Triangle)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
         {
             var p0 = new Vector3(r.P1.X, height, r.P1.Y);
             var p1 = new Vector3(r.P2.X, height, r.P2.Y);
@@ -659,7 +662,7 @@ namespace AISamples.Common
                 DrawEnvelope(new Envelope(border, 2, 3), height + hLayer + hDelta, roadMarksColor, roadMarksDrawer);
             }
         }
-        private static void DrawEnvelope(Envelope envelope, float height, Color4 color, GeometryDrawer<VertexPositionNormalColor> drawer)
+        private static void DrawEnvelope(Envelope envelope, float height, Vector4 color, GeometryDrawer<VertexPositionNormalColor> drawer)
         {
             var vertices = envelope
                 .GetPolygonVertices()
@@ -684,14 +687,14 @@ namespace AISamples.Common
                 var tree = trees.ElementAtOrDefault(i);
                 if (tree == null)
                 {
-                    drawer[i].Manipulator.SetTransform(Matrix.Identity);
+                    drawer[i].Manipulator.SetTransform(Matrix4x4.Identity);
                     drawer[i].Visible = false;
                     continue;
                 }
 
-                var scale = Matrix.Scaling(tree.Radius * baseScale);
-                var rot = Matrix.RotationY(i * 0.1f);
-                var translation = Matrix.Translation(tree.Position);
+                var scale = Matrix4x4.CreateScale(tree.Radius * baseScale);
+                var rot = Matrix4x4.CreateRotationY(i * 0.1f);
+                var translation = Matrix4x4.CreateTranslation(tree.Position);
                 var transform = scale * rot * translation;
 
                 drawer[i].Manipulator.SetTransform(transform);
@@ -838,7 +841,7 @@ namespace AISamples.Common
 
         private void SetVisible(bool value)
         {
-            if(visible == value)
+            if (visible == value)
             {
                 return;
             }

@@ -1,10 +1,10 @@
 ﻿using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -14,9 +14,9 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
+        static readonly Vector3 Epsilon = new(Helper.ZeroTolerance);
 
-        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {
             var box = new BoxCollider(extents);
             var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
@@ -24,7 +24,7 @@ namespace Engine.PhysicsTests
 
             return box;
         }
-        static HalfSpaceCollider FromPlane(Plane plane, Matrix transform)
+        static HalfSpaceCollider FromPlane(Plane plane, Matrix4x4 transform)
         {
             var p = new HalfSpaceCollider(plane);
             var triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
@@ -32,7 +32,7 @@ namespace Engine.PhysicsTests
 
             return p;
         }
-        static ConvexMeshCollider FromTriangle(Triangle tri, Matrix transform)
+        static ConvexMeshCollider FromTriangle(Triangle tri, Matrix4x4 transform)
         {
             var ctri = new ConvexMeshCollider([tri]);
             var triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
@@ -52,14 +52,14 @@ namespace Engine.PhysicsTests
         {
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 0.99f));
+            var box = FromAABB(Vector3.One, Matrix4x4.CreateTranslation(Vector3Extensions.Up * 0.99f));
 
             var p1 = new Vector3(0f, 0f, 100f);
             var p2 = new Vector3(100f, 0f, -100f);
             var p3 = new Vector3(-100f, 0f, -100f);
             var tri = new Triangle(p1, p2, p3);
 
-            var triSoup = FromTriangle(tri, Matrix.Identity);
+            var triSoup = FromTriangle(tri, Matrix4x4.Identity);
 
             bool intersectionTri = ContactDetector.BetweenObjects(box, triSoup, dataTri);
             Assert.IsTrue(intersectionTri);
@@ -74,14 +74,14 @@ namespace Engine.PhysicsTests
             var dataPln = new ContactResolver();
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down));
-            var plane = FromPlane(new Plane(Vector3.Up, 0), Matrix.Identity);
+            var box = FromAABB(Vector3.One, Matrix4x4.CreateTranslation(Vector3Extensions.Down));
+            var plane = FromPlane(new Plane(Vector3Extensions.Up, 0), Matrix4x4.Identity);
 
             var p1 = new Vector3(0f, -0.1f, 0f);
             var p2 = new Vector3(5f, 5f, 0f);
             var p3 = new Vector3(-5f, 5f, 0f);
             var tri = new Triangle(p1, p2, p3);
-            var triSoup = FromTriangle(tri, Matrix.Identity);
+            var triSoup = FromTriangle(tri, Matrix4x4.Identity);
 
             bool intersectionPln = ContactDetector.BetweenObjects(triSoup, plane, dataPln);
             Assert.IsTrue(intersectionPln);
@@ -104,11 +104,11 @@ namespace Engine.PhysicsTests
 
                 var expectedPenetration = expectedContact.Penetration;
                 var expectedPosition = expectedContact.Position;
-                var expectedNormal = Vector3.Up;
+                var expectedNormal = Vector3Extensions.Up;
 
-                Assert.IsTrue(MathUtil.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
-                Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
-                Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
+                Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
+                Assert.IsTrue(Vector3Extensions.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
+                Assert.IsTrue(Vector3Extensions.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
             }
         }
     }

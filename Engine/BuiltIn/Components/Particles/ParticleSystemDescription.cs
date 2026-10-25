@@ -2,7 +2,7 @@
 using Engine.Content.Persistence;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -14,15 +14,15 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Default gravity value
         /// </summary>
-        public static readonly Vector3 DefaultGravity = Vector3.Down;
+        public static readonly Vector3 DefaultGravity = Vector3Extensions.Down;
         /// <summary>
         /// Default minimum color variation
         /// </summary>
-        public static readonly Color DefaultMinColor = Color.Black;
+        public static readonly Vector3 DefaultMinColor = Vector3.Zero;
         /// <summary>
         /// Default maximum color variation
         /// </summary>
-        public static readonly Color DefaultMaxColor = Color.White;
+        public static readonly Vector3 DefaultMaxColor = Vector3.One;
 
         /// <summary>
         /// Creates a new particle description from another one
@@ -82,8 +82,8 @@ namespace Engine.BuiltIn.Components.Particles
 
                 EndVelocity = 0.1f,
 
-                MinColor = Color.SandyBrown * 0.5f,
-                MaxColor = Color.SandyBrown,
+                MinColor = System.Drawing.Color.SandyBrown.RGB() * 0.5f,
+                MaxColor = System.Drawing.Color.SandyBrown.RGB(),
 
                 MinRotateSpeed = -1,
                 MaxRotateSpeed = 1,
@@ -128,8 +128,8 @@ namespace Engine.BuiltIn.Components.Particles
 
                 Gravity = new Vector3(0, 0, 0),
 
-                MinColor = new Color(1f, 1f, 1f, 0.85f),
-                MaxColor = new Color(1f, 1f, 1f, 1f),
+                MinColor = new Vector4(1f, 1f, 1f, 0.85f),
+                MaxColor = new Vector4(1f, 1f, 1f, 1f),
 
                 MinStartSize = 0.1f,
                 MaxStartSize = 0.5f,
@@ -221,8 +221,8 @@ namespace Engine.BuiltIn.Components.Particles
                 MinVerticalVelocity = -0.1f,
                 MaxVerticalVelocity = 0.1f,
 
-                MinColor = Color.Gray,
-                MaxColor = Color.White,
+                MinColor = System.Drawing.Color.Gray.RGB(),
+                MaxColor = System.Drawing.Color.White.RGB(),
 
                 MinRotateSpeed = 1,
                 MaxRotateSpeed = 1,
@@ -267,8 +267,8 @@ namespace Engine.BuiltIn.Components.Particles
 
                 EndVelocity = 1,
 
-                MinColor = Color.White,
-                MaxColor = Color.White,
+                MinColor = System.Drawing.Color.White.RGB(),
+                MaxColor = System.Drawing.Color.White.RGB(),
 
                 MinRotateSpeed = -1,
                 MaxRotateSpeed = 1,
@@ -314,8 +314,8 @@ namespace Engine.BuiltIn.Components.Particles
 
                 EndVelocity = 0,
 
-                MinColor = Color.LightGray,
-                MaxColor = Color.White,
+                MinColor = System.Drawing.Color.LightGray.RGB(),
+                MaxColor = System.Drawing.Color.White.RGB(),
 
                 MinRotateSpeed = -2,
                 MaxRotateSpeed = 2,
@@ -472,7 +472,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <param name="scale">Scale to apply</param>
         public void Scale(float scale)
         {
-            if (MathUtil.IsOne(scale))
+            if (Helper.IsOne(scale))
             {
                 return;
             }

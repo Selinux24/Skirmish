@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -20,12 +20,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (prev.Ref == TileRef.Null.Ref)
             {
-                Logger.WriteInformation(nameof(QueryFilterExtensions), "Getting first path node costs");
+                Game.Logger.WriteInformation(nameof(QueryFilterExtensions), "Getting first path node costs");
             }
 
             if (next.Ref == TileRef.Null.Ref)
             {
-                Logger.WriteInformation(nameof(QueryFilterExtensions), "Getting last path node costs");
+                Game.Logger.WriteInformation(nameof(QueryFilterExtensions), "Getting last path node costs");
             }
 
             float dist = Vector3.Distance(pa, pb);

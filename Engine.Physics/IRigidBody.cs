@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -52,24 +52,24 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the inertia tensor
         /// </summary>
-        Matrix3x3 InertiaTensor { get; }
+        Matrix4x4 InertiaTensor { get; }
         /// <summary>
         /// Gets the inverse inertia tensor
         /// </summary>
-        Matrix3x3 InverseInertiaTensor { get; }
+        Matrix4x4 InverseInertiaTensor { get; }
         /// <summary>
         /// Gets the inertia tensor in world coordinates
         /// </summary>
-        Matrix3x3 InertiaTensorWorld { get; }
+        Matrix4x4 InertiaTensorWorld { get; }
         /// <summary>
         /// Gets the inverse inertia tensor in world coordinates
         /// </summary>
-        Matrix3x3 InverseInertiaTensorWorld { get; }
+        Matrix4x4 InverseInertiaTensorWorld { get; }
 
         /// <summary>
         /// Gets the rigid body transform matrix
         /// </summary>
-        Matrix Transform { get; }
+        Matrix4x4 Transform { get; }
 
         /// <summary>
         /// Gets whether the body is awake or not
@@ -88,7 +88,7 @@ namespace Engine.Physics
         /// Sets the initial state of the body
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        void SetInitialState(Matrix transform);
+        void SetInitialState(Matrix4x4 transform);
         /// <summary>
         /// Sets the initial state of the body to the indicated position, scale and rotation
         /// </summary>
@@ -106,7 +106,7 @@ namespace Engine.Physics
         /// Sets the state of the body
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        void SetState(Matrix transform);
+        void SetState(Matrix4x4 transform);
         /// <summary>
         /// Sets the state of the body
         /// </summary>

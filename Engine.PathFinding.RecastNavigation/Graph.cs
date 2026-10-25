@@ -1,11 +1,12 @@
 ﻿using Engine.PathFinding.RecastNavigation.Detour;
 using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {

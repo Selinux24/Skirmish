@@ -1,9 +1,9 @@
 ﻿using AISamples.Common.Persistence;
 using AISamples.Common.Primitives;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common
 {

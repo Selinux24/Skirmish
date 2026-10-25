@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Geometry
 {
@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Vector4 TintColor { get; set; } = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// Texture index
         /// </summary>

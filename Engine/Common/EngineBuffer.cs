@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Engine buffer
@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Buffer
         /// </summary>
-        private readonly Buffer buffer;
+        private readonly ID3D11Buffer buffer;
 
         /// <summary>
         /// Name
@@ -24,7 +24,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="buffer">Buffer</param>
-        internal EngineBuffer(string name, Buffer buffer)
+        internal EngineBuffer(string name, ID3D11Buffer buffer)
         {
             Name = name;
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
@@ -60,7 +60,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the internal buffer
         /// </summary>
-        internal Buffer GetBuffer()
+        internal ID3D11Buffer GetBuffer()
         {
             return buffer;
         }

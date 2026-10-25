@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Audio
 {
@@ -19,7 +19,7 @@ namespace Engine.Audio
         {
             get
             {
-                return agentTransform?.Forward ?? Vector3.ForwardLH;
+                return agentTransform?.Forward ?? Vector3Extensions.ForwardLH;
             }
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace Engine.Audio
         {
             get
             {
-                return agentTransform?.Up ?? Vector3.Up;
+                return agentTransform?.Up ?? Vector3Extensions.Up;
             }
         }
         /// <summary>

@@ -2,10 +2,10 @@
 using Engine.BuiltIn.Drawers.Forward;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
@@ -22,7 +22,7 @@ namespace Engine.BuiltIn.Components.Geometry
     /// <param name="name">Name</param>
     public sealed class GeometryColorDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryColorDrawerDescription<T>>(scene, id, name), ITransformable3D where T : IVertexList
     {
-        const string className = nameof(GeometryColorDrawer<T>);
+        const string className = nameof(GeometryColorDrawer<>);
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -31,11 +31,11 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Primitives to draw
         /// </summary>
-        private int drawCount = 0;
+        private uint drawCount = 0;
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private readonly ConcurrentDictionary<Color4, List<T>> dictionary = new();
+        private readonly ConcurrentDictionary<Vector4, List<T>> dictionary = new();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -43,7 +43,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Item stride
         /// </summary>
-        private int stride = 0;
+        private uint stride = 0;
         /// <summary>
         /// Item topology
         /// </summary>
@@ -98,21 +98,21 @@ namespace Engine.BuiltIn.Components.Geometry
             stride = tmp.GetStride();
             topology = tmp.GetTopology();
 
-            int count;
+            uint count;
             if (Description.Primitives?.Length > 0)
             {
                 bufferData = new List<VertexPositionColor>(Description.Primitives.Length);
 
-                count = Description.Primitives.Length * stride;
+                count = (uint)Description.Primitives.Length * stride;
 
-                dictionary.TryAdd(Description.Color, new List<T>(Description.Primitives));
+                dictionary.TryAdd(Description.Color, [.. Description.Primitives]);
                 dictionaryChanged = true;
             }
             else
             {
                 bufferData = new List<VertexPositionColor>(Description.Count);
 
-                count = Description.Count * stride;
+                count = (uint)Description.Count * stride;
 
                 dictionaryChanged = false;
             }
@@ -125,7 +125,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="vertexCount">Vertex count</param>
-        private void InitializeBuffers(string name, int vertexCount)
+        private void InitializeBuffers(string name, uint vertexCount)
         {
             vertexBuffer = BufferManager.AddVertexData(name, true, new VertexPositionColor[vertexCount]);
         }
@@ -134,7 +134,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitive">Primitive</param>
-        public void SetPrimitives(Color4 color, T primitive)
+        public void SetPrimitives(Vector4 color, T primitive)
         {
             SetPrimitives(color, [primitive]);
         }
@@ -143,7 +143,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitives">Primitives list</param>
-        public void SetPrimitives(Color4 color, IEnumerable<T> primitives)
+        public void SetPrimitives(Vector4 color, IEnumerable<T> primitives)
         {
             if (primitives?.Any() ?? false)
             {
@@ -175,7 +175,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Set primitives list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void SetPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
+        public void SetPrimitives(IDictionary<Vector4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -187,7 +187,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitive">primitive</param>
-        public void AddPrimitives(Color4 color, T primitive)
+        public void AddPrimitives(Vector4 color, T primitive)
         {
             AddPrimitives(color, [primitive]);
         }
@@ -196,7 +196,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitives">Primitives list</param>
-        public void AddPrimitives(Color4 color, IEnumerable<T> primitives)
+        public void AddPrimitives(Vector4 color, IEnumerable<T> primitives)
         {
             if (!dictionary.ContainsKey(color))
             {
@@ -211,7 +211,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Add primitives to list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void AddPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
+        public void AddPrimitives(IDictionary<Vector4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -222,7 +222,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Add primitives to list
         /// </summary>
         /// <param name="primitivesEnum">Primitives by color enumerable</param>
-        public void AddPrimitives(IEnumerable<(Color4, IEnumerable<T>)> primitivesEnum)
+        public void AddPrimitives(IEnumerable<(Vector4, IEnumerable<T>)> primitivesEnum)
         {
             foreach (var primitive in primitivesEnum)
             {
@@ -233,7 +233,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Remove by color
         /// </summary>
         /// <param name="color">Color</param>
-        public void Clear(Color4 color)
+        public void Clear(Vector4 color)
         {
             if (dictionary.ContainsKey(color))
             {
@@ -257,7 +257,7 @@ namespace Engine.BuiltIn.Components.Geometry
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
 
                 return;
             }
@@ -324,7 +324,7 @@ namespace Engine.BuiltIn.Components.Geometry
                 return;
             }
 
-            drawCount = bufferData.Count;
+            drawCount = (uint)bufferData.Count;
 
             dictionaryChanged = false;
         }

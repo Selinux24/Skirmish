@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -90,8 +91,8 @@ namespace Engine.PathFinding.RecastNavigation
                 // If the triangle does not touch the bbox of the heightfield, skip the triangle.
                 yield break;
             }
-            float min = polyBounds.Minimum.Z;
-            float max = polyBounds.Maximum.Z;
+            float min = polyBounds.Min.Z;
+            float max = polyBounds.Max.Z;
             float ics = settings.InverseCellSize;
             int h = settings.Height;
             int maxHeight = RasterizerSettings.MaxHeight;
@@ -115,8 +116,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Calculate min and max of the span.
                 var (minY, maxY) = CalculateSpanMinMax(p, Axis.Y);
-                minY -= bounds.Minimum.Y;
-                maxY -= bounds.Minimum.Y;
+                minY -= bounds.Min.Y;
+                maxY -= bounds.Min.Y;
 
                 // Clamp the span to the heightfield bbox.
                 var (inside, nminY, nmaxY) = SpanInsideBBox(minY, maxY, by);
@@ -129,8 +130,8 @@ namespace Engine.PathFinding.RecastNavigation
                 maxY = nmaxY;
 
                 // Snap the span to the heightfield height grid.
-                int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, maxHeight);
-                int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, maxHeight);
+                int ismin = Math.Clamp((int)MathF.Floor(minY * ich), 0, maxHeight);
+                int ismax = Math.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, maxHeight);
 
                 yield return new(x, z, ismin, ismax, item.AreaType, flagMergeThr);
             }
@@ -153,7 +154,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int z = z0; z <= z1; ++z)
             {
                 // Clip polygon to row. Store the remaining polygon as well
-                float cz = bounds.Minimum.Z + z * cs;
+                float cz = bounds.Min.Z + z * cs;
                 var (row, newPoly) = DividePoly(poly, Axis.Z, cz + cs);
 
                 RasterizerDivisionData divZ = new()
@@ -200,7 +201,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int x = x0; x <= x1; ++x)
             {
                 // Clip polygon to column. store the remaining polygon as well
-                float cx = bounds.Minimum.X + x * cs;
+                float cx = bounds.Min.X + x * cs;
                 var (patch, newRow) = DividePoly(row, Axis.X, cx + cs);
 
                 RasterizerDivisionData divX = new()
@@ -268,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static (bool, int, int) FindFootPrint(float min, float max, BoundingBox b, float ics, Axis axis, int axisOffset)
         {
             int a = (int)axis;
-            float av = b.Minimum[a];
+            float av = b.Min[a];
 
             int s0 = (int)MathF.Round((min - av) * ics);
             int s1 = (int)MathF.Round((max - av) * ics);
@@ -276,8 +277,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return (false, s0, s1);
             }
-            s0 = MathUtil.Clamp(s0, -1, axisOffset - 1);
-            s1 = MathUtil.Clamp(s1, 0, axisOffset - 1);
+            s0 = Math.Clamp(s0, -1, axisOffset - 1);
+            s1 = Math.Clamp(s1, 0, axisOffset - 1);
 
             return (true, s0, s1);
         }

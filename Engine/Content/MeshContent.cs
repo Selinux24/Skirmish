@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Content
 {
@@ -10,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Intial transformation
         /// </summary>
-        public Matrix Transform { get; set; } = Matrix.Identity;
+        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
         /// <summary>
         /// Sub mesh names
         /// </summary>

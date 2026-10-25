@@ -10,6 +10,6 @@ namespace Engine
         /// <summary>
         /// Gets the input element colection
         /// </summary>
-        EngineInputElement[] GetInput(int slot);
+        EngineInputElement[] GetInput(uint slot);
     }
 }

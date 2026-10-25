@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Content
 {
@@ -96,37 +96,25 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public static implicit operator Color(ColorRgba value)
+        public static implicit operator Vector4(ColorRgba value)
         {
-            return new Color(value.R, value.G, value.B, value.A);
+            return new Vector4(value.R, value.G, value.B, value.A);
         }
         /// <inheritdoc/>
-        public static implicit operator ColorRgba(Color value)
+        public static implicit operator ColorRgba(Vector4 value)
         {
-            var color4 = value.ToColor4();
-            return new ColorRgba(color4.Red, color4.Green, color4.Blue, color4.Alpha);
-        }
-
-        /// <inheritdoc/>
-        public static implicit operator Color3(ColorRgba value)
-        {
-            return new Color3(value.R, value.G, value.B);
-        }
-        /// <inheritdoc/>
-        public static implicit operator ColorRgba(Color3 value)
-        {
-            return new ColorRgba(value.Red, value.Green, value.Blue, 1f);
+            return new ColorRgba(value.X, value.Y, value.Z, value.W);
         }
 
         /// <inheritdoc/>
-        public static implicit operator Color4(ColorRgba value)
+        public static implicit operator Vector3(ColorRgba value)
         {
-            return new Color4(value.R, value.G, value.B, value.A);
+            return new Vector3(value.R, value.G, value.B);
         }
         /// <inheritdoc/>
-        public static implicit operator ColorRgba(Color4 value)
+        public static implicit operator ColorRgba(Vector3 value)
         {
-            return new ColorRgba(value.Red, value.Green, value.Blue, value.Alpha);
+            return new ColorRgba(value.X, value.Y, value.Z, 1f);
         }
 
         /// <inheritdoc/>
@@ -157,7 +145,7 @@ namespace Engine.Content
 
         public readonly bool Equals(ref ColorRgba other)
         {
-            return MathUtil.NearEqual(other.R, R) && MathUtil.NearEqual(other.G, G) && MathUtil.NearEqual(other.B, B) && MathUtil.NearEqual(other.A, A);
+            return Helper.NearEqual(other.R, R) && Helper.NearEqual(other.G, G) && Helper.NearEqual(other.B, B) && Helper.NearEqual(other.A, A);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()

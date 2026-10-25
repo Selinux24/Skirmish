@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Content.FmtObj
 {
@@ -10,16 +10,16 @@ namespace Engine.Content.FmtObj
         public float Ns { get; set; }
         public string MapNs { get; set; }
 
-        public Color3 Ka { get; set; }
+        public Vector3 Ka { get; set; }
         public string MapKa { get; set; }
         
-        public Color3 Kd { get; set; }
+        public Vector3 Kd { get; set; }
         public string MapKd { get; set; }
         
-        public Color3 Ks { get; set; }
+        public Vector3 Ks { get; set; }
         public string MapKs { get; set; }
         
-        public Color3 Ke { get; set; }
+        public Vector3 Ke { get; set; }
         public float Ni { get; set; }
         
         public float D { get; set; }

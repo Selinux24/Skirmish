@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
@@ -160,7 +160,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 float time = times[i];
                 var interpolation = i < interpolations.Length ? interpolations[i] : KeyframeInterpolations.None;
                 float position = -1;
-                Matrix transform = Matrix.Identity;
+                Matrix4x4 transform = Matrix4x4.Identity;
                 if (interpolation == KeyframeInterpolations.Linear && i < transforms.Length)
                 {
                     transform = transforms[i];
@@ -230,7 +230,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns the keyframe transform list</returns>
-        private static Matrix[] ReadMatrix(Sampler sampler, Animation animationLibrary)
+        private static Matrix4x4[] ReadMatrix(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Output];
             if (input == null)

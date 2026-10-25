@@ -6,14 +6,18 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneSimpleAnimation
 {
+    using Color = System.Drawing.Color;
+
     public class SimpleAnimationScene : Scene
     {
         private const string resourcesAsphaltFolder = "Common/Asphalt/";
@@ -66,8 +70,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.6f);
-        private readonly Color itemLinesColor = new(Color.Red.ToColor3(), 1f);
+        private readonly Vector4 itemTrisColor = new(Color.Yellow.RGB(), 0.6f);
+        private readonly Vector4 itemLinesColor = new(Color.Red.RGB(), 1f);
         private bool showItemDEBUG = false;
         private bool showItem = true;
         private int itemIndex = 0;
@@ -133,7 +137,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
         }
 
         public override void Initialize()
@@ -157,19 +161,19 @@ namespace IntermediateSamples.SceneSimpleAnimation
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 128 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 128 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -209,7 +213,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             float l = 15f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
@@ -255,8 +259,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersA[0].Manipulator.SetPosition(-4f, 1, 0);
             laddersA[1].Manipulator.SetPosition(-4.5f, 1, 5);
 
-            laddersA[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersA[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersA[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersA[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersA[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersA[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -275,8 +279,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersB[0].Manipulator.SetPosition(-3f, 1, 0);
             laddersB[1].Manipulator.SetPosition(-3.5f, 1, 5);
 
-            laddersB[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersB[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersB[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersB[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersB[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersB[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -295,8 +299,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersC[0].Manipulator.SetPosition(-2f, 1, 0);
             laddersC[1].Manipulator.SetPosition(-2.5f, 1, 5);
 
-            laddersC[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersC[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersC[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersC[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersC[0].AnimationController.AppendPlan(ladderPaths[PushString]);
             laddersC[1].AnimationController.AppendPlan(ladderPaths[PushString]);
@@ -393,11 +397,11 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8);
-            doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             doors[0].Manipulator.SetScaling(2.5f);
 
             walls[0].Manipulator.SetPosition(-10, 0, 8);
-            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
@@ -434,7 +438,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             jails[0].Manipulator.SetPosition(10, 0, 8);
-            jails[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            jails[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             jails[0].Manipulator.SetScaling(2.5f);
 
             var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -449,7 +453,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8);
-            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
@@ -522,9 +526,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
             var bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
-                bbox = SharpDX.BoundingBox.Merge(bbox, item.GetBoundingBox());
+                bbox = Vortice.Mathematics.BoundingBox.CreateMerged(bbox, item.GetBoundingBox());
             });
-            float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
+            float playerHeight = bbox.Max.Y - bbox.Min.Y;
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;
@@ -688,15 +692,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
             }
             else
             {
-                if (itemTris != null)
-                {
-                    itemTris.Active = itemTris.Visible = false;
-                }
+                itemTris?.Active = itemTris.Visible = false;
 
-                if (itemLines != null)
-                {
-                    itemLines.Active = itemLines.Visible = false;
-                }
+                itemLines?.Active = itemLines.Visible = false;
             }
         }
 

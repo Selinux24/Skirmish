@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
@@ -16,7 +17,7 @@ namespace Engine.Collections.Generic
     /// <param name="parent">Parent node</param>
     public class PickingQuadTreeNode<T>(PickingQuadTreeNode<T> parent) : IQuadTreeNode<PickingQuadTreeNode<T>> where T : IVertexList, IRayIntersectable
     {
-        const string cName = nameof(PickingQuadTreeNode<T>);
+        const string cName = nameof(PickingQuadTreeNode<>);
 
         /// <summary>
         /// Recursive partition creation
@@ -52,7 +53,7 @@ namespace Engine.Collections.Generic
             var nodeItems = items
                 .Where(t =>
                 {
-                    var tbox = SharpDXExtensions.BoundingBoxFromPoints(t.GetVertices());
+                    var tbox = BoundingBoxExtensions.BoundingBoxFromPoints(t.GetVertices());
 
                     return bbox.Contains(tbox) != ContainmentType.Disjoint;
                 })

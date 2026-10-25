@@ -1,7 +1,7 @@
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Physics.Colliders
 {
@@ -30,12 +30,12 @@ namespace Engine.Physics.Colliders
                 throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(ConvexMeshCollider)} must have one triangle at least.");
             }
 
-            this.triangles = triangles.Distinct().ToArray();
+            this.triangles = [.. triangles.Distinct()];
 
-            vertices = triangles.SelectMany(t => t.GetVertices()).Distinct().ToArray();
+            vertices = [.. triangles.SelectMany(t => t.GetVertices()).Distinct()];
 
-            boundingBox = SharpDXExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = SharpDXExtensions.BoundingSphereFromPoints(vertices);
+            boundingBox = BoundingBoxExtensions.BoundingBoxFromPoints(vertices);
+            boundingSphere = BoundingSphereExtensions.BoundingSphereFromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 
@@ -65,7 +65,7 @@ namespace Engine.Physics.Colliders
 
             var trn = RigidBody.Transform;
             var verts = vertices.ToArray();
-            Vector3.TransformCoordinate(verts, ref trn, verts);
+            Vector3Extensions.TransformCoordinate(verts, ref trn, verts);
             return verts;
         }
 

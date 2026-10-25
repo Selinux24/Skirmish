@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers
 {
@@ -14,7 +14,7 @@ namespace Engine.BuiltIn.Drawers
         {
             return new BuiltInDrawerMeshState
             {
-                Local = Matrix.Identity,
+                Local = Matrix4x4.Identity,
                 AnimationOffset1 = 0,
                 AnimationOffset2 = 0,
                 AnimationInterpolationAmount = 0f,
@@ -23,7 +23,7 @@ namespace Engine.BuiltIn.Drawers
         /// <summary>
         /// Default state with local transform
         /// </summary>
-        public static BuiltInDrawerMeshState SetLocal(Matrix local)
+        public static BuiltInDrawerMeshState SetLocal(Matrix4x4 local)
         {
             return new BuiltInDrawerMeshState
             {
@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Drawers
         }
 
         /// <inheritdoc/>
-        public Matrix Local { get; set; }
+        public Matrix4x4 Local { get; set; }
         /// <summary>
         /// First offset in the animation palette
         /// </summary>

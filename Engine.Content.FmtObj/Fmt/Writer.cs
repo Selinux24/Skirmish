@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Content.FmtObj.Fmt
 {
@@ -16,8 +16,8 @@ namespace Engine.Content.FmtObj.Fmt
             triangles.ToList().ForEach(t => normals.AddRange([t.Normal, t.Normal, t.Normal]));
 
             int index = 0;
-            var indices = new List<Int3>();
-            triangles.ToList().ForEach(t => indices.Add(new Int3(index++, index++, index++)));
+            var indices = new List<Vector3Int>();
+            triangles.ToList().ForEach(t => indices.Add(new Vector3Int(index++, index++, index++)));
 
             // Write the file
             WriteData(wr, "v", points.Cast<Vector3?>());

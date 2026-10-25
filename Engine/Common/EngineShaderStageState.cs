@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal resource list
         /// </summary>
-        private readonly Dictionary<int, T> resources = [];
+        private readonly Dictionary<uint, T> resources = [];
 
         /// <summary>
         /// Device context
@@ -33,10 +33,10 @@ namespace Engine.Common
                 return [];
             }
 
-            int maxSlot = resources.Keys.Max();
+            uint maxSlot = resources.Keys.Max();
 
             T[] values = new T[maxSlot + 1];
-            for (int i = 0; i < values.Length; i++)
+            for (uint i = 0; i < values.Length; i++)
             {
                 if (resources.TryGetValue(i, out T resource))
                 {
@@ -52,7 +52,7 @@ namespace Engine.Common
         /// <param name="slot">Slot</param>
         /// <param name="resource">Resource</param>
         /// <returns>Returns true if the update must change the current resource state in the device</returns>
-        public bool Update(int slot, T resource)
+        public bool Update(uint slot, T resource)
         {
             if (Equals(resource, default(T)))
             {
@@ -83,7 +83,7 @@ namespace Engine.Common
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceList">Resource list</param>
         /// <returns>Returns true if the update must change the current resource state in the device</returns>
-        public bool Update(int startSlot, IEnumerable<T> resourceList)
+        public bool Update(uint startSlot, IEnumerable<T> resourceList)
         {
             if (resourceList?.Any() != true)
             {
@@ -102,7 +102,7 @@ namespace Engine.Common
         /// <summary>
         /// Clears the state
         /// </summary>
-        protected void Clear()
+        protected void ClearResources()
         {
             resources.Clear();
         }

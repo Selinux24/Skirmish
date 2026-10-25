@@ -1,9 +1,9 @@
 ﻿using Engine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 
 namespace EngineTests
 {
@@ -30,12 +30,12 @@ namespace EngineTests
         static Vector3 p1i45 = new(1, 1, 1);
         static Vector3 p2i45 = new(-1, -1, -1);
         static Vector3 p3i45 = new(-1, -1, 1);
-        static readonly float inc45 = MathUtil.PiOverFour;
+        static readonly float inc45 = Helper.PiOver4;
 
         static Vector3 p1i90 = new(0, 1, 1);
         static Vector3 p2i90 = new(0, -1, -1);
         static Vector3 p3i90 = new(0, -1, 1);
-        static readonly float inc90 = MathUtil.PiOverTwo;
+        static readonly float inc90 = Helper.PiOver2;
 
         static Vector3 p1r2 = new(2, 0, 1);
         static Vector3 p2r2 = new(-1, 0, -1);
@@ -60,7 +60,7 @@ namespace EngineTests
             Assert.AreEqual(Vector3.Zero, t1.Point1);
             Assert.AreEqual(Vector3.Zero, t1.Point2);
             Assert.AreEqual(Vector3.Zero, t1.Point3);
-            Assert.AreEqual(3, t1.GetStride());
+            Assert.AreEqual(3u, t1.GetStride());
             Assert.AreEqual(Topology.TriangleList, t1.GetTopology());
 
             Assert.AreEqual(p1, t2.Point1);

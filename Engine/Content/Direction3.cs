@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Direct2D1.Effects;
 
 namespace Engine.Content
 {
@@ -122,12 +123,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Direction3 operator +(Direction3 value, float scalar)
         {
-            return (Vector3)value + scalar;
+            return Vector3.Add((Vector3)value, new Vector3(scalar));
         }
         /// <inheritdoc/>
         public static Direction3 operator +(float scalar, Direction3 value)
         {
-            return scalar + (Vector3)value;
+            return Vector3.Add(new Vector3(scalar), (Vector3)value);
         }
         /// <inheritdoc/>
         public static Direction3 operator -(Direction3 left, Direction3 right)
@@ -142,12 +143,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Direction3 operator -(Direction3 value, float scalar)
         {
-            return (Vector3)value - scalar;
+            return Vector3.Subtract((Vector3)value, new Vector3(scalar));
         }
         /// <inheritdoc/>
         public static Direction3 operator -(float scalar, Direction3 value)
         {
-            return scalar - (Vector3)value;
+            return Vector3.Subtract(new Vector3(scalar), (Vector3)value);
         }
         /// <inheritdoc/>
         public static Direction3 operator *(Direction3 left, Direction3 right)
@@ -172,7 +173,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Direction3 operator /(float scale, Direction3 value)
         {
-            return scale / (Vector3)value;
+            return Vector3.Divide(new Vector3(scale), (Vector3)value);
         }
         /// <inheritdoc/>
         public static Direction3 operator /(Direction3 value, Direction3 scale)
@@ -219,7 +220,7 @@ namespace Engine.Content
 
         public readonly bool Equals(ref Direction3 other)
         {
-            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
+            return Helper.NearEqual(other.X, X) && Helper.NearEqual(other.Y, Y) && Helper.NearEqual(other.Z, Z);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()
@@ -263,7 +264,7 @@ namespace Engine.Content
         public void Normalize()
         {
             float length = Length();
-            if (!MathUtil.IsZero(length))
+            if (!Helper.IsZero(length))
             {
                 float inv = 1.0f / length;
                 X *= inv;

@@ -6,15 +6,17 @@ using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneStart
 {
+    using Color = System.Drawing.Color;
+
     class StartScene : Scene
     {
         private const string resourceCursor = "Common/UI/Cursor/pointer.png";
@@ -49,10 +51,10 @@ namespace TerrainSamples.SceneStart
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
         private readonly string largeControlsFont = "HelveticaNeue Medium.ttf";
-        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.DarkSeaGreen, 1.5f);
-        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
-        private Color4 SceneButtonColorBase { get { return new Color4(sceneButtonColor.RGB(), 0.8f); } }
-        private Color4 SceneButtonColorHighlight { get { return new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f); } }
+        private readonly Vector4 sceneButtonColor = Vector4Extensions.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
+        private readonly Vector4 exitButtonColor = Vector4Extensions.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
+        private Vector4 SceneButtonColorBase { get { return new(sceneButtonColor.RGB(), 0.8f); } }
+        private Vector4 SceneButtonColorHighlight { get { return new(sceneButtonColor.RGB() * 1.2f, 0.9f); } }
 
         private bool sceneReady = false;
 
@@ -61,7 +63,7 @@ namespace TerrainSamples.SceneStart
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
         }
 
         public override void Initialize()
@@ -115,8 +117,8 @@ namespace TerrainSamples.SceneStart
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.ContentPath = resourceFontsFolder;
-            titleDesc.TextForeColor = Color.Gold;
-            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextForeColor = Color.Gold.RGBA();
+            titleDesc.TextShadowColor = new(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -137,9 +139,9 @@ namespace TerrainSamples.SceneStart
             startButtonDesc.ContentPath = resourceControlsFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
-            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.TextForeColor = Color.Gold;
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.TextForeColor = Color.Gold.RGBA();
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             startButtonDesc.StartsVisible = false;
@@ -161,8 +163,8 @@ namespace TerrainSamples.SceneStart
             exitButtonDesc.ContentPath = resourceControlsFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
-            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             exitButtonDesc.StartsVisible = false;
@@ -225,9 +227,9 @@ namespace TerrainSamples.SceneStart
             var mediumClickFont = FontDescription.FromFile(mediumControlsFont, 12);
             mediumClickFont.ContentPath = resourceFontsFolder;
 
-            var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
+            var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent.RGBA(), SceneButtonColorBase, SceneButtonColorHighlight);
             desc.ButtonDescription.Font = mediumFont;
-            desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;
+            desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow.RGBA();
             desc.ButtonDescription.TextHorizontalAlign = TextHorizontalAlign.Center;
             desc.ButtonDescription.TextVerticalAlign = TextVerticalAlign.Middle;
             desc.TabButtonsAreaSize *= 1.5f;
@@ -250,7 +252,7 @@ namespace TerrainSamples.SceneStart
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.Text = "Click image to load...";
-                buttonDesc.TextForeColor = Color.DarkGray;
+                buttonDesc.TextForeColor = Color.DarkGray.RGBA();
                 buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Right;
                 buttonDesc.TextVerticalAlign = TextVerticalAlign.Bottom;
                 var button = await CreateComponent<UIButton, UIButtonDescription>($"ModularDungeonTabs.Button_{i}", $"ModularDungeonTabs.Button_{i}", buttonDesc);
@@ -268,7 +270,7 @@ namespace TerrainSamples.SceneStart
             var buttonBasicDesc = UIButtonDescription.Default(largeFont, "basicdungeon/basicdungeon.png");
             buttonBasicDesc.ContentPath = modularDungeonTabsPath;
             buttonBasicDesc.Text = "Basic Dungeon";
-            buttonBasicDesc.TextForeColor = Color.Gold;
+            buttonBasicDesc.TextForeColor = Color.Gold.RGBA();
             buttonBasicDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonBasicDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             var buttonBasic = await CreateComponent<UIButton, UIButtonDescription>("ModularDungeonTabs.ButtonBasicDungeon", "ModularDungeonTabs.ButtonBasicDungeon", buttonBasicDesc);
@@ -329,8 +331,8 @@ namespace TerrainSamples.SceneStart
             float butWidth = exitButton.Width;
             float butHeight = exitButton.Height;
 
-            int formWidth = Game.Form.RenderWidth;
-            int formHeight = Game.Form.RenderHeight;
+            int formWidth = (int)Game.Form.RenderWidth;
+            int formHeight = (int)Game.Form.RenderHeight;
 
             int i = 0;
             for (int row = 0; row < rowCount; row++)

@@ -9,7 +9,7 @@ namespace Engine.Common
         /// <summary>
         /// Instances
         /// </summary>
-        int Instances { get; set; }
+        uint Instances { get; set; }
         /// <summary>
         /// Vertex buffer binding index in the manager list
         /// </summary>

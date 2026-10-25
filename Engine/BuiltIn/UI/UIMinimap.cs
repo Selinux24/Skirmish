@@ -1,8 +1,9 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -49,7 +50,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Color BackColor { get; set; }
+        public Vector4 BackColor { get; set; }
 
         /// <summary>
         /// Destructor
@@ -88,7 +89,7 @@ namespace Engine.BuiltIn.UI
 
             var rt = Game.Graphics.CreateRenderTargetTexture(
                 $"RenderTexture_{Name}",
-                SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                Vortice.DXGI.Format.R8G8B8A8_UNorm,
                 Description.Width, Description.Height, false);
 
             renderTarget = rt.RenderTarget;
@@ -174,9 +175,7 @@ namespace Engine.BuiltIn.UI
 
             dc.SetViewport(viewport);
 
-            dc.SetRenderTargets(
-                renderTarget, true, BackColor,
-                false);
+            dc.SetRenderTargets(renderTarget, true, (Color4)BackColor, false);
 
             foreach (var item in drawables)
             {
@@ -184,7 +183,7 @@ namespace Engine.BuiltIn.UI
             }
 
             dc.SetViewport(graphics.Viewport);
-            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, Color.Transparent);
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, new(0));
 
             minimapBox.Texture = renderTexture;
             bool drawn = minimapBox.Draw(drawContext);

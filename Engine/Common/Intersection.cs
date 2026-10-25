@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -381,11 +382,11 @@ namespace Engine.Common
         public static bool CylinderIntersectsPlane(BoundingCylinder cylinder, Plane plane)
         {
             // Bounding cylinder is axis aligned. The direction of the cylinder is the up vector
-            var cDir = Vector3.Up;
+            var cDir = Vector3Extensions.Up;
 
             // dir points towards the plane and -dir in the opposite direction
             var dir = Vector3.Cross(plane.Normal, cDir);
-            if (MathUtil.IsZero(dir.Length()))
+            if (Helper.IsZero(dir.Length()))
             {
                 // Perfect base contact. Test distance from center
                 var h = cylinder.Height * 0.5f;
@@ -492,8 +493,8 @@ namespace Engine.Common
                 }
             }
 
-            triangles = tris.Distinct().ToArray();
-            segments = segs.Distinct().ToArray();
+            triangles = [.. tris.Distinct()];
+            segments = [.. segs.Distinct()];
 
             return triangles.Any();
         }
@@ -746,10 +747,9 @@ namespace Engine.Common
         /// <returns>Returns true if the triangle intersects the mesh</returns>
         public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles)
         {
-            triangles = mesh
+            triangles = [.. mesh
                 .Where(t => TriangleIntersectsTriangle(triangle, t))
-                .Distinct()
-                .ToArray();
+                .Distinct()];
 
             return triangles.Any();
         }
@@ -778,8 +778,8 @@ namespace Engine.Common
                 }
             }
 
-            triangles = tris.Distinct().ToArray();
-            segments = segs.Where(seg => seg.Point1 != seg.Point2).Distinct().ToArray();
+            triangles = [.. tris.Distinct()];
+            segments = [.. segs.Where(seg => seg.Point1 != seg.Point2).Distinct()];
 
             return intersected;
         }
@@ -941,7 +941,7 @@ namespace Engine.Common
         /// <returns>Returns the point of the box closest to the specified point</returns>
         public static Vector3 ClosestPointInBox(Vector3 point, BoundingBox box)
         {
-            return ClosestPointInBox(point, box.Center, box.GetExtents(), Matrix.Identity);
+            return ClosestPointInBox(point, box.Center, box.GetExtents(), Matrix4x4.Identity);
         }
         /// <summary>
         /// Gets the point of the box closest to the specified point
@@ -961,13 +961,13 @@ namespace Engine.Common
         /// <param name="extents">Box extents</param>
         /// <param name="transform">Box transform</param>
         /// <returns>Returns the point of the box closest to the specified point</returns>
-        public static Vector3 ClosestPointInBox(Vector3 point, Vector3 center, Vector3 extents, Matrix transform)
+        public static Vector3 ClosestPointInBox(Vector3 point, Vector3 center, Vector3 extents, Matrix4x4 transform)
         {
             Vector3 diff = point - center;
 
-            float closestX = Vector3.Dot(diff, transform.Right);
-            float closestY = Vector3.Dot(diff, transform.Up);
-            float closestZ = Vector3.Dot(diff, transform.Backward);
+            float closestX = Vector3.Dot(diff, transform.GetRight());
+            float closestY = Vector3.Dot(diff, transform.GetUp());
+            float closestZ = Vector3.Dot(diff, transform.GetBackward());
 
             //X axis
             if (closestX < -extents.X)
@@ -1000,9 +1000,9 @@ namespace Engine.Common
             }
 
             Vector3 closestPoint = center;
-            closestPoint += closestX * transform.Right;
-            closestPoint += closestY * transform.Up;
-            closestPoint += closestZ * transform.Backward;
+            closestPoint += closestX * transform.GetRight();
+            closestPoint += closestY * transform.GetUp();
+            closestPoint += closestZ * transform.GetBackward();
 
             return closestPoint;
         }
@@ -1160,7 +1160,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType SphereContainsFrustum(BoundingSphere sphere, BoundingFrustum frustum)
         {
-            if (!frustum.Intersects(ref sphere))
+            if (!frustum.Intersects(sphere))
             {
                 // Not intersection at all
                 return ContainmentType.Disjoint;
@@ -1171,7 +1171,7 @@ namespace Engine.Common
             for (int i = 0; i < corners.Length; i++)
             {
                 var v = corners[i];
-                if (sphere.Contains(ref v) == ContainmentType.Disjoint)
+                if (sphere.Contains(v) == ContainmentType.Disjoint)
                 {
                     return ContainmentType.Intersects;
                 }
@@ -1257,7 +1257,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType BoxContainsFrustum(BoundingBox box, BoundingFrustum frustum)
         {
-            if (!frustum.Intersects(ref box))
+            if (!frustum.Intersects(box))
             {
                 // Not intersection at all
                 return ContainmentType.Disjoint;
@@ -1268,7 +1268,7 @@ namespace Engine.Common
             for (int i = 0; i < corners.Length; i++)
             {
                 var v = corners[i];
-                if (box.Contains(ref v) == ContainmentType.Disjoint)
+                if (box.Contains(v) == ContainmentType.Disjoint)
                 {
                     return ContainmentType.Intersects;
                 }
@@ -1513,7 +1513,8 @@ namespace Engine.Common
             bool intersects = false;
             foreach (var vertex in points)
             {
-                var res = frustum.Contains(vertex);
+                var v = vertex;
+                ContainmentType res = frustum.Contains(ref v);
                 if (res != ContainmentType.Disjoint)
                 {
                     intersects = true;
@@ -1553,7 +1554,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
+            if (!inDistance.HasValue || Helper.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1587,7 +1588,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!inDistance.HasValue || MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
+            if (!inDistance.HasValue || Helper.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
             {
                 return false;
             }
@@ -1628,13 +1629,13 @@ namespace Engine.Common
 
             bool intoSegmentBounds = false;
 
-            if (inDistance.HasValue && !MathUtil.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
+            if (inDistance.HasValue && !Helper.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
             {
                 enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
                 intoSegmentBounds = true;
             }
 
-            if (outDistance.HasValue && !MathUtil.NearEqual(MathF.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
+            if (outDistance.HasValue && !Helper.NearEqual(MathF.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
             {
                 exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
                 intoSegmentBounds = true;
@@ -1651,9 +1652,9 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, BoundingSphere sphere)
         {
-            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
-            return mbox.Contains(ref sphere);
+            return mbox.Contains(sphere);
         }
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingBox.
@@ -1663,9 +1664,9 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, BoundingBox box)
         {
-            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
-            return mbox.Contains(ref box);
+            return mbox.Contains(box);
         }
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingFrustum.
@@ -1675,7 +1676,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, BoundingFrustum frustum)
         {
-            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
             return BoxContainsFrustum(mbox, frustum);
         }
@@ -1688,16 +1689,16 @@ namespace Engine.Common
         public static ContainmentType MeshContainsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2)
         {
             // A mesh is not a volume. Calculate the bounding volumes of the tow meshes
-            var bbox1 = SharpDXExtensions.BoundingBoxFromPoints(mesh1.SelectMany(t => t.GetVertices()).ToArray());
-            var bbox2 = SharpDXExtensions.BoundingBoxFromPoints(mesh2.SelectMany(t => t.GetVertices()).ToArray());
+            var bbox1 = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh1.SelectMany(t => t.GetVertices())]);
+            var bbox2 = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh2.SelectMany(t => t.GetVertices())]);
 
-            if (bbox1.Contains(ref bbox2) == ContainmentType.Disjoint)
+            if (bbox1.Contains(bbox2) == ContainmentType.Disjoint)
             {
                 // If volumes disjoint, no intersection is possible
                 return ContainmentType.Disjoint;
             }
 
-            if (bbox2.Contains(ref bbox1) == ContainmentType.Contains)
+            if (bbox2.Contains(bbox1) == ContainmentType.Contains)
             {
                 // Box2 contains box1. Then box1 intersects box2
                 return ContainmentType.Intersects;
@@ -1725,7 +1726,7 @@ namespace Engine.Common
         /// <param name="radius">Circle radius</param>
         public static bool RayIntersectsCircle3D(ref Ray ray, Vector3 center, Vector3 normal, float radius)
         {
-            var pFrom = new Plane(center, normal);
+            var pFrom = PlaneExtensions.CreatePlane(center, normal);
             if (!pFrom.Intersects(ref ray, out Vector3 p))
             {
                 return false;

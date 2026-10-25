@@ -1,9 +1,11 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.UI
 {
@@ -90,11 +92,11 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        private Color4 baseColor;
+        private Vector4 baseColor;
         /// <summary>
         /// Tint color
         /// </summary>
-        private Color4 tintColor;
+        private Vector4 tintColor;
         /// <summary>
         /// Alpha color component
         /// </summary>
@@ -201,7 +203,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(width, value))
+                if (!Helper.NearEqual(width, value))
                 {
                     width = value;
 
@@ -218,7 +220,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(height, value))
+                if (!Helper.NearEqual(height, value))
                 {
                     height = value;
 
@@ -236,7 +238,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(scale, value))
+                if (!Helper.NearEqual(scale, value))
                 {
                     scale = value;
 
@@ -261,8 +263,8 @@ namespace Engine.UI
             }
             set
             {
-                float v = value % MathUtil.TwoPi;
-                if (!MathUtil.NearEqual(rotation, v))
+                float v = value % Helper.TwoPi;
+                if (!Helper.NearEqual(rotation, v))
                 {
                     rotation = v;
 
@@ -305,7 +307,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(left, value))
+                if (!Helper.NearEqual(left, value))
                 {
                     left = value;
 
@@ -330,7 +332,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(top, value))
+                if (!Helper.NearEqual(top, value))
                 {
                     top = value;
 
@@ -348,31 +350,31 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual RectangleF LocalRectangle
+        public virtual Rect LocalRectangle
         {
             get
             {
-                return new RectangleF(0, 0, Width, Height);
+                return new Rect(0, 0, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF AbsoluteRectangle
+        public virtual Rect AbsoluteRectangle
         {
             get
             {
-                return new RectangleF(AbsoluteLeft, AbsoluteTop, Width, Height);
+                return new Rect(AbsoluteLeft, AbsoluteTop, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF RelativeToParentRectangle
+        public virtual Rect RelativeToParentRectangle
         {
             get
             {
-                return new RectangleF(Left, Top, Width, Height);
+                return new Rect(Left, Top, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF RelativeToRootRectangle
+        public virtual Rect RelativeToRootRectangle
         {
             get
             {
@@ -380,7 +382,7 @@ namespace Engine.UI
 
                 if (Root != null)
                 {
-                    return new RectangleF
+                    return new Rect
                     {
                         Left = rect.Left - Root.Left,
                         Top = rect.Top - Root.Top,
@@ -480,7 +482,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual Color4 BaseColor
+        public virtual Vector4 BaseColor
         {
             get
             {
@@ -501,7 +503,7 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public virtual Color4 TintColor
+        public virtual Vector4 TintColor
         {
             get
             {
@@ -530,7 +532,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(alpha, value))
+                if (!Helper.NearEqual(alpha, value))
                 {
                     alpha = value;
                 }
@@ -747,7 +749,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual Matrix GetTransform()
+        public virtual Matrix4x4 GetTransform()
         {
             return fitWithParent && HasParent ? Parent.GetTransform() : Manipulator.LocalTransform;
         }
@@ -1174,7 +1176,7 @@ namespace Engine.UI
             SetPosition(position.X, position.Y);
         }
         /// <inheritdoc/>
-        public virtual void SetRectangle(RectangleF rectangle)
+        public virtual void SetRectangle(Rect rectangle)
         {
             left = rectangle.Left;
             top = rectangle.Top;
@@ -1186,9 +1188,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual RectangleF GetRenderArea(bool applyPadding)
+        public virtual Rect GetRenderArea(bool applyPadding)
         {
-            RectangleF renderArea;
+            Rect renderArea;
 
             if (fitWithParent && Parent != null)
             {
@@ -1202,7 +1204,7 @@ namespace Engine.UI
             return applyPadding ? Padding.Apply(renderArea) : renderArea;
         }
         /// <inheritdoc/>
-        public virtual RectangleF GetControlArea()
+        public virtual Rect GetControlArea()
         {
             return GetRenderArea(false);
         }

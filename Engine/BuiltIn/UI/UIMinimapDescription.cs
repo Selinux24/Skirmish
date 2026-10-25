@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -18,11 +19,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Width
         /// </summary>
-        public int Width { get; set; }
+        public uint Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height { get; set; }
+        public uint Height { get; set; }
         /// <summary>
         /// Terrain to draw
         /// </summary>
@@ -30,7 +31,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Color BackColor { get; set; } = Color.Black;
+        public Vector4 BackColor { get; set; } = Vector4.Zero;
         /// <summary>
         /// Minimap render area
         /// </summary>

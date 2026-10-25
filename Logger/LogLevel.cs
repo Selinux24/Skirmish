@@ -1,5 +1,5 @@
 ﻿
-namespace Engine
+namespace Logger
 {
     /// <summary>
     /// Log level

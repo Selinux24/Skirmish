@@ -41,7 +41,7 @@ namespace Engine.Common
 
             if (!data.Any())
             {
-                Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
+                Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
 
                 Processed = ProcessedStages.Processed;
                 return;
@@ -49,7 +49,7 @@ namespace Engine.Common
 
             BufferManagerIndices indicesDesc;
 
-            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(uint)} [{Id}]");
+            Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(uint)} [{Id}]");
 
             int slot = bufferManager.FindIndexBufferDescription(Dynamic);
             if (slot < 0)

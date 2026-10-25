@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace Engine.Animation
@@ -249,7 +249,7 @@ namespace Engine.Animation
             }
 
             float tunedElapsedTime = elapsedSeconds * TimeDelta;
-            if (MathUtil.IsZero(tunedElapsedTime))
+            if (Helper.IsZero(tunedElapsedTime))
             {
                 return;
             }
@@ -300,7 +300,7 @@ namespace Engine.Animation
         {
             if (result.HasFlag(AnimationPlanIntegrationResults.PathChanged))
             {
-                Logger.WriteTrace(this, $"Moved to next animation path: {plan.CurrentPath}");
+                Game.Logger.WriteTrace(this, $"Moved to next animation path: {plan.CurrentPath}");
                 PathChanged?.Invoke(this, new AnimationControllerEventArgs()
                 {
                     CurrentOffset = plan.AnimationOffset,
@@ -312,7 +312,7 @@ namespace Engine.Animation
 
             if (result.HasFlag(AnimationPlanIntegrationResults.UpdatedPath))
             {
-                Logger.WriteTrace(this, $"Current animation path updated: {plan.CurrentPath}");
+                Game.Logger.WriteTrace(this, $"Current animation path updated: {plan.CurrentPath}");
                 PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
                 {
                     CurrentOffset = plan.AnimationOffset,
@@ -324,7 +324,7 @@ namespace Engine.Animation
 
             if (result.HasFlag(AnimationPlanIntegrationResults.UpdatedOffset))
             {
-                Logger.WriteTrace(this, $"Animation offset changed: {plan.AnimationOffset}");
+                Game.Logger.WriteTrace(this, $"Animation offset changed: {plan.AnimationOffset}");
                 AnimationOffsetChanged?.Invoke(this, new AnimationControllerEventArgs()
                 {
                     CurrentOffset = plan.AnimationOffset,
@@ -336,7 +336,7 @@ namespace Engine.Animation
 
             if (result.HasFlag(AnimationPlanIntegrationResults.EndPlan))
             {
-                Logger.WriteTrace(this, "All animation paths done");
+                Game.Logger.WriteTrace(this, "All animation paths done");
                 PlanEnding?.Invoke(this, new AnimationControllerEventArgs()
                 {
                     CurrentOffset = plan.AnimationOffset,
@@ -409,7 +409,7 @@ namespace Engine.Animation
         /// Gets the transformation matrix list at current time
         /// </summary>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public IEnumerable<Matrix> GetCurrentPose()
+        public IEnumerable<Matrix4x4> GetCurrentPose()
         {
             return animationPlan.GetCurrentPose(SkinningData);
         }

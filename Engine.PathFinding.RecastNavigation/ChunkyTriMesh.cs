@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -122,7 +123,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var t in triangles)
             {
-                var bbox = SharpDXExtensions.BoundingBoxFromPoints(t.GetVertices().ToArray());
+                var bbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. t.GetVertices()]);
 
                 items.Add(new BoundsItem
                 {
@@ -144,7 +145,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return new ChunkyTriMesh
             {
-                triangles = triangles.ToArray(),
+                triangles = [.. triangles],
                 nodes = [.. data.Nodes],
                 triangleIndices = [.. data.OutTris]
             };
@@ -221,7 +222,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="bounds">Bounds</param>
         /// <returns>Returns the longest axis</returns>
-        private static Axis LongestAxis(RectangleF bounds)
+        private static Axis LongestAxis(Rect bounds)
         {
             Vector2 bmin = bounds.TopLeft;
             Vector2 bmax = bounds.BottomRight;
@@ -238,13 +239,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="imin">Minimum index</param>
         /// <param name="imax">Maximum index</param>
         /// <returns>Returns the items bounds</returns>
-        private static RectangleF CalcExtends(BoundsItem[] items, int imin, int imax)
+        private static Rect CalcExtends(BoundsItem[] items, int imin, int imax)
         {
             var bounds = items[imin].Bounds;
 
             for (int i = imin + 1; i < imax; ++i)
             {
-                bounds = RectangleF.Union(bounds, items[i].Bounds);
+                bounds = Rect.Union(bounds, items[i].Bounds);
             }
 
             return bounds;
@@ -319,8 +320,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var ids = new List<int>();
 
-            var bmin = new Vector2(bbox.Minimum.X, bbox.Minimum.Z);
-            var bmax = new Vector2(bbox.Maximum.X, bbox.Maximum.Z);
+            var bmin = new Vector2(bbox.Min.X, bbox.Min.Z);
+            var bmax = new Vector2(bbox.Max.X, bbox.Max.Z);
 
             // Traverse tree
             int i = 0;

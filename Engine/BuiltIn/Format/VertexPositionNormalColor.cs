@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -19,13 +19,13 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new ("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, Vortice.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("COLOR", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
         /// <summary>
@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Color4 color)
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Vector4 color)
         {
             if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
 
@@ -58,7 +58,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Color4> colors)
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector4> colors)
         {
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
             if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
@@ -94,7 +94,7 @@ namespace Engine.BuiltIn.Format
                 {
                     Position = v.Position ?? Vector3.Zero,
                     Normal = v.Normal ?? Vector3.Zero,
-                    Color = v.Color ?? Color4.White,
+                    Color = v.Color ?? new(1, 1, 1, 1),
                 };
             });
 
@@ -112,7 +112,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Color4 Color;
+        public Vector4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -135,17 +135,17 @@ namespace Engine.BuiltIn.Format
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexPositionNormalColor>();
+            return (uint)Marshal.SizeOf<VertexPositionNormalColor>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

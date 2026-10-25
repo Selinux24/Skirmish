@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.Common
 {
@@ -24,7 +24,7 @@ namespace Engine.Common
         /// Transforms the normal data
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        public void Transform(Matrix transform)
+        public void Transform(Matrix4x4 transform)
         {
             Normal = Vector3.TransformNormal(Normal, transform);
             Tangent = Vector3.TransformNormal(Tangent, transform);

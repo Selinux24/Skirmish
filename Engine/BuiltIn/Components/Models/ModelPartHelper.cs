@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -116,7 +116,7 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the part's global transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetWorldTransformByName(string name)
+        public Matrix4x4? GetWorldTransformByName(string name)
         {
             return GetModelPartByName(name)?.GetWorldTransform();
         }
@@ -124,7 +124,7 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the part's local transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetLocalTransformByName(string name)
+        public Matrix4x4? GetLocalTransformByName(string name)
         {
             return GetModelPartByName(name)?.GetLocalTransform();
         }
@@ -132,7 +132,7 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the part's pose transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetPoseTransformByName(string name)
+        public Matrix4x4? GetPoseTransformByName(string name)
         {
             return GetModelPartByName(name)?.InitialWorldTransform;
         }
@@ -140,7 +140,7 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the part's final transform by name
         /// </summary>
         /// <param name="name">Name</param>
-        public Matrix? GetPartTransformByName(string name)
+        public Matrix4x4? GetPartTransformByName(string name)
         {
             return GetModelPartByName(name)?.GetPartTransform();
         }

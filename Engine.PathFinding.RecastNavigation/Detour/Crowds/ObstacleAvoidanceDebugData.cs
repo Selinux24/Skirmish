@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 float s = range > 0.001f ? (1.0f / range) : 1;
                 for (int i = 0; i < n; ++i)
                 {
-                    arr[i] = MathUtil.Clamp((arr[i] - min) * s, 0.0f, 1.0f);
+                    arr[i] = Math.Clamp((arr[i] - min) * s, 0.0f, 1.0f);
                 }
             }
         }

@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Maximum instance count
         /// </summary>
-        int InstanceCount { get; }
+        uint InstanceCount { get; }
 
         /// <summary>
         /// Draw shadows

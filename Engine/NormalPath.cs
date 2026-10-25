@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine
 {
@@ -81,7 +81,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return checkPoints[0];
             }
@@ -115,10 +115,10 @@ namespace Engine
         {
             if (NormalCount <= 0)
             {
-                return Vector3.Up;
+                return Vector3Extensions.Up;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return normals[0];
             }
@@ -155,7 +155,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return checkPoints[0];
             }

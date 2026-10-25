@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Globalization;
 
 namespace Engine.Content
@@ -115,7 +114,7 @@ namespace Engine.Content
 
                     if (float.TryParse(degrees, NumberStyles.Float, Local, out float d))
                     {
-                        return RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(d));
+                        return RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(d));
                     }
                 }
             }

@@ -1,7 +1,6 @@
 ﻿using Engine;
 using Engine.Tween;
 using Engine.UI.Tween;
-using SharpDX;
 
 namespace BasicSamples
 {
@@ -21,14 +20,14 @@ namespace BasicSamples
         {
             tweener.TweenScaleUp(ctrl, milliseconds, ScaleFuncs.QuinticEaseOut);
             tweener.TweenShow(ctrl, milliseconds / 4, ScaleFuncs.Linear);
-            tweener.TweenRotate(ctrl, MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
+            tweener.TweenRotate(ctrl, Helper.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
         public static void HideRoll(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
         {
             tweener.TweenScaleDown(ctrl, milliseconds, ScaleFuncs.QuinticEaseOut);
             tweener.TweenHide(ctrl, milliseconds / 4, ScaleFuncs.Linear);
-            tweener.TweenRotate(ctrl, -MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
+            tweener.TweenRotate(ctrl, -Helper.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
         public static void ScaleInScaleOut(this UIControlTweener tweener, IUIControl ctrl, float from, float to, long milliseconds)

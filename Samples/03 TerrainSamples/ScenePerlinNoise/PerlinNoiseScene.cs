@@ -2,22 +2,24 @@
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.IO;
+using System.Numerics;
 using System.Threading.Tasks;
 using TerrainSamples.Common.Dialogs;
 using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
+    using Color = System.Drawing.Color;
+
     class PerlinNoiseScene : Scene
     {
         const string fontFamily = "Microsoft Sans Serif";
-        static readonly Color4 pBackground = Color.RosyBrown;
-        static readonly Color4 bColor1 = Color.Brown;
-        static readonly Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
-        static readonly Color4 pColor = Color.DeepSkyBlue;
+        static readonly Vector4 pBackground = Color.RosyBrown.RGBA();
+        static readonly Vector4 bColor1 = Color.Brown.RGBA();
+        static readonly Vector4 bColor2 = Vector4Extensions.AdjustSaturation(Color.Brown.RGBA(), 1.5f);
+        static readonly Vector4 pColor = Color.DeepSkyBlue.RGBA();
 
         const int dialogWidth = 600;
         const int dialogHeight = 350;
@@ -42,9 +44,9 @@ namespace TerrainSamples.ScenePerlinNoise
         UIButton btnSave;
         bool dialogVisible = false;
         string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        readonly Color4 dialogButtonColor = Color4.AdjustSaturation(bColor1, 1.5f);
-        readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
-        readonly Color4 dialogBackgroundColor = bColor1;
+        readonly Vector4 dialogButtonColor = Vector4Extensions.AdjustSaturation(bColor1, 1.5f);
+        readonly Vector4 dialogButtonTextColor = Color.WhiteSmoke.RGBA();
+        readonly Vector4 dialogBackgroundColor = bColor1;
         UISaveFileDialog saveFileDialog = null;
 
         UITextureRenderer perlinRenderer;
@@ -53,7 +55,7 @@ namespace TerrainSamples.ScenePerlinNoise
         bool noiseMapDirty = true;
         bool generatingMap = false;
 
-        readonly int mapSize = 128;
+        readonly uint mapSize = 128;
         readonly float maxScale = 100;
         readonly float maxLacunarity = 20;
         readonly float maxPersistance = 1;
@@ -252,7 +254,7 @@ namespace TerrainSamples.ScenePerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
+            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Vector4>(), mapSize, true);
 
             perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
@@ -350,25 +352,25 @@ namespace TerrainSamples.ScenePerlinNoise
 
             bool updateMap = false;
 
-            if (!MathUtil.NearEqual(Scale, pbScale.ProgressValue))
+            if (!Helper.NearEqual(Scale, pbScale.ProgressValue))
             {
                 Scale = pbScale.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
+            if (!Helper.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
             {
                 Lacunarity = pbLacunarity.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Persistance, pbPersistance.ProgressValue))
+            if (!Helper.NearEqual(Persistance, pbPersistance.ProgressValue))
             {
                 Persistance = pbPersistance.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Octaves, pbOctaves.ProgressValue))
+            if (!Helper.NearEqual(Octaves, pbOctaves.ProgressValue))
             {
                 Octaves = pbOctaves.ProgressValue;
                 updateMap = true;
@@ -560,7 +562,7 @@ namespace TerrainSamples.ScenePerlinNoise
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 generatingMap = false;

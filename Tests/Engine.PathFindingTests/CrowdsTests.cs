@@ -4,10 +4,10 @@ using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Engine.PathFindingTests
 {

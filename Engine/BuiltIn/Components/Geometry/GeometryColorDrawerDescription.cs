@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Geometry
 {
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Initial color
         /// </summary>
-        public Color4 Color { get; set; } = Color4.Black;
+        public Vector4 Color { get; set; } = new(0f, 0f, 0f, 1f);
 
         /// <summary>
         /// Constructor

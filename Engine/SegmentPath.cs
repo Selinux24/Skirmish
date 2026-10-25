@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace Engine
 {
@@ -125,7 +125,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return path[0];
             }
@@ -157,7 +157,7 @@ namespace Engine
         /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
-            return Vector3.Up;
+            return Vector3Extensions.Up;
         }
         /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)
@@ -167,7 +167,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return path[0];
             }

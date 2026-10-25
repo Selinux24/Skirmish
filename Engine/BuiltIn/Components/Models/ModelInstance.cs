@@ -1,9 +1,10 @@
 ﻿using Engine.Animation;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -59,7 +60,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Texture index
         /// </summary>
@@ -238,15 +239,12 @@ namespace Engine.BuiltIn.Components.Models
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"ModelInstance Id: {Id} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"ModelInstance Id: {Id} - Sets a null manipulator. Discarded.");
 
                 return;
             }
 
-            if (Manipulator != null)
-            {
-                Manipulator.Updated -= ManipulatorUpdated;
-            }
+            Manipulator?.Updated -= ManipulatorUpdated;
 
             Manipulator = manipulator;
             Manipulator.Updated += ManipulatorUpdated;
@@ -269,28 +267,28 @@ namespace Engine.BuiltIn.Components.Models
             return partHelper.GetModelPartByName(name);
         }
         /// <inheritdoc/>
-        public Matrix GetLocalTransformByName(string name)
+        public Matrix4x4 GetLocalTransformByName(string name)
         {
-            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix.Identity;
+            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix4x4.Identity;
 
             return localTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetWorldTransformByName(string name)
+        public Matrix4x4 GetWorldTransformByName(string name)
         {
-            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix.Identity;
+            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix4x4.Identity;
 
             return worldTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetPoseTransformByName(string name)
+        public Matrix4x4 GetPoseTransformByName(string name)
         {
-            return partHelper.GetPoseTransformByName(name) ?? Matrix.Identity;
+            return partHelper.GetPoseTransformByName(name) ?? Matrix4x4.Identity;
         }
         /// <inheritdoc/>
-        public Matrix GetPartTransformByName(string name)
+        public Matrix4x4 GetPartTransformByName(string name)
         {
-            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix.Identity;
+            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix4x4.Identity;
 
             return partTransform * Manipulator.GlobalTransform;
         }
@@ -300,7 +298,7 @@ namespace Engine.BuiltIn.Components.Models
         /// </summary>
         public void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
+            Game.Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
 
             geometryHelper.Invalidate();
             boundsHelper.Invalidate(Manipulator);

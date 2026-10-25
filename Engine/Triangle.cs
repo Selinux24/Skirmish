@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -173,7 +174,7 @@ namespace Engine
         /// <param name="triangle">Triangle</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new triangle</returns>
-        public static Triangle Transform(Triangle triangle, Matrix transform)
+        public static Triangle Transform(Triangle triangle, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
@@ -181,9 +182,9 @@ namespace Engine
             }
 
             return new Triangle(
-                Vector3.TransformCoordinate(triangle.Point1, transform),
-                Vector3.TransformCoordinate(triangle.Point2, transform),
-                Vector3.TransformCoordinate(triangle.Point3, transform));
+                Vector3.Transform(triangle.Point1, transform),
+                Vector3.Transform(triangle.Point2, transform),
+                Vector3.Transform(triangle.Point3, transform));
         }
         /// <summary>
         /// Transform triangle list coordinates
@@ -191,7 +192,7 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new triangle list</returns>
-        public static IEnumerable<Triangle> Transform(IEnumerable<Triangle> triangles, Matrix transform)
+        public static IEnumerable<Triangle> Transform(IEnumerable<Triangle> triangles, Matrix4x4 transform)
         {
             if (triangles?.Any() != true)
             {
@@ -400,7 +401,7 @@ namespace Engine
         /// <returns>Returns the projection vector</returns>
         public readonly Vector3 ProjectToVector(Vector3 vector)
         {
-            if (!vector.IsNormalized)
+            if (!vector.IsNormalized())
             {
                 vector = Vector3.Normalize(vector);
             }
@@ -425,7 +426,7 @@ namespace Engine
             yield return Point3;
         }
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
             return 3;
         }
@@ -440,7 +441,7 @@ namespace Engine
         /// </summary>
         public readonly Plane GetPlane()
         {
-            return new Plane(Point1, Point2, Point3);
+            return Plane.CreateFromVertices(Point1, Point2, Point3);
         }
         /// <summary>
         /// Gets the triangle minimal point
@@ -461,7 +462,7 @@ namespace Engine
         /// </summary>
         public readonly float GetInclination()
         {
-            return Helper.Angle(Normal, Vector3.Down);
+            return Vector3Extensions.Angle(Normal, Vector3Extensions.Down);
         }
 
         /// <summary>
@@ -541,7 +542,7 @@ namespace Engine
         /// </summary>
         public readonly BoundingBox GetBounds()
         {
-            return SharpDXExtensions.BoundingBoxFromPoints([Point1, Point2, Point3]);
+            return BoundingBoxExtensions.BoundingBoxFromPoints([Point1, Point2, Point3]);
         }
 
         /// <summary>

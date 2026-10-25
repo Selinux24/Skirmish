@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -50,7 +50,7 @@ namespace Engine.BuiltIn.Components.Particles
         public ParticleEmitterDescription()
         {
             Position = Vector3.Zero;
-            Velocity = Vector3.Up;
+            Velocity = Vector3Extensions.Up;
             Scale = 1f;
             EmissionRate = 1f;
             Duration = 0f;

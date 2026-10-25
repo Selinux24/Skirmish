@@ -9,15 +9,17 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
+    using Color = System.Drawing.Color;
+
     /// <summary>
     /// Coding with Radu scene
     /// </summary>
@@ -62,9 +64,9 @@ namespace AISamples.SceneCWRVirtualWorld
         private const string editorFont = "Consolas";
         private const int editorButtonWidth = 100;
         private const int editorButtonHeight = 25;
-        private readonly Color editorBackgroundColor = Color.WhiteSmoke;
-        private readonly Color editorButtonColor = Color.LightGray;
-        private readonly Color editorButtonTextColor = Color.Black;
+        private readonly Vector4 editorBackgroundColor = Color.WhiteSmoke.RGBA();
+        private readonly Vector4 editorButtonColor = Color.LightGray.RGBA();
+        private readonly Vector4 editorButtonTextColor = Color.Black.RGBA();
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -102,9 +104,9 @@ ESC - EXIT";
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
 
-            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color3.White, Color3.Black, true));
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color.White.RGB(), Color.Black.RGB(), true));
 
             world = new(graph, 0);
             world.Generate();
@@ -153,13 +155,13 @@ ESC - EXIT";
             var titleDesc = new UITextAreaDescription
             {
                 Font = defaultFont18,
-                TextForeColor = Color.White,
+                TextForeColor = Color.White.RGBA(),
                 Text = titleText,
                 StartsVisible = false,
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
+            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.66f));
             spDesc.StartsVisible = false;
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
         }
@@ -170,7 +172,7 @@ ESC - EXIT";
             var runtimeTextDesc = new UITextAreaDescription
             {
                 Font = defaultFont11,
-                TextForeColor = Color.Yellow,
+                TextForeColor = Color.Yellow.RGBA(),
                 MaxTextLength = 256,
                 Text = string.Empty,
                 StartsVisible = false,
@@ -180,7 +182,7 @@ ESC - EXIT";
             var infoDesc = new UITextAreaDescription
             {
                 Font = defaultFont11,
-                TextForeColor = Color.Yellow,
+                TextForeColor = Color.Yellow.RGBA(),
                 MaxTextLength = 256,
                 Text = infoText,
                 StartsVisible = false,
@@ -197,7 +199,7 @@ ESC - EXIT";
             editorButtonDesc.Width = editorButtonWidth;
             editorButtonDesc.Height = editorButtonHeight;
             editorButtonDesc.ColorReleased = editorButtonColor;
-            editorButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 1f);
+            editorButtonDesc.ColorPressed = new (editorButtonColor.RGB() * 1.2f, 1f);
             editorButtonDesc.TextForeColor = editorButtonTextColor;
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -291,7 +293,7 @@ ESC - EXIT";
             };
 
             terrain = await AddComponentGround<Model, ModelDescription>(nameof(terrain), nameof(terrain), desc);
-            terrain.TintColor = Color.GreenYellow;
+            terrain.TintColor = Color.GreenYellow.RGBA();
         }
         private Task InitializeWorld()
         {
@@ -308,7 +310,7 @@ ESC - EXIT";
                 var exList = res.GetExceptions();
                 foreach (var ex in exList)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 Game.Exit();
@@ -455,12 +457,12 @@ ESC - EXIT";
 
             if (Game.Input.KeyPressed(Keys.C))
             {
-                Camera.Move(gameTime, Vector3.Down, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3Extensions.Down, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.Space))
             {
-                Camera.Move(gameTime, Vector3.Up, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3Extensions.Up, Game.Input.ShiftPressed);
             }
         }
         private void UpdateWorld(IGameTime gameTime)

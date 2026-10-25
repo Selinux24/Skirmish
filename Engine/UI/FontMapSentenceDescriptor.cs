@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.UI
 {
@@ -77,7 +78,7 @@ namespace Engine.UI
         /// <param name="vertices">Vertex list</param>
         /// <param name="uvs">Uvs</param>
         /// <param name="color">Color</param>
-        public void Add(IEnumerable<uint> indices, IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
+        public void Add(IEnumerable<uint> indices, IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Vector4 color)
         {
             Vector3[] vArray = [.. vertices];
             Vector2[] uvArray = [.. uvs];
@@ -121,7 +122,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a new vertex list</returns>
-        public void Adjust(RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
+        public void Adjust(Rect rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             //Find total height (the column height)
             var textSize = GetSize(0, (int)VertexCount);
@@ -130,7 +131,7 @@ namespace Engine.UI
 
             for (int i = 0; i < VertexCount; i += 4)
             {
-                if (i == 0 || !MathUtil.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
+                if (i == 0 || !Helper.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
                 {
                     //Skip until the first character
                     continue;
@@ -155,7 +156,7 @@ namespace Engine.UI
         /// <param name="rect">Rectangle</param>
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
-        private readonly void AdjustLine(int from, int to, Vector2 textSize, RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
+        private readonly void AdjustLine(int from, int to, Vector2 textSize, Rect rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             //Find this line width
             var lineSize = GetSize(from, to);
@@ -164,7 +165,7 @@ namespace Engine.UI
             float diffX = GetDeltaX(horizontalAlign, rect.Width, lineSize.X);
             float diffY = GetDeltaY(verticalAlign, rect.Height, textSize.Y);
 
-            if (MathUtil.IsZero(diffX) && MathUtil.IsZero(diffY))
+            if (Helper.IsZero(diffX) && Helper.IsZero(diffY))
             {
                 //No changes, add the line and skip the update
                 return;

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -15,7 +15,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <returns>Returns a new particle system parameters set scaled to the specified value</returns>
         public static ParticleSystemParams operator *(ParticleSystemParams p, float scale)
         {
-            if (MathUtil.IsOne(scale))
+            if (Helper.IsOne(scale))
             {
                 return p;
             }
@@ -164,11 +164,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public Color MinColor { get; set; }
+        public Vector4 MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public Color MaxColor { get; set; }
+        public Vector4 MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed

@@ -1,8 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Audio
@@ -86,7 +86,7 @@ namespace Engine.Audio
         /// </summary>
         /// <typeparam name="T">Type of audio loader</typeparam>
         /// <param name="sampleRate">Sample rate</param>
-        public static void RegisterAudio<T>(int sampleRate) where T : class, IGameAudioLoader
+        public static void RegisterAudio<T>(uint sampleRate) where T : class, IGameAudioLoader
         {
             T audio = Activator.CreateInstance<T>();
 
@@ -336,7 +336,7 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
         /// <param name="loudness">Threshold of the limiter</param>
-        public void SetMasteringLimit(int release, int loudness)
+        public void SetMasteringLimit(uint release, uint loudness)
         {
             gameAudio.SetMasteringLimit(release, loudness);
         }

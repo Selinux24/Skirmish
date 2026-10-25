@@ -1,13 +1,11 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Engine.Audio
 {
-    using SharpDX;
-    using SharpDX.MediaFoundation;
-    using SharpDX.Multimedia;
-    using SharpDX.XAudio2;
+    using Vortice.Multimedia;
+    using Vortice.XAudio2;
 
     /// <summary>
     /// Game audio file
@@ -15,7 +13,7 @@ namespace Engine.Audio
     class GameAudioFile : IDisposable
     {
         private const int DefaultBufferCount = 3;
-        private const int DefaulBuffertSize = 32 * 1024; // default size 32Kb
+        private const int DefaultBufferSize = 32 * 1024; //32Kb
 
         /// <summary>
         /// Loads a file
@@ -26,11 +24,10 @@ namespace Engine.Audio
             return new GameAudioFile(fileName);
         }
 
-        private IEnumerator<DataPointer> sampleIterator = null;
         private int currentSample = 0;
-        private readonly AudioDecoder audioDecoder;
+        private readonly AudioFileReader audioDecoder;
         private readonly AudioBuffer[] audioBuffers;
-        private readonly DataBuffer[] memBuffers;
+        private readonly byte[][] memBuffers;
         private int nextBuffer = 0;
 
         /// <summary>
@@ -40,19 +37,13 @@ namespace Engine.Audio
         /// <summary>
         /// Wave format
         /// </summary>
-        public WaveFormat WaveFormat
-        {
-            get
-            {
-                return audioDecoder.WaveFormat;
-            }
-        }
+        public WaveFormat WaveFormat { get; private set; }
         /// <summary>
         /// Sound duration
         /// </summary>
         public TimeSpan Duration
         {
-            get { return audioDecoder.Duration; }
+            get { return audioDecoder.TotalTime; }
         }
         /// <summary>
         /// Buffer count
@@ -67,17 +58,27 @@ namespace Engine.Audio
         {
             FileName = fileName;
 
-            // Initialize the audio decoder
-            audioDecoder = new AudioDecoder(File.OpenRead(fileName));
+            // Initialize NAudio universal decoder
+            audioDecoder = new AudioFileReader(fileName);
 
-            // Pre-allocate buffers
+            // Convert and map the NAudio format to the native Vortice WaveFormat
+            WaveFormat = WaveFormat.CreateCustomFormat(
+                (WaveFormatEncoding)audioDecoder.WaveFormat.Encoding,
+                audioDecoder.WaveFormat.SampleRate,
+                audioDecoder.WaveFormat.Channels,
+                audioDecoder.WaveFormat.AverageBytesPerSecond,
+                audioDecoder.WaveFormat.BlockAlign,
+                audioDecoder.WaveFormat.BitsPerSample
+            );
+
+            // Initialize the circle buffer struct
             audioBuffers = new AudioBuffer[DefaultBufferCount];
-            memBuffers = new DataBuffer[DefaultBufferCount];
+            memBuffers = new byte[DefaultBufferCount][];
 
             for (int i = 0; i < DefaultBufferCount; i++)
             {
-                audioBuffers[i] = new AudioBuffer();
-                memBuffers[i] = new DataBuffer(DefaulBuffertSize);
+                memBuffers[i] = new byte[DefaultBufferSize];
+                audioBuffers[i] = new AudioBuffer(memBuffers[i]);
             }
         }
         /// <summary>
@@ -85,9 +86,9 @@ namespace Engine.Audio
         /// </summary>
         ~GameAudioFile()
         {
-            // Finalizer calls Dispose(false)  
             Dispose(false);
         }
+
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -96,6 +97,7 @@ namespace Engine.Audio
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -105,11 +107,6 @@ namespace Engine.Audio
             if (disposing)
             {
                 audioDecoder?.Dispose();
-
-                for (int i = 0; i < BufferCount; i++)
-                {
-                    memBuffers[i]?.Dispose();
-                }
             }
         }
 
@@ -119,12 +116,12 @@ namespace Engine.Audio
         /// <param name="start">Start time</param>
         public void SetPosition(TimeSpan start)
         {
-            sampleIterator = audioDecoder.GetSamples(start).GetEnumerator();
+            audioDecoder.CurrentTime = start;
             currentSample = 0;
         }
 
         /// <summary>
-        /// Reads the buffer data from the decoder sample pointer, and writes into the next audio buffer to submit to the Source Voice
+        /// Reads the buffer data from the decoder, and writes into the next audio buffer to submit to the Source Voice
         /// </summary>
         /// <param name="buffer">Returns the audio buffer prepared to submit</param>
         /// <returns>Returns true if there are more buffers to play</returns>
@@ -132,37 +129,35 @@ namespace Engine.Audio
         {
             buffer = null;
 
-            if (!sampleIterator.MoveNext())
+            // Move to the next index in the circular buffer
+            nextBuffer = (nextBuffer + 1) % BufferCount;
+
+            // Read the bytes directly from NAudio using the specified size
+            int bytesToRead = DefaultBufferSize;
+            byte[] activeStorage = memBuffers[nextBuffer];
+
+            uint bytesRead = (uint)audioDecoder.Read(activeStorage, 0, bytesToRead);
+
+            // If no bytes were read, it means we have reached the end of the file.
+            if (bytesRead <= 0)
             {
-                //End of audio
                 return false;
             }
 
-            Logger.WriteTrace(this, $"Sample: {currentSample++}");
+            Game.Logger.WriteTrace(this, $"Sample: {currentSample++}");
 
-            var bufferPointer = sampleIterator.Current;
-
-            // Go to next entry in the ringg audio buffer
-            nextBuffer = ++nextBuffer % BufferCount;
-
-            // Check that our ring buffer has enough space to store the audio buffer.
-            if (bufferPointer.Size > memBuffers[nextBuffer].Size)
+            // Adjust the native Vortice AudioBuffer to point to the segment of read bytes
+            var targetBuffer = new AudioBuffer(activeStorage, BufferFlags.None)
             {
-                memBuffers[nextBuffer].Dispose();
-                memBuffers[nextBuffer] = new DataBuffer(bufferPointer.Size);
-            }
+                AudioBytes = bytesRead
+            };
 
-            // Copy to data fuffer
-            memBuffers[nextBuffer].Set(0, bufferPointer.ToArray());
-
-            // Set the pointer to the data.
-            audioBuffers[nextBuffer].AudioDataPointer = memBuffers[nextBuffer].DataPointer;
-            audioBuffers[nextBuffer].AudioBytes = bufferPointer.Size;
-
+            audioBuffers[nextBuffer] = targetBuffer;
             buffer = audioBuffers[nextBuffer];
 
             return true;
         }
+
         /// <summary>
         /// Gets the complete audio buffer
         /// </summary>
@@ -170,25 +165,36 @@ namespace Engine.Audio
         /// <returns>Returns the audio buffer prepared to submit</returns>
         public AudioBuffer GetCompleteAudioBuffer(bool isLooped)
         {
+            // Reset the file position to the beginning to perform a full read
+            audioDecoder.Position = 0;
+
             var bufferBytes = new List<byte>();
+            byte[] tempBuffer = new byte[DefaultBufferSize];
+            int bytesRead;
 
-            var iterator = audioDecoder.GetSamples().GetEnumerator();
-            while (iterator.MoveNext())
+            // Read the entire multimedia file sequentially and accumulate it
+            while ((bytesRead = audioDecoder.Read(tempBuffer, 0, tempBuffer.Length)) > 0)
             {
-                var pointer = iterator.Current;
-
-                bufferBytes.AddRange(pointer.ToArray());
+                if (bytesRead == tempBuffer.Length)
+                {
+                    bufferBytes.AddRange(tempBuffer);
+                }
+                else
+                {
+                    byte[] exactBuffer = new byte[bytesRead];
+                    Buffer.BlockCopy(tempBuffer, 0, exactBuffer, 0, bytesRead);
+                    bufferBytes.AddRange(exactBuffer);
+                }
             }
 
-            var dataBuffer = new DataBuffer(bufferBytes.Count);
-            dataBuffer.Set(0, bufferBytes.ToArray());
+            var finalArray = bufferBytes.ToArray();
 
-            var result = new AudioBuffer
+            // Instantiate the Vortice buffer by passing it the total number of bytes.
+            var result = new AudioBuffer(finalArray)
             {
-                AudioDataPointer = dataBuffer.DataPointer,
-                AudioBytes = bufferBytes.Count,
+                AudioBytes = (uint)finalArray.Length,
                 Flags = BufferFlags.EndOfStream,
-                LoopCount = isLooped ? AudioBuffer.LoopInfinite : 0,
+                LoopCount = isLooped ? (uint)XAudio2.LoopInfinite : 0,
             };
 
             return result;

@@ -1,7 +1,7 @@
 ﻿using AISamples.Common.Persistence;
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace AISamples.Common.Primitives
 {

@@ -1,10 +1,11 @@
 using Engine;
 using Engine.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Collections
 {

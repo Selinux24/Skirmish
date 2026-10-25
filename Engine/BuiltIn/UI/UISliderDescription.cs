@@ -1,5 +1,5 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default slider description
         /// </summary>
         /// <param name="rangeCount">Number of ranges</param>
-        public static UISliderDescription Default(int rangeCount)
+        public static UISliderDescription Default(uint rangeCount)
         {
             float step = 1f / rangeCount;
 
@@ -43,12 +43,12 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Number of ranges in the slider
         /// </summary>
-        public int RangeCount { get; set; } = 1;
+        public uint RangeCount { get; set; } = 1;
 
         /// <summary>
         /// Bar colors
         /// </summary>
-        public Color4[] BarColors { get; set; } = [UIConfiguration.BaseColor, UIConfiguration.BaseColor];
+        public Vector4[] BarColors { get; set; } = [UIConfiguration.BaseColor, UIConfiguration.BaseColor];
         /// <summary>
         /// Range values array
         /// </summary>
@@ -57,7 +57,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Selector colors
         /// </summary>
-        public Color4[] SelectorColors { get; set; } = [UIConfiguration.HighlightColor];
+        public Vector4[] SelectorColors { get; set; } = [UIConfiguration.HighlightColor];
         /// <summary>
         /// Selector height
         /// </summary>

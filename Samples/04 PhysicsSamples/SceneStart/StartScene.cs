@@ -6,12 +6,14 @@ using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace PhysicsSamples.SceneStart
 {
+    using Color = System.Drawing.Color;
+
     class StartScene : Scene
     {
         private const int layerHUD = 99;
@@ -29,8 +31,8 @@ namespace PhysicsSamples.SceneStart
         private readonly string resourcesFolder = "SceneStart";
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.DarkSeaGreen, 1.5f);
-        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
+        private readonly Vector4 sceneButtonColor = Vector4Extensions.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
+        private readonly Vector4 exitButtonColor = Vector4Extensions.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
 
         private bool sceneReady = false;
 
@@ -39,7 +41,7 @@ namespace PhysicsSamples.SceneStart
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
         }
 
         public override void Initialize()
@@ -91,8 +93,8 @@ namespace PhysicsSamples.SceneStart
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.ContentPath = resourcesFolder;
-            titleDesc.TextForeColor = Color.Gold;
-            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextForeColor = Color.Gold.RGBA();
+            titleDesc.TextShadowColor = new(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -112,9 +114,9 @@ namespace PhysicsSamples.SceneStart
             startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
-            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.TextForeColor = Color.Gold;
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.TextForeColor = Color.Gold.RGBA();
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
@@ -128,8 +130,8 @@ namespace PhysicsSamples.SceneStart
             exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
-            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
@@ -197,8 +199,8 @@ namespace PhysicsSamples.SceneStart
             float butWidth = exitButton.Width;
             float butHeight = exitButton.Height;
 
-            int formWidth = Game.Form.RenderWidth;
-            int formHeight = Game.Form.RenderHeight;
+            int formWidth = (int)Game.Form.RenderWidth;
+            int formHeight = (int)Game.Form.RenderHeight;
 
             int i = 0;
             for (int row = 0; row < rowCount; row++)

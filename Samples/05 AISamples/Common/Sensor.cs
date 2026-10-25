@@ -1,12 +1,13 @@
 ﻿using AISamples.Common.Agents;
 using AISamples.Common.Primitives;
-using SharpDX;
+using Engine;
 using System;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common
 {
-    class Sensor(Car car, int rayCount, float rayLength, float raySpread = MathUtil.PiOverFour)
+    class Sensor(Car car, int rayCount, float rayLength, float raySpread = Helper.PiOver4)
     {
         private readonly Car car = car;
         private readonly int rayCount = rayCount;
@@ -34,7 +35,7 @@ namespace AISamples.Common
             {
                 // Calculate the angle of the ray
                 float amount = rayCount == 1 ? 0.5f : i / ((float)rayCount - 1);
-                float angle = MathUtil.Lerp(-raySpread * 0.5f, raySpread * 0.5f, amount);
+                float angle = float.Lerp(-raySpread * 0.5f, raySpread * 0.5f, amount);
                 angle -= car.GetAngle();
 
                 var start = car.GetPosition();

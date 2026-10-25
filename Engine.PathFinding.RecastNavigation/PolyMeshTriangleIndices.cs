@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {

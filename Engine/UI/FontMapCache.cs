@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Engine.UI
@@ -40,7 +39,7 @@ namespace Engine.UI
         /// <returns>Returns the font map</returns>
         public static FontMap<T> Get(string fontFamily, float size, FontMapStyles style)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && MathUtil.NearEqual(f.FontSize, size) && f.FontStyle == style);
+            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && Helper.NearEqual(f.FontSize, size) && f.FontStyle == style);
         }
 
         /// <summary>

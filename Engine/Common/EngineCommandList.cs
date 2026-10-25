@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Command list interface
@@ -17,7 +17,7 @@ namespace Engine.Common
         /// Gets the internal command list
         /// </summary>
         /// <returns></returns>
-        CommandList GetCommandList();
+        ID3D11CommandList GetCommandList();
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal command list
         /// </summary>
-        private readonly CommandList commandList;
+        private readonly ID3D11CommandList commandList;
 
         /// <inheritdoc/>
         public string Name { get; private set; }
@@ -38,7 +38,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="commandList">Command list</param>
-        internal EngineCommandList(string name, CommandList commandList)
+        internal EngineCommandList(string name, ID3D11CommandList commandList)
         {
             Name = name;
             this.commandList = commandList ?? throw new ArgumentNullException(nameof(commandList));
@@ -74,7 +74,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public CommandList GetCommandList()
+        public ID3D11CommandList GetCommandList()
         {
             return commandList;
         }

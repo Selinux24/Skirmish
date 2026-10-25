@@ -1,10 +1,10 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
@@ -19,9 +19,9 @@ namespace Engine.BuiltIn.Components.Geometry
     /// <param name="scene">Scene</param>
     /// <param name="id">Id</param>
     /// <param name="name">Name</param>
-    public sealed class GeometryDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryDrawerDescription<T>>(scene, id, name), ITransformable3D, IUseMaterials where T : struct, IVertexData
+    public sealed class GeometryDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryDrawerDescription<T>>(scene, id, name), ITransformable3D, IUseMaterials where T : unmanaged, IVertexData
     {
-        const string className = nameof(GeometryDrawer<T>);
+        const string className = nameof(GeometryDrawer<>);
 
         /// <summary>
         /// Triangle dictionary by color
@@ -47,7 +47,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Vertices to draw
         /// </summary>
-        private int vertexCount = 0;
+        private uint vertexCount = 0;
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -69,11 +69,11 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Gets the vertex count
         /// </summary>
-        public int Count { get => vertexCount; }
+        public uint Count { get => vertexCount; }
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Texture index
         /// </summary>
@@ -248,7 +248,7 @@ namespace Engine.BuiltIn.Components.Geometry
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
 
                 return;
             }
@@ -347,7 +347,7 @@ namespace Engine.BuiltIn.Components.Geometry
 
             if (Game.WriteVertexBuffer(Game.Graphics.ImmediateContext, vertexBuffer, copy, false))
             {
-                vertexCount = copy.Length;
+                vertexCount = (uint)copy.Length;
                 bagChanged = false;
             }
         }

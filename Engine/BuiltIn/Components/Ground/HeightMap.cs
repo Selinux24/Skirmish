@@ -1,10 +1,10 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
@@ -76,10 +76,10 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="colorBitmap">Color image</param>
         /// <param name="heights">Returns the height map</param>
         /// <param name="colors">Returns the color map</param>
-        private static void ReadImages(Image heightBitmap, Image? colorBitmap, out float[,] heights, out Color4[,] colors)
+        private static void ReadImages(Image heightBitmap, Image? colorBitmap, out float[,] heights, out Vector4[,] colors)
         {
             heights = new float[heightBitmap.Height + 1, heightBitmap.Width + 1];
-            colors = new Color4[heightBitmap.Height + 1, heightBitmap.Width + 1];
+            colors = new Vector4[heightBitmap.Height + 1, heightBitmap.Width + 1];
 
             for (int h = 0; h < heightBitmap.Height + 1; h++)
             {
@@ -90,8 +90,8 @@ namespace Engine.BuiltIn.Components.Ground
                     int ww = w < heightBitmap.Width ? w : w - 1;
 
                     //Flip coordinates
-                    heights[h, w] = heightBitmap.GetPixel(ww, hh).Blue;
-                    colors[h, w] = colorBitmap?.GetPixel(ww, hh) ?? Color.Gray;
+                    heights[h, w] = heightBitmap.GetPixel(ww, hh).Z;
+                    colors[h, w] = colorBitmap?.GetPixel(ww, hh) ?? new(0.5f, 0.5f, 0.5f, 1f);
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="falloffCurveA">Falloff curve A</param>
         /// <param name="falloffCurveB">Falloff curve B</param>
         /// <returns>Returns the new generated height map</returns>
-        private static HeightMap FromMap(float[,] heights, Color4[,] colors, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
+        private static HeightMap FromMap(float[,] heights, Vector4[,] colors, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
         {
             float[,] falloffMap = null;
             if (useFalloff)
@@ -247,7 +247,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Color map data
         /// </summary>
-        private Color4[,] m_ColorData;
+        private Vector4[,] m_ColorData;
         /// <summary>
         /// Falloff map mada
         /// </summary>
@@ -313,7 +313,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="heightData">Height map data</param>
         /// <param name="colorData">Color map data</param>
         /// <param name="falloffData">Falloff map data</param>
-        HeightMap(float[,] heightData, Color4[,] colorData, float[,] falloffData)
+        HeightMap(float[,] heightData, Vector4[,] colorData, float[,] falloffData)
         {
             m_HeightData = heightData;
             m_ColorData = colorData;
@@ -433,10 +433,10 @@ namespace Engine.BuiltIn.Components.Ground
             float h = heightCurve.Evaluate(m_HeightData[depth, width]);
             if (m_FalloffData != null)
             {
-                h = MathUtil.Clamp(h - m_FalloffData[depth, width], 0, 1);
+                h = Math.Clamp(h - m_FalloffData[depth, width], 0, 1);
             }
 
-            Color4 c = m_ColorData != null ? m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);
+            Vector4 c = m_ColorData != null ? m_ColorData[depth, width] : new(Vector3.Lerp(Vector3.Zero, Vector3.One, h), 1f);
 
             float posX = depth * cellSize - totalDepth * 0.5f;
             float posY = h * cellHeight;

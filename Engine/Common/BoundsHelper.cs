@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -89,7 +90,7 @@ namespace Engine.Common
 
             if (updateBoundingSphere || refresh)
             {
-                boundingSphere = bounds.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix.Identity);
+                boundingSphere = bounds.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix4x4.Identity);
 
                 updateBoundingSphere = false;
             }
@@ -128,7 +129,7 @@ namespace Engine.Common
             if (updateOrientedBox || refresh)
             {
                 orientedBox = new OrientedBoundingBox(bounds.BoundingBox);
-                orientedBox.Transform(manipulator?.GlobalTransform ?? Matrix.Identity);
+                orientedBox.Transform(manipulator?.GlobalTransform ?? Matrix4x4.Identity);
 
                 updateOrientedBox = false;
             }

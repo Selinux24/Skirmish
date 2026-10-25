@@ -1,5 +1,4 @@
 ﻿using Engine.Tween;
-using SharpDX;
 
 namespace Engine.Audio.Tween
 {
@@ -111,15 +110,15 @@ namespace Engine.Audio.Tween
         /// <param name="ftVolume">Volume tween</param>
         public void AddVolumeTween(IGameAudioEffect effect, FloatTween ftVolume)
         {
-            effect.Volume = ftVolume.StartValue;
+            effect.SetVolume(ftVolume.StartValue);
 
             collection.AddTween(effect, (d) =>
             {
                 ftVolume.Update(d);
 
-                effect.Volume = ftVolume.CurrentValue;
+                effect.SetVolume(ftVolume.CurrentValue);
 
-                if (MathUtil.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
+                if (Helper.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     return true;
                 }
@@ -134,15 +133,15 @@ namespace Engine.Audio.Tween
         /// <param name="ftVolume">Volume tween</param>
         public void AddVolumeBounce(IGameAudioEffect effect, FloatTween ftVolume)
         {
-            effect.Volume = ftVolume.StartValue;
+            effect.SetVolume(ftVolume.StartValue);
 
             collection.AddTween(effect, (d) =>
             {
                 ftVolume.Update(d);
 
-                effect.Volume = ftVolume.CurrentValue;
+                effect.SetVolume(ftVolume.CurrentValue);
 
-                if (MathUtil.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
+                if (Helper.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     var newStart = ftVolume.EndValue;
                     var newEnd = ftVolume.StartValue;

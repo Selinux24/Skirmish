@@ -1,10 +1,10 @@
 ﻿using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -16,16 +16,16 @@ namespace Engine.PhysicsTests
 
         static readonly float Epsilon = 0.0005f;
 
-        static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix transform)
+        static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix4x4 transform)
         {
-            var p = new Plane(point, normal);
+            var p = PlaneExtensions.CreatePlane(point, normal);
             var c = new HalfSpaceCollider(p);
             var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
 
             return c;
         }
-        static TriangleCollider FromTriangle(Triangle tri, Matrix transform)
+        static TriangleCollider FromTriangle(Triangle tri, Matrix4x4 transform)
         {
             var c = new TriangleCollider(tri);
             var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
@@ -33,7 +33,7 @@ namespace Engine.PhysicsTests
 
             return c;
         }
-        static ConvexMeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix transform)
+        static ConvexMeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix4x4 transform)
         {
             var c = new ConvexMeshCollider(tris);
             var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
@@ -42,7 +42,7 @@ namespace Engine.PhysicsTests
             return c;
         }
 
-        static SphereCollider FromRadius(float radius, Matrix transform)
+        static SphereCollider FromRadius(float radius, Matrix4x4 transform)
         {
             var c = new SphereCollider(radius);
             var rb = new RigidBody(new() { Mass = 1, InitialTransform = transform });
@@ -65,18 +65,18 @@ namespace Engine.PhysicsTests
             var data3 = new ContactResolver();
 
             float ah = 0;
-            var trnA = Matrix.Translation(0, 0, 0);
+            var trnA = Matrix4x4.CreateTranslation(0, 0, 0);
 
             var t = new Triangle(new Vector3(-10, ah, -10), new Vector3(0, ah, 10), new Vector3(10, ah, -10));
             var t1 = new Triangle(new Vector3(-10, ah, -10), new Vector3(-10, ah, 10), new Vector3(10, ah, -10));
             var t2 = new Triangle(new Vector3(-10, ah, 10), new Vector3(10, ah, 10), new Vector3(10, ah, -10));
 
-            var c1 = FromPlane(new Vector3(0, ah, 0), Vector3.Up, trnA);
+            var c1 = FromPlane(new Vector3(0, ah, 0), Vector3Extensions.Up, trnA);
             var c2 = FromTriangle(t, trnA);
             var c3 = FromTriangles([t1, t2], trnA);
 
             float bh = -0.5f;
-            Matrix trnB = Matrix.Translation(0, bh, 0);
+            Matrix4x4 trnB = Matrix4x4.CreateTranslation(0, bh, 0);
             float r = 1f;
 
             var b = FromRadius(r, trnB);
@@ -104,13 +104,13 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(penetrationHf, contact2.Penetration, Epsilon); //It's a half space calculation
             Assert.AreEqual(penetration, contact3.Penetration, Epsilon); //Not's a half space
 
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Up, contact1.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact2.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact2.Normal}");
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact3.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact3.Normal}");
+            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Up, contact1.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
+            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Down, contact2.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Down} != {contact2.Normal}");
+            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Down, contact3.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Down} != {contact3.Normal}");
 
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact1.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact1.Position}");
-            Assert.IsTrue(Vector3.NearEqual(new Vector3(0, -r, 0), contact2.Position, new Vector3(Epsilon)), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact3.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact3.Position}");
+            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3.Zero, contact1.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact1.Position}");
+            Assert.IsTrue(Vector3Extensions.NearEqual(new Vector3(0, -r, 0), contact2.Position, new Vector3(Epsilon)), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
+            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3.Zero, contact3.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact3.Position}");
         }
     }
 }

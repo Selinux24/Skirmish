@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
@@ -18,7 +18,7 @@ namespace Engine.BuiltIn.Format
     /// <param name="animationOffsetB">Second animation offset</param>
     /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInstancingData(Matrix local, Color4 tintColor, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f) : IInstacingData
+    public struct VertexInstancingData(Matrix4x4 local, Vector4 tintColor, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f) : IInstacingData
     {
         private const string LocalTransformString = "localTransform";
         private const string TintColorString = "tintColor";
@@ -32,11 +32,11 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Local transformation for the instance
         /// </summary>
-        public Matrix Local = local;
+        public Matrix4x4 Local = local;
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor = tintColor;
+        public Vector4 TintColor = tintColor;
         /// <summary>
         /// Texture index
         /// </summary>
@@ -67,34 +67,34 @@ namespace Engine.BuiltIn.Format
         /// <param name="animationOffset">First animation offset</param>
         /// <param name="animationOffsetB">Second animation offset</param>
         /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
-        public VertexInstancingData(Matrix local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f)
-            : this(local, Color4.White, textureIndex, materialIndex, animationOffset, animationOffsetB, animationInterpolation)
+        public VertexInstancingData(Matrix4x4 local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f)
+            : this(local, new(1, 1, 1, 1), textureIndex, materialIndex, animationOffset, animationOffsetB, animationInterpolation)
         {
 
         }
 
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return
             [
-                new (LocalTransformString, 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 1, SharpDX.DXGI.Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 2, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 3, SharpDX.DXGI.Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TintColorString, 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TextureIndexString, 0, SharpDX.DXGI.Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
-                new (MaterialIndexString, 0, SharpDX.DXGI.Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetString, 0, SharpDX.DXGI.Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetBString, 0, SharpDX.DXGI.Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationInterpolationString, 0, SharpDX.DXGI.Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 0, Vortice.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 1, Vortice.DXGI.Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 2, Vortice.DXGI.Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 3, Vortice.DXGI.Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TintColorString, 0, Vortice.DXGI.Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TextureIndexString, 0, Vortice.DXGI.Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
+                new (MaterialIndexString, 0, Vortice.DXGI.Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetString, 0, Vortice.DXGI.Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetBString, 0, Vortice.DXGI.Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationInterpolationString, 0, Vortice.DXGI.Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
             ];
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexInstancingData>();
+            return (uint)Marshal.SizeOf<VertexInstancingData>();
         }
     }
 }

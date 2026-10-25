@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Animation
 {
@@ -65,10 +65,10 @@ namespace Engine.Animation
             }
 
             //Pre-normalize rotations
-            List<Keyframe> tmp = new(keyframes);
-            for (int i = 0; i < tmp.Count; i++)
+            Keyframe[] tmp = [.. keyframes];
+            for (int i = 0; i < tmp.Length; i++)
             {
-                tmp[i].Rotation.Normalize();
+                tmp[i].Rotation = Quaternion.Normalize(tmp[i].Rotation);
             }
 
             Keyframes = tmp;
@@ -81,15 +81,15 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="time">Time</param>
         /// <returns>Return interpolated transformation</returns>
-        public Matrix Interpolate(float time)
+        public Matrix4x4 Interpolate(float time)
         {
             Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             //Create the combined transformation matrix
             return
-                Matrix.Scaling(scale) *
-                Matrix.RotationQuaternion(rotation) *
-                Matrix.Translation(translation);
+                Matrix4x4.CreateScale(scale) *
+                Matrix4x4.CreateFromQuaternion(rotation) *
+                Matrix4x4.CreateTranslation(translation);
         }
         /// <summary>
         /// Interpolate bone transformation
@@ -185,8 +185,8 @@ namespace Engine.Animation
             return
                 Joint == other.Joint &&
                 Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
-                MathUtil.NearEqual(StartTime, other.StartTime) &&
-                MathUtil.NearEqual(EndTime, other.EndTime);
+                Helper.NearEqual(StartTime, other.StartTime) &&
+                Helper.NearEqual(EndTime, other.EndTime);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

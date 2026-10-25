@@ -1,5 +1,6 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -20,7 +21,7 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
         /// <summary>
@@ -37,14 +38,14 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
         /// <summary>
         /// Gets a texture renderer description
         /// </summary>
         /// <param name="bounds">Control bounds</param>
-        public static UITextureRendererDescription Default(RectangleF bounds)
+        public static UITextureRendererDescription Default(Rect bounds)
         {
             return new()
             {
@@ -53,7 +54,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
         /// <summary>
@@ -61,7 +62,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="fileName">Texture file name</param>
         /// <param name="bounds">Control bounds</param>
-        public static UITextureRendererDescription Default(string fileName, RectangleF bounds)
+        public static UITextureRendererDescription Default(string fileName, Rect bounds)
         {
             return new()
             {
@@ -71,7 +72,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
         /// <summary>
@@ -90,7 +91,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
         /// <summary>
@@ -111,7 +112,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Color4.White,
+                BaseColor = Vector4.One,
             };
         }
 

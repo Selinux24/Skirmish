@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine
 {
@@ -11,11 +11,11 @@ namespace Engine
         /// <summary>
         /// Width
         /// </summary>
-        public int MapWidth { get; set; }
+        public uint MapWidth { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int MapHeight { get; set; }
+        public uint MapHeight { get; set; }
         /// <summary>
         /// Noise scale
         /// </summary>
@@ -50,7 +50,7 @@ namespace Engine
             MapHeight = Math.Max(1, MapHeight);
             Scale = MathF.Max(0.0001f, Scale);
             Octaves = Math.Max(1, Octaves);
-            Persistance = MathUtil.Clamp(Persistance, 0, 1);
+            Persistance = Math.Clamp(Persistance, 0, 1);
             Lacunarity = MathF.Max(1f, Lacunarity);
             Seed = Math.Max(0, Seed);
             Offset = new Vector2(MathF.Max(1f, Offset.X), MathF.Max(1f, Offset.Y));

@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -96,27 +96,27 @@ namespace Engine.Physics
             Position = position;
 
             float implosionArea = description.ImplosionMaxRadius - description.ImplosionMinRadius;
-            if (MathUtil.IsZero(implosionArea) || implosionArea <= 0)
+            if (Helper.IsZero(implosionArea) || implosionArea <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionMinRadius)} - {nameof(description.ImplosionMaxRadius)} must be major than 0.");
             }
             ImplosionMinRadius = description.ImplosionMinRadius;
             ImplosionMaxRadius = description.ImplosionMaxRadius;
 
-            if (MathUtil.IsZero(description.ImplosionDuration) || description.ImplosionDuration <= 0)
+            if (Helper.IsZero(description.ImplosionDuration) || description.ImplosionDuration <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionDuration)} must be major than 0.");
             }
             ImplosionDuration = description.ImplosionDuration;
 
-            if (MathUtil.IsZero(description.ImplosionForce) || description.ImplosionForce <= 0)
+            if (Helper.IsZero(description.ImplosionForce) || description.ImplosionForce <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionForce)} must be major than 0.");
             }
             ImplosionForce = description.ImplosionForce;
 
             float maxDistance = (description.ShockwaveSpeed * description.ConcussionDuration) + description.ShockwaveThickness;
-            if (MathUtil.IsZero(maxDistance) || maxDistance <= 0)
+            if (Helper.IsZero(maxDistance) || maxDistance <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"({nameof(description.ShockwaveSpeed)} * {nameof(description.ConcussionDuration)}) - {nameof(description.ShockwaveThickness)} must be major than 0.");
             }
@@ -124,13 +124,13 @@ namespace Engine.Physics
             ShockwaveThickness = description.ShockwaveThickness;
             ConcussionDuration = description.ConcussionDuration;
 
-            if (MathUtil.IsZero(description.PeakConcussionForce) || description.PeakConcussionForce <= 0)
+            if (Helper.IsZero(description.PeakConcussionForce) || description.PeakConcussionForce <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.PeakConcussionForce)} must be major than 0.");
             }
             PeakConcussionForce = description.PeakConcussionForce;
 
-            if (MathUtil.IsZero(description.ShockwaveOvertakenAttenuation) || description.ShockwaveOvertakenAttenuation <= 0)
+            if (Helper.IsZero(description.ShockwaveOvertakenAttenuation) || description.ShockwaveOvertakenAttenuation <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ShockwaveOvertakenAttenuation)} must be major than 0.");
             }
@@ -140,7 +140,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void UpdateForce(float time)
         {
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return;
             }
@@ -180,7 +180,7 @@ namespace Engine.Physics
                     break;
             }
 
-            if (MathUtil.IsZero(forceMagnitude))
+            if (Helper.IsZero(forceMagnitude))
             {
                 return;
             }
@@ -261,7 +261,7 @@ namespace Engine.Physics
         /// <param name="max">Max value</param>
         private static float CalculateAttenuation(float current, float max)
         {
-            if (MathUtil.IsZero(max) || max < 0)
+            if (Helper.IsZero(max) || max < 0)
             {
                 return 0;
             }

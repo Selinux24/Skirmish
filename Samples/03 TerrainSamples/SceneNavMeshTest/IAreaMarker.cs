@@ -1,6 +1,8 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using Engine;
+using Engine.Common;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
@@ -21,7 +23,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly bool IntersectsRay(Ray ray)
         {
-            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3.Up, Radius))
+            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3Extensions.Up, Radius))
             {
                 return true;
             }
@@ -39,14 +41,14 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly BoundingBox GetBounds()
         {
-            return BoundingBox.FromPoints(Vertices);
+            return BoundingBox.CreateFromPoints(Vertices);
         }
 
         public readonly bool IntersectsRay(Ray ray)
         {
             var cvBox = GetBounds();
 
-            return cvBox.Intersects(ref ray);
+            return cvBox.Intersects(ray).HasValue;
         }
 
         public readonly IEnumerable<(Vector3[] verts, bool ccw)> GetPolygons()

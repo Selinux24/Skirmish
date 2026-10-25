@@ -4,7 +4,7 @@ using Engine.Common;
 
 namespace Engine.BuiltIn.Drawers
 {
-    using Format = SharpDX.DXGI.Format;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Built-in drawer class
@@ -322,7 +322,7 @@ namespace Engine.BuiltIn.Drawers
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, IMesh[] meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(IEngineDeviceContext dc, IMesh[] meshes, uint instances = 0, uint startInstanceLocation = 0)
         {
             if (meshes.Length <= 0)
             {
@@ -385,7 +385,7 @@ namespace Engine.BuiltIn.Drawers
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount)
+        public virtual bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, uint drawCount)
         {
             if (buffer == null)
             {
@@ -407,7 +407,7 @@ namespace Engine.BuiltIn.Drawers
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, int count, int startLocation)
+        public virtual bool Draw(IEngineDeviceContext dc, uint bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, uint count, uint startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);

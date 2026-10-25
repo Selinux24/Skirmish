@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -11,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix initialTransform = Matrix.Identity;
+        private Matrix4x4 initialTransform = Matrix4x4.Identity;
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -34,7 +35,7 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public override Matrix ParentTransform
+        public override Matrix4x4 ParentTransform
         {
             get
             {
@@ -48,11 +49,11 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public Matrix Local
+        public Matrix4x4 Local
         {
             get
             {
-                return Matrix.Scaling(Radius) * Matrix.Translation(Position);
+                return Matrix4x4.CreateScale(Radius) * Matrix4x4.CreateTranslation(Position);
             }
         }
 
@@ -63,10 +64,10 @@ namespace Engine
         /// <param name="direction">Direction</param>
         /// <param name="up">Up vector</param>
         /// <returns>Returns the point light from light view matrix</returns>
-        private static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        private static Matrix4x4 GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
         {
             // View from light to scene center position
-            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
+            return Matrix4x4.CreateLookAtLeftHanded(lightPosition, lightPosition + direction, up);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
-        public SceneLightPoint(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, SceneLightPointDescription description)
+        public SceneLightPoint(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialTransform = description.Transform;
@@ -103,7 +104,7 @@ namespace Engine
         {
             var trn = initialTransform * ParentTransform;
 
-            trn.Decompose(out Vector3 scale, out _, out Vector3 translation);
+            Matrix4x4.Decompose(trn, out Vector3 scale, out _, out Vector3 translation);
             Radius = initialRadius * scale.X;
             Intensity = initialIntensity * scale.X;
             Position = translation;
@@ -134,19 +135,19 @@ namespace Engine
         /// Gets from light view * projection matrix cube
         /// </summary>
         /// <returns>Returns the from light view * projection matrix cube</returns>
-        private Matrix[] UpdateFromLightViewProjection()
+        private Matrix4x4[] UpdateFromLightViewProjection()
         {
             // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, Radius);
+            var projection = Matrix4x4.CreatePerspectiveFieldOfView(Helper.PiOver2, 1f, 0.1f, Radius);
 
             return
             [
-                GetFromPointLightViewProjection(Position, Vector3.Right,      Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3.Left,       Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3.Up,         Vector3.BackwardLH) * projection,
-                GetFromPointLightViewProjection(Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
-                GetFromPointLightViewProjection(Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3.BackwardLH, Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.Right,      Vector3Extensions.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.Left,       Vector3Extensions.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.Up,         Vector3Extensions.BackwardLH) * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.Down,       Vector3Extensions.ForwardLH)  * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.ForwardLH,  Vector3Extensions.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3Extensions.BackwardLH, Vector3Extensions.Up)         * projection,
             ];
         }
         /// <inheritdoc/>

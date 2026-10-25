@@ -1,5 +1,5 @@
 ﻿using AISamples.Common.Primitives;
-using SharpDX;
+using System.Numerics;
 
 namespace AISamples.Common
 {

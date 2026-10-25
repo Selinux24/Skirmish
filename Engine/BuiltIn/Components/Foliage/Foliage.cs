@@ -3,12 +3,13 @@ using Engine.BuiltIn.Drawers.Foliage;
 using Engine.Collections;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -605,7 +606,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 var state = new BuiltInFoliageState
                 {
-                    TintColor = Color4.White,
+                    TintColor = new(1f, 1f, 1f, 1f),
 
                     StartRadius = channelData.StartRadius,
                     EndRadius = channelData.EndRadius,

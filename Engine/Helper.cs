@@ -1,13 +1,13 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -21,9 +21,59 @@ namespace Engine
         /// </summary>
         public const float Radian = 0.0174532924f;
         /// <summary>
+        /// Zero tolerance value
+        /// </summary>
+        public const float ZeroTolerance = MathHelper.ZeroTolerance;
+        /// <summary>
         /// Zero tolerance vector
         /// </summary>
-        public static readonly Vector3 ZeroToleranceVector = new(MathUtil.ZeroTolerance);
+        public static readonly Vector2 ZeroToleranceVector2 = new(ZeroTolerance);
+        /// <summary>
+        /// Zero tolerance vector
+        /// </summary>
+        public static readonly Vector3 ZeroToleranceVector3 = new(ZeroTolerance);
+        /// <summary>
+        /// Zero tolerance vector
+        /// </summary>
+        public static readonly Vector4 ZeroToleranceVector4 = new(ZeroTolerance);
+
+        public const float Pi = MathHelper.Pi;
+        public const float TwoPi = MathHelper.TwoPi;
+        public const float PiOver2 = MathHelper.PiOver2;
+        public const float PiOver4 = MathHelper.PiOver4;
+
+        #region Maths
+
+        public static bool IsZero(float a, float epsilon = ZeroTolerance)
+        {
+            return Math.Abs(a) < epsilon;
+        }
+        public static bool IsOne(float a)
+        {
+            return IsZero(a - 1.0f);
+        }
+        public static bool NearEqual(float a, float b, float epsilon = ZeroTolerance)
+        {
+            return MathHelper.WithinEpsilon(a, b, epsilon);
+        }
+
+        public static float Mod(float value, float mod)
+        {
+            if (mod == 0f) return value;
+
+            return value % mod;
+        }
+
+        public static float DegreesToRadians(float d)
+        {
+            return MathHelper.ToRadians(d);
+        }
+        public static float RadiansToDegrees(float d)
+        {
+            return MathHelper.ToDegrees(d);
+        }
+
+        #endregion
 
         #region Random
 
@@ -47,6 +97,31 @@ namespace Engine
             return new(seed);
         }
 
+        public static float NextSingle(this Random rand, float min, float max)
+        {
+            float v = rand.NextSingle();
+
+            return float.Lerp(min, max, v);
+        }
+        public static Vector2 NextVector2(this Random rand, Vector2 min, Vector2 max)
+        {
+            Vector2 alpha = new(rand.NextSingle(), rand.NextSingle());
+
+            return Vector2.Lerp(min, max, alpha);
+        }
+        public static Vector3 NextVector3(this Random rand, Vector3 min, Vector3 max)
+        {
+            Vector3 alpha = new(rand.NextSingle(), rand.NextSingle(), rand.NextSingle());
+
+            return Vector3.Lerp(min, max, alpha);
+        }
+        public static Vector4 NextVector4(this Random rand, Vector4 min, Vector4 max)
+        {
+            Vector4 alpha = new(rand.NextSingle(), rand.NextSingle(), rand.NextSingle(), rand.NextSingle());
+
+            return Vector4.Lerp(min, max, alpha);
+        }
+
         #endregion
 
         #region Memory
@@ -60,22 +135,6 @@ namespace Engine
         public static void Swap<T>(ref T left, ref T right)
         {
             (right, left) = (left, right);
-        }
-        /// <summary>
-        /// Converts the byte array to a structure
-        /// </summary>
-        /// <typeparam name="T">Structure type</typeparam>
-        /// <param name="bytes">Bytes</param>
-        /// <param name="start">Start intex</param>
-        /// <param name="count">Element count</param>
-        /// <returns>Gets the generated struct</returns>
-        public static T ToStructure<T>(this byte[] bytes, int start, int count) where T : struct
-        {
-            byte[] temp = [.. bytes.Skip(start).Take(count)];
-            GCHandle handle = GCHandle.Alloc(temp, GCHandleType.Pinned);
-            T stuff = Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
-            handle.Free();
-            return stuff;
         }
         /// <summary>
         /// Writes stream to memory
@@ -326,6 +385,20 @@ namespace Engine
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(uint length, T defaultValue = default) where T : struct
+        {
+            T[] array = new T[length];
+
+            InitializeArray(array, defaultValue);
+
+            return array;
+        }
+        /// <summary>
+        /// Generate an array initialized to defaultValue
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="defaultValue">Default value</param>
+        /// <returns>Returns array</returns>
         public static T[] CreateArray<T>(int length, T defaultValue = default) where T : struct
         {
             T[] array = new T[length];
@@ -340,7 +413,35 @@ namespace Engine
         /// <param name="length">Length</param>
         /// <param name="func">Function</param>
         /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(uint length, Func<T> func)
+        {
+            T[] array = new T[length];
+
+            InitializeArray(array, func);
+
+            return array;
+        }
+        /// <summary>
+        /// Generate an array initialized to function result
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="func">Function</param>
+        /// <returns>Returns array</returns>
         public static T[] CreateArray<T>(int length, Func<T> func)
+        {
+            T[] array = new T[length];
+
+            InitializeArray(array, func);
+
+            return array;
+        }
+        /// <summary>
+        /// Generate an array initialized to function result
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="func">Function</param>
+        /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(uint length, Func<int, T> func)
         {
             T[] array = new T[length];
 
@@ -468,7 +569,7 @@ namespace Engine
         /// <returns>Returns next pair</returns>
         public static int NextPair(this int num)
         {
-            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num + 1 : num;
+            return !NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num + 1 : num;
         }
         /// <summary>
         /// Gets next odd of even number, if even
@@ -477,7 +578,7 @@ namespace Engine
         /// <returns>Returns next odd</returns>
         public static int NextOdd(this int num)
         {
-            return !MathUtil.NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num : num + 1;
+            return !NearEqual(num * 0.5f, (int)(num * 0.5f)) ? num : num + 1;
         }
         /// <summary>
         /// Calculates the next highest power of two.
@@ -698,264 +799,8 @@ namespace Engine
 
         #endregion
 
-        #region Arithmetic
-
-        /// <summary>
-        /// Performs cross product between two vectors
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the cross product</returns>
-        public static float Cross(Vector2 one, Vector2 two)
-        {
-            return one.X * two.Y - one.Y * two.X;
-        }
-        /// <summary>
-        /// Gets the angle between two vectors
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float Angle(Vector2 one, Vector2 two)
-        {
-            //Get the dot product
-            float dot = Vector2.Dot(one, two);
-
-            // Divide the dot by the product of the magnitudes of the vectors
-            dot /= one.Length() * two.Length();
-
-            //Get the arc cosin of the angle, you now have your angle in radians 
-            return MathF.Acos(dot);
-        }
-        /// <summary>
-        /// Gets the angle between two quaternions
-        /// </summary>
-        /// <param name="one">First quaternions</param>
-        /// <param name="two">Second quaternions</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float Angle(Quaternion one, Quaternion two)
-        {
-            float dot = Quaternion.Dot(one, two);
-
-            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f)) * 2f;
-        }
-        /// <summary>
-        /// Gets the angle between two vectors
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float Angle(Vector3 one, Vector3 two)
-        {
-            float dot = Vector3.Dot(one, two);
-
-            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f));
-        }
-        /// <summary>
-        /// Gets the signed angle between two vectors
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float AngleSigned(Vector2 one, Vector2 two)
-        {
-            return MathF.Atan2(Cross(one, two), Vector2.Dot(one, two));
-        }
-        /// <summary>
-        /// Gets the signed angle between two vectors
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float AngleSigned(Vector3 one, Vector3 two)
-        {
-            float dot = Vector3.Dot(one, two);
-
-            return MathF.Acos(MathUtil.Clamp(dot, -1f, 1f));
-        }
-        /// <summary>
-        /// Gets the angle between two vectors in the same plane
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <param name="planeNormal">Plane normal</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
-        {
-            var p = new Plane(planeNormal, 0);
-
-            float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
-
-            float angle = MathF.Acos(MathUtil.Clamp(dot, 0, 1));
-
-            var cross = Vector3.Cross(one, two);
-
-            if (Vector3.Dot(p.Normal, cross) > 0)
-            {
-                angle = -angle;
-            }
-
-            return angle;
-        }
-        /// <summary>
-        /// Gets the yaw and pitch values from vector
-        /// </summary>
-        /// <param name="vec">Vector</param>
-        /// <param name="yaw">Yaw value</param>
-        /// <param name="pitch">Pitch value</param>
-        public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
-        {
-            yaw = MathF.Atan2(vec.X, vec.Y);
-
-            if (yaw < 0.0f)
-            {
-                yaw += MathUtil.TwoPi;
-            }
-
-            if (MathF.Abs(vec.X) > MathF.Abs(vec.Y))
-            {
-                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.X));
-            }
-            else
-            {
-                pitch = MathF.Atan2(MathF.Abs(vec.Z), MathF.Abs(vec.Y));
-            }
-
-            if (vec.Z < 0.0f)
-            {
-                pitch = -pitch;
-            }
-        }
-        /// <summary>
-        /// Get the vector from yaw and pitch angles
-        /// </summary>
-        /// <param name="yaw">Yaw angle</param>
-        /// <param name="pitch">Pitch angle</param>
-        /// <param name="vec">Vector</param>
-        public static void GetVectorFromAngles(float yaw, float pitch, out Vector3 vec)
-        {
-            Quaternion rot = Quaternion.RotationYawPitchRoll(-yaw, pitch, 0.0f);
-            Matrix mat = Matrix.RotationQuaternion(rot);
-
-            vec = Vector3.TransformCoordinate(Vector3.Up, mat);
-        }
-
-        #endregion
-
         #region Transforms
 
-        /// <summary>
-        /// Creates a new world Matrix
-        /// </summary>
-        /// <param name="position">The position vector.</param>
-        /// <param name="forward">The forward direction vector.</param>
-        /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
-        /// <returns>The world Matrix</returns>
-        public static Matrix CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
-        {
-            var result = new Matrix();
-
-            Vector3.Normalize(ref forward, out Vector3 z);
-            Vector3.Cross(ref forward, ref up, out Vector3 x);
-            Vector3.Cross(ref x, ref forward, out Vector3 y);
-            x.Normalize();
-            y.Normalize();
-
-            result.Right = x;
-            result.Up = y;
-            result.Forward = z;
-            result.TranslationVector = position;
-            result.M44 = 1f;
-
-            return result;
-        }
-        /// <summary>
-        /// Look at target
-        /// </summary>
-        /// <param name="eyePosition">Eye position</param>
-        /// <param name="target">Target</param>
-        /// <param name="up">Up vector</param>
-        /// <param name="axis">Relative rotation axis</param>
-        /// <returns>Returns rotation quaternion</returns>
-        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis = Axis.None)
-        {
-            if (MathUtil.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target))))
-            {
-                up = Vector3.Left;
-            }
-
-            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, up));
-
-            if (axis != Axis.None)
-            {
-                q = q.ClampToAxis(axis);
-            }
-
-            return q;
-        }
-        /// <summary>
-        /// Clamps the rotation to the specified axis
-        /// </summary>
-        /// <param name="q">Quaternion</param>
-        /// <param name="axis">Axis</param>
-        /// <returns>Returns the clamped quaternion</returns>
-        public static Quaternion ClampToAxis(this Quaternion q, Axis axis)
-        {
-            switch (axis)
-            {
-                case Axis.X:
-                    q.Y = 0;
-                    q.Z = 0;
-                    q.Normalize();
-                    break;
-                case Axis.Y:
-                    q.X = 0;
-                    q.Z = 0;
-                    q.Normalize();
-                    break;
-                case Axis.Z:
-                    q.X = 0;
-                    q.Y = 0;
-                    q.Normalize();
-                    break;
-            }
-
-            return q;
-        }
-        /// <summary>
-        /// Finds the quaternion between from and to quaternions traveling maxDelta radians
-        /// </summary>
-        /// <param name="from">From</param>
-        /// <param name="to">To</param>
-        /// <param name="maxDelta">Maximum radians</param>
-        /// <returns>Gets the quaternion between from and to quaternions traveling maxDelta radians</returns>
-        public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
-        {
-            float angle = Angle(from, to);
-            if (MathUtil.IsZero(angle))
-            {
-                return to;
-            }
-
-            float delta = MathF.Min(1f, maxDelta / angle);
-
-            return Quaternion.Slerp(from, to, delta);
-        }
-        /// <summary>
-        /// Creates a rotation from the direction vector from the up vector
-        /// </summary>
-        /// <param name="direction">Direction vector</param>
-        /// <param name="up">Up vector</param>
-        /// <returns>Returns a rotation quaternion</returns>
-        public static Quaternion RotateFromDirection(Vector3 direction, Vector3 up)
-        {
-            var a = Vector3.Cross(direction, up);
-            var w = MathF.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
-            Quaternion q = new(a, w);
-            q.Normalize();
-
-            return q;
-        }
         /// <summary>
         /// Gets the screen coordinates from the specified 3D point
         /// </summary>
@@ -964,12 +809,12 @@ namespace Engine
         /// <param name="wvp">World * View * Projection</param>
         /// <param name="isInsideScreen">Returns true if the resulting point is inside the screen</param>
         /// <returns>Returns the resulting screen coordinates</returns>
-        public static Vector2 UnprojectToScreen(Vector3 point, ViewportF viewPort, Matrix wvp, out bool isInsideScreen)
+        public static Vector2 UnprojectToScreen(Vector3 point, Viewport viewPort, Matrix4x4 wvp, out bool isInsideScreen)
         {
             isInsideScreen = true;
 
             // Go to projection space
-            Vector3.Transform(ref point, ref wvp, out Vector4 projected);
+            var projected = Vector3Extensions.Transform(point, wvp);
 
             // Clip
             // 
@@ -1021,29 +866,29 @@ namespace Engine
 
         #endregion
 
-        #region Rectangle & RectangleF
+        #region Rect & RectI
 
-        public static Vector2Int TopLeft(this Rectangle rectangle)
+        public static Vector2Int TopLeft(this RectI rectangle)
         {
             return new Vector2Int(rectangle.Top, rectangle.Left);
         }
-        public static Vector2Int TopRight(this Rectangle rectangle)
+        public static Vector2Int TopRight(this RectI rectangle)
         {
             return new Vector2Int(rectangle.Top, rectangle.Right);
         }
-        public static Vector2Int BottomLeft(this Rectangle rectangle)
+        public static Vector2Int BottomLeft(this RectI rectangle)
         {
             return new Vector2Int(rectangle.Bottom, rectangle.Left);
         }
-        public static Vector2Int BottomRight(this Rectangle rectangle)
+        public static Vector2Int BottomRight(this RectI rectangle)
         {
             return new Vector2Int(rectangle.Bottom, rectangle.Right);
         }
-        public static Vector2Int Center(this Rectangle rectangle)
+        public static Vector2Int Center(this RectI rectangle)
         {
             return new Vector2Int(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
         }
-        public static Vector2Int[] GetVertices(this Rectangle rectangle)
+        public static Vector2Int[] GetVertices(this RectI rectangle)
         {
             return
             [
@@ -1053,7 +898,7 @@ namespace Engine
                 new (rectangle.Left, rectangle.Bottom),
             ];
         }
-        public static Vector2[] GetVertices(this RectangleF rectangle)
+        public static Vector2[] GetVertices(this Rect rectangle)
         {
             return
             [
@@ -1063,7 +908,7 @@ namespace Engine
                 new (rectangle.Left, rectangle.Bottom),
             ];
         }
-        public static RectangleF Scale(this RectangleF rectangle, float scale)
+        public static Rect Scale(this Rect rectangle, float scale)
         {
             float width = rectangle.Width * scale;
             float height = rectangle.Height * scale;
@@ -1073,132 +918,7 @@ namespace Engine
             float left = rectangle.Left - (dWidth * 0.5f);
             float top = rectangle.Top - (dHeight * 0.5f);
 
-            return new RectangleF(left, top, width, height);
-        }
-
-        #endregion
-
-        #region Bounding Box
-
-        /// <summary>
-        /// Merges the array of bounding boxes into one bounding box
-        /// </summary>
-        /// <param name="boxes">Array of boxes</param>
-        /// <returns>Returns a bounding box containing all the boxes in the array</returns>
-        public static BoundingBox MergeBoundingBox(IEnumerable<BoundingBox> boxes)
-        {
-            var fbbox = new BoundingBox();
-
-            if (boxes?.Any() != true)
-            {
-                return fbbox;
-            }
-
-            var defaultBox = new BoundingBox();
-
-            foreach (var bbox in boxes.Where(b => b != defaultBox))
-            {
-                fbbox = MergeBoundingBox(fbbox, bbox);
-            }
-
-            return fbbox;
-        }
-        /// <summary>
-        /// Merges the boxes
-        /// </summary>
-        /// <param name="sourceBox">Source box</param>
-        /// <param name="newBox">New box</param>
-        /// <returns>If source box is null or default, returns new box</returns>
-        private static BoundingBox MergeBoundingBox(BoundingBox? sourceBox, BoundingBox newBox)
-        {
-            if (!sourceBox.HasValue || sourceBox == new BoundingBox())
-            {
-                return newBox;
-            }
-
-            return BoundingBox.Merge(sourceBox.Value, newBox);
-        }
-
-        #endregion
-
-        #region Colors
-
-        /// <summary>
-        /// Converts an integer value to Color4
-        /// </summary>
-        /// <param name="value">Integer value</param>
-        /// <param name="alpha">Alpha value from 0 to 255</param>
-        /// <returns>Returns the Color4 value</returns>
-        public static Color4 IntToCol(int value, int alpha)
-        {
-            int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;
-            int g = Bit(value, 1) + Bit(value, 4) * 2 + 1;
-            int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
-
-            return new Color4(
-                1 - r * 63.0f / 255.0f,
-                1 - g * 63.0f / 255.0f,
-                1 - b * 63.0f / 255.0f,
-                alpha / 255.0f);
-        }
-        /// <summary>
-        /// Bitwise secret wisdoms
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        private static int Bit(int a, int b)
-        {
-            return (a & (1 << b)) >> b;
-        }
-
-        #endregion
-
-        #region Debug Utils
-
-        /// <summary>
-        /// Gets matrix description
-        /// </summary>
-        /// <param name="matrix">Matrix</param>
-        /// <returns>Return matrix description</returns>
-        public static string GetDescription(this Matrix matrix)
-        {
-            if (matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
-            {
-                return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
-                    scale.GetDescription(),
-                    translation.GetDescription(),
-                    rotation.GetDescription());
-            }
-            else
-            {
-                return "Bad transform matrix";
-            }
-        }
-        /// <summary>
-        /// Gets quaternion description
-        /// </summary>
-        /// <param name="quaternion">Quaternion</param>
-        /// <returns>Return quaternion description</returns>
-        public static string GetDescription(this Quaternion quaternion)
-        {
-            Vector3 axis = quaternion.Axis;
-            float angle = quaternion.Angle;
-
-            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription());
-        }
-        /// <summary>
-        /// Gets vector description
-        /// </summary>
-        /// <param name="vector">Vector</param>
-        /// <returns>Return vector description</returns>
-        public static string GetDescription(this Vector3 vector)
-        {
-            vector.X = MathF.Round(vector.X, 3);
-            vector.Y = MathF.Round(vector.Y, 3);
-            vector.Z = MathF.Round(vector.Z, 3);
-
-            return string.Format("X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}", vector.X, vector.Y, vector.Z);
+            return new Rect(left, top, width, height);
         }
 
         #endregion

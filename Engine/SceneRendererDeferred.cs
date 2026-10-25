@@ -1,13 +1,13 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using SharpDX;
-using SharpDX.DXGI;
+using Vortice.DXGI;
 using System.Collections.Generic;
 using System.Linq;
 using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Deferred;
 using Engine.Common;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -413,7 +413,7 @@ namespace Engine
 
             int gbCount = 6;
 
-            geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, gbCount);
+            geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, (uint)gbCount);
             lightBuffer = new RenderTarget(scene.Game, "LightBuffer", Format.R32G32B32A32_Float, false, 1);
 
             blendDeferredComposer = EngineBlendState.DeferredComposer(scene.Game.Graphics, gbCount);
@@ -569,7 +569,7 @@ namespace Engine
                     {
                         Target = Targets.Objects,
                         ClearRT = true,
-                        ClearRTColor = Scene.GameEnvironment.Background,
+                        ClearRTColor = (Color4)Scene.GameEnvironment.Background,
                     };
                     DoDeferred(rt, deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
                 });
@@ -618,7 +618,7 @@ namespace Engine
                 {
                     Target = Targets.UI,
                     ClearRT = true,
-                    ClearRTColor = Color.Transparent,
+                    ClearRTColor = new(0),
                 };
                 DoForward(rt, uiComponents, CullUI, UIPass);
             });
@@ -799,7 +799,7 @@ namespace Engine
 
             //Set g-buffer render targets
             dc.SetRenderTargets(
-                geometryBuffer.Targets, true, Color.Transparent,
+                geometryBuffer.Targets, true, new(0),
                 Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
         }
@@ -814,7 +814,7 @@ namespace Engine
 
             //Set light buffer to draw lights
             dc.SetRenderTargets(
-                lightBuffer.Targets, true, Color.Transparent,
+                lightBuffer.Targets, true, new(0),
                 false);
         }
 

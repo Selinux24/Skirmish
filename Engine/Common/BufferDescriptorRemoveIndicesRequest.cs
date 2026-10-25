@@ -29,7 +29,7 @@ namespace Engine.Common
             {
                 var desc = bufferManager.GetIndexBufferDescription(descriptor.BufferDescriptionIndex);
 
-                Logger.WriteTrace(this, $"Remove BufferDescriptor {(desc.Dynamic ? "dynamic" : "static")} [{descriptor.Id}]");
+                Game.Logger.WriteTrace(this, $"Remove BufferDescriptor {(desc.Dynamic ? "dynamic" : "static")} [{descriptor.Id}]");
 
                 desc.RemoveDescriptor(descriptor);
             }

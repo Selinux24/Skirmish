@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -228,7 +227,7 @@ namespace Engine.Animation
 
             UpdateItems(skData);
 
-            if (MathUtil.IsZero(elapsedSeconds))
+            if (Helper.IsZero(elapsedSeconds))
             {
                 return false;
             }
@@ -286,7 +285,7 @@ namespace Engine.Animation
         private static TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
         {
             var itemTotalDuration = item.TotalDuration * item.TimeDelta;
-            if (MathUtil.IsZero(itemTotalDuration))
+            if (Helper.IsZero(itemTotalDuration))
             {
                 return new TimeInItemData
                 {

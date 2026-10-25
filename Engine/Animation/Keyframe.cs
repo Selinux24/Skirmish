@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Animation
 {
@@ -22,7 +22,7 @@ namespace Engine.Animation
         /// <summary>
         /// Frame transformation
         /// </summary>
-        private Matrix transform;
+        private Matrix4x4 transform;
 
         /// <summary>
         /// Time
@@ -36,7 +36,7 @@ namespace Engine.Animation
         /// <summary>
         /// Frame transformation
         /// </summary>
-        public Matrix Transform
+        public Matrix4x4 Transform
         {
             readonly get
             {
@@ -44,9 +44,8 @@ namespace Engine.Animation
             }
             set
             {
-                Matrix trn = value;
-
-                if (trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 location))
+                Matrix4x4 trn = value;
+                if (Matrix4x4.Decompose(trn, out Vector3 scale, out Quaternion rotation, out Vector3 location))
                 {
                     transform = trn;
                     Translation = location;
@@ -66,7 +65,7 @@ namespace Engine.Animation
         /// <summary>
         /// Rotation
         /// </summary>
-        public Quaternion Rotation { get; private set; }
+        public Quaternion Rotation { get; set; }
         /// <summary>
         /// Scale
         /// </summary>
@@ -92,8 +91,8 @@ namespace Engine.Animation
         public readonly bool Equals(Keyframe other)
         {
             return
-                MathUtil.NearEqual(Time, other.Time) &&
-                MathUtil.NearEqual(Position, other.Position) &&
+                Helper.NearEqual(Time, other.Time) &&
+                Helper.NearEqual(Position, other.Position) &&
                 Translation == other.Translation &&
                 Rotation == other.Rotation &&
                 Scale == other.Scale &&

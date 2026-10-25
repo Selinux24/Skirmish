@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -113,7 +114,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var (triRes, tris) = TriangulationHelper.Triangulate(verts);
             if (!triRes || tris.Length <= 0)
             {
-                Logger.WriteWarning(nameof(TileCacheContourSet), $"Polygon contour triangulation error: Reg {RegionId}");
+                Game.Logger.WriteWarning(nameof(TileCacheContourSet), $"Polygon contour triangulation error: Reg {RegionId}");
             }
 
             return tris;
@@ -137,7 +138,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];
-                center += v.Position;
+                center.Add(v.Position);
             }
 
             Vector3 res = new(center.X, center.Y, center.Z);

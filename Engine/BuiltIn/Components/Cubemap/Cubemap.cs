@@ -3,10 +3,10 @@ using Engine.BuiltIn.Drawers.Cubemap;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Cubemap
 {
@@ -132,7 +132,7 @@ namespace Engine.BuiltIn.Components.Cubemap
         /// </summary>
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="faces">Texture faces</param>
-        protected void InitializeTextureCubic(string textureFileName, Rectangle[] faces = null)
+        protected void InitializeTextureCubic(string textureFileName, RectI[] faces = null)
         {
             var image = new FileCubicImageContent(textureFileName, faces);
 

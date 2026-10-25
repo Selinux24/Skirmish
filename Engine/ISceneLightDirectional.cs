@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        Matrix ToShadowSpace { get; set; }
+        Matrix4x4 ToShadowSpace { get; set; }
         /// <summary>
         /// X cascade offset
         /// </summary>

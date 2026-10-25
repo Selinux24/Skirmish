@@ -3,7 +3,6 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +11,8 @@ using System.Threading.Tasks;
 namespace Engine.Modular
 {
     using Engine.Modular.Persistence;
+    using System.Numerics;
+    using Vortice.Mathematics;
 
     /// <summary>
     /// Terrain model
@@ -361,14 +362,14 @@ namespace Engine.Modular
                 }
                 else
                 {
-                    Logger.WriteWarning(this, $"{nameof(ModularScenery)}. Light type not allowed {light.GetType()}");
+                    Game.Logger.WriteWarning(this, $"{nameof(ModularScenery)}. Light type not allowed {light.GetType()}");
 
                     continue;
                 }
 
                 var emitter = new ParticleEmitter(obj.ParticleLight)
                 {
-                    Position = Vector3.TransformCoordinate(lightPosition, trn),
+                    Position = Vector3.Transform(lightPosition, trn),
                     Instance = instance,
                 };
 
@@ -458,8 +459,8 @@ namespace Engine.Modular
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, $"{obj.Id}: {obj.AssetName}/{obj.LevelAssetId}.{obj.MapAssetId}");
-                    Logger.WriteError(this, ex.ToString(), ex);
+                    Game.Logger.WriteError(this, $"{obj.Id}: {obj.AssetName}/{obj.LevelAssetId}.{obj.MapAssetId}");
+                    Game.Logger.WriteError(this, ex.ToString(), ex);
 
                     throw;
                 }
@@ -472,7 +473,7 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void ParseAssetsMap(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            var transforms = new Dictionary<string, List<Matrix>>();
+            var transforms = new Dictionary<string, List<Matrix4x4>>();
 
             float total = level.Map.Count() + transforms.Keys.Count;
             int current = 0;
@@ -506,7 +507,7 @@ namespace Engine.Modular
         /// <param name="item">Reference</param>
         /// <param name="assetIndex">Asset index</param>
         /// <param name="transforms">Transforms dictionary</param>
-        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix>> transforms)
+        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix4x4>> transforms)
         {
             var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
@@ -551,7 +552,7 @@ namespace Engine.Modular
                         if (maintain)
                         {
                             //Invert complex asset rotation
-                            basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                            basicTrn = Matrix4x4.CreateFromQuaternion(Quaternion.Inverse(complexAssetRotation)) * t;
                         }
                     }
 
@@ -672,7 +673,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                res = BoundingSphere.Merge(res, sph);
+                res = BoundingSphere.CreateMerged(res, sph);
             }
 
             sceneBoundingSphere = res;
@@ -706,7 +707,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                res = BoundingBox.Merge(res, box);
+                res = BoundingBox.CreateMerged(res, box);
             }
 
             sceneBoundingBox = res;
@@ -760,7 +761,7 @@ namespace Engine.Modular
             var res = entities
                 .Where(o => string.Equals(o.Object.AssetName, name, StringComparison.OrdinalIgnoreCase));
 
-            return res.ToArray();
+            return [.. res];
         }
         /// <summary>
         /// Gets objects by type
@@ -772,7 +773,7 @@ namespace Engine.Modular
             var res = entities
                 .Where(o => objectType.HasFlag(o.Object.Type));
 
-            return res.ToArray();
+            return [.. res];
         }
 
         /// <summary>
@@ -902,13 +903,13 @@ namespace Engine.Modular
                     {
                         var sph = e.Instance.GetBoundingSphere();
 
-                        return sphere.Contains(ref sph) != ContainmentType.Disjoint;
+                        return sphere.Contains(sph) != ContainmentType.Disjoint;
                     }
                     else
                     {
                         var bbox = e.Instance.GetBoundingBox();
 
-                        return sphere.Contains(ref bbox) != ContainmentType.Disjoint;
+                        return sphere.Contains(bbox) != ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -985,9 +986,7 @@ namespace Engine.Modular
                 return [];
             }
 
-            return triggerValue
-                .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+            return [.. triggerValue.Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))];
         }
 
         /// <summary>
@@ -1080,7 +1079,7 @@ namespace Engine.Modular
             /// <summary>
             /// Complex asset transform
             /// </summary>
-            public Matrix Transform;
+            public Matrix4x4 Transform;
             /// <summary>
             /// Individual asset indices
             /// </summary>

@@ -11,6 +11,6 @@ namespace Engine
         /// Gets the audio loader delegate
         /// </summary>
         /// <param name="sampleRate">Sample rate</param>
-        Func<IGameAudio> GetDelegate(int sampleRate);
+        Func<IGameAudio> GetDelegate(uint sampleRate);
     }
 }

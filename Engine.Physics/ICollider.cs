@@ -1,4 +1,5 @@
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Physics
 {
@@ -22,11 +23,11 @@ namespace Engine.Physics
         /// <summary>
         /// Rotation/scale component of model matrix
         /// </summary>
-        Matrix RotationScale { get; }
+        Matrix4x4 RotationScale { get; }
         /// <summary>
         /// Inverse rotation/scale component of model matrix
         /// </summary>
-        Matrix RotationScaleInverse { get; }
+        Matrix4x4 RotationScaleInverse { get; }
         /// <summary>
         /// Gets whether the collider has transform or not
         /// </summary>

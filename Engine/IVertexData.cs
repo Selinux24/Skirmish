@@ -32,6 +32,6 @@ namespace Engine
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        EngineInputElement[] GetInput(int slot);
+        EngineInputElement[] GetInput(uint slot);
     }
 }

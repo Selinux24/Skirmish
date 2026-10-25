@@ -1,12 +1,12 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Vortice;
 
 namespace Engine
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Graphic buffers management
@@ -20,7 +20,7 @@ namespace Engine
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateVertexBuffer(string name, int sizeInBytes, bool dynamic)
+        public EngineBuffer CreateVertexBuffer(string name, uint sizeInBytes, bool dynamic)
         {
             return CreateBuffer(
                 name,
@@ -38,7 +38,7 @@ namespace Engine
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -57,7 +57,7 @@ namespace Engine
         /// <returns>Returns created buffer initialized with the specified data</returns>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         public EngineBuffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -75,7 +75,7 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateStreamOutBuffer<T>(string name, IEnumerable<T> data)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -90,7 +90,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateStreamOutBuffer(string name, int sizeInBytes)
+        public EngineBuffer CreateStreamOutBuffer(string name, uint sizeInBytes)
         {
             return CreateBuffer(
                 name,
@@ -106,7 +106,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="length">Buffer length</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateStreamOutBuffer<T>(string name, int length)
+        public EngineBuffer CreateStreamOutBuffer<T>(string name, uint length)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -126,7 +126,7 @@ namespace Engine
         public EngineBuffer CreateConstantBuffer<T>(string name)
             where T : struct, IBufferData
         {
-            int sizeInBytes = Marshal.SizeOf<T>();
+            uint sizeInBytes = (uint)Marshal.SizeOf<T>();
             sizeInBytes = sizeInBytes / 16 * 16;
 
             ResourceUsage usage = ResourceUsage.Default;
@@ -137,14 +137,14 @@ namespace Engine
             var description = new BufferDescription()
             {
                 Usage = usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = binding,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            return new EngineBuffer(name, device.CreateBuffer(description));
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+        public EngineBuffer CreateBuffer(string name, uint sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
             if (sizeInBytes == 0)
             {
@@ -168,14 +168,14 @@ namespace Engine
             var description = new BufferDescription()
             {
                 Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = (CpuAccessFlags)access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            return new EngineBuffer(name, device.CreateBuffer(description));
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -187,9 +187,9 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+        public EngineBuffer CreateBuffer<T>(string name, uint length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
-            int sizeInBytes = Marshal.SizeOf<T>() * length;
+            uint sizeInBytes = (uint)Marshal.SizeOf<T>() * length;
             if (sizeInBytes == 0)
             {
                 return null;
@@ -200,14 +200,14 @@ namespace Engine
             var description = new BufferDescription()
             {
                 Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = (CpuAccessFlags)access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            return new EngineBuffer(name, device.CreateBuffer(description));
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -220,34 +220,34 @@ namespace Engine
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
-            where T : struct
+            where T : unmanaged
         {
             T[] dataArray = data?.ToArray() ?? [];
-            int length = dataArray.Length;
+            uint length = (uint)dataArray.Length;
             if (length == 0)
             {
                 return null;
             }
 
-            int sizeInBytes = Marshal.SizeOf<T>() * length;
+            uint sizeInBytes = (uint)Marshal.SizeOf<T>() * length;
 
             FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 
-            using var dstr = new DataStream(sizeInBytes, true, true);
+            using var dstr = new DataStream((int)sizeInBytes, true, true);
             dstr.WriteRange(dataArray);
             dstr.Position = 0;
 
             var description = new BufferDescription()
             {
                 Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = (CpuAccessFlags)access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, dstr, description));
+            return new EngineBuffer(name, device.CreateBuffer(dstr.BasePointer, description));
         }
     }
 }

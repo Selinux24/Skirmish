@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Cubemap
 {
@@ -101,7 +101,7 @@ namespace Engine.BuiltIn.Components.Cubemap
         /// Computes the cubmap faces
         /// </summary>
         /// <param name="faceSize">Face size</param>
-        public static Rectangle[] ComputeCubemapFaces(int faceSize)
+        public static RectI[] ComputeCubemapFaces(int faceSize)
         {
             return
             [
@@ -134,7 +134,7 @@ namespace Engine.BuiltIn.Components.Cubemap
         /// Index 4: Front face
         /// Index 5: Back face
         /// </remarks>
-        public Rectangle[] Faces { get; set; } = [];
+        public RectI[] Faces { get; set; } = [];
 
         /// <summary>
         /// Plain texture list

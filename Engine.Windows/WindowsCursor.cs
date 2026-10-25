@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Drawing;
 
 namespace Engine.Windows
 {
@@ -27,7 +27,7 @@ namespace Engine.Windows
             }
             set
             {
-                var p = new System.Drawing.Point(value.X, value.Y);
+                var p = new Point(value.X, value.Y);
 
                 SystemCursor.Position = p;
             }

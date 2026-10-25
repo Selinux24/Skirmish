@@ -2,10 +2,11 @@
 using Engine.Common;
 using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Content
 {
@@ -43,25 +44,25 @@ namespace EngineTests.Content
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
 
-            SubMeshContent content1 = new(Topology.TriangleList, null, false, false, Matrix.Identity);
+            SubMeshContent content1 = new(Topology.TriangleList, null, false, false, Matrix4x4.Identity);
             content1.SetVertices(data);
             var tris1 = content1.GetTriangles();
             var points1 = tris1.SelectMany(t => t.GetVertices()).ToArray();
-            var bounds1 = BoundingBox.FromPoints(points1);
+            var bounds1 = BoundingBox.CreateFromPoints(points1);
             Assert.AreEqual(cubeMedium, bounds1);
 
-            SubMeshContent content2 = new(Topology.TriangleList, null, false, false, Matrix.Scaling(2));
+            SubMeshContent content2 = new(Topology.TriangleList, null, false, false, Matrix4x4.CreateScale(2));
             content2.SetVertices(data);
             var tris2 = content2.GetTriangles();
             var points2 = tris2.SelectMany(t => t.GetVertices()).ToArray();
-            var bounds2 = BoundingBox.FromPoints(points2);
+            var bounds2 = BoundingBox.CreateFromPoints(points2);
             Assert.AreEqual(cubeBig, bounds2);
 
-            SubMeshContent content3 = new(Topology.TriangleList, null, false, false, Matrix.Scaling(0.5f));
+            SubMeshContent content3 = new(Topology.TriangleList, null, false, false, Matrix4x4.CreateScale(0.5f));
             content3.SetVertices(data);
             var tris3 = content3.GetTriangles();
             var points3 = tris3.SelectMany(t => t.GetVertices()).ToArray();
-            var bounds3 = BoundingBox.FromPoints(points3);
+            var bounds3 = BoundingBox.CreateFromPoints(points3);
             Assert.AreEqual(cubeSmall, bounds3);
         }
     }

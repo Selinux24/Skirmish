@@ -1,11 +1,11 @@
 ﻿
 namespace Engine.Common
 {
-    using DXComparison = SharpDX.Direct3D11.Comparison;
-    using DXDepthStencilOperationDescription = SharpDX.Direct3D11.DepthStencilOperationDescription;
-    using DXDepthStencilStateDescription = SharpDX.Direct3D11.DepthStencilStateDescription;
-    using DXDepthWriteMask = SharpDX.Direct3D11.DepthWriteMask;
-    using DXStencilOperation = SharpDX.Direct3D11.StencilOperation;
+    using DXComparison = Vortice.Direct3D11.ComparisonFunction;
+    using DXDepthStencilOperationDescription = Vortice.Direct3D11.DepthStencilOperationDescription;
+    using DXDepthStencilStateDescription = Vortice.Direct3D11.DepthStencilDescription;
+    using DXDepthWriteMask = Vortice.Direct3D11.DepthWriteMask;
+    using DXStencilOperation = Vortice.Direct3D11.StencilOperation;
 
     /// <summary>
     /// Describes depth-stencil state.
@@ -16,10 +16,10 @@ namespace Engine.Common
         {
             return new DXDepthStencilStateDescription
             {
-                IsDepthEnabled = obj.IsDepthEnabled,
+                DepthEnable = obj.IsDepthEnabled,
                 DepthWriteMask = (DXDepthWriteMask)obj.DepthWriteMask,
-                DepthComparison = (DXComparison)obj.DepthComparison,
-                IsStencilEnabled = obj.IsStencilEnabled,
+                DepthFunc = (DXComparison)obj.DepthComparison,
+                StencilEnable = obj.IsStencilEnabled,
                 StencilReadMask = obj.StencilReadMask,
                 StencilWriteMask = obj.StencilWriteMask,
                 FrontFace = (DXDepthStencilOperationDescription)obj.FrontFace,
@@ -30,10 +30,10 @@ namespace Engine.Common
         {
             return new EngineDepthStencilStateDescription
             {
-                IsDepthEnabled = obj.IsDepthEnabled,
+                IsDepthEnabled = obj.DepthEnable,
                 DepthWriteMask = (DepthWriteMask)obj.DepthWriteMask,
-                DepthComparison = (Comparison)obj.DepthComparison,
-                IsStencilEnabled = obj.IsStencilEnabled,
+                DepthComparison = (Comparison)obj.DepthFunc,
+                IsStencilEnabled = obj.StencilEnable,
                 StencilReadMask = obj.StencilReadMask,
                 StencilWriteMask = obj.StencilWriteMask,
                 FrontFace = (DepthStencilOperationDescription)obj.FrontFace,
@@ -107,20 +107,20 @@ namespace Engine.Common
         {
             return new DXDepthStencilOperationDescription
             {
-                FailOperation = (DXStencilOperation)obj.FailOperation,
-                DepthFailOperation = (DXStencilOperation)obj.FailOperation,
-                PassOperation = (DXStencilOperation)obj.PassOperation,
-                Comparison = (DXComparison)obj.Comparison,
+                StencilFailOp = (DXStencilOperation)obj.FailOperation,
+                StencilDepthFailOp = (DXStencilOperation)obj.FailOperation,
+                StencilPassOp = (DXStencilOperation)obj.PassOperation,
+                StencilFunc = (DXComparison)obj.Comparison,
             };
         }
         public static explicit operator DepthStencilOperationDescription(DXDepthStencilOperationDescription obj)
         {
             return new DepthStencilOperationDescription
             {
-                FailOperation = (StencilOperation)obj.FailOperation,
-                DepthFailOperation = (StencilOperation)obj.FailOperation,
-                PassOperation = (StencilOperation)obj.PassOperation,
-                Comparison = (Comparison)obj.Comparison,
+                FailOperation = (StencilOperation)obj.StencilFailOp,
+                DepthFailOperation = (StencilOperation)obj.StencilDepthFailOp,
+                PassOperation = (StencilOperation)obj.StencilPassOp,
+                Comparison = (Comparison)obj.StencilFunc,
             };
         }
 
@@ -163,11 +163,11 @@ namespace Engine.Common
         /// <summary>
         /// Increment the stencil value by 1, and clamp the result.
         /// </summary>
-        IncrementAndClamp = DXStencilOperation.IncrementAndClamp,
+        IncrementSaturate = DXStencilOperation.IncrementSaturate,
         /// <summary>
         /// Decrement the stencil value by 1, and clamp the result.
         /// </summary>
-        DecrementAndClamp = DXStencilOperation.DecrementAndClamp,
+        DecrementSaturate = DXStencilOperation.DecrementSaturate,
         /// <summary>
         /// Invert the stencil data.
         /// </summary>

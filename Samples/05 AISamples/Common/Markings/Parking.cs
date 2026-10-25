@@ -2,7 +2,7 @@
 using AISamples.Common.Primitives;
 using Engine;
 using Engine.BuiltIn.Format;
-using SharpDX;
+using System.Numerics;
 
 namespace AISamples.Common.Markings
 {

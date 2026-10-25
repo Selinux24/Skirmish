@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
@@ -15,12 +15,12 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("SIZE", 0, Vortice.DXGI.Format.R32G32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 
@@ -56,12 +56,12 @@ namespace Engine.BuiltIn.Format
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexBillboard>();
+            return (uint)Marshal.SizeOf<VertexBillboard>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

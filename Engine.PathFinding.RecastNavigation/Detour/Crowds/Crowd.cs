@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -258,9 +258,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <inheritdoc/>
         public (int Id, Vector3 Position)[] GetPositions()
         {
-            return crowdAgents
-                .Select(a => (a.Id, a.Agent.NPos))
-                .ToArray();
+            return [.. crowdAgents.Select(a => (a.Id, a.Agent.NPos))];
         }
         /// <inheritdoc/>
         public Vector3 GetPosition(int id)
@@ -434,7 +432,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     int idx = crowdAgents.FindIndex(a => a.Agent == ag);
 
-                    Logger.WriteError(this, $"RequestMoveTargetReplan error: Id=>{idx} from {ag.TargetRef} to {ag.TargetPos}");
+                    Game.Logger.WriteError(this, $"RequestMoveTargetReplan error: Id=>{idx} from {ag.TargetRef} to {ag.TargetPos}");
                 }
             }
         }
@@ -613,7 +611,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (path.Length == 0)
             {
-                Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Game.Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             // Quick search towards the goal.
@@ -720,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (path.Length == 0)
             {
-                Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Game.Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             // Apply results.

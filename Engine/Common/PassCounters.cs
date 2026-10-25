@@ -175,11 +175,11 @@ namespace Engine.Common
         /// <summary>
         /// Sum of single draw calls and instance draw calls * instance count of this call
         /// </summary>
-        public int InstancesPerFrame { get; set; }
+        public uint InstancesPerFrame { get; set; }
         /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
-        public int PrimitivesPerFrame { get; set; }
+        public uint PrimitivesPerFrame { get; set; }
 
         /// <summary>
         /// State changes count per frame (rasterizer, blend and depth-stencil states)

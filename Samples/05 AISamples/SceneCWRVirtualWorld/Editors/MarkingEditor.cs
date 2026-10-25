@@ -5,7 +5,7 @@ using Engine;
 using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Format;
 using Engine.Content;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors

@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Choose random polygon weighted by area, using reservoi sampling.
             areaSum += polyArea;
-            float u = Helper.RandomGenerator.NextFloat(0, 1);
+            float u = Helper.RandomGenerator.NextSingle(0, 1);
             if (u * areaSum <= polyArea)
             {
                 return tileFrom;

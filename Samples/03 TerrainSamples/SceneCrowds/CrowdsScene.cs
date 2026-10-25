@@ -13,14 +13,16 @@ using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneCrowds
 {
+    using Color = System.Drawing.Color;
+
     public class CrowdsScene : WalkableScene
     {
         private const string resourceCursor = "Common/UI/Cursor/target.png";
@@ -101,13 +103,13 @@ namespace TerrainSamples.SceneCrowds
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
-            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
-            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 128 };
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() };
+            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 128 };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
 
-            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
         }
         private void InitializeUIComponentsComplete(LoadResourcesResult res)
         {
@@ -260,7 +262,7 @@ namespace TerrainSamples.SceneCrowds
 
             cameraPosition /= modelCount;
             Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-            Camera.LookTo(cameraPosition + Vector3.Up);
+            Camera.LookTo(cameraPosition + Vector3Extensions.Up);
             Camera.NearPlaneDistance = near;
             Camera.FarPlaneDistance = far;
 
@@ -299,15 +301,15 @@ namespace TerrainSamples.SceneCrowds
             }
 
             var clrRnd = Helper.NewGenerator(1);
-            Color[] regions = new Color[nodes.Count()];
+            Vector4[] regions = new Vector4[nodes.Count()];
             for (int i = 0; i < nodes.Count(); i++)
             {
-                regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                regions[i] = new(clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), 0.55f);
             }
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = ColorExtensions.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -328,7 +330,7 @@ namespace TerrainSamples.SceneCrowds
             {
                 if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
                 {
-                    trees[i].Manipulator.SetTransform(pos.Position, Vector3.Up, i, 0.5f);
+                    trees[i].Manipulator.SetTransform(pos.Position, Vector3Extensions.Up, i, 0.5f);
                 }
             }
         }
@@ -449,8 +451,8 @@ namespace TerrainSamples.SceneCrowds
             var tri = Line3D.CreateTriangle(r.PickingResult.Primitive);
             var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);
 
-            lineDrawer.SetPrimitives(Color.White, tri);
-            lineDrawer.SetPrimitives(Color.Red, cross);
+            lineDrawer.SetPrimitives(Color.White.RGBA(), tri);
+            lineDrawer.SetPrimitives(Color.Red.RGBA(), cross);
 
             if (Game.Input.ShiftPressed)
             {
@@ -483,7 +485,7 @@ namespace TerrainSamples.SceneCrowds
                 var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
+                if (Vector3Extensions.NearEqual(aPos, pPos, new Vector3(0.001f)))
                 {
                     continue;
                 }
@@ -529,7 +531,7 @@ namespace TerrainSamples.SceneCrowds
 
             lines.AddRange(Line3D.CreateCircle(rt.Position, r, 64));
 
-            lineDrawer.SetPrimitives(Color.Orange, lines);
+            lineDrawer.SetPrimitives(Color.Orange.RGBA(), lines);
         }
 
         public override void GameGraphicsResized()
@@ -581,7 +583,7 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = ColorExtensions.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }

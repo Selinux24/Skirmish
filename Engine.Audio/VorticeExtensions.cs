@@ -2,12 +2,12 @@
 
 namespace Engine.Audio
 {
-    using SharpDX.X3DAudio;
+    using Vortice.XAudio2;
 
     /// <summary>
-    /// SharpDX extensions
+    /// Vortice extensions
     /// </summary>
-    static class SharpDXExtensions
+    static class VorticeExtensions
     {
         /// <summary>
         /// Converts the game curve to the SharpDX curve

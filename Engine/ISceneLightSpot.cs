@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -35,7 +36,7 @@ namespace Engine
         /// <summary>
         /// Local matrix
         /// </summary>
-        Matrix Local { get; }
+        Matrix4x4 Local { get; }
 
         /// <summary>
         /// Test the light shadow casting based on the viewer position

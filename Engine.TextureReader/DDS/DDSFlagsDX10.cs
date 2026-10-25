@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
     /// <summary>
     /// DDS Header DX10 Misc flags 2 enumeration

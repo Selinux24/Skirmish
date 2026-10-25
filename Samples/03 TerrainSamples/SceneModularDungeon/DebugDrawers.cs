@@ -5,13 +5,16 @@ using Engine.Common;
 using Engine.Modular;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Color = System.Drawing.Color;
+
     internal class DebugDrawers(Scene scene, string id, string name) : BaseSceneObject<SceneObjectDescription>(scene, id, name)
     {
         private GeometryColorDrawer<Line3D> bboxesDrawer = null;
@@ -20,8 +23,8 @@ namespace TerrainSamples.SceneModularDungeon
         private GeometryColorDrawer<Triangle> obstacleDrawer = null;
         private GeometryColorDrawer<Line3D> connectionDrawer = null;
 
-        private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
-        private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
+        private readonly Vector4 connectionColor = new(Color.LightBlue.RGB(), 1f);
+        private readonly Vector4 obstacleColor = new(Color.Pink.RGB(), 0.5f);
 
         private Player[] agents;
         private int currentAgentIndex = 0;
@@ -39,7 +42,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var bboxesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
+                Color = new(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
             bboxesDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
@@ -47,7 +50,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var ratDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
+                Color = new(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
             modelDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
@@ -91,13 +94,13 @@ namespace TerrainSamples.SceneModularDungeon
             bboxesDrawer.Clear();
 
             //Objects
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance.GetBoundingBox()), Color.PaleVioletRed);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance.GetBoundingBox()), Color.ForestGreen);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance.GetBoundingBox()), Color.Cyan);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow);
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance.GetBoundingBox()), Color.PaleVioletRed.RGBA());
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance.GetBoundingBox()), Color.ForestGreen.RGBA());
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance.GetBoundingBox()), Color.Cyan.RGBA());
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow.RGBA());
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple.RGBA());
         }
-        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color color)
+        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Vector4 color)
         {
             if (!boxes.Any())
             {
@@ -111,7 +114,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var frustum = Line3D.CreateFrustum(camera.Frustum);
 
-            bboxesDrawer.SetPrimitives(Color.White, frustum);
+            bboxesDrawer.SetPrimitives(Color.White.RGBA(), frustum);
         }
         public void DrawObstacles(IEnumerable<ObstacleInfo> obstacles)
         {
@@ -172,7 +175,7 @@ namespace TerrainSamples.SceneModularDungeon
             graphDrawer.Clear();
             graphDrawer.SetPrimitives(nodes);
         }
-        private static Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
+        private static Dictionary<Vector4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
         {
             var nodes = scene.GetNodes(agent).OfType<GraphNode>();
             if (!nodes.Any())
@@ -180,16 +183,16 @@ namespace TerrainSamples.SceneModularDungeon
                 return [];
             }
 
-            Dictionary<Color4, IEnumerable<Triangle>> res = [];
+            Dictionary<Vector4, IEnumerable<Triangle>> res = [];
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = ColorExtensions.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
                 if (!res.TryGetValue(color, out var value))
                 {
-                    value = new List<Triangle>(tris);
+                    value = [.. tris];
                     res.Add(color, value);
                 }
                 else
@@ -209,7 +212,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var bbox = model.GetBoundingBox();
 
-            modelDrawer.SetPrimitives(Color.White, Line3D.CreateBox(bbox));
+            modelDrawer.SetPrimitives(Color.White.RGBA(), Line3D.CreateBox(bbox));
         }
         public void DrawPath(PathFindingPath path)
         {
@@ -218,7 +221,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            modelDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.Positions));
+            modelDrawer.SetPrimitives(Color.Red.RGBA(), Line3D.CreateLineList(path.Positions));
         }
 
         public void ToggleConnections()

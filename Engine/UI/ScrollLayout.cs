@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.UI
 {
@@ -84,7 +84,7 @@ namespace Engine.UI
         /// <param name="verticalAlign">Vertical alignment of this scroll bar</param>
         /// <param name="horizontalAlign">Horizontal aligment of the other container scroll bar, if any.</param>
         /// <returns>Returns the layout rectangle for the scroll bar</returns>
-        public static RectangleF GetVerticalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
+        public static Rect GetVerticalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
         {
             var renderArea = container.GetRenderArea(false);
 
@@ -102,7 +102,7 @@ namespace Engine.UI
                 top = size;
             }
 
-            return new RectangleF
+            return new Rect
             {
                 Left = left,
                 Top = top,
@@ -118,7 +118,7 @@ namespace Engine.UI
         /// <param name="verticalAlign">Vertical alignment of the other scroll bar, if any</param>
         /// <param name="horizontalAlign">Horizontal aligment of this scroll bar</param>
         /// <returns>Returns the layout rectangle for the scroll bar</returns>
-        public static RectangleF GetHorizontalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
+        public static Rect GetHorizontalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
         {
             var renderArea = container.GetRenderArea(false);
 
@@ -136,7 +136,7 @@ namespace Engine.UI
                 left = size;
             }
 
-            return new RectangleF
+            return new Rect
             {
                 Left = left,
                 Top = top,

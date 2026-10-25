@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.UI
 {
@@ -154,7 +155,7 @@ namespace Engine.UI
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
         /// <returns>Returns the layout updated state</returns>
-        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
+        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {

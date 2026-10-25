@@ -2,7 +2,6 @@
 using Engine.Modular.Persistence;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -143,7 +142,7 @@ namespace Engine.Content.OnePageDungeon
                 return list.First();
             }
 
-            float weight = GetGenerator().NextFloat(0, 1);
+            float weight = GetGenerator().NextSingle(0, 1);
 
             var sortedList = list.OrderBy(i => i.Weight);
 

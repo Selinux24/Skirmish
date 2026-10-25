@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.UI
 {
@@ -43,11 +43,11 @@ namespace Engine.UI
         /// <summary>
         /// Colors by character of part list
         /// </summary>
-        public Color4[][] Colors { get; set; }
+        public Vector4[][] Colors { get; set; }
         /// <summary>
         /// Shadow colors by character of part list
         /// </summary>
-        public Color4[][] ShadowColors { get; set; }
+        public Vector4[][] ShadowColors { get; set; }
 
         /// <summary>
         /// Gets the number of part in the sentence

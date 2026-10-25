@@ -4,7 +4,7 @@ using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -126,7 +126,7 @@ namespace Engine.BuiltIn.UI
             spriteDrawer.UpdateSprite(dc, new BuiltInSpriteState
             {
                 Local = Manipulator.LocalTransform,
-                Color1 = Color4.White,
+                Color1 = Vector4.One,
                 Texture = Texture,
                 TextureIndex = TextureIndex,
                 Channel = Channel,

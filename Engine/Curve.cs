@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine
 {
@@ -194,7 +193,7 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (!MathUtil.NearEqual(position, first.Position))
+            if (!Helper.NearEqual(position, first.Position))
             {
                 //start -> end / start -> end
                 int cycle = GetNumberOfCycle(first, last, position);
@@ -216,7 +215,7 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (!MathUtil.NearEqual(position, first.Position))
+            if (!Helper.NearEqual(position, first.Position))
             {
                 //make the curve continue (with no step) so must up the curve each cycle of delta(value)
                 int cycle = GetNumberOfCycle(first, last, position);
@@ -238,7 +237,7 @@ namespace Engine
             var first = keys[0];
             var last = keys[^1];
 
-            if (!MathUtil.NearEqual(position, first.Position))
+            if (!Helper.NearEqual(position, first.Position))
             {
                 //go back on curve from end and target start 
                 // start-> end / end -> start

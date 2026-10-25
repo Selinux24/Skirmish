@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
@@ -39,7 +40,7 @@ namespace Engine.Physics.Colliders
 
             var extents = new Vector3(radius, hh, radius);
             boundingBox = new BoundingBox(-extents, extents);
-            boundingSphere = BoundingSphere.FromBox(boundingBox);
+            boundingSphere = BoundingSphere.CreateFromBoundingBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 
@@ -59,12 +60,12 @@ namespace Engine.Physics.Colliders
             }
 
             var trn = RigidBody.Transform;
-            bse = Vector3.TransformCoordinate(bse, trn);
-            cap = Vector3.TransformCoordinate(cap, trn);
+            bse = Vector3.Transform(bse, trn);
+            cap = Vector3.Transform(cap, trn);
             var cNorm = Vector3.Normalize(cap - bse);
             var dir = Vector3.Cross(normal, cNorm);
 
-            if (MathUtil.IsZero(dir.Length()))
+            if (Helper.IsZero(dir.Length()))
             {
                 return [bse, cap];
             }

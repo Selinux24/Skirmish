@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.UI
 {
@@ -19,11 +19,11 @@ namespace Engine.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        Color4 TextForeColor { get; set; }
+        Vector4 TextForeColor { get; set; }
         /// <summary>
         /// Text shadow color
         /// </summary>
-        Color4 TextShadowColor { get; set; }
+        Vector4 TextShadowColor { get; set; }
         /// <summary>
         /// Shadow position delta
         /// </summary>

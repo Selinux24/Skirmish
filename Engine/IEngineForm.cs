@@ -1,5 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Drawing;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -55,19 +57,19 @@ namespace Engine
         /// <summary>
         /// Render width
         /// </summary>
-        int RenderWidth { get; }
+        uint RenderWidth { get; }
         /// <summary>
         /// Render height
         /// </summary>
-        int RenderHeight { get; }
+        uint RenderHeight { get; }
         /// <summary>
         /// Render rectangle
         /// </summary>
-        RectangleF RenderRectangle
+        Rect RenderRectangle
         {
             get
             {
-                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+                return new Rect(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <summary>
@@ -124,7 +126,7 @@ namespace Engine
         /// Gets the current ortho-projection matrix
         /// </summary>
         /// <returns>Returns the current ortho-projection matrix</returns>
-        Matrix GetOrthoProjectionMatrix();
+        Matrix4x4 GetOrthoProjectionMatrix();
         /// <summary>
         /// Transform to screen space using the form view ortho projection matrix
         /// </summary>

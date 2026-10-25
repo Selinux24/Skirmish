@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn.Drawers.Foliage
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; }
+        public Vector4 TintColor { get; set; }
         /// <summary>
         /// Material index
         /// </summary>

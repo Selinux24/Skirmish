@@ -3,9 +3,9 @@ using AISamples.Common.Primitives;
 using Engine;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common.Markings
 {

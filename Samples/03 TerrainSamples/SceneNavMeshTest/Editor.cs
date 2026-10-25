@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.BuiltIn.UI;
 using Engine.UI;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="name">Name</param>
         protected async Task<UIPanel> InitializePanel(string id, string name)
         {
-            var panelColor = new Color4(UIConfiguration.BaseColor.ToVector3(), 0.85f);
+            var panelColor = new Vector4(UIConfiguration.BaseColor.RGB(), 0.85f);
             var desc = UIPanelDescription.Default(panelColor);
             desc.StartsVisible = false;
 

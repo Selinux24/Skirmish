@@ -1,8 +1,8 @@
 ﻿using AISamples.Common.Primitives;
 using Engine;
-using SharpDX;
 using System;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common.Agents
 {
@@ -55,17 +55,17 @@ namespace AISamples.Common.Agents
 
             if (controlType != AgentControlTypes.Dummy)
             {
-                Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
+                Sensor = new(this, 5, 50, Helper.PiOver2);
                 Brain = new([Sensor.GetRayCount(), 6, AgentControls.InputCount]);
             }
         }
 
         private void CreatePoints()
         {
-            var trn = Matrix.RotationY(angle) * Matrix.Translation(x, 0, y);
+            var trn = Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(x, 0, y);
 
             trnBox = box;
-            trnBox.Transform(ref trn);
+            trnBox.Transform(trn);
             var corners = trnBox.GetCorners();
 
             points[0] = new(corners[4].X, 0f, corners[4].Z);
@@ -225,7 +225,7 @@ namespace AISamples.Common.Agents
         }
         public void SetDirection(Vector2 direction)
         {
-            angle = -Utils.Angle(direction.Y, direction.X) + MathUtil.PiOverTwo;
+            angle = -Utils.Angle(direction.Y, direction.X) + Helper.PiOver2;
         }
         public void SetScale(float scale)
         {
@@ -243,11 +243,11 @@ namespace AISamples.Common.Agents
         {
             return trnBox;
         }
-        public Matrix GetTransform(float height = 0)
+        public Matrix4x4 GetTransform(float height = 0)
         {
-            var trn = Matrix.RotationY(angle) * Matrix.Translation(x, height, y);
+            var trn = Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(x, height, y);
 
-            return Matrix.Scaling(scale) * trn;
+            return Matrix4x4.CreateScale(scale) * trn;
         }
     }
 }

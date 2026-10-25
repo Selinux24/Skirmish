@@ -1,6 +1,7 @@
 ﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
 using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -41,9 +42,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             return new()
             {
-                Origin = generationBounds.Minimum,
-                TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
-                TileHeight = generationBounds.Maximum.Z - generationBounds.Minimum.Z,
+                Origin = generationBounds.Min,
+                TileWidth = generationBounds.Max.X - generationBounds.Min.X,
+                TileHeight = generationBounds.Max.Z - generationBounds.Min.Z,
                 MaxTiles = 1,
                 MaxPolys = polyCount,
             };
@@ -78,7 +79,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return new()
             {
-                Origin = generationBounds.Minimum,
+                Origin = generationBounds.Min,
                 TileWidth = tileCellSize,
                 TileHeight = tileCellSize,
                 MaxTiles = maxTiles,

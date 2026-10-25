@@ -3,10 +3,10 @@ using Engine.BuiltIn.Components.Models;
 using Engine.Common;
 using Engine.Physics;
 using Engine.Physics.Colliders;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace PhysicsSamples.ScenePhysics
 {
@@ -27,7 +27,8 @@ namespace PhysicsSamples.ScenePhysics
         private static ConvexMeshCollider CollisionTriangleSoupFromModel(Model model)
         {
             var tris = model.GetGeometry(true);
-            tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.GlobalTransform));
+            Matrix4x4.Invert(model.Manipulator.GlobalTransform, out var inv);
+            tris = Triangle.Transform(tris, inv);
 
             return new ConvexMeshCollider(tris);
         }
@@ -113,7 +114,7 @@ namespace PhysicsSamples.ScenePhysics
             return Model.GetIntersectionVolume(IntersectDetectionMode.Sphere);
         }
         /// <inheritdoc/>
-        public void Reset(Matrix transform)
+        public void Reset(Matrix4x4 transform)
         {
             RigidBody?.SetInitialState(transform);
         }

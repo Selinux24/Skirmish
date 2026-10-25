@@ -6,9 +6,10 @@ using Engine.BuiltIn.Components.Particles;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneParticles
@@ -61,11 +62,11 @@ namespace BasicSamples.SceneParticles
         {
             base.Initialize();
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 5000f;
-            Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
+            Camera.Goto(Vector3Extensions.ForwardLH * -15f + Vector3.UnitY * 10f);
             Camera.LookTo(Vector3.Zero);
 
             InitializeUIObjects();
@@ -86,8 +87,8 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont20,
                 Text = "Particle System Drawing",
-                TextForeColor = Color.Yellow,
-                TextShadowColor = Color.OrangeRed
+                TextForeColor = Color.Yellow.RGBA(),
+                TextShadowColor = Color.OrangeRed.RGBA()
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "title", titleDesc);
 
@@ -95,8 +96,8 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont10,
                 MaxTextLength = 512,
-                TextForeColor = Color.LightBlue,
-                TextShadowColor = Color.DarkBlue
+                TextForeColor = Color.LightBlue.RGBA(),
+                TextShadowColor = Color.DarkBlue.RGBA()
             };
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "runtime", runtimeDesc);
 
@@ -104,16 +105,16 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont10,
                 MaxTextLength = 128,
-                TextForeColor = Color.LightBlue,
-                TextShadowColor = Color.DarkBlue
+                TextForeColor = Color.LightBlue.RGBA(),
+                TextShadowColor = Color.DarkBlue.RGBA()
             };
             particle1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "particle1", particleDesc);
             particle2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "particle2", particleDesc);
 
-            var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            var backPanelDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("ui5", "Backpanel", backPanelDesc, LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue.RGBA());
             consoleDesc.StartsVisible = false;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui6", "Console", consoleDesc, LayerUI + 1);
         }
@@ -124,7 +125,7 @@ namespace BasicSamples.SceneParticles
                 res.ThrowExceptions();
             }
 
-            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color3.White, Color3.White, true));
+            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color.White.RGB(), Color.White.RGB(), true));
 
             UpdateLayout();
 
@@ -150,13 +151,13 @@ namespace BasicSamples.SceneParticles
             float l = 20f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
-            geo.Transform(Matrix.RotationY(MathUtil.PiOverTwo));
+            geo.Transform(Matrix4x4.CreateRotationY(Helper.PiOver2));
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFloor;
-            material.DiffuseColor = Color.White;
+            material.DiffuseColor = Color.White.RGBA();
 
             var desc = new ModelDescription()
             {
@@ -325,7 +326,7 @@ namespace BasicSamples.SceneParticles
 
         private void AddSystem()
         {
-            float percent = Helper.RandomGenerator.NextFloat(0, 1);
+            float percent = Helper.RandomGenerator.NextSingle(0, 1);
             if (percent <= 0.25f)
             {
                 AddExplosionSystem();
@@ -347,8 +348,8 @@ namespace BasicSamples.SceneParticles
         }
         private void AddExplosionSystem()
         {
-            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
-            var velocity = Vector3.Up;
+            var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
+            var velocity = Vector3Extensions.Up;
             float duration = 0.5f;
             float rate = 0.01f;
 
@@ -379,8 +380,8 @@ namespace BasicSamples.SceneParticles
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.005f,
-                AngularVelocity = Helper.RandomGenerator.NextFloat(3, 10),
-                Radius = Helper.RandomGenerator.NextFloat(5, 10),
+                AngularVelocity = Helper.RandomGenerator.NextSingle(3, 10),
+                Radius = Helper.RandomGenerator.NextSingle(5, 10),
                 Duration = 3,
                 MaximumDistance = 100f,
             };
@@ -392,8 +393,8 @@ namespace BasicSamples.SceneParticles
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.1f,
-                AngularVelocity = Helper.RandomGenerator.NextFloat(0, 1),
-                Radius = Helper.RandomGenerator.NextFloat(1, 10),
+                AngularVelocity = Helper.RandomGenerator.NextSingle(0, 1),
+                Radius = Helper.RandomGenerator.NextSingle(1, 10),
                 Duration = 5,
                 MaximumDistance = 250f,
             };
@@ -402,10 +403,10 @@ namespace BasicSamples.SceneParticles
         }
         private void AddSmokePlumeSystem()
         {
-            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
-            var velocity = Vector3.Up;
-            float duration = Helper.RandomGenerator.NextFloat(10, 60);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
+            var velocity = Vector3Extensions.Up;
+            float duration = Helper.RandomGenerator.NextSingle(10, 60);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             var emitter1 = new ParticleEmitter()
             {
@@ -432,7 +433,7 @@ namespace BasicSamples.SceneParticles
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
-            Vector3 velocity = Vector3.Up;
+            Vector3 velocity = Vector3Extensions.Up;
             float duration = 60;
             float fireRate = 0.05f;
             float smokeRate = 0.1f;
@@ -448,7 +449,7 @@ namespace BasicSamples.SceneParticles
             };
             var emitter21 = new ParticleEmitter()
             {
-                Position = positionCPU + (Vector3.Up * 0.5f),
+                Position = positionCPU + (Vector3Extensions.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = smokeRate,
@@ -467,7 +468,7 @@ namespace BasicSamples.SceneParticles
             };
             var emitter22 = new ParticleEmitter()
             {
-                Position = positionGPU + (Vector3.Up * 0.5f),
+                Position = positionGPU + (Vector3Extensions.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = smokeRate,
@@ -486,7 +487,7 @@ namespace BasicSamples.SceneParticles
             var emitter = new ParticleEmitter()
             {
                 Position = new Vector3(0, 0, 0),
-                Velocity = Vector3.Up,
+                Velocity = Vector3Extensions.Up,
                 InfiniteDuration = true,
                 EmissionRate = 0.001f,
                 MaximumDistance = 1000f,
@@ -513,7 +514,7 @@ namespace BasicSamples.SceneParticles
                 lines.AddRange(Line3D.CreateBox(bbox));
             }
 
-            pManagerLineDrawer.SetPrimitives(Color.Red, [.. lines]);
+            pManagerLineDrawer.SetPrimitives(Color.Red.RGBA(), [.. lines]);
         }
 
         public override void Draw(IGameTime gameTime)

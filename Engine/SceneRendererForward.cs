@@ -1,11 +1,11 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -251,7 +251,7 @@ namespace Engine
                 {
                     Target = Targets.Objects,
                     ClearRT = true,
-                    ClearRTColor = Scene.GameEnvironment.Background,
+                    ClearRTColor = (Color4)Scene.GameEnvironment.Background,
                     ClearDepth = true,
                     ClearStencil = true,
                 };
@@ -288,7 +288,7 @@ namespace Engine
                 {
                     Target = Targets.UI,
                     ClearRT = true,
-                    ClearRTColor = Color.Transparent,
+                    ClearRTColor = new(0),
                 };
                 DoRender(rt, uiComponents, CullUI, UIPass);
             });

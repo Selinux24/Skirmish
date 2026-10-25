@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using SharpDX.DXGI;
-using System;
+﻿using System;
+using Vortice.DXGI;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -41,20 +41,10 @@ namespace Engine.Common
         /// <param name="viewport">Viewport</param>
         void SetViewport(Viewport viewport);
         /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        void SetViewport(ViewportF viewport);
-        /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
         void SetViewports(Viewport[] viewports);
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
-        void SetViewports(ViewportF[] viewports);
 
         /// <summary>
         /// Set render target
@@ -102,7 +92,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="state">Depth stencil state</param>
         /// <param name="stencilRef">Stencil reference</param>
-        void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0);
+        void SetDepthStencilState(EngineDepthStencilState state, uint stencilRef = 0);
 
         /// <summary>
         /// Sets blend state
@@ -121,14 +111,14 @@ namespace Engine.Common
         /// </summary>
         /// <param name="firstSlot">The first input slot for binding</param>
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
-        void IASetVertexBuffers(int firstSlot, EngineVertexBufferBinding[] vertexBufferBindings);
+        void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vertexBufferBindings);
         /// <summary>
         /// Bind an index buffer to the input-assembler stage.
         /// </summary>
         /// <param name="indexBufferRef">A reference to an Buffer object</param>
         /// <param name="format">A SharpDX.DXGI.Format that specifies the format of the data in the index buffer</param>
         /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
-        void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, int offset);
+        void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, uint offset);
 
         /// <summary>
         /// Clear shader resources
@@ -150,38 +140,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetVertexShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetVertexShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current vertex shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetVertexShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetVertexShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current vertex shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource view</param>
-        void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetVertexShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current vertex shader shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource view list</param>
-        void SetVertexShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetVertexShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current vertex shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetVertexShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetVertexShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current vertex shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetVertexShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
+        void SetVertexShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
 
 
         /// <summary>
@@ -199,38 +189,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetHullShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current hull shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetHullShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetHullShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current hull shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetHullShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current hull shader shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetHullShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetHullShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current hull shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetHullShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetHullShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current hull shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetHullShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
+        void SetHullShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
 
 
         /// <summary>
@@ -248,38 +238,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetDomainShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current domain shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetDomainShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetDomainShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current domain shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetDomainShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current domain shader shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetDomainShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetDomainShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current domain shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetDomainShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetDomainShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current domain shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetDomainShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
+        void SetDomainShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Sets the geometry shader in the current device context
@@ -296,38 +286,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetGeometryShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current geometry shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetGeometryShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetGeometryShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current geometry shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetGeometryShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current geometry shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetGeometryShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetGeometryShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current geometry shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetGeometryShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current geometry shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetGeometryShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
+        void SetGeometryShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
         /// <summary>
         /// Sets targets for stream output
         /// </summary>
@@ -349,38 +339,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetPixelShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetPixelShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current pixel shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetPixelShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetPixelShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current pixel shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetPixelShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current pixel shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetPixelShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetPixelShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current pixel shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetPixelShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetPixelShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current pixel shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetPixelShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
+        void SetPixelShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Sets the compute shader in the current device context
@@ -397,46 +387,38 @@ namespace Engine.Common
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="slot">Slot</param>
         /// <param name="buffer">Buffer</param>
-        void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer);
+        void SetComputeShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer);
         /// <summary>
         /// Sets the constant buffer list to the current compute shader
         /// </summary>
         /// <typeparam name="T">Type o buffer</typeparam>
         /// <param name="startSlot">Start slot</param>
         /// <param name="bufferList">Buffer list</param>
-        void SetComputeShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList);
+        void SetComputeShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList);
         /// <summary>
         /// Sets the specified resource in the current compute shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView);
+        void SetComputeShaderResourceView(uint slot, EngineShaderResourceView resourceView);
         /// <summary>
         /// Sets the specified resource in the current compute shader shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="resourceViews">Resource list</param>
-        void SetComputeShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews);
+        void SetComputeShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews);
         /// <summary>
         /// Sets the specified sampler state in the current compute shader
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <param name="samplerState">Sampler</param>
-        void SetComputeShaderSampler(int slot, EngineSamplerState samplerState);
+        void SetComputeShaderSampler(uint slot, EngineSamplerState samplerState);
         /// <summary>
         /// Sets the specified sampler state in the current compute shader
         /// </summary>
         /// <param name="startSlot">Start slot</param>
         /// <param name="samplerStates">Sampler state list</param>
-        void SetComputeShaderSamplers(int startSlot, EngineSamplerState[] samplerStates);
-
-        /// <summary>
-        /// Apply effect pass
-        /// </summary>
-        /// <param name="technique"></param>
-        /// <param name="index"></param>
-        /// <param name="flags"></param>
-        void EffectPassApply(EngineEffectTechnique technique, int index, int flags);
+        void SetComputeShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates);
 
         /// <summary>
         /// Updates a constant buffer in the device context
@@ -444,7 +426,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="constantBuffer">Constant buffer</param>
         /// <param name="data">Data</param>
-        bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : struct, IBufferData;
+        bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : unmanaged, IBufferData;
         /// <summary>
         /// Updates a constant buffer in the device context
         /// </summary>
@@ -458,21 +440,21 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
+        void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged;
         /// <summary>
         /// Updates a texture
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>    
-        void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
+        void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged;
         /// <summary>
         /// Updates a texture
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : struct;
+        void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged;
 
         /// <summary>
         /// Reads an array of values from the specified buffer
@@ -481,7 +463,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : struct;
+        T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : unmanaged;
         /// <summary>
         /// Reads an array of values from the specified buffer
         /// </summary>
@@ -490,7 +472,7 @@ namespace Engine.Common
         /// <param name="offset">Offset to read</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : struct;
+        T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : unmanaged;
 
         /// <summary>
         /// Writes data into buffer
@@ -498,14 +480,14 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data) where T : struct;
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data) where T : unmanaged;
         /// <summary>
         /// Writes data into buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data) where T : struct;
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged;
         /// <summary>
         /// Writes data into buffer
         /// </summary>
@@ -513,7 +495,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : struct;
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged;
 
         /// <summary>
         /// Writes data into buffer
@@ -521,7 +503,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : struct;
+        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged;
         /// <summary>
         /// Writes data into buffer
         /// </summary>
@@ -529,14 +511,14 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : struct;
+        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged;
 
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="vertexCount">Vertex count</param>
         /// <param name="startVertexLocation">Start vertex location</param>
-        void Draw(int vertexCount, int startVertexLocation);
+        void Draw(uint vertexCount, uint startVertexLocation);
         /// <summary>
         /// Draw
         /// </summary>
@@ -549,21 +531,21 @@ namespace Engine.Common
         /// <param name="instanceCount">Instance count</param>
         /// <param name="startVertexLocation">Start vertex location</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation);
+        void DrawInstanced(uint vertexCountPerInstance, uint instanceCount, uint startVertexLocation, uint startInstanceLocation);
         /// <summary>
         /// Draw instanced
         /// </summary>
         /// <param name="instanceCount">Instance count</param>
         /// <param name="startInstanceLocation">Start instance location</param>
         /// <param name="vertexBuffer">Vertex buffer descriptor</param>
-        void DrawInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor vertexBuffer);
+        void DrawInstanced(uint instanceCount, uint startInstanceLocation, BufferDescriptor vertexBuffer);
         /// <summary>
         /// Draw indexed
         /// </summary>
         /// <param name="indexCount">Index count</param>
         /// <param name="startIndexLocation">Start vertex location</param>
         /// <param name="baseVertexLocation">Base vertex location</param>
-        void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation);
+        void DrawIndexed(uint indexCount, uint startIndexLocation, uint baseVertexLocation);
         /// <summary>
         /// Draw indexed
         /// </summary>
@@ -578,7 +560,7 @@ namespace Engine.Common
         /// <param name="startIndexLocation">Start index location</param>
         /// <param name="baseVertexLocation">Base vertex location</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation);
+        void DrawIndexedInstanced(uint indexCountPerInstance, uint instanceCount, uint startIndexLocation, uint baseVertexLocation, uint startInstanceLocation);
         /// <summary>
         /// Draw indexed instanced
         /// </summary>
@@ -586,7 +568,7 @@ namespace Engine.Common
         /// <param name="startInstanceLocation">Start instance location</param>
         /// <param name="indexBuffer">Index buffer descriptor</param>
         /// <param name="vertexBuffer">Vertex buffer descriptor</param>
-        void DrawIndexedInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer);
+        void DrawIndexedInstanced(uint instanceCount, uint startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer);
         /// <summary>
         /// Draw auto
         /// </summary>

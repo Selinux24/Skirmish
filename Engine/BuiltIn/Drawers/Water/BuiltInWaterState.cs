@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.Water
 {
@@ -10,11 +10,11 @@ namespace Engine.BuiltIn.Drawers.Water
         /// <summary>
         /// Base color
         /// </summary>
-        public Color3 BaseColor { get; set; }
+        public Vector3 BaseColor { get; set; }
         /// <summary>
         /// Water color (with alpha component)
         /// </summary>
-        public Color4 WaterColor { get; set; }
+        public Vector4 WaterColor { get; set; }
         /// <summary>
         /// Wave heigth
         /// </summary>

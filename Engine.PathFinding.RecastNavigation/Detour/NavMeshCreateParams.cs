@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -170,15 +171,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < VertCount; ++i)
                 {
                     var iv = Verts[i];
-                    float h = Bounds.Minimum.Y + iv.Y * CellHeight;
+                    float h = Bounds.Min.Y + iv.Y * CellHeight;
                     hmin = MathF.Min(hmin, h);
                     hmax = MathF.Max(hmax, h);
                 }
             }
             hmin -= WalkableClimb;
             hmax += WalkableClimb;
-            var bmin = Bounds.Minimum;
-            var bmax = Bounds.Maximum;
+            var bmin = Bounds.Min;
+            var bmax = Bounds.Max;
             bmin.Y = hmin;
             bmax.Y = hmax;
 

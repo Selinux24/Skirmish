@@ -1,10 +1,11 @@
-﻿namespace Engine.Common
+﻿
+namespace Engine.Common
 {
     /// <summary>
     /// Instace buffer descriptor request
     /// </summary>
-    class BufferDescriptorAddInstancingRequest<T>(string id, bool dynamic, int instances) : IBufferDescriptorRequest
-        where T : struct, IInstacingData
+    class BufferDescriptorAddInstancingRequest<T>(string id, bool dynamic, uint instances) : IBufferDescriptorRequest
+        where T : unmanaged, IInstacingData
     {
         /// <summary>
         /// New descriptor instance
@@ -13,7 +14,7 @@
         /// <summary>
         /// Gets or sets de number of instances of this geometry
         /// </summary>
-        private readonly int instances = instances;
+        private readonly uint instances = instances;
 
         /// <inheritdoc/>
         public string Id { get; } = id;
@@ -39,7 +40,7 @@
 
             if (instances == 0)
             {
-                Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
+                Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
 
                 Processed = ProcessedStages.Processed;
                 return;
@@ -47,7 +48,7 @@
 
             BufferManagerInstances<T> instancesDesc;
 
-            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(T)} [{Id}]");
+            Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(T)} [{Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(Dynamic);
             if (slot < 0)

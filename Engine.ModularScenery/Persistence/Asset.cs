@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Modular.Persistence
 {
@@ -31,9 +31,9 @@ namespace Engine.Modular.Persistence
         /// Gets the instance transforms dictionary
         /// </summary>
         /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
-        public Dictionary<string, Matrix[]> GetInstanceTransforms()
+        public Dictionary<string, Matrix4x4[]> GetInstanceTransforms()
         {
-            Dictionary<string, Matrix[]> res = [];
+            Dictionary<string, Matrix4x4[]> res = [];
 
             var assetNames = References.Select(a => a.AssetName).Distinct();
 

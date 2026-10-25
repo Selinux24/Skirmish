@@ -3,11 +3,12 @@ using Engine.Collections;
 using Engine.Collections.Generic;
 using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Collections.Generic
 {
@@ -40,36 +41,36 @@ namespace EngineTests.Collections.Generic
 
             var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
             var tris = Triangle.ComputeTriangleList(geom.Vertices, geom.Indices);
-            tris = Triangle.Transform(tris, Matrix.Translation(-7.5f, 0, -7.5f));
+            tris = Triangle.Transform(tris, Matrix4x4.CreateTranslation(-7.5f, 0, -7.5f));
 
             mesh =
             [
-                .. Triangle.Transform(tris, Matrix.Translation(0,10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,10,5)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,10,5)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(0,10,0)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(0,10,5)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(5,10,0)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(5,10,5)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(10,5,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(10,5,5)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,5,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,5,5)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(10,5,0)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(10,5,5)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(15,5,0)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(15,5,5)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(0,-5,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,-5,15)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,-5,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,-5,15)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(0,-5,10)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(0,-5,15)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(5,-5,10)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(5,-5,15)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(10,-10,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(10,-10,15)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,-10,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,-10,15)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(10,-10,10)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(10,-10,15)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(15,-10,10)),
+                .. Triangle.Transform(tris, Matrix4x4.CreateTranslation(15,-10,15)),
             ];
 
             t0 = mesh[0];
             t0PickingPoint = t0.GetCenter();
             t0PickingDistance = 10f;
             var r0Start = t0PickingPoint + new Vector3(0, t0PickingDistance, 0);
-            t0PickingRay = new Ray(r0Start, Vector3.Down);
+            t0PickingRay = new Ray(r0Start, Vector3Extensions.Down);
 
             t10 = mesh[0];
             t11 = mesh[31];

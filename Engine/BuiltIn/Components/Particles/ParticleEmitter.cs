@@ -1,6 +1,7 @@
 ﻿using Engine.Content.Persistence;
-using SharpDX;
 using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -71,10 +72,10 @@ namespace Engine.BuiltIn.Components.Particles
             var finalH1 = new BoundingSphere(finalPosH1 + new Vector3(0, endSize, 0), endSize * 0.5f);
             var finalH2 = new BoundingSphere(finalPosH2 + new Vector3(0, endSize, 0), endSize * 0.5f);
 
-            var bbox = BoundingBox.FromSphere(initial);
-            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalV));
-            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH1));
-            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH2));
+            var bbox = BoundingBox.CreateFromSphere(initial);
+            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalV));
+            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalH1));
+            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalH2));
 
             return bbox;
         }
@@ -197,7 +198,7 @@ namespace Engine.BuiltIn.Components.Particles
         public ParticleEmitter()
         {
             Position = Vector3.Zero;
-            Velocity = Vector3.Up;
+            Velocity = Vector3Extensions.Up;
             Scale = 1f;
             EmissionRate = 1f;
             Duration = 0f;
@@ -264,12 +265,12 @@ namespace Engine.BuiltIn.Components.Particles
             var tmp = mergedBoundingBox;
 
             mergedBoundingBox = new BoundingBox(
-                boundingBox.Minimum + Position,
-                boundingBox.Maximum + Position);
+                boundingBox.Min + Position,
+                boundingBox.Max + Position);
 
             if (tmp != null)
             {
-                mergedBoundingBox = BoundingBox.Merge(tmp.Value, mergedBoundingBox.Value);
+                mergedBoundingBox = BoundingBox.CreateMerged(tmp.Value, mergedBoundingBox.Value);
             }
         }
 
@@ -285,17 +286,17 @@ namespace Engine.BuiltIn.Components.Particles
         {
             Vector3 velocity = Velocity * parameters.EmitterVelocitySensitivity;
 
-            float horizontalVelocity = MathUtil.Lerp(
+            float horizontalVelocity = MathHelper.Lerp(
                 parameters.HorizontalVelocity.X,
                 parameters.HorizontalVelocity.Y,
                 hVelVariance);
 
-            float horizontalAngle = hAngleVariance * MathUtil.TwoPi;
+            float horizontalAngle = hAngleVariance * Helper.TwoPi;
 
             velocity.X += horizontalVelocity * MathF.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * MathF.Sin(horizontalAngle);
 
-            velocity.Y += MathUtil.Lerp(
+            velocity.Y += MathHelper.Lerp(
                 parameters.VerticalVelocity.X,
                 parameters.VerticalVelocity.Y,
                 vVelVariance);
@@ -308,11 +309,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// </summary>
         /// <param name="maxParticleDuration">Maximum particle duration</param>
         /// <returns>Returns the maximum number of particles running at the same time</returns>
-        public int GetMaximumConcurrentParticles(float maxParticleDuration)
+        public uint GetMaximumConcurrentParticles(float maxParticleDuration)
         {
             float maxActiveParticles = maxParticleDuration * (1f / EmissionRate);
 
-            return (int)(maxActiveParticles > (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
+            return (uint)(maxActiveParticles > (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
 
         /// <inheritdoc/>
@@ -347,8 +348,8 @@ namespace Engine.BuiltIn.Components.Particles
         public virtual BoundingBox GetBoundingBox()
         {
             return mergedBoundingBox ?? new BoundingBox(
-                boundingBox.Minimum + Position,
-                boundingBox.Maximum + Position);
+                boundingBox.Min + Position,
+                boundingBox.Max + Position);
         }
         /// <summary>
         /// Updates the particle emitter bounds
@@ -357,8 +358,8 @@ namespace Engine.BuiltIn.Components.Particles
         public void UpdateBounds(ParticleSystemParams systemParams)
         {
             var bbox = SampleBBox(this, systemParams, 0.33f);
-            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 0.66f));
-            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 1f));
+            bbox = BoundingBox.CreateMerged(bbox, SampleBBox(this, systemParams, 0.66f));
+            bbox = BoundingBox.CreateMerged(bbox, SampleBBox(this, systemParams, 1f));
 
             SetBoundingBox(bbox);
         }

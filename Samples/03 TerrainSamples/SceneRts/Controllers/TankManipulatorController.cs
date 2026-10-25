@@ -1,6 +1,6 @@
 ﻿using Engine;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace TerrainSamples.SceneRts.Controllers
 {
@@ -49,7 +49,7 @@ namespace TerrainSamples.SceneRts.Controllers
             // A vector pointing from the location to the target
             var desired = (next - position);
             float dToNext = desired.Length();
-            if (MathUtil.IsZero(dToNext))
+            if (Helper.IsZero(dToNext))
             {
                 return;
             }
@@ -83,9 +83,9 @@ namespace TerrainSamples.SceneRts.Controllers
             var futureTarget = futurePosition + (futurePosition - position);
 
             //Calculates a delta using the future angle
-            var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, Axis.Y);
-            float futureAngle = Helper.Angle(rotation, futureRotation);
-            float maxRot = MathUtil.PiOverTwo;
+            var futureRotation = QuaternionExtensions.CreateLookAtLeftHanded(position, futureTarget, futureNormal, Axis.Y);
+            float futureAngle = QuaternionExtensions.Angle(rotation, futureRotation);
+            float maxRot = Helper.PiOver2;
             futureAngle = MathF.Min(futureAngle, maxRot);
             float velDelta = 1.0f - (futureAngle / maxRot);
 
@@ -93,7 +93,7 @@ namespace TerrainSamples.SceneRts.Controllers
             newVelocity *= velDelta;
             Velocity = newVelocity;
 
-            if (MathUtil.IsZero(velDelta) && !MathUtil.IsZero(futureAngle))
+            if (Helper.IsZero(velDelta) && !Helper.IsZero(futureAngle))
             {
                 //Rotates only
                 manipulator.RotateTo(futureTarget, futureNormal, Axis.Y, 0.01f);

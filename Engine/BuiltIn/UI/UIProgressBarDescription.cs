@@ -1,5 +1,5 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(Color4 baseColor, Color4 progressColor)
+        public static UIProgressBarDescription Default(Vector4 baseColor, Vector4 progressColor)
         {
             return new()
             {
@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default progress bar description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIProgressBarDescription Default(Engine.UI.FontDescription font)
+        public static UIProgressBarDescription Default(FontDescription font)
         {
             return new()
             {
@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(Engine.UI.FontDescription font, Color4 baseColor, Color4 progressColor)
+        public static UIProgressBarDescription Default(FontDescription font, Vector4 baseColor, Vector4 progressColor)
         {
             return new()
             {
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = Engine.UI.FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+                Font = FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
 
@@ -101,12 +101,12 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Progress color
         /// </summary>
-        public Color4 ProgressColor { get; set; } = UIConfiguration.HighlightColor;
+        public Vector4 ProgressColor { get; set; } = UIConfiguration.HighlightColor;
 
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
@@ -115,11 +115,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Color4 TextShadowColor { get; set; } = Color.Transparent;
+        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
         /// <summary>
         /// Shadow position delta
         /// </summary>

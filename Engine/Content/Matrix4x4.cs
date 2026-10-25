@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Content
 {
+    using Matrix = System.Numerics.Matrix4x4;
+
     /// <summary>
     /// 4x4 matrix
     /// </summary>
@@ -22,7 +23,7 @@ namespace Engine.Content
         /// <param name="scale">Scaling vector</param>
         public static Matrix4X4 Scaling(Scale3 scale)
         {
-            return Matrix.Scaling(scale);
+            return Matrix.CreateScale(scale);
         }
         /// <summary>
         /// Gets the rotation matrix
@@ -30,7 +31,7 @@ namespace Engine.Content
         /// <param name="rotation">Rotation quaternion</param>
         public static Matrix4X4 Rotation(RotationQ rotation)
         {
-            return Matrix.RotationQuaternion(rotation);
+            return Matrix.CreateFromQuaternion(rotation);
         }
         /// <summary>
         /// Gets the translation matrix
@@ -38,7 +39,7 @@ namespace Engine.Content
         /// <param name="position">Position</param>
         public static Matrix4X4 Translation(Position3 position)
         {
-            return Matrix.Translation(position);
+            return Matrix.CreateTranslation(position);
         }
 
         /// <summary>
@@ -223,22 +224,22 @@ namespace Engine.Content
         public readonly bool Equals(ref Matrix4X4 other)
         {
             return
-                MathUtil.NearEqual(other.M11, M11) &&
-                MathUtil.NearEqual(other.M12, M12) &&
-                MathUtil.NearEqual(other.M13, M13) &&
-                MathUtil.NearEqual(other.M14, M14) &&
-                MathUtil.NearEqual(other.M21, M21) &&
-                MathUtil.NearEqual(other.M22, M22) &&
-                MathUtil.NearEqual(other.M23, M23) &&
-                MathUtil.NearEqual(other.M24, M24) &&
-                MathUtil.NearEqual(other.M31, M31) &&
-                MathUtil.NearEqual(other.M32, M32) &&
-                MathUtil.NearEqual(other.M33, M33) &&
-                MathUtil.NearEqual(other.M34, M34) &&
-                MathUtil.NearEqual(other.M41, M41) &&
-                MathUtil.NearEqual(other.M42, M42) &&
-                MathUtil.NearEqual(other.M43, M43) &&
-                MathUtil.NearEqual(other.M44, M44);
+                Helper.NearEqual(other.M11, M11) &&
+                Helper.NearEqual(other.M12, M12) &&
+                Helper.NearEqual(other.M13, M13) &&
+                Helper.NearEqual(other.M14, M14) &&
+                Helper.NearEqual(other.M21, M21) &&
+                Helper.NearEqual(other.M22, M22) &&
+                Helper.NearEqual(other.M23, M23) &&
+                Helper.NearEqual(other.M24, M24) &&
+                Helper.NearEqual(other.M31, M31) &&
+                Helper.NearEqual(other.M32, M32) &&
+                Helper.NearEqual(other.M33, M33) &&
+                Helper.NearEqual(other.M34, M34) &&
+                Helper.NearEqual(other.M41, M41) &&
+                Helper.NearEqual(other.M42, M42) &&
+                Helper.NearEqual(other.M43, M43) &&
+                Helper.NearEqual(other.M44, M44);
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()

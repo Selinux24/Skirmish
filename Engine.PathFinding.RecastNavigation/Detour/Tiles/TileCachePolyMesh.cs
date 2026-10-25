@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -308,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var (triRes, tris) = TriangulationHelper.Triangulate(triVerts, triHole);
             if (!triRes)
             {
-                Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
+                Game.Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
             }
 
             if (tris.Length > MAX_REM_EDGES)
@@ -334,7 +334,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Store polygons.
             if (!StorePolygons(polys, polys.Length, pareas, maxPolys))
             {
-                Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
+                Game.Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
 
                 return false;
             }

@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -129,16 +130,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // BV-tree uses cs for all dimensions
             BMin = new Int3
             {
-                X = MathUtil.Clamp((int)((bbox.Minimum.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bbox.Minimum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bbox.Minimum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = Math.Clamp((int)((bbox.Min.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = Math.Clamp((int)((bbox.Min.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = Math.Clamp((int)((bbox.Min.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
 
             BMax = new Int3
             {
-                X = MathUtil.Clamp((int)((bbox.Maximum.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bbox.Maximum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bbox.Maximum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = Math.Clamp((int)((bbox.Max.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = Math.Clamp((int)((bbox.Max.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = Math.Clamp((int)((bbox.Max.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
         }
         /// <summary>

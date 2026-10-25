@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Audio
 {
     /// <summary>
@@ -16,8 +15,8 @@ namespace Engine.Audio
             {
                 return new GameAudioConeDescription()
                 {
-                    InnerAngle = MathUtil.Pi * 5.0f / 6.0f,
-                    OuterAngle = MathUtil.Pi * 11.0f / 6.0f,
+                    InnerAngle = Helper.Pi * 5.0f / 6.0f,
+                    OuterAngle = Helper.Pi * 11.0f / 6.0f,
                     InnerVolume = 1.0f,
                     OuterVolume = 0.75f,
                     InnerLpf = 0.0f,

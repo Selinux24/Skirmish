@@ -4,7 +4,7 @@ using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -44,19 +44,19 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// First color
         /// </summary>
-        public Color4 Color1 { get; set; }
+        public Vector4 Color1 { get; set; }
         /// <summary>
         /// Second color
         /// </summary>
-        public Color4 Color2 { get; set; }
+        public Vector4 Color2 { get; set; }
         /// <summary>
         /// Third color
         /// </summary>
-        public Color4 Color3 { get; set; }
+        public Vector4 Color3 { get; set; }
         /// <summary>
         /// Fourth color
         /// </summary>
-        public Color4 Color4 { get; set; }
+        public Vector4 Color4 { get; set; }
         /// <summary>
         /// Gets or sets the texture index to render
         /// </summary>
@@ -164,7 +164,7 @@ namespace Engine.BuiltIn.UI
             {
                 geom = GeometryUtil.CreateUnitSprite();
 
-                var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
+                var vertices = VertexPositionColor.Generate(geom.Vertices, Vector4.One);
                 vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             }
 
@@ -233,8 +233,8 @@ namespace Engine.BuiltIn.UI
             }
             else
             {
-                var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
-                color.Alpha *= Alpha;
+                var color = Vector4Extensions.AdjustSaturation(BaseColor * TintColor, 1f);
+                color.W *= Alpha;
 
                 state = new BuiltInSpriteState
                 {

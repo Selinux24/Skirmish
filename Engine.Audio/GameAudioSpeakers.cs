@@ -1,4 +1,4 @@
-﻿using SharpDX.Multimedia;
+﻿using Vortice.Multimedia;
 
 namespace Engine.Audio
 {

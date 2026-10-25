@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Render target
@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Render target list
         /// </summary>
-        private List<RenderTargetView1> rtvList = [];
+        private List<ID3D11RenderTargetView1> rtvList = [];
 
         /// <summary>
         /// Name
@@ -44,7 +44,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="renderTarget">Render target view</param>
-        internal EngineRenderTargetView(string name, RenderTargetView1 renderTarget)
+        internal EngineRenderTargetView(string name, ID3D11RenderTargetView1 renderTarget)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A render target name must be specified.");
 
@@ -89,7 +89,7 @@ namespace Engine.Common
         /// Adds a new Render Target to the collection
         /// </summary>
         /// <param name="renderTarget">Render target view</param>
-        internal void Add(RenderTargetView1 renderTarget)
+        internal void Add(ID3D11RenderTargetView1 renderTarget)
         {
             if (renderTarget == null)
             {
@@ -104,7 +104,7 @@ namespace Engine.Common
         /// Gets the render target
         /// </summary>
         /// <returns>Returns the internal render target</returns>
-        internal RenderTargetView1 GetRenderTarget()
+        internal ID3D11RenderTargetView1 GetRenderTarget()
         {
             return rtvList.FirstOrDefault();
         }
@@ -112,7 +112,7 @@ namespace Engine.Common
         /// Gets the render targets
         /// </summary>
         /// <returns>Returns the internal render target list</returns>
-        internal IEnumerable<RenderTargetView1> GetRenderTargets()
+        internal ID3D11RenderTargetView1[] GetRenderTargets()
         {
             return [.. rtvList];
         }

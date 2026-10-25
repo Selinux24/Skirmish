@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12224.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resources", "Resources\Resources.csproj", "{28391C85-9275-4E62-A159-3C67DFADC428}"
 EndProject
@@ -114,6 +114,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.PathFindingTests", "Tests\Engine.PathFindingTests\Engine.PathFindingTests.csproj", "{FB5A5AC6-C811-4B5C-A350-1AD8C9D8B720}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "05 AISamples", "Samples\05 AISamples\05 AISamples.csproj", "{AD944E82-9FF6-4287-BC4C-0AC83A784FDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.TextureReader", "Engine.TextureReader\Engine.TextureReader.csproj", "{62BA7CDA-064F-8494-07DB-ABC344FA51CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{C000A97B-2D46-7DE7-E934-66D7144D4963}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -413,6 +417,30 @@ Global
 		{AD944E82-9FF6-4287-BC4C-0AC83A784FDB}.Release|x64.Build.0 = Release|x64
 		{AD944E82-9FF6-4287-BC4C-0AC83A784FDB}.Release|x86.ActiveCfg = Release|x86
 		{AD944E82-9FF6-4287-BC4C-0AC83A784FDB}.Release|x86.Build.0 = Release|x86
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|x64.ActiveCfg = Debug|x64
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|x64.Build.0 = Debug|x64
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|x86.ActiveCfg = Debug|x86
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Debug|x86.Build.0 = Debug|x86
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|x64.ActiveCfg = Release|x64
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|x64.Build.0 = Release|x64
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|x86.ActiveCfg = Release|x86
+		{62BA7CDA-064F-8494-07DB-ABC344FA51CC}.Release|x86.Build.0 = Release|x86
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|x64.ActiveCfg = Debug|x64
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|x64.Build.0 = Debug|x64
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|x86.ActiveCfg = Debug|x86
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Debug|x86.Build.0 = Debug|x86
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|x64.ActiveCfg = Release|x64
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|x64.Build.0 = Release|x64
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|x86.ActiveCfg = Release|x86
+		{C000A97B-2D46-7DE7-E934-66D7144D4963}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

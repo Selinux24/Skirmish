@@ -47,7 +47,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess
             var graphics = game.Graphics;
             var bufferManager = game.BufferManager;
 
-            var screen = GeometryUtil.CreateScreen((int)graphics.Viewport.Width, (int)graphics.Viewport.Height);
+            var screen = GeometryUtil.CreateScreen((uint)graphics.Viewport.Width, (uint)graphics.Viewport.Height);
             var vertices = VertexPositionTexture.Generate(screen.Vertices, screen.Uvs);
 
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);

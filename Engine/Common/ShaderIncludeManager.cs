@@ -1,15 +1,19 @@
 ﻿using Engine.Shaders.Properties;
-using SharpDX;
-using SharpDX.D3DCompiler;
+using Vortice.Direct3D;
 using System.IO;
 
 namespace Engine.Common
 {
-    class ShaderIncludeManager : CallbackBase, Include
+    class ShaderIncludeManager : Include
     {
         public void Close(Stream stream)
         {
             stream.Dispose();
+        }
+
+        public void Dispose()
+        {
+            throw new System.NotImplementedException();
         }
 
         public Stream Open(IncludeType type, string fileName, Stream parentStream)

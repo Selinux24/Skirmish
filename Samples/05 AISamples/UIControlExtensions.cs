@@ -2,8 +2,8 @@
 using Engine.BuiltIn.UI;
 using Engine.Tween;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace AISamples
 {
@@ -14,7 +14,7 @@ namespace AISamples
             tweener.TweenScaleBounce(ctrl, from, to, milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void ScaleColor(this UIControlTweener tweener, IUIControl ctrl, Color4 from, Color4 to, long milliseconds)
+        public static void ScaleColor(this UIControlTweener tweener, IUIControl ctrl, Vector4 from, Vector4 to, long milliseconds)
         {
             tweener.TweenBaseColorBounce(ctrl, from, to, milliseconds, ScaleFuncs.CubicEaseInOut);
         }
@@ -28,8 +28,8 @@ namespace AISamples
             int h = 8;
             int hv = h - 1;
 
-            int formWidth = form.RenderWidth;
-            int formHeight = form.RenderHeight;
+            int formWidth = (int)form.RenderWidth;
+            int formHeight = (int)form.RenderHeight;
 
             int i = 0;
             for (int row = 0; row < rowCount; row++)

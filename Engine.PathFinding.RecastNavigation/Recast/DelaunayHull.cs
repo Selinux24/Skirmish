@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -210,7 +211,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var t = tris[i];
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
-                    Logger.WriteWarning(nameof(DelaunayHull), $"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
+                    Game.Logger.WriteWarning(nameof(DelaunayHull), $"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
                     tris[i] = tris[^1];
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
@@ -275,7 +276,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             if (edges.Count >= maxEdges)
             {
-                Logger.WriteWarning(this, $"addEdge: Too many edges ({edges.Count}/{maxEdges}).");
+                Game.Logger.WriteWarning(this, $"addEdge: Too many edges ({edges.Count}/{maxEdges}).");
                 return;
             }
 

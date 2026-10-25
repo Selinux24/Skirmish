@@ -3,10 +3,10 @@ using AISamples.Common.Primitives;
 using Engine;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common.Markings
 {
@@ -66,8 +66,8 @@ namespace AISamples.Common.Markings
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, support.P1, support.P2, width, height);
             var tris = Triangle.ComputeTriangleList(t);
 
-            Vector3[] allPoints = tris.SelectMany(t => new Vector3[] { t.Point3, t.Point2, t.Point1 }).ToArray();
-            if (!MathUtil.IsOne(scale))
+            Vector3[] allPoints = [.. tris.SelectMany(t => new Vector3[] { t.Point3, t.Point2, t.Point1 })];
+            if (!Helper.IsOne(scale))
             {
                 allPoints = Utils.ScaleFromCenter(allPoints, scale);
             }

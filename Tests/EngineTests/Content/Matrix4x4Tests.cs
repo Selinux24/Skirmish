@@ -1,11 +1,14 @@
-﻿using Engine.Content;
+﻿using Engine;
+using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.Content
 {
+    using Matrix = System.Numerics.Matrix4x4;
+    using Quaternion = System.Numerics.Quaternion;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]
@@ -122,41 +125,29 @@ namespace EngineTests.Content
         public void MatrixMultiplyTest()
         {
             Matrix4X4 res = new Matrix4X4(1) * new Matrix4X4(2);
-            Matrix4X4 expected = new Matrix(1) * new Matrix(2);
+            Matrix4X4 expected = Matrix.Create(1) * Matrix.Create(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixScalingTest()
         {
             Matrix4X4 res = Matrix4X4.Scaling(new Scale3(2));
-            Matrix4X4 expected = Matrix.Scaling(2);
+            Matrix4X4 expected = Matrix.CreateScale(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixRotationTest()
         {
             Matrix4X4 res = Matrix4X4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
-            Matrix4X4 expected = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, 10));
+            Matrix4X4 expected = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3Extensions.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixTranslationTest()
         {
             Matrix4X4 res = Matrix4X4.Translation(new Position3(2));
-            Matrix4X4 expected = Matrix.Translation(2, 2, 2);
+            Matrix4X4 expected = Matrix.CreateTranslation(2, 2, 2);
             Assert.AreEqual(expected, res);
-        }
-
-        [TestMethod()]
-        public void MatrixToMatrixTest()
-        {
-            Matrix res1 = new Matrix4X4(matrixValues);
-            Matrix expected1 = new(matrixValues);
-            Assert.AreEqual(expected1, res1);
-
-            Matrix4X4 res2 = new Matrix(matrixValues);
-            Matrix4X4 expected2 = new(matrixValues);
-            Assert.AreEqual(expected2, res2);
         }
     }
 }

@@ -1,6 +1,6 @@
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Engine
 {
@@ -321,7 +321,7 @@ namespace Engine
         /// <param name="segmentTime">Relative time value for curve</param>
         public void FindCurve(float time, out int curve, out float segmentTime)
         {
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 curve = 0;
                 segmentTime = 0;
@@ -356,7 +356,7 @@ namespace Engine
         /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
-            return Vector3.Up;
+            return Vector3Extensions.Up;
         }
         /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)

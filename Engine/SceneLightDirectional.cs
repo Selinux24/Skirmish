@@ -1,5 +1,5 @@
 ﻿using Engine.BuiltIn.Components.ShadowMapping;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine
 {
@@ -21,7 +21,7 @@ namespace Engine
             get
             {
                 float brightness = 0.8f;
-                var lightColor = new Color3(1, 0.9607844f, 0.8078432f) * brightness;
+                var lightColor = new Vector3(1, 0.9607844f, 0.8078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Key light",
@@ -41,13 +41,13 @@ namespace Engine
             get
             {
                 float brightness = 0.5f;
-                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
+                var lightColor = new Vector3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Fill light",
                     false,
                     lightColor,
-                    Color3.Black,
+                    Vector3.Zero,
                     true,
                     new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
                     brightness);
@@ -61,7 +61,7 @@ namespace Engine
             get
             {
                 float brightness = 0.1f;
-                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
+                var lightColor = new Vector3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
 
                 return new SceneLightDirectional(
                     "Back light",
@@ -77,14 +77,14 @@ namespace Engine
         /// <summary>
         /// Initial light direction
         /// </summary>
-        private Vector3 initialDirection = Vector3.ForwardLH;
+        private Vector3 initialDirection = Vector3Extensions.ForwardLH;
         /// <summary>
         /// Light volume
         /// </summary>
         private ICullingVolume lightVolume;
 
         /// <inheritdoc/>
-        public override Matrix ParentTransform
+        public override Matrix4x4 ParentTransform
         {
             get
             {
@@ -104,7 +104,7 @@ namespace Engine
         /// <inheritdoc/>
         public float Brightness { get; set; } = 1f;
         /// <inheritdoc/>
-        public Matrix ToShadowSpace { get; set; }
+        public Matrix4x4 ToShadowSpace { get; set; }
         /// <inheritdoc/>
         public Vector4 ToCascadeOffsetX { get; set; }
         /// <inheritdoc/>
@@ -130,7 +130,7 @@ namespace Engine
         /// <param name="enabled">Lights is enabled</param>
         /// <param name="direction">Direction</param>
         /// <param name="brigthness">Brightness</param>
-        public SceneLightDirectional(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, Vector3 direction, float brigthness)
+        public SceneLightDirectional(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialDirection = direction;
@@ -160,7 +160,7 @@ namespace Engine
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
             FromLightVP = [];
-            ToShadowSpace = Matrix.Identity;
+            ToShadowSpace = Matrix4x4.Identity;
             ToCascadeOffsetX = Vector4.Zero;
             ToCascadeOffsetY = Vector4.Zero;
             ToCascadeScale = Vector4.Zero;

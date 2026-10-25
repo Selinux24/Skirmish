@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -41,7 +41,7 @@ namespace Engine.Physics
         /// <summary>
         /// Orthonormal matrix for local-to-world transforms.
         /// </summary>
-        private Matrix3x3 contactToWorld;
+        private Matrix4x4 contactToWorld;
 
         /// <summary>
         /// Contact position in world coordinates.
@@ -89,7 +89,7 @@ namespace Engine.Physics
         /// Primary direction of friction for anisotropic friction or random orientation for isotropic friction
         /// </remarks>
         /// <returns>Returns the contact basis matrix</returns>
-        private static Matrix3x3 CalculateContactBasis(Vector3 contactNormal)
+        private static Matrix4x4 CalculateContactBasis(Vector3 contactNormal)
         {
             Vector3 contactTangent1;
             Vector3 contactTangent2;
@@ -126,12 +126,11 @@ namespace Engine.Physics
                 contactTangent2.Z = contactNormal.X * contactTangent1.Y;
             }
 
-            return new Matrix3x3()
-            {
-                Column1 = contactNormal,
-                Column2 = contactTangent1,
-                Column3 = contactTangent2,
-            };
+            return new Matrix4x4(
+                contactNormal.X, contactNormal.Y, contactNormal.Z, 0f,
+                contactTangent1.X, contactTangent1.Y, contactTangent1.Z, 0f,
+                contactTangent2.X, contactTangent2.Y, contactTangent2.Z, 0f,
+                0f, 0f, 0f, 1f);
         }
         /// <summary>
         /// Gets the symmetric matrix based on the specified vector
@@ -141,17 +140,13 @@ namespace Engine.Physics
         /// <remarks>
         /// The symmetric matrix is the equivalent to the cross product of the specified vector, such that a x b = A_s b, where a and b are vectors and A_s is the symmetric form of a
         /// </remarks>
-        private static Matrix3x3 SkewSymmetric(Vector3 vector)
+        private static Matrix4x4 SkewSymmetric(Vector3 vector)
         {
-            Matrix3x3 result;
-            result.M11 = result.M22 = result.M33 = 0f;
-            result.M12 = -vector.Z;
-            result.M13 = vector.Y;
-            result.M21 = vector.Z;
-            result.M23 = -vector.X;
-            result.M31 = -vector.Y;
-            result.M32 = vector.X;
-            return result;
+            return new(
+                0f, -vector.Z, vector.Y, 0f,
+                vector.Z, 0f, -vector.X, 0f,
+                -vector.Y, vector.X, 0f, 0f,
+                0f, 0f, 0f, 1f);
         }
 
         /// <summary>
@@ -362,7 +357,7 @@ namespace Engine.Physics
 
                 // We have the linear amount of motion required to rotate the body.
                 // Now you have to calculate the desired rotation to make it rotate.
-                if (MathUtil.IsZero(angularMove))
+                if (Helper.IsZero(angularMove))
                 {
                     // There is no angular movement. No rotation.
                     angularChange[i] = Vector3.Zero;
@@ -453,7 +448,7 @@ namespace Engine.Physics
             rotationChange = new Vector3[2];
 
             // Storing inverse masses and inverse inertia tensors in world coordinates.
-            Matrix3x3[] inverseInertiaTensor = new Matrix3x3[2];
+            Matrix4x4[] inverseInertiaTensor = new Matrix4x4[2];
             inverseInertiaTensor[0] = body1.InverseInertiaTensorWorld;
             if (body2.HasFiniteMass())
             {
@@ -462,7 +457,7 @@ namespace Engine.Physics
 
             // Calculate the impulse on each contact axis
             Vector3 impulseContact;
-            if (MathUtil.IsZero(friction))
+            if (Helper.IsZero(friction))
             {
                 // Frictionless impulse
                 impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);
@@ -506,7 +501,7 @@ namespace Engine.Physics
         /// <remarks>
         /// The two inertia tensors, one for each body of the contact, are necessary to save calculations.
         /// </remarks>
-        private Vector3 CalculateFrictionlessImpulse(Matrix3x3[] inverseInertiaTensor)
+        private Vector3 CalculateFrictionlessImpulse(Matrix4x4[] inverseInertiaTensor)
         {
             Vector3 impulseContact;
 
@@ -546,14 +541,14 @@ namespace Engine.Physics
         /// <remarks>
         /// The two inertia tensors, one for each body of the contact, are necessary to save calculations.
         /// </remarks>
-        private Vector3 CalculateFrictionImpulse(Matrix3x3[] inverseInertiaTensor)
+        private Vector3 CalculateFrictionImpulse(Matrix4x4[] inverseInertiaTensor)
         {
             Vector3 impulseContact;
             float inverseMass = body1.InverseMass;
 
             // The equivalent of the cross product in matrices is multiplication by the skew symmetric matrix.
             // The matrix will be used to convert linear quantities to angular ones.
-            Matrix3x3 impulseToTorque;
+            Matrix4x4 impulseToTorque;
             impulseToTorque = SkewSymmetric(relativeContactPositionsWorld1);
 
             // Get the matrix to convert contact impulse to velocity variation in world coordinates.
@@ -580,7 +575,7 @@ namespace Engine.Physics
             }
 
             // Convert to contact coordinates by changing the base.
-            var deltaVelocity = Matrix3x3.Transpose(contactToWorld);
+            var deltaVelocity = Matrix4x4.Transpose(contactToWorld);
             deltaVelocity *= deltaVelWorld;
             deltaVelocity *= contactToWorld;
 
@@ -590,7 +585,7 @@ namespace Engine.Physics
             deltaVelocity.M33 += inverseMass;
 
             // Reverse to get the momentum needed per unit of speed.
-            var impulseMatrix = Matrix3x3.Invert(deltaVelocity);
+            Matrix4x4.Invert(deltaVelocity, out var impulseMatrix);
 
             // Find the velocities to kill.
             var velKill = new Vector3(

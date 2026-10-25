@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
         /// <summary>
         /// Inverse light wave length
         /// </summary>
-        public Color3 InvWaveLength4 { get; set; }
+        public Vector3 InvWaveLength4 { get; set; }
         /// <summary>
         /// Scale
         /// </summary>
@@ -58,7 +58,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
         /// <summary>
         /// Back color
         /// </summary>
-        public Color4 BackColor { get; set; }
+        public Vector4 BackColor { get; set; }
         /// <summary>
         /// HDR exposure
         /// </summary>

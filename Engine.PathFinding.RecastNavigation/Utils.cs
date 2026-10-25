@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -671,8 +672,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a a random point</returns>
         public static Vector3 RandomPointInConvexPoly(Vector3[] polygon)
         {
-            float s = Helper.RandomGenerator.NextFloat(0, 1);
-            float t = Helper.RandomGenerator.NextFloat(0, 1);
+            float s = Helper.RandomGenerator.NextSingle(0, 1);
+            float t = Helper.RandomGenerator.NextSingle(0, 1);
 
             List<float> areas = [];
 
@@ -752,7 +753,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a value between 0 and 1</returns>
         public static float Tween(float t, float t0, float t1)
         {
-            return MathUtil.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
+            return Math.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
         }
         /// <summary>
         /// Gets whether the point b is into the cylinder defined by the a vector, and the specified radius and height
@@ -913,7 +914,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="amax">A maximum rectangle point</param>
         /// <param name="bounds">Bounds</param>
         /// <returns>Returns true if rectangles overlap</returns>
-        public static bool OverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
+        public static bool OverlapRect(Vector2 amin, Vector2 amax, Rect bounds)
         {
             return
                 !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
@@ -965,7 +966,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = verts[j] + orig;
 
-                if (!MathUtil.IsZero(cellHeight))
+                if (!Helper.IsZero(cellHeight))
                 {
                     p.Y += cellHeight;// Is this offset necessary?
                 }

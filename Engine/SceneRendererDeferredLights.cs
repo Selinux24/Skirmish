@@ -16,7 +16,7 @@ namespace Engine
         /// <summary>
         /// Render helper geometry buffer slot
         /// </summary>
-        public static int BufferSlot { get; set; } = 0;
+        public static uint BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Light geometry
@@ -26,11 +26,11 @@ namespace Engine
             /// <summary>
             /// Geometry offset
             /// </summary>
-            public int Offset;
+            public uint Offset;
             /// <summary>
             /// Index count
             /// </summary>
-            public int IndexCount;
+            public uint IndexCount;
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Engine
         /// </summary>
         /// <param name="width">New width</param>
         /// <param name="height">New height</param>
-        public void Update(int width, int height)
+        public void Update(uint width, uint height)
         {
             lightGeometryVertices.Clear();
             lightGeometryIndices.Clear();
@@ -211,12 +211,12 @@ namespace Engine
         /// </summary>
         /// <param name="width">Screen width</param>
         /// <param name="height">Screen height</param>
-        private void AddRectangle(int width, int height)
+        private void AddRectangle(uint width, uint height)
         {
             var screen = GeometryUtil.CreateScreen(width, height);
 
-            screenGeometry.Offset = lightGeometryIndices.Count;
-            screenGeometry.IndexCount = screen.Indices.Count();
+            screenGeometry.Offset = (uint)lightGeometryIndices.Count;
+            screenGeometry.IndexCount = (uint)screen.Indices.Count();
 
             screen.Indices.ToList().ForEach(i =>
             {
@@ -233,8 +233,8 @@ namespace Engine
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
-            pointLightGeometry.Offset = lightGeometryIndices.Count;
-            pointLightGeometry.IndexCount = sphere.Indices.Count();
+            pointLightGeometry.Offset = (uint)lightGeometryIndices.Count;
+            pointLightGeometry.IndexCount = (uint)sphere.Indices.Count();
 
             sphere.Indices.ToList().ForEach(i =>
             {
@@ -251,8 +251,8 @@ namespace Engine
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
-            spotLightGeometry.Offset = lightGeometryIndices.Count;
-            spotLightGeometry.IndexCount = sphere.Indices.Count();
+            spotLightGeometry.Offset = (uint)lightGeometryIndices.Count;
+            spotLightGeometry.IndexCount = (uint)sphere.Indices.Count();
 
             sphere.Indices.ToList().ForEach(i =>
             {
@@ -277,7 +277,7 @@ namespace Engine
             if (lightGeometryVertexBuffer == null)
             {
                 lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", lightGeometryVertices, true);
-                lightGeometryVertexBufferBinding = new EngineVertexBufferBinding(lightGeometryVertexBuffer, lightGeometryVertices[0].GetStride(), 0);
+                lightGeometryVertexBufferBinding = new EngineVertexBufferBinding(lightGeometryVertexBuffer, (uint)lightGeometryVertices[0].GetStride(), 0);
             }
             else
             {
@@ -303,7 +303,7 @@ namespace Engine
         /// <param name="drawer">Drawer</param>
         private void DrawSingleLight(IEngineDeviceContext dc, LightGeometry geometry, IDrawer drawer)
         {
-            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, geometry.IndexCount, geometry.Offset);
+            drawer.Draw(dc, (uint)BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, (uint)geometry.IndexCount, (uint)geometry.Offset);
         }
         /// <summary>
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
@@ -320,7 +320,7 @@ namespace Engine
         /// <param name="drawer">Drawer</param>
         public void DrawDirectional(IEngineDeviceContext dc, IDrawer drawer)
         {
-            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, (uint)BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, (uint)screenGeometry.IndexCount, (uint)screenGeometry.Offset);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
@@ -391,7 +391,7 @@ namespace Engine
         /// <param name="drawer">Effect</param>
         public void DrawResult(IEngineDeviceContext dc, IDrawer drawer)
         {
-            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, (uint)BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, (uint)screenGeometry.IndexCount, (uint)screenGeometry.Offset);
         }
 
         /// <summary>

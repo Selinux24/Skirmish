@@ -153,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -173,7 +173,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -195,7 +195,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }
@@ -217,7 +217,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }

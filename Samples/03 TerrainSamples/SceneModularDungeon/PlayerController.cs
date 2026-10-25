@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Engine.PathFinding;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
@@ -168,8 +168,8 @@ namespace TerrainSamples.SceneModularDungeon
         private void StartHeadSway(float totalTime, float dt)
         {
             var pos = Vector3.Zero;
-            pos.Y = MathUtil.Lerp(pos.Y, MathF.Sin(totalTime * Frequency) * Amount * 1.4f, Smooth * dt);
-            pos.X = MathUtil.Lerp(pos.X, MathF.Cos(totalTime * Frequency * 0.5f) * Amount * 1.6f, Smooth * dt);
+            pos.Y = float.Lerp(pos.Y, MathF.Sin(totalTime * Frequency) * Amount * 1.4f, Smooth * dt);
+            pos.X = float.Lerp(pos.X, MathF.Cos(totalTime * Frequency * 0.5f) * Amount * 1.6f, Smooth * dt);
             headPositionDelta = pos * Scale;
         }
         /// <summary>
@@ -178,7 +178,7 @@ namespace TerrainSamples.SceneModularDungeon
         /// <param name="dt">Delta time</param>
         private void StopHeadSway(float dt)
         {
-            if (Vector3.NearEqual(headPositionDelta, Vector3.Zero, new(0.0001f)))
+            if (Vector3Extensions.NearEqual(headPositionDelta, Vector3.Zero, new(0.0001f)))
             {
                 return;
             }

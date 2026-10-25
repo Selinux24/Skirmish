@@ -1,13 +1,13 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using Vortice.Mathematics;
 
 namespace Engine.Content
 {
     using Engine.Common;
-    using System.Text;
 
     /// <summary>
     /// Image content array from file
@@ -21,7 +21,7 @@ namespace Engine.Content
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle;
+        private readonly RectI cropRectangle;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -38,7 +38,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="paths">Paths to image</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(string path, Rectangle? cropRectangle = null)
+        public FileArrayImageContent(string path, RectI? cropRectangle = null)
         {
             if (path == null)
             {
@@ -55,7 +55,7 @@ namespace Engine.Content
             }
 
             paths = p;
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
         /// <summary>
         /// Constructor
@@ -63,7 +63,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentFileName">Path to image</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(string contentFolder, string contentFileName, Rectangle? cropRectangle = null)
+        public FileArrayImageContent(string contentFolder, string contentFileName, RectI? cropRectangle = null)
         {
             if (contentFileName == null)
             {
@@ -77,17 +77,17 @@ namespace Engine.Content
             }
 
             paths = p;
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="paths">Paths to images</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(IEnumerable<string> paths, Rectangle? cropRectangle = null)
+        public FileArrayImageContent(IEnumerable<string> paths, RectI? cropRectangle = null)
         {
             this.paths = paths ?? throw new ArgumentNullException(nameof(paths), "A path array must be specified.");
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
 
             if (!paths.Any(s => s != null))
             {
@@ -100,7 +100,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentFileNames">Paths to images</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(string contentFolder, IEnumerable<string> contentFileNames, Rectangle? cropRectangle = null)
+        public FileArrayImageContent(string contentFolder, IEnumerable<string> contentFileNames, RectI? cropRectangle = null)
         {
             if (contentFileNames == null)
             {
@@ -119,7 +119,7 @@ namespace Engine.Content
             }
 
             paths = p;
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
 
         /// <inheritdoc/>
@@ -127,7 +127,7 @@ namespace Engine.Content
         {
             Name = name;
 
-            if (cropRectangle == Rectangle.Empty)
+            if (cropRectangle == Rect.Empty)
             {
                 return game.Graphics.LoadTextureArray($"{name}_{GetResourceKey()}", paths, mipAutogen, dynamic);
             }

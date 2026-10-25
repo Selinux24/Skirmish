@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Fonts
@@ -58,9 +58,9 @@ namespace Engine.BuiltIn.Drawers.Fonts
             public Vector4 Rectangle;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerFont>();
+                return (uint)Marshal.SizeOf<PerFont>();
             }
         }
         /// <summary>
@@ -69,11 +69,11 @@ namespace Engine.BuiltIn.Drawers.Fonts
         [StructLayout(LayoutKind.Explicit, Size = 64)]
         struct PerText : IBufferData
         {
-            public static PerText Build(Matrix local)
+            public static PerText Build(Matrix4x4 local)
             {
                 return new PerText
                 {
-                    Local = Matrix.Transpose(local),
+                    Local = Matrix4x4.Transpose(local),
                 };
             }
 
@@ -81,12 +81,12 @@ namespace Engine.BuiltIn.Drawers.Fonts
             /// Local matrix
             /// </summary>
             [FieldOffset(0)]
-            public Matrix Local;
+            public Matrix4x4 Local;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerText>();
+                return (uint)Marshal.SizeOf<PerText>();
             }
         }
 
@@ -131,7 +131,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="local">Local transform</param>
-        public void UpdateText(IEngineDeviceContext dc, Matrix local)
+        public void UpdateText(IEngineDeviceContext dc, Matrix4x4 local)
         {
             dc.UpdateConstantBuffer(cbPerText, PerText.Build(local));
 

@@ -3,11 +3,11 @@ using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.PathFindingTests
@@ -45,15 +45,15 @@ namespace Engine.PathFindingTests
 
             var pZero = GeometryUtil.CreateXZPlane(10, 10, hZero);
             zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
-            pointZero = Vector3.Up * hZero;
+            pointZero = Vector3Extensions.Up * hZero;
 
             var pOne = GeometryUtil.CreateXZPlane(10, 10, hOne);
             hOnePlaneTris = Triangle.ComputeTriangleList(pOne.Vertices, pOne.Indices);
-            pointOne = Vector3.Up * hOne;
+            pointOne = Vector3Extensions.Up * hOne;
 
             var pTwo = GeometryUtil.CreateXZPlane(10, 10, hTwo);
             hTwoPlaneTris = Triangle.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
-            pointTwo = Vector3.Up * hTwo;
+            pointTwo = Vector3Extensions.Up * hTwo;
 
             sceneryTris = (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t);
 

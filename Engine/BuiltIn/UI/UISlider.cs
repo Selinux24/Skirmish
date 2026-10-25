@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -105,10 +105,10 @@ namespace Engine.BuiltIn.UI
             await base.ReadAssets(description);
 
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(description.RangeCount);
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorInitialValues?.Length ?? 0, description.RangeCount);
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.SelectorColors?.Length ?? 0, description.RangeCount);
-            ArgumentOutOfRangeException.ThrowIfLessThan(description.BarRanges?.Length ?? 0, description.RangeCount);
-            ArgumentOutOfRangeException.ThrowIfLessThan((description.BarColors?.Length ?? 0) + 1, description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan((uint)(description.SelectorInitialValues?.Length ?? 0), description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan((uint)(description.SelectorColors?.Length ?? 0), description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan((uint)(description.BarRanges?.Length ?? 0), description.RangeCount);
+            ArgumentOutOfRangeException.ThrowIfLessThan((uint)(description.BarColors?.Length ?? 0) + 1, description.RangeCount);
 
             Minimum = description.Minimum;
             Maximum = description.Maximum;
@@ -130,7 +130,7 @@ namespace Engine.BuiltIn.UI
             AddChildren(bars, false);
             AddChildren(selectors, false);
         }
-        private async Task<Sprite> CreateBarSprite(int index, Color4 barColor, float height)
+        private async Task<Sprite> CreateBarSprite(int index, Vector4 barColor, float height)
         {
             var desc = SpriteDescription.Default(barColor);
             desc.EventsEnabled = true;
@@ -162,7 +162,7 @@ namespace Engine.BuiltIn.UI
 
             UpdateValue(sprite);
         }
-        private async Task<Sprite> CreateSelectorSprite(int index, Color4 selectorColor, float width, float height)
+        private async Task<Sprite> CreateSelectorSprite(int index, Vector4 selectorColor, float width, float height)
         {
             var desc = SpriteDescription.Default(selectorColor);
             desc.EventsEnabled = true;
@@ -242,7 +242,7 @@ namespace Engine.BuiltIn.UI
             float right = Width * max;
 
             //Get the percentage of the mouse position
-            float xmouse = MathUtil.Clamp(Game.Input.MouseX - Left, left, right);
+            float xmouse = Math.Clamp(Game.Input.MouseX - Left, left, right);
             float value = xmouse / Width;
 
             //Set the range value

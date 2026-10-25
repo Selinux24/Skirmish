@@ -4,12 +4,14 @@ using Engine.BuiltIn.UI;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneStart
 {
+    using Color = System.Drawing.Color;
+
     class StartScene : Scene
     {
         private const string EmtpyNameString = "Empty";
@@ -28,7 +30,7 @@ namespace IntermediateSamples.SceneStart
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            GameEnvironment.Background = Color.Black.RGBA();
         }
 
         public override void Initialize()
@@ -77,28 +79,28 @@ namespace IntermediateSamples.SceneStart
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
             title.Text = "Intermediate Samples";
-            title.TextForeColor = Color.Gold;
-            title.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            title.TextForeColor = Color.Gold.RGBA();
+            title.TextShadowColor = new(Color.LightYellow.RGB(), 0.25f);
             title.TextShadowDelta = new Vector2(4, 4);
             title.TextHorizontalAlign = TextHorizontalAlign.Center;
             title.TextVerticalAlign = TextVerticalAlign.Middle;
         }
         private async Task InitializeMainPanel()
         {
-            mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", UIPanelDescription.Default(Color.Transparent));
+            mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", UIPanelDescription.Default(Color.Transparent.RGBA()));
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(3));
 
             var buttonFont = FontDescription.FromFamily(buttonFonts, 24, true);
 
-            var highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);
-            buttonDesc.TextForeColor = Color.Gold;
+            var highlightColor = new Vector4(0.3333f, 0.3333f, 0.3333f, 0f);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red.RGBA(), Color.Red.RGBA() + highlightColor);
+            buttonDesc.TextForeColor = Color.Gold.RGBA();
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
-            var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange, Color.Orange.ToColor4() + highlightColor);
-            exitDesc.TextForeColor = Color.Gold;
+            var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange.RGBA(), Color.Orange.RGBA() + highlightColor);
+            exitDesc.TextForeColor = Color.Gold.RGBA();
             exitDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
@@ -166,7 +168,7 @@ namespace IntermediateSamples.SceneStart
         }
         private async Task<UIPanel> CreatePanel(string text)
         {
-            return await CreateComponent<UIPanel, UIPanelDescription>($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
+            return await CreateComponent<UIPanel, UIPanelDescription>($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", UIPanelDescription.Default(new Vector4(1, 1, 1, 0.25f)));
         }
         private async Task<UIButton> CreateButton(UIButtonDescription desc, string text, MouseEventHandler mouseClickHandler)
         {

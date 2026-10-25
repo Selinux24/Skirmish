@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -302,15 +303,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             foreach (var pmesh in meshes)
             {
-                int ox = (int)MathF.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.X) / mesh.CellSize + 0.5f);
-                int oz = (int)MathF.Floor((pmesh.Bounds.Minimum.X - mesh.Bounds.Minimum.Z) / mesh.CellSize + 0.5f);
+                int ox = (int)MathF.Floor((pmesh.Bounds.Min.X - mesh.Bounds.Min.X) / mesh.CellSize + 0.5f);
+                int oz = (int)MathF.Floor((pmesh.Bounds.Min.X - mesh.Bounds.Min.Z) / mesh.CellSize + 0.5f);
 
                 RemapParams remapParams = new()
                 {
                     IsMinX = ox == 0,
                     IsMinZ = oz == 0,
-                    IsMaxX = ((int)MathF.Floor((mesh.Bounds.Maximum.X - pmesh.Bounds.Maximum.X) / mesh.CellSize + 0.5f)) == 0,
-                    IsMaxZ = ((int)MathF.Floor((mesh.Bounds.Maximum.Z - pmesh.Bounds.Maximum.Z) / mesh.CellSize + 0.5f)) == 0,
+                    IsMaxX = ((int)MathF.Floor((mesh.Bounds.Max.X - pmesh.Bounds.Max.X) / mesh.CellSize + 0.5f)) == 0,
+                    IsMaxZ = ((int)MathF.Floor((mesh.Bounds.Max.Z - pmesh.Bounds.Max.Z) / mesh.CellSize + 0.5f)) == 0,
                 };
 
                 for (int j = 0; j < pmesh.vertCount; ++j)
@@ -350,8 +351,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int maxVertsPerMesh = 0;
             foreach (var mesh in meshes)
             {
-                var bmin = Vector3.Min(first.Bounds.Minimum, mesh.Bounds.Minimum);
-                var bmax = Vector3.Max(first.Bounds.Maximum, mesh.Bounds.Maximum);
+                var bmin = Vector3.Min(first.Bounds.Min, mesh.Bounds.Min);
+                var bmax = Vector3.Max(first.Bounds.Max, mesh.Bounds.Max);
                 mesh.Bounds = new(bmin, bmax);
                 maxVertsPerMesh = Math.Max(maxVertsPerMesh, mesh.vertCount);
                 maxVerts += mesh.vertCount;
@@ -618,7 +619,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var (triRes, tris) = TriangulationHelper.Triangulate(tverts, thole);
             if (!triRes)
             {
-                Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
+                Game.Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
             }
 
             // Merge the hole triangles back to polygons.
@@ -640,7 +641,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Store polygons.
             if (!StorePolygons(polys, polys.Length, pareas, pregs, maxPolys))
             {
-                Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
+                Game.Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
 
                 return false;
             }

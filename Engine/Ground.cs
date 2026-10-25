@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -72,7 +73,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            return BoundingSphere.FromBox(GetBoundingBox(refresh));
+            return BoundingSphere.CreateFromBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
         public virtual BoundingBox GetBoundingBox(bool refresh = false)

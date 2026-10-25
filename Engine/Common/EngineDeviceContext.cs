@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Vortice;
+using Vortice.Direct3D;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
-    using SharpDX;
-    using SharpDX.Direct3D;
-    using SharpDX.Direct3D11;
-    using SharpDX.Mathematics.Interop;
-    using Format = SharpDX.DXGI.Format;
+    using Vortice.Direct3D11;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Engine device context
@@ -23,35 +23,25 @@ namespace Engine.Common
         /// </summary>
         class ShaderConstantBufferState(EngineDeviceContext deviceContext) : EngineShaderStageState<IEngineConstantBuffer>(deviceContext)
         {
-            /// <summary>
-            /// Null constant buffers for shader clearing
-            /// </summary>
-            private static readonly Buffer[] nullBuffers = new Buffer[CommonShaderStage.ConstantBufferApiSlotCount];
-
-            public void SetConstantBuffer(CommonShaderStage shaderStage, int slot, IEngineConstantBuffer buffer)
+            public void SetConstantBuffer(uint slot, IEngineConstantBuffer buffer)
             {
                 Update(slot, buffer);
 
-                var buffers = GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
-                shaderStage.SetConstantBuffers(0, buffers.Length, buffers);
                 DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
-            public void SetConstantBuffers(CommonShaderStage shaderStage, int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+            public void SetConstantBuffers(uint startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
             {
                 Update(startSlot, bufferList);
 
-                var buffers = GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
-                shaderStage.SetConstantBuffers(0, buffers.Length, buffers);
                 DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
-            public void Clear(CommonShaderStage shaderStage)
+            public void Clear()
             {
-                shaderStage.SetConstantBuffers(0, nullBuffers.Length, nullBuffers);
                 DeviceContext.frameCounters.ConstantBufferClears++;
 
-                Clear();
+                ClearResources();
             }
         }
         /// <summary>
@@ -59,35 +49,25 @@ namespace Engine.Common
         /// </summary>
         class ShaderResourceState(EngineDeviceContext deviceContext) : EngineShaderStageState<EngineShaderResourceView>(deviceContext)
         {
-            /// <summary>
-            /// Null shader resources for shader clearing
-            /// </summary>
-            private static readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
-
-            public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
+            public void SetShaderResource(uint slot, EngineShaderResourceView resourceView)
             {
                 Update(slot, resourceView);
 
-                var resources = GetResources().Select(r => r?.GetResource()).ToArray();
-                shaderStage.SetShaderResources(0, resources.Length, resources);
                 DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
-            public void SetShaderResources(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
+            public void SetShaderResources(uint startSlot, IEnumerable<EngineShaderResourceView> resourceList)
             {
                 Update(startSlot, resourceList);
 
-                var resources = GetResources().Select(r => r?.GetResource()).ToArray();
-                shaderStage.SetShaderResources(0, resources.Length, resources);
                 DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
-            public void Clear(CommonShaderStage shaderStage)
+            public void Clear()
             {
-                shaderStage.SetShaderResources(0, nullSrv.Length, nullSrv);
                 DeviceContext.frameCounters.ShaderResourceClears++;
 
-                Clear();
+                ClearResources();
             }
         }
         /// <summary>
@@ -95,35 +75,25 @@ namespace Engine.Common
         /// </summary>
         class ShaderSamplerState(EngineDeviceContext deviceContext) : EngineShaderStageState<EngineSamplerState>(deviceContext)
         {
-            /// <summary>
-            /// Null samplers for shader clearing
-            /// </summary>
-            private static readonly SamplerState[] nullSamplers = new SamplerState[CommonShaderStage.SamplerSlotCount];
-
-            public void SetSampler(CommonShaderStage shaderStage, int slot, EngineSamplerState samplerState)
+            public void SetSampler(uint slot, EngineSamplerState samplerState)
             {
                 Update(slot, samplerState);
 
-                var resources = GetResources().Select(r => r?.GetSamplerState()).ToArray();
-                shaderStage.SetSamplers(0, resources.Length, resources);
                 DeviceContext.frameCounters.SamplerSets++;
             }
 
-            public void SetSamplers(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineSamplerState> samplerList)
+            public void SetSamplers(uint startSlot, IEnumerable<EngineSamplerState> samplerList)
             {
                 Update(startSlot, samplerList);
 
-                var samplers = GetResources().Select(r => r?.GetSamplerState()).ToArray();
-                shaderStage.SetSamplers(0, samplers.Length, samplers);
                 DeviceContext.frameCounters.SamplerSets++;
             }
 
-            public void Clear(CommonShaderStage shaderStage)
+            public void Clear()
             {
-                shaderStage.SetSamplers(0, nullSamplers.Length, nullSamplers);
                 DeviceContext.frameCounters.SamplerClears++;
 
-                Clear();
+                ClearResources();
             }
         }
 
@@ -132,7 +102,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal device context
         /// </summary>
-        private readonly DeviceContext3 deviceContext = null;
+        private readonly ID3D11DeviceContext3 deviceContext = null;
         /// <summary>
         /// Current primitive topology set in input assembler
         /// </summary>
@@ -144,7 +114,7 @@ namespace Engine.Common
         /// <summary>
         /// Current viewport
         /// </summary>
-        private RawViewportF[] currentViewports;
+        private Viewport[] currentViewports;
 
         /// <summary>
         /// Current depth-stencil state
@@ -153,7 +123,7 @@ namespace Engine.Common
         /// <summary>
         /// Current depth-stencil reference
         /// </summary>
-        private int currentDepthStencilRef = 0;
+        private uint currentDepthStencilRef = 0;
         /// <summary>
         /// Current blend state
         /// </summary>
@@ -273,7 +243,7 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex buffer first slot
         /// </summary>
-        private int currentVertexBufferFirstSlot = -1;
+        private uint currentVertexBufferFirstSlot = uint.MaxValue;
         /// <summary>
         /// Current vertex buffer bindings
         /// </summary>
@@ -289,7 +259,7 @@ namespace Engine.Common
         /// <summary>
         /// Current index buffer offset
         /// </summary>
-        private int currentIndexOffset = -1;
+        private uint currentIndexOffset = uint.MaxValue;
 
         /// <summary>
         /// Frame counters class
@@ -313,7 +283,7 @@ namespace Engine.Common
             {
                 if (currentIAPrimitiveTopology != value)
                 {
-                    deviceContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
+                    deviceContext.IASetPrimitiveTopology((PrimitiveTopology)value);
                     frameCounters.IAPrimitiveTopologySets++;
 
                     currentIAPrimitiveTopology = value;
@@ -331,7 +301,7 @@ namespace Engine.Common
             {
                 if (currentIAInputLayout != value)
                 {
-                    deviceContext.InputAssembler.InputLayout = value?.GetInputLayout();
+                    deviceContext.IASetInputLayout(value?.GetInputLayout());
                     frameCounters.IAInputLayoutSets++;
 
                     currentIAInputLayout = value;
@@ -346,7 +316,7 @@ namespace Engine.Common
         /// <param name="immediate">Is the immediate context</param>
         /// <param name="passIndex">Pass index</param>
         /// <param name="deviceContext">Device context</param>
-        internal EngineDeviceContext(string name, bool immediate, int passIndex, DeviceContext3 deviceContext)
+        internal EngineDeviceContext(string name, bool immediate, int passIndex, ID3D11DeviceContext3 deviceContext)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A device context name must be specified.");
             this.deviceContext = deviceContext ?? throw new ArgumentNullException(nameof(deviceContext), "A device context must be specified.");
@@ -430,45 +400,35 @@ namespace Engine.Common
             currentPixelShader = null;
             currentComputeShader = null;
 
-            currentVertexBufferFirstSlot = -1;
+            currentVertexBufferFirstSlot = uint.MaxValue;
             currentVertexBufferBindings = null;
             currentIndexBufferRef = null;
             currentIndexFormat = Format.Unknown;
-            currentIndexOffset = -1;
+            currentIndexOffset = uint.MaxValue;
         }
 
         /// <inheritdoc/>
         public void SetViewport(Viewport viewport)
         {
-            SetViewPorts([(RawViewportF)viewport]);
-        }
-        /// <inheritdoc/>
-        public void SetViewport(ViewportF viewport)
-        {
-            SetViewPorts([(RawViewportF)viewport]);
+            SetViewPorts([viewport]);
         }
         /// <inheritdoc/>
         public void SetViewports(Viewport[] viewports)
         {
-            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
-        }
-        /// <inheritdoc/>
-        public void SetViewports(ViewportF[] viewports)
-        {
-            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
+            SetViewPorts(viewports);
         }
         /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        private void SetViewPorts(RawViewportF[] viewports)
+        private void SetViewPorts(Viewport[] viewports)
         {
             if (Helper.CompareEnumerables(currentViewports, viewports))
             {
                 return;
             }
 
-            deviceContext.Rasterizer.SetViewports(viewports);
+            deviceContext.RSSetViewports(viewports);
             frameCounters.ViewportsSets++;
 
             currentViewports = viewports;
@@ -477,7 +437,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, EngineDepthStencilView depthMap)
         {
-            deviceContext.OutputMerger.SetTargets(depthMap.GetDepthStencil(), renderTargets.GetRenderTarget());
+            deviceContext.OMSetRenderTargets(renderTargets.GetRenderTarget(), depthMap.GetDepthStencil());
             frameCounters.RenderTargetSets++;
         }
         /// <inheritdoc/>
@@ -494,16 +454,16 @@ namespace Engine.Common
             }
 
             var rtv = renderTargets?.GetRenderTargets() ?? [];
-            var rtvCount = rtv.Count();
+            uint rtvCount = (uint)rtv.Length;
 
-            deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
+            deviceContext.OMSetRenderTargets(rtvCount, rtv, null);
             frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -518,16 +478,16 @@ namespace Engine.Common
 
             var dsv = depthMap?.GetDepthStencil();
             var rtv = renderTargets?.GetRenderTargets() ?? [];
-            var rtvCount = rtv.Count();
+            uint rtvCount = (uint)rtv.Length;
 
-            deviceContext.OutputMerger.SetTargets(dsv, 0, [], [], rtv.ToArray());
+            deviceContext.OMSetRenderTargets(0, rtv, dsv);
             frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -549,14 +509,14 @@ namespace Engine.Common
             }
         }
         /// <inheritdoc/>
-        public void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0)
+        public void SetDepthStencilState(EngineDepthStencilState state, uint stencilRef = 0)
         {
             if (currentDepthStencilState == state && currentDepthStencilRef == stencilRef)
             {
                 return;
             }
 
-            deviceContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), stencilRef);
+            deviceContext.OMSetDepthStencilState(state.GetDepthStencilState(), stencilRef);
             frameCounters.DepthStencilStateChanges++;
 
             currentDepthStencilState = state;
@@ -571,7 +531,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.Rasterizer.State = state.GetRasterizerState();
+            deviceContext.RSSetState(state.GetRasterizerState());
             frameCounters.RasterizerStateChanges++;
 
             currentRasterizerState = state;
@@ -584,32 +544,34 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;
         }
 
         /// <inheritdoc/>
-        public void IASetVertexBuffers(int firstSlot, EngineVertexBufferBinding[] vertexBufferBindings)
+        public void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vbBindings)
         {
-            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vbBindings))
             {
-                var vbBindings = vertexBufferBindings?.Select(v => v.GetVertexBufferBinding()).ToArray() ?? [];
+                ID3D11Buffer[] buffers = [.. vbBindings.Select(v => v.Buffer?.GetBuffer())];
+                uint[] strides = [.. vbBindings.Select(v => v.Stride)];
+                uint[] offsets = [.. vbBindings.Select(v => v.Offset)];
 
-                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vbBindings);
+                deviceContext.IASetVertexBuffers(firstSlot, buffers, strides, offsets);
                 frameCounters.IAVertexBuffersSets++;
 
                 currentVertexBufferFirstSlot = firstSlot;
-                currentVertexBufferBindings = vertexBufferBindings;
+                currentVertexBufferBindings = vbBindings;
             }
         }
         /// <inheritdoc/>
-        public void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, int offset)
+        public void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, uint offset)
         {
             if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
             {
-                deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef?.GetBuffer(), format, offset);
+                deviceContext.IASetIndexBuffer(indexBufferRef?.GetBuffer(), format, offset);
                 frameCounters.IAIndexBufferSets++;
 
                 currentIndexBufferRef = indexBufferRef;
@@ -621,35 +583,47 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void ClearShaderResources()
         {
-            var vs = deviceContext.VertexShader;
-            currentVertexShaderConstantBufferState.Clear(vs);
-            currentVertexShaderResourceViewState.Clear(vs);
-            currentVertexShaderSamplerState.Clear(vs);
+            deviceContext.VSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.VSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.VSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentVertexShaderConstantBufferState.Clear();
+            currentVertexShaderResourceViewState.Clear();
+            currentVertexShaderSamplerState.Clear();
 
-            var hs = deviceContext.HullShader;
-            currentHullShaderConstantBufferState.Clear(hs);
-            currentHullShaderResourceViewState.Clear(hs);
-            currentHullShaderSamplerState.Clear(hs);
+            deviceContext.HSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.HSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.HSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentHullShaderConstantBufferState.Clear();
+            currentHullShaderResourceViewState.Clear();
+            currentHullShaderSamplerState.Clear();
 
-            var ds = deviceContext.DomainShader;
-            currentDomainShaderConstantBufferState.Clear(ds);
-            currentDomainShaderResourceViewState.Clear(ds);
-            currentDomainShaderSamplerState.Clear(ds);
+            deviceContext.DSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.DSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.DSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentDomainShaderConstantBufferState.Clear();
+            currentDomainShaderResourceViewState.Clear();
+            currentDomainShaderSamplerState.Clear();
 
-            var gs = deviceContext.GeometryShader;
-            currentGeometryShaderConstantBufferState.Clear(gs);
-            currentGeometryShaderResourceViewState.Clear(gs);
-            currentGeometryShaderSamplerState.Clear(gs);
+            deviceContext.GSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.GSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.GSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentGeometryShaderConstantBufferState.Clear();
+            currentGeometryShaderResourceViewState.Clear();
+            currentGeometryShaderSamplerState.Clear();
 
-            var ps = deviceContext.PixelShader;
-            currentPixelShaderConstantBufferState.Clear(ps);
-            currentPixelShaderResourceViewState.Clear(ps);
-            currentPixelShaderSamplerState.Clear(ps);
+            deviceContext.PSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.PSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.PSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentPixelShaderConstantBufferState.Clear();
+            currentPixelShaderResourceViewState.Clear();
+            currentPixelShaderSamplerState.Clear();
 
-            var cs = deviceContext.ComputeShader;
-            currentComputeShaderConstantBufferState.Clear(cs);
-            currentComputeShaderResourceViewState.Clear(cs);
-            currentComputeShaderSamplerState.Clear(cs);
+            deviceContext.CSUnsetConstantBuffers(0, ID3D11DeviceContext.CommonShaderConstantBufferSlotCount);
+            deviceContext.CSUnsetShaderResources(0, ID3D11DeviceContext.CommonShaderInputResourceSlotCount);
+            deviceContext.CSUnsetSamplers(0, ID3D11DeviceContext.CommonShaderSamplerSlotCount);
+            currentComputeShaderConstantBufferState.Clear();
+            currentComputeShaderResourceViewState.Clear();
+            currentComputeShaderSamplerState.Clear();
         }
 
         /// <inheritdoc/>
@@ -660,7 +634,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.VertexShader.Set(vertexShader?.GetShader());
+            deviceContext.VSSetShader(vertexShader?.GetShader());
             frameCounters.VertexShadersSets++;
 
             currentVertexShader = vertexShader;
@@ -671,34 +645,46 @@ namespace Engine.Common
             SetVertexShader(null);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetVertexShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentVertexShaderConstantBufferState.SetConstantBuffer(deviceContext.VertexShader, slot, buffer);
+            currentVertexShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentVertexShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.VSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetVertexShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentVertexShaderConstantBufferState.SetConstantBuffers(deviceContext.VertexShader, startSlot, bufferList);
+            currentVertexShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentVertexShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.VSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetVertexShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentVertexShaderResourceViewState.SetShaderResource(deviceContext.VertexShader, slot, resourceView);
+            currentVertexShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentVertexShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.VSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetVertexShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentVertexShaderResourceViewState.SetShaderResources(deviceContext.VertexShader, startSlot, resourceViews);
+            currentVertexShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentVertexShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.VSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetVertexShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentVertexShaderSamplerState.SetSampler(deviceContext.VertexShader, slot, samplerState);
+            currentVertexShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentVertexShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.VSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetVertexShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetVertexShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentVertexShaderSamplerState.SetSamplers(deviceContext.VertexShader, startSlot, samplerStates);
+            currentVertexShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var samplers = currentVertexShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.VSSetSamplers(0, samplers);
         }
 
         /// <inheritdoc/>
@@ -709,7 +695,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.HullShader.Set(hullShader?.GetShader());
+            deviceContext.HSSetShader(hullShader?.GetShader());
             frameCounters.HullShadersSets++;
 
             currentHullShader = hullShader;
@@ -720,34 +706,46 @@ namespace Engine.Common
             SetHullShader(null);
         }
         /// <inheritdoc/>
-        public void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetHullShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentHullShaderConstantBufferState.SetConstantBuffer(deviceContext.HullShader, slot, buffer);
+            currentHullShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentHullShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.HSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetHullShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetHullShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentHullShaderConstantBufferState.SetConstantBuffers(deviceContext.HullShader, startSlot, bufferList);
+            currentHullShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentHullShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.HSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetHullShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
+            currentHullShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentHullShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.HSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetHullShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetHullShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
+            currentHullShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentHullShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.HSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetHullShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetHullShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentHullShaderSamplerState.SetSampler(deviceContext.HullShader, slot, samplerState);
+            currentHullShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentHullShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.HSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetHullShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetHullShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentHullShaderSamplerState.SetSamplers(deviceContext.HullShader, startSlot, samplerStates);
+            currentHullShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var samplers = currentHullShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.HSSetSamplers(0, samplers);
         }
 
         /// <inheritdoc/>
@@ -758,7 +756,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.DomainShader.Set(domainShader?.GetShader());
+            deviceContext.DSSetShader(domainShader?.GetShader());
             frameCounters.DomainShadersSets++;
 
             currentDomainShader = domainShader;
@@ -769,34 +767,46 @@ namespace Engine.Common
             SetDomainShader(null);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetDomainShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentDomainShaderConstantBufferState.SetConstantBuffer(deviceContext.DomainShader, slot, buffer);
+            currentDomainShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentDomainShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.DSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetDomainShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentDomainShaderConstantBufferState.SetConstantBuffers(deviceContext.DomainShader, startSlot, bufferList);
+            currentDomainShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentDomainShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.DSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetDomainShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
+            currentDomainShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentDomainShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.DSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetDomainShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
+            currentDomainShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentDomainShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.DSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetDomainShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentDomainShaderSamplerState.SetSampler(deviceContext.DomainShader, slot, samplerState);
+            currentDomainShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentDomainShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.DSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetDomainShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetDomainShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentDomainShaderSamplerState.SetSamplers(deviceContext.DomainShader, startSlot, samplerStates);
+            currentDomainShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var resources = currentDomainShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.DSSetSamplers(0, resources);
         }
 
         /// <inheritdoc/>
@@ -807,7 +817,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.GeometryShader.Set(geometryShader?.GetShader());
+            deviceContext.GSSetShader(geometryShader?.GetShader());
             frameCounters.GeometryShadersSets++;
 
             currentGeomeryShader = geometryShader;
@@ -818,34 +828,46 @@ namespace Engine.Common
             SetGeometryShader(null);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetGeometryShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentGeometryShaderConstantBufferState.SetConstantBuffer(deviceContext.GeometryShader, slot, buffer);
+            currentGeometryShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentGeometryShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.GSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetGeometryShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentGeometryShaderConstantBufferState.SetConstantBuffers(deviceContext.GeometryShader, startSlot, bufferList);
+            currentGeometryShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentGeometryShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.GSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetGeometryShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentGeometryShaderResourceViewState.SetShaderResource(deviceContext.GeometryShader, slot, resourceView);
+            currentGeometryShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentGeometryShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.GSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetGeometryShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentGeometryShaderResourceViewState.SetShaderResources(deviceContext.GeometryShader, startSlot, resourceViews);
+            currentGeometryShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentGeometryShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.GSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetGeometryShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentGeometryShaderSamplerState.SetSampler(deviceContext.GeometryShader, slot, samplerState);
+            currentGeometryShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentGeometryShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.GSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetGeometryShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetGeometryShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentGeometryShaderSamplerState.SetSamplers(deviceContext.GeometryShader, startSlot, samplerStates);
+            currentGeometryShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var resources = currentGeometryShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.GSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
         public void SetGeometryShaderStreamOutputTargets(EngineStreamOutputBufferBinding[] streamOutBinding)
@@ -855,9 +877,11 @@ namespace Engine.Common
                 return;
             }
 
-            var soBindings = streamOutBinding?.Select(s => s.GetStreamOutputBufferBinding()).ToArray();
+            var soBindings = streamOutBinding?.Select(s => s.GetStreamOutputBufferBinding()) ?? [];
+            var buffers = soBindings.Select(s => s.Buffer).ToArray();
+            var offsets = soBindings.Select(s => s.Offset).ToArray();
 
-            deviceContext.StreamOutput.SetTargets(soBindings);
+            deviceContext.SOSetTargets(buffers, offsets);
             frameCounters.SOTargetsSets++;
 
             currentStreamOutputBindings = streamOutBinding;
@@ -871,7 +895,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.PixelShader.Set(pixelShader?.GetShader());
+            deviceContext.PSSetShader(pixelShader?.GetShader());
             frameCounters.PixelShadersSets++;
 
             currentPixelShader = pixelShader;
@@ -882,34 +906,46 @@ namespace Engine.Common
             SetPixelShader(null);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetPixelShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentPixelShaderConstantBufferState.SetConstantBuffer(deviceContext.PixelShader, slot, buffer);
+            currentPixelShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentPixelShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.PSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetPixelShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentPixelShaderConstantBufferState.SetConstantBuffers(deviceContext.PixelShader, startSlot, bufferList);
+            currentPixelShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentPixelShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.PSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetPixelShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentPixelShaderResourceViewState.SetShaderResource(deviceContext.PixelShader, slot, resourceView);
+            currentPixelShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentPixelShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.PSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetPixelShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentPixelShaderResourceViewState.SetShaderResources(deviceContext.PixelShader, startSlot, resourceViews);
+            currentPixelShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentPixelShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.PSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetPixelShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentPixelShaderSamplerState.SetSampler(deviceContext.PixelShader, slot, samplerState);
+            currentPixelShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentPixelShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.PSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetPixelShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetPixelShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentPixelShaderSamplerState.SetSamplers(deviceContext.PixelShader, startSlot, samplerStates);
+            currentPixelShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var resources = currentPixelShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.PSSetSamplers(0, resources);
         }
 
         /// <inheritdoc/>
@@ -920,7 +956,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.ComputeShader.Set(computeShader?.GetShader());
+            deviceContext.CSSetShader(computeShader?.GetShader());
             frameCounters.ComputeShadersSets++;
 
             currentComputeShader = computeShader;
@@ -931,45 +967,50 @@ namespace Engine.Common
             SetComputeShader(null);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        public void SetComputeShaderConstantBuffer(uint slot, IEngineConstantBuffer buffer)
         {
-            currentComputeShaderConstantBufferState.SetConstantBuffer(deviceContext.ComputeShader, slot, buffer);
+            currentComputeShaderConstantBufferState.SetConstantBuffer(slot, buffer);
+            var buffers = currentComputeShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.CSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderConstantBuffers(int startSlot, IEngineConstantBuffer[] bufferList)
+        public void SetComputeShaderConstantBuffers(uint startSlot, IEngineConstantBuffer[] bufferList)
         {
-            currentComputeShaderConstantBufferState.SetConstantBuffers(deviceContext.ComputeShader, startSlot, bufferList);
+            currentComputeShaderConstantBufferState.SetConstantBuffers(startSlot, bufferList);
+            var buffers = currentComputeShaderConstantBufferState.GetResources().Select(r => r?.Buffer.GetBuffer()).ToArray();
+            deviceContext.CSSetConstantBuffers(0, buffers);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        public void SetComputeShaderResourceView(uint slot, EngineShaderResourceView resourceView)
         {
-            currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
+            currentComputeShaderResourceViewState.SetShaderResource(slot, resourceView);
+            var resources = currentComputeShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.CSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderResourceViews(int startSlot, EngineShaderResourceView[] resourceViews)
+        public void SetComputeShaderResourceViews(uint startSlot, EngineShaderResourceView[] resourceViews)
         {
-            currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
+            currentComputeShaderResourceViewState.SetShaderResources(startSlot, resourceViews);
+            var resources = currentComputeShaderResourceViewState.GetResources().Select(r => r?.GetResource()).ToArray();
+            deviceContext.CSSetShaderResources(0, resources);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderSampler(int slot, EngineSamplerState samplerState)
+        public void SetComputeShaderSampler(uint slot, EngineSamplerState samplerState)
         {
-            currentComputeShaderSamplerState.SetSampler(deviceContext.ComputeShader, slot, samplerState);
+            currentComputeShaderSamplerState.SetSampler(slot, samplerState);
+            var resources = currentComputeShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.CSSetSamplers(0, resources);
         }
         /// <inheritdoc/>
-        public void SetComputeShaderSamplers(int startSlot, EngineSamplerState[] samplerStates)
+        public void SetComputeShaderSamplers(uint startSlot, EngineSamplerState[] samplerStates)
         {
-            currentComputeShaderSamplerState.SetSamplers(deviceContext.ComputeShader, startSlot, samplerStates);
+            currentComputeShaderSamplerState.SetSamplers(startSlot, samplerStates);
+            var resources = currentComputeShaderSamplerState.GetResources().Select(r => r?.GetSamplerState()).ToArray();
+            deviceContext.CSSetSamplers(0, resources);
         }
 
         /// <inheritdoc/>
-        public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
-        {
-            technique.GetPass(index).Apply(deviceContext, flags);
-            frameCounters.TechniquePasses++;
-        }
-
-        /// <inheritdoc/>
-        public bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : struct, IBufferData
+        public bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : unmanaged, IBufferData
         {
             IEngineConstantBuffer buffer = constantBuffer;
 
@@ -986,9 +1027,9 @@ namespace Engine.Common
             var dataStream = constantBuffer.DataStream.GetDataStream();
             var buffer = constantBuffer.Buffer.GetBuffer();
 
-            Marshal.StructureToPtr(data, dataStream.DataPointer, false);
+            Marshal.StructureToPtr(data, dataStream.BasePointer, false);
 
-            var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
+            var dataBox = new DataBox(dataStream.BasePointer, 0, 0);
             deviceContext.UpdateSubresource(dataBox, buffer, 0);
             frameCounters.SubresourceUpdates++;
 
@@ -996,7 +1037,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : struct
+        public void UpdateTexture1D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1009,10 +1050,10 @@ namespace Engine.Common
                 return;
             }
 
-            UpdateResource(t.Resource.QueryInterface<Texture1D>(), data);
+            UpdateResource(t.Resource.QueryInterface<ID3D11Texture1D>(), data);
         }
         /// <inheritdoc/>
-        public void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : struct
+        public void UpdateTexture2D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1025,10 +1066,10 @@ namespace Engine.Common
                 return;
             }
 
-            UpdateResource(t.Resource.QueryInterface<Texture2D1>(), data);
+            UpdateResource(t.Resource.QueryInterface<ID3D11Texture2D1>(), data);
         }
         /// <inheritdoc/>
-        public void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : struct
+        public void UpdateTexture3D<T>(EngineShaderResourceView texture, T[] data) where T : unmanaged
         {
             var t = texture?.GetResource();
             if (t == null)
@@ -1041,7 +1082,7 @@ namespace Engine.Common
                 return;
             }
 
-            UpdateResource(t.Resource.QueryInterface<Texture3D1>(), data);
+            UpdateResource(t.Resource.QueryInterface<ID3D11Texture3D1>(), data);
         }
         /// <summary>
         /// Updates a resource
@@ -1049,20 +1090,16 @@ namespace Engine.Common
         /// <typeparam name="T">Type of data</typeparam>
         /// <param name="resource">Resource to update</param>
         /// <param name="data">Data</param>
-        private void UpdateResource<T>(Resource resource, T[] data) where T : struct
+        private void UpdateResource<T>(ID3D11Resource resource, T[] data) where T : unmanaged
         {
             using (resource)
             {
-                deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                var msr = deviceContext.Map(resource, 0, MapMode.WriteDiscard, MapFlags.None);
                 frameCounters.SubresourceMaps++;
 
-                using (stream)
-                {
-                    stream.Position = 0;
-                    stream.WriteRange(data.ToArray());
-                }
+                UnsafeUtilities.Write(msr.DataPointer, data);
 
-                deviceContext.UnmapSubresource(resource, 0);
+                deviceContext.Unmap(resource, 0);
                 frameCounters.SubresourceUnmaps++;
             }
 
@@ -1070,20 +1107,17 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data)
-            where T : struct
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data) where T : unmanaged
         {
-            return WriteDiscardBuffer(buffer, 0, new[] { data });
+            return WriteDiscardBuffer(buffer, 0, [data]);
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data)
-            where T : struct
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged
         {
             return WriteDiscardBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data)
-            where T : struct
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1096,16 +1130,13 @@ namespace Engine.Common
                 return true;
             }
 
-            deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            var msr = deviceContext.Map(b, MapMode.WriteDiscard, MapFlags.None);
             frameCounters.SubresourceMaps++;
 
-            using (stream)
-            {
-                stream.Position = Marshal.SizeOf(default(T)) * offset;
-                stream.WriteRange(data.ToArray());
-            }
+            nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
+            UnsafeUtilities.Write(position, data);
 
-            deviceContext.UnmapSubresource(b, 0);
+            deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
 
             frameCounters.BufferWrites++;
@@ -1114,14 +1145,12 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data)
-            where T : struct
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data)
-            where T : struct
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1134,16 +1163,13 @@ namespace Engine.Common
                 return true;
             }
 
-            deviceContext.MapSubresource(b, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            var msr = deviceContext.Map(b, MapMode.WriteNoOverwrite, MapFlags.None);
             frameCounters.SubresourceMaps++;
 
-            using (stream)
-            {
-                stream.Position = Marshal.SizeOf(default(T)) * offset;
-                stream.WriteRange(data.ToArray());
-            }
+            nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
+            UnsafeUtilities.Write(position, data);
 
-            deviceContext.UnmapSubresource(b, 0);
+            deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
 
             frameCounters.BufferWrites++;
@@ -1152,14 +1178,12 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, int length)
-            where T : struct
+        public T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : unmanaged
         {
             return ReadBuffer<T>(buffer, 0, length);
         }
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
-            where T : struct
+        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1169,20 +1193,12 @@ namespace Engine.Common
 
             T[] data = new T[length];
 
-            deviceContext.MapSubresource(b, MapMode.Read, MapFlags.None, out DataStream stream);
+            var msr = deviceContext.Map(b, MapMode.Read, MapFlags.None);
             frameCounters.SubresourceMaps++;
 
-            using (stream)
-            {
-                stream.Position = Marshal.SizeOf(default(T)) * offset;
+            UnsafeUtilities.Read(msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset, data);
 
-                for (int i = 0; i < length; i++)
-                {
-                    data[i] = stream.Read<T>();
-                }
-            }
-
-            deviceContext.UnmapSubresource(b, 0);
+            deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
 
             frameCounters.BufferReads++;
@@ -1191,7 +1207,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void Draw(int vertexCount, int startVertexLocation)
+        public void Draw(uint vertexCount, uint startVertexLocation)
         {
             if (vertexCount <= 0)
             {
@@ -1207,14 +1223,14 @@ namespace Engine.Common
             Draw(vertexBuffer.Count, vertexBuffer.BufferOffset);
         }
         /// <inheritdoc/>
-        public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
+        public void DrawIndexed(uint indexCount, uint startIndexLocation, uint baseVertexLocation)
         {
             if (indexCount <= 0)
             {
                 return;
             }
 
-            deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+            deviceContext.DrawIndexed(indexCount, startIndexLocation, (int)baseVertexLocation);
             UpdateDrawPrimitives(indexCount, 1);
         }
         /// <inheritdoc/>
@@ -1225,7 +1241,7 @@ namespace Engine.Common
                 vertexBuffer.BufferOffset);
         }
         /// <inheritdoc/>
-        public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
+        public void DrawInstanced(uint vertexCountPerInstance, uint instanceCount, uint startVertexLocation, uint startInstanceLocation)
         {
             if (vertexCountPerInstance <= 0)
             {
@@ -1241,12 +1257,12 @@ namespace Engine.Common
             UpdateDrawPrimitives(vertexCountPerInstance, instanceCount);
         }
         /// <inheritdoc/>
-        public void DrawInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor vertexBuffer)
+        public void DrawInstanced(uint instanceCount, uint startInstanceLocation, BufferDescriptor vertexBuffer)
         {
             DrawInstanced(vertexBuffer.Count, instanceCount, vertexBuffer.BufferOffset, startInstanceLocation);
         }
         /// <inheritdoc/>
-        public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
+        public void DrawIndexedInstanced(uint indexCountPerInstance, uint instanceCount, uint startIndexLocation, uint baseVertexLocation, uint startInstanceLocation)
         {
             if (indexCountPerInstance <= 0)
             {
@@ -1258,11 +1274,11 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+            deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, (int)baseVertexLocation, startInstanceLocation);
             UpdateDrawPrimitives(indexCountPerInstance, instanceCount);
         }
         /// <inheritdoc/>
-        public void DrawIndexedInstanced(int instanceCount, int startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer)
+        public void DrawIndexedInstanced(uint instanceCount, uint startInstanceLocation, BufferDescriptor indexBuffer, BufferDescriptor vertexBuffer)
         {
             DrawIndexedInstanced(
                 indexBuffer.Count, instanceCount, indexBuffer.BufferOffset,
@@ -1279,19 +1295,19 @@ namespace Engine.Common
         /// </summary>
         /// <param name="count">Submitted vertices / indexes</param>
         /// <param name="instanceCount">Instace count</param>
-        private void UpdateDrawPrimitives(int count, int instanceCount)
+        private void UpdateDrawPrimitives(uint count, uint instanceCount)
         {
             frameCounters.DrawCallsPerFrame++;
 
             //Figure number of real primitives using the primitive topology
-            int div = (int)currentIAPrimitiveTopology switch
+            uint div = (uint)currentIAPrimitiveTopology switch
             {
                 >= 2 and <= 3 or >= 10 and <= 11 => 2,
                 >= 4 and <= 5 or >= 12 and <= 13 => 3,
                 _ => 1,
             };
 
-            int primitives = count / div;
+            uint primitives = count / div;
             frameCounters.PrimitivesPerFrame += primitives * instanceCount;
             frameCounters.InstancesPerFrame += instanceCount;
         }
@@ -1337,7 +1353,7 @@ namespace Engine.Common
         /// <summary>
         /// Implicit conversion between the Engine Device Context and the DX11 device context
         /// </summary>
-        public static implicit operator DeviceContext3(EngineDeviceContext value)
+        public static implicit operator ID3D11DeviceContext3(EngineDeviceContext value)
         {
             return value.deviceContext;
         }

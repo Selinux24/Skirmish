@@ -4,51 +4,51 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Engine
+namespace Logger
 {
     /// <summary>
     /// Logger helper
     /// </summary>
-    public static class Logger
+    public class Log
     {
         /// <summary>
         /// Log entry array
         /// </summary>
-        private static LogEntry[] log = new LogEntry[100];
+        private LogEntry[] log = new LogEntry[100];
         /// <summary>
         /// Current log entry index
         /// </summary>
-        private static int logIndex = 0;
+        private int logIndex = 0;
         /// <summary>
         /// Log stack size
         /// </summary>
-        private static int logStackSize = 100;
+        private int logStackSize = 100;
 
         /// <summary>
         /// Custom filter function
         /// </summary>
-        private static Func<LogEntry, bool> filterFnc;
+        private Func<LogEntry, bool> filterFnc;
         /// <summary>
         /// Custom format function
         /// </summary>
-        private static Func<LogEntry, string> formatFnc;
+        private Func<LogEntry, string> formatFnc;
         /// <summary>
         /// Log level
         /// </summary>
-        public static LogLevel LogLevel { get; set; }
+        public LogLevel LogLevel { get; set; }
         /// <summary>
         /// Enables the console log
         /// </summary>
-        public static bool EnableConsole { get; set; } = false;
+        public bool EnableConsole { get; set; } = false;
         /// <summary>
         /// Console log level
         /// </summary>
-        public static LogLevel ConsoleLogLevel { get; set; } = LogLevel.Warning;
+        public LogLevel ConsoleLogLevel { get; set; } = LogLevel.Warning;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        static Logger()
+        public Log()
         {
 #if DEBUG
             LogLevel = LogLevel.Debug;
@@ -61,7 +61,7 @@ namespace Engine
         /// Sets the log stack size
         /// </summary>
         /// <param name="stackSize">Stack size</param>
-        public static void SetStackSize(int stackSize)
+        public void SetStackSize(int stackSize)
         {
             if (stackSize <= 0)
             {
@@ -83,7 +83,7 @@ namespace Engine
         /// </summary>
         /// <param name="caller">Caller</param>
         /// <param name="text">Entry text</param>
-        public static void WriteTrace(object caller, string text)
+        public void WriteTrace(object caller, string text)
         {
             Write(LogLevel.Trace, caller, text);
         }
@@ -92,7 +92,7 @@ namespace Engine
         /// </summary>
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="text">Entry text</param>
-        public static void WriteTrace(string callerTypeName, string text)
+        public void WriteTrace(string callerTypeName, string text)
         {
             Write(LogLevel.Trace, callerTypeName, text);
         }
@@ -101,7 +101,7 @@ namespace Engine
         /// </summary>
         /// <param name="caller">Caller</param>
         /// <param name="text">Entry text</param>
-        public static void WriteDebug(object caller, string text)
+        public void WriteDebug(object caller, string text)
         {
             Write(LogLevel.Debug, caller, text);
         }
@@ -110,7 +110,7 @@ namespace Engine
         /// </summary>
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="text">Entry text</param>
-        public static void WriteDebug(string callerTypeName, string text)
+        public void WriteDebug(string callerTypeName, string text)
         {
             Write(LogLevel.Debug, callerTypeName, text);
         }
@@ -119,7 +119,7 @@ namespace Engine
         /// </summary>
         /// <param name="caller">Caller</param>
         /// <param name="text">Entry text</param>
-        public static void WriteInformation(object caller, string text)
+        public void WriteInformation(object caller, string text)
         {
             Write(LogLevel.Information, caller, text);
         }
@@ -128,7 +128,7 @@ namespace Engine
         /// </summary>
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="text">Entry text</param>
-        public static void WriteInformation(string callerTypeName, string text)
+        public void WriteInformation(string callerTypeName, string text)
         {
             Write(LogLevel.Information, callerTypeName, text);
         }
@@ -137,7 +137,7 @@ namespace Engine
         /// </summary>
         /// <param name="caller">Caller</param>
         /// <param name="text">Entry text</param>
-        public static void WriteWarning(object caller, string text)
+        public void WriteWarning(object caller, string text)
         {
             Write(LogLevel.Warning, caller, text);
         }
@@ -146,7 +146,7 @@ namespace Engine
         /// </summary>
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="text">Entry text</param>
-        public static void WriteWarning(string callerTypeName, string text)
+        public void WriteWarning(string callerTypeName, string text)
         {
             Write(LogLevel.Warning, callerTypeName, text);
         }
@@ -156,7 +156,7 @@ namespace Engine
         /// <param name="caller">Caller</param>
         /// <param name="text">Entry text</param>
         /// <param name="ex">Exception (optional)</param>
-        public static void WriteError(object caller, string text, Exception ex = null)
+        public void WriteError(object caller, string text, Exception ex = null)
         {
             Write(LogLevel.Error, caller, text, ex);
         }
@@ -166,7 +166,7 @@ namespace Engine
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="text">Entry text</param>
         /// <param name="ex">Exception (optional)</param>
-        public static void WriteError(string callerTypeName, string text, Exception ex = null)
+        public void WriteError(string callerTypeName, string text, Exception ex = null)
         {
             Write(LogLevel.Error, callerTypeName, text, ex);
         }
@@ -175,7 +175,7 @@ namespace Engine
         /// </summary>
         /// <param name="caller">Caller</param>
         /// <param name="ex">Exception</param>
-        public static void WriteError(object caller, Exception ex)
+        public void WriteError(object caller, Exception ex)
         {
             Write(LogLevel.Error, caller, ex.Message, ex);
         }
@@ -184,7 +184,7 @@ namespace Engine
         /// </summary>
         /// <param name="callerTypeName">Caller type name</param>
         /// <param name="ex">Exception</param>
-        public static void WriteError(string callerTypeName, Exception ex)
+        public void WriteError(string callerTypeName, Exception ex)
         {
             Write(LogLevel.Error, callerTypeName, ex.Message, ex);
         }
@@ -195,7 +195,7 @@ namespace Engine
         /// <param name="logLevel">Log level</param>
         /// <param name="text">Entry text</param>
         /// <param name="ex">Exception (optional)</param>
-        public static void Write(LogLevel logLevel, object caller, string text, Exception ex = null)
+        public void Write(LogLevel logLevel, object caller, string text, Exception ex = null)
         {
             Write(logLevel, caller?.GetType().Name, text, ex);
         }
@@ -206,7 +206,7 @@ namespace Engine
         /// <param name="logLevel">Log level</param>
         /// <param name="text">Entry text</param>
         /// <param name="ex">Exception (optional)</param>
-        public static void Write(LogLevel logLevel, string callerTypeName, string text, Exception ex = null)
+        public void Write(LogLevel logLevel, string callerTypeName, string text, Exception ex = null)
         {
             if (logLevel < LogLevel)
             {
@@ -236,7 +236,7 @@ namespace Engine
         /// <summary>
         /// Gets whether the log has any errors or not
         /// </summary>
-        public static bool HasErrors()
+        public bool HasErrors()
         {
             return Array.Exists(log, l => l?.LogLevel == LogLevel.Error);
         }
@@ -245,7 +245,7 @@ namespace Engine
         /// Reads a list of entries from the log
         /// </summary>
         /// <param name="count">Number of entries, from the last one</param>
-        public static IEnumerable<LogEntry> Read(int count = 0)
+        public IEnumerable<LogEntry> Read(int count = 0)
         {
             return Read(DefaultFilter, count);
         }
@@ -254,7 +254,7 @@ namespace Engine
         /// </summary>
         /// <param name="logLevel">Log level</param>
         /// <param name="count">Number of entries, from the last one</param>
-        public static IEnumerable<LogEntry> Read(LogLevel logLevel, int count = 0)
+        public IEnumerable<LogEntry> Read(LogLevel logLevel, int count = 0)
         {
             return Read(l => l.LogLevel >= logLevel, count);
         }
@@ -263,7 +263,7 @@ namespace Engine
         /// </summary>
         /// <param name="predicate">Filter predicate function</param>
         /// <param name="count">Number of entries, from the last one</param>
-        public static IEnumerable<LogEntry> Read(Func<LogEntry, bool> predicate, int count = 0)
+        public IEnumerable<LogEntry> Read(Func<LogEntry, bool> predicate, int count = 0)
         {
             var logCopy = log.ToArray();
             logCopy = logCopy
@@ -284,7 +284,7 @@ namespace Engine
         /// </summary>
         /// <param name="maxLines">Maximum number of lines</param>
         /// <param name="reverse">Reverse entry order</param>
-        public static string ReadText(int maxLines = 0, bool reverse = true)
+        public string ReadText(int maxLines = 0, bool reverse = true)
         {
             return ReadText(DefaultFilter, DefaultFormatter, maxLines, reverse);
         }
@@ -294,7 +294,7 @@ namespace Engine
         /// <param name="fncFormat">Log line format function</param>
         /// <param name="maxLines">Maximum number of lines</param>
         /// <param name="reverse">Reverse entry order</param>
-        public static string ReadText(Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
+        public string ReadText(Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
         {
             return ReadText(DefaultFilter, fncFormat ?? DefaultFormatter, maxLines, reverse);
         }
@@ -305,7 +305,7 @@ namespace Engine
         /// <param name="fncFormat">Log line format function</param>
         /// <param name="maxLines">Maximum number of lines</param>
         /// <param name="reverse">Reverse entry order</param>
-        public static string ReadText(Func<LogEntry, bool> predicate, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
+        public string ReadText(Func<LogEntry, bool> predicate, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
         {
             return ReadText(Read(predicate ?? DefaultFilter), fncFormat ?? DefaultFormatter, maxLines, reverse);
         }
@@ -316,7 +316,7 @@ namespace Engine
         /// <param name="fncFormat">Log line format function</param>
         /// <param name="maxLines">Maximum number of lines</param>
         /// <param name="reverse">Reverse entry order</param>
-        private static string ReadText(IEnumerable<LogEntry> logEntries, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
+        private string ReadText(IEnumerable<LogEntry> logEntries, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
         {
             if (logEntries?.Any() != true)
             {
@@ -345,7 +345,7 @@ namespace Engine
         /// Sets a custom log entry filter
         /// </summary>
         /// <param name="predicate">Filter predicate</param>
-        public static void SetCustomFilter(Func<LogEntry, bool> predicate)
+        public void SetCustomFilter(Func<LogEntry, bool> predicate)
         {
             filterFnc = predicate;
         }
@@ -353,7 +353,7 @@ namespace Engine
         /// Sets a custom log entry formatter
         /// </summary>
         /// <param name="formatter">Formatter function</param>
-        public static void SetCustomFormatter(Func<LogEntry, string> formatter)
+        public void SetCustomFormatter(Func<LogEntry, string> formatter)
         {
             formatFnc = formatter;
         }
@@ -361,7 +361,7 @@ namespace Engine
         /// Default log filter
         /// </summary>
         /// <param name="logEntry">Log entry</param>
-        private static bool DefaultFilter(LogEntry logEntry)
+        private bool DefaultFilter(LogEntry logEntry)
         {
             return filterFnc != null ? filterFnc(logEntry) : logEntry != null;
         }
@@ -369,21 +369,21 @@ namespace Engine
         /// Default log line formatter
         /// </summary>
         /// <param name="logEntry">Log entry</param>
-        private static string DefaultFormatter(LogEntry logEntry)
+        private string DefaultFormatter(LogEntry logEntry)
         {
             return formatFnc != null ? formatFnc(logEntry) : $"{logEntry.EventDate:HH:mm:ss.fff} [{logEntry.LogLevel}]> {logEntry.Text}{Environment.NewLine}";
         }
         /// <summary>
         /// Sets the built-in log entry filter
         /// </summary>
-        public static void SetDefaultFilter()
+        public void SetDefaultFilter()
         {
             filterFnc = null;
         }
         /// <summary>
         /// Sets the built-in log entry formatter
         /// </summary>
-        public static void SetDefaultFormatter()
+        public void SetDefaultFormatter()
         {
             formatFnc = null;
         }
@@ -391,7 +391,7 @@ namespace Engine
         /// <summary>
         /// Clears the log
         /// </summary>
-        public static void Clear()
+        public void Clear()
         {
             logIndex = 0;
             for (int i = 0; i < log.Length; i++)
@@ -404,11 +404,23 @@ namespace Engine
         /// Dumps the log to a file
         /// </summary>
         /// <param name="fileName">File name</param>
-        public static void Dump(string fileName, Func<LogEntry, bool> predicate = null, Func<LogEntry, string> fncFormat = null)
+        public void Dump(string fileName, Func<LogEntry, bool> predicate = null, Func<LogEntry, string> fncFormat = null)
         {
             string dumpText = ReadText(predicate ?? DefaultFilter, fncFormat ?? DefaultFormatter, 0, false);
 
             File.WriteAllText(fileName, dumpText);
+        }
+
+        /// <summary>
+        /// Gets the log level base on frame time
+        /// </summary>
+        /// <param name="frameTime">Frame time</param>
+        /// <returns>Returns the log level</returns>
+        public static LogLevel EvaluateTime(long frameTime)
+        {
+            if (frameTime > 500) return LogLevel.Warning;
+            if (frameTime > 30) return LogLevel.Information;
+            else return LogLevel.Debug;
         }
     }
 }

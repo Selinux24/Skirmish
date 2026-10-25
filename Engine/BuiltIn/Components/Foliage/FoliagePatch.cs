@@ -1,11 +1,12 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Collections;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -118,8 +119,8 @@ namespace Engine.BuiltIn.Components.Foliage
                 foreach (var (found, r) in res)
                 {
                     Vector2 size = new(
-                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
+                        rnd.NextSingle(description.MinSize.X, description.MaxSize.X),
+                        rnd.NextSingle(description.MinSize.Y, description.MaxSize.Y));
 
                     if (found)
                     {
@@ -177,13 +178,13 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="pos">Resulting point</param>
         private static bool CalculatePoint(FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd, out Vector3 pos)
         {
-            Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
-            Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
+            Vector2 min = new(gbbox.Min.X, gbbox.Min.Z);
+            Vector2 max = new(gbbox.Max.X, gbbox.Max.Z);
 
             pos = new(
-                rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
-                nbbox.Maximum.Y + 1f,
-                rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
+                rnd.NextSingle(nbbox.Min.X, nbbox.Max.X),
+                nbbox.Max.Y + 1f,
+                rnd.NextSingle(nbbox.Min.Z, nbbox.Max.Z));
 
             bool plant = false;
             if (map != null)
@@ -192,7 +193,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 if (c[description.Index] > 0)
                 {
-                    plant = rnd.NextFloat(0, 1) < c[description.Index];
+                    plant = rnd.NextSingle(0, 1) < c[description.Index];
                 }
             }
             else

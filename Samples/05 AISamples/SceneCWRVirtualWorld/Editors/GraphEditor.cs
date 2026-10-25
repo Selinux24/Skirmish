@@ -3,16 +3,16 @@ using AISamples.Common.Primitives;
 using Engine;
 using Engine.BuiltIn.Components.Geometry;
 using Engine.Common;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
     class GraphEditor(World world, float height) : IEditor
     {
-        private static readonly Color4 graphColor = new(0f, 0f, 0f, 0.5f);
-        private static readonly Color4 highlightColor = new(1f, 1f, 0f, 0.33f);
+        private static readonly Vector4 graphColor = new(0f, 0f, 0f, 0.5f);
+        private static readonly Vector4 highlightColor = new(1f, 1f, 0f, 0.33f);
         private const float editorPointRadius = 10f;
         private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
@@ -229,13 +229,13 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height + hLayer, lineThickness, graphHighlightsDrawer, graphColor);
             }
         }
-        private static void DrawPoint(Vector2 point, float height, float strokeSize, GeometryColorDrawer<Triangle> drawer, Color4 tColor)
+        private static void DrawPoint(Vector2 point, float height, float strokeSize, GeometryColorDrawer<Triangle> drawer, Vector4 tColor)
         {
             var tp = new Vector3(point.X, height + hDelta, point.Y);
             var t = GeometryUtil.CreateCircle(Topology.TriangleList, tp, strokeSize, 32);
             drawer.AddPrimitives(tColor, Triangle.ComputeTriangleList(t));
         }
-        private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Triangle> drawer, Color4 lineColor)
+        private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Triangle> drawer, Vector4 lineColor)
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, segment.P1, segment.P2, lineThickness, height + hDelta);
             drawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));

@@ -5,8 +5,10 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using System;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneCascadedShadows
@@ -97,16 +99,16 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUIText()
         {
-            var defaultFont20 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 20);
-            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
-            var defaultFont12 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 12);
+            var defaultFont20 = FontDescription.FromFamily(fontFamilyName, 20);
+            var defaultFont14 = FontDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont12 = FontDescription.FromFamily(fontFamilyName, 12);
 
             var titleDesc = new UITextAreaDescription
             {
                 Font = defaultFont20,
                 Text = "Cascaded Shadows",
-                TextForeColor = Color.Yellow,
-                TextShadowColor = Color.OrangeRed
+                TextForeColor = Color.Yellow.RGBA(),
+                TextShadowColor = Color.OrangeRed.RGBA()
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
@@ -114,37 +116,37 @@ namespace BasicSamples.SceneCascadedShadows
             {
                 Font = defaultFont14,
                 Text = helpText1,
-                TextForeColor = Color.LightBlue,
-                TextShadowColor = Color.DarkBlue
+                TextForeColor = Color.LightBlue.RGBA(),
+                TextShadowColor = Color.DarkBlue.RGBA()
             };
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", helpDesc);
 
             var selectorDesc = new UITextAreaDescription
             {
                 Font = defaultFont12,
-                TextForeColor = Color.LightBlue,
+                TextForeColor = Color.LightBlue.RGBA(),
             };
             selector = await AddComponentUI<UITextArea, UITextAreaDescription>("SelectorText", "SelectorText", selectorDesc);
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue.RGBA());
             consoleDesc.MaxTextLength = 5000;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
         }
         private async Task InitializeUILevelsControl()
         {
-            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(new Color(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
-            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(new Color(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
-            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(new Color(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
+            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
+            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
+            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
 
-            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(Vector4Extensions.FromRgba(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect1.EventsEnabled = true;
             spSelect1.MouseJustPressed += PbJustPressed;
             spSelect1.MouseJustReleased += PbJustReleased;
 
-            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(Vector4Extensions.FromRgba(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect2.EventsEnabled = true;
             spSelect2.MouseJustPressed += PbJustPressed;
             spSelect2.MouseJustReleased += PbJustReleased;
@@ -169,13 +171,13 @@ namespace BasicSamples.SceneCascadedShadows
             bufferDrawer2.TextureIndex = 1;
             bufferDrawer3.TextureIndex = 2;
 
-            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont14 = FontDescription.FromFamily(fontFamilyName, 14);
 
             var captionDesc = new UITextAreaDescription
             {
                 Font = defaultFont14,
-                TextForeColor = Color.LightBlue,
-                TextShadowColor = Color.DarkBlue,
+                TextForeColor = Color.LightBlue.RGBA(),
+                TextShadowColor = Color.DarkBlue.RGBA(),
                 GrowControlWithText = false,
                 StartsVisible = false,
             };
@@ -219,7 +221,7 @@ namespace BasicSamples.SceneCascadedShadows
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -267,16 +269,16 @@ namespace BasicSamples.SceneCascadedShadows
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
-                    new ( 0.0f, 5.6f, new Color( 25,  25,  25), resourceFlare4String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
+                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
+                    new ( 0.0f, 5.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare4String),
+                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -295,7 +297,7 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private void StartLights()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
 
             Lights.KeyLight.Enabled = true;
             Lights.KeyLight.CastShadow = true;
@@ -420,10 +422,7 @@ namespace BasicSamples.SceneCascadedShadows
         {
             selector.Text = $"High: {GameEnvironment.ShadowDistanceHigh:0.00} - Medium: {GameEnvironment.ShadowDistanceMedium:0.00} - Low: {GameEnvironment.ShadowDistanceLow:0.00}";
 
-            if (currentSelector != null)
-            {
-                currentSelector.Left = MathUtil.Clamp(Game.Input.MouseX, min, max) - 5f;
-            }
+            currentSelector?.Left = Math.Clamp(Game.Input.MouseX, min, max) - 5f;
 
             float select1Pos = spSelect1.Left + 5;
             float select2Pos = spSelect2.Left + 5;
@@ -520,7 +519,7 @@ namespace BasicSamples.SceneCascadedShadows
         private void UpdateLayoutUIDrawers()
         {
             int height = (int)(Game.Form.RenderHeight * 0.33f);
-            int top = Game.Form.RenderHeight - height;
+            int top = (int)Game.Form.RenderHeight - height;
             int width = (int)(Game.Form.RenderWidth / 3f);
 
             bufferDrawer1.Height = height;

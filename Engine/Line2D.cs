@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -42,11 +42,11 @@ namespace Engine
         /// <param name="line">Line</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line</returns>
-        public static Line2D Transform(Line2D line, Matrix transform)
+        public static Line2D Transform(Line2D line, Matrix4x4 transform)
         {
             return new Line2D(
-                Vector2.TransformCoordinate(line.Point1, transform),
-                Vector2.TransformCoordinate(line.Point2, transform));
+                Vector2.Transform(line.Point1, transform),
+                Vector2.Transform(line.Point2, transform));
         }
         /// <summary>
         /// Transform line list coordinates
@@ -54,7 +54,7 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static Line2D[] Transform(Line2D[] lines, Matrix transform)
+        public static Line2D[] Transform(Line2D[] lines, Matrix4x4 transform)
         {
             Line2D[] trnLines = new Line2D[lines.Length];
 

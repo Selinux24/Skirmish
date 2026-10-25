@@ -1,10 +1,10 @@
 ﻿using Engine.Common;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -93,7 +93,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                if (MathUtil.NearEqual(tabButtonsAreaSize, value))
+                if (Helper.NearEqual(tabButtonsAreaSize, value))
                 {
                     return;
                 }

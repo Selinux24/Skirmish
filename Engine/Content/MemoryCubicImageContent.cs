@@ -1,7 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.IO;
-using System.Linq;
+using Vortice.Mathematics;
 
 namespace Engine.Content
 {
@@ -19,7 +18,7 @@ namespace Engine.Content
         /// <summary>
         /// Texture faces
         /// </summary>
-        private readonly Rectangle[] faces;
+        private readonly RectI[] faces;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -36,7 +35,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="stream">Texture stream</param>
         /// <param name="faces">Texture faces</param>
-        public MemoryCubicImageContent(MemoryStream stream, Rectangle[] faces = null)
+        public MemoryCubicImageContent(MemoryStream stream, RectI[] faces = null)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
             this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");

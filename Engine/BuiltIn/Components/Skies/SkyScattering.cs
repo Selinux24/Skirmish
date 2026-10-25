@@ -2,9 +2,10 @@
 using Engine.BuiltIn.Drawers.SkyScattering;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Skies
 {
@@ -67,7 +68,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Wave length
         /// </summary>
-        private Color3 wavelength;
+        private Vector3 wavelength;
         /// <summary>
         /// Sphere inner radius
         /// </summary>
@@ -88,7 +89,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Inverse wave length * 4
         /// </summary>
-        public Color3 InvWaveLength4 { get; private set; }
+        public Vector3 InvWaveLength4 { get; private set; }
         /// <summary>
         /// Scattering Scale
         /// </summary>
@@ -114,7 +115,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 rayleighScattering = value;
-                RayleighScattering4PI = value * 4.0f * MathUtil.Pi;
+                RayleighScattering4PI = value * 4.0f * Helper.Pi;
             }
         }
         /// <summary>
@@ -133,7 +134,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 mieScattering = value;
-                MieScattering4PI = value * 4.0f * MathUtil.Pi;
+                MieScattering4PI = value * 4.0f * Helper.Pi;
             }
         }
         /// <summary>
@@ -147,7 +148,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Color3 WaveLength
+        public Vector3 WaveLength
         {
             get
             {
@@ -156,10 +157,10 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 wavelength = value;
-                InvWaveLength4 = new Color3(
-                    1f / MathF.Pow(value.Red, 4.0f),
-                    1f / MathF.Pow(value.Green, 4.0f),
-                    1f / MathF.Pow(value.Blue, 4.0f));
+                InvWaveLength4 = new Vector3(
+                    1f / MathF.Pow(value.X, 4.0f),
+                    1f / MathF.Pow(value.Y, 4.0f),
+                    1f / MathF.Pow(value.Z, 4.0f));
             }
         }
         /// <summary>
@@ -382,16 +383,16 @@ namespace Engine.BuiltIn.Components.Skies
         {
             var outColor = new Color4(0f, 0f, 0f, 0f);
 
-            Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
+            Vector3Extensions.GetAnglesFromVector(Vector3Extensions.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
 
-            float pitch = MathUtil.DegreesToRadians(10.0f);
+            float pitch = Helper.DegreesToRadians(10.0f);
 
             uint samples = 10;
 
             for (uint i = 0; i < samples; i++)
             {
-                Helper.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
+                Vector3Extensions.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
 
                 scatterPos *= PlanetRadius + PlanetAtmosphereRadius;
                 scatterPos.Y -= PlanetRadius;
@@ -402,16 +403,16 @@ namespace Engine.BuiltIn.Components.Skies
 
                 if (i <= samples / 2)
                 {
-                    yaw += MathUtil.DegreesToRadians(5.0f);
+                    yaw += Helper.DegreesToRadians(5.0f);
                 }
                 else
                 {
-                    originalYaw += MathUtil.DegreesToRadians(-5.0f);
+                    originalYaw += Helper.DegreesToRadians(-5.0f);
 
                     yaw = originalYaw;
                 }
 
-                yaw = MathUtil.Mod(yaw, MathUtil.TwoPi);
+                yaw = Helper.Mod(yaw, Helper.TwoPi);
             }
 
             outColor *= 1f / samples;
@@ -449,7 +450,7 @@ namespace Engine.BuiltIn.Components.Skies
 
             var samplePoint = eyePosition + sampleRay * 0.5f;
 
-            var frontColor = Color3.Black;
+            var frontColor = Vector3.Zero;
 
             for (uint i = 0; i < 2; i++)
             {
@@ -461,7 +462,7 @@ namespace Engine.BuiltIn.Components.Skies
 
                 float scatter = startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle));
 
-                var attenuate = Color3.Black;
+                var attenuate = Vector3.Zero;
                 attenuate[0] = MathF.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[1] = MathF.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[2] = MathF.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
@@ -480,9 +481,9 @@ namespace Engine.BuiltIn.Components.Skies
             var color = rayleighColor + miePhase * mieColor;
 
             var expColor = Vector3.Zero;
-            expColor.X = 1.0f - MathF.Exp(-HDRExposure * color.Red);
-            expColor.Y = 1.0f - MathF.Exp(-HDRExposure * color.Green);
-            expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Blue);
+            expColor.X = 1.0f - MathF.Exp(-HDRExposure * color.X);
+            expColor.Y = 1.0f - MathF.Exp(-HDRExposure * color.Y);
+            expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Z);
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);

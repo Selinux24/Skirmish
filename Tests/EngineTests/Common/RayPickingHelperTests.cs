@@ -2,11 +2,12 @@
 using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace EngineTests.Common
 {
@@ -53,9 +54,9 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var ray = new Ray(Vector3.Zero, Vector3.ForwardLH);
-            var rayReverse = new Ray(Vector3.ForwardLH * 4, Vector3.BackwardLH);
-            var rayNoContact = new Ray(Vector3.Zero, Vector3.BackwardLH);
+            var ray = new Ray(Vector3.Zero, Vector3Extensions.ForwardLH);
+            var rayReverse = new Ray(Vector3Extensions.ForwardLH * 4, Vector3Extensions.BackwardLH);
+            var rayNoContact = new Ray(Vector3.Zero, Vector3Extensions.BackwardLH);
 
             rayDefault = new PickingRay(ray, PickingHullTypes.Default);
             rayDefaultReverse = new PickingRay(rayReverse, PickingHullTypes.Default);
@@ -86,13 +87,13 @@ namespace EngineTests.Common
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
             var p3 = t3.SelectMany(t => t.GetVertices()).ToArray();
 
-            bsph1 = SharpDXExtensions.BoundingSphereFromPoints(p1);
-            bsph2 = SharpDXExtensions.BoundingSphereFromPoints(p2);
-            bsph3 = SharpDXExtensions.BoundingSphereFromPoints(p3);
+            bsph1 = BoundingSphereExtensions.BoundingSphereFromPoints(p1);
+            bsph2 = BoundingSphereExtensions.BoundingSphereFromPoints(p2);
+            bsph3 = BoundingSphereExtensions.BoundingSphereFromPoints(p3);
 
-            bbox1 = SharpDXExtensions.BoundingBoxFromPoints(p1);
-            bbox2 = SharpDXExtensions.BoundingBoxFromPoints(p2);
-            bbox3 = SharpDXExtensions.BoundingBoxFromPoints(p3);
+            bbox1 = BoundingBoxExtensions.BoundingBoxFromPoints(p1);
+            bbox2 = BoundingBoxExtensions.BoundingBoxFromPoints(p2);
+            bbox3 = BoundingBoxExtensions.BoundingBoxFromPoints(p3);
 
             var bbox1Tris = Triangle.ComputeTriangleList(bbox1);
             var bbox2Tris = Triangle.ComputeTriangleList(bbox2);

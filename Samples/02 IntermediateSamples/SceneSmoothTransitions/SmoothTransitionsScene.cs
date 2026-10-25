@@ -6,15 +6,18 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
+    using Color = System.Drawing.Color;
+
     public class SmoothTransitionsScene : Scene
     {
         private const string resourcesAsphaltFolder = "Common/Asphalt/";
@@ -36,7 +39,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private readonly Vector3 soldierInitPosition = new(0, 0, 5);
 
         private GeometryColorDrawer<Triangle> itemTris = null;
-        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.25f);
+        private readonly Vector4 itemTrisColor = new(Color.Yellow.RGB(), 0.25f);
 
         private SegmentPath soldierPath;
         private readonly float soldierPathArrival = 5.333f;
@@ -53,7 +56,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
 
         public SmoothTransitionsScene(Game game) : base(game)
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
 
             Game.VisibleMouse = true;
             Game.LockMouse = false;
@@ -80,17 +83,17 @@ namespace IntermediateSamples.SceneSmoothTransitions
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
 
             title.Text = "Smooth Transitions";
             runtime.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -126,7 +129,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             float l = 15f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
@@ -301,7 +304,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             if (Game.Input.KeyJustReleased(Keys.M))
             {
                 soldier.Manipulator.SetPosition(soldierInitPosition);
-                Vector3 to = soldierInitPosition - (Vector3.ForwardLH * 31f);
+                Vector3 to = soldierInitPosition - (Vector3Extensions.ForwardLH * 31f);
 
                 MoveSoldierTo(gameTime, to, Game.Input.KeyPressed(Keys.ShiftKey));
             }
@@ -455,23 +458,23 @@ namespace IntermediateSamples.SceneSmoothTransitions
         /// Gets a gradient color
         /// </summary>
         /// <param name="value">Value</param>
-        private static Color4 GetColor(float value)
+        private static Vector4 GetColor(float value)
         {
-            var colorFrom = new Color4(0f, 1f, 0f, 0.25f);
-            var colorMiddle = new Color4(Color.Orange.ToColor3(), 0.25f);
-            var colorTo = new Color4(1f, 0f, 0f, 0.25f);
+            var colorFrom = new Vector4(0f, 1f, 0f, 0.25f);
+            var colorMiddle = new Vector4(Color.Orange.RGB(), 0.25f);
+            var colorTo = new Vector4(1f, 0f, 0f, 0.25f);
 
             if (value < 0.5f)
             {
                 float v = value * 2f;
 
-                return Color4.Lerp(colorFrom, colorMiddle, v);
+                return Vector4.Lerp(colorFrom, colorMiddle, v);
             }
             else
             {
                 float v = (value - 0.5f) * 2f;
 
-                return Color4.Lerp(colorMiddle, colorTo, v);
+                return Vector4.Lerp(colorMiddle, colorTo, v);
             }
         }
 
@@ -501,7 +504,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 animData.AppendLine($"PathUpdated  : {e.CurrentPath}");
 
                 var tris = soldier.GetGeometry();
-                itemTris.AddPrimitives(new Color(Color.MediumPurple.ToColor3(), 0.5f), tris);
+                itemTris.AddPrimitives(new Vector4(Color.MediumPurple.RGB(), 0.5f), tris);
             }
         }
         private void SoldierControllerPathChanged(object sender, AnimationControllerEventArgs e)

@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Color map
         /// </summary>
-        public Color4[,] Colormap { get; set; } = null;
+        public Vector4[,] Colormap { get; set; } = null;
         /// <summary>
         /// Color map file name
         /// </summary>
@@ -82,7 +82,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Transform matrix
         /// </summary>
-        public Matrix Transform { get; set; } = Matrix.Identity;
+        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
 
         /// <summary>
         /// Constructor
@@ -125,7 +125,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var material = MaterialBlinnPhongContent.Default;
 
-                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Matrix.Identity);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

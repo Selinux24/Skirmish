@@ -1,4 +1,5 @@
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
@@ -21,7 +22,7 @@ namespace Engine.Physics.Colliders
             Extents = extents;
 
             boundingBox = new BoundingBox(-extents, extents);
-            boundingSphere = BoundingSphere.FromBox(boundingBox);
+            boundingSphere = BoundingSphere.CreateFromBoundingBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

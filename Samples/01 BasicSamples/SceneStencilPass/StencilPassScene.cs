@@ -3,9 +3,10 @@ using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStencilPass
@@ -80,7 +81,7 @@ namespace BasicSamples.SceneStencilPass
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -141,9 +142,9 @@ namespace BasicSamples.SceneStencilPass
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = true;
 
-            Lights.Add(new SceneLightPoint("Point1", false, Color3.White, Color3.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
+            Lights.Add(new SceneLightPoint("Point1", false, Color.White.RGB(), Color.White.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            Lights.Add(new SceneLightSpot("Spot1", false, Color3.White, Color3.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color.White.RGB(), Color.White.RGB(), true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3Extensions.Down, 20, 5, 5)));
         }
 
         public override void Update(IGameTime gameTime)
@@ -232,7 +233,7 @@ namespace BasicSamples.SceneStencilPass
             position.Z = r * MathF.Sin(av * Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
-            var col1 = animateLightColors ? new Color3(pos1.X, pos1.Y, pos1.Z) : Color3.White;
+            var col1 = animateLightColors ? new Vector3(pos1.X, pos1.Y, pos1.Z) : Color.White.RGB();
 
             lightEmitter1.Manipulator.SetPosition(pos1);
             Lights.PointLights[0].Position = pos1;
@@ -240,7 +241,7 @@ namespace BasicSamples.SceneStencilPass
             Lights.PointLights[0].SpecularColor = col1;
 
             var pos2 = (position * -1) + new Vector3(0, h, 0);
-            var col2 = animateLightColors ? new Color3(pos2.X, pos2.Y, pos2.Z) : Color3.White;
+            var col2 = animateLightColors ? new Vector3(pos2.X, pos2.Y, pos2.Z) : Color.White.RGB();
 
             lightEmitter2.Manipulator.SetPosition(pos2);
             Lights.SpotLights[0].Position = pos2;
@@ -270,7 +271,7 @@ namespace BasicSamples.SceneStencilPass
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor, 0.25f);
+                    var color = new Vector4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -279,7 +280,7 @@ namespace BasicSamples.SceneStencilPass
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor, 0.25f);
+                    var color = new Vector4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 
@@ -289,7 +290,7 @@ namespace BasicSamples.SceneStencilPass
 
             if (drawCullVolumes)
             {
-                var color = new Color4(Color.Red.RGB(), 0.50f);
+                var color = new Vector4(Color.Red.RGB(), 0.50f);
 
                 foreach (var spot in Lights.SpotLights)
                 {

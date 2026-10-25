@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -10,10 +10,10 @@ namespace Engine
         /// <summary>
         /// Ambient down color
         /// </summary>
-        Color3 AmbientDown { get; set; }
+        Vector3 AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        Color3 AmbientUp { get; set; }
+        Vector3 AmbientUp { get; set; }
     }
 }

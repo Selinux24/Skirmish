@@ -2,6 +2,7 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Windows
@@ -24,7 +25,7 @@ namespace Engine.Windows
                 {
                     var color = bitmap.GetPixel(w, h);
 
-                    image.SetPixel(w, h, new SharpDX.Color(color.R, color.G, color.B, color.A));
+                    image.SetPixel(w, h, new Vector4(color.R, color.G, color.B, color.A));
                 }
             }
 
@@ -34,7 +35,7 @@ namespace Engine.Windows
         public void SaveToFile(string fileName, Image image)
         {
             int stride = sizeof(int);
-            int[] bits = image.Flatten().Select(c => c.ToRgba()).ToArray();
+            uint[] bits = [.. image.Flatten().Select(c => ((Vortice.Mathematics.Color4)c).ToRgba())];
 
             var bitsHandle = GCHandle.Alloc(bits, GCHandleType.Pinned);
             using var bitmap = new Bitmap(image.Width, image.Height, image.Width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject());

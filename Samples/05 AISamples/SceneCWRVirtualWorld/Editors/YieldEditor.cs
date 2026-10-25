@@ -1,7 +1,7 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Markings;
 using AISamples.Common.Primitives;
-using SharpDX;
+using System.Numerics;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {

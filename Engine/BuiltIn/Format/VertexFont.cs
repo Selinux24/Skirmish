@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
@@ -18,13 +18,13 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 20, slot, EngineInputClassification.PerVertexData, 0),
+                new("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new("TEXCOORD", 0, Vortice.DXGI.Format.R32G32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new("COLOR", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 20, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
         /// <summary>
@@ -34,7 +34,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="color">Color</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
+        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Vector4 color)
         {
             if (!vertices.Any())
             {
@@ -52,7 +52,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Color4> colors)
+        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Vector4> colors)
         {
             if (!vertices.Any())
             {
@@ -76,7 +76,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Color4 Color;
+        public Vector4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -99,17 +99,17 @@ namespace Engine.BuiltIn.Format
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexFont>();
+            return (uint)Marshal.SizeOf<VertexFont>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

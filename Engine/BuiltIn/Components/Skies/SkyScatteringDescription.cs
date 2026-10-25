@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Skies
 {
@@ -42,7 +42,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Sun light wave length
         /// </summary>
-        public static readonly Color3 SunLightWaveLength = new(0.650f, 0.570f, 0.475f);
+        public static readonly Vector3 SunLightWaveLength = new(0.650f, 0.570f, 0.475f);
 
         /// <summary>
         /// Gets the default sky scattering description
@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Color3 WaveLength { get; set; }
+        public Vector3 WaveLength { get; set; }
         /// <summary>
         /// Sky brightness
         /// </summary>

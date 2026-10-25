@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -14,17 +14,18 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public string Name { get; set; } = name;
         /// <inheritdoc/>
-        public Matrix InitialWorldTransform { get; private set; } = Matrix.Identity;
+        public Matrix4x4 InitialWorldTransform { get; private set; } = Matrix4x4.Identity;
         /// <inheritdoc/>
-        public Matrix InitialLocalTransform
+        public Matrix4x4 InitialLocalTransform
         {
             get
             {
                 // Get parent's initial transform
-                var parentTransform = Parent?.InitialWorldTransform ?? Matrix.Identity;
+                var parentTransform = Parent?.InitialWorldTransform ?? Matrix4x4.Identity;
 
                 // Transform to local
-                return Matrix.Invert(parentTransform) * InitialWorldTransform;
+                Matrix4x4.Invert(parentTransform, out var inv);
+                return inv * InitialWorldTransform;
             }
         }
         /// <inheritdoc/>
@@ -38,42 +39,43 @@ namespace Engine.BuiltIn.Components.Models
             Parent = parent;
         }
         /// <inheritdoc/>
-        public void SetWorldTransform(Matrix transform)
+        public void SetWorldTransform(Matrix4x4 transform)
         {
             InitialWorldTransform = transform;
         }
         /// <inheritdoc/>
-        public Matrix GetWorldTransform()
+        public Matrix4x4 GetWorldTransform()
         {
             // Build transform
             var local = GetParentManipulatorTransform();
 
             local *= InitialLocalTransform;
 
-            return (Parent?.InitialWorldTransform ?? Matrix.Identity) * local;
+            return (Parent?.InitialWorldTransform ?? Matrix4x4.Identity) * local;
         }
         /// <inheritdoc/>
-        public Matrix GetLocalTransform()
+        public Matrix4x4 GetLocalTransform()
         {
             // Get the parent transform
-            return Manipulator.LocalTransform * (Parent?.GetLocalTransform() ?? Matrix.Identity);
+            return Manipulator.LocalTransform * (Parent?.GetLocalTransform() ?? Matrix4x4.Identity);
         }
         /// <inheritdoc/>
-        public Matrix GetPartTransform()
+        public Matrix4x4 GetPartTransform()
         {
             // Calculate the part's world transform
-            var worldTransform = Matrix.Invert(InitialWorldTransform) * Manipulator.LocalTransform * InitialWorldTransform;
+            Matrix4x4.Invert(InitialWorldTransform, out var inv);
+            var worldTransform = inv * Manipulator.LocalTransform * InitialWorldTransform;
 
             // Get the parent's part world transform, if any
-            var parentTransform = Parent?.GetPartTransform() ?? Matrix.Identity;
+            var parentTransform = Parent?.GetPartTransform() ?? Matrix4x4.Identity;
 
             // Build transform - 
             return worldTransform * parentTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetParentManipulatorTransform()
+        public Matrix4x4 GetParentManipulatorTransform()
         {
-            return Manipulator.LocalTransform * (Parent?.GetParentManipulatorTransform() ?? Matrix.Identity);
+            return Manipulator.LocalTransform * (Parent?.GetParentManipulatorTransform() ?? Matrix4x4.Identity);
         }
 
         /// <inheritdoc/>

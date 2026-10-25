@@ -1,6 +1,6 @@
 ﻿using Engine;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
@@ -16,7 +16,7 @@ namespace TerrainSamples.SceneModularDungeon
         /// <summary>
         /// Initial controller time
         /// </summary>
-        private readonly float initialTime = Helper.RandomGenerator.NextFloat(0, 100);
+        private readonly float initialTime = Helper.RandomGenerator.NextSingle(0, 100);
 
         /// <summary>
         /// Spot light
@@ -42,10 +42,10 @@ namespace TerrainSamples.SceneModularDungeon
             float cos = MathF.Cos(v * totalSeconds);
             float sin = MathF.Sin(v * totalSeconds);
 
-            float x = r * cos * rnd.NextFloat(0.15f, 9f);
-            float z = r * sin * rnd.NextFloat(0.85f, 9f);
+            float x = r * cos * rnd.NextSingle(0.15f, 9f);
+            float z = r * sin * rnd.NextSingle(0.85f, 9f);
 
-            float y = h * sin * rnd.NextFloat(0.35f, 9f);
+            float y = h * sin * rnd.NextSingle(0.35f, 9f);
 
             Light.Position = PositionFnc() + new Vector3(x, y, z);
         }

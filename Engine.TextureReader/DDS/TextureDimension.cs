@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
     public enum TextureDimension
     {

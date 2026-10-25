@@ -74,7 +74,7 @@ namespace Engine.BuiltIn.Drawers.Deferred
             dc.SetPixelShaderConstantBuffers(0, cb);
 
             dc.SetPixelShaderResourceViews(0, deferredBuffer);
-            dc.SetPixelShaderResourceView(deferredBuffer.Length, BuiltInShaders.GetShadowMapPointResourceView());
+            dc.SetPixelShaderResourceView((uint)deferredBuffer.Length, BuiltInShaders.GetShadowMapPointResourceView());
 
             dc.SetPixelShaderSampler(0, samplerPoint);
 

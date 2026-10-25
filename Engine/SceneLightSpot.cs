@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -12,7 +13,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix initialTransform = Matrix.Identity;
+        private Matrix4x4 initialTransform = Matrix4x4.Identity;
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -31,11 +32,11 @@ namespace Engine
         {
             get
             {
-                return MathUtil.DegreesToRadians(FallOffAngle);
+                return Helper.DegreesToRadians(FallOffAngle);
             }
             set
             {
-                FallOffAngle = MathUtil.RadiansToDegrees(value);
+                FallOffAngle = Helper.RadiansToDegrees(value);
             }
         }
         /// <inheritdoc/>
@@ -54,7 +55,7 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public override Matrix ParentTransform
+        public override Matrix4x4 ParentTransform
         {
             get
             {
@@ -68,14 +69,14 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public Matrix Local
+        public Matrix4x4 Local
         {
             get
             {
                 float radius = Radius * 0.5f;
                 Vector3 center = (Position + (Vector3.Normalize(Direction) * radius));
 
-                return Matrix.Scaling(radius) * Matrix.Translation(center);
+                return Matrix4x4.CreateScale(radius) * Matrix4x4.CreateTranslation(center);
             }
         }
 
@@ -85,11 +86,11 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="direction">Direction</param>
         /// <returns>Returns the transform matrix</returns>
-        public static Matrix CreateFromPositionDirection(Vector3 position, Vector3 direction)
+        public static Matrix4x4 CreateFromPositionDirection(Vector3 position, Vector3 direction)
         {
-            float f = MathF.Abs(Vector3.Dot(direction, Vector3.Up));
-            Vector3 up = MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
-            return Helper.CreateWorld(position, direction, up);
+            float f = MathF.Abs(Vector3.Dot(direction, Vector3Extensions.Up));
+            Vector3 up = Helper.IsOne(f) ? Vector3Extensions.ForwardLH : Vector3Extensions.Up;
+            return Matrix4x4Extensions.CreateWorld(position, direction, up);
         }
 
         /// <summary>
@@ -109,7 +110,7 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
-        public SceneLightSpot(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, SceneLightSpotDescription description)
+        public SceneLightSpot(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             Position = description.Position;
@@ -130,10 +131,10 @@ namespace Engine
         {
             var trn = initialTransform * ParentTransform;
 
-            trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+            Matrix4x4.Decompose(trn, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
             Radius = initialRadius * scale.X;
             Intensity = initialIntensity * scale.X;
-            Direction = Matrix.RotationQuaternion(rotation).Backward;
+            Direction = Matrix4x4.CreateFromQuaternion(rotation).GetBackward();
             Position = translation;
         }
 
@@ -161,14 +162,14 @@ namespace Engine
         /// <summary>
         /// Gets the from light view * projection matrix
         /// </summary>
-        private Matrix[] CalcFromLightViewProjection()
+        private Matrix4x4[] CalcFromLightViewProjection()
         {
             var near = 1f;
-            var projection = Matrix.PerspectiveFovLH(FallOffAngleRadians * 2f, 1f, near, Radius);
+            var projection = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(FallOffAngleRadians * 2f, 1f, near, Radius);
 
             var pos = Position;
             var look = Position + (Direction * Radius);
-            var view = Matrix.LookAtLH(pos, look, Vector3.Up);
+            var view = Matrix4x4.CreateLookAtLeftHanded(pos, look, Vector3Extensions.Up);
 
             var vp = view * projection;
 
@@ -212,11 +213,11 @@ namespace Engine
             var coneLines = Line3D.CreateConeCupAngle(FallOffAngleRadians, Radius, sliceCount);
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
-            Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
+            Matrix4x4 rot = Matrix4x4.CreateRotationX(Helper.PiOver2);
 
             //Then move and rotate the cone to light position and direction
-            float f = MathF.Abs(Vector3.Dot(Direction, Vector3.Up));
-            Matrix trn = Helper.CreateWorld(Position, Direction, MathUtil.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
+            float f = MathF.Abs(Vector3.Dot(Direction, Vector3Extensions.Up));
+            Matrix4x4 trn = Matrix4x4Extensions.CreateWorld(Position, Direction, Helper.IsOne(f) ? Vector3Extensions.ForwardLH : Vector3Extensions.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }

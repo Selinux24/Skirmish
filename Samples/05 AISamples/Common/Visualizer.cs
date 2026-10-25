@@ -1,16 +1,18 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Geometry;
 using Engine.Common;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace AISamples.Common
 {
+    using Color = System.Drawing.Color;
+
     class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
     {
-        private static readonly Color4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
-        private static readonly Color4 wPositiveColor = Color.Yellow;
-        private static readonly Color4 wNegativeColor = Color.Blue;
+        private static readonly Vector4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
+        private static readonly Vector4 wPositiveColor = Color.Yellow.RGBA();
+        private static readonly Vector4 wNegativeColor = Color.Blue.RGBA();
 
         private readonly GeometryColorDrawer<Triangle> opaqueDrawer = opaqueDrawer;
         private readonly GeometryColorDrawer<Triangle> triangleDrawer = triangleDrawer;
@@ -40,7 +42,7 @@ namespace AISamples.Common
             int levelHeight = height / levels;
             for (int i = levels - 1; i >= 0; i--)
             {
-                float levelTop = top + MathUtil.Lerp(height - levelHeight, 0, GetX(i, levels));
+                float levelTop = top + float.Lerp(height - levelHeight, 0, GetX(i, levels));
 
                 DrawLevel(network.GetLevel(i), nodeRadius, -left, (int)-levelTop, -width, -levelHeight, position.Z);
             }
@@ -73,8 +75,8 @@ namespace AISamples.Common
                 for (int o = 0; o < outputCount; o++)
                 {
                     var l = new Line3D(
-                        new(MathUtil.Lerp(left, right, GetX(i, inputCount)), bottom, 1 + depth),
-                        new(MathUtil.Lerp(left, right, GetX(o, outputCount)), top, 1 + depth));
+                        new(float.Lerp(left, right, GetX(i, inputCount)), bottom, 1 + depth),
+                        new(float.Lerp(left, right, GetX(o, outputCount)), top, 1 + depth));
 
                     float w = level.GetWeight(i, o);
                     lineDrawer.AddPrimitives(ColorFromValue(w), l);
@@ -83,23 +85,23 @@ namespace AISamples.Common
 
             for (int i = 0; i < inputCount; i++)
             {
-                float x = MathUtil.Lerp(left, right, GetX(i, inputCount));
+                float x = float.Lerp(left, right, GetX(i, inputCount));
 
                 float iv = level.GetInput(i);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3Extensions.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(iv), Triangle.ComputeTriangleList(gT));
             }
 
             for (int o = 0; o < outputCount; o++)
             {
-                float x = MathUtil.Lerp(left, right, GetX(o, outputCount));
+                float x = float.Lerp(left, right, GetX(o, outputCount));
 
                 float ov = level.GetOutput(o);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3Extensions.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(ov), Triangle.ComputeTriangleList(gT));
 
                 float bv = level.GetBias(o);
-                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3.ForwardLH);
+                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3Extensions.ForwardLH);
                 lineDrawer.AddPrimitives(ColorFromValue(bv), Line3D.CreateFromVertices(gL));
             }
         }
@@ -108,12 +110,12 @@ namespace AISamples.Common
         {
             return count == 1 ? 0.5f : (float)i / (count - 1);
         }
-        private static Color4 ColorFromValue(float v)
+        private static Vector4 ColorFromValue(float v)
         {
-            float alpha = MathUtil.Clamp(MathF.Abs(v), 0f, 1f);
-            Color3 color = v > 0 ? wPositiveColor.ToVector3() : wNegativeColor.ToVector3();
+            float alpha = Math.Clamp(MathF.Abs(v), 0f, 1f);
+            Vector3 color = v > 0 ? wPositiveColor.RGB() : wNegativeColor.RGB();
 
-            return new Color4(color, alpha);
+            return new(color, alpha);
         }
     }
 }

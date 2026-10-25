@@ -3,8 +3,8 @@ using Engine.BuiltIn.Drawers.Clouds;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
@@ -59,7 +59,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Clouds color
         /// </summary>
-        private Color3 color;
+        private Vector3 color;
         /// <summary>
         /// Clouds drawer
         /// </summary>
@@ -96,7 +96,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Color3 CloudsBaseColor { get; set; }
+        public Vector3 CloudsBaseColor { get; set; }
         /// <summary>
         /// Returns true if the buffers were ready
         /// </summary>

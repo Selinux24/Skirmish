@@ -1,6 +1,6 @@
 ﻿using Engine;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace AISamples.Common.Agents
 {

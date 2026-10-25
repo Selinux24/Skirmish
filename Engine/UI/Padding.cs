@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Mathematics;
 
 namespace Engine.UI
 {
@@ -86,9 +86,9 @@ namespace Engine.UI
         /// Applies padding to rectangle
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
-        public readonly RectangleF Apply(RectangleF rectangle)
+        public readonly Rect Apply(Rect rectangle)
         {
-            return new RectangleF(
+            return new Rect(
                 rectangle.Left + Left,
                 rectangle.Top + Top,
                 rectangle.Width - (Left + Right),
@@ -99,10 +99,10 @@ namespace Engine.UI
         public readonly bool Equals(Padding other)
         {
             return
-                MathUtil.NearEqual(other.Left, Left) &&
-                MathUtil.NearEqual(other.Top, Top) &&
-                MathUtil.NearEqual(other.Bottom, Bottom) &&
-                MathUtil.NearEqual(other.Right, Right);
+                Helper.NearEqual(other.Left, Left) &&
+                Helper.NearEqual(other.Top, Top) &&
+                Helper.NearEqual(other.Bottom, Bottom) &&
+                Helper.NearEqual(other.Right, Right);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

@@ -1,10 +1,10 @@
-﻿using SharpDX.Mathematics.Interop;
-using SharpDX.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Vortice.Mathematics;
+using Vortice.Win32;
 
 [assembly: DisableRuntimeMarshalling]
 namespace Engine.Windows.Helpers
@@ -216,7 +216,7 @@ namespace Engine.Windows.Helpers
 
         [LibraryImport("user32.dll", EntryPoint = "GetClientRect")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static partial bool GetClientRect(IntPtr hWnd, out RawRectangle lpRect);
+        public static partial bool GetClientRect(IntPtr hWnd, out Rect lpRect);
         [LibraryImport("user32.dll", EntryPoint = "PeekMessageA", SetLastError = true)]
         public static partial int PeekMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg);
         [LibraryImport("user32.dll", EntryPoint = "GetMessageA")]

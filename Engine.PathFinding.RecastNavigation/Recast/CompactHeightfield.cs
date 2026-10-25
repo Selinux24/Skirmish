@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -162,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public static CompactHeightfield Build(Heightfield hf, int walkableHeight, int walkableClimb)
         {
             var bbox = hf.Bounds;
-            bbox.Maximum.Y += walkableHeight * hf.CellHeight;
+            bbox.Max.Y += walkableHeight * hf.CellHeight;
 
             // Fill in header.
             var chf = new CompactHeightfield
@@ -270,9 +271,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 var center = new Vector3
                 {
-                    X = Bounds.Minimum.X + (col + 0.5f) * CellSize,
+                    X = Bounds.Min.X + (col + 0.5f) * CellSize,
                     Y = sy,
-                    Z = Bounds.Minimum.Z + (row + 0.5f) * CellSize
+                    Z = Bounds.Min.Z + (row + 0.5f) * CellSize
                 };
 
                 yield return (i, center);
@@ -459,7 +460,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 k++;
             }
 
-            return idx.Take(nidx).ToArray();
+            return [.. idx.Take(nidx)];
         }
         /// <summary>
         /// Finds maximum deviation along the segment
@@ -497,8 +498,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public BoundingBox GetBoundsWithBorder()
         {
-            var bmin = Bounds.Minimum;
-            var bmax = Bounds.Maximum;
+            var bmin = Bounds.Min;
+            var bmax = Bounds.Max;
             if (BorderSize <= 0)
             {
                 return new(bmin, bmax);
@@ -606,8 +607,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     {
                         int bot = s.Max;
                         int top = s.Next?.Min ?? int.MaxValue;
-                        Spans[idx].Y = MathUtil.Clamp(bot, 0, SPAN_MAX_WIDTH);
-                        Spans[idx].H = MathUtil.Clamp(top - bot, 0, SPAN_MAX_HEIGHT);
+                        Spans[idx].Y = Math.Clamp(bot, 0, SPAN_MAX_WIDTH);
+                        Spans[idx].H = Math.Clamp(top - bot, 0, SPAN_MAX_HEIGHT);
                         Areas[idx] = s.Area;
                         idx++;
                         c.Count++;
@@ -729,12 +730,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             min = new Int3();
             max = new Int3();
 
-            min.X = (int)((bbox.Minimum.X - Bounds.Minimum.X) / CellSize);
-            min.Y = (int)((bbox.Minimum.Y - Bounds.Minimum.Y) / CellHeight);
-            min.Z = (int)((bbox.Minimum.Z - Bounds.Minimum.Z) / CellSize);
-            max.X = (int)((bbox.Maximum.X - Bounds.Minimum.X) / CellSize);
-            max.Y = (int)((bbox.Maximum.Y - Bounds.Minimum.Y) / CellHeight);
-            max.Z = (int)((bbox.Maximum.Z - Bounds.Minimum.Z) / CellSize);
+            min.X = (int)((bbox.Min.X - Bounds.Min.X) / CellSize);
+            min.Y = (int)((bbox.Min.Y - Bounds.Min.Y) / CellHeight);
+            min.Z = (int)((bbox.Min.Z - Bounds.Min.Z) / CellSize);
+            max.X = (int)((bbox.Max.X - Bounds.Min.X) / CellSize);
+            max.Y = (int)((bbox.Max.Y - Bounds.Min.Y) / CellHeight);
+            max.Z = (int)((bbox.Max.Z - Bounds.Min.Z) / CellSize);
 
             if (max.X < 0) return false;
             if (max.Z < 0) return false;
@@ -1139,7 +1140,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
         /// </remarks>
         /// <returns>Returns the height patch</returns>
-        public HeightPatch GetHeightData(IndexedPolygon poly, int region, Int3[] verts, Rectangle rect)
+        public HeightPatch GetHeightData(IndexedPolygon poly, int region, Int3[] verts, RectI rect)
         {
             var queue = new List<HeightDataItem>(512);
 
@@ -1334,7 +1335,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (tris.Length == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
-                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Length} verts).");
+                Game.Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Length} verts).");
 
                 outVerts = verts;
                 outTris = [];
@@ -1353,8 +1354,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
             if (ntris > MAX_TRIS)
             {
-                tris = tris.Take(MAX_TRIS).ToArray();
-                Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
+                tris = [.. tris.Take(MAX_TRIS)];
+                Game.Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
             outVerts = verts;
@@ -1526,12 +1527,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int heightSearchRadius = param.HeightSearchRadius;
 
             var bbox = Utils.GetPolygonBounds(polygon);
-            float h = (bbox.Maximum.Y + bbox.Minimum.Y) * 0.5f;
+            float h = (bbox.Max.Y + bbox.Min.Y) * 0.5f;
 
-            int x0 = (int)MathF.Floor(bbox.Minimum.X / sampleDist);
-            int x1 = (int)MathF.Ceiling(bbox.Maximum.X / sampleDist);
-            int z0 = (int)MathF.Floor(bbox.Minimum.Z / sampleDist);
-            int z1 = (int)MathF.Ceiling(bbox.Maximum.Z / sampleDist);
+            int x0 = (int)MathF.Floor(bbox.Min.X / sampleDist);
+            int x1 = (int)MathF.Ceiling(bbox.Max.X / sampleDist);
+            int z0 = (int)MathF.Floor(bbox.Min.Z / sampleDist);
+            int z1 = (int)MathF.Ceiling(bbox.Max.Z / sampleDist);
 
             float cs = CellSize;
             float ch = CellHeight;
@@ -1653,7 +1654,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 if (stack.Count < 1)
                 {
-                    Logger.WriteWarning(this, "Walk towards polygon center failed to reach center");
+                    Game.Logger.WriteWarning(this, "Walk towards polygon center failed to reach center");
                     break;
                 }
 
@@ -1764,7 +1765,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int k = 0; k < cellOffsets.Length && dmin > 0; ++k)
                 {
                     var offset = cellOffsets[k];
-                    var a = vert + offset;
+                    var a = Int3Extensions.Sum(vert, offset);
                     if (!hp.Contains(a.X, a.Z))
                     {
                         continue;

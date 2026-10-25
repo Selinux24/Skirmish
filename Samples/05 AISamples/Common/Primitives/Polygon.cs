@@ -1,9 +1,9 @@
 ﻿using AISamples.Common.Persistence;
 using Engine;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AISamples.Common.Primitives
 {
@@ -32,8 +32,8 @@ namespace AISamples.Common.Primitives
         {
             return new()
             {
-                Vertices = polygon.vertices.Select(Vector2File.FromVector2).ToArray(),
-                Segments = polygon.segments.Select(Segment2.FromSegment).ToArray(),
+                Vertices = [.. polygon.vertices.Select(Vector2File.FromVector2)],
+                Segments = [.. polygon.segments.Select(Segment2.FromSegment)],
             };
         }
         public static Polygon FromPolygonFile(PolygonFile polygon)
@@ -107,7 +107,7 @@ namespace AISamples.Common.Primitives
                         segs1[i].P1, segs1[i].P2,
                         segs2[j].P1, segs2[j].P2);
 
-                    if (!exists || MathUtil.IsZero(offset) || MathUtil.IsOne(offset))
+                    if (!exists || Helper.IsZero(offset) || Helper.IsOne(offset))
                     {
                         continue;
                     }
@@ -144,8 +144,8 @@ namespace AISamples.Common.Primitives
             int intersections = 0;
             for (int i = 0; i < segments.Count; i++)
             {
-                var intersection = GetIntersection(outerPoint, point, segments[i].P1, segments[i].P2);
-                if (intersection.Exists)
+                var (exists, _, _) = GetIntersection(outerPoint, point, segments[i].P1, segments[i].P2);
+                if (exists)
                 {
                     intersections++;
                 }
@@ -158,8 +158,8 @@ namespace AISamples.Common.Primitives
             {
                 for (int j = 0; j < poly.segments.Count; j++)
                 {
-                    var intersection = GetIntersection(segments[i].P1, segments[i].P2, poly.segments[j].P1, poly.segments[j].P2);
-                    if (intersection.Exists)
+                    var (exists, _, _) = GetIntersection(segments[i].P1, segments[i].P2, poly.segments[j].P1, poly.segments[j].P2);
+                    if (exists)
                     {
                         return true;
                     }
@@ -190,7 +190,7 @@ namespace AISamples.Common.Primitives
         private static (bool Exists, float Offset, Vector2 Point) GetIntersection(Vector2 s1p1, Vector2 s1p2, Vector2 s2p1, Vector2 s2p2)
         {
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
-            if (!MathUtil.WithinEpsilon(0f, bottom, 0.01f))
+            if (!Helper.NearEqual(0f, bottom, 0.01f))
             {
                 var tTop = (s2p2.X - s2p1.X) * (s1p1.Y - s2p1.Y) - (s2p2.Y - s2p1.Y) * (s1p1.X - s2p1.X);
                 var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);
@@ -199,7 +199,7 @@ namespace AISamples.Common.Primitives
                 float u = uTop / bottom;
                 if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
                 {
-                    return (true, t, new(MathUtil.Lerp(s1p1.X, s1p2.X, t), MathUtil.Lerp(s1p1.Y, s1p2.Y, t)));
+                    return (true, t, new(float.Lerp(s1p1.X, s1p2.X, t), float.Lerp(s1p1.Y, s1p2.Y, t)));
                 }
             }
 

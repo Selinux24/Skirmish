@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -16,21 +16,21 @@ namespace Engine
         /// <inheritdoc/>
         public bool CastShadowsMarked { get; set; } = false;
         /// <inheritdoc/>
-        public Color3 DiffuseColor { get; set; }
+        public Vector3 DiffuseColor { get; set; }
         /// <inheritdoc/>
-        public Color3 SpecularColor { get; set; }
+        public Vector3 SpecularColor { get; set; }
         /// <inheritdoc/>
         public int ShadowMapIndex { get; set; } = 0;
         /// <inheritdoc/>
         public uint ShadowMapCount { get; set; }
         /// <inheritdoc/>
-        public Matrix[] FromLightVP { get; set; }
+        public Matrix4x4[] FromLightVP { get; set; }
         /// <inheritdoc/>
         public Vector3 Position { get; set; }
         /// <inheritdoc/>
         public virtual object State { get; set; }
         /// <inheritdoc/>
-        public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
+        public virtual Matrix4x4 ParentTransform { get; set; } = Matrix4x4.Identity;
 
         /// <summary>
         /// Evaluates whether a light must be processed as a shadow casting light or not
@@ -81,7 +81,7 @@ namespace Engine
         /// <param name="diffuse">Diffuse color contribution</param>
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        protected SceneLight(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled)
+        protected SceneLight(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled)
         {
             Name = name;
             Enabled = enabled;

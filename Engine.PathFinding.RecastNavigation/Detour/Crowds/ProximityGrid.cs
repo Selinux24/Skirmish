@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -32,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private readonly int m_poolSize;
         private readonly ProximityGridItem<T>[] m_pool;
         private int m_poolHead;
-        private RectangleF m_bounds;
+        private Rect m_bounds;
 
         /// <summary>
         /// Constructor
@@ -53,7 +54,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_pool = new ProximityGridItem<T>[m_poolSize];
             m_poolHead = 0;
 
-            m_bounds = new RectangleF()
+            m_bounds = new Rect()
             {
                 Left = float.MaxValue,
                 Top = float.MaxValue,
@@ -73,7 +74,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var min = new Vector2(position.X - radius, position.Z - radius);
             var max = new Vector2(position.X + radius, position.Z + radius);
 
-            m_bounds = new RectangleF()
+            m_bounds = new Rect()
             {
                 Left = MathF.Min(m_bounds.Left, min.X),
                 Top = MathF.Min(m_bounds.Top, min.Y),
@@ -126,7 +127,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_pool[i] = null;
             }
 
-            m_bounds = new RectangleF()
+            m_bounds = new Rect()
             {
                 Left = float.MaxValue,
                 Top = float.MaxValue,
@@ -221,7 +222,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Gets the proximity grid bounds
         /// </summary>
         /// <returns>Returns a rectangle</returns>
-        public RectangleF GetBounds()
+        public Rect GetBounds()
         {
             return m_bounds;
         }

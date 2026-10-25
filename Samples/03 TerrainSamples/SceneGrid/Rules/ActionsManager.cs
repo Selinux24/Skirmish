@@ -72,11 +72,11 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             if (phase != Phase.End && actionType.HasFlag(ActionTypes.Automatic))
             {
-                return actions.Where(a => a.Automatic).ToArray();
+                return [.. actions.Where(a => a.Automatic)];
             }
             else if (phase != Phase.End && actionType.HasFlag(ActionTypes.Manual))
             {
-                return actions.Where(a => !a.Automatic).ToArray();
+                return [.. actions.Where(a => !a.Automatic)];
             }
 
             return [.. actions];
@@ -105,7 +105,7 @@ namespace TerrainSamples.SceneGrid.Rules
                 filteredActions = filteredActions.Where(a => a.Automatic == (actionType == ActionTypes.Automatic));
             }
 
-            return filteredActions.ToArray();
+            return [.. filteredActions];
         }
 
         private static IEnumerable<ActionSpecification> FilterByPhase(IEnumerable<ActionSpecification> actions, Phase phase, Soldier soldier)
@@ -134,7 +134,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         private static ActionSpecification[] GetListForTeam(Team team)
         {
-            Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
+            Game.Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
 
             return [];
         }

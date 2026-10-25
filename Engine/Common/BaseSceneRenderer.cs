@@ -1,15 +1,16 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using Engine.BuiltIn.Components.ShadowMapping;
 using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.PostProcess;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -281,11 +282,11 @@ namespace Engine.Common
         /// <summary>
         /// Renderer width
         /// </summary>
-        protected int Width;
+        protected uint Width;
         /// <summary>
         /// Renderer height
         /// </summary>
-        protected int Height;
+        protected uint Height;
         /// <summary>
         /// Cull manager
         /// </summary>
@@ -360,10 +361,10 @@ namespace Engine.Common
         /// </summary>
         /// <param name="pixelCount">Pixel count</param>
         /// <returns>Returns the texture size</returns>
-        protected static int GetTextureSize(int pixelCount)
+        protected static uint GetTextureSize(int pixelCount)
         {
-            int texWidth = (int)MathF.Sqrt(pixelCount) + 1;
-            int texHeight = 1;
+            uint texWidth = (uint)MathF.Sqrt(pixelCount) + 1;
+            uint texHeight = 1;
             while (texHeight < texWidth)
             {
                 texHeight <<= 1;
@@ -439,7 +440,7 @@ namespace Engine.Common
 
             cullManager = new SceneCullManager();
 
-            var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
+            var targetFormat = Vortice.DXGI.Format.R32G32B32A32_Float;
 
             sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
             sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
@@ -673,7 +674,7 @@ namespace Engine.Common
                 return true;
             });
 
-            return opaques.ToList();
+            return [.. opaques];
         }
         /// <summary>
         /// Sorting opaque list comparer
@@ -741,7 +742,7 @@ namespace Engine.Common
                 return true;
             });
 
-            return transparents.ToList();
+            return [.. transparents];
         }
         /// <summary>
         /// Sorting transparent list comparer
@@ -1234,12 +1235,12 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindDefaultTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindDefaultTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
             //Restore back buffer as render target and clear it
-            dc.SetRenderTargets(graphics.DefaultRenderTarget, clearRT, clearRTColor);
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, clearRT, (Color4)clearRTColor);
             dc.SetViewport(graphics.Viewport);
         }
         /// <summary>
@@ -1250,11 +1251,11 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindObjectsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindObjectsTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
-            dc.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
+            dc.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, (Color4)clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
             dc.SetViewport(graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1263,9 +1264,9 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
+            dc.SetRenderTargets(sceneUITarget.Targets, clearRT, (Color4)clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1274,9 +1275,9 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
+            dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, (Color4)clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1286,9 +1287,9 @@ namespace Engine.Common
         /// <param name="target">Render target</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Color4 clearRTColor)
+        private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(target.Targets, clearRT, clearRTColor);
+            dc.SetRenderTargets(target.Targets, clearRT, (Color4)clearRTColor);
             dc.SetViewport(Scene.Game.Form.GetViewport()); //Set local viewport
         }
         /// <summary>
@@ -1383,7 +1384,7 @@ namespace Engine.Common
                 var target = GetPostProcessingTargets(targetIndex);
 
                 //Bind the buffer as render target
-                BindPostProcessingTarget(dc, target, false, Color.Transparent);
+                BindPostProcessingTarget(dc, target, false, Vector4.Zero);
 
                 //Draw effect into target, using the source texture
                 processingDrawer.Draw(dc, source, effect, state.State);
@@ -1469,7 +1470,7 @@ namespace Engine.Common
         /// <param name="materialPaletteWidth">Material palette width</param>
         private void BuildMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
         {
-            Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
+            Game.Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
 
             List<IMeshMaterial> mats =
             [
@@ -1494,10 +1495,10 @@ namespace Engine.Common
                 values.AddRange(matV);
             }
 
-            int texWidth = GetTextureSize(values.Count);
+            uint texWidth = GetTextureSize(values.Count);
 
             materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
-            materialPaletteWidth = (uint)texWidth;
+            materialPaletteWidth = texWidth;
         }
         /// <summary>
         /// Builds the global animation palette
@@ -1506,7 +1507,7 @@ namespace Engine.Common
         /// <param name="animationPaletteWidth">Animation palette width</param>
         private void BuildAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
         {
-            Logger.WriteInformation(this, $"{nameof(BuildAnimationPalette)} =>Building Animation palette.");
+            Game.Logger.WriteInformation(this, $"{nameof(BuildAnimationPalette)} =>Building Animation palette.");
 
             var skData = Scene.Components.Get<IUseSkinningData>(c => c.SkinningData != null)
                 .Select(c => c.SkinningData)
@@ -1538,10 +1539,10 @@ namespace Engine.Common
                 }
             }
 
-            int texWidth = GetTextureSize(values.Count);
+            uint texWidth = GetTextureSize(values.Count);
 
             animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
-            animationPaletteWidth = (uint)texWidth;
+            animationPaletteWidth = texWidth;
         }
         /// <summary>
         /// Assign light information for shadow mapping
@@ -1786,7 +1787,7 @@ namespace Engine.Common
             var ic = graphics.ImmediateContext;
             ic.SetViewport(graphics.Viewport);
             ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultRenderTarget, true, (Color4)Scene.GameEnvironment.Background,
                 graphics.DefaultDepthStencil, true, true,
                 false);
 

@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
-    using SharpDX.DXGI;
+    using Vortice.DXGI;
 
     /// <summary>
     /// DDS Header DXT10
@@ -13,7 +13,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Size of structure
         /// </summary>
-        public readonly static int StructSize = Marshal.SizeOf(new DdsHeaderDX10());
+        public readonly static uint StructSize = (uint)Marshal.SizeOf(new DdsHeaderDX10());
 
         /// <summary>
         /// The surface pixel format
@@ -26,11 +26,11 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Identifies other, less common options for resources
         /// </summary>
-        public int MiscFlag;
+        public uint MiscFlag;
         /// <summary>
         /// The number of elements in the array.
         /// </summary>
-        public int ArraySize;
+        public uint ArraySize;
         /// <summary>
         /// Contains additional metadata (formerly was reserved). The lower 3 bits indicate the alpha mode of the associated resource. The upper 29 bits are reserved and are typically 0.
         /// </summary>

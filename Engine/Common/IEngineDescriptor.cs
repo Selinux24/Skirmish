@@ -22,7 +22,7 @@ namespace Engine.Common
         /// <summary>
         /// Allocated size into graphics device
         /// </summary>
-        int AllocatedSize { get; }
+        uint AllocatedSize { get; }
         /// <summary>
         /// Gets whether the internal buffer needs reallocation
         /// </summary>
@@ -34,17 +34,17 @@ namespace Engine.Common
         /// <summary>
         /// Number of allocations
         /// </summary>
-        int Allocations { get; }
+        uint Allocations { get; }
 
         /// <summary>
         /// Gets the buffer format stride
         /// </summary>
         /// <returns>Returns the buffer format stride in bytes</returns>
-        int GetStride();
+        uint GetStride();
         /// <summary>
         /// Gets the complete data size in bytes
         /// </summary>
-        int SizeInBytes();
+        uint SizeInBytes();
 
         /// <summary>
         /// Removes a buffer descriptor from the internal list

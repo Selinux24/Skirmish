@@ -2,12 +2,12 @@
 
 namespace Engine.Common
 {
-    using DXBlendOperation = SharpDX.Direct3D11.BlendOperation;
-    using DXBlendOption = SharpDX.Direct3D11.BlendOption;
-    using DXBlendStateDescription = SharpDX.Direct3D11.BlendStateDescription1;
-    using DXColorWriteMaskFlags = SharpDX.Direct3D11.ColorWriteMaskFlags;
-    using DXLogicOperation = SharpDX.Direct3D11.LogicOperation;
-    using DXRenderTargetBlendDescription = SharpDX.Direct3D11.RenderTargetBlendDescription1;
+    using DXBlendOperation = Vortice.Direct3D11.BlendOperation;
+    using DXBlendOption = Vortice.Direct3D11.Blend;
+    using DXBlendStateDescription = Vortice.Direct3D11.BlendDescription1;
+    using DXColorWriteMaskFlags = Vortice.Direct3D11.ColorWriteEnable;
+    using DXLogicOperation = Vortice.Direct3D11.LogicOp;
+    using DXRenderTargetBlendDescription = Vortice.Direct3D11.RenderTargetBlendDescription1;
 
     /// <summary>
     /// Describes the blend state that you use in a call to CreateBlendState1 to create a blend-state object.
@@ -38,7 +38,7 @@ namespace Engine.Common
 
         public static explicit operator DXBlendStateDescription(EngineBlendStateDescription obj)
         {
-            var blendState = DXBlendStateDescription.Default();
+            var blendState = DXBlendStateDescription.Opaque;
 
             blendState.AlphaToCoverageEnable = obj.AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = obj.IndependentBlendEnable;
@@ -77,7 +77,7 @@ namespace Engine.Common
         /// </summary>
         public static EngineBlendStateDescription Default()
         {
-            return (EngineBlendStateDescription)DXBlendStateDescription.Default();
+            return (EngineBlendStateDescription)DXBlendStateDescription.Opaque;
         }
 
         /// <summary>
@@ -146,15 +146,15 @@ namespace Engine.Common
         {
             return new DXRenderTargetBlendDescription
             {
-                IsBlendEnabled = obj.IsBlendEnabled,
-                IsLogicOperationEnabled = obj.IsLogicOperationEnabled,
+                BlendEnable = obj.IsBlendEnabled,
+                LogicOpEnable = obj.IsLogicOperationEnabled,
                 SourceBlend = (DXBlendOption)obj.SourceBlend,
                 DestinationBlend = (DXBlendOption)obj.DestinationBlend,
                 BlendOperation = (DXBlendOperation)obj.BlendOperation,
-                SourceAlphaBlend = (DXBlendOption)obj.SourceAlphaBlend,
-                DestinationAlphaBlend = (DXBlendOption)obj.DestinationAlphaBlend,
-                AlphaBlendOperation = (DXBlendOperation)obj.AlphaBlendOperation,
-                LogicOperation = (DXLogicOperation)obj.LogicOperation,
+                SourceBlendAlpha = (DXBlendOption)obj.SourceAlphaBlend,
+                DestinationBlendAlpha = (DXBlendOption)obj.DestinationAlphaBlend,
+                BlendOperationAlpha = (DXBlendOperation)obj.AlphaBlendOperation,
+                LogicOp = (DXLogicOperation)obj.LogicOperation,
                 RenderTargetWriteMask = (DXColorWriteMaskFlags)obj.RenderTargetWriteMask,
             };
         }
@@ -162,15 +162,15 @@ namespace Engine.Common
         {
             return new EngineRenderTargetBlendDescription
             {
-                IsBlendEnabled = obj.IsBlendEnabled,
-                IsLogicOperationEnabled = obj.IsLogicOperationEnabled,
+                IsBlendEnabled = obj.BlendEnable,
+                IsLogicOperationEnabled = obj.LogicOpEnable,
                 SourceBlend = (BlendOption)obj.SourceBlend,
                 DestinationBlend = (BlendOption)obj.DestinationBlend,
                 BlendOperation = (BlendOperation)obj.BlendOperation,
-                SourceAlphaBlend = (BlendOption)obj.SourceAlphaBlend,
-                DestinationAlphaBlend = (BlendOption)obj.DestinationAlphaBlend,
-                AlphaBlendOperation = (BlendOperation)obj.AlphaBlendOperation,
-                LogicOperation = (LogicOperation)obj.LogicOperation,
+                SourceAlphaBlend = (BlendOption)obj.SourceBlendAlpha,
+                DestinationAlphaBlend = (BlendOption)obj.DestinationBlendAlpha,
+                AlphaBlendOperation = (BlendOperation)obj.BlendOperationAlpha,
+                LogicOperation = (LogicOperation)obj.LogicOp,
                 RenderTargetWriteMask = (ColorWriteMasks)obj.RenderTargetWriteMask,
             };
         }
@@ -293,30 +293,6 @@ namespace Engine.Common
         /// The pre-blend operation inverts the blend factor, generating 1 - blend_factor.
         /// </summary>
         InverseBlendFactor = DXBlendOption.InverseBlendFactor,
-        /// <summary>
-        /// The blend factor is data sources both as color data output by a pixel shader.
-        /// There is no pre-blend operation.
-        /// This blend factor supports dual-source color blending.
-        /// </summary>
-        SecondarySourceColor = DXBlendOption.SecondarySourceColor,
-        /// <summary>
-        /// The blend factor is data sources both as color data output by a pixel shader.
-        /// The pre-blend operation inverts the data, generating 1 - RGB.
-        /// This blend factor supports dual-source color blending.
-        /// </summary>
-        InverseSecondarySourceColor = DXBlendOption.InverseSecondarySourceColor,
-        /// <summary>
-        /// The blend factor is data sources as alpha data output by a pixel shader.
-        /// There is no pre-blend operation.
-        /// This blend factor supports dual-source color blending.
-        /// </summary>
-        SecondarySourceAlpha = DXBlendOption.SecondarySourceAlpha,
-        /// <summary>
-        /// The blend factor is data sources as alpha data output by a pixel shader.
-        /// The pre-blend operation inverts the data, generating 1 - A.
-        /// This blend factor supports dual-source color blending.
-        /// </summary>
-        InverseSecondarySourceAlpha = DXBlendOption.InverseSecondarySourceAlpha
     }
 
     /// <summary>
@@ -344,14 +320,6 @@ namespace Engine.Common
         /// Subtract source 2 from source 1.
         /// </summary>
         ReverseSubtract = DXBlendOperation.ReverseSubtract,
-        /// <summary>
-        /// Find the minimum of source 1 and source 2.
-        /// </summary>
-        Minimum = DXBlendOperation.Minimum,
-        /// <summary>
-        /// Find the maximum of source 1 and source 2.
-        /// </summary>
-        Maximum = DXBlendOperation.Maximum
     }
 
     /// <summary>

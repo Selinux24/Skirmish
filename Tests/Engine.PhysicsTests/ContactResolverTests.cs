@@ -1,8 +1,8 @@
 ﻿using Engine.Physics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -34,8 +34,8 @@ namespace Engine.PhysicsTests
         {
             var settings = new ContactResolverSettings();
             var resolver = new ContactResolver(settings);
-            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
-            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
+            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
@@ -50,8 +50,8 @@ namespace Engine.PhysicsTests
         {
             var settings = new ContactResolverSettings();
             var resolver = new ContactResolver(settings);
-            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
-            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
+            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
@@ -71,8 +71,8 @@ namespace Engine.PhysicsTests
         {
             var settings = new ContactResolverSettings();
             var resolver = new ContactResolver(settings);
-            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
-            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
+            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
             int left = resolver.ContactsLeft;
             for (int i = 0; i < left; i++)
@@ -96,8 +96,8 @@ namespace Engine.PhysicsTests
             var resolver = new ContactResolver(settings);
 
             var curr = resolver.CurrentContact;
-            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
-            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
+            IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             var pos = new Vector3(1, 2, 3);
             var norm = new Vector3(4, 5, 6);
             float pen = 7;
@@ -119,9 +119,9 @@ namespace Engine.PhysicsTests
             var resolver = new ContactResolver(settings);
             float time = 1f / 60f;
 
-            RigidBody r1 = new(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            RigidBody r1 = new(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
-            RigidBody r2 = new(new() { Mass = 1f, InitialTransform = Matrix.Translation(0, 1, 0) });
+            RigidBody r2 = new(new() { Mass = 1f, InitialTransform = Matrix4x4.CreateTranslation(0, 1, 0) });
             r2.AddLinearVelocity(new Vector3(0, -1, 0));
 
             var pos = new Vector3(0, 0, 0);

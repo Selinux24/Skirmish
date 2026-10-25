@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Vortice.Mathematics;
+using System.Numerics;
 
 namespace Engine
 {

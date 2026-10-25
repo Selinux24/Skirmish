@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Mathematics;
 
 namespace Engine.Tween
 {
@@ -28,7 +28,7 @@ namespace Engine.Tween
     /// </remarks>
     public static class ScaleFuncs
     {
-        private const float Pi = MathUtil.Pi;
+        private const float Pi = MathHelper.Pi;
         private const float HalfPi = Pi / 2f;
 
         /// <summary>

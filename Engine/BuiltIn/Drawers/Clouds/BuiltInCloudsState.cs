@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Drawers.Clouds
         /// <summary>
         /// Color
         /// </summary>
-        public Color3 Color { get; set; }
+        public Vector3 Color { get; set; }
         /// <summary>
         /// Brightness
         /// </summary>

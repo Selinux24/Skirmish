@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Particles
@@ -70,9 +70,9 @@ namespace Engine.BuiltIn.Drawers.Particles
             public Vector4 RandomValues;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerStreamOut>();
+                return (uint)Marshal.SizeOf<PerStreamOut>();
             }
         }
 

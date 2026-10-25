@@ -1,5 +1,6 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -30,7 +31,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="viewProj">Camera view * projection matrix</param>
-        public IntersectionVolumeFrustum(Matrix viewProj) : this(new BoundingFrustum(viewProj))
+        public IntersectionVolumeFrustum(Matrix4x4 viewProj) : this(new BoundingFrustum(viewProj))
         {
 
         }

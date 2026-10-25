@@ -1,7 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -118,7 +119,7 @@ namespace Engine
                 return ContainmentType.Disjoint;
             }
 
-            if (MathUtil.NearEqual(distance, Radius))
+            if (Helper.NearEqual(distance, Radius))
             {
                 // In the capsule
                 return ContainmentType.Intersects;
@@ -152,8 +153,8 @@ namespace Engine
         {
             return
                 left.Center == right.Center &&
-                MathUtil.NearEqual(left.Radius, right.Radius) &&
-                MathUtil.NearEqual(left.Height, right.Height);
+                Helper.NearEqual(left.Radius, right.Radius) &&
+                Helper.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
         public static bool operator !=(BoundingCapsule left, BoundingCapsule right)

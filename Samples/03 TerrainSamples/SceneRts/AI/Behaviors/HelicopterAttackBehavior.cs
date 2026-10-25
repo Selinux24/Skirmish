@@ -1,5 +1,4 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
@@ -18,7 +17,7 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
             if (Target != null)
             {
                 var model = Agent.SceneObject;
-                model?.Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.Y, 0.01f);
+                model?.Manipulator.RotateTo(Target.Value, Vector3Extensions.Up, Axis.Y, 0.01f);
             }
 
             base.Task(gameTime);

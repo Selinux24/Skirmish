@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+using System.Numerics;
 
 namespace Engine.Content.FmtColladaTests
 {
@@ -26,19 +26,19 @@ namespace Engine.Content.FmtColladaTests
 
         }
 
-        public static void AreEqual(Matrix m1, Matrix m2)
+        public static void AreEqual(Matrix4x4 m1, Matrix4x4 m2)
         {
             AreEqual(m1, m2, 0, null);
         }
-        public static void AreEqual(Matrix m1, Matrix m2, float tolerance)
+        public static void AreEqual(Matrix4x4 m1, Matrix4x4 m2, float tolerance)
         {
             AreEqual(m1, m2, tolerance, null);
         }
-        public static void AreEqual(Matrix m1, Matrix m2, string message)
+        public static void AreEqual(Matrix4x4 m1, Matrix4x4 m2, string message)
         {
             AreEqual(m1, m2, 0, message);
         }
-        public static void AreEqual(Matrix m1, Matrix m2, float tolerance, string message)
+        public static void AreEqual(Matrix4x4 m1, Matrix4x4 m2, float tolerance, string message)
         {
             Assert.AreEqual(m1.M11, m2.M11, tolerance, message);
             Assert.AreEqual(m1.M12, m2.M12, tolerance, message);

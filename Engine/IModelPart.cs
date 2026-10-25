@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 
 namespace Engine
 {
@@ -14,11 +14,11 @@ namespace Engine
         /// <summary>
         /// Initial world part transform
         /// </summary>
-        Matrix InitialWorldTransform { get; }
+        Matrix4x4 InitialWorldTransform { get; }
         /// <summary>
         /// Initial local part transform
         /// </summary>
-        Matrix InitialLocalTransform { get; }
+        Matrix4x4 InitialLocalTransform { get; }
         /// <summary>
         /// Parent model part
         /// </summary>
@@ -37,22 +37,22 @@ namespace Engine
         /// Sets the world transform
         /// </summary>
         /// <param name="transform">Transform</param>
-        void SetWorldTransform(Matrix transform);
+        void SetWorldTransform(Matrix4x4 transform);
         /// <summary>
         /// Gets the part world transform
         /// </summary>
-        Matrix GetWorldTransform();
+        Matrix4x4 GetWorldTransform();
         /// <summary>
         /// Gets the part local transform
         /// </summary>
-        Matrix GetLocalTransform();
+        Matrix4x4 GetLocalTransform();
         /// <summary>
         /// Gets the part's final transform, adding each manipulator local transform
         /// </summary>
-        Matrix GetPartTransform();
+        Matrix4x4 GetPartTransform();
         /// <summary>
         /// Gets the parent manipulator transform
         /// </summary>
-        Matrix GetParentManipulatorTransform();
+        Matrix4x4 GetParentManipulatorTransform();
     }
 }

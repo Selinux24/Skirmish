@@ -1,5 +1,6 @@
 ﻿using Engine.UI;
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -39,8 +40,8 @@ namespace Engine.BuiltIn.UI
             {
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Color4.White,
-                StateOffColor = Color4.White,
+                StateOnColor = Vector4.One,
+                StateOffColor = Vector4.One,
             };
         }
         /// <summary>
@@ -58,8 +59,8 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Color4.White,
-                StateOffColor = Color4.White,
+                StateOnColor = Vector4.One,
+                StateOffColor = Vector4.One,
             };
         }
         /// <summary>
@@ -101,8 +102,8 @@ namespace Engine.BuiltIn.UI
                 Font = font,
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Color4.White,
-                StateOffColor = Color4.White,
+                StateOnColor = Vector4.One,
+                StateOffColor = Vector4.One,
             };
         }
         /// <summary>
@@ -122,8 +123,8 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Color4.White,
-                StateOffColor = Color4.White,
+                StateOnColor = Vector4.One,
+                StateOffColor = Vector4.One,
             };
         }
 
@@ -139,11 +140,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Color4 TextShadowColor { get; set; } = Color.Transparent;
+        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
         /// <summary>
         /// Shadow position delta
         /// </summary>
@@ -164,7 +165,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// State on button color
         /// </summary>
-        public Color4 StateOnColor { get; set; } = UIConfiguration.HighlightColor;
+        public Vector4 StateOnColor { get; set; } = UIConfiguration.HighlightColor;
         /// <summary>
         /// State on texture UV map
         /// </summary>
@@ -177,7 +178,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// State off button color
         /// </summary>
-        public Color4 StateOffColor { get; set; } = UIConfiguration.BaseColor;
+        public Vector4 StateOffColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// State off texture UV map
         /// </summary>

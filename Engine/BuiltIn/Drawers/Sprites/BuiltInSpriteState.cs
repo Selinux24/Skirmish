@@ -1,5 +1,6 @@
 ﻿using Engine.Common;
-using SharpDX;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
@@ -11,23 +12,23 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Local transform
         /// </summary>
-        public Matrix Local { get; set; }
+        public Matrix4x4 Local { get; set; }
         /// <summary>
         /// First color
         /// </summary>
-        public Color4 Color1 { get; set; }
+        public Vector4 Color1 { get; set; }
         /// <summary>
         /// Secondo color
         /// </summary>
-        public Color4 Color2 { get; set; }
+        public Vector4 Color2 { get; set; }
         /// <summary>
         /// Third color
         /// </summary>
-        public Color4 Color3 { get; set; }
+        public Vector4 Color3 { get; set; }
         /// <summary>
         /// Fourth color
         /// </summary>
-        public Color4 Color4 { get; set; }
+        public Vector4 Color4 { get; set; }
         /// <summary>
         /// Color channel
         /// </summary>
@@ -51,7 +52,7 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Render area in pixels
         /// </summary>
-        public RectangleF RenderArea { get; set; }
+        public Rect RenderArea { get; set; }
         /// <summary>
         /// Draw direction
         /// </summary>
@@ -72,6 +73,6 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        public RectangleF ClippingRecangle { get; set; }
+        public Rect ClippingRecangle { get; set; }
     }
 }

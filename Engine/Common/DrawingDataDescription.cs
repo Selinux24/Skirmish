@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets or sets the number of instances
         /// </summary>
-        public int Instances { get; set; } = 0;
+        public uint Instances { get; set; } = 0;
         /// <summary>
         /// Gets or sets whether the animation data must be loaded or not
         /// </summary>
@@ -22,7 +22,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets or sets the texture count
         /// </summary>
-        public int TextureCount { get; set; } = 0;
+        public uint TextureCount { get; set; } = 0;
         /// <summary>
         /// Gets or sets whether the model uses normal maps or not
         /// </summary>

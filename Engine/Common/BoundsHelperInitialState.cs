@@ -1,6 +1,7 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -54,10 +55,10 @@ namespace Engine.Common
                 var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
-                sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
+                sphere = BoundingSphereExtensions.BoundingSphereFromPoints(distinctPoints);
 
                 //Initialize the identity box
-                box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
+                box = BoundingBoxExtensions.BoundingBoxFromPoints(distinctPoints);
             }
 
             if (sphere != BoundingSphere || box != BoundingBox)

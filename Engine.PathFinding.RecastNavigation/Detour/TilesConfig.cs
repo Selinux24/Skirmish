@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -109,18 +109,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var tileBounds = new BoundingBox();
 
-            tileBounds.Minimum.X = bounds.Minimum.X + tx * tileCellSize;
-            tileBounds.Minimum.Y = bounds.Minimum.Y;
-            tileBounds.Minimum.Z = bounds.Minimum.Z + ty * tileCellSize;
+            tileBounds.Min.X = bounds.Min.X + tx * tileCellSize;
+            tileBounds.Min.Y = bounds.Min.Y;
+            tileBounds.Min.Z = bounds.Min.Z + ty * tileCellSize;
 
-            tileBounds.Maximum.X = bounds.Minimum.X + (tx + 1) * tileCellSize;
-            tileBounds.Maximum.Y = bounds.Maximum.Y;
-            tileBounds.Maximum.Z = bounds.Minimum.Z + (ty + 1) * tileCellSize;
+            tileBounds.Max.X = bounds.Min.X + (tx + 1) * tileCellSize;
+            tileBounds.Max.Y = bounds.Max.Y;
+            tileBounds.Max.Z = bounds.Min.Z + (ty + 1) * tileCellSize;
 
-            tileBounds.Minimum.X -= borderSize * cellsize;
-            tileBounds.Minimum.Z -= borderSize * cellsize;
-            tileBounds.Maximum.X += borderSize * cellsize;
-            tileBounds.Maximum.Z += borderSize * cellsize;
+            tileBounds.Min.X -= borderSize * cellsize;
+            tileBounds.Min.Z -= borderSize * cellsize;
+            tileBounds.Max.X += borderSize * cellsize;
+            tileBounds.Max.Z += borderSize * cellsize;
 
             return tileBounds;
         }

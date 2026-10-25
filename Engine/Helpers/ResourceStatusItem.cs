@@ -21,11 +21,11 @@ namespace Engine.Helpers
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public long Size;
+        public uint Size;
         /// <summary>
         /// Number of elements
         /// </summary>
-        public int Elements;
+        public uint Elements;
 
         /// <inheritdoc/>
         public override string ToString()

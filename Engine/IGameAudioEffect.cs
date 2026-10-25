@@ -14,23 +14,23 @@ namespace Engine
         /// </summary>
         bool IsLooped { get; set; }
         /// <summary>
-        /// Gets or sets the pan value of the sound effect.
+        /// Gets the pan value of the sound effect.
         /// </summary>
         /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
         /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        float Pan { get; set; }
+        float Pan { get; }
         /// <summary>
-        /// Gets or sets the pitch value of the sound effect.
+        /// Gets the pitch value of the sound effect.
         /// </summary>
         /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
         /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        float Pitch { get; set; }
+        float Pitch { get; }
         /// <summary>
-        /// Gets or sets the volume of the current sound effect instance.
+        /// Gets the volume of the current sound effect instance.
         /// </summary>
         /// <remarks>The value is clamped to (0f, 1f) range.</remarks>
         /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        float Volume { get; set; }
+        float Volume { get; }
 
         /// <summary>
         /// Gets or sets whether the master voice uses 3D audio or not
@@ -106,6 +106,22 @@ namespace Engine
         /// Resets the current instance.
         /// </summary>
         void Reset();
+
+        /// <summary>
+        /// Sets the pan value
+        /// </summary>
+        /// <param name="value">Value</param>
+        void SetPan(float value);
+        /// <summary>
+        /// Sets the pitch value
+        /// </summary>
+        /// <param name="value">Value</param>
+        void SetPitch(float value);
+        /// <summary>
+        /// Sets the volume value
+        /// </summary>
+        /// <param name="value">Value</param>
+        void SetVolume(float value);
 
         /// <summary>
         /// Applies the 3D effect to the current sound effect instance.

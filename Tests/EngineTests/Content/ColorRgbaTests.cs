@@ -1,9 +1,9 @@
 ﻿using Engine.Content;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 
 namespace EngineTests.Content
 {
@@ -103,32 +103,21 @@ namespace EngineTests.Content
         }
 
         [TestMethod()]
-        public void ColorToColorTest()
-        {
-            Color res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Color expected1 = new(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(expected1, res1);
-
-            ColorRgba res2 = Color.Red;
-            ColorRgba expected2 = new(1f, 0f, 0f, 1f);
-            Assert.AreEqual(expected2, res2);
-        }
-        [TestMethod()]
         public void ColorToColor3Test()
         {
-            Color3 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(new Color3(0.1f, 0.2f, 0.3f), res1);
+            Vector3 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
+            Assert.AreEqual(new Vector3(0.1f, 0.2f, 0.3f), res1);
 
-            ColorRgba res2 = new Color3(0.1f, 0.2f, 0.3f);
+            ColorRgba res2 = new Vector3(0.1f, 0.2f, 0.3f);
             Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 1f), res2);
         }
         [TestMethod()]
         public void ColorToColor4Test()
         {
-            Color4 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(new Color4(0.1f, 0.2f, 0.3f, 0.4f), res1);
+            Vector4 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
+            Assert.AreEqual(new Vector4(0.1f, 0.2f, 0.3f, 0.4f), res1);
 
-            ColorRgba res2 = new Color4(0.1f, 0.2f, 0.3f, 0.4f);
+            ColorRgba res2 = new Vector4(0.1f, 0.2f, 0.3f, 0.4f);
             Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f), res2);
         }
         [TestMethod()]

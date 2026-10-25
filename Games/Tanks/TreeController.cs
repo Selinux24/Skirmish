@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Models;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Tanks
 {
@@ -122,7 +122,7 @@ namespace Tanks
 
                 Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-                if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
+                if (Helper.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
                 {
                     Active = false;
 
@@ -157,7 +157,7 @@ namespace Tanks
 
                 float time = gameTime.ElapsedSeconds;
                 DurationSeconds -= time;
-                Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3.Down * time));
+                Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3Extensions.Down * time));
 
                 if (DurationSeconds <= 0)
                 {

@@ -15,15 +15,19 @@ using Engine.PathFinding.RecastNavigation;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Color = System.Drawing.Color;
+
     public class ModularDungeonScene : WalkableScene
     {
         private const float maxDistance = 35;
@@ -49,11 +53,11 @@ namespace TerrainSamples.SceneModularDungeon
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Color ambientUp = new(255, 224, 255, 255);
-        private readonly Color ambientDown = new(72, 72, 255, 255);
+        private readonly Vector4 ambientUp = Vector4Extensions.FromRgba(255, 224, 255, 255);
+        private readonly Vector4 ambientDown = Vector4Extensions.FromRgba(72, 72, 255, 255);
 
         private Player playerAgentType = null;
-        private readonly Color3 agentTorchLight = new Color(255, 201, 14).RGB();
+        private readonly Vector3 agentTorchLight = Vector3Extensions.FromRgb(255, 201, 14);
         private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new(-1001, 1000, 1000);
 
@@ -103,7 +107,7 @@ namespace TerrainSamples.SceneModularDungeon
             this.dungeonMapFile = dungeonMapFile;
             this.dungeonCnfFile = dungeonCnfFile;
 
-            Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(ModularDungeonScene); });
+            Game.Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(ModularDungeonScene); });
 
 
 #if DEBUG
@@ -134,7 +138,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (value.Id == "LoadAssets")
             {
-                Logger.WriteDebug(this, $"Level progress {value.Progress * 100f:0}%");
+                Game.Logger.WriteDebug(this, $"Level progress {value.Progress * 100f:0}%");
 
                 pbLevels.Caption.Text = $"{value.Progress * 100f:0}%";
                 pbLevels.ProgressValue = value.Progress;
@@ -142,7 +146,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
+            Game.Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
         public void NavigationGraphLoading()
         {
@@ -319,7 +323,7 @@ namespace TerrainSamples.SceneModularDungeon
             consoleDesc.LogFilterFunc = (l) => l.LogLevel == LogLevel.Debug;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui1", "Console", consoleDesc, LayerUI + 1);
 
-            var pvLevelsDesc = UIProgressBarDescription.Default(Color.Transparent, Color.Green);
+            var pvLevelsDesc = UIProgressBarDescription.Default(Color.Transparent.RGBA(), Color.Green.RGBA());
             pvLevelsDesc.StartsVisible = false;
             pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", pvLevelsDesc);
 
@@ -328,8 +332,8 @@ namespace TerrainSamples.SceneModularDungeon
             messagesDesc.StartsVisible = false;
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Messages", messagesDesc, LayerUI + 1);
             messages.Text = null;
-            messages.TextForeColor = Color.Red;
-            messages.TextShadowColor = Color.DarkRed;
+            messages.TextForeColor = Color.Red.RGBA();
+            messages.TextShadowColor = Color.DarkRed.RGBA();
             messages.SetPosition(new Vector2(0, 0));
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
@@ -385,7 +389,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -579,7 +583,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (AggregateException ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 var exceptions = ex.Flatten().InnerExceptions
                     .Select(e => e.Message)
@@ -620,7 +624,7 @@ namespace TerrainSamples.SceneModularDungeon
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
 
-            Lights.FogColor = GameEnvironment.Background = Color.Black;
+            Lights.FogColor = GameEnvironment.Background = Color.Black.RGBA();
             Lights.FogRange = 10f;
             Lights.FogStart = maxDistance - 15f;
 
@@ -718,12 +722,12 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Game.Input.KeyPressed(Keys.Left))
             {
-                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = Math.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
             {
-                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = Math.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
             }
         }
         private void UpdateGraphInput()
@@ -803,10 +807,10 @@ namespace TerrainSamples.SceneModularDungeon
             var tris = selectedItem.Instance.GetGeometry();
             if (tris.Any())
             {
-                Color4 sItemColor = Color.LightYellow;
-                sItemColor.Alpha = 0.3333f;
+                Vector4 sItemColor = Color.LightYellow.RGBA();
+                sItemColor.W = 0.3333f;
 
-                Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
+                Game.Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
 
                 selectedItemDrawer.SetPrimitives(sItemColor, tris);
                 selectedItemDrawer.Visible = true;
@@ -869,8 +873,8 @@ namespace TerrainSamples.SceneModularDungeon
                 return false;
             }
 
-            path.InsertControlPoint(0, from, Vector3.Up);
-            path.AddControlPoint(to, Vector3.Up);
+            path.InsertControlPoint(0, from, Vector3Extensions.Up);
+            path.AddControlPoint(to, Vector3Extensions.Up);
 
             ratController.Follow(new NormalPath(path.Positions, path.Normals));
             ratController.MaximumSpeed = ratAgentType.Velocity;
@@ -901,7 +905,11 @@ namespace TerrainSamples.SceneModularDungeon
             //Test items into the camera frustum and nearest to the player
             var items =
                 scenery.GetObjectsInVolume(sphere, objTypes, false, true)
-                .Where(i => Camera.Frustum.Contains(i.Instance.GetBoundingBox()) != ContainmentType.Disjoint)
+                .Where(i =>
+                {
+                    var bbox = i.Instance.GetBoundingBox();
+                    return Camera.Frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+                })
                 .Where(i =>
                 {
                     if (i.Instance.PickNearest(ray, out _))
@@ -916,8 +924,8 @@ namespace TerrainSamples.SceneModularDungeon
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
-                        Ray rRay = ray;
-                        return sBbox.Intersects(ref rRay);
+                        float? dist = sBbox.Intersects(ray);
+                        return dist.HasValue;
                     }
                 })
                 .ToList();
@@ -1187,7 +1195,7 @@ namespace TerrainSamples.SceneModularDungeon
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
+                    Game.Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
                 }
                 finally
                 {
@@ -1243,7 +1251,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var ex = res.Flatten();
 
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -1275,7 +1283,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -1310,10 +1318,9 @@ namespace TerrainSamples.SceneModularDungeon
         private void StartEntities()
         {
             //Rat holes
-            ratHoles = scenery
+            ratHoles = [.. scenery
                 .GetObjectsByName("Dn_Rat_Hole_1")
-                .Select(o => o.Instance.Manipulator.Position)
-                .ToArray();
+                .Select(o => o.Instance.Manipulator.Position)];
 
             //NPCs
             StartNPCs();
@@ -1344,7 +1351,7 @@ namespace TerrainSamples.SceneModularDungeon
             for (int i = 0; i < human.InstanceCount; i++)
             {
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29);
-                human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0);
+                human[i].Manipulator.SetRotation(-Helper.PiOver2, 0, 0);
 
                 human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
@@ -1406,7 +1413,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 float h = 1.5f;
                 float r = 0.8f;
-                var center = human[i].Manipulator.Position + (Vector3.Up * h * 0.5f);
+                var center = human[i].Manipulator.Position + (Vector3Extensions.Up * h * 0.5f);
                 var bc = new BoundingCylinder(center, r, h);
 
                 int index = AddObstacle(bc);
@@ -1474,7 +1481,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var windEffectDuration = soundEffectsManager.PlayWind(man);
 
-            float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
+            float durationVariation = Helper.RandomGenerator.NextSingle(0.5f, 1.0f);
             int duration = (int)(windEffectDuration.TotalMilliseconds * durationVariation);
 
             Task.Run(async () =>

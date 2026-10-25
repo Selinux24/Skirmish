@@ -1,10 +1,10 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace Engine.Content.FmtObj.Fmt
 {
@@ -18,7 +18,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="transform">Transform to apply to all vertices</param>
         /// <param name="content">Result content</param>
         /// <param name="materials">Result materials</param>
-        public static void LoadObj(Stream stream, string folder, Matrix transform, out IEnumerable<SubMeshContent> content, out IEnumerable<Material> materials)
+        public static void LoadObj(Stream stream, string folder, Matrix4x4 transform, out IEnumerable<SubMeshContent> content, out IEnumerable<Material> materials)
         {
             var models = new List<SubMeshContent>();
 
@@ -119,16 +119,16 @@ namespace Engine.Content.FmtObj.Fmt
             return null;
         }
 
-        private static List<Vector3> TransformCoordinate(IEnumerable<Vector3> list, Matrix transform)
+        private static List<Vector3> TransformCoordinate(IEnumerable<Vector3> list, Matrix4x4 transform)
         {
             var tmp = list.ToList();
 
             var res = new List<Vector3>();
-            tmp.ForEach(p => res.Add(Vector3.TransformCoordinate(p, transform)));
+            tmp.ForEach(p => res.Add(Vector3.Transform(p, transform)));
 
             return res;
         }
-        private static List<Vector3> TransformNormal(IEnumerable<Vector3> list, Matrix transform)
+        private static List<Vector3> TransformNormal(IEnumerable<Vector3> list, Matrix4x4 transform)
         {
             var tmp = list.ToList();
 
@@ -152,13 +152,13 @@ namespace Engine.Content.FmtObj.Fmt
 
             return defaultValue;
         }
-        private static Color3 ReadColor3(string line, int index)
+        private static Vector3 ReadColor3(string line, int index)
         {
             float r = ReadFloat(line, index + 0);
             float g = ReadFloat(line, index + 1);
             float b = ReadFloat(line, index + 2);
 
-            return new Color3(r, g, b);
+            return new Vector3(r, g, b);
         }
         private static Vector2[] ReadVector2(string strLine, string dataType)
         {
@@ -334,7 +334,7 @@ namespace Engine.Content.FmtObj.Fmt
                 faceIndex++;
             }
 
-            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix.Identity);
+            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix4x4.Identity);
 
             content.SetVertices(vertexList);
             content.SetIndices(indexList);

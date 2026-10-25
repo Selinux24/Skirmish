@@ -1,7 +1,6 @@
 ﻿using Engine;
-using SharpDX;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
 
 namespace Tanks
 {
@@ -58,10 +57,10 @@ namespace Tanks
                 {
                     //Low light
                     float newRadius = Description.Radius * invD * 0.1f;
-                    Light.Radius = MathUtil.Lerp(Light.Radius, newRadius, 0.3f);
+                    Light.Radius = float.Lerp(Light.Radius, newRadius, 0.3f);
                     Light.Intensity = Light.Radius * Description.IntensityCurve.Evaluate(d);
 
-                    var col = Color3.Lerp(Description.StartColor, Description.EndColor, Description.ColorCurve.Evaluate(d));
+                    var col = Vector3.Lerp(Description.StartColor, Description.EndColor, Description.ColorCurve.Evaluate(d));
                     Light.DiffuseColor = col;
                     Light.SpecularColor = col;
                 }
@@ -154,7 +153,7 @@ namespace Tanks
         /// <param name="startColor">Starting color</param>
         /// <param name="endColor">End color</param>
         /// <returns>Returns la explosion tween description</returns>
-        public static LightTweenDescription ExplosionTween(float radius, float intensity, Color3 startColor, Color3 endColor)
+        public static LightTweenDescription ExplosionTween(float radius, float intensity, Vector3 startColor, Vector3 endColor)
         {
             var intensityCurve = new Curve();
             intensityCurve.Keys.Add(0f, 1f);
@@ -188,7 +187,7 @@ namespace Tanks
         /// <param name="startColor">Starting color</param>
         /// <param name="endColor">End color</param>
         /// <returns>Returns la shot tween description</returns>
-        public static LightTweenDescription ShootTween(float radius, float intensity, Color3 startColor, Color3 endColor)
+        public static LightTweenDescription ShootTween(float radius, float intensity, Vector3 startColor, Vector3 endColor)
         {
             var intensityCurve = new Curve();
             intensityCurve.Keys.Add(0f, 1f);
@@ -232,10 +231,10 @@ namespace Tanks
         /// <summary>
         /// Light initial color
         /// </summary>
-        public Color3 StartColor;
+        public Vector3 StartColor;
         /// <summary>
         /// Light end color
         /// </summary>
-        public Color3 EndColor;
+        public Vector3 EndColor;
     }
 }

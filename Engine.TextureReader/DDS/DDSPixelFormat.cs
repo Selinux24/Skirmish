@@ -1,8 +1,8 @@
-﻿using SharpDX.DXGI;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using Vortice.DXGI;
 
-namespace Engine.Helpers.DDS
+namespace Engine.TextureReader.DDS
 {
     /// <summary>
     /// DDS Pixel Format
@@ -38,15 +38,15 @@ namespace Engine.Helpers.DDS
         /// <param name="outNumBytes">Resulting number of bytes</param>
         /// <param name="outRowBytes">Resulting number of bytes in a row</param>
         /// <param name="outNumRows">Resulting number of rows</param>
-        public static void GetSurfaceInfo(int width, int height, Format fmt, out int outNumBytes, out int outRowBytes, out int outNumRows)
+        public static void GetSurfaceInfo(uint width, uint height, Format fmt, out uint outNumBytes, out uint outRowBytes, out uint outNumRows)
         {
-            int numBytes;
-            int rowBytes;
-            int numRows;
+            uint numBytes;
+            uint rowBytes;
+            uint numRows;
 
             bool bc = false;
             bool packed = false;
-            int bcnumBytesPerBlock = 0;
+            uint bcnumBytesPerBlock = 0;
             switch (fmt)
             {
                 case Format.BC1_Typeless:
@@ -86,12 +86,12 @@ namespace Engine.Helpers.DDS
 
             if (bc)
             {
-                int numBlocksWide = 0;
+                uint numBlocksWide = 0;
                 if (width > 0)
                 {
                     numBlocksWide = Math.Max(1, (width + 3) / 4);
                 }
-                int numBlocksHigh = 0;
+                uint numBlocksHigh = 0;
                 if (height > 0)
                 {
                     numBlocksHigh = Math.Max(1, (height + 3) / 4);
@@ -106,7 +106,7 @@ namespace Engine.Helpers.DDS
             }
             else
             {
-                int bpp = BitsPerPixel(fmt);
+                uint bpp = BitsPerPixel(fmt);
                 rowBytes = (width * bpp + 7) / 8; // round up to nearest byte
                 numRows = height;
             }
@@ -122,14 +122,14 @@ namespace Engine.Helpers.DDS
         /// </summary>
         /// <param name="fmt">Format</param>
         /// <returns>Returns the bits per pixel</returns>
-        public static int BitsPerPixel(Format fmt)
+        public static uint BitsPerPixel(Format fmt)
         {
             return fmt switch
             {
                 Format.R32G32B32A32_Typeless or Format.R32G32B32A32_Float or Format.R32G32B32A32_UInt or Format.R32G32B32A32_SInt => 128,
                 Format.R32G32B32_Typeless or Format.R32G32B32_Float or Format.R32G32B32_UInt or Format.R32G32B32_SInt => 96,
                 Format.R16G16B16A16_Typeless or Format.R16G16B16A16_Float or Format.R16G16B16A16_UNorm or Format.R16G16B16A16_UInt or Format.R16G16B16A16_SNorm or Format.R16G16B16A16_SInt or Format.R32G32_Typeless or Format.R32G32_Float or Format.R32G32_UInt or Format.R32G32_SInt or Format.R32G8X24_Typeless or Format.D32_Float_S8X24_UInt or Format.R32_Float_X8X24_Typeless or Format.X32_Typeless_G8X24_UInt => 64,
-                Format.R10G10B10A2_Typeless or Format.R10G10B10A2_UNorm or Format.R10G10B10A2_UInt or Format.R11G11B10_Float or Format.R8G8B8A8_Typeless or Format.R8G8B8A8_UNorm or Format.R8G8B8A8_UNorm_SRgb or Format.R8G8B8A8_UInt or Format.R8G8B8A8_SNorm or Format.R8G8B8A8_SInt or Format.R16G16_Typeless or Format.R16G16_Float or Format.R16G16_UNorm or Format.R16G16_UInt or Format.R16G16_SNorm or Format.R16G16_SInt or Format.R32_Typeless or Format.D32_Float or Format.R32_Float or Format.R32_UInt or Format.R32_SInt or Format.R24G8_Typeless or Format.D24_UNorm_S8_UInt or Format.R24_UNorm_X8_Typeless or Format.X24_Typeless_G8_UInt or Format.R9G9B9E5_Sharedexp or Format.R8G8_B8G8_UNorm or Format.G8R8_G8B8_UNorm or Format.B8G8R8A8_UNorm or Format.B8G8R8X8_UNorm or Format.R10G10B10_Xr_Bias_A2_UNorm or Format.B8G8R8A8_Typeless or Format.B8G8R8A8_UNorm_SRgb or Format.B8G8R8X8_Typeless or Format.B8G8R8X8_UNorm_SRgb => 32,
+                Format.R10G10B10A2_Typeless or Format.R10G10B10A2_UNorm or Format.R10G10B10A2_UInt or Format.R11G11B10_Float or Format.R8G8B8A8_Typeless or Format.R8G8B8A8_UNorm or Format.R8G8B8A8_UNorm_SRgb or Format.R8G8B8A8_UInt or Format.R8G8B8A8_SNorm or Format.R8G8B8A8_SInt or Format.R16G16_Typeless or Format.R16G16_Float or Format.R16G16_UNorm or Format.R16G16_UInt or Format.R16G16_SNorm or Format.R16G16_SInt or Format.R32_Typeless or Format.D32_Float or Format.R32_Float or Format.R32_UInt or Format.R32_SInt or Format.R24G8_Typeless or Format.D24_UNorm_S8_UInt or Format.R24_UNorm_X8_Typeless or Format.X24_Typeless_G8_UInt or Format.R9G9B9E5_SharedExp or Format.R8G8_B8G8_UNorm or Format.G8R8_G8B8_UNorm or Format.B8G8R8A8_UNorm or Format.B8G8R8X8_UNorm or Format.R10G10B10_Xr_Bias_A2_UNorm or Format.B8G8R8A8_Typeless or Format.B8G8R8A8_UNorm_SRgb or Format.B8G8R8X8_Typeless or Format.B8G8R8X8_UNorm_SRgb => 32,
                 Format.R8G8_Typeless or Format.R8G8_UNorm or Format.R8G8_UInt or Format.R8G8_SNorm or Format.R8G8_SInt or Format.R16_Typeless or Format.R16_Float or Format.D16_UNorm or Format.R16_UNorm or Format.R16_UInt or Format.R16_SNorm or Format.R16_SInt or Format.B5G6R5_UNorm or Format.B5G5R5A1_UNorm or Format.B4G4R4A4_UNorm => 16,
                 Format.R8_Typeless or Format.R8_UNorm or Format.R8_UInt or Format.R8_SNorm or Format.R8_SInt or Format.A8_UNorm => 8,
                 Format.R1_UNorm => 1,

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Sprites
@@ -13,7 +13,7 @@ namespace Engine.BuiltIn.Drawers.Sprites
         {
             return new PerSprite
             {
-                Local = Matrix.Transpose(state.Local),
+                Local = Matrix4x4.Transpose(state.Local),
                 Size = new Vector4(state.RenderArea.X, state.RenderArea.Y, state.RenderArea.Width, state.RenderArea.Height),
                 Color1 = state.Color1,
                 Color2 = state.Color2,
@@ -33,7 +33,7 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// Local transform
         /// </summary>
         [FieldOffset(0)]
-        public Matrix Local;
+        public Matrix4x4 Local;
 
         /// <summary>
         /// Sprite size
@@ -45,22 +45,22 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// Color 1
         /// </summary>
         [FieldOffset(80)]
-        public Color4 Color1;
+        public Vector4 Color1;
         /// <summary>
         /// Color 2
         /// </summary>
         [FieldOffset(96)]
-        public Color4 Color2;
+        public Vector4 Color2;
         /// <summary>
         /// Color 3
         /// </summary>
         [FieldOffset(112)]
-        public Color4 Color3;
+        public Vector4 Color3;
         /// <summary>
         /// Color 4
         /// </summary>
         [FieldOffset(128)]
-        public Color4 Color4;
+        public Vector4 Color4;
 
         /// <summary>
         /// Use percent values
@@ -101,9 +101,9 @@ namespace Engine.BuiltIn.Drawers.Sprites
         public Vector4 ClippingRecangle;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerSprite));
+            return (uint)Marshal.SizeOf<PerSprite>();
         }
     }
 }

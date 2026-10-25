@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Particles;
-using SharpDX;
 using System;
+using System.Numerics;
 
 namespace BasicSamples.SceneParticles
 {
