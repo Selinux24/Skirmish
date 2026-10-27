@@ -120,7 +120,7 @@ namespace Engine.Content.FmtColladaTests
             var points1 = res[treeMeshName][treeBarkName].GetPoints();
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = [.. points1, .. points2];
-            var bounds = BoundingSphere.CreateFromPoints([.. points.Distinct()]);
+            var bounds = BoundingSphereExtensions.FromPoints([.. points.Distinct()]);
             bounds = bounds.SetTransform(Matrix4x4.CreateScale(2) * Matrix4x4.CreateFromYawPitchRoll(1, 0, 0) * Matrix4x4.CreateTranslation(10, 10, 10));
             Assert.AreEqual(sph, bounds);
         }
@@ -154,8 +154,8 @@ namespace Engine.Content.FmtColladaTests
             //Sets the transform of the current instance
             Matrix4x4 instanceTrn = Matrix4x4.CreateTranslation(Vector3.One);
             Matrix4x4 hullTrn = Matrix4x4.Identity;
-            Matrix4x4 turretTrn = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3Extensions.Up, Helper.PiOver2));
-            Matrix4x4 barrelTrn = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3Extensions.Left, Helper.PiOver4));
+            Matrix4x4 turretTrn = Matrix4x4.CreateFromQuaternion(QuaternionExtensions.RotateAxis(Vector3Extensions.Up, Helper.PiOver2));
+            Matrix4x4 barrelTrn = Matrix4x4.CreateFromQuaternion(QuaternionExtensions.RotateAxis(Vector3Extensions.Left, Helper.PiOver4));
 
             model[0].Manipulator.SetTransform(instanceTrn);
             model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);

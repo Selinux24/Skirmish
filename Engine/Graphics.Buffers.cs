@@ -1,8 +1,8 @@
 ﻿using Engine.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Vortice;
 
 namespace Engine
 {
@@ -107,7 +107,7 @@ namespace Engine
         /// <param name="length">Buffer length</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateStreamOutBuffer<T>(string name, uint length)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer<T>(
                 name,
@@ -144,7 +144,13 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, device.CreateBuffer(description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
 
         /// <summary>
@@ -175,7 +181,13 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, device.CreateBuffer(description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -188,6 +200,7 @@ namespace Engine
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
         public EngineBuffer CreateBuffer<T>(string name, uint length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+            where T : unmanaged
         {
             uint sizeInBytes = (uint)Marshal.SizeOf<T>() * length;
             if (sizeInBytes == 0)
@@ -207,7 +220,13 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, device.CreateBuffer(description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -219,35 +238,68 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> values, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
             where T : unmanaged
         {
-            T[] dataArray = data?.ToArray() ?? [];
-            uint length = (uint)dataArray.Length;
-            if (length == 0)
+            var buffer = CreateWithSubresource(
+                name, values,
+                (ResourceUsage)usage, (BindFlags)binding, (CpuAccessFlags)access,
+                (desc, data) =>
+                {
+                    var res = device.CreateBuffer(desc, data, out var b);
+                    if (res.Failure)
+                    {
+                        throw new EngineException(res.ToString());
+                    }
+                    return b;
+                });
+
+            buffer.DebugName = name;
+
+            return new EngineBuffer(name, buffer);
+        }
+        /// <summary>
+        /// Creates a populated resource using a callback function
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <typeparam name="TResource">Resource type</typeparam>
+        /// <param name="name">Resource name</param>
+        /// <param name="values">Data values</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Data binding</param>
+        /// <param name="access">CPU access flags</param>
+        /// <param name="createResourceFunc">Callback</param>
+        /// <returns>Returns the created resource</returns>
+        private static unsafe TResource CreateWithSubresource<T, TResource>(
+            string name, IEnumerable<T> values, ResourceUsage usage, BindFlags binding, CpuAccessFlags access,
+            Func<BufferDescription, SubresourceData, TResource> createResourceFunc)
+            where T : unmanaged
+        {
+            uint length = (uint)values.Count();
+
+            T[] array = new T[length];
+            Array.Copy(values.ToArray(), array, length);
+
+            uint bytesPerPixel = (uint)Marshal.SizeOf<T>() * length;
+            uint rowPitch = length * bytesPerPixel;
+            uint slicePitch = rowPitch;
+
+            var desc = new BufferDescription()
             {
-                return null;
-            }
-
-            uint sizeInBytes = (uint)Marshal.SizeOf<T>() * length;
-
-            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
-
-            using var dstr = new DataStream((int)sizeInBytes, true, true);
-            dstr.WriteRange(dataArray);
-            dstr.Position = 0;
-
-            var description = new BufferDescription()
-            {
-                Usage = (ResourceUsage)usage,
-                ByteWidth = sizeInBytes,
-                BindFlags = (BindFlags)binding,
-                CPUAccessFlags = (CpuAccessFlags)access,
+                Usage = usage,
+                ByteWidth = bytesPerPixel,
+                BindFlags = binding,
+                CPUAccessFlags = access,
                 MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, device.CreateBuffer(dstr.BasePointer, description));
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, bytesPerPixel, length);
+
+            fixed (T* ptr = array)
+            {
+                return createResourceFunc(desc, new((IntPtr)ptr, rowPitch, slicePitch));
+            }
         }
     }
 }

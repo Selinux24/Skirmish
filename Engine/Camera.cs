@@ -999,8 +999,8 @@ namespace Engine
             StopTranslations();
 
             //Smooth rotation
-            Quaternion sourceRotation = Quaternion.CreateFromAxisAngle(axis, 0);
-            Quaternion targetRotation = Quaternion.CreateFromAxisAngle(axis, Helper.DegreesToRadians(degrees));
+            Quaternion sourceRotation = QuaternionExtensions.RotateAxis(axis, 0);
+            Quaternion targetRotation = QuaternionExtensions.RotateAxis(axis, Helper.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
             Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);

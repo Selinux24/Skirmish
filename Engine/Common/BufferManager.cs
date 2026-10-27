@@ -815,7 +815,7 @@ namespace Engine.Common
         /// <param name="vertexType">Vertex type</param>
         /// <param name="dynamic">Dynamic</param>
         /// <returns>Returns the internal description index</returns>
-        public int FindVertexBufferDescription<T>(bool dynamic) where T : struct, IVertexData
+        public int FindVertexBufferDescription<T>(bool dynamic) where T : unmanaged, IVertexData
         {
             return vertexBufferDescriptors.FindIndex(k =>
                 k.OfType<T>() &&

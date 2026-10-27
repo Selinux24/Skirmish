@@ -29,7 +29,7 @@ namespace Engine.Physics.Colliders
             vertices = [.. triangle.GetVertices()];
 
             boundingBox = BoundingBoxExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = BoundingSphereExtensions.BoundingSphereFromPoints(vertices);
+            boundingSphere = BoundingSphereExtensions.FromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

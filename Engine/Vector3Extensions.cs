@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Vortice.Mathematics;
 
@@ -9,6 +11,20 @@ namespace Engine
     /// </summary>
     public static class Vector3Extensions
     {
+        public class Vector3Comparer : IEqualityComparer<Vector3>
+        {
+            public bool Equals(Vector3 x, Vector3 y)
+            {
+                return Vector3Extensions.NearEqual(x, y);
+            }
+            public int GetHashCode([DisallowNull] Vector3 obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
+        public static readonly Vector3Comparer Comparer = new();
+
         /// <summary>
         /// Creates a new rgb color
         /// </summary>
@@ -151,7 +167,7 @@ namespace Engine
             return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z);
         }
 
-        public static Color3 AdjustContrast(Vector3 value, float contrast)
+        public static Vector3 AdjustContrast(Vector3 value, float contrast)
         {
             return new(
                 0.5f + contrast * (value.X - 0.5f),
@@ -238,6 +254,11 @@ namespace Engine
             };
 
             result = new Vector3(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W);
+        }
+        public static Vector3 TransformCoordinate(Vector3 coord, Matrix4x4 trn)
+        {
+            TransformCoordinate(ref coord, ref trn, out var res);
+            return res;
         }
         public static void TransformCoordinate(Vector3[] source, ref Matrix4x4 trn, Vector3[] destination)
         {

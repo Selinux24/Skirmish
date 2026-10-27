@@ -55,7 +55,7 @@ namespace Engine.Common
                 var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
-                sphere = BoundingSphereExtensions.BoundingSphereFromPoints(distinctPoints);
+                sphere = BoundingSphereExtensions.FromPoints(distinctPoints);
 
                 //Initialize the identity box
                 box = BoundingBoxExtensions.BoundingBoxFromPoints(distinctPoints);

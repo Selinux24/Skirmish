@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -23,7 +22,7 @@ namespace Engine.Common
         /// <summary>
         /// Blend factor
         /// </summary>
-        public Color4 BlendFactor { get; set; }
+        public Vector4 BlendFactor { get; set; }
         /// <summary>
         /// Sample mask
         /// </summary>
@@ -330,7 +329,7 @@ namespace Engine.Common
         /// <param name="blendState">Blend state</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
-        internal EngineBlendState(string name, BlendState blendState, Color4 blendFactor, uint sampleMask)
+        internal EngineBlendState(string name, BlendState blendState, Vector4 blendFactor, uint sampleMask)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A blend state name must be specified.");
             state = blendState ?? throw new ArgumentNullException(nameof(blendState), "A blend state must be specified.");

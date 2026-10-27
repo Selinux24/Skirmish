@@ -35,7 +35,7 @@ namespace Engine.Windows
         public void SaveToFile(string fileName, Image image)
         {
             int stride = sizeof(int);
-            uint[] bits = [.. image.Flatten().Select(c => ((Vortice.Mathematics.Color4)c).ToRgba())];
+            uint[] bits = [.. image.Flatten().Select(c => c.ToRgba())];
 
             var bitsHandle = GCHandle.Alloc(bits, GCHandleType.Pinned);
             using var bitmap = new Bitmap(image.Width, image.Height, image.Width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject());

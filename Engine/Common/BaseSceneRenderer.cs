@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -63,7 +62,7 @@ namespace Engine.Common
             /// <summary>
             /// Render target clear color
             /// </summary>
-            public Color4 ClearRTColor { get; set; }
+            public Vector4 ClearRTColor { get; set; }
             /// <summary>
             /// Clears the depth buffer
             /// </summary>
@@ -1240,7 +1239,7 @@ namespace Engine.Common
             var graphics = Scene.Game.Graphics;
 
             //Restore back buffer as render target and clear it
-            dc.SetRenderTargets(graphics.DefaultRenderTarget, clearRT, (Color4)clearRTColor);
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, clearRT, clearRTColor);
             dc.SetViewport(graphics.Viewport);
         }
         /// <summary>
@@ -1255,7 +1254,7 @@ namespace Engine.Common
         {
             var graphics = Scene.Game.Graphics;
 
-            dc.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, (Color4)clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
+            dc.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
             dc.SetViewport(graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1266,7 +1265,7 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(sceneUITarget.Targets, clearRT, (Color4)clearRTColor);
+            dc.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1277,7 +1276,7 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, (Color4)clearRTColor);
+            dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
@@ -1289,7 +1288,7 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Vector4 clearRTColor)
         {
-            dc.SetRenderTargets(target.Targets, clearRT, (Color4)clearRTColor);
+            dc.SetRenderTargets(target.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Form.GetViewport()); //Set local viewport
         }
         /// <summary>
@@ -1787,7 +1786,7 @@ namespace Engine.Common
             var ic = graphics.ImmediateContext;
             ic.SetViewport(graphics.Viewport);
             ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, (Color4)Scene.GameEnvironment.Background,
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
                 graphics.DefaultDepthStencil, true, true,
                 false);
 

@@ -569,7 +569,7 @@ namespace Engine
                     {
                         Target = Targets.Objects,
                         ClearRT = true,
-                        ClearRTColor = (Color4)Scene.GameEnvironment.Background,
+                        ClearRTColor = Scene.GameEnvironment.Background,
                     };
                     DoDeferred(rt, deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
                 });

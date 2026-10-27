@@ -163,7 +163,7 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
         public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix transform)
-            where T : struct, IVertexData
+            where T : unmanaged, IVertexData
         {
             if (vertices?.Any() != true)
             {
@@ -172,7 +172,7 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
@@ -188,7 +188,7 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
         public static T Transform<T>(T vertex, Matrix transform)
-            where T : struct, IVertexData
+            where T : unmanaged, IVertexData
         {
             if (transform.IsIdentity)
             {

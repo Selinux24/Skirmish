@@ -2628,7 +2628,7 @@ namespace Engine.Common
                 {
                     var axis = Vector3.Cross(up, Vector3Extensions.Up);
 
-                    v = Vector3.TransformNormal(v, Matrix.CreateFromAxisAngle(axis, Helper.PiOver2));
+                    v = Vector3.TransformNormal(v, Matrix4x4Extensions.RotationAxis(axis, Helper.PiOver2));
                 }
 
                 verts.Add(v + center);
@@ -2897,7 +2897,7 @@ namespace Engine.Common
                 axis = Vector3.Normalize(Vector3.Cross(Vector3Extensions.Up, rotNormal));
             }
 
-            geometry.Transform(Matrix.CreateFromAxisAngle(axis, angle));
+            geometry.Transform(Matrix4x4Extensions.RotationAxis(axis, angle));
 
             return geometry;
         }
@@ -3192,7 +3192,7 @@ namespace Engine.Common
 
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return BoundingSphereExtensions.BoundingSphereFromPoints(points);
+            return BoundingSphereExtensions.FromPoints(points);
         }
         /// <summary>
         /// Generates a bounding cylinder from a vertex item list
@@ -3362,7 +3362,7 @@ namespace Engine.Common
                 axis = Vector3.Normalize(axis);
 
                 //Create rotation matrix
-                matrix *= Matrix.CreateFromAxisAngle(axis, angle);
+                matrix *= Matrix4x4Extensions.RotationAxis(axis, angle);
             }
 
             Matrix.Invert(matrix, out var result);

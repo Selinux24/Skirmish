@@ -1544,7 +1544,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
             var localPos = barrelManipulator.Position;
             var c = Vector3.Cross(barrelDir, newDir);
-            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4.CreateFromAxisAngle(c, angle));
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4Extensions.RotationAxis(c, angle));
 
             //Apply de local delta
             barrelManipulator.RotateTo(localPos + localDir, Vector3Extensions.Up, Axis.Y, 0.01f);

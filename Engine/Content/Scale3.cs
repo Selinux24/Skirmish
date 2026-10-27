@@ -117,12 +117,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Scale3 operator -(Scale3 value, float scalar)
         {
-            return Vector3.Subtract(new Vector3(scalar), value);
+            return Vector3.Subtract(value, new Vector3(scalar));
         }
         /// <inheritdoc/>
         public static Scale3 operator -(float scalar, Scale3 value)
         {
-            return Vector3.Subtract(value, new Vector3(scalar));
+            return Vector3.Subtract(new Vector3(scalar), value);
         }
         /// <inheritdoc/>
         public static Scale3 operator *(Scale3 left, Scale3 right)

@@ -80,8 +80,8 @@ namespace TerrainSamples.SceneGrid
         private readonly float soldierAssaultSpeed = 6f;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
-        private readonly Color4 bsphColor = new(Color.LightYellow.RGB(), 0.25f);
-        private readonly Color4 frstColor = new(Color.Yellow.RGB(), 1f);
+        private readonly Vector4 bsphColor = new(Color.LightYellow.RGB(), 0.25f);
+        private readonly Vector4 frstColor = new(Color.Yellow.RGB(), 1f);
         private readonly int bsphSlices = 50;
         private readonly int bsphStacks = 25;
 

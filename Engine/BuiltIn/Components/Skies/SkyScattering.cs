@@ -5,7 +5,6 @@ using Engine.Common;
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Skies
 {
@@ -379,9 +378,9 @@ namespace Engine.BuiltIn.Components.Skies
         /// </summary>
         /// <param name="lightDirection">Light direction</param>
         /// <returns>Returns the fog color</returns>
-        public Color4 GetFogColor(Vector3 lightDirection)
+        public Vector4 GetFogColor(Vector3 lightDirection)
         {
-            var outColor = new Color4(0f, 0f, 0f, 0f);
+            var outColor = Vector4.Zero;
 
             Vector3Extensions.GetAnglesFromVector(Vector3Extensions.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
@@ -397,7 +396,7 @@ namespace Engine.BuiltIn.Components.Skies
                 scatterPos *= PlanetRadius + PlanetAtmosphereRadius;
                 scatterPos.Y -= PlanetRadius;
 
-                GetColor(scatterPos, lightDirection, out Color4 tmpColor);
+                GetColor(scatterPos, lightDirection, out var tmpColor);
 
                 outColor += tmpColor;
 
@@ -425,7 +424,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <param name="scatterPosition">Scatter position</param>
         /// <param name="lightDirection">Light direction</param>
         /// <param name="outColor">Resulting color</param>
-        private void GetColor(Vector3 scatterPosition, Vector3 lightDirection, out Color4 outColor)
+        private void GetColor(Vector3 scatterPosition, Vector3 lightDirection, out Vector4 outColor)
         {
             float viewerHeight = 1f;
             var eyePosition = new Vector3(0, viewerHeight, 0);
@@ -486,7 +485,7 @@ namespace Engine.BuiltIn.Components.Skies
             expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Z);
             expColor.Normalize();
 
-            outColor = new Color4(expColor, 1f);
+            outColor = new(expColor, 1f);
         }
     }
 }

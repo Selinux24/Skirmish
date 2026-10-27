@@ -1,5 +1,4 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -81,7 +80,7 @@ namespace Engine.Common
             desc.Filter = Filter.ComparisonMinMagMipLinear;
             desc.AddressU = TextureAddressMode.Border;
             desc.AddressV = TextureAddressMode.Border;
-            desc.BorderColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            desc.BorderColor = new(1.0f, 1.0f, 1.0f, 1.0f);
             desc.ComparisonFunction = Comparison.LessEqual;
 
             return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualBorder)}", desc);

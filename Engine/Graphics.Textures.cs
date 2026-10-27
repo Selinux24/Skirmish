@@ -56,16 +56,16 @@ namespace Engine
                     MipLevels = mipAutogen ? uint.MaxValue : texture.Description1.MipLevels,
                 },
             };
-            var result = device.CreateShaderResourceView1(texture, desc);
-            result.DebugName = name;
+            var srv = device.CreateShaderResourceView1(texture, desc);
+            srv.DebugName = name;
 
             if (mipAutogen)
             {
                 ID3D11DeviceContext3 ic = immediateContext;
-                ic.GenerateMips(result);
+                ic.GenerateMips(srv);
             }
 
-            return result;
+            return srv;
         }
         /// <summary>
         /// Creates a resource view from a texture description list
@@ -85,27 +85,27 @@ namespace Engine
                 mipAutogen = DeviceSupportsMipMapGeneration(description.Format);
             }
 
-            using var textureArray = CreateTexture2D(name, descriptions, mipAutogen, dynamic);
+            using var texture = CreateTexture2D(name, descriptions, mipAutogen, dynamic);
             var desc = new ShaderResourceViewDescription1()
             {
-                Format = textureArray.Description1.Format,
+                Format = texture.Description1.Format,
                 ViewDimension = ShaderResourceViewDimension.Texture2DArray,
                 Texture2DArray = new Texture2DArrayShaderResourceView1()
                 {
-                    ArraySize = textureArray.Description.ArraySize,
-                    MipLevels = mipAutogen ? uint.MaxValue : textureArray.Description1.MipLevels,
+                    ArraySize = texture.Description.ArraySize,
+                    MipLevels = mipAutogen ? uint.MaxValue : texture.Description1.MipLevels,
                 },
             };
-            var result = device.CreateShaderResourceView1(textureArray, desc);
-            result.DebugName = name;
+            var srv = device.CreateShaderResourceView1(texture, desc);
+            srv.DebugName = name;
 
             if (mipAutogen)
             {
                 ID3D11DeviceContext3 ic = immediateContext;
-                ic.GenerateMips(result);
+                ic.GenerateMips(srv);
             }
 
-            return result;
+            return srv;
         }
         /// <summary>
         /// Creates a resource view from a texture description
@@ -133,16 +133,16 @@ namespace Engine
                     MipLevels = mipAutogen ? uint.MaxValue : texture.Description1.MipLevels,
                 }
             };
-            var result = device.CreateShaderResourceView1(texture, desc);
-            result.DebugName = name;
+            var srv = device.CreateShaderResourceView1(texture, desc);
+            srv.DebugName = name;
 
             if (mipAutogen)
             {
                 ID3D11DeviceContext3 ic = immediateContext;
-                ic.GenerateMips(result);
+                ic.GenerateMips(srv);
             }
 
-            return result;
+            return srv;
         }
         /// <summary>
         /// Creates a resource view from a texture description
@@ -162,27 +162,27 @@ namespace Engine
                 mipAutogen = DeviceSupportsMipMapGeneration(description.Format);
             }
 
-            using var textureArray = CreateTexture2DCube(name, descriptions, mipAutogen, dynamic);
+            using var texture = CreateTexture2DCube(name, descriptions, mipAutogen, dynamic);
             var desc = new ShaderResourceViewDescription1()
             {
-                Format = textureArray.Description1.Format,
+                Format = texture.Description1.Format,
                 ViewDimension = ShaderResourceViewDimension.TextureCubeArray,
                 TextureCubeArray = new TextureCubeArrayShaderResourceView()
                 {
-                    NumCubes = textureArray.Description1.ArraySize / 6,
-                    MipLevels = mipAutogen ? uint.MaxValue : textureArray.Description1.MipLevels,
+                    NumCubes = texture.Description1.ArraySize / 6,
+                    MipLevels = mipAutogen ? uint.MaxValue : texture.Description1.MipLevels,
                 }
             };
-            var result = device.CreateShaderResourceView1(textureArray, desc);
-            result.DebugName = name;
+            var srv = device.CreateShaderResourceView1(texture, desc);
+            srv.DebugName = name;
 
             if (mipAutogen)
             {
                 ID3D11DeviceContext3 ic = immediateContext;
-                ic.GenerateMips(result);
+                ic.GenerateMips(srv);
             }
 
-            return result;
+            return srv;
         }
         /// <summary>
         /// Creates a texture filled with specified values
@@ -308,7 +308,7 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2D</returns>
-        private ID3D11Texture2D1 CreateTexture2D(string name, TextureData description, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2D(string name, TextureData description, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
@@ -340,14 +340,18 @@ namespace Engine
 
                 var index = texture.CalculateSubResourceIndex(0, 0, out _);
 
-                ID3D11DeviceContext3 ic = immediateContext;
-                ic.UpdateSubresource(description.GetData(0, 0), texture, index);
+                description.GetDataOffset(0, 0, out byte[] data, out uint stride);
+                fixed (void* ptr = data)
+                {
+                    ID3D11DeviceContext3 ic = immediateContext;
+                    ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
+                }
 
                 return texture;
             }
             else
             {
-                var texture = device.CreateTexture2D1(desc, description.GetData());
+                var texture = device.CreateTexture2D1(desc, GetSubresourceData(description));
                 texture.DebugName = name;
 
                 return texture;
@@ -361,16 +365,16 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2D</returns>
-        private ID3D11Texture2D1 CreateTexture2D(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2D(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
             var description = descriptions.First();
 
-            var width = description.Width;
-            var height = description.Height;
+            uint width = description.Width;
+            uint height = description.Height;
             var format = description.Format;
-            var mipMaps = description.MipMaps;
+            uint mipMaps = description.MipMaps;
             uint arraySize = (uint)descriptions.Count();
 
             var desc = new Texture2DDescription1()
@@ -390,25 +394,30 @@ namespace Engine
 
             if (generateMips)
             {
-                var textureArray = device.CreateTexture2D1(desc);
+                var texture = device.CreateTexture2D1(desc);
+                texture.DebugName = name;
 
                 ID3D11DeviceContext3 ic = immediateContext;
 
                 uint i = 0;
-                foreach (var currentDesc in descriptions)
+                foreach (var curr in descriptions)
                 {
-                    var index = textureArray.CalculateSubResourceIndex(0, i++, out _);
+                    var index = texture.CalculateSubResourceIndex(0, i++, out _);
 
-                    ic.UpdateSubresource(currentDesc.GetData(0, 0), textureArray, index);
+                    curr.GetDataOffset(0, 0, out byte[] data, out uint stride);
+                    fixed (void* ptr = data)
+                    {
+                        ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
+                    }
                 }
 
-                return textureArray;
+                return texture;
             }
             else
             {
-                var data = descriptions.SelectMany(d => d.GetData()).ToArray();
+                var data = descriptions.SelectMany(GetSubresourceData);
 
-                var texture = device.CreateTexture2D1(desc, data);
+                var texture = device.CreateTexture2D1(desc, [.. data]);
                 texture.DebugName = name;
 
                 return texture;
@@ -422,7 +431,7 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private ID3D11Texture2D1 CreateTexture2DCube(string name, TextureData description, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2DCube(string name, TextureData description, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
@@ -453,14 +462,18 @@ namespace Engine
 
                 var index = texture.CalculateSubResourceIndex(0, 0, out _);
 
-                ID3D11DeviceContext3 ic = immediateContext;
-                ic.UpdateSubresource(description.GetData(0, 0), texture, index);
+                description.GetDataOffset(0, 0, out byte[] data, out uint stride);
+                fixed (void* ptr = data)
+                {
+                    ID3D11DeviceContext3 ic = immediateContext;
+                    ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
+                }
 
                 return texture;
             }
             else
             {
-                var texture = device.CreateTexture2D1(desc, description.GetData());
+                var texture = device.CreateTexture2D1(desc, GetSubresourceData(description));
                 texture.DebugName = name;
 
                 return texture;
@@ -474,7 +487,7 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private ID3D11Texture2D1 CreateTexture2DCube(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2DCube(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
@@ -503,26 +516,30 @@ namespace Engine
 
             if (generateMips)
             {
-                var textureArray = device.CreateTexture2D1(desc);
-                textureArray.DebugName = name;
+                var texture = device.CreateTexture2D1(desc);
+                texture.DebugName = name;
 
                 ID3D11DeviceContext3 ic = immediateContext;
 
                 uint i = 0;
-                foreach (var currentDesc in descriptions)
+                foreach (var curr in descriptions)
                 {
-                    var index = textureArray.CalculateSubResourceIndex(0, i++, out _);
+                    var index = texture.CalculateSubResourceIndex(0, i++, out _);
 
-                    ic.UpdateSubresource(currentDesc.GetData(0, 0), textureArray, index);
+                    curr.GetDataOffset(0, 0, out byte[] data, out uint stride);
+                    fixed (void* ptr = data)
+                    {
+                        ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
+                    }
                 }
 
-                return textureArray;
+                return texture;
             }
             else
             {
-                var data = descriptions.SelectMany(d => d.GetData()).ToArray();
+                var data = descriptions.SelectMany(GetSubresourceData);
 
-                var texture = device.CreateTexture2D1(desc, data);
+                var texture = device.CreateTexture2D1(desc, [.. data]);
                 texture.DebugName = name;
 
                 return texture;
@@ -543,17 +560,38 @@ namespace Engine
             T[] array = new T[width * height];
             Array.Copy(values.ToArray(), array, values.Count());
 
-            // 2. Cálculos de Pitch
             uint bitsPerPixel = format.GetBitsPerPixel();
             uint bytesPerPixel = (bitsPerPixel + 7) / 8;
             uint rowPitch = width * bytesPerPixel;
             uint slicePitch = rowPitch * height;
 
-            // 3. Fijación automática mediante el compilador
-            fixed (T* ptr = array)
+            fixed (void* ptr = array)
             {
-                return createResourceFunc(new((IntPtr)ptr, rowPitch, slicePitch));
+                return createResourceFunc(new(ptr, rowPitch, slicePitch));
             }
+        }
+        /// <summary>
+        /// Gets the subresource data array from the texture data
+        /// </summary>
+        /// <param name="texData">Texture data</param>
+        private static unsafe SubresourceData[] GetSubresourceData(TextureData texData)
+        {
+            var res = new SubresourceData[texData.ArraySize * texData.MipMaps];
+
+            uint index = 0;
+            for (uint j = 0; j < texData.ArraySize; j++)
+            {
+                for (uint i = 0; i < texData.MipMaps; i++)
+                {
+                    texData.GetDataOffset(j, i, out byte[] data, out uint stride);
+                    fixed (void* ptr = data)
+                    {
+                        res[index++] = new(ptr, stride, stride);
+                    }
+                }
+            }
+
+            return res;
         }
 
         /// <summary>

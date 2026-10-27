@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Vortice.Mathematics;
 
@@ -9,6 +11,20 @@ namespace Engine
     /// </summary>
     public static class QuaternionExtensions
     {
+        public class QuaternionComparer : IEqualityComparer<Quaternion>
+        {
+            public bool Equals(Quaternion x, Quaternion y)
+            {
+                return QuaternionExtensions.NearEqual(x, y);
+            }
+            public int GetHashCode([DisallowNull] Quaternion obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
+        public static readonly QuaternionComparer Comparer = new();
+
         /// <summary>
         /// Gets the angle between two quaternions
         /// </summary>
@@ -121,7 +137,10 @@ namespace Engine
 
             return q;
         }
-
+        public static Quaternion RotateAxis(Vector3 axis, float angle)
+        {
+            return Quaternion.CreateFromAxisAngle(Vector3.Normalize(axis), angle);
+        }
         /// <summary>
         /// Gets the quaternion axis
         /// </summary>
@@ -146,6 +165,13 @@ namespace Engine
             if (MathHelper.IsZero(length)) return 0.0f;
 
             return (float)(2.0 * Math.Acos(MathHelper.Clamp(q.W, -1f, 1f)));
+        }
+
+        public static bool NearEqual(Quaternion a, Quaternion b)
+        {
+            return
+                Vector3Extensions.NearEqual(a.GetAxis(), b.GetAxis()) &&
+                Helper.NearEqual(a.GetAngle(), b.GetAngle());
         }
 
         /// <summary>

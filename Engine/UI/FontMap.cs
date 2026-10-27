@@ -13,7 +13,7 @@ namespace Engine.UI
     /// Font map
     /// </summary>
     public class FontMap<T> : IDisposable
-        where T : struct, IVertexData
+        where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Sample character

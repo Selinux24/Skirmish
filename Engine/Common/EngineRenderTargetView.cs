@@ -96,7 +96,7 @@ namespace Engine.Common
                 throw new ArgumentNullException(nameof(renderTarget), "A render target must be specified.");
             }
 
-            renderTarget.DebugName = Name;
+            renderTarget.DebugName = $"{Name}[{rtvList.Count}]";
             rtvList.Add(renderTarget);
         }
 

@@ -35,7 +35,7 @@ namespace Engine.Physics.Colliders
             vertices = [.. triangles.SelectMany(t => t.GetVertices()).Distinct()];
 
             boundingBox = BoundingBoxExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = BoundingSphereExtensions.BoundingSphereFromPoints(vertices);
+            boundingSphere = BoundingSphereExtensions.FromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

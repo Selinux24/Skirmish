@@ -30,7 +30,7 @@ namespace Engine.BuiltIn.Drawers.Deferred
         /// <typeparam name="T">Vertex data type</typeparam>
         /// <param name="instanced">Use instancing data</param>
         /// <returns>Returns the drawing effect</returns>
-        public static IDrawer GetDrawer<T>(bool instanced) where T : struct, IVertexData
+        public static IDrawer GetDrawer<T>(bool instanced) where T : unmanaged, IVertexData
         {
             return GetDrawer(default(T), instanced);
         }

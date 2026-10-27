@@ -57,9 +57,8 @@ namespace Engine
 
         public OrientedBoundingBox()
         {
-            var Center = Vector3.Zero;
-            Extents = Vector3.One * 0.5f;
-            Transformation = Matrix4x4.CreateTranslation(Center);
+            Extents = Vector3.Zero;
+            Transformation = Matrix4x4.Create(0);
         }
         public OrientedBoundingBox(BoundingBox bb)
         {
@@ -94,9 +93,9 @@ namespace Engine
             Transformation = Matrix4x4.CreateTranslation(Center);
         }
 
-        public BoundingBox GetBoundingBox()
+        public readonly BoundingBox GetBoundingBox()
         {
-            throw new NotImplementedException();
+            return BoundingBox.CreateFromPoints(GetCorners());
         }
 
         public void Transform(Matrix4x4 mat)

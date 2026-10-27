@@ -513,7 +513,7 @@ namespace EngineTests.Collections.Generic
             Assert.IsTrue(picked);
             Assert.AreEqual(t1PickingDistance0, t.Distance, 0.0001f);
             Assert.AreEqual(t10, t.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t.Position);
+            Assert.AreEqual(t1PickingPoint0, t.Position, Vector3Extensions.Comparer);
 
             //Short pick
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
@@ -535,12 +535,12 @@ namespace EngineTests.Collections.Generic
             var t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t0.Position);
+            Assert.AreEqual(t1PickingPoint0, t0.Position, Vector3Extensions.Comparer);
 
             var t1 = tlist.ElementAt(1);
             Assert.AreEqual(t1PickingDistance1, t1.Distance, 0.0001f);
             Assert.AreEqual(t11, t1.Primitive);
-            Assert.AreEqual(t1PickingPoint1, t1.Position);
+            Assert.AreEqual(t1PickingPoint1, t1.Position, Vector3Extensions.Comparer);
 
             //Short pick
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
@@ -557,7 +557,7 @@ namespace EngineTests.Collections.Generic
             t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t0.Position);
+            Assert.AreEqual(t1PickingPoint0, t0.Position, Vector3Extensions.Comparer);
         }
     }
 }

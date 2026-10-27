@@ -1014,13 +1014,13 @@ namespace BasicSamples.SceneTest
         {
             volumeDrawer.Clear();
 
-            var spotLines = Lights.SpotLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
+            var spotLines = Lights.SpotLights.Select(l => new { Color = new Vector4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
             foreach (var spot in spotLines)
             {
                 volumeDrawer.AddPrimitives(spot.Color, spot.Volume);
             }
 
-            var pointLines = Lights.PointLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
+            var pointLines = Lights.PointLights.Select(l => new { Color = new Vector4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
             foreach (var point in pointLines)
             {
                 volumeDrawer.AddPrimitives(point.Color, point.Volume);
@@ -1028,7 +1028,7 @@ namespace BasicSamples.SceneTest
 
             var pBoxes = pManager.ParticleSystems.Select(s => s.Emitter.GetBoundingBox());
             var pLines = Line3D.CreateBoxes(pBoxes);
-            volumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
+            volumeDrawer.AddPrimitives(new Vector4(0, 0, 1, 0.75f), pLines);
             volumeDrawer.Active = volumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
@@ -1039,14 +1039,14 @@ namespace BasicSamples.SceneTest
             {
                 var lines = Line3D.CreateSphere(spot.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Vector4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = Line3D.CreateSphere(point.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Vector4(Color.Red.RGB(), 0.55f), lines);
             }
 
             volumeDrawer.Active = volumeDrawer.Visible = true;

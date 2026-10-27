@@ -182,9 +182,9 @@ namespace Engine
             }
 
             return new Triangle(
-                Vector3.Transform(triangle.Point1, transform),
-                Vector3.Transform(triangle.Point2, transform),
-                Vector3.Transform(triangle.Point3, transform));
+                Vector3Extensions.TransformCoordinate(triangle.Point1, transform),
+                Vector3Extensions.TransformCoordinate(triangle.Point2, transform),
+                Vector3Extensions.TransformCoordinate(triangle.Point3, transform));
         }
         /// <summary>
         /// Transform triangle list coordinates

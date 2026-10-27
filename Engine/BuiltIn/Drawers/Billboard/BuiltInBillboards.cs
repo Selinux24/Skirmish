@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
+using System.Numerics;
 using System.Runtime.InteropServices;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Billboard
 {
@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Drawers.Billboard
             /// Tint color
             /// </summary>
             [FieldOffset(0)]
-            public Color4 TintColor;
+            public Vector4 TintColor;
 
             /// <summary>
             /// Material index

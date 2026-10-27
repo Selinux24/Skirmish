@@ -385,7 +385,7 @@ namespace Engine
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
-        public static T[] CreateArray<T>(uint length, T defaultValue = default) where T : struct
+        public static T[] CreateArray<T>(uint length, T defaultValue = default) where T : unmanaged
         {
             T[] array = new T[length];
 
@@ -399,7 +399,7 @@ namespace Engine
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
-        public static T[] CreateArray<T>(int length, T defaultValue = default) where T : struct
+        public static T[] CreateArray<T>(int length, T defaultValue = default) where T : unmanaged
         {
             T[] array = new T[length];
 
@@ -469,7 +469,7 @@ namespace Engine
         /// <typeparam name="T">Type of array</typeparam>
         /// <param name="arr">Array</param>
         /// <param name="value">Value to set to all array elements</param>
-        public static void InitializeArray<T>(this T[] arr, T value) where T : struct
+        public static void InitializeArray<T>(this T[] arr, T value) where T : unmanaged
         {
             for (int i = 0; i < arr.Length; i++)
             {

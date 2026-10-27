@@ -102,7 +102,7 @@ namespace PhysicsSamples.ScenePhysics
             runtimeText.Text = "";
             info.Text = "Press F1 for Help.";
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
+            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
         }
         private async Task InitializeLineDrawer()

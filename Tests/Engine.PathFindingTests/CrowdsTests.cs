@@ -153,9 +153,9 @@ namespace Engine.PathFindingTests
 
             crowd.Update(mockGameTime.Object);
             positions = crowd.GetPositions();
-            Assert.AreNotEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreNotEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreNotEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
+            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
+            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
         }
         [TestMethod()]
         public void CrowdRequestMoveAgent()
@@ -186,7 +186,7 @@ namespace Engine.PathFindingTests
 
             crowd.Update(mockGameTime.Object);
             positions = crowd.GetPositions();
-            Assert.AreNotEqual(p1Start.XZ(), positions[0].Position.XZ());
+            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
             Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
             Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
         }

@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace EngineTests.Content
 {
     using Matrix = System.Numerics.Matrix4x4;
-    using Quaternion = System.Numerics.Quaternion;
 
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -139,7 +138,7 @@ namespace EngineTests.Content
         public void MatrixRotationTest()
         {
             Matrix4X4 res = Matrix4X4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
-            Matrix4X4 expected = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3Extensions.Up, 10));
+            Matrix4X4 expected = Matrix.CreateFromQuaternion(QuaternionExtensions.RotateAxis(Vector3Extensions.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]

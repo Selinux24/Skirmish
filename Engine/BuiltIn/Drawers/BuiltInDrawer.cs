@@ -516,7 +516,7 @@ namespace Engine.BuiltIn.Drawers
         /// <param name="mode">Drawing mode</param>
         /// <param name="instanced">Use instancing data</param>
         /// <returns>Returns the drawing effect</returns>
-        public static IDrawer GetDrawer<T>(DrawerModes mode, bool instanced) where T : struct, IVertexData
+        public static IDrawer GetDrawer<T>(DrawerModes mode, bool instanced) where T : unmanaged, IVertexData
         {
             if (mode.HasFlag(DrawerModes.Forward))
             {

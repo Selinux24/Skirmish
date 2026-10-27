@@ -48,11 +48,11 @@ namespace Engine
         }
 
         /// <summary>
-        /// Converts an integer value to Color4
+        /// Converts an integer value to Vector4
         /// </summary>
         /// <param name="value">Integer value</param>
         /// <param name="alpha">Alpha value from 0 to 255</param>
-        /// <returns>Returns the Color4 value</returns>
+        /// <returns>Returns the Vector4 value</returns>
         public static Vector4 IntToCol(int value, int alpha)
         {
             int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;

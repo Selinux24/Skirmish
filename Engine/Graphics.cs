@@ -113,88 +113,86 @@ namespace Engine
         private static void FindModeDescription(ID3D11Device3 device, Format format, uint width, uint height, uint refreshRate, out ModeDescription1 mode)
         {
 #if DEBUG
-            using (var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true))
+            using var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true);
 #else
-            using (var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false))
+            using var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false);
 #endif
-            using (var factory = tmpFactory.QueryInterface<IDXGIFactory5>())
+            using var factory = tmpFactory.QueryInterface<IDXGIFactory5>();
+            factory.EnumAdapters1(0, out IDXGIAdapter1 tmpAdapter);
+            using (tmpAdapter)
             {
-                factory.EnumAdapters1(0, out IDXGIAdapter1 tmpAdapter);
-                using (tmpAdapter)
+                using var adapter = tmpAdapter.QueryInterface<IDXGIAdapter4>();
+                adapter.EnumOutputs(0, out IDXGIOutput tmpOutput);
+                using (tmpOutput)
                 {
-                    using var adapter = tmpAdapter.QueryInterface<IDXGIAdapter4>();
-                    adapter.EnumOutputs(0, out IDXGIOutput tmpOutput);
-                    using (tmpOutput)
+                    using var output = tmpOutput.QueryInterface<IDXGIOutput6>();
+                    try
                     {
-                        using var output = tmpOutput.QueryInterface<IDXGIOutput6>();
-                        try
+                        var displayModeList = output.GetDisplayModeList1(
+                            format,
+                            DisplayModeEnumerationFlags.Interlaced);
+
+                        displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
+                        if (displayModeList.Length > 0)
                         {
-                            var displayModeList = output.GetDisplayModeList1(
-                                format,
-                                DisplayModeEnumerationFlags.Interlaced);
-
-                            displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
-                            if (displayModeList.Length > 0)
+                            if (refreshRate > 0)
                             {
-                                if (refreshRate > 0)
+                                Array.Sort(displayModeList, (d1, d2) =>
                                 {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+                                    float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                    float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
 
-                                        f1 = MathF.Abs(refreshRate - f1);
-                                        f2 = MathF.Abs(refreshRate - f2);
+                                    f1 = MathF.Abs(refreshRate - f1);
+                                    f2 = MathF.Abs(refreshRate - f2);
 
-                                        return f1.CompareTo(f2);
-                                    });
-                                }
-                                else
+                                    return f1.CompareTo(f2);
+                                });
+                            }
+                            else
+                            {
+                                Array.Sort(displayModeList, (d1, d2) =>
                                 {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+                                    float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                    float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
 
-                                        return f2.CompareTo(f1);
-                                    });
-                                }
-
-                                mode = displayModeList[0];
-
-                                return;
+                                    return f2.CompareTo(f1);
+                                });
                             }
 
-                            mode = new ModeDescription1()
-                            {
-                                Width = width,
-                                Height = height,
-                                Format = format,
-                                RefreshRate = new Rational(0, 1),
-                                Scaling = ModeScaling.Unspecified,
-                                ScanlineOrdering = ModeScanlineOrder.Unspecified,
-                            };
-
-                            //var desc = new ModeDescription1()
-                            //{
-                            //    Width = width,
-                            //    Height = height,
-                            //    Format = format,
-                            //};
-                            //output.FindClosestMatchingMode1(
-                            //    ref desc,
-                            //    out mode,
-                            //    device);
-
-                            //mode.Width = width;
-                            //mode.Height = height;
+                            mode = displayModeList[0];
 
                             return;
                         }
-                        catch
+
+                        mode = new ModeDescription1()
                         {
-                            // Display mode not found
-                        }
+                            Width = width,
+                            Height = height,
+                            Format = format,
+                            RefreshRate = new Rational(0, 1),
+                            Scaling = ModeScaling.Unspecified,
+                            ScanlineOrdering = ModeScanlineOrder.Unspecified,
+                        };
+
+                        //var desc = new ModeDescription1()
+                        //{
+                        //    Width = width,
+                        //    Height = height,
+                        //    Format = format,
+                        //};
+                        //output.FindClosestMatchingMode1(
+                        //    ref desc,
+                        //    out mode,
+                        //    device);
+
+                        //mode.Width = width;
+                        //mode.Height = height;
+
+                        return;
+                    }
+                    catch
+                    {
+                        // Display mode not found
                     }
                 }
             }
@@ -266,22 +264,26 @@ namespace Engine
                 using (tmpAdapter)
                 using (var adapter = tmpAdapter.QueryInterface<IDXGIAdapter4>())
                 {
-                    DeviceDescription = string.Format("{0}", adapter.Description2.Description);
+                    DeviceDescription = adapter.Description2.Description;
 
                     DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
 
 #if DEBUG
                     creationFlags |= DeviceCreationFlags.Debug;
 #endif
-                    D3D11.D3D11CreateDevice(
+                    var res = D3D11.D3D11CreateDevice(
                         adapter,
                         DriverType.Unknown,
                         creationFlags,
                         [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0],
                         out var tmpDevice, out FeatureLevel featureLevel);
+                    if (res.Failure)
+                    {
+                        throw new EngineException(res.ToString());
+                    }
 
                     device = tmpDevice.QueryInterface<ID3D11Device3>();
-                    device.DebugName = "GraphicsDevice";
+                    device.DebugName = "Graphics Device";
                 }
 
                 if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
@@ -312,14 +314,11 @@ namespace Engine
                 };
 
                 using var tmpSwapChain = factory.CreateSwapChainForHwnd(device, form.Handle, desc, fsdesc);
-
                 swapChain = tmpSwapChain.QueryInterface<IDXGISwapChain4>();
-                swapChain.DebugName = "GraphicsSwapChain";
+                swapChain.DebugName = "Graphics Swap Chain";
             }
 
-            const string icName = "Immediate Context";
-            device.ImmediateContext3.DebugName = icName;
-            immediateContext = new(icName, true, -1, device.ImmediateContext3);
+            immediateContext = new("Immediate Context", true, -1, device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -344,13 +343,12 @@ namespace Engine
         private static uint SelectBestAdapter(IDXGIFactory5 factory)
         {
             uint bestIndex = 0;
-
-            long bestSize = 0;
+            ulong bestSize = 0;
             for (uint i = 0; factory.EnumAdapters1(i, out var adapter).Success; i++)
             {
                 using (adapter)
                 {
-                    long size = adapter.Description1.DedicatedVideoMemory;
+                    ulong size = adapter.Description1.DedicatedVideoMemory;
                     if (size > bestSize)
                     {
                         bestSize = size;
@@ -446,14 +444,16 @@ namespace Engine
             swapChain.GetBuffer(0, out ID3D11Resource backBuffer);
             using (backBuffer)
             {
-                renderTargetView = new EngineRenderTargetView("DefaultRenderTarget", device.CreateRenderTargetView1(backBuffer));
+                backBuffer.DebugName = "Default Render Target Surface";
+
+                renderTargetView = new("Default Render Target", device.CreateRenderTargetView1(backBuffer));
             }
 
             #endregion
 
             #region Depth Stencil Buffer and View
 
-            depthStencilView = CreateDepthStencilBuffer("DefaultDepthStencil", depthFormat, width, height, true);
+            depthStencilView = CreateDepthStencilBuffer("Default Depth Stencil", depthFormat, width, height, true);
 
             #endregion
 
@@ -584,14 +584,7 @@ namespace Engine
         /// <param name="passIndex">Pass index</param>
         public IEngineDeviceContext CreateDeferredContext(string name, int passIndex)
         {
-            var ctx = device.CreateDeferredContext3();
-            ctx.DebugName = name;
-
-            return new EngineDeviceContext(
-                name,
-                false,
-                passIndex,
-                ctx);
+            return new EngineDeviceContext(name, false, passIndex, device.CreateDeferredContext3());
         }
 
         /// <summary>
@@ -602,9 +595,7 @@ namespace Engine
         /// <returns>Returns a new depth stencil state</returns>
         public EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description)
         {
-            return new(
-                name,
-                device.CreateDepthStencilState((DepthStencilDescription)description));
+            return new(name, device.CreateDepthStencilState((DepthStencilDescription)description));
         }
 
         /// <summary>
@@ -620,7 +611,7 @@ namespace Engine
             return new(
                 name,
                 device.CreateBlendState1((BlendDescription1)description),
-                (Color4)blendFactor,
+                blendFactor,
                 sampleMask);
         }
 
@@ -668,20 +659,21 @@ namespace Engine
                 sampleDescription = CurrentSampleDescription;
             }
 
-            using var texture = device.CreateTexture2D1(
-                new()
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = format,
-                    SampleDescription = sampleDescription,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil,
-                    CPUAccessFlags = CpuAccessFlags.None,
-                    MiscFlags = ResourceOptionFlags.None,
-                });
+            var textureDesc = new Texture2DDescription1()
+            {
+                Width = width,
+                Height = height,
+                MipLevels = 1,
+                ArraySize = 1,
+                Format = format,
+                SampleDescription = sampleDescription,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.DepthStencil,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None,
+            };
+            using var texture = device.CreateTexture2D1(textureDesc);
+            texture.DebugName = $"{name}.TEX";
 
             var description = new DepthStencilViewDescription()
             {
@@ -690,8 +682,9 @@ namespace Engine
                 Texture2D = new(),
                 Texture2DMS = new(),
             };
+            var dsv = device.CreateDepthStencilView(texture, description);
 
-            return new($"{name}.DSV", device.CreateDepthStencilView(texture, description));
+            return new($"{name}.DSV", dsv);
         }
 
         /// <summary>
@@ -724,6 +717,7 @@ namespace Engine
             };
             var texture = device.CreateTexture2D1(desc);
             texture.DebugName = $"{name}.TEX";
+
             using (texture)
             {
                 var rtvDesc = new RenderTargetViewDescription1()
@@ -866,7 +860,6 @@ namespace Engine
                 CPUAccessFlags = CpuAccessFlags.None,
                 MiscFlags = ResourceOptionFlags.None
             };
-
             var depthMap = device.CreateTexture2D1(desc);
             depthMap.DebugName = $"{name}.TEX";
             using (depthMap)
@@ -921,7 +914,6 @@ namespace Engine
                 CPUAccessFlags = CpuAccessFlags.None,
                 MiscFlags = ResourceOptionFlags.None
             };
-
             var depthMap = device.CreateTexture2D1(desc);
             depthMap.DebugName = $"{name}.TEX_array({mapCount})";
             using (depthMap)
@@ -980,7 +972,6 @@ namespace Engine
                 MiscFlags = ResourceOptionFlags.None,
                 TextureLayout = TextureLayout.Undefined,
             };
-
             var depthMap = device.CreateTexture2D1(desc);
             depthMap.DebugName = $"{name}.TEX_array({arraySize},{mapCount})";
             using (depthMap)
@@ -1044,7 +1035,6 @@ namespace Engine
                 SampleDescription = new SampleDescription(1, 0),
                 TextureLayout = TextureLayout.Undefined,
             };
-
             var depthMap = device.CreateTexture2D1(desc);
             depthMap.DebugName = $"{name}.TEX_cube";
             using (depthMap)
@@ -1102,7 +1092,6 @@ namespace Engine
                 MiscFlags = ResourceOptionFlags.TextureCube,
                 TextureLayout = TextureLayout.Undefined,
             };
-
             var depthMap = device.CreateTexture2D1(desc);
             depthMap.DebugName = $"{name}.TEX_cube_array({arraySize})";
             using (depthMap)

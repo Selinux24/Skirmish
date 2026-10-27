@@ -1,9 +1,25 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Engine
 {
     public static class Matrix4x4Extensions
     {
+        public class Matrix4x4Comparer : IEqualityComparer<Matrix4x4>
+        {
+            public bool Equals(Matrix4x4 x, Matrix4x4 y)
+            {
+                return Matrix4x4Extensions.NearEqual(x, y);
+            }
+            public int GetHashCode([DisallowNull] Matrix4x4 obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
+        public static readonly Matrix4x4Comparer Comparer = new();
+
         public static Matrix4x4 Zero => new(
             0, 0, 0, 0,
             0, 0, 0, 0,
@@ -97,6 +113,11 @@ namespace Engine
             m.M33 = value.Z;
         }
 
+        public static Matrix4x4 RotationAxis(Vector3 axis, float angle)
+        {
+            return Matrix4x4.CreateFromAxisAngle(Vector3.Normalize(axis), angle);
+        }
+
         public static void Transformation(ref Vector3 scalingCenter, ref Quaternion scalingRotation, ref Vector3 scaling, ref Vector3 rotationCenter, ref Quaternion rotation, ref Vector3 translation, out Matrix4x4 result)
         {
             Matrix4x4 scalingRot = Matrix4x4.CreateFromQuaternion(scalingRotation);
@@ -156,6 +177,30 @@ namespace Engine
             return result;
         }
 
+        public static bool NearEqual(Matrix4x4 a, Matrix4x4 b)
+        {
+            return
+                Helper.NearEqual(a.M11, b.M11) &&
+                Helper.NearEqual(a.M12, b.M12) &&
+                Helper.NearEqual(a.M13, b.M13) &&
+                Helper.NearEqual(a.M14, b.M14) &&
+
+                Helper.NearEqual(a.M21, b.M21) &&
+                Helper.NearEqual(a.M22, b.M22) &&
+                Helper.NearEqual(a.M23, b.M23) &&
+                Helper.NearEqual(a.M24, b.M24) &&
+
+                Helper.NearEqual(a.M31, b.M31) &&
+                Helper.NearEqual(a.M32, b.M32) &&
+                Helper.NearEqual(a.M33, b.M33) &&
+                Helper.NearEqual(a.M34, b.M34) &&
+
+                Helper.NearEqual(a.M41, b.M41) &&
+                Helper.NearEqual(a.M42, b.M42) &&
+                Helper.NearEqual(a.M43, b.M43) &&
+                Helper.NearEqual(a.M44, b.M44);
+        }
+
         /// <summary>
         /// Gets matrix description
         /// </summary>
@@ -175,7 +220,7 @@ namespace Engine
                 return "Bad transform matrix";
             }
         }
-     
+
         /// <summary>
         /// Creates a new world Matrix
         /// </summary>

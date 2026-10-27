@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 using Vortice.Mathematics;
 
 namespace Engine
@@ -28,6 +29,20 @@ namespace Engine
         public static Vector4 FromRgb(byte r, byte g, byte b)
         {
             return new Vector4(r / 255f, g / 255f, b / 255f, 1f);
+        }
+        public static uint ToRgba(this Vector4 color)
+        {
+            uint r = (uint)(color.X * 255f) & 255;
+            uint g = (uint)(color.Y * 255f) & 255;
+            uint b = (uint)(color.Z * 255f) & 255;
+            uint a = (uint)(color.W * 255f) & 255;
+
+            uint value = r;
+            value |= g << 8;
+            value |= b << 16;
+            value |= a << 24;
+
+            return value;
         }
 
         /// <summary>

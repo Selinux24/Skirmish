@@ -175,7 +175,7 @@ namespace Engine.BuiltIn.UI
 
             dc.SetViewport(viewport);
 
-            dc.SetRenderTargets(renderTarget, true, (Color4)BackColor, false);
+            dc.SetRenderTargets(renderTarget, true, BackColor, false);
 
             foreach (var item in drawables)
             {

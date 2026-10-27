@@ -9,12 +9,34 @@ namespace Engine
     public static class BoundingSphereExtensions
     {
         /// <summary>
-        /// Constructs a BoundingSphere that fully contains the given points.
+        /// Constructs the minimum BoundingSphere that fully contains the given points.
         /// </summary>
         /// <param name="points">Point list</param>
-        public static BoundingSphere BoundingSphereFromPoints(IEnumerable<Vector3> points)
+        public static BoundingSphere FromPoints(IEnumerable<Vector3> points)
         {
-            return BoundingSphere.CreateFromPoints(points.ToArray());
+            Vector3 center = Vector3.Zero;
+            float radius = 0f;
+
+            int count = points.Count();
+
+            for (int i = 0; i < count; i++)
+            {
+                center = Vector3.Add(points.ElementAt(i), center);
+            }
+            center /= count;
+
+            for (int j = 0; j < count; j++)
+            {
+                var d = Vector3.DistanceSquared(center, points.ElementAt(j));
+                if (d > radius)
+                {
+                    radius = d;
+                }
+            }
+
+            radius = MathF.Sqrt(radius);
+
+            return new(center, radius);
         }
         /// <summary>
         /// Gets a sphere transformed by the given matrix

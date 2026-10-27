@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Engine
 {
@@ -35,7 +36,7 @@ namespace Engine
         /// <param name="bytes">Code bytes</param>
         /// <param name="bufferSlot">Buffer slot</param>
         /// <returns>Returns a new Input Layout</returns>
-        public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, uint bufferSlot) where T : struct, IVertexData
+        public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, uint bufferSlot) where T : unmanaged, IVertexData
         {
             var inputElements = default(T).GetInput(bufferSlot);
 
@@ -242,7 +243,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             return new EngineHullShader(name, device.CreateHullShader(blob), blob.AsBytes());
@@ -342,7 +345,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             return new EngineDomainShader(name, device.CreateDomainShader(blob), blob.AsBytes());
@@ -442,7 +447,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             return new EngineGeometryShader(name, device.CreateGeometryShader(blob), blob.AsBytes());
@@ -549,7 +556,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             var so = soElements.Select(s => (SODeclarationEntry)s).ToArray();
@@ -657,7 +666,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             return new EnginePixelShader(name, device.CreatePixelShader(blob), blob.AsBytes());
@@ -757,7 +768,9 @@ namespace Engine
 
             if (cmpResult.Failure)
             {
-                compilationErrors = errorBlob.ToString();
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
             return new EngineComputeShader(name, device.CreateComputeShader(blob), blob.AsBytes());

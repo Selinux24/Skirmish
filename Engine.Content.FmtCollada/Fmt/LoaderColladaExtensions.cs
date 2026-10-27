@@ -62,10 +62,10 @@ namespace Engine.Content.FmtCollada.Fmt
             }
         }
         /// <summary>
-        /// Reads a Color3 from BasicColor
+        /// Reads a Vector3 from BasicColor
         /// </summary>
         /// <param name="color">BasicColor color</param>
-        /// <returns>Returns the parsed Color3 from BasicColor</returns>
+        /// <returns>Returns the parsed Vector3 from BasicColor</returns>
         public static Vector3 ToVector3(this BasicColor color)
         {
             if (color.Values != null && color.Values.Length == 3)
@@ -82,10 +82,10 @@ namespace Engine.Content.FmtCollada.Fmt
             }
         }
         /// <summary>
-        /// Reads a Color4 from BasicColor
+        /// Reads a Vector4 from BasicColor
         /// </summary>
         /// <param name="color">BasicColor color</param>
-        /// <returns>Returns the parsed Color4 from BasicColor</returns>
+        /// <returns>Returns the parsed Vector4 from BasicColor</returns>
         public static Vector4 ToVector4(this BasicColor color)
         {
             if (color.Values != null && color.Values.Length == 3)
@@ -98,7 +98,7 @@ namespace Engine.Content.FmtCollada.Fmt
             }
             else
             {
-                throw new EngineException("Value cannot be parsed to Color4.");
+                throw new EngineException("Value cannot be parsed to Vector4.");
             }
         }
         /// <summary>
@@ -442,21 +442,21 @@ namespace Engine.Content.FmtCollada.Fmt
                 if (rotX != null)
                 {
                     Vector4 r = rotX.ToVector4();
-                    finalRotation *= Matrix4x4.CreateFromAxisAngle(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
                 if (rotY != null)
                 {
                     Vector4 r = rotY.ToVector4();
-                    finalRotation *= Matrix4x4.CreateFromAxisAngle(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
                 if (rotZ != null)
                 {
                     Vector4 r = rotZ.ToVector4();
-                    finalRotation *= Matrix4x4.CreateFromAxisAngle(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
             }
 

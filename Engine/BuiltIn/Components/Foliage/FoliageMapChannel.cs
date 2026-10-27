@@ -2,7 +2,6 @@
 using Engine.Common;
 using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -54,7 +53,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor;
+        public Vector4 TintColor;
         /// <summary>
         /// Foliage start radius
         /// </summary>

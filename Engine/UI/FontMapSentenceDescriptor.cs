@@ -8,7 +8,7 @@ namespace Engine.UI
     /// <summary>
     /// Sentence descriptor
     /// </summary>
-    public struct FontMapSentenceDescriptor<T> where T : struct, IVertexData
+    public struct FontMapSentenceDescriptor<T> where T : unmanaged, IVertexData
     {
         /// <summary>
         /// One character sentence descriptor

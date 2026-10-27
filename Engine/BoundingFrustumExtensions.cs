@@ -10,30 +10,23 @@ namespace Engine
         {
             return index switch
             {
-                0 => frustum.Left,
-                1 => frustum.Right,
-                2 => frustum.Top,
-                3 => frustum.Bottom,
-                4 => frustum.Near,
-                5 => frustum.Far,
+                0 => new(-frustum.Left.Normal, -frustum.Left.D),
+                1 => new(-frustum.Right.Normal, -frustum.Right.D),
+                2 => new(-frustum.Top.Normal, -frustum.Top.D),
+                3 => new(-frustum.Bottom.Normal, -frustum.Bottom.D),
+                4 => new(-frustum.Near.Normal, -frustum.Near.D),
+                5 => new(-frustum.Far.Normal, -frustum.Far.D),
                 _ => new Plane(),
             };
         }
         public static ContainmentType Contains(this BoundingFrustum frustum, ref Vector3 point)
         {
             var result = PlaneIntersectionType.Front;
-            var planeResult = PlaneIntersectionType.Front;
+
             for (int i = 0; i < 6; i++)
             {
-                switch (i)
-                {
-                    case 0: planeResult = frustum.Near.Intersects(ref point); break;
-                    case 1: planeResult = frustum.Far.Intersects(ref point); break;
-                    case 2: planeResult = frustum.Left.Intersects(ref point); break;
-                    case 3: planeResult = frustum.Right.Intersects(ref point); break;
-                    case 4: planeResult = frustum.Top.Intersects(ref point); break;
-                    case 5: planeResult = frustum.Bottom.Intersects(ref point); break;
-                }
+                PlaneIntersectionType planeResult = frustum.GetPlane(i).Intersects(ref point);
+
                 switch (planeResult)
                 {
                     case PlaneIntersectionType.Back:
@@ -71,18 +64,10 @@ namespace Engine
         public static ContainmentType Contains(this BoundingFrustum frustum, ref BoundingSphere sphere)
         {
             var result = PlaneIntersectionType.Front;
-            var planeResult = PlaneIntersectionType.Front;
+
             for (int i = 0; i < 6; i++)
             {
-                switch (i)
-                {
-                    case 0: planeResult = frustum.Near.Intersects(ref sphere); break;
-                    case 1: planeResult = frustum.Far.Intersects(ref sphere); break;
-                    case 2: planeResult = frustum.Left.Intersects(ref sphere); break;
-                    case 3: planeResult = frustum.Right.Intersects(ref sphere); break;
-                    case 4: planeResult = frustum.Top.Intersects(ref sphere); break;
-                    case 5: planeResult = frustum.Bottom.Intersects(ref sphere); break;
-                }
+                var planeResult = frustum.GetPlane(i).Intersects(ref sphere);
                 switch (planeResult)
                 {
                     case PlaneIntersectionType.Back:
@@ -171,11 +156,11 @@ namespace Engine
 
         public static FrustumCameraParams GetCameraParams(this BoundingFrustum frustum)
         {
-            var pRight = frustum.Right;
-            var pTop = frustum.Top;
-            var pLeft = frustum.Left;
-            var pNear = frustum.Near;
-            var pFar = frustum.Far;
+            var pLeft = frustum.GetPlane(0);
+            var pRight = frustum.GetPlane(1);
+            var pTop = frustum.GetPlane(2);
+            var pNear = frustum.GetPlane(4);
+            var pFar = frustum.GetPlane(5);
             var corners = frustum.GetCorners();
 
             var position = Get3PlanesInterPoint(ref pRight, ref pTop, ref pLeft);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Vortice;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using Vortice.WIC;
@@ -10,7 +9,6 @@ using Vortice.WIC;
 namespace Engine.TextureReader
 {
     using Engine.TextureReader.DDS;
-    using Vortice.Direct3D11;
 
     /// <summary>
     /// Texture data
@@ -572,73 +570,17 @@ namespace Engine.TextureReader
         }
 
         /// <summary>
-        /// Gets a data box
-        /// </summary>
-        /// <param name="slice">Array slice</param>
-        /// <param name="mip">Mip index</param>
-        /// <returns>Returns a databox</returns>
-        public SubresourceData GetData(uint slice, uint mip)
-        {
-            GetDataOffset(slice, mip, out uint offset, out uint size, out uint stride);
-
-            var bytes = new byte[size];
-            Array.Copy(data, offset, bytes, 0, bytes.Length);
-
-            var stream = DataStream.Create(bytes, true, true);
-
-            return new SubresourceData(stream.BasePointer, stride, stride);
-        }
-        /// <summary>
-        /// Gets a data box array for the specified slice
-        /// </summary>
-        /// <param name="slice">Array slice</param>
-        /// <returns>Returns a databox array</returns>
-        public SubresourceData[] GetData(uint slice)
-        {
-            var res = new SubresourceData[MipMaps];
-
-            for (uint i = 0; i < MipMaps; i++)
-            {
-                res[i] = GetData(slice, i);
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Gets the complete data box array
-        /// </summary>
-        /// <returns>Returns a databox array</returns>
-        public SubresourceData[] GetData()
-        {
-            var res = new SubresourceData[ArraySize * MipMaps];
-
-            uint index = 0;
-            for (uint j = 0; j < ArraySize; j++)
-            {
-                for (uint i = 0; i < MipMaps; i++)
-                {
-                    res[index++] = GetData(j, i);
-                }
-            }
-
-            return res;
-        }
-
-        /// <summary>
         /// Get data offset for the specifies slice and mip index
         /// </summary>
         /// <param name="slice">Array slice</param>
         /// <param name="mip">Mip index</param>
-        /// <param name="offset">Returns the slice and mip offset</param>
-        /// <param name="size">Returns the slice and mip size</param>
+        /// <param name="bytes">Returns the data bytes</param>
         /// <param name="stride">Returns the slice and mip stride</param>
         /// <returns>Returns true if the slice and mip were located</returns>
-        private void GetDataOffset(
-            uint slice, uint mip,
-            out uint offset, out uint size, out uint stride)
+        public void GetDataOffset(uint slice, uint mip, out byte[] bytes, out uint stride)
         {
-            offset = 0;
-            size = 0;
+            uint offset = 0;
+            uint size = 0;
             stride = 0;
 
             for (uint j = 0; j < ArraySize; j++)
@@ -662,6 +604,8 @@ namespace Engine.TextureReader
                     {
                         size = numBytes;
                         stride = rowBytes;
+                        bytes = new byte[size];
+                        Array.Copy(data, offset, bytes, 0, size);
 
                         return;
                     }
@@ -678,6 +622,9 @@ namespace Engine.TextureReader
                     index++;
                 }
             }
+
+            bytes = new byte[size];
+            Array.Copy(data, offset, bytes, 0, size);
         }
     }
 }

@@ -479,14 +479,14 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public new Point PointToClient(Point p)
         {
-            var drRes = PointToClient(new Point(p.X, p.Y));
+            var drRes = base.PointToClient(new Point(p.X, p.Y));
 
             return new Point(drRes.X, drRes.Y);
         }
         /// <inheritdoc/>
         public new Point PointToScreen(Point p)
         {
-            var drRes = PointToScreen(new Point(p.X, p.Y));
+            var drRes = base.PointToScreen(new Point(p.X, p.Y));
 
             return new Point(drRes.X, drRes.Y);
         }

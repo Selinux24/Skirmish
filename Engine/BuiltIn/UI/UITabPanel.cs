@@ -3,8 +3,8 @@ using Engine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Selected button color
         /// </summary>
-        private Color4 selectedColor;
+        private Vector4 selectedColor;
 
         /// <summary>
         /// Background
@@ -226,7 +226,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the button selected color
         /// </summary>
-        public Color4 SelectedColor
+        public Vector4 SelectedColor
         {
             get
             {

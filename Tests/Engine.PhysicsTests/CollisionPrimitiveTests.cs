@@ -29,7 +29,7 @@ namespace Engine.PhysicsTests
             var sourcePlane = new Plane(normal, distance);
 
             var plane = new HalfSpaceCollider(sourcePlane);
-            Assert.AreEqual(plane.Normal, normal);
+            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -37,7 +37,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
             plane = new HalfSpaceCollider(normal, distance);
-            Assert.AreEqual(plane.Normal, normal);
+            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -46,7 +46,7 @@ namespace Engine.PhysicsTests
 
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             plane.Attach(rbody);
-            Assert.AreEqual(plane.Normal, normal);
+            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -57,7 +57,7 @@ namespace Engine.PhysicsTests
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
 
             plane.Attach(rbody);
-            Assert.AreEqual(plane.Normal, normal);
+            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -70,18 +70,18 @@ namespace Engine.PhysicsTests
         {
             var extents = Vector3Extensions.Up;
             var sourceBox = new BoundingBox(-extents, extents);
-            var sphere = BoundingSphereExtensions.BoundingSphereFromPoints([.. sourceBox.GetVertices()]);
+            var sphere = BoundingSphereExtensions.FromPoints([.. sourceBox.GetVertices()]);
             var obb = new OrientedBoundingBox([.. sourceBox.GetVertices()]);
 
             var box = new BoxCollider(extents);
-            Assert.AreEqual(box.Extents, extents);
+            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             box.Attach(rbody);
-            Assert.AreEqual(box.Extents, extents);
+            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
@@ -92,7 +92,7 @@ namespace Engine.PhysicsTests
             sphere = sphere.SetTransform(trn);
             obb = obb.SetTransform(trn);
             box.Attach(rbody);
-            Assert.AreEqual(box.Extents, extents);
+            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
@@ -142,7 +142,7 @@ namespace Engine.PhysicsTests
             Triangle[] distinctTris = [.. allTris.Distinct()];
             Vector3[] allPoints = [.. allTris.SelectMany(t => t.GetVertices())];
             Vector3[] distinctPoints = [.. allPoints.Distinct()];
-            var sphere = BoundingSphereExtensions.BoundingSphereFromPoints(distinctPoints);
+            var sphere = BoundingSphereExtensions.FromPoints(distinctPoints);
             var box = BoundingBoxExtensions.BoundingBoxFromPoints(distinctPoints);
             var obb = new OrientedBoundingBox(distinctPoints);
 

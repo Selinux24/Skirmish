@@ -6,7 +6,7 @@ namespace Engine.UI
     /// <summary>
     /// Font map caché helper
     /// </summary>
-    static class FontMapCache<T> where T : struct, IVertexData
+    static class FontMapCache<T> where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Font cache

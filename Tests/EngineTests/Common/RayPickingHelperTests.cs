@@ -87,9 +87,9 @@ namespace EngineTests.Common
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
             var p3 = t3.SelectMany(t => t.GetVertices()).ToArray();
 
-            bsph1 = BoundingSphereExtensions.BoundingSphereFromPoints(p1);
-            bsph2 = BoundingSphereExtensions.BoundingSphereFromPoints(p2);
-            bsph3 = BoundingSphereExtensions.BoundingSphereFromPoints(p3);
+            bsph1 = BoundingSphereExtensions.FromPoints(p1);
+            bsph2 = BoundingSphereExtensions.FromPoints(p2);
+            bsph3 = BoundingSphereExtensions.FromPoints(p3);
 
             bbox1 = BoundingBoxExtensions.BoundingBoxFromPoints(p1);
             bbox2 = BoundingBoxExtensions.BoundingBoxFromPoints(p2);

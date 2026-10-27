@@ -494,7 +494,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, p.Distance);
-            Assert.AreEqual(Vector3.Zero, p.Position);
+            Assert.AreEqual(Vector3.Zero, p.Position, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -641,66 +641,66 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactOverOriginTest()
         {
-            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, 0));
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsFalse(res);
 
-            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact * 0.5f, 0));
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactBelowOriginTest()
         {
-            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, 0));
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsFalse(res);
 
-            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact * 0.5f, 0));
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoOverOriginTest()
         {
-            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, 0));
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsFalse(res);
 
-            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto * 0.5f, 0));
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoBelowOriginTest()
         {
-            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, 0));
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsFalse(res);
 
-            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto * 0.5f, 0));
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterOverOriginTest()
         {
-            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, 0));
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsFalse(res);
 
-            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter * 0.5f, 0));
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterBelowOriginTest()
         {
-            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, 0));
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsFalse(res);
 
-            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter * 0.5f, 0));
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter * 0.5f, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
             Assert.IsFalse(res);
         }
@@ -1032,51 +1032,51 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactPlaneLeftCoplanarTest()
         {
-            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, 0, 0));
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsFalse(res);
 
-            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact * 0.5f, 0, 0));
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactPlaneRightCoplanarTest()
         {
-            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, 0, 0));
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsFalse(res);
 
-            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact * 0.5f, 0, 0));
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactPlaneForwardCoplanarTest()
         {
-            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaExact));
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaExact));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsFalse(res);
 
-            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaExact * 0.5f));
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaExact * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactPlaneBackwardCoplanarTest()
         {
-            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaExact));
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaExact));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsFalse(res);
 
-            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaExact * 0.5f));
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaExact * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactOverLeftCoplanarTest()
         {
-            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, triToTriDeltaExact, 0));
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, triToTriDeltaExact, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
 
@@ -1085,7 +1085,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactOverRightCoplanarTest()
         {
-            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, triToTriDeltaExact, 0));
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, triToTriDeltaExact, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
 
@@ -1094,7 +1094,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactOverForwardCoplanarTest()
         {
-            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, triToTriDeltaExact));
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, triToTriDeltaExact));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
 
@@ -1103,7 +1103,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactOverBackwardCoplanarTest()
         {
-            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, -triToTriDeltaExact));
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaExact, -triToTriDeltaExact));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
 
@@ -1112,7 +1112,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactBelowLeftCoplanarTest()
         {
-            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, -triToTriDeltaExact, 0));
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaExact, -triToTriDeltaExact, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
 
@@ -1121,7 +1121,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactBelowRightCoplanarTest()
         {
-            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, -triToTriDeltaExact, 0));
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaExact, -triToTriDeltaExact, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
 
@@ -1130,7 +1130,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactBelowForwardCoplanarTest()
         {
-            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, triToTriDeltaExact));
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, triToTriDeltaExact));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
 
@@ -1139,7 +1139,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularExactBelowBackwardCoplanarTest()
         {
-            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, -triToTriDeltaExact));
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaExact, -triToTriDeltaExact));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
 
@@ -1149,51 +1149,51 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoPlaneLeftCoplanarTest()
         {
-            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, 0, 0));
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsFalse(res);
 
-            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto * 0.5f, 0, 0));
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoPlaneRightCoplanarTest()
         {
-            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, 0, 0));
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsFalse(res);
 
-            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto * 0.5f, 0, 0));
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoPlaneForwardCoplanarTest()
         {
-            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaInto));
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaInto));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsFalse(res);
 
-            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaInto * 0.5f));
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaInto * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoPlaneBackwardCoplanarTest()
         {
-            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaInto));
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaInto));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsFalse(res);
 
-            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaInto * 0.5f));
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaInto * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoOverLeftCoplanarTest()
         {
-            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, triToTriDeltaInto, 0));
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, triToTriDeltaInto, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
 
@@ -1202,7 +1202,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoOverRightCoplanarTest()
         {
-            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, triToTriDeltaInto, 0));
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, triToTriDeltaInto, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
 
@@ -1211,7 +1211,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoOverForwardCoplanarTest()
         {
-            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, triToTriDeltaInto));
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, triToTriDeltaInto));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
 
@@ -1220,7 +1220,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoOverBackwardCoplanarTest()
         {
-            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, -triToTriDeltaInto));
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaInto, -triToTriDeltaInto));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
 
@@ -1229,7 +1229,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoBelowLeftCoplanarTest()
         {
-            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, -triToTriDeltaInto, 0));
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaInto, -triToTriDeltaInto, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
 
@@ -1238,7 +1238,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoBelowRightCoplanarTest()
         {
-            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, -triToTriDeltaInto, 0));
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaInto, -triToTriDeltaInto, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
 
@@ -1247,7 +1247,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoBelowForwardCoplanarTest()
         {
-            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, triToTriDeltaInto));
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, triToTriDeltaInto));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
 
@@ -1256,7 +1256,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularIntoBelowBackwardCoplanarTest()
         {
-            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, -triToTriDeltaInto));
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaInto, -triToTriDeltaInto));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
 
@@ -1266,51 +1266,51 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterPlaneLeftCoplanarTest()
         {
-            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, 0, 0));
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsFalse(res);
 
-            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter * 0.5f, 0, 0));
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterPlaneRightCoplanarTest()
         {
-            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, 0, 0));
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, 0, 0));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsFalse(res);
 
-            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter * 0.5f, 0, 0));
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter * 0.5f, 0, 0));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterPlaneForwardCoplanarTest()
         {
-            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaOuter));
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaOuter));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsFalse(res);
 
-            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaOuter * 0.5f));
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, triToTriDeltaOuter * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterPlaneBackwardCoplanarTest()
         {
-            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaOuter));
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaOuter));
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsFalse(res);
 
-            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaOuter * 0.5f));
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, 0, -triToTriDeltaOuter * 0.5f));
             res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
             Assert.IsFalse(res);
         }
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterOverLeftCoplanarTest()
         {
-            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, triToTriDeltaOuter, 0));
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, triToTriDeltaOuter, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
 
@@ -1319,7 +1319,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterOverRightCoplanarTest()
         {
-            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, triToTriDeltaOuter, 0));
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, triToTriDeltaOuter, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
 
@@ -1328,7 +1328,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterOverForwardCoplanarTest()
         {
-            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, triToTriDeltaOuter));
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, triToTriDeltaOuter));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
 
@@ -1337,7 +1337,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterOverBackwardCoplanarTest()
         {
-            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, -triToTriDeltaOuter));
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, triToTriDeltaOuter, -triToTriDeltaOuter));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
 
@@ -1346,7 +1346,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterBelowLeftCoplanarTest()
         {
-            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(-triToTriDeltaOuter, -triToTriDeltaOuter, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
 
@@ -1355,7 +1355,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterBelowRightCoplanarTest()
         {
-            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(triToTriDeltaOuter, -triToTriDeltaOuter, 0));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
 
@@ -1364,7 +1364,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterBelowForwardCoplanarTest()
         {
-            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, triToTriDeltaOuter));
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, triToTriDeltaOuter));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
 
@@ -1373,7 +1373,7 @@ namespace EngineTests.Common
         [TestMethod()]
         public void TriangleIntersectsTrianglePerpendicularOuterBelowBackwardCoplanarTest()
         {
-            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, -triToTriDeltaOuter));
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix4x4Extensions.RotationAxis(Vector3.UnitZ, Helper.PiOver2) * Matrix4x4.CreateTranslation(0, -triToTriDeltaOuter, -triToTriDeltaOuter));
 
             var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
 
@@ -1411,9 +1411,9 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.IsNotNull(segment);
-            Assert.AreNotEqual(segment.Value.Point2, segment.Value.Point1);
-            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Value.Point1);
-            Assert.AreEqual(new Vector3(0, 0, 0), segment.Value.Point2);
+            Assert.AreNotEqual(segment.Value.Point2, segment.Value.Point1, Vector3Extensions.Comparer);
+            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Value.Point1, Vector3Extensions.Comparer);
+            Assert.AreEqual(new Vector3(0, 0, 0), segment.Value.Point2, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultNotIntersectedTest()
@@ -1459,7 +1459,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri2, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(sph1.Center, pick.Position);
+            Assert.AreEqual(sph1.Center, pick.Position, Vector3Extensions.Comparer);
             Assert.AreEqual(0, pick.Distance);
             Assert.AreEqual(tri2, pick.Primitive);
         }
@@ -1469,7 +1469,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri3, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(sph1.Center, pick.Position);
+            Assert.AreEqual(sph1.Center, pick.Position, Vector3Extensions.Comparer);
             Assert.AreEqual(0, pick.Distance);
             Assert.AreEqual(tri3, pick.Primitive);
         }
@@ -1479,7 +1479,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri4, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(tri4.Point3, pick.Position);
+            Assert.AreEqual(tri4.Point3, pick.Position, Vector3Extensions.Comparer);
             Assert.AreEqual(Vector3.Distance(sph1.Center, tri4.Point3), pick.Distance);
             Assert.AreEqual(tri4, pick.Primitive);
         }
@@ -1489,7 +1489,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri5, out var pick);
 
             Assert.IsFalse(res);
-            Assert.AreEqual(Vector3.Zero, pick.Position);
+            Assert.AreEqual(Vector3.Zero, pick.Position, Vector3Extensions.Comparer);
             Assert.AreEqual(float.MaxValue, pick.Distance);
             Assert.AreEqual(new Triangle(), pick.Primitive);
         }
@@ -1629,7 +1629,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreEqual(Vector3.Distance(rayIn.Position, Vector3.Zero), distance);
-            Assert.AreEqual(Vector3.Zero, position);
+            Assert.AreEqual(Vector3.Zero, position, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void RayIntersectsTriangleNotIntersectedTest()
@@ -1638,7 +1638,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, position);
+            Assert.AreEqual(Vector3.Zero, position, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -1691,7 +1691,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point);
+            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultContainedTest()
@@ -1700,7 +1700,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreNotEqual(float.MaxValue, distance);
-            Assert.AreNotEqual(Vector3.Zero, point);
+            Assert.AreNotEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultIntersectedTest()
@@ -1709,7 +1709,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreNotEqual(float.MaxValue, distance);
-            Assert.AreNotEqual(Vector3.Zero, point);
+            Assert.AreNotEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest()
@@ -1718,7 +1718,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point);
+            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest2()
@@ -1727,7 +1727,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point);
+            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest3()
@@ -1736,7 +1736,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point);
+            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -1843,7 +1843,7 @@ namespace EngineTests.Common
         {
             var p = Intersection.ClosestPointInRay(rayIn, pointRayLeft);
 
-            Assert.AreEqual(rayIn.Position, p);
+            Assert.AreEqual(rayIn.Position, p, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInRayCenterTest()
@@ -1852,7 +1852,7 @@ namespace EngineTests.Common
 
             float d = Vector3.Dot(pointRayCenter - rayIn.Position, Vector3.Normalize(rayIn.Direction));
             Vector3 tp = rayIn.Position + (Vector3.Normalize(rayIn.Direction) * d);
-            Assert.AreEqual(tp, p);
+            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInRayRightTest()
@@ -1860,7 +1860,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayRigh);
 
             Vector3 tp = rayIn.Position + rayIn.Direction;
-            Assert.AreEqual(tp, p);
+            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -1869,7 +1869,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayLeft, out float d);
 
             Vector3 tp = rayIn.Position;
-            Assert.AreEqual(tp, p);
+            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
             Assert.AreEqual(Vector3.Distance(pointRayLeft, p), d);
         }
         [TestMethod()]
@@ -1879,7 +1879,7 @@ namespace EngineTests.Common
 
             float td = Vector3.Dot(pointRayCenter - rayIn.Position, Vector3.Normalize(rayIn.Direction));
             Vector3 tp = rayIn.Position + (Vector3.Normalize(rayIn.Direction) * td);
-            Assert.AreEqual(tp, p);
+            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
             Assert.AreEqual(Vector3.Distance(pointRayCenter, p), d);
         }
         [TestMethod()]
@@ -1888,7 +1888,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayRigh, out float d);
 
             Vector3 tp = rayIn.Position + rayIn.Direction;
-            Assert.AreEqual(tp, p);
+            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
             Assert.AreEqual(Vector3.Distance(pointRayRigh, p), d);
         }
 
@@ -1897,105 +1897,105 @@ namespace EngineTests.Common
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterPlane, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest);
+            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleCenterOverTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterOver, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest);
+            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleCenterBelowTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterBelow, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest);
+            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP1PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP1Perfect, tri1);
 
-            Assert.AreEqual(triP1Perfect, closest);
+            Assert.AreEqual(triP1Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP1Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP1, tri1);
 
-            Assert.AreEqual(triP1Perfect, closest);
+            Assert.AreEqual(triP1Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP2PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP2Perfect, tri1);
 
-            Assert.AreEqual(triP2Perfect, closest);
+            Assert.AreEqual(triP2Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP2Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP2, tri1);
 
-            Assert.AreEqual(triP2Perfect, closest);
+            Assert.AreEqual(triP2Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP3PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP3Perfect, tri1);
 
-            Assert.AreEqual(triP3Perfect, closest);
+            Assert.AreEqual(triP3Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP3Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP3, tri1);
 
-            Assert.AreEqual(triP3Perfect, closest);
+            Assert.AreEqual(triP3Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS1PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS1Perfect, tri1);
 
-            Assert.AreEqual(triS1Perfect, closest);
+            Assert.AreEqual(triS1Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS1Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS1, tri1);
 
-            Assert.AreEqual(triS1Perfect, closest);
+            Assert.AreEqual(triS1Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS2PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS2Perfect, tri1);
 
-            Assert.AreEqual(triS2Perfect, closest);
+            Assert.AreEqual(triS2Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS2Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS2, tri1);
 
-            Assert.AreEqual(triS2Perfect, closest);
+            Assert.AreEqual(triS2Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS3PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS3Perfect, tri1);
 
-            Assert.AreEqual(triS3Perfect, closest);
+            Assert.AreEqual(triS3Perfect, closest, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS3Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS3, tri1);
 
-            Assert.AreEqual(triS3Perfect, closest);
+            Assert.AreEqual(triS3Perfect, closest, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -2004,7 +2004,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterPlane, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint);
+            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshCenterOverTest()
@@ -2012,7 +2012,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterOver, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint);
+            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshCenterBelowTest()
@@ -2020,7 +2020,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterBelow, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint);
+            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP1PerfectTest()
@@ -2028,7 +2028,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP1Perfect, closestPoint);
+            Assert.AreEqual(triP1Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP1Test()
@@ -2036,7 +2036,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP1Perfect, closestPoint);
+            Assert.AreEqual(triP1Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP2PerfectTest()
@@ -2044,7 +2044,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP2Perfect, closestPoint);
+            Assert.AreEqual(triP2Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP2Test()
@@ -2052,7 +2052,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP2Perfect, closestPoint);
+            Assert.AreEqual(triP2Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP3PerfectTest()
@@ -2060,7 +2060,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP3Perfect, closestPoint);
+            Assert.AreEqual(triP3Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshP3Test()
@@ -2068,7 +2068,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP3Perfect, closestPoint);
+            Assert.AreEqual(triP3Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS1PerfectTest()
@@ -2076,7 +2076,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS1Perfect, closestPoint);
+            Assert.AreEqual(triS1Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS1Test()
@@ -2084,7 +2084,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS1Perfect, closestPoint);
+            Assert.AreEqual(triS1Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS2PerfectTest()
@@ -2092,7 +2092,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS2Perfect, closestPoint);
+            Assert.AreEqual(triS2Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS2Test()
@@ -2100,7 +2100,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS2Perfect, closestPoint);
+            Assert.AreEqual(triS2Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS3PerfectTest()
@@ -2108,7 +2108,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS3Perfect, closestPoint);
+            Assert.AreEqual(triS3Perfect, closestPoint, Vector3Extensions.Comparer);
         }
         [TestMethod()]
         public void ClosestPointInMeshS3Test()
@@ -2116,7 +2116,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS3Perfect, closestPoint);
+            Assert.AreEqual(triS3Perfect, closestPoint, Vector3Extensions.Comparer);
         }
 
         [TestMethod()]
@@ -2748,13 +2748,17 @@ namespace EngineTests.Common
         }
 
         [TestMethod()]
+        [DataRow(0f, 3f, false)]
+        [DataRow(0f, 2f, false)]
         [DataRow(0f, 1f, false)]
         [DataRow(0f, 0.5f, false)]
         [DataRow(0f, 0f, true)]
         [DataRow(0f, -1f, true)]
         [DataRow(0f, -2f, true)]
         [DataRow(0f, -3f, true)]
-        [DataRow(Helper.PiOver4, 1f, false)]
+        [DataRow(Helper.PiOver4, 3f, false)]
+        [DataRow(Helper.PiOver4, 2f, false)]
+        [DataRow(Helper.PiOver4, 1f, true)]
         [DataRow(Helper.PiOver4, 0.5f, true)]
         [DataRow(Helper.PiOver4, 0f, true)]
         [DataRow(Helper.PiOver4, -1f, true)]

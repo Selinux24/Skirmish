@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.Direct3D;
@@ -321,6 +322,8 @@ namespace Engine.Common
             Name = name ?? throw new ArgumentNullException(nameof(name), "A device context name must be specified.");
             this.deviceContext = deviceContext ?? throw new ArgumentNullException(nameof(deviceContext), "A device context must be specified.");
 
+            deviceContext.DebugName = name;
+
             IsImmediateContext = immediate;
 
             PassIndex = passIndex;
@@ -441,12 +444,12 @@ namespace Engine.Common
             frameCounters.RenderTargetSets++;
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor)
         {
             SetRenderTargets(renderTargets, clearRT, clearRTColor, false);
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, bool freeOMResources)
         {
             if (freeOMResources)
             {
@@ -463,13 +466,13 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], (Color4)clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
         {
             if (freeOMResources)
             {
@@ -487,7 +490,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], (Color4)clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -544,7 +547,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), (Color4)state.BlendFactor, state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;

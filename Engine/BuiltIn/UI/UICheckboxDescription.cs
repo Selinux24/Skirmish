@@ -1,6 +1,5 @@
 ﻿using Engine.UI;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -21,7 +20,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="colorOn">State on color</param>
         /// <param name="colorOff">State off color</param>
-        public static UICheckboxDescription Default(Color4 colorOn, Color4 colorOff)
+        public static UICheckboxDescription Default(Vector4 colorOn, Vector4 colorOff)
         {
             return new()
             {
@@ -80,7 +79,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="colorOn">State on color</param>
         /// <param name="colorOff">State off color</param>
-        public static UICheckboxDescription Default(Engine.UI.FontDescription font, Color4 colorOn, Color4 colorOff)
+        public static UICheckboxDescription Default(Engine.UI.FontDescription font, Vector4 colorOn, Vector4 colorOff)
         {
             return new()
             {

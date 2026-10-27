@@ -32,7 +32,7 @@ namespace Engine.Common
             if (graphics == null) throw new ArgumentNullException(nameof(graphics), "Must specify the graphics instance to create the constant buffer in the graphics device.");
 
             Name = name;
-            DataStream = new EngineDataStream(Marshal.SizeOf(typeof(T)), true, true);
+            DataStream = new EngineDataStream(Marshal.SizeOf<T>(), true, true);
             Buffer = graphics.CreateConstantBuffer<T>(name);
         }
         /// <summary>
@@ -65,7 +65,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{nameof(EngineConstantBuffer<T>)} {Name}";
+            return $"{nameof(EngineConstantBuffer<>)} {Name}";
         }
     }
 }

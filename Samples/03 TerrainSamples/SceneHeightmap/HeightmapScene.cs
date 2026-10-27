@@ -164,7 +164,7 @@ namespace TerrainSamples.SceneHeightmap
         private GeometryColorDrawer<Triangle> soldierTris = null;
         private GeometryColorDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
-        private readonly Color4 soldierColorDEBUG = new(Color.Orange.RGB(), 0.6f);
+        private readonly Vector4 soldierColorDEBUG = new(Color.Orange.RGB(), 0.6f);
 
         private ModelInstanced troops = null;
 
@@ -284,7 +284,7 @@ namespace TerrainSamples.SceneHeightmap
             help.Text = "";
             help2.Text = "";
 
-            var desc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            var desc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
 
             panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, LayerUI - 1);
         }
@@ -1716,10 +1716,10 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateDebugDrawers()
         {
-            Color4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
+            Vector4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
 
-            Color4 frustumLColor = new(Color.LightPink.RGB(), 0.75f);
-            Color4 frustumTColor = new(Color.LightPink.RGB(), 0.25f);
+            Vector4 frustumLColor = new(Color.LightPink.RGB(), 0.75f);
+            Vector4 frustumTColor = new(Color.LightPink.RGB(), 0.25f);
 
             lightsVolumeDrawer.Clear();
             lightsVolumeDrawer.Clear();
@@ -1739,7 +1739,7 @@ namespace TerrainSamples.SceneHeightmap
                 UpdateCameraFrustum(frustumLColor, frustumTColor);
             }
         }
-        private void UpdateDebugTerrain(Color4 color)
+        private void UpdateDebugTerrain(Vector4 color)
         {
             if (terrainInitializedDEBUG)
             {
@@ -1752,7 +1752,7 @@ namespace TerrainSamples.SceneHeightmap
 
             terrainInitializedDEBUG = true;
         }
-        private void UpdateCameraFrustum(Color4 lColor, Color4 tColor)
+        private void UpdateCameraFrustum(Vector4 lColor, Vector4 tColor)
         {
             var lines = Line3D.CreateFrustum(cameraFrustum);
             var tris = GeometryUtil.CreateFrustum(Topology.TriangleList, cameraFrustum);
@@ -1864,21 +1864,21 @@ namespace TerrainSamples.SceneHeightmap
             {
                 var lines = spot.GetVolume(12);
 
-                lightsDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Vector4(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(6, 12);
 
-                lightsDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Vector4(point.DiffuseColor, 0.15f), lines);
             }
         }
         private void UpdateDebugLightCullingVolumes()
         {
             lightsVolumeDrawer.Clear();
 
-            var lColor = new Color4(Color.MediumPurple.RGB(), 0.15f);
+            var lColor = new Vector4(Color.MediumPurple.RGB(), 0.15f);
 
             BoundingSphere[] sphList =
             [

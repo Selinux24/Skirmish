@@ -99,7 +99,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             return GetDrawer(mesh.GetVertexType(), instanced, useTextureAlpha);
         }
         /// <inheritdoc/>
-        public IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : struct, IVertexData
+        public IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : unmanaged, IVertexData
         {
             return GetDrawer(default(T), instanced, useTextureAlpha);
         }
