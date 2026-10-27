@@ -2748,13 +2748,17 @@ namespace EngineTests.Common
         }
 
         [TestMethod()]
+        [DataRow(0f, 3f, false)]
+        [DataRow(0f, 2f, false)]
         [DataRow(0f, 1f, false)]
         [DataRow(0f, 0.5f, false)]
         [DataRow(0f, 0f, true)]
         [DataRow(0f, -1f, true)]
         [DataRow(0f, -2f, true)]
         [DataRow(0f, -3f, true)]
-        [DataRow(MathUtil.PiOverFour, 1f, false)]
+        [DataRow(MathUtil.PiOverFour, 3f, false)]
+        [DataRow(MathUtil.PiOverFour, 2f, false)]
+        [DataRow(MathUtil.PiOverFour, 1f, true)]
         [DataRow(MathUtil.PiOverFour, 0.5f, true)]
         [DataRow(MathUtil.PiOverFour, 0f, true)]
         [DataRow(MathUtil.PiOverFour, -1f, true)]

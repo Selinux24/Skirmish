@@ -405,28 +405,28 @@ namespace Engine.Common
 
                 var base1 = basePosition + dir;
                 float distance = Vector3.Dot(plane.Normal, base1) + plane.D;
-                if (distance <= 0)
+                if (distance <= MathUtil.ZeroTolerance)
                 {
                     return true;
                 }
 
                 var cap1 = capPosition + dir;
                 distance = Vector3.Dot(plane.Normal, cap1) + plane.D;
-                if (distance <= 0)
+                if (distance <= MathUtil.ZeroTolerance)
                 {
                     return true;
                 }
 
                 var base2 = basePosition - dir;
                 distance = Vector3.Dot(plane.Normal, base2) + plane.D;
-                if (distance <= 0)
+                if (distance <= MathUtil.ZeroTolerance)
                 {
                     return true;
                 }
 
                 var cap2 = capPosition - dir;
                 distance = Vector3.Dot(plane.Normal, cap2) + plane.D;
-                if (distance <= 0)
+                if (distance <= MathUtil.ZeroTolerance)
                 {
                     return true;
                 }
