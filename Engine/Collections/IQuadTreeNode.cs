@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Collections
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Quad-tree node interface
     /// </summary>

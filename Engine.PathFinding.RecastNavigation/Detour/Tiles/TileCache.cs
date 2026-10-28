@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tile Cache
     /// </summary>
@@ -310,7 +311,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     var tbounds = tile.Header.GetTightTileBounds(cs);
 
-                    if (Utils.OverlapBounds(bounds.Min, bounds.Max, tbounds.Min, tbounds.Max) && resultCount < maxResults)
+                    if (Utils.OverlapBounds(bounds.Minimum, bounds.Maximum, tbounds.Minimum, tbounds.Maximum) && resultCount < maxResults)
                     {
                         resultCount++;
 
@@ -791,7 +792,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 navData.BuildData = new()
                 {
-                    Origin = tile.Header.Bounds.Min,
+                    Origin = tile.Header.Bounds.Minimum,
                     CellSize = m_params.CellSize,
                     CellHeight = m_params.CellHeight,
                     TileCacheLayer = tlayer,
@@ -825,7 +826,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                m_obstacles[i].Rasterize(ref tlayer, tile.Header.Bounds.Min, m_params.CellSize, m_params.CellHeight);
+                m_obstacles[i].Rasterize(ref tlayer, tile.Header.Bounds.Minimum, m_params.CellSize, m_params.CellHeight);
             }
         }
     }

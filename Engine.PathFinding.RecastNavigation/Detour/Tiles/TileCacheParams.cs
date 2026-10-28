@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tile cache parameters
     /// </summary>
@@ -82,10 +83,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             float tw = Width * CellSize;
             float th = Height * CellSize;
-            int tx0 = (int)MathF.Floor((bounds.Min.X - Origin.X) / tw);
-            int tx1 = (int)MathF.Floor((bounds.Max.X - Origin.X) / tw);
-            int ty0 = (int)MathF.Floor((bounds.Min.Z - Origin.Z) / th);
-            int ty1 = (int)MathF.Floor((bounds.Max.Z - Origin.Z) / th);
+            int tx0 = (int)MathF.Floor((bounds.Minimum.X - Origin.X) / tw);
+            int tx1 = (int)MathF.Floor((bounds.Maximum.X - Origin.X) / tw);
+            int ty0 = (int)MathF.Floor((bounds.Minimum.Z - Origin.Z) / th);
+            int ty1 = (int)MathF.Floor((bounds.Maximum.Z - Origin.Z) / th);
 
             for (int ty = ty0; ty <= ty1; ++ty)
             {
@@ -112,7 +113,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Tile cache params.
             return new()
             {
-                Origin = generationBounds.Min,
+                Origin = generationBounds.Minimum,
                 CellSize = settings.CellSize,
                 CellHeight = settings.CellHeight,
                 Width = tileSize,
@@ -125,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileWidth = tileWidth,
                 TileHeight = tileHeight,
                 MaxObstacles = 128,
-                
+
                 EnableDebugInfo = settings.EnableDebugInfo,
             };
         }

@@ -75,6 +75,20 @@ namespace Engine
             return MathHelper.ToDegrees(d);
         }
 
+        /// <summary>
+        /// Performs smooth (cubic Hermite) interpolation between 0 and 1.
+        /// </summary>
+        /// <remarks>
+        /// See https://en.wikipedia.org/wiki/Smoothstep
+        /// </remarks>
+        /// <param name="amount">Value between 0 and 1 indicating interpolation amount.</param>
+        public static float SmoothStep(float amount)
+        {
+            return (amount <= 0) ? 0
+                : (amount >= 1) ? 1
+                : amount * amount * (3 - (2 * amount));
+        }
+
         #endregion
 
         #region Random

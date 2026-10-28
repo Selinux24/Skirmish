@@ -1,10 +1,11 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using System;
+﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+
     /// <summary>
     /// Navigation mesh parameters
     /// </summary>
@@ -42,9 +43,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             return new()
             {
-                Origin = generationBounds.Min,
-                TileWidth = generationBounds.Max.X - generationBounds.Min.X,
-                TileHeight = generationBounds.Max.Z - generationBounds.Min.Z,
+                Origin = generationBounds.Minimum,
+                TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
+                TileHeight = generationBounds.Maximum.Z - generationBounds.Minimum.Z,
                 MaxTiles = 1,
                 MaxPolys = polyCount,
             };
@@ -79,7 +80,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return new()
             {
-                Origin = generationBounds.Min,
+                Origin = generationBounds.Minimum,
                 TileWidth = tileCellSize,
                 TileHeight = tileCellSize,
                 MaxTiles = maxTiles,

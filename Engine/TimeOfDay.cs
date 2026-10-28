@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="azimuth">Azimuth in radians</param>
         public static Vector3 CalcLightDirection(float elevation, float azimuth)
         {
-            Matrix4x4 rot = Matrix4x4.CreateFromYawPitchRoll(azimuth, elevation, 0);
+            Matrix4x4 rot = Matrix4x4.RotationYawPitchRoll(azimuth, elevation, 0);
 
             return Vector3.TransformNormal(Vector3Extensions.Up, rot);
         }

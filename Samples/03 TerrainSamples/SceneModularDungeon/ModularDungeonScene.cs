@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
@@ -908,7 +907,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(i =>
                 {
                     var bbox = i.Instance.GetBoundingBox();
-                    return Camera.Frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+                    return Camera.Frustum.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
                 })
                 .Where(i =>
                 {
@@ -919,13 +918,13 @@ namespace TerrainSamples.SceneModularDungeon
                     else
                     {
                         var bbox = i.Instance.GetBoundingBox();
-                        var center = bbox.GetCenter();
-                        var extents = bbox.GetExtents();
+                        var center = bbox.Center;
+                        var extents = bbox.Extents;
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
-                        float? dist = sBbox.Intersects(ray);
-                        return dist.HasValue;
+                        Ray pRay = ray;
+                        return sBbox.Intersects(ref pRay, out float _);
                     }
                 })
                 .ToList();

@@ -85,8 +85,8 @@ namespace TerrainSamples.SceneRts.Controllers
             var futureTarget = futurePosition + (futurePosition - position);
 
             //Calculates a delta using the future angle
-            var futureRotation = QuaternionExtensions.CreateLookAtLeftHanded(position, futureTarget, futureNormal, Axis.Y);
-            float futureAngle = QuaternionExtensions.Angle(rotation, futureRotation);
+            var futureRotation = Quaternion.LookAtLH(position, futureTarget, futureNormal, Axis.Y);
+            float futureAngle = Quaternion.GetAngle(rotation, futureRotation);
             float maxRot = Helper.PiOver2;
             futureAngle = MathF.Min(futureAngle, maxRot);
             float velDelta = 1.0f - (futureAngle / maxRot);

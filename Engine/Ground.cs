@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -46,7 +45,7 @@ namespace Engine
                 return false;
             }
 
-            bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
+            bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == Vortice.Mathematics.ContainmentType.Disjoint;
             if (!cull)
             {
                 distance = 0;
@@ -74,7 +73,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            return BoundingSphere.CreateFromBoundingBox(GetBoundingBox(refresh));
+            return BoundingSphere.FromBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
         public virtual BoundingBox GetBoundingBox(bool refresh = false)
@@ -166,12 +165,12 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+            return Intersection.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

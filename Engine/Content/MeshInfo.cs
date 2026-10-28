@@ -1,13 +1,14 @@
-﻿using Engine.BuiltIn.Format;
-using Engine.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Mesh information
     /// </summary>

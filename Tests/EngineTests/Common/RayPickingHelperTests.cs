@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace EngineTests.Common
 {
@@ -89,13 +88,13 @@ namespace EngineTests.Common
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
             var p3 = t3.SelectMany(t => t.GetVertices()).ToArray();
 
-            bsph1 = BoundingSphereExtensions.FromPoints(p1);
-            bsph2 = BoundingSphereExtensions.FromPoints(p2);
-            bsph3 = BoundingSphereExtensions.FromPoints(p3);
+            bsph1 = BoundingSphere.FromPoints(p1);
+            bsph2 = BoundingSphere.FromPoints(p2);
+            bsph3 = BoundingSphere.FromPoints(p3);
 
-            bbox1 = BoundingBoxExtensions.BoundingBoxFromPoints(p1);
-            bbox2 = BoundingBoxExtensions.BoundingBoxFromPoints(p2);
-            bbox3 = BoundingBoxExtensions.BoundingBoxFromPoints(p3);
+            bbox1 = BoundingBox.FromPoints(p1);
+            bbox2 = BoundingBox.FromPoints(p2);
+            bbox3 = BoundingBox.FromPoints(p3);
 
             var bbox1Tris = Triangle.ComputeTriangleList(bbox1);
             var bbox2Tris = Triangle.ComputeTriangleList(bbox2);

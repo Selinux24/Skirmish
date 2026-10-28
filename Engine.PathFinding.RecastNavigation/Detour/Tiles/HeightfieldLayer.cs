@@ -1,8 +1,9 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Heightfield layer
     /// </summary>

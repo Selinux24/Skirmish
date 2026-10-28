@@ -155,7 +155,7 @@ namespace BasicSamples.SceneWater
             };
             var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
-            groundDesc.Heightmap.Transform = Matrix4x4.CreateTranslation(0, -terrainHeight * 0.99f, 0);
+            groundDesc.Heightmap.Transform = Matrix4x4.Translation(0, -terrainHeight * 0.99f, 0);
 
             await AddComponentGround<Scenery, SceneryDescription>("SeaBottom", "Sea Bottom", groundDesc);
         }

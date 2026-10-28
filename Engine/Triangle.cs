@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -442,7 +441,7 @@ namespace Engine
         /// </summary>
         public readonly Plane GetPlane()
         {
-            return Plane.CreateFromVertices(Point1, Point2, Point3);
+            return new Plane(Point1, Point2, Point3);
         }
         /// <summary>
         /// Gets the triangle minimal point
@@ -543,7 +542,7 @@ namespace Engine
         /// </summary>
         public readonly BoundingBox GetBounds()
         {
-            return BoundingBoxExtensions.BoundingBoxFromPoints([Point1, Point2, Point3]);
+            return BoundingBox.FromPoints([Point1, Point2, Point3]);
         }
 
         /// <summary>

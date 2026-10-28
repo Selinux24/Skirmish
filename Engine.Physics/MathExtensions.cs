@@ -2,6 +2,8 @@
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Extensions
     /// </summary>
@@ -60,7 +62,7 @@ namespace Engine.Physics
         /// <param name="matrix">Matrix</param>
         /// <param name="vector">Vector</param>
         /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
-        public static Vector3 TransformTranspose(Matrix4x4 matrix, Vector3 vector)
+        public static Vector3 TransformTranspose(Matrix3x3 matrix, Vector3 vector)
         {
             Vector3 result;
             result.X = vector.X * matrix.M11 + vector.Y * matrix.M21 + vector.Z * matrix.M31;

@@ -20,7 +20,7 @@ namespace Engine.PhysicsTests
 
         static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix4x4 transform)
         {
-            var p = PlaneExtensions.CreatePlane(point, normal);
+            var p = new Plane(point, normal);
             var c = new HalfSpaceCollider(p);
             var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
@@ -67,7 +67,7 @@ namespace Engine.PhysicsTests
             var data3 = new ContactResolver();
 
             float ah = 0;
-            var trnA = Matrix4x4.CreateTranslation(0, 0, 0);
+            var trnA = Matrix4x4.Translation(0, 0, 0);
 
             var t = new Triangle(new Vector3(-10, ah, -10), new Vector3(0, ah, 10), new Vector3(10, ah, -10));
             var t1 = new Triangle(new Vector3(-10, ah, -10), new Vector3(-10, ah, 10), new Vector3(10, ah, -10));
@@ -78,7 +78,7 @@ namespace Engine.PhysicsTests
             var c3 = FromTriangles([t1, t2], trnA);
 
             float bh = -0.5f;
-            Matrix4x4 trnB = Matrix4x4.CreateTranslation(0, bh, 0);
+            Matrix4x4 trnB = Matrix4x4.Translation(0, bh, 0);
             float r = 1f;
 
             var b = FromRadius(r, trnB);

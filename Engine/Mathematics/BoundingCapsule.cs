@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {
@@ -106,7 +105,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public readonly ContainmentType Contains(ref Vector3 point)
+        public readonly Vortice.Mathematics.ContainmentType Contains(ref Vector3 point)
         {
             // Find capsule points
             var p1 = BasePosition;
@@ -117,23 +116,23 @@ namespace Engine.Mathematics
             if (distance > Radius)
             {
                 // Outside capsule radius
-                return ContainmentType.Disjoint;
+                return Vortice.Mathematics.ContainmentType.Disjoint;
             }
 
             if (Helper.NearEqual(distance, Radius))
             {
                 // In the capsule
-                return ContainmentType.Intersects;
+                return Vortice.Mathematics.ContainmentType.Intersects;
             }
 
-            return ContainmentType.Contains;
+            return Vortice.Mathematics.ContainmentType.Contains;
         }
         /// <summary>
         /// Determines whether the current objects contains a point.
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public readonly ContainmentType Contains(Vector3 point)
+        public readonly Vortice.Mathematics.ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
         }

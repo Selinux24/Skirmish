@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Scene light
     /// </summary>

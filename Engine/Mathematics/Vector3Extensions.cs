@@ -142,8 +142,8 @@ namespace Engine.Mathematics
         /// <param name="vec">Vector</param>
         public static void GetVectorFromAngles(float yaw, float pitch, out Vector3 vec)
         {
-            Quaternion rot = Quaternion.CreateFromYawPitchRoll(-yaw, pitch, 0.0f);
-            Matrix4x4 mat = Matrix4x4.CreateFromQuaternion(rot);
+            Quaternion rot = Quaternion.RotationYawPitchRoll(-yaw, pitch, 0.0f);
+            Matrix4x4 mat = Matrix4x4.RotationQuaternion(rot);
 
             vec = Vector3.Transform(Vector3Extensions.Up, mat);
         }
@@ -215,7 +215,7 @@ namespace Engine.Mathematics
         public static void Unproject(ref Vector3 vector, float x, float y, float width, float height, float minZ, float maxZ, ref Matrix4x4 worldViewProjection, out Vector3 result)
         {
             Vector3 v = new();
-            Matrix4x4.Invert(worldViewProjection, out Matrix4x4 matrix);
+            Matrix4x4.Invert(ref worldViewProjection, out Matrix4x4 matrix);
 
             v.X = (((vector.X - x) / width) * 2.0f) - 1.0f;
             v.Y = -((((vector.Y - y) / height) * 2.0f) - 1.0f);

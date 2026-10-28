@@ -522,7 +522,7 @@ namespace AISamples.Common
                 {
                     if (carDrawer[i].TintColor != Color.Black.RGBA())
                     {
-                        carDrawer[i].Manipulator.SetTransform(Matrix4x4.CreateTranslation(Vector3.One * 10000000f));
+                        carDrawer[i].Manipulator.SetTransform(Matrix4x4.Translation(Vector3.One * 10000000f));
                         carDrawer[i].TintColor = Color.Black.RGBA();
                     }
 
@@ -693,9 +693,9 @@ namespace AISamples.Common
                     continue;
                 }
 
-                var scale = Matrix4x4.CreateScale(tree.Radius * baseScale);
-                var rot = Matrix4x4.CreateRotationY(i * 0.1f);
-                var translation = Matrix4x4.CreateTranslation(tree.Position);
+                var scale = Matrix4x4.Scaling(tree.Radius * baseScale);
+                var rot = Matrix4x4.RotationY(i * 0.1f);
+                var translation = Matrix4x4.Translation(tree.Position);
                 var transform = scale * rot * translation;
 
                 drawer[i].Manipulator.SetTransform(transform);

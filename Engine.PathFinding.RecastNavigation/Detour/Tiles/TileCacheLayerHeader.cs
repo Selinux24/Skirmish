@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tile cache header
     /// </summary>
@@ -93,12 +94,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var bmin = new Vector3();
             var bmax = new Vector3();
 
-            bmin.X = Bounds.Min.X + MinX * cs;
-            bmin.Y = Bounds.Min.Y;
-            bmin.Z = Bounds.Min.Z + MinY * cs;
-            bmax.X = Bounds.Min.X + (MaxX + 1) * cs;
-            bmax.Y = Bounds.Max.Y;
-            bmax.Z = Bounds.Min.Z + (MaxY + 1) * cs;
+            bmin.X = Bounds.Minimum.X + MinX * cs;
+            bmin.Y = Bounds.Minimum.Y;
+            bmin.Z = Bounds.Minimum.Z + MinY * cs;
+            bmax.X = Bounds.Minimum.X + (MaxX + 1) * cs;
+            bmax.Y = Bounds.Maximum.Y;
+            bmax.Z = Bounds.Minimum.Z + (MaxY + 1) * cs;
 
             return new(bmin, bmax);
         }

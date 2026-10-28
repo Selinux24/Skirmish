@@ -6,7 +6,7 @@ namespace EngineTests.Content
 {
     using Engine.Content;
     using Engine.Mathematics;
-    using Matrix = System.Numerics.Matrix4x4;
+    using Matrix = Engine.Mathematics.Matrix4x4;
 
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -124,28 +124,28 @@ namespace EngineTests.Content
         public void MatrixMultiplyTest()
         {
             Matrix4X4 res = new Matrix4X4(1) * new Matrix4X4(2);
-            Matrix4X4 expected = Matrix.Create(1) * Matrix.Create(2);
+            Matrix4X4 expected = new Matrix4X4(1) * new Matrix4X4(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixScalingTest()
         {
             Matrix4X4 res = Matrix4X4.Scaling(new Scale3(2));
-            Matrix4X4 expected = Matrix.CreateScale(2);
+            Matrix4X4 expected = Matrix.Scaling(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixRotationTest()
         {
             Matrix4X4 res = Matrix4X4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
-            Matrix4X4 expected = Matrix.CreateFromQuaternion(QuaternionExtensions.RotateAxis(Vector3Extensions.Up, 10));
+            Matrix4X4 expected = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixTranslationTest()
         {
             Matrix4X4 res = Matrix4X4.Translation(new Position3(2));
-            Matrix4X4 expected = Matrix.CreateTranslation(2, 2, 2);
+            Matrix4X4 expected = Matrix.Translation(2, 2, 2);
             Assert.AreEqual(expected, res);
         }
     }

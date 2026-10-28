@@ -143,7 +143,7 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            var prePos = localTransform.Translation;
+            var prePos = localTransform.TranslationVector;
             Velocity = position - prePos;
 
             if (!transformUpdateNeeded)
@@ -151,18 +151,18 @@ namespace Engine
                 return;
             }
 
-            var sca = Matrix4x4.CreateScale(scaling);
-            var rot = Matrix4x4.CreateFromQuaternion(rotation);
-            var tra = Matrix4x4.CreateTranslation(position);
+            var sca = Matrix4x4.Scaling(scaling);
+            var rot = Matrix4x4.RotationQuaternion(rotation);
+            var tra = Matrix4x4.Translation(position);
 
             localTransform = sca * rot * tra;
 
-            Forward = -rot.GetForward();
-            Backward = -rot.GetBackward();
-            Left = rot.GetLeft();
-            Right = rot.GetRight();
-            Up = rot.GetUp();
-            Down = rot.GetDown();
+            Forward = -rot.Forward;
+            Backward = -rot.Backward;
+            Left = rot.Left;
+            Right = rot.Right;
+            Up = rot.Up;
+            Down = rot.Down;
 
             transformUpdateNeeded = false;
 
@@ -252,7 +252,7 @@ namespace Engine
             float deltaPitch = pitch * time;
             float deltaRoll = roll * time;
 
-            var newRotation = rotation * Quaternion.CreateFromYawPitchRoll(deltaYaw, deltaPitch, deltaRoll);
+            var newRotation = rotation * Quaternion.RotationYawPitchRoll(deltaYaw, deltaPitch, deltaRoll);
 
             SetRotation(newRotation);
         }
@@ -342,12 +342,12 @@ namespace Engine
         /// <inheritdoc/>
         public void SetRotation(Vector3 rotationAxis, float rotationAngle)
         {
-            SetRotation(QuaternionExtensions.RotateAxis(rotationAxis, rotationAngle));
+            SetRotation(Quaternion.RotationAxis(rotationAxis, rotationAngle));
         }
         /// <inheritdoc/>
         public void SetRotation(float yaw, float pitch, float roll)
         {
-            SetRotation(Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll));
+            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll));
         }
         /// <inheritdoc/>
         public void SetRotation(Quaternion rotation)
@@ -392,22 +392,22 @@ namespace Engine
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, float scaling)
         {
-            SetTransform(position, QuaternionExtensions.RotateAxis(rotationAxis, rotationAngle), scaling);
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
         }
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scaling)
         {
-            SetTransform(position, QuaternionExtensions.RotateAxis(rotationAxis, rotationAngle), scaling);
+            SetTransform(position, Quaternion.RotationAxis(rotationAxis, rotationAngle), scaling);
         }
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, float yaw, float pitch, float roll, float scaling)
         {
-            SetTransform(position, Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll), scaling);
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
         }
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, float yaw, float pitch, float roll, Vector3 scaling)
         {
-            SetTransform(position, Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll), scaling);
+            SetTransform(position, Quaternion.RotationYawPitchRoll(yaw, pitch, roll), scaling);
         }
         /// <inheritdoc/>
         public void SetTransform(Vector3 position, Quaternion rotation, float scaling)
@@ -428,7 +428,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetTransform(Matrix4x4 transform)
         {
-            if (!Matrix4x4.Decompose(transform, out var newScaling, out var newRotation, out var newPosition))
+            if (!transform.Decompose(out var newScaling, out var newRotation, out var newPosition))
             {
                 return;
             }
@@ -453,7 +453,7 @@ namespace Engine
             if (Parent != null)
             {
                 //Set parameters to local space
-                Matrix4x4.Invert(Parent.GlobalTransform, out var parentTransform);
+                var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
                 target = Vector3Extensions.TransformCoordinate(target, parentTransform);
             }
@@ -463,7 +463,7 @@ namespace Engine
                 return;
             }
 
-            var newRotation = QuaternionExtensions.CreateLookAtLeftHanded(position, target, up, Axis.None);
+            var newRotation = Quaternion.LookAtLH(position, target, up, Axis.None);
 
             SetRotation(newRotation);
         }
@@ -479,7 +479,7 @@ namespace Engine
             if (Parent != null)
             {
                 //Set parameters to local space
-                Matrix4x4.Invert(Parent.GlobalTransform, out var parentTransform);
+                var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
                 target = Vector3Extensions.TransformCoordinate(target, parentTransform);
             }
@@ -489,11 +489,11 @@ namespace Engine
                 return;
             }
 
-            var newRotation = QuaternionExtensions.CreateLookAtLeftHanded(position, target, up, axis);
+            var newRotation = Quaternion.LookAtLH(position, target, up, axis);
 
             if (interpolationAmount > 0)
             {
-                newRotation = QuaternionExtensions.RotateTowards(rotation, newRotation, interpolationAmount);
+                newRotation = Quaternion.RotateTowards(rotation, newRotation, interpolationAmount);
             }
 
             SetRotation(newRotation);
@@ -506,7 +506,7 @@ namespace Engine
 
             var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3Extensions.Left : Vector3.Cross(Up, normal);
 
-            var newRotation = QuaternionExtensions.RotateAxis(Vector3.Normalize(axis), angle) * rotation;
+            var newRotation = Quaternion.RotationAxis(Vector3.Normalize(axis), angle) * rotation;
 
             if (interpolationAmount > 0)
             {

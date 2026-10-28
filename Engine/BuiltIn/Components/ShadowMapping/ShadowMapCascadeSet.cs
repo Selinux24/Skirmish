@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
@@ -120,7 +119,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
             var lookAt = lightPosition + lightDirection * camera.FarPlaneDistance;
             var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3Extensions.Left));
-            var shadowView = Matrix4x4.CreateLookAtLeftHanded(lightPosition, lookAt, up);
+            var shadowView = Matrix4x4.LookAtLH(lightPosition, lookAt, up);
 
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(
@@ -133,7 +132,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             shadowBoundRadius = MathF.Max(shadowBoundRadius, boundingSphere.Radius);
 
             // Find the projection matrix
-            var shadowProj = Matrix4x4.CreateOrthographicLeftHanded(
+            var shadowProj = Matrix4x4.OrthoLH(
                 shadowBoundRadius,
                 shadowBoundRadius,
                 -shadowBoundRadius,
@@ -162,7 +161,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <param name="shadowView">Shadow view</param>
         private void UpdateAntiFlicker(Camera camera, Matrix4x4 shadowView)
         {
-            Matrix4x4.Invert(shadowView, out var shadowViewInv);
+            Matrix4x4.Invert(ref shadowView, out var shadowViewInv);
 
             // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
@@ -216,11 +215,11 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
             toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-            cascadeTrans = Matrix4x4.CreateTranslation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+            cascadeTrans = Matrix4x4.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
 
             // Update the scale from shadow to cascade space
             toCascadeScale[cascadeIdx] = shadowBoundRadius / cascadeBoundRadius[cascadeIdx];
-            cascadeScale = Matrix4x4.CreateScale(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+            cascadeScale = Matrix4x4.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
         }
         /// <summary>
         /// Updates the matrix set, the cheaper option
@@ -283,11 +282,11 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
             toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-            cascadeTrans = Matrix4x4.CreateTranslation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+            cascadeTrans = Matrix4x4.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
 
             // Update the scale from shadow to cascade space
             toCascadeScale[cascadeIdx] = 2f / MathF.Max(max.X - min.X, max.Y - min.Y);
-            cascadeScale = Matrix4x4.CreateScale(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+            cascadeScale = Matrix4x4.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
         }
 
         /// <summary>

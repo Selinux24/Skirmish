@@ -4,33 +4,32 @@ using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {
-    /*
-     * This class is organized so that the least complex objects come first so that the least
-     * complex objects will have the most methods in most cases. Note that not all shapes exist
-     * at this time and not all shapes have a corresponding struct. Only the objects that have
-     * a corresponding struct should come first in naming and in parameter order. The order of
-     * complexity is as follows:
-     * 
-     * 1. Point
-     * 2. Ray
-     * 3. Segment
-     * 4. Plane
-     * 5. Triangle
-     * 6. Polygon
-     * 7. Box
-     * 8. Sphere
-     * 9. Ellipsoid
-     * 10. Cylinder
-     * 11. Cone
-     * 12. Capsule
-     * 13. Torus
-     * 14. Polyhedron
-     * 15. Frustum
-    */
-
     /// <summary>
     /// Contains static methods to help in determining intersections, containment, etc.
     /// </summary>
+    /// <remarks>
+    /// This class is organized so that the least complex objects come first so that the least
+    /// complex objects will have the most methods in most cases. Note that not all shapes exist
+    /// at this time and not all shapes have a corresponding struct. Only the objects that have
+    /// a corresponding struct should come first in naming and in parameter order. The order of
+    /// complexity is as follows:
+    /// 
+    /// 1. Point
+    /// 2. Ray
+    /// 3. Segment
+    /// 4. Plane
+    /// 5. Triangle
+    /// 6. Polygon
+    /// 7. Box
+    /// 8. Sphere
+    /// 9. Ellipsoid
+    /// 10. Cylinder
+    /// 11. Cone
+    /// 12. Capsule
+    /// 13. Torus
+    /// 14. Polyhedron
+    /// 15. Frustum
+    /// </remarks>
     public static class Collision
     {
         /// <summary>
@@ -141,8 +140,8 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 130
 
-            Vector3 temp = Vector3.Max(point, box.Min);
-            result = Vector3.Min(temp, box.Max);
+            Vector3 temp = Vector3.Max(point, box.Minimum);
+            result = Vector3.Min(temp, box.Maximum);
         }
 
         /// <summary>
@@ -226,20 +225,20 @@ namespace Engine.Mathematics
 
             float distance = 0f;
 
-            if (point.X < box.Min.X)
-                distance += (box.Min.X - point.X) * (box.Min.X - point.X);
-            if (point.X > box.Max.X)
-                distance += (point.X - box.Max.X) * (point.X - box.Max.X);
+            if (point.X < box.Minimum.X)
+                distance += (box.Minimum.X - point.X) * (box.Minimum.X - point.X);
+            if (point.X > box.Maximum.X)
+                distance += (point.X - box.Maximum.X) * (point.X - box.Maximum.X);
 
-            if (point.Y < box.Min.Y)
-                distance += (box.Min.Y - point.Y) * (box.Min.Y - point.Y);
-            if (point.Y > box.Max.Y)
-                distance += (point.Y - box.Max.Y) * (point.Y - box.Max.Y);
+            if (point.Y < box.Minimum.Y)
+                distance += (box.Minimum.Y - point.Y) * (box.Minimum.Y - point.Y);
+            if (point.Y > box.Maximum.Y)
+                distance += (point.Y - box.Maximum.Y) * (point.Y - box.Maximum.Y);
 
-            if (point.Z < box.Min.Z)
-                distance += (box.Min.Z - point.Z) * (box.Min.Z - point.Z);
-            if (point.Z > box.Max.Z)
-                distance += (point.Z - box.Max.Z) * (point.Z - box.Max.Z);
+            if (point.Z < box.Minimum.Z)
+                distance += (box.Minimum.Z - point.Z) * (box.Minimum.Z - point.Z);
+            if (point.Z > box.Maximum.Z)
+                distance += (point.Z - box.Maximum.Z) * (point.Z - box.Maximum.Z);
 
             return (float)Math.Sqrt(distance);
         }
@@ -258,38 +257,38 @@ namespace Engine.Mathematics
             float distance = 0f;
 
             //Distance for X.
-            if (box1.Min.X > box2.Max.X)
+            if (box1.Minimum.X > box2.Maximum.X)
             {
-                float delta = box2.Max.X - box1.Min.X;
+                float delta = box2.Maximum.X - box1.Minimum.X;
                 distance += delta * delta;
             }
-            else if (box2.Min.X > box1.Max.X)
+            else if (box2.Minimum.X > box1.Maximum.X)
             {
-                float delta = box1.Max.X - box2.Min.X;
+                float delta = box1.Maximum.X - box2.Minimum.X;
                 distance += delta * delta;
             }
 
             //Distance for Y.
-            if (box1.Min.Y > box2.Max.Y)
+            if (box1.Minimum.Y > box2.Maximum.Y)
             {
-                float delta = box2.Max.Y - box1.Min.Y;
+                float delta = box2.Maximum.Y - box1.Minimum.Y;
                 distance += delta * delta;
             }
-            else if (box2.Min.Y > box1.Max.Y)
+            else if (box2.Minimum.Y > box1.Maximum.Y)
             {
-                float delta = box1.Max.Y - box2.Min.Y;
+                float delta = box1.Maximum.Y - box2.Minimum.Y;
                 distance += delta * delta;
             }
 
             //Distance for Z.
-            if (box1.Min.Z > box2.Max.Z)
+            if (box1.Minimum.Z > box2.Maximum.Z)
             {
-                float delta = box2.Max.Z - box1.Min.Z;
+                float delta = box2.Maximum.Z - box1.Minimum.Z;
                 distance += delta * delta;
             }
-            else if (box2.Min.Z > box1.Max.Z)
+            else if (box2.Minimum.Z > box1.Maximum.Z)
             {
-                float delta = box1.Max.Z - box2.Min.Z;
+                float delta = box1.Maximum.Z - box2.Minimum.Z;
                 distance += delta * delta;
             }
 
@@ -658,7 +657,7 @@ namespace Engine.Mathematics
 
             if (Helper.IsZero(ray.Direction.X))
             {
-                if (ray.Position.X < box.Min.X || ray.Position.X > box.Max.X)
+                if (ray.Position.X < box.Minimum.X || ray.Position.X > box.Maximum.X)
                 {
                     distance = 0f;
                     return false;
@@ -667,8 +666,8 @@ namespace Engine.Mathematics
             else
             {
                 float inverse = 1.0f / ray.Direction.X;
-                float t1 = (box.Min.X - ray.Position.X) * inverse;
-                float t2 = (box.Max.X - ray.Position.X) * inverse;
+                float t1 = (box.Minimum.X - ray.Position.X) * inverse;
+                float t2 = (box.Maximum.X - ray.Position.X) * inverse;
 
                 if (t1 > t2)
                 {
@@ -687,7 +686,7 @@ namespace Engine.Mathematics
 
             if (Helper.IsZero(ray.Direction.Y))
             {
-                if (ray.Position.Y < box.Min.Y || ray.Position.Y > box.Max.Y)
+                if (ray.Position.Y < box.Minimum.Y || ray.Position.Y > box.Maximum.Y)
                 {
                     distance = 0f;
                     return false;
@@ -696,8 +695,8 @@ namespace Engine.Mathematics
             else
             {
                 float inverse = 1.0f / ray.Direction.Y;
-                float t1 = (box.Min.Y - ray.Position.Y) * inverse;
-                float t2 = (box.Max.Y - ray.Position.Y) * inverse;
+                float t1 = (box.Minimum.Y - ray.Position.Y) * inverse;
+                float t2 = (box.Maximum.Y - ray.Position.Y) * inverse;
 
                 if (t1 > t2)
                 {
@@ -716,7 +715,7 @@ namespace Engine.Mathematics
 
             if (Helper.IsZero(ray.Direction.Z))
             {
-                if (ray.Position.Z < box.Min.Z || ray.Position.Z > box.Max.Z)
+                if (ray.Position.Z < box.Minimum.Z || ray.Position.Z > box.Maximum.Z)
                 {
                     distance = 0f;
                     return false;
@@ -725,8 +724,8 @@ namespace Engine.Mathematics
             else
             {
                 float inverse = 1.0f / ray.Direction.Z;
-                float t1 = (box.Min.Z - ray.Position.Z) * inverse;
-                float t2 = (box.Max.Z - ray.Position.Z) * inverse;
+                float t1 = (box.Minimum.Z - ray.Position.Z) * inverse;
+                float t2 = (box.Maximum.Z - ray.Position.Z) * inverse;
 
                 if (t1 > t2)
                 {
@@ -949,12 +948,12 @@ namespace Engine.Mathematics
             Vector3 min;
             Vector3 max;
 
-            max.X = (plane.Normal.X >= 0.0f) ? box.Min.X : box.Max.X;
-            max.Y = (plane.Normal.Y >= 0.0f) ? box.Min.Y : box.Max.Y;
-            max.Z = (plane.Normal.Z >= 0.0f) ? box.Min.Z : box.Max.Z;
-            min.X = (plane.Normal.X >= 0.0f) ? box.Max.X : box.Min.X;
-            min.Y = (plane.Normal.Y >= 0.0f) ? box.Max.Y : box.Min.Y;
-            min.Z = (plane.Normal.Z >= 0.0f) ? box.Max.Z : box.Min.Z;
+            max.X = (plane.Normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
+            max.Y = (plane.Normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
+            max.Z = (plane.Normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
+            min.X = (plane.Normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
+            min.Y = (plane.Normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
+            min.Z = (plane.Normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
 
             float distance = Vector3.Dot(plane.Normal, max);
 
@@ -1024,13 +1023,13 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool BoxIntersectsBox(ref BoundingBox box1, ref BoundingBox box2)
         {
-            if (box1.Min.X > box2.Max.X || box2.Min.X > box1.Max.X)
+            if (box1.Minimum.X > box2.Maximum.X || box2.Minimum.X > box1.Maximum.X)
                 return false;
 
-            if (box1.Min.Y > box2.Max.Y || box2.Min.Y > box1.Max.Y)
+            if (box1.Minimum.Y > box2.Maximum.Y || box2.Minimum.Y > box1.Maximum.Y)
                 return false;
 
-            if (box1.Min.Z > box2.Max.Z || box2.Min.Z > box1.Max.Z)
+            if (box1.Minimum.Z > box2.Maximum.Z || box2.Minimum.Z > box1.Maximum.Z)
                 return false;
 
             return true;
@@ -1047,7 +1046,7 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 166
 
-            Vector3 vector = Vector3.Clamp(sphere.Center, box.Min, box.Max);
+            Vector3 vector = Vector3.Clamp(sphere.Center, box.Minimum, box.Maximum);
             float distance = Vector3.DistanceSquared(sphere.Center, vector);
 
             return distance <= sphere.Radius * sphere.Radius;
@@ -1094,9 +1093,9 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType BoxContainsPoint(ref BoundingBox box, ref Vector3 point)
         {
-            if (box.Min.X <= point.X && box.Max.X >= point.X &&
-                box.Min.Y <= point.Y && box.Max.Y >= point.Y &&
-                box.Min.Z <= point.Z && box.Max.Z >= point.Z)
+            if (box.Minimum.X <= point.X && box.Maximum.X >= point.X &&
+                box.Minimum.Y <= point.Y && box.Maximum.Y >= point.Y &&
+                box.Minimum.Z <= point.Z && box.Maximum.Z >= point.Z)
             {
                 return ContainmentType.Contains;
             }
@@ -1137,18 +1136,18 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType BoxContainsBox(ref BoundingBox box1, ref BoundingBox box2)
         {
-            if (box1.Max.X < box2.Min.X || box1.Min.X > box2.Max.X)
+            if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
                 return ContainmentType.Disjoint;
 
-            if (box1.Max.Y < box2.Min.Y || box1.Min.Y > box2.Max.Y)
+            if (box1.Maximum.Y < box2.Minimum.Y || box1.Minimum.Y > box2.Maximum.Y)
                 return ContainmentType.Disjoint;
 
-            if (box1.Max.Z < box2.Min.Z || box1.Min.Z > box2.Max.Z)
+            if (box1.Maximum.Z < box2.Minimum.Z || box1.Minimum.Z > box2.Maximum.Z)
                 return ContainmentType.Disjoint;
 
-            if (box1.Min.X <= box2.Min.X && (box2.Max.X <= box1.Max.X &&
-                box1.Min.Y <= box2.Min.Y && box2.Max.Y <= box1.Max.Y) &&
-                box1.Min.Z <= box2.Min.Z && box2.Max.Z <= box1.Max.Z)
+            if (box1.Minimum.X <= box2.Minimum.X && (box2.Maximum.X <= box1.Maximum.X &&
+                box1.Minimum.Y <= box2.Minimum.Y && box2.Maximum.Y <= box1.Maximum.Y) &&
+                box1.Minimum.Z <= box2.Minimum.Z && box2.Maximum.Z <= box1.Maximum.Z)
             {
                 return ContainmentType.Contains;
             }
@@ -1164,15 +1163,15 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType BoxContainsSphere(ref BoundingBox box, ref BoundingSphere sphere)
         {
-            Vector3 vector = Vector3.Clamp(sphere.Center, box.Min, box.Max);
+            Vector3 vector = Vector3.Clamp(sphere.Center, box.Minimum, box.Maximum);
             float distance = Vector3.DistanceSquared(sphere.Center, vector);
 
             if (distance > sphere.Radius * sphere.Radius)
                 return ContainmentType.Disjoint;
 
-            if ((((box.Min.X + sphere.Radius <= sphere.Center.X) && (sphere.Center.X <= box.Max.X - sphere.Radius)) && ((box.Max.X - box.Min.X > sphere.Radius) &&
-                (box.Min.Y + sphere.Radius <= sphere.Center.Y))) && (((sphere.Center.Y <= box.Max.Y - sphere.Radius) && (box.Max.Y - box.Min.Y > sphere.Radius)) &&
-                (((box.Min.Z + sphere.Radius <= sphere.Center.Z) && (sphere.Center.Z <= box.Max.Z - sphere.Radius)) && (box.Max.Z - box.Min.Z > sphere.Radius))))
+            if ((((box.Minimum.X + sphere.Radius <= sphere.Center.X) && (sphere.Center.X <= box.Maximum.X - sphere.Radius)) && ((box.Maximum.X - box.Minimum.X > sphere.Radius) &&
+                (box.Minimum.Y + sphere.Radius <= sphere.Center.Y))) && (((sphere.Center.Y <= box.Maximum.Y - sphere.Radius) && (box.Maximum.Y - box.Minimum.Y > sphere.Radius)) &&
+                (((box.Minimum.Z + sphere.Radius <= sphere.Center.Z) && (sphere.Center.Z <= box.Maximum.Z - sphere.Radius)) && (box.Maximum.Z - box.Minimum.Z > sphere.Radius))))
             {
                 return ContainmentType.Contains;
             }
@@ -1234,58 +1233,58 @@ namespace Engine.Mathematics
                 return ContainmentType.Disjoint;
 
             float radiussquared = sphere.Radius * sphere.Radius;
-            vector.X = sphere.Center.X - box.Min.X;
-            vector.Y = sphere.Center.Y - box.Max.Y;
-            vector.Z = sphere.Center.Z - box.Max.Z;
+            vector.X = sphere.Center.X - box.Minimum.X;
+            vector.Y = sphere.Center.Y - box.Maximum.Y;
+            vector.Z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Max.X;
-            vector.Y = sphere.Center.Y - box.Max.Y;
-            vector.Z = sphere.Center.Z - box.Max.Z;
+            vector.X = sphere.Center.X - box.Maximum.X;
+            vector.Y = sphere.Center.Y - box.Maximum.Y;
+            vector.Z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Max.X;
-            vector.Y = sphere.Center.Y - box.Min.Y;
-            vector.Z = sphere.Center.Z - box.Max.Z;
+            vector.X = sphere.Center.X - box.Maximum.X;
+            vector.Y = sphere.Center.Y - box.Minimum.Y;
+            vector.Z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Min.X;
-            vector.Y = sphere.Center.Y - box.Min.Y;
-            vector.Z = sphere.Center.Z - box.Max.Z;
+            vector.X = sphere.Center.X - box.Minimum.X;
+            vector.Y = sphere.Center.Y - box.Minimum.Y;
+            vector.Z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Min.X;
-            vector.Y = sphere.Center.Y - box.Max.Y;
-            vector.Z = sphere.Center.Z - box.Min.Z;
+            vector.X = sphere.Center.X - box.Minimum.X;
+            vector.Y = sphere.Center.Y - box.Maximum.Y;
+            vector.Z = sphere.Center.Z - box.Minimum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Max.X;
-            vector.Y = sphere.Center.Y - box.Max.Y;
-            vector.Z = sphere.Center.Z - box.Min.Z;
+            vector.X = sphere.Center.X - box.Maximum.X;
+            vector.Y = sphere.Center.Y - box.Maximum.Y;
+            vector.Z = sphere.Center.Z - box.Minimum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Max.X;
-            vector.Y = sphere.Center.Y - box.Min.Y;
-            vector.Z = sphere.Center.Z - box.Min.Z;
+            vector.X = sphere.Center.X - box.Maximum.X;
+            vector.Y = sphere.Center.Y - box.Minimum.Y;
+            vector.Z = sphere.Center.Z - box.Minimum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;
 
-            vector.X = sphere.Center.X - box.Min.X;
-            vector.Y = sphere.Center.Y - box.Min.Y;
-            vector.Z = sphere.Center.Z - box.Min.Z;
+            vector.X = sphere.Center.X - box.Minimum.X;
+            vector.Y = sphere.Center.Y - box.Minimum.Y;
+            vector.Z = sphere.Center.Z - box.Minimum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return ContainmentType.Intersects;

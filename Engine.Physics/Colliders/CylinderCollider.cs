@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
@@ -42,7 +41,7 @@ namespace Engine.Physics.Colliders
 
             var extents = new Vector3(radius, hh, radius);
             boundingBox = new BoundingBox(-extents, extents);
-            boundingSphere = BoundingSphere.CreateFromBoundingBox(boundingBox);
+            boundingSphere = BoundingSphere.FromBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

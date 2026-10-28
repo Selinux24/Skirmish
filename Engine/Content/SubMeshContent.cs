@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
     using Matrix = System.Numerics.Matrix4x4;
 
     /// <summary>

@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {
-    using Engine;
-
     /// <summary>
     /// Bounding box intersection volume
     /// </summary>
@@ -21,7 +18,7 @@ namespace Engine.Mathematics
         private readonly BoundingBox bbox = bbox;
 
         /// <inheritdoc/>
-        public Vector3 Position { get; private set; } = bbox.GetCenter();
+        public Vector3 Position { get; private set; } = bbox.Center;
 
         /// <summary>
         /// Constructor
@@ -34,22 +31,22 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingSphere sphere)
+        public readonly Vortice.Mathematics.ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.BoxContainsSphere(bbox, sphere);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingBox bbox)
+        public readonly Vortice.Mathematics.ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.BoxContainsBox(this.bbox, bbox);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingFrustum frustum)
+        public readonly Vortice.Mathematics.ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.BoxContainsFrustum(bbox, frustum);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public readonly Vortice.Mathematics.ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.BoxContainsMesh(bbox, mesh);
         }

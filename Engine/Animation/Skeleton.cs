@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.Animation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Skeleton class
     /// </summary>
@@ -109,17 +111,17 @@ namespace Engine.Animation
                 return;
             }
 
-            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
-            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
+            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out var rot1, out Vector3 sca1);
+            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out var rot2, out Vector3 sca2);
 
             Vector3 translation = Vector3.Lerp(pos1, pos2, factor);
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
             Vector3 scale = Vector3.Lerp(sca1, sca2, factor);
 
             joint.LocalTransform =
-                Matrix4x4.CreateScale(scale) *
-                Matrix4x4.CreateFromQuaternion(rotation) *
-                Matrix4x4.CreateTranslation(translation);
+                Matrix4x4.Scaling(scale) *
+                Matrix4x4.RotationQuaternion(rotation) *
+                Matrix4x4.Translation(translation);
 
             if ((joint.Childs?.Length ?? 0) == 0)
             {

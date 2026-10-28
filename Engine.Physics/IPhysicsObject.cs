@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Physics object interface
     /// </summary>

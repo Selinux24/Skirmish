@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Modular
 {
@@ -553,7 +552,7 @@ namespace Engine.Modular
                         if (maintain)
                         {
                             //Invert complex asset rotation
-                            basicTrn = Matrix4x4.CreateFromQuaternion(Quaternion.Inverse(complexAssetRotation)) * t;
+                            basicTrn = Matrix4x4.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
                         }
                     }
 
@@ -674,7 +673,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                res = BoundingSphere.CreateMerged(res, sph);
+                res = BoundingSphere.Merge(res, sph);
             }
 
             sceneBoundingSphere = res;
@@ -708,7 +707,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                res = BoundingBox.CreateMerged(res, box);
+                res = BoundingBox.Merge(res, box);
             }
 
             sceneBoundingBox = res;
@@ -862,18 +861,18 @@ namespace Engine.Modular
                 {
                     if (useSphere)
                     {
-                        return bbox.Contains(e.Instance.GetBoundingSphere()) != ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingSphere()) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                     else
                     {
-                        return bbox.Contains(e.Instance.GetBoundingBox()) != ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingBox()) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
 
             if (sortByDistance)
             {
-                var center = bbox.GetCenter();
+                var center = bbox.Center;
 
                 res.Sort((a, b) =>
                 {
@@ -904,13 +903,13 @@ namespace Engine.Modular
                     {
                         var sph = e.Instance.GetBoundingSphere();
 
-                        return sphere.Contains(sph) != ContainmentType.Disjoint;
+                        return sphere.Contains(ref sph) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                     else
                     {
                         var bbox = e.Instance.GetBoundingBox();
 
-                        return sphere.Contains(bbox) != ContainmentType.Disjoint;
+                        return sphere.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -948,13 +947,13 @@ namespace Engine.Modular
                     {
                         var sph = e.Instance.GetBoundingSphere();
 
-                        return frustum.Contains(ref sph) != ContainmentType.Disjoint;
+                        return frustum.Contains(ref sph) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                     else
                     {
                         var bbox = e.Instance.GetBoundingBox();
 
-                        return frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+                        return frustum.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
                     }
                 })
                 .ToList();

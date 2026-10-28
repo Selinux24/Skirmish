@@ -245,9 +245,9 @@ namespace Engine.Animation
 
                     foreach (var mat in poseMatrices)
                     {
-                        values.Add(new Vector4(mat.GetRow(0).XYZ(), mat.GetRow(3).X));
-                        values.Add(new Vector4(mat.GetRow(1).XYZ(), mat.GetRow(3).Y));
-                        values.Add(new Vector4(mat.GetRow(2).XYZ(), mat.GetRow(3).Z));
+                        values.Add(new Vector4(mat.Row1.XYZ(), mat.Row4.X));
+                        values.Add(new Vector4(mat.Row2.XYZ(), mat.Row4.Y));
+                        values.Add(new Vector4(mat.Row2.XYZ(), mat.Row4.Z));
                         values.Add(Vector4.Zero);
                     }
                 }

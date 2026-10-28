@@ -1,8 +1,9 @@
 ﻿using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph area
     /// </summary>
@@ -33,8 +34,8 @@ namespace Engine.PathFinding
         /// </summary>
         public GraphAreaBox(BoundingBox box) : base()
         {
-            BMin = box.Min;
-            BMax = box.Max;
+            BMin = box.Minimum;
+            BMax = box.Maximum;
         }
 
         /// <inheritdoc/>

@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using TerrainSamples.SceneGrid.Rules;
 using TerrainSamples.SceneGrid.Rules.Enum;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneGrid
 {
@@ -41,11 +40,11 @@ namespace TerrainSamples.SceneGrid
         private UITextArea txtAction = null;
         private UIMinimap minimap = null;
 
-        private Rect hudTextureSize;
-        private Rect initialGameArea;
-        private Rect gameArea;
-        private Rect initialMinimapArea;
-        private Rect minimapArea;
+        private Vortice.Mathematics.Rect hudTextureSize;
+        private Vortice.Mathematics.Rect initialGameArea;
+        private Vortice.Mathematics.Rect gameArea;
+        private Vortice.Mathematics.Rect initialMinimapArea;
+        private Vortice.Mathematics.Rect minimapArea;
 
         private readonly string titleFontFileName = "ARMY RUST.TTF";
         private readonly string fontFileName = "JOYSTIX.TTF";
@@ -181,8 +180,8 @@ namespace TerrainSamples.SceneGrid
             await AddComponentUI<Sprite, SpriteDescription>("HUD", "HUD", bgDesc, LayerUI - 1);
 
             hudTextureSize = new(0, 0, 800, 600);
-            initialGameArea = new Rect(8, 71, 780, 426);
-            initialMinimapArea = new Rect(593, 443, 196, 147);
+            initialGameArea = new(8, 71, 780, 426);
+            initialMinimapArea = new(593, 443, 196, 147);
         }
         private async Task InitializeText()
         {
@@ -765,7 +764,7 @@ namespace TerrainSamples.SceneGrid
         {
             var bbox = terrain.GetBoundingBox();
 
-            float terrainHeight = bbox.Max.Z - bbox.Min.Z;
+            float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
             float teamSeparation = terrainHeight / skirmishGame.Teams.Length;
 
             float soldierSeparation = 12f;

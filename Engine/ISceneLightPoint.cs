@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Scene point light without direction
     /// </summary>

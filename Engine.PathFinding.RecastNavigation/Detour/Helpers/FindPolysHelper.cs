@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -500,7 +499,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
                 // Calc polygon bounds.
                 var tileBounds = tile.GetPolyBounds(p);
 
-                if (bounds.Contains(tileBounds) != ContainmentType.Disjoint)
+                if (bounds.Contains(tileBounds) != Vortice.Mathematics.ContainmentType.Disjoint)
                 {
                     int r = bse | i;
 

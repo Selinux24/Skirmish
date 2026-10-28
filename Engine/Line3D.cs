@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Mathematics;
-    using Matrix = Matrix4x4;
+    using Matrix = Mathematics.Matrix4x4;
 
     /// <summary>
     /// 3D Line
@@ -278,12 +277,12 @@ namespace Engine
         {
             List<Line3D> lines = [];
 
-            var p = transform.Translation;
+            var p = transform.TranslationVector;
 
-            var up = p + (transform.GetUp() * size);
-            var forward = p + (transform.GetForward() * size);
-            var left = p + (transform.GetLeft() * size);
-            var right = p + (transform.GetRight() * size);
+            var up = p + (transform.Up * size);
+            var forward = p + (transform.Forward * size);
+            var left = p + (transform.Left * size);
+            var right = p + (transform.Right * size);
 
             var c1 = (forward * 0.8f) + (left * 0.2f);
             var c2 = (forward * 0.8f) + (right * 0.2f);

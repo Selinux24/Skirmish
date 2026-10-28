@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Represents the source data used to build an navigation mesh tile.
     /// </summary>
@@ -17,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
         /// </summary>
-        public Int3[] Verts { get; set; }
+        public Vortice.Mathematics.Int3[] Verts { get; set; }
         /// <summary>
         /// The number vertices in the polygon mesh. [Limit: >= 3]
         /// </summary>
@@ -171,15 +172,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < VertCount; ++i)
                 {
                     var iv = Verts[i];
-                    float h = Bounds.Min.Y + iv.Y * CellHeight;
+                    float h = Bounds.Minimum.Y + iv.Y * CellHeight;
                     hmin = MathF.Min(hmin, h);
                     hmax = MathF.Max(hmax, h);
                 }
             }
             hmin -= WalkableClimb;
             hmax += WalkableClimb;
-            var bmin = Bounds.Min;
-            var bmax = Bounds.Max;
+            var bmin = Bounds.Minimum;
+            var bmax = Bounds.Maximum;
             bmin.Y = hmin;
             bmax.Y = hmax;
 

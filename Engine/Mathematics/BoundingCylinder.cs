@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {
@@ -106,7 +105,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public readonly ContainmentType Contains(ref Vector3 point)
+        public readonly Vortice.Mathematics.ContainmentType Contains(ref Vector3 point)
         {
             // Find cylinder central axis
             var p1 = BasePosition;
@@ -117,7 +116,7 @@ namespace Engine.Mathematics
             if (distance > Radius)
             {
                 // Outside cylinder radius
-                return ContainmentType.Disjoint;
+                return Vortice.Mathematics.ContainmentType.Disjoint;
             }
 
             // Find distance from closest point in axis to the center
@@ -126,29 +125,29 @@ namespace Engine.Mathematics
             if (distOnAxis > hh)
             {
                 // Outside cap and base distances
-                return ContainmentType.Disjoint;
+                return Vortice.Mathematics.ContainmentType.Disjoint;
             }
 
             if (Helper.NearEqual(distance, Radius))
             {
                 // The point is into the cylinder radius, and between cap and base distances.
-                return ContainmentType.Intersects;
+                return Vortice.Mathematics.ContainmentType.Intersects;
             }
 
             if (Helper.NearEqual(distOnAxis, hh))
             {
                 // The point is in the cap or base.
-                return ContainmentType.Intersects;
+                return Vortice.Mathematics.ContainmentType.Intersects;
             }
 
-            return ContainmentType.Contains;
+            return Vortice.Mathematics.ContainmentType.Contains;
         }
         /// <summary>
         /// Determines whether the current objects contains a point.
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public readonly ContainmentType Contains(Vector3 point)
+        public readonly Vortice.Mathematics.ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
         }

@@ -1,4 +1,5 @@
-﻿namespace Engine.Mathematics
+﻿
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Intersectable detection mode

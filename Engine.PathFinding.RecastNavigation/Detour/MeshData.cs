@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -219,7 +218,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="imax">Maximum index</param>
         /// <param name="bmin">Resulting minimum bounds point</param>
         /// <param name="bmax">Resulting maximum bounds point</param>
-        private static void CalcExtends(BVItem[] items, int imin, int imax, out Int3 bmin, out Int3 bmax)
+        private static void CalcExtends(BVItem[] items, int imin, int imax, out Vortice.Mathematics.Int3 bmin, out Vortice.Mathematics.Int3 bmax)
         {
             bmin.X = items[imin].BMin.X;
             bmin.Y = items[imin].BMin.Y;
@@ -265,7 +264,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Calc polygon bounds. Use detail meshes if available.
                 if (param.DetailMeshes != null)
                 {
-                    it.CalcDetailBounds(param.DetailMeshes[i], param.DetailVerts, param.Bounds.Min, quantFactor);
+                    it.CalcDetailBounds(param.DetailMeshes[i], param.DetailVerts, param.Bounds.Minimum, quantFactor);
                 }
                 else
                 {
@@ -303,8 +302,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Find tight heigh bounds, used for culling out off-mesh start locations.
             var bbox = param.FindBounds();
-            Vector3 bmin = bbox.Min;
-            Vector3 bmax = bbox.Max;
+            Vector3 bmin = bbox.Minimum;
+            Vector3 bmax = bbox.Maximum;
 
             for (int i = 0; i < param.OffMeshConCount; ++i)
             {
@@ -449,9 +448,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var iv = param.Verts[i];
                 var v = new Vector3
                 {
-                    X = param.Bounds.Min.X + iv.X * param.CellSize,
-                    Y = param.Bounds.Min.Y + iv.Y * param.CellHeight,
-                    Z = param.Bounds.Min.Z + iv.Z * param.CellSize
+                    X = param.Bounds.Minimum.X + iv.X * param.CellSize,
+                    Y = param.Bounds.Minimum.Y + iv.Y * param.CellHeight,
+                    Z = param.Bounds.Minimum.Z + iv.Z * param.CellSize
                 };
                 NavVerts.Add(v);
             }

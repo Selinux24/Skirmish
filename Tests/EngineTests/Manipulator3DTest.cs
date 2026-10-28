@@ -35,11 +35,11 @@ namespace EngineTests
             Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Quaternion.Identity, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(Matrix4x4.Identity, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(Matrix4x4.Identity, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(Matrix4x4.Identity, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(Matrix4x4.Identity, man.GlobalTransform, "GlobalTransform error");
         }
 
         [TestMethod()]
@@ -47,7 +47,7 @@ namespace EngineTests
         {
             Manipulator3D man = new();
             var point = Vector3.One;
-            var trn = Matrix4x4.CreateTranslation(point);
+            var trn = Matrix4x4.Translation(point);
 
             man.Reset();
             man.SetPosition(point.X, point.Y, point.Z);
@@ -67,19 +67,19 @@ namespace EngineTests
             Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Quaternion.Identity, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
         [TestMethod()]
         public void SetRotationTest()
         {
             Manipulator3D man = new();
             var angle = Helper.PiOver2;
-            var rot = Quaternion.CreateFromYawPitchRoll(angle, 0, 0);
-            var trn = Matrix4x4.CreateFromQuaternion(rot);
+            var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
+            var trn = Matrix4x4.RotationQuaternion(rot);
 
             man.Reset();
             man.SetRotation(Vector3Extensions.Up, angle);
@@ -95,19 +95,19 @@ namespace EngineTests
         }
         private static void ValidateSetRotation(Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(-trn.GetForward(), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-trn.GetBackward(), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(trn.GetLeft(), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(trn.GetRight(), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(trn.GetUp(), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(trn.GetDown(), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-trn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(-trn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
+            Assert.AreEqual(trn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
+            Assert.AreEqual(trn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
+            Assert.AreEqual(trn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
+            Assert.AreEqual(trn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(rot, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
         [TestMethod()]
         public void SetScalingTest()
@@ -115,7 +115,7 @@ namespace EngineTests
             Manipulator3D man = new();
             float scale = 2f;
             var scaling = new Vector3(scale);
-            var trn = Matrix4x4.CreateScale(scaling);
+            var trn = Matrix4x4.Scaling(scaling);
 
             man.Reset();
             man.SetScaling(scale);
@@ -139,11 +139,11 @@ namespace EngineTests
             Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Quaternion.Identity, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
         [TestMethod()]
         public void SetTransformTest()
@@ -153,9 +153,9 @@ namespace EngineTests
             var angle = Helper.PiOver2;
             float scale = 2f;
             var scaling = new Vector3(scale);
-            var rot = Quaternion.CreateFromYawPitchRoll(angle, 0, 0);
-            var rotTrn = Matrix4x4.CreateFromQuaternion(rot);
-            var trn = Matrix4x4.CreateScale(scaling) * rotTrn * Matrix4x4.CreateTranslation(point);
+            var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
+            var rotTrn = Matrix4x4.RotationQuaternion(rot);
+            var trn = Matrix4x4.Scaling(scaling) * rotTrn * Matrix4x4.Translation(point);
 
             man.Reset();
             man.SetTransform(point, Vector3Extensions.Up, angle, scale);
@@ -183,21 +183,21 @@ namespace EngineTests
         }
         private static void ValidateSetTransform(Vector3 point, Quaternion rot, Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
-            var rotTrn = Matrix4x4.CreateFromQuaternion(rot);
+            var rotTrn = Matrix4x4.RotationQuaternion(rot);
 
-            Assert.AreEqual(-rotTrn.GetForward(), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-rotTrn.GetBackward(), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(rotTrn.GetLeft(), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(rotTrn.GetRight(), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(rotTrn.GetUp(), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(rotTrn.GetDown(), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-rotTrn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(-rotTrn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
+            Assert.AreEqual(rotTrn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
+            Assert.AreEqual(rotTrn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
+            Assert.AreEqual(rotTrn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
+            Assert.AreEqual(rotTrn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(rot, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
         [TestMethod()]
         public void LookAtTest()
@@ -409,61 +409,61 @@ namespace EngineTests
 
             var direction = Vector3.One;
             var translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            var trn = Matrix4x4.CreateTranslation(point + translation);
+            var trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.Move(time.Object, direction, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetForward();
+            direction = Matrix4x4.Identity.Forward;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveForward(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetBackward();
+            direction = Matrix4x4.Identity.Backward;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveBackward(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetLeft();
+            direction = Matrix4x4.Identity.Left;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveLeft(time.Object, -velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetRight();
+            direction = Matrix4x4.Identity.Right;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveRight(time.Object, -velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetUp();
+            direction = Matrix4x4.Identity.Up;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveUp(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix4x4.Identity.GetDown();
+            direction = Matrix4x4.Identity.Down;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix4x4.CreateTranslation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveDown(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            trn = Matrix4x4.CreateTranslation(point);
+            trn = Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.MoveForward(time.Object, velocity);
@@ -484,11 +484,11 @@ namespace EngineTests
             Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Quaternion.Identity, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
 
         [TestMethod()]
@@ -521,57 +521,57 @@ namespace EngineTests
             float pitch = Helper.PiOver2;
             float roll = Helper.PiOver2;
 
-            var rot = Quaternion.CreateFromYawPitchRoll(yaw * timeSeconds, pitch * timeSeconds, roll * timeSeconds);
-            var trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            var rot = Quaternion.RotationYawPitchRoll(yaw * timeSeconds, pitch * timeSeconds, roll * timeSeconds);
+            var trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Rotate(time.Object, yaw, pitch, roll);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(-yaw * timeSeconds, 0, 0);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(-yaw * timeSeconds, 0, 0);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawLeft(time.Object, yaw);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(yaw * timeSeconds, 0, 0);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(yaw * timeSeconds, 0, 0);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawRight(time.Object, yaw);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(0, -pitch * timeSeconds, 0);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(0, -pitch * timeSeconds, 0);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.PitchDown(time.Object, pitch);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(0, pitch * timeSeconds, 0);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(0, pitch * timeSeconds, 0);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.PitchUp(time.Object, pitch);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(0, 0, -roll * timeSeconds);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(0, 0, -roll * timeSeconds);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.RollLeft(time.Object, roll);
             ValidateRotate(point, rot, trn, man);
 
-            rot = Quaternion.CreateFromYawPitchRoll(0, 0, roll * timeSeconds);
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            rot = Quaternion.RotationYawPitchRoll(0, 0, roll * timeSeconds);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.RollRight(time.Object, roll);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.Identity;
-            trn = Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawLeft(time.Object, yaw);
@@ -584,19 +584,19 @@ namespace EngineTests
         }
         private static void ValidateRotate(Vector3 point, Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(-trn.GetForward(), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-trn.GetBackward(), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(trn.GetLeft(), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(trn.GetRight(), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(trn.GetUp(), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(trn.GetDown(), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-trn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(-trn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
+            Assert.AreEqual(trn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
+            Assert.AreEqual(trn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
+            Assert.AreEqual(trn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
+            Assert.AreEqual(trn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(rot, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
 
         [TestMethod()]
@@ -636,19 +636,19 @@ namespace EngineTests
             float scale = 2;
             Vector3 scaling = new(scale);
 
-            var trn = Matrix4x4.CreateScale(Vector3.One + scaling * timeSeconds) * Matrix4x4.CreateTranslation(point);
+            var trn = Matrix4x4.Scaling(Vector3.One + scaling * timeSeconds) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, scaling);
             ValidateScale(point, Vector3.One + scaling * timeSeconds, trn, man);
 
-            trn = Matrix4x4.CreateScale(Vector3.One + scaling * timeSeconds) * Matrix4x4.CreateTranslation(point);
+            trn = Matrix4x4.Scaling(Vector3.One + scaling * timeSeconds) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, scale);
             ValidateScale(point, Vector3.One + scaling * timeSeconds, trn, man);
 
-            trn = Matrix4x4.CreateTranslation(point);
+            trn = Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, 2f);
@@ -657,19 +657,19 @@ namespace EngineTests
         }
         private static void ValidateScale(Vector3 point, Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(Vector3.Normalize(-trn.GetForward()), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3.Normalize(-trn.GetBackward()), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.GetLeft()), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.GetRight()), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.GetUp()), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.GetDown()), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.Normalize(-trn.Forward), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(Vector3.Normalize(-trn.Backward), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Left), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Right), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Up), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Down), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
 
             Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Quaternion.Identity, man.Rotation, QuaternionExtensions.Comparer, "Rotation quaternion error");
+            Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
 
-            Assert.AreEqual(trn, man.LocalTransform, Matrix4x4Extensions.Comparer, "LocalTransform error");
-            Assert.AreEqual(trn, man.GlobalTransform, Matrix4x4Extensions.Comparer, "GlobalTransform error");
+            Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
         }
     }
 }

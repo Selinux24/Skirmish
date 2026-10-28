@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
@@ -54,9 +53,9 @@ namespace Engine.Collections.Generic
             var nodeItems = items
                 .Where(t =>
                 {
-                    var tbox = BoundingBoxExtensions.BoundingBoxFromPoints(t.GetVertices());
+                    var tbox = Mathematics.BoundingBox.FromPoints(t.GetVertices());
 
-                    return bbox.Contains(tbox) != ContainmentType.Disjoint;
+                    return bbox.Contains(tbox) != Vortice.Mathematics.ContainmentType.Disjoint;
                 })
                 .ToList(); //Break the reference
 

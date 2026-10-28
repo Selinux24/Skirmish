@@ -1,11 +1,12 @@
-﻿using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Modular.Persistence
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Asset map class
     /// </summary>

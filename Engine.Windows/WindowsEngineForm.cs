@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Forms;
-using Vortice.Mathematics;
 
 namespace Engine.Windows
 {
@@ -445,19 +444,19 @@ namespace Engine.Windows
         }
 
         /// <inheritdoc/>
-        public Viewport GetViewport()
+        public Vortice.Mathematics.Viewport GetViewport()
         {
-            return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
+            return new(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
         }
         /// <inheritdoc/>
         public Matrix4x4 GetOrthoProjectionMatrix()
         {
-            Matrix4x4 view = Matrix4x4.CreateLookAtLeftHanded(
+            Matrix4x4 view = Matrix4x4.LookAtLH(
                 Vector3.Zero,
                 Vector3Extensions.ForwardLH,
                 Vector3Extensions.Up);
 
-            Matrix4x4 projection = Matrix4x4.CreateOrthographicLeftHanded(
+            Matrix4x4 projection = Matrix4x4.OrthoLH(
                 RenderWidth,
                 RenderHeight,
                 0f, 100f);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -21,8 +20,8 @@ namespace Engine.PathFinding.RecastNavigation
     /// <param name="agent">Agent</param>
     public struct GraphDebug(Graph graph, AgentType agent) : IGraphDebug
     {
-        private static readonly Vector4 DefaultNodeColor = new Color(255, 255, 255, 32).ToVector4();
-        private static readonly Vector4 DefaultPrimitiveColor = new Color(0, 192, 255, 128).ToVector4();
+        private static readonly Vector4 DefaultNodeColor = new Vortice.Mathematics.Color(255, 255, 255, 32).ToVector4();
+        private static readonly Vector4 DefaultPrimitiveColor = new Vortice.Mathematics.Color(0, 192, 255, 128).ToVector4();
 
         /// <summary>
         /// Internal graph
@@ -188,7 +187,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             const string name = nameof(GetHeightfield);
 
-            var orig = hf.Bounds.Min;
+            var orig = hf.Bounds.Minimum;
             float cs = hf.CellSize;
             float ch = hf.CellHeight;
 
@@ -229,9 +228,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (walkable)
             {
-                Vector4 walkableColor = new Color(64, 128, 160, 255).ToVector4();
-                Vector4 nullColor = new Color(64, 64, 64, 255).ToVector4();
-                Vector4 multiColor = new Color(0, 192, 255, 255).ToVector4();
+                Vector4 walkableColor = new Vortice.Mathematics.Color(64, 128, 160, 255).ToVector4();
+                Vector4 nullColor = new Vortice.Mathematics.Color(64, 64, 64, 255).ToVector4();
+                Vector4 multiColor = new Vortice.Mathematics.Color(0, 192, 255, 255).ToVector4();
 
                 Dictionary<Vector4, IEnumerable<Vector3>> data = new()
                 {
@@ -268,7 +267,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            var orig = cset.Bounds.Min;
+            var orig = cset.Bounds.Minimum;
             float cs = cset.CellSize;
             float ch = cset.CellHeight;
 
@@ -349,7 +348,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static IEnumerable<GraphDebugDataCollection> GetContourBorders(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
-            Vector4 bseColor = new Color(255, 255, 255, a).ToVector4();
+            Vector4 bseColor = new Vortice.Mathematics.Color(255, 255, 255, a).ToVector4();
 
             Dictionary<Vector4, List<Vector3>> lines = [];
 
@@ -424,7 +423,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Color(32, 128, 128, 196).ToVector4();
+            Vector4 color = new Vortice.Mathematics.Color(32, 128, 128, 196).ToVector4();
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -447,7 +446,7 @@ namespace Engine.PathFinding.RecastNavigation
             Vector4 color = DefaultNodeColor;
             float cs = pm.CellSize;
             float ch = pm.CellHeight;
-            var orig = pm.Bounds.Min;
+            var orig = pm.Bounds.Minimum;
 
             return
                      [
@@ -513,7 +512,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Color(0, 48, 64, 255).ToVector4();
+            Vector4 color = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -539,7 +538,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Vector4 col = new Color(0, 48, 64, 255).ToVector4();
+                Vector4 col = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
                 if (p.IsExternalLink(i0))
                 {
                     col = Vector4.One;
@@ -625,7 +624,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (flag == DetailTriEdgeFlagTypes.Boundary)
                 {
                     // Ext edge
-                    color = new Color(128, 128, 128, 220).ToVector4();
+                    color = new Vortice.Mathematics.Color(128, 128, 128, 220).ToVector4();
                 }
                 else
                 {
@@ -635,7 +634,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Internal edge
-                    color = new Color(0, 0, 0, 64).ToVector4();
+                    color = new Vortice.Mathematics.Color(0, 0, 0, 64).ToVector4();
                 }
 
                 res.TryAdd(color, []);
@@ -693,8 +692,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             Vector4 color = ColorExtensions.IntToCol(idx + 1, 128);
 
-            var bmin = layer.Header.Bounds.Min;
-            var bmax = layer.Header.Bounds.Max;
+            var bmin = layer.Header.Bounds.Minimum;
+            var bmax = layer.Header.Bounds.Maximum;
 
             // Layer bounds
             Vector3 lbmin = new();
@@ -718,7 +717,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Dictionary<Vector4, List<Vector3>> res = [];
 
-            var bmin = layer.Header.Bounds.Min;
+            var bmin = layer.Header.Bounds.Minimum;
 
             int idx = layer.Header.TLayer;
             Vector4 color = ColorExtensions.IntToCol(idx + 1, 255);
@@ -732,11 +731,11 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector4 col;
                 if (area == AreaTypes.RC_WALKABLE_AREA)
                 {
-                    col = Vector4.Lerp(color, new Color(0, 192, 255, 64).ToVector4(), 32);
+                    col = Vector4.Lerp(color, new Vortice.Mathematics.Color(0, 192, 255, 64).ToVector4(), 32);
                 }
                 else if (area == AreaTypes.RC_NULL_AREA)
                 {
-                    col = Vector4.Lerp(color, new Color(0, 0, 0, 64).ToVector4(), 32);
+                    col = Vector4.Lerp(color, new Vortice.Mathematics.Color(0, 0, 0, 64).ToVector4(), 32);
                 }
                 else
                 {
@@ -775,7 +774,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Dictionary<Vector4, List<Vector3>> res = [];
 
-            var bmin = layer.Header.Bounds.Min;
+            var bmin = layer.Header.Bounds.Minimum;
 
             int idx = layer.Header.TLayer;
             Vector4 color = ColorExtensions.IntToCol(idx + 1, 255);
@@ -821,7 +820,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Dictionary<Vector4, List<Vector3>> res = [];
 
-            var bmin = layer.Header.Bounds.Min;
+            var bmin = layer.Header.Bounds.Minimum;
 
             // Portals
             Vector4 pcol = new(255, 255, 255, 255);
@@ -890,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static IEnumerable<GraphDebugDataCollection> GetTileCacheContourBorders(TileCacheContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
-            Vector4 bseColor = new Color(255, 255, 255, a).ToVector4();
+            Vector4 bseColor = new Vortice.Mathematics.Color(255, 255, 255, a).ToVector4();
 
             Dictionary<Vector4, List<Vector3>> lines = [];
 
@@ -965,7 +964,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Color(32, 128, 128, 196).ToVector4();
+            Vector4 color = new Vortice.Mathematics.Color(32, 128, 128, 196).ToVector4();
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -1046,7 +1045,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Color(0, 48, 64, 255).ToVector4();
+            Vector4 color = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -1072,7 +1071,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Vector4 col = new Color(0, 48, 64, 255).ToVector4();
+                Vector4 col = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
                 if (p.IsExternalLink(i0))
                 {
                     col = Vector4.One;
@@ -1182,12 +1181,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<(Vector4, Vector3)> ReadTris(Int3[] t, int area, Vector3 orig, float cs, float ch)
+        private static IEnumerable<(Vector4, Vector3)> ReadTris(Vortice.Mathematics.Int3[] t, int area, Vector3 orig, float cs, float ch)
         {
             Vector4 col;
             if (area == 0)
             {
-                col = new Color(0, 0, 0, 128).ToVector4();
+                col = new Vortice.Mathematics.Color(0, 0, 0, 128).ToVector4();
             }
             else
             {
@@ -1212,7 +1211,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Int3[] verts, Vector3 orig, float cs, float ch)
+        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Vortice.Mathematics.Int3[] verts, Vector3 orig, float cs, float ch)
         {
             int[] vi = [p0, p1];
 
@@ -1237,7 +1236,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (area == 0)
             {
                 // Treat zero area type as default.
-                return new Color(0, 192, 255, alpha).ToVector4();
+                return new Vortice.Mathematics.Color(0, 192, 255, alpha).ToVector4();
             }
             else
             {

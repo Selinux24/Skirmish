@@ -1,8 +1,9 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Build solo configuration
     /// </summary>
@@ -51,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BorderSize = borderSize,
                 Width = width,
                 Height = height,
-                
+
                 FilterLedgeSpans = settings.FilterLedgeSpans,
                 FilterLowHangingObstacles = settings.FilterLowHangingObstacles,
                 FilterWalkableLowHeightSpans = settings.FilterWalkableLowHeightSpans,

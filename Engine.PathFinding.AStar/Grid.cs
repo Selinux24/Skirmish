@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.AStar
 {
@@ -62,8 +61,8 @@ namespace Engine.PathFinding.AStar
 
             var dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
-            float fxSize = (bbox.Max.X - bbox.Min.X) / grid.Settings.NodeSize;
-            float fzSize = (bbox.Max.Z - bbox.Min.Z) / grid.Settings.NodeSize;
+            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.Settings.NodeSize;
+            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.Settings.NodeSize;
 
             int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
             int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
@@ -71,13 +70,13 @@ namespace Engine.PathFinding.AStar
             float total = bbox.Size.X * bbox.Size.X / grid.Settings.NodeSize;
             int curr = 0;
 
-            for (float x = bbox.Min.X; x < bbox.Max.X; x += grid.Settings.NodeSize)
+            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
             {
-                for (float z = bbox.Min.Z; z < bbox.Max.Z; z += grid.Settings.NodeSize)
+                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.Settings.NodeSize)
                 {
                     GridCollisionInfo[] info;
 
-                    var ray = new PickingRay(new Vector3(x, bbox.Max.Y + 0.01f, z), Vector3Extensions.Down);
+                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3Extensions.Down);
 
                     bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
                     if (intersects)

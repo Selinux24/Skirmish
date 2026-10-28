@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Physics
 {
@@ -51,7 +50,7 @@ namespace Engine.Physics
                     return Matrix4x4.Identity;
                 }
 
-                return Matrix4x4.CreateFromQuaternion(RigidBody.Rotation);
+                return Matrix4x4.RotationQuaternion(RigidBody.Rotation);
             }
         }
         /// <inheritdoc/>
@@ -64,8 +63,7 @@ namespace Engine.Physics
                     return Matrix4x4.Identity;
                 }
 
-                Matrix4x4.Invert(RotationScale, out var inv);
-                return inv;
+                return Matrix4x4.Invert(RotationScale);
             }
         }
         /// <inheritdoc/>
@@ -94,7 +92,7 @@ namespace Engine.Physics
                     return boundingBox;
                 }
 
-                return boundingBox.SetTransform(RigidBody.Transform);
+                return BoundingBox.Transform(boundingBox, RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -112,7 +110,7 @@ namespace Engine.Physics
                     return boundingSphere;
                 }
 
-                return boundingSphere.SetTransform(RigidBody.Transform);
+                return BoundingSphere.Transform(boundingSphere, RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -130,7 +128,7 @@ namespace Engine.Physics
                     return orientedBoundingBox;
                 }
 
-                return orientedBoundingBox.SetTransform(RigidBody.Transform);
+                return OrientedBoundingBox.Transform(orientedBoundingBox, RigidBody.Transform);
             }
         }
 
@@ -152,7 +150,7 @@ namespace Engine.Physics
                 return;
             }
 
-            Vector3 halfSize = boundingBox.GetExtents();
+            Vector3 halfSize = boundingBox.Extents;
             Vector3 squares = halfSize * halfSize;
 
             RigidBody.SetIntertiaCoefficients(

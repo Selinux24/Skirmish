@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Tanks
 {
@@ -567,7 +566,7 @@ namespace Tanks
 
             terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", groundDesc);
 
-            terrainTop = terrain.GetBoundingBox().Max.Y;
+            terrainTop = terrain.GetBoundingBox().Maximum.Y;
         }
         private async Task InitializeModelsTrees()
         {
@@ -859,9 +858,9 @@ namespace Tanks
             uiTweener.Show(loadingBar, 500);
 
             var bbox = terrain.GetBoundingBox();
-            var min = bbox.Min.XZ();
-            var max = bbox.Max.XZ();
-            var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
+            var min = bbox.Minimum.XZ();
+            var max = bbox.Maximum.XZ();
+            var sph = new BoundingSphere(bbox.Center, bbox.Extents.X * 0.66f);
 
             uint totalTrees = (uint)treeModels.Sum(t => t.InstanceCount);
 
@@ -898,7 +897,7 @@ namespace Tanks
                 }
 
                 var pos = result.Position;
-                if (sph.Contains(pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
+                if (sph.Contains(ref pos) != Vortice.Mathematics.ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
                 {
                     continue;
                 }
@@ -1457,7 +1456,7 @@ You will lost all the game progress.",
                 dist += sampleDist;
 
                 // Test the individual marker visibility against camera
-                if (Camera.Frustum.Contains(ref markerPos) == ContainmentType.Disjoint)
+                if (Camera.Frustum.Contains(ref markerPos) == Vortice.Mathematics.ContainmentType.Disjoint)
                 {
                     continue;
                 }
@@ -1494,8 +1493,8 @@ You will lost all the game progress.",
         {
             var barrelTransform = model.GetWorldTransformByName(tankBarrelPart);
 
-            var dir = barrelTransform.GetForward();
-            var pos = barrelTransform.Translation + (dir * 15f);
+            var dir = barrelTransform.Forward;
+            var pos = barrelTransform.TranslationVector + (dir * 15f);
 
             return (pos, dir);
         }
@@ -1504,7 +1503,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
 
             //Extract single pitch angle from quaternion
-            float sAngle = barrelManipulator.Rotation.GetAngle();
+            float sAngle = barrelManipulator.Rotation.Angle;
             if (barrelManipulator.Rotation.X < 0)
             {
                 sAngle *= -1f;
@@ -1529,8 +1528,8 @@ You will lost all the game progress.",
             var barrelTransform = model.GetPartTransformByName(tankTurretPart);
 
             //Gets the position and direction of the barrel
-            var barrelDir = barrelTransform.GetForward();
-            var barrelPos = barrelTransform.Translation;
+            var barrelDir = barrelTransform.Forward;
+            var barrelPos = barrelTransform.TranslationVector;
 
             //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
             var newDir = Vector3.Normalize(barrelPos - position);
@@ -1545,7 +1544,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
             var localPos = barrelManipulator.Position;
             var c = Vector3.Cross(barrelDir, newDir);
-            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4Extensions.RotationAxis(c, angle));
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4.RotationAxis(c, angle));
 
             //Apply de local delta
             barrelManipulator.RotateTo(localPos + localDir, Vector3Extensions.Up, Axis.Y, 0.01f);
@@ -1558,14 +1557,14 @@ You will lost all the game progress.",
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            Rect terrainRect = new(bbox.Min.X, bbox.Min.Z, bbox.Width, bbox.Depth);
+            Vortice.Mathematics.Rect terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
             Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
             Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
 
             // Get the mini map rectangle
-            Rect miniMapRect = miniMapBackground.GetRenderArea(false);
+            Vortice.Mathematics.Rect miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
             Vector2 markerBounds1 = new(miniMapTank1.Width, miniMapTank1.Height);
@@ -1630,7 +1629,7 @@ You will lost all the game progress.",
 
             // Test if projectile is under the terrain box
             var terrainBox = terrain.GetBoundingBox();
-            if (projVolume.Center.Y + projVolume.Radius < terrainBox.Min.Y)
+            if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
                 ResolveShot(false, null, null);
 

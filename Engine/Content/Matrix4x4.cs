@@ -2,7 +2,7 @@
 
 namespace Engine.Content
 {
-    using Matrix = System.Numerics.Matrix4x4;
+    using Matrix = Mathematics.Matrix4x4;
 
     /// <summary>
     /// 4x4 matrix
@@ -23,7 +23,7 @@ namespace Engine.Content
         /// <param name="scale">Scaling vector</param>
         public static Matrix4X4 Scaling(Scale3 scale)
         {
-            return Matrix.CreateScale(scale);
+            return Matrix.Scaling(scale);
         }
         /// <summary>
         /// Gets the rotation matrix
@@ -31,7 +31,7 @@ namespace Engine.Content
         /// <param name="rotation">Rotation quaternion</param>
         public static Matrix4X4 Rotation(RotationQ rotation)
         {
-            return Matrix.CreateFromQuaternion(rotation);
+            return Matrix.RotationQuaternion(rotation);
         }
         /// <summary>
         /// Gets the translation matrix
@@ -39,7 +39,7 @@ namespace Engine.Content
         /// <param name="position">Position</param>
         public static Matrix4X4 Translation(Position3 position)
         {
-            return Matrix.CreateTranslation(position);
+            return Matrix.Translation(position);
         }
 
         /// <summary>

@@ -1,15 +1,16 @@
-﻿using Engine.Animation;
-using Engine.Common;
-using Engine.Content.Persistence;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
+    using Engine.Common;
+    using Engine.Content.Persistence;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Model content
     /// </summary>

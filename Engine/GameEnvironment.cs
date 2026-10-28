@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Global variables 
     /// </summary>
@@ -273,7 +274,7 @@ namespace Engine
         /// <returns>Returns the level of detail</returns>
         public LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix4x4 localTransform)
         {
-            Vector3 position = localTransform.Translation;
+            Vector3 position = localTransform.TranslationVector;
             float radius = 0f;
 
             if (coarseBoundingSphere.HasValue)

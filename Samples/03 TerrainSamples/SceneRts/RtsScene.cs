@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneRts
 {
@@ -581,8 +580,8 @@ namespace TerrainSamples.SceneRts
             var tankbbox = tankP1.GetBoundingBox(true);
 
             // Initialize dust generation relative positions
-            tankLeftCat = new Vector3(tankbbox.Max.X, tankbbox.Min.Y, tankbbox.Max.Z);
-            tankRightCat = new Vector3(tankbbox.Min.X, tankbbox.Min.Y, tankbbox.Max.Z);
+            tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
+            tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
 
             // Initialize agent
             tankAgentType = new GraphAgentType()
@@ -1275,9 +1274,9 @@ namespace TerrainSamples.SceneRts
             var bbox = terrain.GetBoundingBox();
 
             float sep = 2.1f;
-            for (float x = bbox.Min.X + 1; x < bbox.Max.X - 1; x += sep)
+            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
             {
-                for (float z = bbox.Min.Z + 1; z < bbox.Max.Z - 1; z += sep)
+                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
                     if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
@@ -1735,8 +1734,8 @@ namespace TerrainSamples.SceneRts
             if (curveLineDrawer.Visible)
             {
                 Matrix4x4 rot =
-                    Matrix4x4.CreateFromQuaternion(helicopter.Manipulator.Rotation) *
-                    Matrix4x4.CreateTranslation(helicopter.Manipulator.Position);
+                    Matrix4x4.RotationQuaternion(helicopter.Manipulator.Rotation) *
+                    Matrix4x4.Translation(helicopter.Manipulator.Position);
 
                 curveLineDrawer.SetPrimitives(hAxisColor, Line3D.CreateAxis(rot, 5f));
             }

@@ -73,8 +73,8 @@ namespace TerrainSamples.SceneSkybox
         ];
         private readonly Quaternion[] obeliskRotations =
         [
-            Quaternion.CreateFromYawPitchRoll(-Helper.PiOver2 * 0.75f, Helper.PiOver2 * 1.03f, 0.45f),
-            Quaternion.CreateFromYawPitchRoll(0, -0.15f, 0),
+            Quaternion.RotationYawPitchRoll(-Helper.PiOver2 * 0.75f, Helper.PiOver2 * 1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
         ];
@@ -281,7 +281,7 @@ namespace TerrainSamples.SceneSkybox
             };
             var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
-            groundDesc.Heightmap.Transform = Matrix4x4.CreateTranslation(0, -terrainHeight * 0.33f, 0);
+            groundDesc.Heightmap.Transform = Matrix4x4.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
 
             lakeBottom = await AddComponentEffect<Scenery, SceneryDescription>("Lake Bottom", "Lake Bottom", groundDesc);
@@ -417,7 +417,7 @@ namespace TerrainSamples.SceneSkybox
                 torchs[i].Manipulator.SetTransform(firePositions3D, Quaternion.Identity, 0.2f);
 
                 var bbox = torchs[i].GetBoundingBox(true);
-                firePositions3D.Y += (bbox.Max.Y - bbox.Min.Y) * 0.95f;
+                firePositions3D.Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
                 var torchLights = new SceneLightPoint(
                     string.Format("Torch {0}", i),

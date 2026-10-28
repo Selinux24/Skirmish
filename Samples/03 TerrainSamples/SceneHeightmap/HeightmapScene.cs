@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using TerrainSamples.Common.Dialogs;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneHeightmap
 {
@@ -28,6 +26,7 @@ namespace TerrainSamples.SceneHeightmap
     using Engine.Tween;
     using Engine.UI;
     using Engine.UI.Tween;
+    using TerrainSamples.Common.Dialogs;
     using Color = System.Drawing.Color;
 
     public class HeightmapScene : WalkableScene
@@ -977,7 +976,7 @@ namespace TerrainSamples.SceneHeightmap
                 torchs[0].Manipulator.SetPosition(position);
                 var tbbox = torchs[0].GetBoundingBox();
 
-                position.Y += (tbbox.Max.Y - tbbox.Min.Y);
+                position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
 
                 spotLight1 = new SceneLightSpot(
                     "Red Spot",
@@ -1008,9 +1007,9 @@ namespace TerrainSamples.SceneHeightmap
                     posRnd.NextSingle(0, 1));
 
                 var position = new Vector3(
-                    posRnd.NextSingle(bbox.Min.X, bbox.Max.X),
+                    posRnd.NextSingle(bbox.Minimum.X, bbox.Maximum.X),
                     0f,
-                    posRnd.NextSingle(bbox.Min.Z, bbox.Max.Z));
+                    posRnd.NextSingle(bbox.Minimum.Z, bbox.Maximum.Z));
 
                 FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
@@ -1019,7 +1018,7 @@ namespace TerrainSamples.SceneHeightmap
                 torchs[i].Manipulator.SetPosition(pos);
                 var tbbox = torchs[i].GetBoundingBox();
 
-                pos.Y += (tbbox.Max.Y - tbbox.Min.Y) * 0.95f;
+                pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
                 torchLights[i - 1] = new SceneLightPoint(
                     string.Format("Torch {0}", i),
@@ -1789,7 +1788,7 @@ namespace TerrainSamples.SceneHeightmap
                 if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
-                var abox = Vortice.Mathematics.BoundingBox.CreateFromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
+                var abox = Engine.Mathematics.BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
 
                 var colL = ColorExtensions.IntToCol(nodes[i].Id, 128);
                 var colT = ColorExtensions.IntToCol(nodes[i].Id, 64);
@@ -1801,12 +1800,12 @@ namespace TerrainSamples.SceneHeightmap
                 bboxesTriDrawer.AddPrimitives(colT, tris);
                 bboxesTriDrawer.AddPrimitives(colT, Triangle.ReverseNormal(tris));
 
-                minY = Math.Min(minY, abox.Min.Y);
+                minY = Math.Min(minY, abox.Minimum.Y);
             }
 
             //Adjust gbox
             var gbbox = g.GetPlantingBounds();
-            gbbox.Min.Y = minY;
+            gbbox.Minimum.Y = minY;
             var col = ColorExtensions.IntToCol(0, 128);
             var glines = Line3D.CreateBox(gbbox);
             bboxesDrawer.AddPrimitives(col, glines);

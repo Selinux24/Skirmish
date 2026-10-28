@@ -1,11 +1,13 @@
-﻿using Engine.Physics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ContactResolverTests
@@ -121,7 +123,7 @@ namespace Engine.PhysicsTests
 
             RigidBody r1 = new(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
-            RigidBody r2 = new(new() { Mass = 1f, InitialTransform = Matrix4x4.CreateTranslation(0, 1, 0) });
+            RigidBody r2 = new(new() { Mass = 1f, InitialTransform = Matrix4x4.Translation(0, 1, 0) });
             r2.AddLinearVelocity(new Vector3(0, -1, 0));
 
             var pos = new Vector3(0, 0, 0);

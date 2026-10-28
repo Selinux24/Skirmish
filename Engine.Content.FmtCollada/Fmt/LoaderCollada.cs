@@ -12,6 +12,7 @@ namespace Engine.Content.FmtCollada.Fmt
     using Engine.Content.FmtCollada.FX;
     using Engine.Content.FmtCollada.Types;
     using Engine.Content.Persistence;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Loader for collada
@@ -1007,7 +1008,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 ProcessVertexWeights(skin, out var ibmList, out var wgList);
 
                 res.InverseBindMatrix = ibmList;
-                res.Weights = wgList.ToArray();
+                res.Weights = [.. wgList];
             }
 
             return res;

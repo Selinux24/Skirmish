@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneGardener
 {
@@ -523,8 +522,8 @@ TAB - Change control between Camera and Agent
             var position = pov.Manipulator.Position;
             var interest = position - pov.Manipulator.Forward;
 
-            var proj = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
-            var view = Matrix4x4.CreateLookAtLeftHanded(position, interest, Vector3Extensions.Up);
+            var proj = Matrix4x4.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
+            var view = Matrix4x4.LookAtLH(position, interest, Vector3Extensions.Up);
             var frustum = new BoundingFrustum(view * proj);
 
             grass.PointOfView = position;
@@ -611,7 +610,7 @@ TAB - Change control between Camera and Agent
         private void DrawGardenerBounds(Vector4 lColor)
         {
             var bbox = grass.GetPlantingBounds();
-            bbox.Min = new Vector3(bbox.Min.X, h, bbox.Min.Z);
+            bbox.Minimum = new Vector3(bbox.Minimum.X, h, bbox.Minimum.Z);
 
             var lines = Line3D.CreateBox(bbox);
             itemLines.SetPrimitives(lColor, lines);

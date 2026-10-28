@@ -54,7 +54,7 @@ namespace Engine.PhysicsTests
         {
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix4x4.CreateTranslation(Vector3Extensions.Up * 0.99f));
+            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3Extensions.Up * 0.99f));
 
             var p1 = new Vector3(0f, 0f, 100f);
             var p2 = new Vector3(100f, 0f, -100f);
@@ -76,7 +76,7 @@ namespace Engine.PhysicsTests
             var dataPln = new ContactResolver();
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix4x4.CreateTranslation(Vector3Extensions.Down));
+            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3Extensions.Down));
             var plane = FromPlane(new Plane(Vector3Extensions.Up, 0), Matrix4x4.Identity);
 
             var p1 = new Vector3(0f, -0.1f, 0f);

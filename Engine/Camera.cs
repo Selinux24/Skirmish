@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -209,7 +208,7 @@ namespace Engine
         {
             get
             {
-                return QuaternionExtensions.RotateFromDirection(Direction, Up);
+                return Quaternion.RotateFromDirection(Direction, Up);
             }
         }
         /// <inheritdoc/>
@@ -564,7 +563,7 @@ namespace Engine
             position = Vector3.One;
             interest = Vector3.Zero;
 
-            View = Matrix4x4.CreateLookAtLeftHanded(position, interest, Vector3.UnitY);
+            View = Matrix4x4.LookAtLH(position, interest, Vector3.UnitY);
             Projection = Matrix4x4.Identity;
             ViewProjection = View * Projection;
 
@@ -633,7 +632,7 @@ namespace Engine
         {
             if (mode == CameraModes.Ortho)
             {
-                Projection = Matrix4x4.CreateOrthographicLeftHanded(
+                Projection = Matrix4x4.OrthoLH(
                     viewportWidth,
                     viewportHeight,
                     nearPlaneDistance,
@@ -641,7 +640,7 @@ namespace Engine
             }
             else
             {
-                Projection = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(
+                Projection = Matrix4x4.PerspectiveFovLH(
                     fieldOfView,
                     aspectRelation,
                     nearPlaneDistance,
@@ -673,7 +672,7 @@ namespace Engine
             }
 
             var upVector = mode == CameraModes.Ortho ? Vector3.UnitZ : Vector3.UnitY;
-            View = Matrix4x4.CreateLookAtLeftHanded(position, interest, upVector);
+            View = Matrix4x4.LookAtLH(position, interest, upVector);
 
             ViewProjection = View * Projection;
 
@@ -999,8 +998,8 @@ namespace Engine
             StopTranslations();
 
             //Smooth rotation
-            Quaternion sourceRotation = QuaternionExtensions.RotateAxis(axis, 0);
-            Quaternion targetRotation = QuaternionExtensions.RotateAxis(axis, Helper.DegreesToRadians(degrees));
+            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, Helper.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
             Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
@@ -1352,12 +1351,12 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+            return Intersection.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

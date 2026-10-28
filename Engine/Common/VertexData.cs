@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Matrix = Matrix4x4;
+    using Matrix = Mathematics.Matrix4x4;
 
     /// <summary>
     /// Vertex helper

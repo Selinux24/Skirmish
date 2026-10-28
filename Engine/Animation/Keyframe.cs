@@ -47,7 +47,7 @@ namespace Engine.Animation
             set
             {
                 Matrix4x4 trn = value;
-                if (Matrix4x4.Decompose(trn, out Vector3 scale, out Quaternion rotation, out Vector3 location))
+                if (trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 location))
                 {
                     transform = trn;
                     Translation = location;

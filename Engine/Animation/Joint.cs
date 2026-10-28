@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Animation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Skeleton's Joint
     /// </summary>

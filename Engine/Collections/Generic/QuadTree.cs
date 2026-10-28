@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
     using Engine.Collections.Helpers;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Quad-tree
     /// </summary>
     public class QuadTree<T> : IQuadTree<QuadTreeNode<T>>
     {
-        const string cName = nameof(QuadTree<T>);
+        const string cName = nameof(QuadTree<>);
 
         /// <inheritdoc/>
         public QuadTreeNode<T> Root { get; private set; }

@@ -202,8 +202,8 @@ namespace Engine.Mathematics
         public static bool BoxIntersectsTriangle(BoundingBox box, Triangle triangle)
         {
             // Translate the triangle to origin, and use only the box extents to refer to the box
-            var boxCenter = box.GetCenter();
-            var boxExtents = box.GetExtents();
+            var boxCenter = box.Center;
+            var boxExtents = box.Extents;
             var origTri = new Triangle(triangle.Point1 - boxCenter, triangle.Point2 - boxCenter, triangle.Point3 - boxCenter);
 
             // Test first 3 edges
@@ -941,7 +941,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the point of the box closest to the specified point</returns>
         public static Vector3 ClosestPointInBox(Vector3 point, BoundingBox box)
         {
-            return ClosestPointInBox(point, box.Center, box.GetExtents(), Matrix4x4.Identity);
+            return ClosestPointInBox(point, box.Center, box.Extents, Matrix4x4.Identity);
         }
         /// <summary>
         /// Gets the point of the box closest to the specified point
@@ -965,9 +965,9 @@ namespace Engine.Mathematics
         {
             Vector3 diff = point - center;
 
-            float closestX = Vector3.Dot(diff, transform.GetRight());
-            float closestY = Vector3.Dot(diff, transform.GetUp());
-            float closestZ = Vector3.Dot(diff, transform.GetBackward());
+            float closestX = Vector3.Dot(diff, transform.Right);
+            float closestY = Vector3.Dot(diff, transform.Up);
+            float closestZ = Vector3.Dot(diff, transform.Backward);
 
             //X axis
             if (closestX < -extents.X)
@@ -1000,9 +1000,9 @@ namespace Engine.Mathematics
             }
 
             Vector3 closestPoint = center;
-            closestPoint += closestX * transform.GetRight();
-            closestPoint += closestY * transform.GetUp();
-            closestPoint += closestZ * transform.GetBackward();
+            closestPoint += closestX * transform.Right;
+            closestPoint += closestY * transform.Up;
+            closestPoint += closestZ * transform.Backward;
 
             return closestPoint;
         }
@@ -1160,7 +1160,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType SphereContainsFrustum(BoundingSphere sphere, BoundingFrustum frustum)
         {
-            if (!frustum.Intersects(sphere))
+            if (!frustum.Intersects(ref sphere))
             {
                 // Not intersection at all
                 return ContainmentType.Disjoint;
@@ -1171,7 +1171,7 @@ namespace Engine.Mathematics
             for (int i = 0; i < corners.Length; i++)
             {
                 var v = corners[i];
-                if (sphere.Contains(v) == ContainmentType.Disjoint)
+                if (sphere.Contains(ref v) == ContainmentType.Disjoint)
                 {
                     return ContainmentType.Intersects;
                 }
@@ -1257,7 +1257,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType BoxContainsFrustum(BoundingBox box, BoundingFrustum frustum)
         {
-            if (!frustum.Intersects(box))
+            if (!frustum.Intersects(ref box))
             {
                 // Not intersection at all
                 return ContainmentType.Disjoint;
@@ -1652,7 +1652,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, BoundingSphere sphere)
         {
-            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
             return mbox.Contains(sphere);
         }
@@ -1664,7 +1664,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, BoundingBox box)
         {
-            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
             return mbox.Contains(box);
         }
@@ -1676,7 +1676,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, BoundingFrustum frustum)
         {
-            var mbox = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
 
             return BoxContainsFrustum(mbox, frustum);
         }
@@ -1689,8 +1689,8 @@ namespace Engine.Mathematics
         public static ContainmentType MeshContainsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2)
         {
             // A mesh is not a volume. Calculate the bounding volumes of the tow meshes
-            var bbox1 = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh1.SelectMany(t => t.GetVertices())]);
-            var bbox2 = BoundingBoxExtensions.BoundingBoxFromPoints([.. mesh2.SelectMany(t => t.GetVertices())]);
+            var bbox1 = BoundingBox.FromPoints([.. mesh1.SelectMany(t => t.GetVertices())]);
+            var bbox2 = BoundingBox.FromPoints([.. mesh2.SelectMany(t => t.GetVertices())]);
 
             if (bbox1.Contains(bbox2) == ContainmentType.Disjoint)
             {
@@ -1726,7 +1726,7 @@ namespace Engine.Mathematics
         /// <param name="radius">Circle radius</param>
         public static bool RayIntersectsCircle3D(ref Ray ray, Vector3 center, Vector3 normal, float radius)
         {
-            var pFrom = PlaneExtensions.CreatePlane(center, normal);
+            var pFrom = new Plane(center, normal);
             if (!pFrom.Intersects(ref ray, out Vector3 p))
             {
                 return false;
@@ -1738,6 +1738,70 @@ namespace Engine.Mathematics
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets whether two intersectables have intersection or not
+        /// </summary>
+        /// <param name="one">Object one</param>
+        /// <param name="detectionModeOne">Detection mode for one</param>
+        /// <param name="two">Object two</param>
+        /// <param name="detectionModeTwo">Detection mode for two</param>
+        /// <returns>Returns true if have intersection</returns>
+        public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, IIntersectable two, IntersectDetectionMode detectionModeTwo)
+        {
+            var oneVolume = one?.GetIntersectionVolume(detectionModeOne);
+            var twoVolume = two?.GetIntersectionVolume(detectionModeTwo);
+
+            return Intersects(oneVolume, twoVolume);
+        }
+        /// <summary>
+        /// Gets whether the intersectable and the volumen have intersection or not
+        /// </summary>
+        /// <param name="one">Object one</param>
+        /// <param name="detectionModeOne">Detection mode for one</param>
+        /// <param name="twoVolume">Volume</param>
+        /// <returns>Returns true if have intersection</returns>
+        public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, ICullingVolume twoVolume)
+        {
+            var oneVolume = one?.GetIntersectionVolume(detectionModeOne);
+
+            return Intersects(oneVolume, twoVolume);
+        }
+        /// <summary>
+        /// Gets whether two volumes have intersection or not
+        /// </summary>
+        /// <param name="one">Volume one</param>
+        /// <param name="two">Volume two</param>
+        /// <returns>Returns true if have intersection</returns>
+        public static bool Intersects(ICullingVolume one, ICullingVolume two)
+        {
+            if (one == null || two == null)
+            {
+                return false;
+            }
+
+            if (two is IntersectionVolumeSphere twoSph)
+            {
+                return one.Contains(twoSph) != ContainmentType.Disjoint;
+            }
+
+            if (two is IntersectionVolumeAxisAlignedBox twoBox)
+            {
+                return one.Contains(twoBox) != ContainmentType.Disjoint;
+            }
+
+            if (two is IntersectionVolumeFrustum twoFrustum)
+            {
+                return one.Contains(twoFrustum) != ContainmentType.Disjoint;
+            }
+
+            if (two is IntersectionVolumeMesh twoMesh)
+            {
+                return one.Contains((Triangle[])twoMesh) != ContainmentType.Disjoint;
+            }
+
+            return false;
         }
     }
 }

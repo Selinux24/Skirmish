@@ -74,10 +74,10 @@ namespace Engine.BuiltIn.Components.Particles
             var finalH1 = new BoundingSphere(finalPosH1 + new Vector3(0, endSize, 0), endSize * 0.5f);
             var finalH2 = new BoundingSphere(finalPosH2 + new Vector3(0, endSize, 0), endSize * 0.5f);
 
-            var bbox = BoundingBox.CreateFromSphere(initial);
-            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalV));
-            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalH1));
-            bbox = BoundingBox.CreateMerged(bbox, BoundingBox.CreateFromSphere(finalH2));
+            var bbox = BoundingBox.FromSphere(initial);
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalV));
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH1));
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH2));
 
             return bbox;
         }
@@ -267,12 +267,12 @@ namespace Engine.BuiltIn.Components.Particles
             var tmp = mergedBoundingBox;
 
             mergedBoundingBox = new BoundingBox(
-                boundingBox.Min + Position,
-                boundingBox.Max + Position);
+                boundingBox.Minimum + Position,
+                boundingBox.Maximum + Position);
 
             if (tmp != null)
             {
-                mergedBoundingBox = BoundingBox.CreateMerged(tmp.Value, mergedBoundingBox.Value);
+                mergedBoundingBox = BoundingBox.Merge(tmp.Value, mergedBoundingBox.Value);
             }
         }
 
@@ -350,8 +350,8 @@ namespace Engine.BuiltIn.Components.Particles
         public virtual BoundingBox GetBoundingBox()
         {
             return mergedBoundingBox ?? new BoundingBox(
-                boundingBox.Min + Position,
-                boundingBox.Max + Position);
+                boundingBox.Minimum + Position,
+                boundingBox.Maximum + Position);
         }
         /// <summary>
         /// Updates the particle emitter bounds
@@ -360,8 +360,8 @@ namespace Engine.BuiltIn.Components.Particles
         public void UpdateBounds(ParticleSystemParams systemParams)
         {
             var bbox = SampleBBox(this, systemParams, 0.33f);
-            bbox = BoundingBox.CreateMerged(bbox, SampleBBox(this, systemParams, 0.66f));
-            bbox = BoundingBox.CreateMerged(bbox, SampleBBox(this, systemParams, 1f));
+            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 0.66f));
+            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 1f));
 
             SetBoundingBox(bbox);
         }

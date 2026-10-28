@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Flares
 {
@@ -152,7 +151,7 @@ namespace Engine.BuiltIn.Components.Flares
 
             // Set view translation to Zero to simulate infinite
             var infiniteView = camera.View;
-            infiniteView.Translation = Vector3.Zero;
+            infiniteView.TranslationVector = Vector3.Zero;
 
             // Project the light position into 2D screen space.
             var projectedPosition = Game.Graphics.Viewport.Project(
@@ -222,7 +221,7 @@ namespace Engine.BuiltIn.Components.Flares
             Vector3 lPositionUnit = eyePosition - light.Direction;
 
             //Is the light into the vision cone?
-            if (frustum.Contains(ref lPositionUnit) != ContainmentType.Disjoint)
+            if (frustum.Contains(ref lPositionUnit) != Vortice.Mathematics.ContainmentType.Disjoint)
             {
                 //Calculate the ray from light to position
                 Vector3 lightPosition = GetPosition(maxZ, light.Direction);

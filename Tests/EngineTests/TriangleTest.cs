@@ -1,5 +1,4 @@
-﻿using Engine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -7,6 +6,9 @@ using System.Numerics;
 
 namespace EngineTests
 {
+    using Engine;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]
@@ -223,13 +225,13 @@ namespace EngineTests
 
             Assert.AreEqual(new Vector3(2, 0, 0), dx);
             Assert.AreEqual(2, dx.Length());
-          
+
             Assert.AreEqual(new Vector3(0, 0, 0), dy);
             Assert.AreEqual(0, dy.Length());
-         
+
             Assert.AreEqual(new Vector3(0, 0, 2), dz);
             Assert.AreEqual(2, dz.Length());
-         
+
             Assert.AreEqual(1.3333f, dOne.X, delta);
             Assert.AreEqual(1.3333f, dOne.Y, delta);
             Assert.AreEqual(1.3333f, dOne.Z, delta);

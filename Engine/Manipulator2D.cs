@@ -80,8 +80,8 @@ namespace Engine
                 pivotPoint = parentScrPosition - localScrPosition;
             }
 
-            SizeTransform = Matrix4x4.CreateScale(new Vector3(Size, 0));
-            SpriteTransform = Matrix4x4Extensions.Transformation2D(pivotPoint, 0, Scale, pivotPoint, Rotation, localScrPosition);
+            SizeTransform = Matrix4x4.Scaling(new Vector3(Size, 0));
+            SpriteTransform = Matrix4x4.Transformation2D(pivotPoint, 0, Scale, pivotPoint, Rotation, localScrPosition);
             LocalTransform = SizeTransform * SpriteTransform;
 
             updateInternals = false;

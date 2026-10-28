@@ -440,7 +440,7 @@ namespace Engine.BuiltIn.Drawers
                     CastShadow = light.CastShadowsMarked ? 1 : 0,
                     MapIndex = light.ShadowMapIndex,
                     MapCount = light.ShadowMapCount,
-                    FromLightVP = (light.FromLightVP?.Length ?? 0) != 0 ? Matrix4x4.Transpose(light.FromLightVP[0]) : Matrix4x4Extensions.Zero,
+                    FromLightVP = (light.FromLightVP?.Length ?? 0) != 0 ? Matrix4x4.Transpose(light.FromLightVP[0]) : Matrix4x4.Zero,
                 };
             }
 
@@ -604,7 +604,7 @@ namespace Engine.BuiltIn.Drawers
                 }
 
                 float radius = light.Radius;
-                var perspectiveMatrix = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(Helper.PiOver2, 1, 0.1f, radius + 0.1f);
+                var perspectiveMatrix = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, radius + 0.1f);
 
                 return new BufferLightPoint
                 {

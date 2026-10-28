@@ -9,19 +9,19 @@ namespace Engine.Mathematics
     /// <remarks>
     /// Initializes a new instance of the <see cref="BoundingBoxInt"/> struct.
     /// </remarks>
-    /// <param name="min">The lower bound of the bounding box.</param>
-    /// <param name="max">The upper bound of the bounding box.</param>
+    /// <param name="minimum">The lower bound of the bounding box.</param>
+    /// <param name="maximum">The upper bound of the bounding box.</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct BoundingBoxInt(Vector3Int min, Vector3Int max) : IEquatable<BoundingBoxInt>
+    public struct BoundingBoxInt(Vector3Int minimum, Vector3Int maximum) : IEquatable<BoundingBoxInt>
     {
         /// <summary>
         /// The lower bound of the bounding box.
         /// </summary>
-        public Vector3Int Min { get; set; } = min;
+        public Vector3Int Minimum { get; set; } = minimum;
         /// <summary>
         /// The upper bound of the bounding box.
         /// </summary>
-        public Vector3Int Max { get; set; } = max;
+        public Vector3Int Maximum { get; set; } = maximum;
 
         /// <summary>
         /// Checks whether two boudning boxes are intersecting.
@@ -31,9 +31,9 @@ namespace Engine.Mathematics
         /// <returns>A value indicating whether the two bounding boxes are overlapping.</returns>
         public static bool Overlapping(ref BoundingBoxInt a, ref BoundingBoxInt b)
         {
-            return !(a.Min.X > b.Max.X || a.Max.X < b.Min.X
-                || a.Min.Y > b.Max.Y || a.Max.Y < b.Min.Y
-                || a.Min.Z > b.Max.Z || a.Max.Z < b.Min.Z);
+            return !(a.Minimum.X > b.Maximum.X || a.Maximum.X < b.Minimum.X
+                || a.Minimum.Y > b.Maximum.Y || a.Maximum.Y < b.Minimum.Y
+                || a.Minimum.Z > b.Maximum.Z || a.Maximum.Z < b.Minimum.Z);
         }
 
         /// <inheritdoc/>
@@ -50,8 +50,8 @@ namespace Engine.Mathematics
         public readonly bool Equals(BoundingBoxInt other)
         {
             return
-                Min == other.Min &&
-                Max == other.Max;
+                Minimum == other.Minimum &&
+                Maximum == other.Maximum;
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
@@ -67,12 +67,12 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
-            return Min.GetHashCode() ^ Max.GetHashCode();
+            return Minimum.GetHashCode() ^ Maximum.GetHashCode();
         }
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"[{Min}, {Max}]";
+            return $"[{Minimum}, {Maximum}]";
         }
     }
 }

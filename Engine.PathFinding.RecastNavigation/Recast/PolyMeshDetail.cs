@@ -38,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return null;
             }
 
-            var orig = mesh.Bounds.Min;
+            var orig = mesh.Bounds.Minimum;
             int heightSearchRadius = Math.Max(1, (int)MathF.Ceiling(mesh.MaxEdgeError));
 
             var (bounds, _, _) = mesh.FindBounds(chf);

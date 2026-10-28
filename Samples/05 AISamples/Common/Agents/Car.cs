@@ -64,7 +64,7 @@ namespace AISamples.Common.Agents
 
         private void CreatePoints()
         {
-            var trn = Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(x, 0, y);
+            var trn = Matrix4x4.RotationY(angle) * Matrix4x4.Translation(x, 0, y);
 
             trnBox = box;
             trnBox.Transform(trn);
@@ -247,9 +247,9 @@ namespace AISamples.Common.Agents
         }
         public Matrix4x4 GetTransform(float height = 0)
         {
-            var trn = Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(x, height, y);
+            var trn = Matrix4x4.RotationY(angle) * Matrix4x4.Translation(x, height, y);
 
-            return Matrix4x4.CreateScale(scale) * trn;
+            return Matrix4x4.Scaling(scale) * trn;
         }
     }
 }

@@ -136,7 +136,7 @@ namespace Engine.BuiltIn.Components.Decals
                 return;
             }
 
-            boundingVolume = BoundingSphereExtensions.FromPoints(activeDecals);
+            boundingVolume = BoundingSphere.FromPoints(activeDecals);
         }
 
         /// <inheritdoc/>

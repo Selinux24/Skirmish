@@ -1,7 +1,8 @@
-﻿using Vortice.Mathematics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Build configuration
     /// </summary>
@@ -112,8 +113,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="height">Resulting height</param>
         public static void CalcGridSize(BoundingBox bounds, float cellSize, out int width, out int height)
         {
-            width = (int)((bounds.Max.X - bounds.Min.X) / cellSize + 0.5f);
-            height = (int)((bounds.Max.Z - bounds.Min.Z) / cellSize + 0.5f);
+            width = (int)((bounds.Maximum.X - bounds.Minimum.X) / cellSize + 0.5f);
+            height = (int)((bounds.Maximum.Z - bounds.Minimum.Z) / cellSize + 0.5f);
         }
     }
 }

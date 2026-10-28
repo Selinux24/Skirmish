@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Engine form interface
     /// </summary>
@@ -65,11 +66,11 @@ namespace Engine
         /// <summary>
         /// Render rectangle
         /// </summary>
-        Rect RenderRectangle
+        Vortice.Mathematics.Rect RenderRectangle
         {
             get
             {
-                return new Rect(0, 0, RenderWidth, RenderHeight);
+                return new(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <summary>
@@ -121,7 +122,7 @@ namespace Engine
         /// Gets the render viewport
         /// </summary>
         /// <returns></returns>
-        Viewport GetViewport();
+        Vortice.Mathematics.Viewport GetViewport();
         /// <summary>
         /// Gets the current ortho-projection matrix
         /// </summary>

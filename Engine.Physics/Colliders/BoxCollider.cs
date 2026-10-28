@@ -1,5 +1,4 @@
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
@@ -24,7 +23,7 @@ namespace Engine.Physics.Colliders
             Extents = extents;
 
             boundingBox = new BoundingBox(-extents, extents);
-            boundingSphere = BoundingSphere.CreateFromBoundingBox(boundingBox);
+            boundingSphere = BoundingSphere.FromBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

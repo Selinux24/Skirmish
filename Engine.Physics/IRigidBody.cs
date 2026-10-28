@@ -2,6 +2,8 @@
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Rigid body interface
     /// </summary>
@@ -52,19 +54,19 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the inertia tensor
         /// </summary>
-        Matrix4x4 InertiaTensor { get; }
+        Matrix3x3 InertiaTensor { get; }
         /// <summary>
         /// Gets the inverse inertia tensor
         /// </summary>
-        Matrix4x4 InverseInertiaTensor { get; }
+        Matrix3x3 InverseInertiaTensor { get; }
         /// <summary>
         /// Gets the inertia tensor in world coordinates
         /// </summary>
-        Matrix4x4 InertiaTensorWorld { get; }
+        Matrix3x3 InertiaTensorWorld { get; }
         /// <summary>
         /// Gets the inverse inertia tensor in world coordinates
         /// </summary>
-        Matrix4x4 InverseInertiaTensorWorld { get; }
+        Matrix3x3 InverseInertiaTensorWorld { get; }
 
         /// <summary>
         /// Gets the rigid body transform matrix

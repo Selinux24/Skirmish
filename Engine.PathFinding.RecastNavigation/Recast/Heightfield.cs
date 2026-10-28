@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Height field
     /// </summary>

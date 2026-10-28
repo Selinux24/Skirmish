@@ -1,14 +1,15 @@
-﻿using Engine.Physics;
-using Engine.Physics.Colliders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using Vortice.Mathematics;
-using Solver = Engine.Physics.GJK.Solver;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+    using Solver = Engine.Physics.GJK.Solver;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class GJKTests
@@ -51,7 +52,7 @@ namespace Engine.PhysicsTests
         public void SphereSphere1Test()
         {
             var s1 = SphereFromRadius(1, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -61,7 +62,7 @@ namespace Engine.PhysicsTests
         public void SphereSphere2Test()
         {
             var s1 = SphereFromRadius(1, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(3, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -71,7 +72,7 @@ namespace Engine.PhysicsTests
         public void SphereSphere3Test()
         {
             var s1 = SphereFromRadius(1, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(1, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -81,7 +82,7 @@ namespace Engine.PhysicsTests
         public void SphereSphere4Test()
         {
             var s1 = SphereFromRadius(1, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(2, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = SphereFromRadius(2, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -92,7 +93,7 @@ namespace Engine.PhysicsTests
         public void CubeSphere1Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -102,7 +103,7 @@ namespace Engine.PhysicsTests
         public void CubeSphere2Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(3, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -112,7 +113,7 @@ namespace Engine.PhysicsTests
         public void CubeSphere3Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(1, Matrix4x4.CreateTranslation(new Vector3(1, 0, 0)));
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -122,7 +123,7 @@ namespace Engine.PhysicsTests
         public void CubeSphere4Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = SphereFromRadius(2, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = SphereFromRadius(2, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -133,7 +134,7 @@ namespace Engine.PhysicsTests
         public void CubeCube1Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -143,7 +144,7 @@ namespace Engine.PhysicsTests
         public void CubeCube2Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(3, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -153,7 +154,7 @@ namespace Engine.PhysicsTests
         public void CubeCube3Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(1, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -163,7 +164,7 @@ namespace Engine.PhysicsTests
         public void CubeCube4Test()
         {
             var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -174,7 +175,7 @@ namespace Engine.PhysicsTests
         public void CubePolytope1Test()
         {
             var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -184,7 +185,7 @@ namespace Engine.PhysicsTests
         public void CubePolytope2Test()
         {
             var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(3, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -194,7 +195,7 @@ namespace Engine.PhysicsTests
         public void CubePolytope3Test()
         {
             var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.CreateTranslation(new Vector3(1, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -204,7 +205,7 @@ namespace Engine.PhysicsTests
         public void CubePolytope4Test()
         {
             var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
-            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.CreateTranslation(new Vector3(2, 0, 0)));
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 

@@ -1,14 +1,14 @@
-﻿using Engine.Common;
-using Engine.Mathematics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Path finder input
     /// </summary>
@@ -66,7 +66,7 @@ namespace Engine.PathFinding
                 {
                     tris = tris.Where(t =>
                     {
-                        return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                        return Intersection.BoxContainsTriangle(bounds.Value, t) != Vortice.Mathematics.ContainmentType.Disjoint;
                     });
                 }
 
@@ -94,7 +94,7 @@ namespace Engine.PathFinding
             {
                 tris = tris.Where(t =>
                 {
-                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                    return Intersection.BoxContainsTriangle(bounds.Value, t) != Vortice.Mathematics.ContainmentType.Disjoint;
                 });
             }
 

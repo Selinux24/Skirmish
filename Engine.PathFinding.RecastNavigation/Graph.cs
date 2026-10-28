@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {

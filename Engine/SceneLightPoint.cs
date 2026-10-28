@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -55,7 +54,7 @@ namespace Engine
         {
             get
             {
-                return Matrix4x4.CreateScale(Radius) * Matrix4x4.CreateTranslation(Position);
+                return Matrix4x4.Scaling(Radius) * Matrix4x4.Translation(Position);
             }
         }
 
@@ -69,7 +68,7 @@ namespace Engine
         private static Matrix4x4 GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
         {
             // View from light to scene center position
-            return Matrix4x4.CreateLookAtLeftHanded(lightPosition, lightPosition + direction, up);
+            return Matrix4x4.LookAtLH(lightPosition, lightPosition + direction, up);
         }
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace Engine
         {
             var trn = initialTransform * ParentTransform;
 
-            Matrix4x4.Decompose(trn, out Vector3 scale, out _, out Vector3 translation);
+            trn.Decompose(out Vector3 scale, out _, out Vector3 translation);
             Radius = initialRadius * scale.X;
             Intensity = initialIntensity * scale.X;
             Position = translation;
@@ -140,7 +139,7 @@ namespace Engine
         private Matrix4x4[] UpdateFromLightViewProjection()
         {
             // Orthogonal projection from center
-            var projection = Matrix4x4.CreatePerspectiveFieldOfView(Helper.PiOver2, 1f, 0.1f, Radius);
+            var projection = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1f, 0.1f, Radius);
 
             return
             [

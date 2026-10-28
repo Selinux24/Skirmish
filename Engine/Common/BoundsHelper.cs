@@ -92,7 +92,7 @@ namespace Engine.Common
 
             if (updateBoundingSphere || refresh)
             {
-                boundingSphere = bounds.BoundingSphere.SetTransform(manipulator?.GlobalTransform ?? Matrix4x4.Identity);
+                boundingSphere = BoundingSphere.Transform(bounds.BoundingSphere, manipulator?.GlobalTransform ?? Matrix4x4.Identity);
 
                 updateBoundingSphere = false;
             }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
@@ -908,7 +907,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             var bbox = inputGeometry.GetBoundingBox();
-            var center = bbox.GetCenter();
+            var center = bbox.Center;
             float maxD = MathF.Max(MathF.Max(bbox.Width, bbox.Height), bbox.Depth);
 
             Camera.SetInterest(center);
@@ -1329,7 +1328,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             foreach (var obs in obstacles)
             {
-                if (obs.Bbox.Intersects(ray).HasValue)
+                if (obs.Bbox.Intersects(ref ray))
                 {
                     NavigationGraph.RemoveObstacle(obs.Id);
                     obstacles.Remove(obs);
@@ -1886,7 +1885,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     for (int i = 0; i < dverts.Length; i += 3)
                     {
                         Vector3[] verts = [dverts[i], dverts[i + 1], dverts[i + 2]];
-                        var norm = Plane.CreateFromVertices(dverts[i], dverts[i + 1], dverts[i + 2]).Normal;
+                        var norm = new Plane(dverts[i], dverts[i + 1], dverts[i + 2]).Normal;
 
                         var vData = verts.Select(v => new VertexData() { Color = color, Position = v, Normal = norm });
                         vertices.AddRange([.. vData]);

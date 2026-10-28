@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// 3D manipulator interface
     /// </summary>

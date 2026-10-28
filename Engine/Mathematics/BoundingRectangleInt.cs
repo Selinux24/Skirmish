@@ -11,11 +11,11 @@ namespace Engine.Mathematics
         /// <summary>
         /// The minimum of the bounding box.
         /// </summary>
-        public Vector2Int Min { get; set; }
+        public Vector2Int Minimum { get; set; }
         /// <summary>
         /// The maximum of the bounding box.
         /// </summary>
-        public Vector2Int Max { get; set; }
+        public Vector2Int Maximum { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BBox2i"/> struct.
@@ -24,8 +24,8 @@ namespace Engine.Mathematics
         /// <param name="max">A maximum bound.</param>
         public BoundingRectangleInt(Vector2Int min, Vector2Int max)
         {
-            Min = min;
-            Max = max;
+            Minimum = min;
+            Maximum = max;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="BBox2i"/> struct.
@@ -36,8 +36,8 @@ namespace Engine.Mathematics
         /// <param name="maxY">The maximum Y bound.</param>
         public BoundingRectangleInt(int minX, int minY, int maxX, int maxY)
         {
-            Min = new Vector2Int(minX, minY);
-            Max = new Vector2Int(maxX, maxY);
+            Minimum = new Vector2Int(minX, minY);
+            Maximum = new Vector2Int(maxX, maxY);
         }
 
         /// <inheritdoc/>
@@ -65,18 +65,18 @@ namespace Engine.Mathematics
         public readonly bool Equals(BoundingRectangleInt other)
         {
             return 
-                Min == other.Min && 
-                Max == other.Max;
+                Minimum == other.Minimum && 
+                Maximum == other.Maximum;
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
-            return Min.GetHashCode() ^ Max.GetHashCode();
+            return Minimum.GetHashCode() ^ Maximum.GetHashCode();
         }
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return $"Min: {Min}; Max: {Max};";
+            return $"Min: {Minimum}; Max: {Maximum};";
         }
     }
 }

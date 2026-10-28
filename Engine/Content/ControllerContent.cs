@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Controller content

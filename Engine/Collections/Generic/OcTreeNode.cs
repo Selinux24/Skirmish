@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
@@ -79,7 +78,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Item</param>
         public void Insert(ICullingVolume itemBoundary, T item)
         {
-            if (itemBoundary.Contains(Boundary) == ContainmentType.Disjoint)
+            if (itemBoundary.Contains(Boundary) == Vortice.Mathematics.ContainmentType.Disjoint)
             {
                 return;
             }
@@ -100,7 +99,7 @@ namespace Engine.Collections.Generic
                 var child = GetNode(index);
                 if (child == null)
                 {
-                    if (itemBoundary.Contains(childBoundary) == ContainmentType.Disjoint)
+                    if (itemBoundary.Contains(childBoundary) == Vortice.Mathematics.ContainmentType.Disjoint)
                     {
                         continue;
                     }
@@ -215,13 +214,13 @@ namespace Engine.Collections.Generic
             }
 
             var containmentType = queryBoundary.Contains(node.Boundary);
-            if (containmentType == ContainmentType.Disjoint)
+            if (containmentType == Vortice.Mathematics.ContainmentType.Disjoint)
             {
                 // The query not contains the current node boundary. Exit
                 return;
             }
 
-            if (containmentType == ContainmentType.Contains)
+            if (containmentType == Vortice.Mathematics.ContainmentType.Contains)
             {
                 // The query contains the current node boundary. Return all items without any query
                 GetItems(node, results);
@@ -279,7 +278,7 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                if (IntersectionHelper.Intersects(queryBoundary, node.items[i].volume))
+                if (Intersection.Intersects(queryBoundary, node.items[i].volume))
                 {
                     results.Add(node.items[i].item);
                 }

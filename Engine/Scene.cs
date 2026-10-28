@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -587,7 +586,7 @@ namespace Engine
                 return new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
             }
 
-            BoundingBox = BoundingBoxExtensions.MergeBoundingBox(boxes);
+            BoundingBox = Mathematics.BoundingBox.Merge(boxes);
 
             return BoundingBox.Value;
         }
@@ -693,7 +692,7 @@ namespace Engine
         {
             var bbox = GetBoundingBox(SceneObjectUsages.Ground);
 
-            float maxY = bbox.Max.Y + 1.0f;
+            float maxY = bbox.Maximum.Y + 1.0f;
 
             return new PickingRay(new Vector3(x, maxY, z), Vector3Extensions.Down, pickingParams);
         }
@@ -809,8 +808,8 @@ namespace Engine
                 Active = Active,
                 Order = Order,
                 SceneMode = sceneMode,
-                GroundBoundingBoxMin = BoundingBox?.Min,
-                GroundBoundingBoxMax = BoundingBox?.Max,
+                GroundBoundingBoxMin = BoundingBox?.Minimum,
+                GroundBoundingBoxMax = BoundingBox?.Maximum,
                 GameEnvironment = GameEnvironment.GetState(),
                 SceneLights = Lights.GetState(),
                 Camera = Camera.GetState(),

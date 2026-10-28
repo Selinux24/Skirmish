@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
@@ -41,14 +40,14 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly BoundingBox GetBounds()
         {
-            return BoundingBox.CreateFromPoints(Vertices);
+            return BoundingBox.FromPoints(Vertices);
         }
 
         public readonly bool IntersectsRay(Ray ray)
         {
             var cvBox = GetBounds();
 
-            return cvBox.Intersects(ray).HasValue;
+            return cvBox.Intersects(ref ray);
         }
 
         public readonly IEnumerable<(Vector3[] verts, bool ccw)> GetPolygons()

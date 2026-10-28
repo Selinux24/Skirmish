@@ -1,9 +1,10 @@
-﻿using Engine.Content;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Engine
 {
+    using Engine.Content;
+
     /// <summary>
     /// Camera state
     /// </summary>

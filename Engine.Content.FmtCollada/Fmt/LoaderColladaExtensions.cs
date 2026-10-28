@@ -434,7 +434,7 @@ namespace Engine.Content.FmtCollada.Fmt
             if (translate != null)
             {
                 BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
-                if (loc != null) finalTranslation *= Matrix4x4.CreateTranslation(loc.ToVector3());
+                if (loc != null) finalTranslation *= Matrix4x4.Translation(loc.ToVector3());
             }
 
             if (rotate != null)
@@ -443,28 +443,28 @@ namespace Engine.Content.FmtCollada.Fmt
                 if (rotX != null)
                 {
                     Vector4 r = rotX.ToVector4();
-                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
                 if (rotY != null)
                 {
                     Vector4 r = rotY.ToVector4();
-                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
                 if (rotZ != null)
                 {
                     Vector4 r = rotZ.ToVector4();
-                    finalRotation *= Matrix4x4Extensions.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
             }
 
             if (scale != null)
             {
                 BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
-                if (sca != null) finalScale *= Matrix4x4.CreateScale(sca.ToVector3());
+                if (sca != null) finalScale *= Matrix4x4.Scaling(sca.ToVector3());
             }
 
             return finalScale * finalRotation * finalTranslation;

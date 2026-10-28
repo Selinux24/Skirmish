@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -20,7 +19,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Matrix4x4 transform)
         {
-            if (Matrix4x4.Decompose(transform, out _, out var rotation, out _))
+            if (transform.Decompose(out _, out var rotation, out _))
             {
                 return GetYRotation(rotation);
             }
@@ -36,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            if (Helper.IsZero(rotation.GetAngle()))
+            if (Helper.IsZero(rotation.Angle))
             {
                 return 0f;
             }
@@ -44,14 +43,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Validates the angle and axis
             var yRotation = 0f;
 
-            if (Vector3Extensions.NearEqual(rotation.GetAxis(), Vector3Extensions.Up, epsilon))
+            if (Vector3Extensions.NearEqual(rotation.Axis, Vector3Extensions.Up, epsilon))
             {
-                yRotation = rotation.GetAngle();
+                yRotation = rotation.Angle;
             }
 
-            if (Vector3Extensions.NearEqual(rotation.GetAxis(), Vector3Extensions.Down, epsilon))
+            if (Vector3Extensions.NearEqual(rotation.Axis, Vector3Extensions.Down, epsilon))
             {
-                yRotation = -rotation.GetAngle();
+                yRotation = -rotation.Angle;
             }
 
             return yRotation;
@@ -117,8 +116,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
-            var min = bounds.Value.Min;
-            var max = bounds.Value.Max;
+            var min = bounds.Value.Minimum;
+            var max = bounds.Value.Maximum;
 
             float xhalf = halfExtents.X * ics + 0.5f;
             float zhalf = halfExtents.Z * ics + 0.5f;
@@ -205,8 +204,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return new BoundingBoxInt
             {
-                Min = new Vector3Int(minx, miny, minz),
-                Max = new Vector3Int(maxx, maxy, maxz),
+                Minimum = new Vector3Int(minx, miny, minz),
+                Maximum = new Vector3Int(maxx, maxy, maxz),
             };
         }
     }

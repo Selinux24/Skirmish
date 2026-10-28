@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
@@ -668,7 +667,7 @@ namespace Engine.PathFinding
 
             for (int i = 0; i < 50; i++)
             {
-                var v = rnd.NextVector3(bbox.Min, bbox.Max);
+                var v = rnd.NextVector3(bbox.Minimum, bbox.Maximum);
 
                 if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {

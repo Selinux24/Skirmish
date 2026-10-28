@@ -1,8 +1,9 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph area interface
     /// </summary>

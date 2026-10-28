@@ -1,8 +1,9 @@
 ﻿using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Light point description
     /// </summary>
@@ -19,7 +20,7 @@ namespace Engine
         {
             return new SceneLightPointDescription
             {
-                Transform = Matrix4x4.CreateTranslation(position),
+                Transform = Matrix4x4.Translation(position),
                 Radius = radius,
                 Intensity = intensity,
             };

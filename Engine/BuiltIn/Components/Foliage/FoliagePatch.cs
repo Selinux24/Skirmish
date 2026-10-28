@@ -6,10 +6,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Foliage patch
     /// </summary>
@@ -178,13 +179,13 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="pos">Resulting point</param>
         private static bool CalculatePoint(FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd, out Vector3 pos)
         {
-            Vector2 min = new(gbbox.Min.X, gbbox.Min.Z);
-            Vector2 max = new(gbbox.Max.X, gbbox.Max.Z);
+            Vector2 min = new(gbbox.Minimum.X, gbbox.Minimum.Z);
+            Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
 
             pos = new(
-                rnd.NextSingle(nbbox.Min.X, nbbox.Max.X),
-                nbbox.Max.Y + 1f,
-                rnd.NextSingle(nbbox.Min.Z, nbbox.Max.Z));
+                rnd.NextSingle(nbbox.Minimum.X, nbbox.Maximum.X),
+                nbbox.Maximum.Y + 1f,
+                rnd.NextSingle(nbbox.Minimum.Z, nbbox.Maximum.Z));
 
             bool plant = false;
             if (map != null)

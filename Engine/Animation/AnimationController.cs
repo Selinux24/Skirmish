@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Text;
 
 namespace Engine.Animation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Animation controller
     /// </summary>

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
     using Engine.PathFinding.RecastNavigation.Recast;
 
     /// <summary>
@@ -94,8 +94,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int lh = h - borderSize * 2;
 
             // Build contracted bbox for layers.
-            var bmin = chf.Bounds.Min;
-            var bmax = chf.Bounds.Max;
+            var bmin = chf.Bounds.Minimum;
+            var bmax = chf.Bounds.Maximum;
             bmin.X += borderSize * chf.CellSize;
             bmin.Z += borderSize * chf.CellSize;
             bmax.X -= borderSize * chf.CellSize;
@@ -741,8 +741,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Adjust the bbox to fit the heightfield.
             var lbbox = Bounds;
-            lbbox.Min.Y = Bounds.Min.Y + hmin * heightfield.CellHeight;
-            lbbox.Max.Y = Bounds.Min.Y + hmax * heightfield.CellHeight;
+            lbbox.Minimum.Y = Bounds.Minimum.Y + hmin * heightfield.CellHeight;
+            lbbox.Maximum.Y = Bounds.Minimum.Y + hmax * heightfield.CellHeight;
 
             return (lbbox, hmin, hmax);
         }

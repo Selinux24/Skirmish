@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Engine.Mathematics
 {
     /// <summary>
     /// Oriented bounding box
     /// </summary>
-    public struct OrientedBoundingBox : IEquatable<OrientedBoundingBox>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct OrientedBoundingBox : IEquatable<OrientedBoundingBox>, IFormattable
     {
+        const string OrientedBoundingBoxStr = "Extents:{0} Transformation:{1}";
+
         public Vector3 Extents;
         public Matrix4x4 Transformation;
 
         public readonly Vector3 Size => Extents * 2;
-        public readonly Vector3 Center => Transformation.Translation;
+        public readonly Vector3 Center => Transformation.TranslationVector;
 
         /// <summary>
         /// Creates an oriented bounding box from a transformed point list and it's transform matrix
@@ -43,7 +48,7 @@ namespace Engine.Mathematics
             var ptArray = points.ToArray();
 
             //Next, remove any point transform and set points to origin
-            Matrix4x4.Invert(transform, out var inv);
+            Matrix4x4.Invert(ref transform, out var inv);
             Vector3Extensions.TransformCoordinate(ptArray, ref inv, ptArray);
 
             //Create the OBB from origin points
@@ -58,19 +63,19 @@ namespace Engine.Mathematics
         public OrientedBoundingBox()
         {
             Extents = Vector3.Zero;
-            Transformation = Matrix4x4.Create(0);
+            Transformation = new(0);
         }
         public OrientedBoundingBox(BoundingBox bb)
         {
-            var Center = bb.Min + (bb.Max - bb.Min) / 2f;
-            Extents = bb.Max - Center;
-            Transformation = Matrix4x4.CreateTranslation(Center);
+            var Center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
+            Extents = bb.Maximum - Center;
+            Transformation = Matrix4x4.Translation(Center);
         }
         public OrientedBoundingBox(Vector3 minimum, Vector3 maximum)
         {
             var Center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - Center;
-            Transformation = Matrix4x4.CreateTranslation(Center);
+            Transformation = Matrix4x4.Translation(Center);
         }
         public OrientedBoundingBox(Vector3[] points)
         {
@@ -90,12 +95,12 @@ namespace Engine.Mathematics
 
             var Center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - Center;
-            Transformation = Matrix4x4.CreateTranslation(Center);
+            Transformation = Matrix4x4.Translation(Center);
         }
 
         public readonly BoundingBox GetBoundingBox()
         {
-            return BoundingBox.CreateFromPoints(GetCorners());
+            return BoundingBox.FromPoints(GetCorners());
         }
 
         public void Transform(Matrix4x4 mat)
@@ -108,30 +113,30 @@ namespace Engine.Mathematics
         }
         public void Translate(Vector3 translation)
         {
-            Transformation.Translation += translation;
+            Transformation.TranslationVector += translation;
         }
 
         /// <summary>
         /// Gets a oriented bounding box transformed by the given matrix
         /// </summary>
-        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="box">Oriented bounding box</param>
         /// <param name="transform">Transform</param>
-        public readonly OrientedBoundingBox SetTransform(Matrix4x4 transform)
+        public static OrientedBoundingBox Transform(OrientedBoundingBox box, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
-                return this;
+                return box;
             }
 
 
-            if (!Matrix4x4.Decompose(transform, out var scale, out var rotation, out var translation))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation))
             {
-                return this;
+                return box;
             }
 
-            var trnObb = this;
+            var trnObb = box;
             trnObb.Scale(scale);
-            trnObb.Transformation = Matrix4x4.CreateFromQuaternion(rotation) * Matrix4x4.CreateTranslation(translation);
+            trnObb.Transformation = Matrix4x4.RotationQuaternion(rotation) * Matrix4x4.Translation(translation);
             return trnObb;
         }
 
@@ -141,7 +146,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the edge list of the current oriented bounding box</returns>
         public readonly IEnumerable<Segment> GetEdges()
         {
-            return BoundingBoxExtensions.GetEdges(GetVertices());
+            return BoundingBox.GetEdges(GetVertices());
         }
         /// <summary>
         /// Gets the oriented bounding box face planes list
@@ -151,25 +156,25 @@ namespace Engine.Mathematics
         {
             var vertices = GetVertices();
 
-            var edges = BoundingBoxExtensions.GetEdges(vertices);
+            var edges = BoundingBox.GetEdges(vertices);
 
             var topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
 
             var bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
 
             var frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
 
             var backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
 
             var leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
 
             var rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
-            yield return PlaneExtensions.CreatePlane(BoundingBoxExtensions.GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
+            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -178,7 +183,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(BoxFaces face)
         {
-            return BoundingBoxExtensions.GetFace(GetFaces(), face);
+            return BoundingBox.GetFace(GetFaces(), face);
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -187,7 +192,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(int faceIndex)
         {
-            return BoundingBoxExtensions.GetFace(GetFaces(), faceIndex);
+            return BoundingBox.GetFace(GetFaces(), faceIndex);
         }
 
         /// <summary>
@@ -196,7 +201,7 @@ namespace Engine.Mathematics
         /// <param name="vertex">Box vertex</param>
         public readonly Vector3 GetVertex(BoxVertices vertex)
         {
-            return BoundingBoxExtensions.GetVertex(GetVertices(), (int)vertex);
+            return BoundingBox.GetVertex(GetVertices(), (int)vertex);
         }
         /// <summary>
         /// Gets the specified vertex
@@ -204,7 +209,7 @@ namespace Engine.Mathematics
         /// <param name="index">Vertex index</param>
         public readonly Vector3 GetVertex(int index)
         {
-            return BoundingBoxExtensions.GetVertex(GetVertices(), index);
+            return BoundingBox.GetVertex(GetVertices(), index);
         }
 
         /// <summary>
@@ -221,7 +226,7 @@ namespace Engine.Mathematics
             normal = Vector3.TransformNormal(normal, trn);
             normal2 = Vector3.TransformNormal(normal2, trn);
             normal3 = Vector3.TransformNormal(normal3, trn);
-            Vector3 translationVector = trn.Translation;
+            Vector3 translationVector = trn.TranslationVector;
 
             yield return translationVector + normal + normal2 + normal3;
             yield return translationVector + normal + normal2 - normal3;
@@ -242,7 +247,7 @@ namespace Engine.Mathematics
             yv = Vector3.TransformNormal(yv, Transformation);
             zv = Vector3.TransformNormal(zv, Transformation);
 
-            var center = Transformation.Translation;
+            var center = Transformation.TranslationVector;
 
             var corners = new Vector3[8];
             corners[0] = center + xv + yv + zv;
@@ -263,30 +268,90 @@ namespace Engine.Mathematics
         /// <param name="vector">Vector</param>
         public readonly float ProjectToVector(Vector3 vector)
         {
-            return BoundingBoxExtensions.ProjectToVector(Extents, Transformation, vector);
+            return BoundingBox.ProjectToVector(Extents, Transformation, vector);
         }
 
-        public readonly bool Equals(OrientedBoundingBox other)
-        {
-            return Extents.Equals(other.Extents)
-                && Transformation.Equals(other.Transformation);
-        }
-        public override readonly bool Equals(object obj)
-        {
-            return obj is OrientedBoundingBox box && Equals(box);
-        }
-        public override readonly int GetHashCode() => HashCode.Combine(Extents, Transformation);
-        public override readonly string ToString() => base.ToString();
-
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(OrientedBoundingBox left, OrientedBoundingBox right)
         {
-            return (left.Extents == right.Extents)
-                && (left.Transformation == right.Transformation);
+            return left.Equals(ref right);
         }
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(OrientedBoundingBox left, OrientedBoundingBox right)
         {
-            return (left.Extents != right.Extents)
-                || (left.Transformation != right.Transformation);
+            return !left.Equals(ref right);
+        }
+
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                OrientedBoundingBoxStr,
+                Extents.ToString(),
+                Transformation.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            if (format == null) return ToString();
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                OrientedBoundingBoxStr,
+                Extents.ToString(format, CultureInfo.CurrentCulture),
+                Transformation.ToString(format, CultureInfo.CurrentCulture));
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                OrientedBoundingBoxStr,
+                Extents.ToString(),
+                Transformation.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null) return ToString(formatProvider);
+
+            return string.Format(
+                formatProvider,
+                OrientedBoundingBoxStr,
+                Extents.ToString(format, formatProvider),
+                Transformation.ToString(format, formatProvider));
+        }
+
+        /// <inheritdoc/>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Extents, Transformation);
+        }
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(ref OrientedBoundingBox value)
+        {
+            return
+                Extents == value.Extents &&
+                Transformation == value.Transformation;
+        }
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(OrientedBoundingBox value)
+        {
+            return Equals(ref value);
+        }
+        /// <inheritdoc/>
+        public readonly override bool Equals(object value)
+        {
+            if (value is not OrientedBoundingBox) return false;
+
+            var strongValue = (OrientedBoundingBox)value;
+            return Equals(ref strongValue);
         }
     }
 }

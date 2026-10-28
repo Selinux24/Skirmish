@@ -5,7 +5,7 @@ namespace Engine
 {
     using Engine.Animation;
     using Engine.Content.Persistence;
-    using System.Numerics;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Skinning data interface
@@ -114,7 +114,7 @@ namespace Engine
         /// </summary>
         /// <returns>Returns the packed skinning data</returns>
         /// <remarks>This method must stay synchronized with InitializeOffsets</remarks>
-        IEnumerable<Vector4> Pack();
+        IEnumerable<System.Numerics.Vector4> Pack();
 
         /// <summary>
         /// Updates the resource data

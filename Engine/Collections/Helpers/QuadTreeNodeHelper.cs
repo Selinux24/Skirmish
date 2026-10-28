@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Helpers
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Quad-tree node helper
     /// </summary>
@@ -234,7 +235,7 @@ namespace Engine.Collections.Helpers
                 return null;
             }
 
-            if (node.BoundingBox.Contains(position) == ContainmentType.Disjoint)
+            if (node.BoundingBox.Contains(position) == Vortice.Mathematics.ContainmentType.Disjoint)
             {
                 // Early exit
                 return null;
@@ -308,7 +309,7 @@ namespace Engine.Collections.Helpers
                 yield break;
             }
 
-            if (volume.Contains(node.BoundingBox) == ContainmentType.Disjoint)
+            if (volume.Contains(node.BoundingBox) == Vortice.Mathematics.ContainmentType.Disjoint)
             {
                 // Early exit
                 yield break;

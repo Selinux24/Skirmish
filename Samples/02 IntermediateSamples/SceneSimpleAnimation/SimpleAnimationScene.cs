@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneSimpleAnimation
 {
@@ -527,9 +526,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
             var bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
-                bbox = Vortice.Mathematics.BoundingBox.CreateMerged(bbox, item.GetBoundingBox());
+                bbox = Engine.Mathematics.BoundingBox.Merge(bbox, item.GetBoundingBox());
             });
-            float playerHeight = bbox.Max.Y - bbox.Min.Y;
+            float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;

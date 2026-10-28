@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Engine.Content.FmtObj.Fmt
     using Engine;
     using Engine.Content;
     using Engine.Content.Persistence;
-    using System.Numerics;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Loader for .obj files

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
     using Engine.Animation;
     using Engine.Content.FmtCollada.Types;
     using Engine.Content.Persistence;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Animation loader

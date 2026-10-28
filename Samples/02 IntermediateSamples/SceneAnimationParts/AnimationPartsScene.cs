@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneAnimationParts
 {
@@ -189,7 +188,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
             BoundingBox bbox = tank.GetBoundingBox();
-            float playerHeight = bbox.Max.Y - bbox.Min.Y;
+            float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
             Vector3 lookDir = Vector3.Normalize(new Vector3(0, playerHeight, -playerHeight * 2f)) * 50;
 
             Camera.NearPlaneDistance = 0.1f;

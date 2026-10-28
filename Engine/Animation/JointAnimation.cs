@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.Animation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Bone animation
     /// </summary>
@@ -87,9 +89,9 @@ namespace Engine.Animation
 
             //Create the combined transformation matrix
             return
-                Matrix4x4.CreateScale(scale) *
-                Matrix4x4.CreateFromQuaternion(rotation) *
-                Matrix4x4.CreateTranslation(translation);
+                Matrix4x4.Scaling(scale) *
+                Matrix4x4.RotationQuaternion(rotation) *
+                Matrix4x4.Translation(translation);
         }
         /// <summary>
         /// Interpolate bone transformation

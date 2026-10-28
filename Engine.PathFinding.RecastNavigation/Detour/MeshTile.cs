@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Mesh tile
     /// </summary>
@@ -549,22 +550,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Calculate quantized box
         /// </summary>
-        public void CalculateQuantizedBox(BoundingBox bounds, out Int3 bmin, out Int3 bmax)
+        public void CalculateQuantizedBox(BoundingBox bounds, out Vortice.Mathematics.Int3 bmin, out Vortice.Mathematics.Int3 bmax)
         {
             var tb = Header.Bounds;
             float qfac = Header.BvQuantFactor;
 
             // Clamp query box to world box.
-            float minx = Math.Clamp(bounds.Min.X, tb.Min.X, tb.Max.X) - tb.Min.X;
-            float miny = Math.Clamp(bounds.Min.Y, tb.Min.Y, tb.Max.Y) - tb.Min.Y;
-            float minz = Math.Clamp(bounds.Min.Z, tb.Min.Z, tb.Max.Z) - tb.Min.Z;
-            float maxx = Math.Clamp(bounds.Max.X, tb.Min.X, tb.Max.X) - tb.Min.X;
-            float maxy = Math.Clamp(bounds.Max.Y, tb.Min.Y, tb.Max.Y) - tb.Min.Y;
-            float maxz = Math.Clamp(bounds.Max.Z, tb.Min.Z, tb.Max.Z) - tb.Min.Z;
+            float minx = Math.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = Math.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = Math.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = Math.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = Math.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = Math.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
 
             // Quantize
-            bmin = new Int3();
-            bmax = new Int3();
+            bmin = new();
+            bmax = new();
             bmin.X = (int)(qfac * minx) & 0xfffe;
             bmin.Y = (int)(qfac * miny) & 0xfffe;
             bmin.Z = (int)(qfac * minz) & 0xfffe;

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -57,10 +56,10 @@ namespace Engine.Common
                 var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
-                sphere = BoundingSphereExtensions.FromPoints(distinctPoints);
+                sphere = BoundingSphere.FromPoints(distinctPoints);
 
                 //Initialize the identity box
-                box = BoundingBoxExtensions.BoundingBoxFromPoints(distinctPoints);
+                box = BoundingBox.FromPoints(distinctPoints);
             }
 
             if (sphere != BoundingSphere || box != BoundingBox)

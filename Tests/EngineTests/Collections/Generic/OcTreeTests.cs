@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace EngineTests.Collections.Generic
 {
@@ -102,17 +101,17 @@ namespace EngineTests.Collections.Generic
             Assert.HasCount(1, res);
             Assert.AreEqual(p3, res.ElementAt(0));
 
-            var d = (IntersectionVolumeAxisAlignedBox)BoundingBox.CreateFromPoints([p1, p2]);
+            var d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p2]);
             res = q.Query(d);
             Assert.HasCount(2, res);
             Assert.AreSequenceEqual([p1, p2], res, SequenceOrder.InAnyOrder);
 
-            d = (IntersectionVolumeAxisAlignedBox)BoundingBox.CreateFromPoints([p1, p3]);
+            d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p3]);
             res = q.Query(d);
             Assert.HasCount(2, res);
             Assert.AreSequenceEqual([p1, p3], res, SequenceOrder.InAnyOrder);
 
-            d = (IntersectionVolumeAxisAlignedBox)BoundingBox.CreateFromPoints([p2, p3]);
+            d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p2, p3]);
             res = q.Query(d);
             Assert.HasCount(3, res);
             Assert.AreSequenceEqual([p1, p2, p3], res, SequenceOrder.InAnyOrder);

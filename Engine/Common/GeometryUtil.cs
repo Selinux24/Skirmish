@@ -8,7 +8,6 @@ using Vortice.Mathematics;
 namespace Engine.Common
 {
     using Engine.Mathematics;
-    using Matrix = Matrix4x4;
 
     /// <summary>
     /// Geometry utilities
@@ -283,9 +282,9 @@ namespace Engine.Common
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns a matrix with the reference transform</returns>
-        public static Matrix Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
+        public static Matrix4x4 Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            return Matrix4x4Extensions.Transformation(
+            return Matrix4x4.Transformation(
                 Vector3.Zero, Quaternion.Identity, scale,
                 Vector3.Zero, rotation,
                 position);
@@ -1511,7 +1510,7 @@ namespace Engine.Common
                 new(-1f, -1f, 1),
             ];
 
-            Matrix trn = Matrix.CreateScale(width, height, depth) * Matrix.CreateTranslation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1611,7 +1610,7 @@ namespace Engine.Common
                 new (0f, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.CreateScale(width, height, depth) * Matrix.CreateTranslation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1734,7 +1733,7 @@ namespace Engine.Common
                 new (+InverseGoldenRatio, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.CreateScale(width, height, depth) * Matrix.CreateTranslation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1907,7 +1906,7 @@ namespace Engine.Common
                 new (+QuadInverseGoldenRatio, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.CreateScale(width, height, depth) * Matrix.CreateTranslation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -2104,7 +2103,7 @@ namespace Engine.Common
                 new (-1f, -1f, -1f),
             ];
 
-            Matrix trn = Matrix.CreateScale(width, height, depth) * Matrix.CreateTranslation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -2629,7 +2628,7 @@ namespace Engine.Common
                 {
                     var axis = Vector3.Cross(up, Vector3Extensions.Up);
 
-                    v = Vector3.TransformNormal(v, Matrix4x4Extensions.RotationAxis(axis, Helper.PiOver2));
+                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, Helper.PiOver2));
                 }
 
                 verts.Add(v + center);
@@ -2898,7 +2897,7 @@ namespace Engine.Common
                 axis = Vector3.Normalize(Vector3.Cross(Vector3Extensions.Up, rotNormal));
             }
 
-            geometry.Transform(Matrix4x4Extensions.RotationAxis(axis, angle));
+            geometry.Transform(Matrix4x4.RotationAxis(axis, angle));
 
             return geometry;
         }
@@ -3177,7 +3176,7 @@ namespace Engine.Common
 
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return BoundingBoxExtensions.BoundingBoxFromPoints(points);
+            return BoundingBox.FromPoints(points);
         }
         /// <summary>
         /// Generates a bounding sphere from a vertex item list
@@ -3193,7 +3192,7 @@ namespace Engine.Common
 
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return BoundingSphereExtensions.FromPoints(points);
+            return BoundingSphere.FromPoints(points);
         }
         /// <summary>
         /// Generates a bounding cylinder from a vertex item list
@@ -3345,7 +3344,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vBase">Axis base</param>
         /// <param name="vTop">Axis top</param>
-        private static Matrix GetInversetAxisTransform(Vector3 vBase, Vector3 vTop)
+        private static Matrix4x4 GetInversetAxisTransform(Vector3 vBase, Vector3 vTop)
         {
             //Rotate vTop from vBase, to put vTop on vBase's Y axis
 
@@ -3355,7 +3354,7 @@ namespace Engine.Common
             //Find angle between dir and up vector
             float angle = MathF.Acos(Vector3.Dot(dir, Vector3Extensions.Up));
 
-            Matrix matrix = Matrix.CreateTranslation(-vBase);
+            Matrix4x4 matrix = Matrix4x4.Translation(-vBase);
             if (!Helper.IsZero(angle))
             {
                 //Find rotation axis
@@ -3363,10 +3362,10 @@ namespace Engine.Common
                 axis = Vector3.Normalize(axis);
 
                 //Create rotation matrix
-                matrix *= Matrix4x4Extensions.RotationAxis(axis, angle);
+                matrix *= Matrix4x4.RotationAxis(axis, angle);
             }
 
-            Matrix.Invert(matrix, out var result);
+            Matrix4x4.Invert(ref matrix, out var result);
             return result;
         }
     }

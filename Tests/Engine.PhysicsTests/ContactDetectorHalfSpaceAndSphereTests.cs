@@ -65,14 +65,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix4x4.CreateTranslation(Vector3Extensions.Up * 5f),
+                            Transform = Matrix4x4.Translation(Vector3Extensions.Up * 5f),
                             IntersectionExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix4x4.CreateTranslation(Vector3Extensions.Up),
+                            Transform = Matrix4x4.Translation(Vector3Extensions.Up),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 0 },
                         }
@@ -88,7 +88,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix4x4.CreateTranslation(Vector3Extensions.Down),
+                            Transform = Matrix4x4.Translation(Vector3Extensions.Down),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 2 },
                         }
@@ -96,7 +96,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix4x4.CreateTranslation(Vector3Extensions.Down * 2f),
+                            Transform = Matrix4x4.Translation(Vector3Extensions.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 3 },
                         }
@@ -104,7 +104,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix4x4.CreateTranslation(Vector3Extensions.Down * 5f),
+                            Transform = Matrix4x4.Translation(Vector3Extensions.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 6 },
                         }
