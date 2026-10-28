@@ -1,14 +1,16 @@
-﻿using Engine;
-using Engine.BuiltIn.UI;
-using Engine.Helpers;
-using Engine.UI;
-using System;
+﻿using System;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.Common.Dialogs
 {
+    using Engine;
+    using Engine.BuiltIn.UI;
+    using Engine.Helpers;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     class UISaveFileDialog(Scene scene, string name, float width, float height, int itemsPerPage, int layer = Scene.LayerUI)
     {
         private const string dlgName = nameof(UISaveFileDialog);

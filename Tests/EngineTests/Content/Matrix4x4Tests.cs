@@ -1,11 +1,11 @@
-﻿using Engine;
-using Engine.Content;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.Content
 {
+    using Engine.Content;
+    using Engine.Mathematics;
     using Matrix = System.Numerics.Matrix4x4;
 
     [ExcludeFromCodeCoverage]

@@ -1,6 +1,8 @@
 ﻿
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// IIntersectable interface
     /// </summary>

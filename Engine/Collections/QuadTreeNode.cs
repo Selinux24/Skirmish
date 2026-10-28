@@ -5,6 +5,7 @@ using Vortice.Mathematics;
 namespace Engine.Collections
 {
     using Engine.Collections.Helpers;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Quad-tree node

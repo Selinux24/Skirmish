@@ -4,6 +4,8 @@ using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Path of bezier curves
     /// </summary>

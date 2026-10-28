@@ -7,6 +7,7 @@ namespace Engine.Content.FmtCollada.Fmt
 {
     using Engine.Common;
     using Engine.Content.FmtCollada.Types;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Extensions for collada to sharpDX data parse

@@ -1,10 +1,11 @@
-﻿using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// OcTree node
     /// </summary>

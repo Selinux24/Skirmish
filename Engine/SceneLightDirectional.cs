@@ -1,8 +1,10 @@
-﻿using Engine.BuiltIn.Components.ShadowMapping;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace Engine
 {
+    using Engine.BuiltIn.Components.ShadowMapping;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Directional light
     /// </summary>

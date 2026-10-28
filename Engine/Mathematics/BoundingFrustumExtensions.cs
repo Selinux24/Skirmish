@@ -2,7 +2,7 @@
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     public static class BoundingFrustumExtensions
     {

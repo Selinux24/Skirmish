@@ -1,6 +1,6 @@
 ﻿using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     public static class Int3Extensions
     {

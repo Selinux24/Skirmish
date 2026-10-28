@@ -1,10 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Flares;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -13,6 +7,14 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneMaterials
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Flares;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Materials scene test
     /// </summary>

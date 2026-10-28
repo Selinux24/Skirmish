@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Light content
     /// </summary>

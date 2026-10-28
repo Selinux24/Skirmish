@@ -1,8 +1,4 @@
-﻿using Engine.Common;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -11,6 +7,12 @@ using System.Numerics;
 
 namespace Engine.PathFindingTests
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class CrowdsTests

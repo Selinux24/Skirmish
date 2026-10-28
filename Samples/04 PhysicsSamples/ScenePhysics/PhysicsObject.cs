@@ -1,15 +1,16 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.Common;
-using Engine.Physics;
-using Engine.Physics.Colliders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     /// <summary>
     /// Physics object
     /// </summary>

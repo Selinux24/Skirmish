@@ -3,6 +3,7 @@
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Helicopter controller

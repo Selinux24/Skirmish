@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// A bounding box for vertices in a <see cref="PolyMesh"/>.

@@ -1,6 +1,6 @@
 ﻿using Vortice.Mathematics;
 
-namespace Engine.Common
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Helper class for intersections detector

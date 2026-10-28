@@ -5,6 +5,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Find polygons helper
     /// </summary>

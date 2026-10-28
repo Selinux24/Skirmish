@@ -3,6 +3,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Collider helper class
     /// </summary>

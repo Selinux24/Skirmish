@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Staight path helper
     /// </summary>

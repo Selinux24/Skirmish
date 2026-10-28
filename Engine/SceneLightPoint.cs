@@ -4,6 +4,8 @@ using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Point light
     /// </summary>

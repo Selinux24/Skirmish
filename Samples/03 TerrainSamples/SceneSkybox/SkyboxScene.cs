@@ -1,19 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Decals;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.Components.Water;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -21,6 +6,22 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneSkybox
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Decals;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.Components.Water;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     public class SkyboxScene : WalkableScene

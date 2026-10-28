@@ -6,6 +6,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Chunky triangle mesh
     /// </summary>

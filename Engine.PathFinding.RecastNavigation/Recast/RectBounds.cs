@@ -2,6 +2,8 @@
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Rectangle bounds
     /// </summary>

@@ -1,15 +1,4 @@
-﻿using AISamples.Common;
-using AISamples.Common.Agents;
-using AISamples.Common.Dialogs;
-using AISamples.Common.Persistence;
-using AISamples.SceneCWRVirtualWorld.Editors;
-using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +7,18 @@ using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
+    using AISamples.Common;
+    using AISamples.Common.Agents;
+    using AISamples.Common.Dialogs;
+    using AISamples.Common.Persistence;
+    using AISamples.SceneCWRVirtualWorld.Editors;
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     /// <summary>

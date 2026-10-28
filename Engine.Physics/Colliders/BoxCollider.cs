@@ -3,6 +3,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Box collider
     /// </summary>

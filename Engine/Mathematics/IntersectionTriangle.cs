@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace Engine.Common
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Triangle-Triangle Overlap Test

@@ -1,21 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Content.FmtObj.Fmt;
-using Engine.Content.OnePageDungeon;
-using Engine.Content.Persistence;
-using Engine.Modular;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using Logger;
+﻿using Logger;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +9,23 @@ using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Content;
+    using Engine.Content.FmtObj.Fmt;
+    using Engine.Content.OnePageDungeon;
+    using Engine.Content.Persistence;
+    using Engine.Mathematics;
+    using Engine.Modular;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
     using Color = System.Drawing.Color;
 
     public class ModularDungeonScene : WalkableScene

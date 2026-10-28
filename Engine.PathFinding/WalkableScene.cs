@@ -8,6 +8,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Walkable scene
     /// </summary>

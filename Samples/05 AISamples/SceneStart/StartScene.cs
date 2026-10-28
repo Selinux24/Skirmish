@@ -1,14 +1,15 @@
-﻿using Engine;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneStart
 {
+    using Engine;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
     using Color = System.Drawing.Color;
 
     class StartScene : Scene

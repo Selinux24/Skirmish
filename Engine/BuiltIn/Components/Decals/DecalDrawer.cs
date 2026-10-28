@@ -1,15 +1,17 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Decals;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.Content;
-using System.Linq;
+﻿using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Decals
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Decals;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Decal drawer class
     /// </summary>

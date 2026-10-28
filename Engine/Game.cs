@@ -1,6 +1,4 @@
-﻿using Engine.Common;
-using Engine.UI;
-using Logger;
+﻿using Logger;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,6 +9,10 @@ using Vortice.DXGI;
 
 namespace Engine
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Game class
     /// </summary>

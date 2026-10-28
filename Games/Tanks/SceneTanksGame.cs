@@ -1,17 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Decals;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -20,6 +7,20 @@ using Vortice.Mathematics;
 
 namespace Tanks
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Decals;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
     using Color = System.Drawing.Color;
 
     /// <summary>

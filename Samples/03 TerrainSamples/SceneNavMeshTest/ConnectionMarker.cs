@@ -1,10 +1,10 @@
-﻿using Engine;
-using Engine.Common;
-using System.Numerics;
+﻿using System.Numerics;
 using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
+    using Engine.Mathematics;
+
     struct ConnectionMarker
     {
         public int Id { get; set; }

@@ -1,13 +1,15 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.SkyScattering;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.SkyScattering;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Scattered sky
     /// </summary>

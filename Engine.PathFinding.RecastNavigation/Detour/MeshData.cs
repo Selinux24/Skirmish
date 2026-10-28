@@ -6,6 +6,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Mesh data
     /// </summary>

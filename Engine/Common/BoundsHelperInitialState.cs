@@ -5,6 +5,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Initial helper state
     /// </summary>

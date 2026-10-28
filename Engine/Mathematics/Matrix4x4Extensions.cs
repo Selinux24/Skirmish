@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     public static class Matrix4x4Extensions
     {

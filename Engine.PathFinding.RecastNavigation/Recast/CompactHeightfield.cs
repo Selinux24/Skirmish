@@ -6,6 +6,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Compact heightfield
     /// </summary>

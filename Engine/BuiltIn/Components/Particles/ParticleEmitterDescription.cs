@@ -2,6 +2,8 @@
 
 namespace Engine.BuiltIn.Components.Particles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle emitter description
     /// </summary>

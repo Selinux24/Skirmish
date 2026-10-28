@@ -5,6 +5,8 @@ using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cascade shadow map matrix set
     /// </summary>

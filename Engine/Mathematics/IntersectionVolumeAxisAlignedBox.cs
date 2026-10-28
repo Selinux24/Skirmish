@@ -2,9 +2,9 @@
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
-    using Engine.Common;
+    using Engine;
 
     /// <summary>
     /// Bounding box intersection volume

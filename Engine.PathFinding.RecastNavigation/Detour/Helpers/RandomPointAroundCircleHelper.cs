@@ -4,6 +4,8 @@ using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Random point around circle helper
     /// </summary>

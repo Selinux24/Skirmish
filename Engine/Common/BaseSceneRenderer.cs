@@ -1,9 +1,6 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using Engine.BuiltIn.Components.ShadowMapping;
-using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.PostProcess;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,6 +10,11 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
+    using Engine.BuiltIn.Components.ShadowMapping;
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Base scene renderer
     /// </summary>

@@ -1,16 +1,17 @@
-﻿using Engine;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.UI;
-using System;
+﻿using System;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
-using TerrainSamples.Common.Dialogs;
-using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
+    using Engine;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+    using TerrainSamples.Common.Dialogs;
+    using TerrainSamples.SceneStart;
     using Color = System.Drawing.Color;
 
     class PerlinNoiseScene : Scene

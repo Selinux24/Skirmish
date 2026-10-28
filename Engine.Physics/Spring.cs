@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Spring force generator
     /// </summary>

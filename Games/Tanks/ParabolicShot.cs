@@ -1,9 +1,11 @@
-﻿using Engine;
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Tanks
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Paralbolic shot helper
     /// </summary>

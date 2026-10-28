@@ -1,7 +1,4 @@
-﻿using Engine.BuiltIn.Format;
-using Engine.Collections.Generic;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,6 +7,11 @@ using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Ground
 {
+    using Engine.BuiltIn.Format;
+    using Engine.Collections.Generic;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Map grid
     /// </summary>

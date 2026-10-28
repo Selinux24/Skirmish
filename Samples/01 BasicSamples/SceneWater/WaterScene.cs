@@ -1,16 +1,18 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Flares;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.Components.Water;
-using Engine.Tween;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneWater
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Flares;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.Components.Water;
+    using Engine.Mathematics;
+    using Engine.Tween;
+
     /// <summary>
     /// Water scene test
     /// </summary>

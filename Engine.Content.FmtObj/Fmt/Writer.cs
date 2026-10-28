@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.Content.FmtObj.Fmt
 {
+    using Engine.Mathematics;
+
     static class Writer
     {
         public static void WriteObj(StreamWriter wr, IEnumerable<Triangle> triangles)

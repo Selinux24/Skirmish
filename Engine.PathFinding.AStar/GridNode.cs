@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.PathFinding.AStar
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Grid node
     /// </summary>

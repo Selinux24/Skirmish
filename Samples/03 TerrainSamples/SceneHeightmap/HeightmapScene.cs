@@ -1,22 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Flares;
-using Engine.BuiltIn.Components.Foliage;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Content.FmtObj.Fmt;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,6 +9,25 @@ using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneHeightmap
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Flares;
+    using Engine.BuiltIn.Components.Foliage;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Content.FmtObj.Fmt;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
     using Color = System.Drawing.Color;
 
     public class HeightmapScene : WalkableScene

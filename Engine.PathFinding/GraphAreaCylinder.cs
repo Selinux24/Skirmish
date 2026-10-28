@@ -3,6 +3,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph area cylinder
     /// </summary>

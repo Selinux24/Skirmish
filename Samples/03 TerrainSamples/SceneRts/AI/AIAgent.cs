@@ -1,13 +1,14 @@
-﻿using Engine;
-using Engine.Common;
-using Engine.PathFinding;
-using System;
+﻿using System;
+using System.Numerics;
 using System.Threading.Tasks;
-using Engine.BuiltIn.Components.Models;
 
 namespace TerrainSamples.SceneRts.AI
 {
-    using System.Numerics;
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
     using TerrainSamples.SceneRts.AI.Behaviors;
 
     /// <summary>

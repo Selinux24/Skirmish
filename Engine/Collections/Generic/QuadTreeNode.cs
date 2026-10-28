@@ -6,6 +6,7 @@ using Vortice.Mathematics;
 namespace Engine.Collections.Generic
 {
     using Engine.Collections.Helpers;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Quad-tree node
@@ -16,7 +17,7 @@ namespace Engine.Collections.Generic
     /// <param name="parent">Parent node</param>
     public class QuadTreeNode<T>(QuadTreeNode<T> parent) : IQuadTreeNode<QuadTreeNode<T>>
     {
-        const string cName = nameof(QuadTreeNode<T>);
+        const string cName = nameof(QuadTreeNode<>);
 
         /// <summary>
         /// Recursive partition creation

@@ -1,11 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Content;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
@@ -13,6 +6,15 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStart
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
+
     class StartScene : Scene
     {
         private SoundEffectsManager soundEffectsManager;
@@ -116,7 +118,7 @@ namespace BasicSamples.SceneStart
             startButtonDesc.StartsVisible = false;
 
             await CreateButton("ButtonCascadedShadows", startButtonDesc, "Cascaded", 'C', SceneButtonClick<SceneCascadedShadows.CascadedShadowsScene>);
-            await CreateButton("ButtonLights", startButtonDesc, "Lights", 'L', SceneButtonClick<SceneLights.LightsScene>);
+            await CreateButton("ButtonLights", startButtonDesc, "Lights", 'L', SceneButtonClick<SceneLighting.LightingScene>);
             await CreateButton("ButtonMaterials", startButtonDesc, "Materials", 'M', SceneButtonClick<SceneMaterials.MaterialsScene>);
             await CreateButton("ButtonNormalMap", startButtonDesc, "Normal Maps", 'N', SceneButtonClick<SceneNormalMap.NormalMapScene>);
             await CreateButton("ButtonParticles", startButtonDesc, "Particles", 'P', SceneButtonClick<SceneParticles.ParticlesScene>);

@@ -7,6 +7,7 @@ using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
     using Matrix = Matrix4x4;
 
     /// <summary>

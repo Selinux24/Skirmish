@@ -1,15 +1,4 @@
-﻿using AISamples.Common.Agents;
-using AISamples.Common.Items;
-using AISamples.Common.Markings;
-using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -18,6 +7,18 @@ using Vortice.Mathematics;
 
 namespace AISamples.Common
 {
+    using AISamples.Common.Agents;
+    using AISamples.Common.Items;
+    using AISamples.Common.Markings;
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
     using Color = System.Drawing.Color;
 
     class World(Graph graph, float height)

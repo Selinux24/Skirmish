@@ -1,7 +1,9 @@
-﻿using Engine;
-
+﻿
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Helicopter attack behavior
     /// </summary>

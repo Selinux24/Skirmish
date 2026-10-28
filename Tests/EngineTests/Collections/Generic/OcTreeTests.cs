@@ -1,5 +1,3 @@
-using Engine;
-using Engine.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -9,6 +7,10 @@ using Vortice.Mathematics;
 
 namespace EngineTests.Collections.Generic
 {
+    using Engine;
+    using Engine.Collections.Generic;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
     [OSCondition(OperatingSystems.Windows)]

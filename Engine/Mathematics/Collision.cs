@@ -2,7 +2,7 @@
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /*
      * This class is organized so that the least complex objects come first so that the least

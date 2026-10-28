@@ -1,12 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using Logger;
+﻿using Logger;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     public class SmoothTransitionsScene : Scene

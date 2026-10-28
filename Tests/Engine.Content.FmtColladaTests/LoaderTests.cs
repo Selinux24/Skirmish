@@ -1,6 +1,4 @@
-﻿using Engine.BuiltIn.Components.Models;
-using Engine.Content.FmtCollada.Fmt;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -8,10 +6,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Content.FmtColladaTests
 {
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Content.FmtCollada.Fmt;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class LoaderTests

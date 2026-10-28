@@ -1,15 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.PathFinding;
-using Engine.PathFinding.AStar;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -20,6 +9,18 @@ using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneGrid
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.AStar;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     public class GridScene : WalkableScene

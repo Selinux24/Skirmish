@@ -7,6 +7,7 @@ using Vortice.Mathematics;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Triangle

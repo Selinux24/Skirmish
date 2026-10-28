@@ -4,8 +4,9 @@ using System.Linq;
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
+    using Engine;
     using Engine.Common;
 
     /// <summary>

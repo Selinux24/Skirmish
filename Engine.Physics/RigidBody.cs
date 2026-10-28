@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// A rigid body is the basic simulation object in the physics core.
     ///

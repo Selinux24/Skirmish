@@ -1,13 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Foliage;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using Logger;
+﻿using Logger;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -16,6 +7,16 @@ using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneGardener
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Foliage;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     public class GardenerScene : Scene

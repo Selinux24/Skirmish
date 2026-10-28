@@ -1,11 +1,13 @@
-﻿using AISamples.Common.Primitives;
-using Engine;
-using System;
+﻿using System;
 using System.Linq;
 using System.Numerics;
 
 namespace AISamples.Common.Agents
 {
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.Mathematics;
+
     class Car
     {
         private float x;

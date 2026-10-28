@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,6 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Built-in shaders
     /// </summary>

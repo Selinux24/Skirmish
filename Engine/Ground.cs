@@ -7,6 +7,7 @@ namespace Engine
 {
     using Engine.Collections.Generic;
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Ground class

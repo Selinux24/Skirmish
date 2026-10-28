@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -8,6 +7,9 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.AStar
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Grid
     /// </summary>

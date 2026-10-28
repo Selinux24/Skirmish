@@ -1,15 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Foliage;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Content;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -17,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Foliage;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     /// <summary>

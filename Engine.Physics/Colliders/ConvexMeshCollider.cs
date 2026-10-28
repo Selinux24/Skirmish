@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Convex mesh collider
     /// </summary>

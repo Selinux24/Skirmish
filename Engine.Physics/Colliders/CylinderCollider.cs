@@ -4,6 +4,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cylinder collider
     /// </summary>

@@ -1,11 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.Common;
-using Engine.Modular;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -13,6 +6,14 @@ using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.Modular;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
     using Color = System.Drawing.Color;
 
     internal class DebugDrawers(Scene scene, string id, string name) : BaseSceneObject<SceneObjectDescription>(scene, id, name)

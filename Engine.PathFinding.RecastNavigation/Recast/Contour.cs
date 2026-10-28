@@ -4,6 +4,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Represents a simple, non-overlapping contour in field space.
     /// </summary>

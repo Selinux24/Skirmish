@@ -6,6 +6,7 @@ using Vortice.Mathematics;
 namespace Engine.Collections.Generic
 {
     using Engine.Collections.Helpers;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Picking quad tree node

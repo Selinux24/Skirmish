@@ -5,6 +5,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Utils
     /// </summary>

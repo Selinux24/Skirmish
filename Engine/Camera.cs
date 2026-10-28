@@ -4,7 +4,7 @@ using Vortice.Mathematics;
 
 namespace Engine
 {
-    using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// 3D Camera

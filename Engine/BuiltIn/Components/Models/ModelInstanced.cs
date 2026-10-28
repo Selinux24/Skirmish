@@ -1,7 +1,4 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +9,11 @@ using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Models
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Instaced model
     /// </summary>

@@ -1,11 +1,11 @@
-﻿using Engine;
-using Engine.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
+    using Engine.Mathematics;
+
     interface IAreaMarker
     {
         int Id { get; set; }

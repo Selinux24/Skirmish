@@ -1,10 +1,12 @@
-﻿using Engine.Content.Persistence;
-using System;
+﻿using System;
 using System.Numerics;
 using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
+    using Engine.Content.Persistence;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle emitter
     /// </summary>

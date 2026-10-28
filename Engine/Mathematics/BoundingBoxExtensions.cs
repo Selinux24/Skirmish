@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Provides extension methods for the BoundingBoxExtensions structure.

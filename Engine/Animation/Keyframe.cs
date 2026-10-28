@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace Engine.Animation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Animation keyframe
     /// </summary>

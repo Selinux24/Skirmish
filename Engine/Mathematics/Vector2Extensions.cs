@@ -2,7 +2,7 @@
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Provides extension methods for the Vector2 structure.

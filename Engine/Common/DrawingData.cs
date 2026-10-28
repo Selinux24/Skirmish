@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace Engine.Common
 {
     using Engine.Content;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Mesh data

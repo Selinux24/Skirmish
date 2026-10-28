@@ -1,7 +1,4 @@
-﻿using Engine.Common;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFindingTests
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class PathFinderDescriptionTests

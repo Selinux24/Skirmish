@@ -1,9 +1,10 @@
-﻿using Engine;
-using System.Numerics;
+﻿using System.Numerics;
 using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
+    using Engine.Mathematics;
+
     struct ObstacleMarker
     {
         public int Id { get; set; }

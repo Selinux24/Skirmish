@@ -1,7 +1,4 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour;
-using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using Engine.PathFinding.RecastNavigation.Recast;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,6 +6,11 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+    using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Graph debug helper
     /// </summary>

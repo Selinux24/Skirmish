@@ -4,6 +4,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Ray picking helper
     /// </summary>

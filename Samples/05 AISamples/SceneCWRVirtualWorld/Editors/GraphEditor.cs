@@ -1,14 +1,16 @@
-﻿using AISamples.Common;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
+    using AISamples.Common;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     class GraphEditor(World world, float height) : IEditor
     {
         private static readonly Vector4 graphColor = new(0f, 0f, 0f, 0.5f);

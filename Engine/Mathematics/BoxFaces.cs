@@ -1,5 +1,4 @@
-﻿
-namespace Engine
+﻿namespace Engine.Mathematics
 {
     /// <summary>
     /// Box faces enumerable

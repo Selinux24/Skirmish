@@ -6,6 +6,7 @@ using System.Numerics;
 namespace Engine.Animation
 {
     using Engine.Content.Persistence;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Skinning data

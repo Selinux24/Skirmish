@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// A 2d vector represented by integers.

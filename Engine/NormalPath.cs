@@ -4,6 +4,8 @@ using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Normal path
     /// </summary>
@@ -69,7 +71,7 @@ namespace Engine
             }
 
             this.checkPoints = points;
-            this.normals = normals.ToArray();
+            this.normals = [.. normals];
             Length = length;
         }
 

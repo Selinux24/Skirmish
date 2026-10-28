@@ -4,6 +4,7 @@ using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
     using Engine.Physics.Colliders;
     using EPAFace = EPA.Face;
     using EPASolver = EPA.Solver;

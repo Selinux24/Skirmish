@@ -1,19 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Content.FmtCollada;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -21,6 +6,22 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneCrowds
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Content.FmtCollada;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     public class CrowdsScene : WalkableScene

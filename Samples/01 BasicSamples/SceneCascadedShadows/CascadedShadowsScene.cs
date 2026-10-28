@@ -1,11 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Flares;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -13,6 +6,15 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneCascadedShadows
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Flares;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Cascade shadows scene test
     /// </summary>

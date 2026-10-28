@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Quaternion extensions

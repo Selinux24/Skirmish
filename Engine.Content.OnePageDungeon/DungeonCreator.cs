@@ -1,12 +1,13 @@
-﻿using Engine.Modular;
-using Engine.Modular.Persistence;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace Engine.Content.OnePageDungeon
 {
+    using Engine.Mathematics;
+    using Engine.Modular;
+    using Engine.Modular.Persistence;
     using Rectangle = Vortice.Mathematics.RectI;
     using RectangleF = Vortice.Mathematics.Rect;
 

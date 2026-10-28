@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Numerics;
 
 namespace Engine
 {
     using Engine.Common;
-    using System.Numerics;
+    using Engine.Mathematics;
 
     /// <summary>
     /// 3D manipulator

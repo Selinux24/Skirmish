@@ -1,6 +1,4 @@
-﻿using Engine.Physics;
-using Engine.Physics.Colliders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,6 +7,10 @@ using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ContactDetectorHalfSpaceAndCylinderTests

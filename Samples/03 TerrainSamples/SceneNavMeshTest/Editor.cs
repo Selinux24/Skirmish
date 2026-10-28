@@ -1,12 +1,14 @@
-﻿using Engine;
-using Engine.BuiltIn.UI;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
+    using Engine;
+    using Engine.BuiltIn.UI;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Base editor
     /// </summary>

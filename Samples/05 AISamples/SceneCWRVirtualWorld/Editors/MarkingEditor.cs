@@ -1,15 +1,17 @@
-﻿using AISamples.Common;
-using AISamples.Common.Markings;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Format;
-using Engine.Content;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
+    using AISamples.Common;
+    using AISamples.Common.Markings;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Format;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     abstract class MarkingEditor(string name, World world, float height, bool is3d = false) : IEditor
     {
         private const float editorPointRadius = 10f;

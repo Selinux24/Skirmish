@@ -1,9 +1,10 @@
-﻿using AISamples.Common.Persistence;
-using Engine;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace AISamples.Common.Items
 {
+    using AISamples.Common.Persistence;
+    using Engine.Mathematics;
+
     class Tree(Vector3 position, float radius, float height)
     {
         public Vector3 Position { get; set; } = position;

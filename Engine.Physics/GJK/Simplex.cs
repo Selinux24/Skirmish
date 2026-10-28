@@ -25,6 +25,8 @@ using System.Numerics;
 
 namespace Engine.Physics.GJK
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Simplex. Just a set of points (a is always most recently added)
     /// </summary>

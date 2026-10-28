@@ -1,13 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Physics;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +8,16 @@ using Vortice.Mathematics;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     class PhysicsScene : Scene

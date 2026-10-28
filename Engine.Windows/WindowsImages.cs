@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Windows
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Images helper
     /// </summary>

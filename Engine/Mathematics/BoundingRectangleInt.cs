@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// A bounding rectangle represeted by integers.

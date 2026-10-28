@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// PathFinder path
     /// </summary>

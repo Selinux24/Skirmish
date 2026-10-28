@@ -1,10 +1,12 @@
-﻿using Engine;
-using Engine.PathFinding;
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Engine;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+
     /// <summary>
     /// Player controller
     /// </summary>

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
-    using Engine.Common;
+    using Engine;
 
     /// <summary>
     /// Mesh intersection volume

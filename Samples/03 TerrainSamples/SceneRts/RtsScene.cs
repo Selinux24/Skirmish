@@ -1,35 +1,36 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.BuiltIn.Components.Flares;
-using Engine.BuiltIn.Components.Foliage;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Ground;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Skies;
-using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.Content.FmtCollada;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using TerrainSamples.SceneRts.AI;
-using TerrainSamples.SceneRts.AI.Agents;
-using TerrainSamples.SceneRts.Controllers;
-using TerrainSamples.SceneRts.Emitters;
-using TerrainSamples.SceneStart;
 using Vortice.Mathematics;
 
 namespace TerrainSamples.SceneRts
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Flares;
+    using Engine.BuiltIn.Components.Foliage;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.BuiltIn.Components.Skies;
+    using Engine.BuiltIn.Drawers.PostProcess;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Content.FmtCollada;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.UI;
+    using TerrainSamples.SceneRts.AI;
+    using TerrainSamples.SceneRts.AI.Agents;
+    using TerrainSamples.SceneRts.Controllers;
+    using TerrainSamples.SceneRts.Emitters;
+    using TerrainSamples.SceneStart;
     using Color = System.Drawing.Color;
 
     public class RtsScene : WalkableScene

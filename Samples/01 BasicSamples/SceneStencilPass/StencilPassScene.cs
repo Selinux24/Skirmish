@@ -1,9 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -11,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStencilPass
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Stencil pass scene test
     /// </summary>

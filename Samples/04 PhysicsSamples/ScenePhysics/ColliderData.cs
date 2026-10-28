@@ -1,12 +1,13 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.Physics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Mathematics;
+    using Engine.Physics;
     using Color = System.Drawing.Color;
 
     class ColliderData(RigidBodyState rbState, Model model)

@@ -6,6 +6,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Pathfinding graph interface
     /// </summary>

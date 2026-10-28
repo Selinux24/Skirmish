@@ -1,11 +1,13 @@
-﻿using Engine.Content;
-using Engine.Content.Persistence;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
+    using Engine.Content;
+    using Engine.Content.Persistence;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle system description
     /// </summary>

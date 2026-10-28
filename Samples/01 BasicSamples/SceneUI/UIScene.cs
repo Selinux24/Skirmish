@@ -1,9 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.UI;
-using Engine.Tween;
-using Engine.UI;
-using Engine.UI.Tween;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -11,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneUI
 {
+    using Engine;
+    using Engine.BuiltIn.UI;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI;
+    using Engine.UI.Tween;
+
     public class UIScene : Scene
     {
         private const string resourcesFolder = "SceneUI/resources";

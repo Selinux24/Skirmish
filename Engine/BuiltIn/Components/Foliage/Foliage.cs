@@ -1,9 +1,4 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Foliage;
-using Engine.Collections;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +8,13 @@ using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Foliage;
+    using Engine.Collections;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Foliage class helper
     /// </summary>

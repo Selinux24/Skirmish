@@ -1,12 +1,4 @@
-﻿using BasicSamples.SceneStart;
-using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -14,6 +6,16 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneParticles
 {
+    using BasicSamples.SceneStart;
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particles scene test
     /// </summary>

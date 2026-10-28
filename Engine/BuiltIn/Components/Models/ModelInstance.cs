@@ -1,6 +1,4 @@
-﻿using Engine.Animation;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -8,6 +6,10 @@ using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Models
 {
+    using Engine.Animation;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Model instance
     /// </summary>

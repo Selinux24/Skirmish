@@ -1,16 +1,17 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Threading.Tasks;
 using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneAnimationParts
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     class AnimationPartsScene : Scene

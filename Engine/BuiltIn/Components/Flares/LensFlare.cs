@@ -1,12 +1,14 @@
-﻿using Engine.BuiltIn.UI;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
 using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Flares
 {
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Lens flare
     /// </summary>

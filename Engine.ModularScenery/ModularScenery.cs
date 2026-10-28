@@ -1,18 +1,19 @@
-﻿using Engine.Animation;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Particles;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 
 namespace Engine.Modular
 {
+    using Engine.Animation;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
     using Engine.Modular.Persistence;
-    using System.Numerics;
-    using Vortice.Mathematics;
 
     /// <summary>
     /// Terrain model

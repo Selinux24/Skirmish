@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using Vortice.Mathematics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
     /// <summary>
     /// Oriented bounding box

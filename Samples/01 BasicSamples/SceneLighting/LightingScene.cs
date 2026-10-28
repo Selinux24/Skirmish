@@ -1,21 +1,23 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace BasicSamples.SceneLights
+namespace BasicSamples.SceneLighting
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Lights scene test
     /// </summary>
-    public class LightsScene : Scene
+    public class LightingScene : Scene
     {
         private const float spaceSize = 20;
         private const string resourceFloorDiffuse = "Common/floors/dirt/dirt002.dds";
@@ -39,7 +41,7 @@ namespace BasicSamples.SceneLights
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public LightsScene(Game game) : base(game)
+        public LightingScene(Game game) : base(game)
         {
 #if DEBUG
             Game.VisibleMouse = false;

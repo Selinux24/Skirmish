@@ -1,11 +1,12 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.Common;
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace AISamples.Common
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.Common;
+    using Engine.Mathematics;
     using Color = System.Drawing.Color;
 
     class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)

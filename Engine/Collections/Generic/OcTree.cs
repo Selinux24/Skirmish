@@ -3,6 +3,8 @@ using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// OcTree
     /// </summary>

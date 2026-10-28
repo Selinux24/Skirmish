@@ -2,9 +2,9 @@
 using Vortice.Mathematics;
 using System.Numerics;
 
-namespace Engine
+namespace Engine.Mathematics
 {
-    using Engine.Common;
+    using Engine;
 
     /// <summary>
     /// Sphere intersection volume

@@ -7,6 +7,7 @@ using Vortice.Mathematics;
 
 namespace Engine.Windows
 {
+    using Engine.Mathematics;
     using Engine.Windows.Helpers;
     using Engine.Windows.Properties;
 

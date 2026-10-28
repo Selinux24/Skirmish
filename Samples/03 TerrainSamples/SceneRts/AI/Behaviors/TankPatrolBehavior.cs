@@ -1,8 +1,10 @@
-﻿using Engine;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tank patrol behavior
     /// </summary>

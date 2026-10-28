@@ -1,8 +1,4 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.Collections.Generic;
-using Engine.Common;
-using Engine.Content;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.Collections.Generic;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Terrain model
     /// </summary>

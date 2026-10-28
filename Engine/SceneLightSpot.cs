@@ -5,6 +5,8 @@ using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Spot light
     /// </summary>

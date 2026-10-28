@@ -4,6 +4,8 @@ using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cylinder obstacle
     /// </summary>
