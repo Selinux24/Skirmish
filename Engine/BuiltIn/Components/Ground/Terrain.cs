@@ -204,7 +204,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var meshState = new BuiltInDrawerMeshState
             {
-                Local = Matrix4x4.Identity,
+                Local = System.Numerics.Matrix4x4.Identity,
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 

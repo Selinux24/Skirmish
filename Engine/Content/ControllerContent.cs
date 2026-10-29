@@ -21,11 +21,11 @@ namespace Engine.Content
         /// <summary>
         /// Bind shape matrix
         /// </summary>
-        public Matrix4x4 BindShapeMatrix { get; set; } = Matrix4x4.Identity;
+        public Mathematics.Matrix4x4 BindShapeMatrix { get; set; } = Mathematics.Matrix4x4.Identity;
         /// <summary>
         /// Inverse bind matrix list by joint name
         /// </summary>
-        public Dictionary<string, Matrix4x4> InverseBindMatrix { get; set; } = [];
+        public Dictionary<string, Mathematics.Matrix4x4> InverseBindMatrix { get; set; } = [];
         /// <summary>
         /// Weight information by joint name
         /// </summary>

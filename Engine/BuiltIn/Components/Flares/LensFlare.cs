@@ -221,7 +221,7 @@ namespace Engine.BuiltIn.Components.Flares
             Vector3 lPositionUnit = eyePosition - light.Direction;
 
             //Is the light into the vision cone?
-            if (frustum.Contains(ref lPositionUnit) != Vortice.Mathematics.ContainmentType.Disjoint)
+            if (frustum.Contains(ref lPositionUnit) != ContainmentType.Disjoint)
             {
                 //Calculate the ray from light to position
                 Vector3 lightPosition = GetPosition(maxZ, light.Direction);

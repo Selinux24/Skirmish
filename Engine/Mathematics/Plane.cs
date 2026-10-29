@@ -213,7 +213,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref Vector3 point)
+        public PlaneIntersectionType Intersects(ref Vector3 point)
         {
             return Collision.PlaneIntersectsPoint(ref this, ref point);
         }
@@ -275,7 +275,7 @@ namespace Engine.Mathematics
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public PlaneIntersectionType Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
         {
             return Collision.PlaneIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
         }
@@ -284,7 +284,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref BoundingBox box)
+        public PlaneIntersectionType Intersects(ref BoundingBox box)
         {
             return Collision.PlaneIntersectsBox(ref this, ref box);
         }
@@ -293,7 +293,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref BoundingSphere sphere)
+        public PlaneIntersectionType Intersects(ref BoundingSphere sphere)
         {
             return Collision.PlaneIntersectsSphere(ref this, ref sphere);
         }

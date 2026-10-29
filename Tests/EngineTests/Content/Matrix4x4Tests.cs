@@ -6,7 +6,6 @@ namespace EngineTests.Content
 {
     using Engine.Content;
     using Engine.Mathematics;
-    using Matrix = Engine.Mathematics.Matrix4x4;
 
     [ExcludeFromCodeCoverage]
     [TestClass()]
@@ -26,24 +25,24 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixZeroTest()
         {
-            var res = Matrix4X4.Zero;
-            var expected = new Matrix4X4(0);
+            var res = Engine.Content.Matrix4x4.Zero;
+            var expected = new Engine.Content.Matrix4x4(0);
 
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixOneTest()
         {
-            var res = Matrix4X4.Identity;
-            var expected = new Matrix4X4 { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
+            var res = Engine.Content.Matrix4x4.Identity;
+            var expected = new Engine.Content.Matrix4x4 { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
 
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixValueTest()
         {
-            var res = new Matrix4X4(1);
-            var expected = new Matrix4X4
+            var res = new Engine.Content.Matrix4x4(1);
+            var expected = new Engine.Content.Matrix4x4
             {
                 M11 = 1.0f,
                 M12 = 1.0f,
@@ -71,8 +70,8 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixArrayTest()
         {
-            var res = new Matrix4X4(matrixValues);
-            var expected = new Matrix4X4
+            var res = new Engine.Content.Matrix4x4(matrixValues);
+            var expected = new Engine.Content.Matrix4x4
             {
                 M11 = 1.0f,
                 M12 = 2.0f,
@@ -100,22 +99,22 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixBadArrayTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new Matrix4X4(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Matrix4X4([]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Matrix4X4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
+            Assert.Throws<ArgumentNullException>(() => new Engine.Content.Matrix4x4(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Engine.Content.Matrix4x4([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Engine.Content.Matrix4x4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
         }
 
         [TestMethod()]
         public void MatrixEqualsTest()
         {
-            var res = Matrix4X4.Zero == new Matrix4X4(0);
+            var res = Engine.Content.Matrix4x4.Zero == new Engine.Content.Matrix4x4(0);
 
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void MatrixDistinctTest()
         {
-            var res = Matrix4X4.Zero != new Matrix4X4(1);
+            var res = Engine.Content.Matrix4x4.Zero != new Engine.Content.Matrix4x4(1);
 
             Assert.IsTrue(res);
         }
@@ -123,29 +122,29 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixMultiplyTest()
         {
-            Matrix4X4 res = new Matrix4X4(1) * new Matrix4X4(2);
-            Matrix4X4 expected = new Matrix4X4(1) * new Matrix4X4(2);
+            Engine.Content.Matrix4x4 res = new Engine.Content.Matrix4x4(1) * new Engine.Content.Matrix4x4(2);
+            Engine.Content.Matrix4x4 expected = new Engine.Content.Matrix4x4(1) * new Engine.Content.Matrix4x4(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixScalingTest()
         {
-            Matrix4X4 res = Matrix4X4.Scaling(new Scale3(2));
-            Matrix4X4 expected = Matrix.Scaling(2);
+            Engine.Content.Matrix4x4 res = Engine.Content.Matrix4x4.Scaling(new Scale3(2));
+            Engine.Content.Matrix4x4 expected = Engine.Mathematics.Matrix4x4.Scaling(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixRotationTest()
         {
-            Matrix4X4 res = Matrix4X4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
-            Matrix4X4 expected = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Up, 10));
+            Engine.Content.Matrix4x4 res = Engine.Content.Matrix4x4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
+            Engine.Content.Matrix4x4 expected = Engine.Mathematics.Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixTranslationTest()
         {
-            Matrix4X4 res = Matrix4X4.Translation(new Position3(2));
-            Matrix4X4 expected = Matrix.Translation(2, 2, 2);
+            Engine.Content.Matrix4x4 res = Engine.Content.Matrix4x4.Translation(new Position3(2));
+            Engine.Content.Matrix4x4 expected = Engine.Mathematics.Matrix4x4.Translation(2, 2, 2);
             Assert.AreEqual(expected, res);
         }
     }

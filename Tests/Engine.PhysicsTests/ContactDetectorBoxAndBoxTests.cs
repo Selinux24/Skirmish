@@ -46,10 +46,6 @@ namespace Engine.PhysicsTests
             var data2 = new ContactResolver();
             var data3 = new ContactResolver();
 
-            //Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
-            //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
-            //var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
-
             var boxTrn1 = Matrix4x4.Translation(new Vector3(0, 0, 0));
             var boxTrn2 = Matrix4x4.Translation(new Vector3(2, 0, 0));
 

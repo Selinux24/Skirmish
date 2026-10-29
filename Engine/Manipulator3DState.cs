@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Final transform for the controller
         /// </summary>
-        public Matrix4X4 LocalTransform { get; set; }
+        public Matrix4x4 LocalTransform { get; set; }
         /// <summary>
         /// Rotation component
         /// </summary>

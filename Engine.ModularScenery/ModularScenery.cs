@@ -473,7 +473,7 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void ParseAssetsMap(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            var transforms = new Dictionary<string, List<Matrix4x4>>();
+            var transforms = new Dictionary<string, List<Mathematics.Matrix4x4>>();
 
             float total = level.Map.Count() + transforms.Keys.Count;
             int current = 0;
@@ -507,7 +507,7 @@ namespace Engine.Modular
         /// <param name="item">Reference</param>
         /// <param name="assetIndex">Asset index</param>
         /// <param name="transforms">Transforms dictionary</param>
-        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix4x4>> transforms)
+        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Mathematics.Matrix4x4>> transforms)
         {
             var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
@@ -552,7 +552,7 @@ namespace Engine.Modular
                         if (maintain)
                         {
                             //Invert complex asset rotation
-                            basicTrn = Matrix4x4.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                            basicTrn = Mathematics.Matrix4x4.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
                         }
                     }
 
@@ -861,11 +861,11 @@ namespace Engine.Modular
                 {
                     if (useSphere)
                     {
-                        return bbox.Contains(e.Instance.GetBoundingSphere()) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingSphere()) != ContainmentType.Disjoint;
                     }
                     else
                     {
-                        return bbox.Contains(e.Instance.GetBoundingBox()) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingBox()) != ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -903,13 +903,13 @@ namespace Engine.Modular
                     {
                         var sph = e.Instance.GetBoundingSphere();
 
-                        return sphere.Contains(ref sph) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return sphere.Contains(ref sph) != ContainmentType.Disjoint;
                     }
                     else
                     {
                         var bbox = e.Instance.GetBoundingBox();
 
-                        return sphere.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return sphere.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -947,13 +947,13 @@ namespace Engine.Modular
                     {
                         var sph = e.Instance.GetBoundingSphere();
 
-                        return frustum.Contains(ref sph) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return frustum.Contains(ref sph) != ContainmentType.Disjoint;
                     }
                     else
                     {
                         var bbox = e.Instance.GetBoundingBox();
 
-                        return frustum.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return frustum.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -1079,7 +1079,7 @@ namespace Engine.Modular
             /// <summary>
             /// Complex asset transform
             /// </summary>
-            public Matrix4x4 Transform;
+            public Mathematics.Matrix4x4 Transform;
             /// <summary>
             /// Individual asset indices
             /// </summary>

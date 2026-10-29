@@ -198,7 +198,7 @@ namespace Engine.Content
                 textured = false;
             }
 
-            SubMeshContent geo = new(topology, materialName, textured, false, Matrix4x4.Identity);
+            SubMeshContent geo = new(topology, materialName, textured, false, Mathematics.Matrix4x4.Identity);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
@@ -813,7 +813,7 @@ namespace Engine.Content
                 }
                 else
                 {
-                    joint.Offset = Matrix4x4.Identity;
+                    joint.Offset = Mathematics.Matrix4x4.Identity;
                 }
             }
 

@@ -45,7 +45,7 @@ namespace Engine
                 return false;
             }
 
-            bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == Vortice.Mathematics.ContainmentType.Disjoint;
+            bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
             if (!cull)
             {
                 distance = 0;

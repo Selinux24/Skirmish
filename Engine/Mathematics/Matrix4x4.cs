@@ -527,12 +527,12 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Creates a new world Matrix
+        /// Creates a new world Matrix4x4
         /// </summary>
         /// <param name="position">The position vector.</param>
         /// <param name="forward">The forward direction vector.</param>
         /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
-        /// <returns>The world Matrix</returns>
+        /// <returns>The world Matrix4x4</returns>
         public static Matrix4x4 CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
         {
             var result = new Matrix4x4();
@@ -3038,7 +3038,7 @@ namespace Engine.Mathematics
             return !left.Equals(ref right);
         }
         /// <summary>
-        /// Convert the System.Numerics.Matrix4x4 to a 4x4 Matrix.
+        /// Convert the System.Numerics.Matrix4x4 to a Matrix4x4.
         /// </summary>
         /// <returns>A Matrix4x4</returns>
         public static implicit operator Matrix4x4(System.Numerics.Matrix4x4 Value)
@@ -3050,7 +3050,7 @@ namespace Engine.Mathematics
                 Value.M41, Value.M42, Value.M43, Value.M44);
         }
         /// <summary>
-        /// Convert the 4x4 Matrix to a System.Numerics.Matrix4x4.
+        /// Convert the Matrix4x4 to a System.Numerics.Matrix4x4.
         /// </summary>
         /// <returns>A System.Numerics.Matrix4x4</returns>
         public static implicit operator System.Numerics.Matrix4x4(Matrix4x4 Value)
@@ -3141,11 +3141,24 @@ namespace Engine.Mathematics
         /// </returns>
         public override readonly int GetHashCode()
         {
-            return HashCode.Combine(
-                HashCode.Combine(M11, M12, M13, M14),
-                HashCode.Combine(M21, M22, M23, M24),
-                HashCode.Combine(M31, M32, M33, M34),
-                HashCode.Combine(M41, M42, M43, M44));
+            HashCode hash = new();
+            hash.Add(M11);
+            hash.Add(M12);
+            hash.Add(M13);
+            hash.Add(M14);
+            hash.Add(M21);
+            hash.Add(M22);
+            hash.Add(M23);
+            hash.Add(M24);
+            hash.Add(M31);
+            hash.Add(M32);
+            hash.Add(M33);
+            hash.Add(M34);
+            hash.Add(M41);
+            hash.Add(M42);
+            hash.Add(M43);
+            hash.Add(M44);
+            return hash.ToHashCode();
         }
 
         /// <summary>

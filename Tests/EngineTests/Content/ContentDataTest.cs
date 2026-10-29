@@ -45,7 +45,7 @@ namespace EngineTests.Content
         {
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Matrix4x4.Identity);
+            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Engine.Mathematics.Matrix4x4.Identity);
             subMeshcontent.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {
@@ -73,9 +73,9 @@ namespace EngineTests.Content
 
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Matrix4x4.Scaling(2));
+            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Engine.Mathematics.Matrix4x4.Scaling(2));
             subMeshcontent1.SetVertices(data);
-            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Matrix4x4.Scaling(0.5f));
+            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Engine.Mathematics.Matrix4x4.Scaling(0.5f));
             subMeshcontent2.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {

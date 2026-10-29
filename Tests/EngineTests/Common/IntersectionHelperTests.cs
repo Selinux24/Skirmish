@@ -397,21 +397,21 @@ namespace EngineTests.Common
         {
             var res = sph1.Contains(bbox1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsSphereBoxTest2()
         {
             var res = sph1.Contains(bbox2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsSphereBoxTest3()
         {
             var res = sph1.Contains(bbox3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -419,21 +419,21 @@ namespace EngineTests.Common
         {
             var res = sph1.Contains(sph1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsSphereSphereTest2()
         {
             var res = sph1.Contains(sph2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsSphereSphereTest3()
         {
             var res = sph1.Contains(sph3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -441,21 +441,21 @@ namespace EngineTests.Common
         {
             var res = sph1.Contains(tmesh1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsSphereMeshTest2()
         {
             var res = sph1.Contains(tmesh2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsSphereMeshTest3()
         {
             var res = sph1.Contains(tmesh3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -463,14 +463,14 @@ namespace EngineTests.Common
         {
             var res = sph1.Contains(frustum1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsSphereFrustumTest2()
         {
             var res = sph1.Contains(frustum3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -478,21 +478,21 @@ namespace EngineTests.Common
         {
             var res = box1.Contains(bbox1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsBoxBoxTest2()
         {
             var res = box1.Contains(bbox2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsBoxBoxTest3()
         {
             var res = box1.Contains(bbox3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -500,21 +500,21 @@ namespace EngineTests.Common
         {
             var res = box1.Contains(sph1_1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsBoxSphereTest2()
         {
             var res = box1.Contains(sph2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsBoxSphereTest3()
         {
             var res = box1.Contains(sph3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -522,21 +522,21 @@ namespace EngineTests.Common
         {
             var res = box1.Contains(tmesh1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Contains, res);
+            Assert.AreEqual(ContainmentType.Contains, res);
         }
         [TestMethod()]
         public void IntersectsBoxMeshTest2()
         {
             var res = box1.Contains(tmesh2);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsBoxMeshTest3()
         {
             var res = box1.Contains(tmesh3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
 
         [TestMethod()]
@@ -544,14 +544,14 @@ namespace EngineTests.Common
         {
             var res = box1.Contains(frustum1);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Intersects, res);
+            Assert.AreEqual(ContainmentType.Intersects, res);
         }
         [TestMethod()]
         public void IntersectsBoxFrustumTest2()
         {
             var res = box1.Contains(frustum3);
 
-            Assert.AreEqual(Vortice.Mathematics.ContainmentType.Disjoint, res);
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
     }
 }

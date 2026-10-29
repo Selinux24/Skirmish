@@ -103,10 +103,10 @@ namespace Engine.Content.FmtCollada.Fmt
             }
         }
         /// <summary>
-        /// Reads a Matrix from BasicFloat4x4
+        /// Reads a Matrix4x4 from BasicFloat4x4
         /// </summary>
         /// <param name="matrix">BasicFloat4x4 matrix</param>
-        /// <returns>Returns the parsed Matrix from BasicFloat4x4</returns>
+        /// <returns>Returns the parsed Matrix4x4 from BasicFloat4x4</returns>
         /// <remarks>
         /// From right handed
         /// { rx, ry, rz, 0 }
@@ -150,7 +150,7 @@ namespace Engine.Content.FmtCollada.Fmt
             }
             else
             {
-                throw new EngineException("Value cannot be parsed to Matrix 4x4.");
+                throw new EngineException("Value cannot be parsed to Matrix4x4.");
             }
         }
 
@@ -321,10 +321,10 @@ namespace Engine.Content.FmtCollada.Fmt
             return [.. verts];
         }
         /// <summary>
-        /// Reads a Matrix array from a source
+        /// Reads a Matrix4x4 array from a source
         /// </summary>
         /// <param name="source">Source</param>
-        /// <returns>Returns the Matrix array</returns>
+        /// <returns>Returns the Matrix4x4 array</returns>
         /// <remarks>
         /// From right handed
         /// { rx, ry, rz, 0 }

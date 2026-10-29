@@ -907,7 +907,7 @@ namespace TerrainSamples.SceneModularDungeon
                 .Where(i =>
                 {
                     var bbox = i.Instance.GetBoundingBox();
-                    return Camera.Frustum.Contains(ref bbox) != Vortice.Mathematics.ContainmentType.Disjoint;
+                    return Camera.Frustum.Contains(ref bbox) != ContainmentType.Disjoint;
                 })
                 .Where(i =>
                 {

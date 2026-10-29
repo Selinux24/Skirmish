@@ -21,11 +21,11 @@ namespace Engine.Content
         /// <summary>
         /// Initial light transform
         /// </summary>
-        public Matrix4x4 Transform
+        public Mathematics.Matrix4x4 Transform
         {
             get
             {
-                return Matrix4x4.Transformation(Vector3.Zero, Quaternion.Identity, Scale, Vector3.Zero, Rotation, Position);
+                return Mathematics.Matrix4x4.Transformation(Vector3.Zero, Quaternion.Identity, Scale, Vector3.Zero, Rotation, Position);
             }
             set
             {
@@ -79,7 +79,7 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
-            Vector3 direction = Vector3.TransformNormal(Vector3Extensions.Up, Matrix4x4.RotationQuaternion(Rotation));
+            Vector3 direction = Vector3.TransformNormal(Vector3Extensions.Up, Mathematics.Matrix4x4.RotationQuaternion(Rotation));
             float radius = GetRadius(QuadraticAttenuation, 0.5f);
             float intensity = ConstantAttenuation * radius;
 

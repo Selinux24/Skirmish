@@ -30,7 +30,7 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public Matrix4X4 ToShadowSpace { get; set; }
+        public Matrix4x4 ToShadowSpace { get; set; }
         /// <summary>
         /// X cascade offset
         /// </summary>

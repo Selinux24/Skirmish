@@ -12,7 +12,7 @@ namespace Engine.Content
         /// <summary>
         /// Bind shape matrix
         /// </summary>
-        public Matrix4x4 BindShapeMatrix { get; set; }
+        public System.Numerics.Matrix4x4 BindShapeMatrix { get; set; }
         /// <summary>
         /// Weight list
         /// </summary>

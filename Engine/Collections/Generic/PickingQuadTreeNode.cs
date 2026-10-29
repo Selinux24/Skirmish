@@ -55,7 +55,7 @@ namespace Engine.Collections.Generic
                 {
                     var tbox = Mathematics.BoundingBox.FromPoints(t.GetVertices());
 
-                    return bbox.Contains(tbox) != Vortice.Mathematics.ContainmentType.Disjoint;
+                    return bbox.Contains(tbox) != ContainmentType.Disjoint;
                 })
                 .ToList(); //Break the reference
 

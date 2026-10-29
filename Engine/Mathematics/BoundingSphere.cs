@@ -111,7 +111,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="plane">The plane to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref Plane plane)
+        public PlaneIntersectionType Intersects(ref Plane plane)
         {
             return Collision.PlaneIntersectsSphere(ref plane, ref this);
         }
@@ -168,7 +168,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Vortice.Mathematics.ContainmentType Contains(ref Vector3 point)
+        public ContainmentType Contains(ref Vector3 point)
         {
             return Collision.SphereContainsPoint(ref this, ref point);
         }
@@ -179,7 +179,7 @@ namespace Engine.Mathematics
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Vortice.Mathematics.ContainmentType Contains(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public ContainmentType Contains(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
         {
             return Collision.SphereContainsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
         }
@@ -188,7 +188,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Vortice.Mathematics.ContainmentType Contains(ref BoundingBox box)
+        public ContainmentType Contains(ref BoundingBox box)
         {
             return Collision.SphereContainsBox(ref this, ref box);
         }
@@ -197,7 +197,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Vortice.Mathematics.ContainmentType Contains(ref BoundingSphere sphere)
+        public ContainmentType Contains(ref BoundingSphere sphere)
         {
             return Collision.SphereContainsSphere(ref this, ref sphere);
         }

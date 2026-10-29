@@ -104,12 +104,12 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Gets the initial transform matrix
         /// </summary>
-        public Matrix4X4 GetTransform()
+        public Matrix4x4 GetTransform()
         {
             return
-                Matrix4X4.Scaling(Scale) *
-                Matrix4X4.Rotation(Rotation) *
-                Matrix4X4.Translation(Position);
+                Matrix4x4.Scaling(Scale) *
+                Matrix4x4.Rotation(Rotation) *
+                Matrix4x4.Translation(Position);
         }
     }
 }

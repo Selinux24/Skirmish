@@ -897,7 +897,7 @@ namespace Tanks
                 }
 
                 var pos = result.Position;
-                if (sph.Contains(ref pos) != Vortice.Mathematics.ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
+                if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
                 {
                     continue;
                 }
@@ -1456,7 +1456,7 @@ You will lost all the game progress.",
                 dist += sampleDist;
 
                 // Test the individual marker visibility against camera
-                if (Camera.Frustum.Contains(ref markerPos) == Vortice.Mathematics.ContainmentType.Disjoint)
+                if (Camera.Frustum.Contains(ref markerPos) == ContainmentType.Disjoint)
                 {
                     continue;
                 }
@@ -1544,7 +1544,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
             var localPos = barrelManipulator.Position;
             var c = Vector3.Cross(barrelDir, newDir);
-            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4.RotationAxis(c, angle));
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Engine.Mathematics.Matrix4x4.RotationAxis(c, angle));
 
             //Apply de local delta
             barrelManipulator.RotateTo(localPos + localDir, Vector3Extensions.Up, Axis.Y, 0.01f);

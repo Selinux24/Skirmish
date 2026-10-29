@@ -87,7 +87,7 @@ namespace Engine.PathFinding.RecastNavigation
             var bounds = settings.Bounds;
 
             var polyBounds = item.Triangle.GetBounds();
-            if (bounds.Contains(polyBounds) == Vortice.Mathematics.ContainmentType.Disjoint)
+            if (bounds.Contains(polyBounds) == ContainmentType.Disjoint)
             {
                 // If the triangle does not touch the bbox of the heightfield, skip the triangle.
                 yield break;

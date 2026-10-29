@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Matrix = Mathematics.Matrix4x4;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Vertex helper
@@ -53,7 +53,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex data</param>
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the weighted position</returns>
-        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix> boneTransforms)
+        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix4x4> boneTransforms)
         {
             if (!vertex.HasChannel(VertexDataChannels.Position))
             {
@@ -101,7 +101,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix transform)
+        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix4x4 transform)
         {
             if (vertices?.Any() != true)
             {
@@ -125,7 +125,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static VertexData Transform(VertexData vertex, Matrix transform)
+        public static VertexData Transform(VertexData vertex, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
@@ -162,7 +162,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix transform)
+        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix4x4 transform)
             where T : unmanaged, IVertexData
         {
             if (vertices?.Any() != true)
@@ -187,7 +187,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static T Transform<T>(T vertex, Matrix transform)
+        public static T Transform<T>(T vertex, Matrix4x4 transform)
             where T : unmanaged, IVertexData
         {
             if (transform.IsIdentity)
@@ -259,7 +259,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public readonly VertexData Transform(Matrix transform)
+        public readonly VertexData Transform(Matrix4x4 transform)
         {
             return Transform(this, transform);
         }

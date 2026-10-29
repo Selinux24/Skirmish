@@ -1,10 +1,11 @@
-﻿using Engine.Common;
-using Engine.Content;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
+    using Engine.Common;
+    using Engine.Content;
+
     /// <summary>
     /// Heightmap description
     /// </summary>
@@ -82,7 +83,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Transform matrix
         /// </summary>
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public System.Numerics.Matrix4x4 Transform { get; set; } = System.Numerics.Matrix4x4.Identity;
 
         /// <summary>
         /// Constructor
@@ -125,7 +126,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var material = MaterialBlinnPhongContent.Default;
 
-                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Matrix4x4.Identity);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Engine.Mathematics.Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

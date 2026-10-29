@@ -41,7 +41,7 @@ namespace Engine.Mathematics
         private Plane pBottom;
 
         /// <summary>
-        /// Gets or sets the Matrix that describes this bounding frustum.
+        /// Gets or sets the Matrix4x4 that describes this bounding frustum.
         /// </summary>
         public Matrix4x4 Matrix
         {
@@ -411,26 +411,26 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(ref Vector3 point)
+        public readonly ContainmentType Contains(ref Vector3 point)
         {
-            var result = Vortice.Mathematics.PlaneIntersectionType.Front;
+            var result = PlaneIntersectionType.Front;
             for (int i = 0; i < 6; i++)
             {
                 var planeResult = GetPlane(i).Intersects(ref point);
                 switch (planeResult)
                 {
-                    case Vortice.Mathematics.PlaneIntersectionType.Back:
-                        return Vortice.Mathematics.ContainmentType.Disjoint;
-                    case Vortice.Mathematics.PlaneIntersectionType.Intersecting:
-                        result = Vortice.Mathematics.PlaneIntersectionType.Intersecting;
+                    case PlaneIntersectionType.Back:
+                        return ContainmentType.Disjoint;
+                    case PlaneIntersectionType.Intersecting:
+                        result = PlaneIntersectionType.Intersecting;
                         break;
                 }
             }
 
             return result switch
             {
-                Vortice.Mathematics.PlaneIntersectionType.Intersecting => Vortice.Mathematics.ContainmentType.Intersects,
-                _ => Vortice.Mathematics.ContainmentType.Contains,
+                PlaneIntersectionType.Intersecting => ContainmentType.Intersects,
+                _ => ContainmentType.Contains,
             };
         }
         /// <summary>
@@ -438,7 +438,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(Vector3 point)
+        public readonly ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
         }
@@ -447,9 +447,9 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="box">The box.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(ref BoundingBox box)
+        public readonly ContainmentType Contains(ref BoundingBox box)
         {
-            var result = Vortice.Mathematics.ContainmentType.Contains;
+            var result = ContainmentType.Contains;
 
             for (int i = 0; i < 6; i++)
             {
@@ -457,14 +457,14 @@ namespace Engine.Mathematics
 
                 GetBoxToPlanePVertexNVertex(ref box, ref plane.Normal, out Vector3 p, out Vector3 n);
 
-                if (Collision.PlaneIntersectsPoint(ref plane, ref p) == Vortice.Mathematics.PlaneIntersectionType.Back)
+                if (Collision.PlaneIntersectsPoint(ref plane, ref p) == PlaneIntersectionType.Back)
                 {
-                    return Vortice.Mathematics.ContainmentType.Disjoint;
+                    return ContainmentType.Disjoint;
                 }
 
-                if (Collision.PlaneIntersectsPoint(ref plane, ref n) == Vortice.Mathematics.PlaneIntersectionType.Back)
+                if (Collision.PlaneIntersectsPoint(ref plane, ref n) == PlaneIntersectionType.Back)
                 {
-                    result = Vortice.Mathematics.ContainmentType.Intersects;
+                    result = ContainmentType.Intersects;
                 }
             }
 
@@ -475,7 +475,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="box">The box.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(BoundingBox box)
+        public readonly ContainmentType Contains(BoundingBox box)
         {
             return Contains(ref box);
         }
@@ -484,7 +484,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="box">The box.</param>
         /// <param name="result">Type of the containment.</param>
-        public readonly void Contains(ref BoundingBox box, out Vortice.Mathematics.ContainmentType result)
+        public readonly void Contains(ref BoundingBox box, out ContainmentType result)
         {
             result = Contains(ref box);
         }
@@ -493,26 +493,26 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(ref BoundingSphere sphere)
+        public readonly ContainmentType Contains(ref BoundingSphere sphere)
         {
-            var result = Vortice.Mathematics.PlaneIntersectionType.Front;
+            var result = PlaneIntersectionType.Front;
             for (int i = 0; i < 6; i++)
             {
                 var planeResult = GetPlane(i).Intersects(ref sphere);
                 switch (planeResult)
                 {
-                    case Vortice.Mathematics.PlaneIntersectionType.Back:
-                        return Vortice.Mathematics.ContainmentType.Disjoint;
-                    case Vortice.Mathematics.PlaneIntersectionType.Intersecting:
-                        result = Vortice.Mathematics.PlaneIntersectionType.Intersecting;
+                    case PlaneIntersectionType.Back:
+                        return ContainmentType.Disjoint;
+                    case PlaneIntersectionType.Intersecting:
+                        result = PlaneIntersectionType.Intersecting;
                         break;
                 }
             }
 
             return result switch
             {
-                Vortice.Mathematics.PlaneIntersectionType.Intersecting => Vortice.Mathematics.ContainmentType.Intersects,
-                _ => Vortice.Mathematics.ContainmentType.Contains,
+                PlaneIntersectionType.Intersecting => ContainmentType.Intersects,
+                _ => ContainmentType.Contains,
             };
         }
         /// <summary>
@@ -520,7 +520,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public readonly Vortice.Mathematics.ContainmentType Contains(BoundingSphere sphere)
+        public readonly ContainmentType Contains(BoundingSphere sphere)
         {
             return Contains(ref sphere);
         }
@@ -529,7 +529,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <param name="result">Type of the containment.</param>
-        public readonly void Contains(ref BoundingSphere sphere, out Vortice.Mathematics.ContainmentType result)
+        public readonly void Contains(ref BoundingSphere sphere, out ContainmentType result)
         {
             result = Contains(ref sphere);
         }
@@ -541,7 +541,7 @@ namespace Engine.Mathematics
         /// <returns>Type of the containment</returns>
         public readonly bool Intersects(ref BoundingSphere sphere)
         {
-            return Contains(ref sphere) != Vortice.Mathematics.ContainmentType.Disjoint;
+            return Contains(ref sphere) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingSphere.
@@ -550,7 +550,7 @@ namespace Engine.Mathematics
         /// <param name="result">Set to <c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</param>
         public readonly void Intersects(ref BoundingSphere sphere, out bool result)
         {
-            result = Contains(ref sphere) != Vortice.Mathematics.ContainmentType.Disjoint;
+            result = Contains(ref sphere) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingBox.
@@ -559,7 +559,7 @@ namespace Engine.Mathematics
         /// <returns><c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</returns>
         public readonly bool Intersects(ref BoundingBox box)
         {
-            return Contains(ref box) != Vortice.Mathematics.ContainmentType.Disjoint;
+            return Contains(ref box) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingBox.
@@ -568,14 +568,14 @@ namespace Engine.Mathematics
         /// <param name="result"><c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</param>
         public readonly void Intersects(ref BoundingBox box, out bool result)
         {
-            result = Contains(ref box) != Vortice.Mathematics.ContainmentType.Disjoint;
+            result = Contains(ref box) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Plane.
         /// </summary>
         /// <param name="plane">The plane.</param>
         /// <returns>Plane intersection type.</returns>
-        public Vortice.Mathematics.PlaneIntersectionType Intersects(ref Plane plane)
+        public PlaneIntersectionType Intersects(ref Plane plane)
         {
             return PlaneIntersectsPoints(ref plane, GetCorners());
         }
@@ -584,7 +584,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="plane">The plane.</param>
         /// <param name="result">Plane intersection type.</param>
-        public void Intersects(ref Plane plane, out Vortice.Mathematics.PlaneIntersectionType result)
+        public void Intersects(ref Plane plane, out PlaneIntersectionType result)
         {
             result = PlaneIntersectsPoints(ref plane, GetCorners());
         }
@@ -606,7 +606,7 @@ namespace Engine.Mathematics
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
         public readonly bool Intersects(ref Ray ray, out float? inDistance, out float? outDistance)
         {
-            if (Contains(ray.Position) != Vortice.Mathematics.ContainmentType.Disjoint)
+            if (Contains(ray.Position) != ContainmentType.Disjoint)
             {
                 float nearstPlaneDistance = float.MaxValue;
 
@@ -645,7 +645,7 @@ namespace Engine.Mathematics
                 Vector3 minPoint = ray.Position + ray.Direction * minDist;
                 Vector3 maxPoint = ray.Position + ray.Direction * maxDist;
                 Vector3 center = (minPoint + maxPoint) / 2f;
-                if (Contains(ref center) != Vortice.Mathematics.ContainmentType.Disjoint)
+                if (Contains(ref center) != ContainmentType.Disjoint)
                 {
                     inDistance = minDist;
                     outDistance = maxDist;
@@ -673,7 +673,7 @@ namespace Engine.Mathematics
             if (planeNormal.Z >= 0) n.Z = box.Minimum.Z;
         }
 
-        private static Vortice.Mathematics.PlaneIntersectionType PlaneIntersectsPoints(ref Plane plane, Vector3[] points)
+        private static PlaneIntersectionType PlaneIntersectsPoints(ref Plane plane, Vector3[] points)
         {
             var result = Collision.PlaneIntersectsPoint(ref plane, ref points[0]);
 
@@ -681,7 +681,7 @@ namespace Engine.Mathematics
             {
                 if (Collision.PlaneIntersectsPoint(ref plane, ref points[i]) != result)
                 {
-                    return Vortice.Mathematics.PlaneIntersectionType.Intersecting;
+                    return PlaneIntersectionType.Intersecting;
                 }
             }
 

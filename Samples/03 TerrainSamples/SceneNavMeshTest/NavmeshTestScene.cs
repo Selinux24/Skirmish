@@ -1892,7 +1892,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     }
                 }
 
-                SubMeshContent geo = new(topology, materialName, false, false, Matrix4x4.Identity);
+                SubMeshContent geo = new(topology, materialName, false, false, Engine.Mathematics.Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 return geo;
             }
@@ -1913,7 +1913,7 @@ namespace TerrainSamples.SceneNavMeshTest
                     }
                 }
 
-                SubMeshContent geo = new(topology, materialName, false, false, Matrix4x4.Identity);
+                SubMeshContent geo = new(topology, materialName, false, false, Engine.Mathematics.Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 return geo;
             }

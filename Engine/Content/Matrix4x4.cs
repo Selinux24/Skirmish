@@ -2,44 +2,42 @@
 
 namespace Engine.Content
 {
-    using Matrix = Mathematics.Matrix4x4;
-
     /// <summary>
     /// 4x4 matrix
     /// </summary>
-    public struct Matrix4X4 : IEquatable<Matrix4X4>
+    public struct Matrix4x4 : IEquatable<Matrix4x4>
     {
         /// <summary>
-        /// A <see cref="Matrix"/> with all of its components set to zero.
+        /// A <see cref="Matrix4x4"/> with all of its components set to zero.
         /// </summary>
-        public static readonly Matrix4X4 Zero = new();
+        public static readonly Matrix4x4 Zero = new();
         /// <summary>
-        /// The identity <see cref="Matrix"/>.
+        /// The identity <see cref="Matrix4x4"/>.
         /// </summary>
-        public static readonly Matrix4X4 Identity = new() { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
+        public static readonly Matrix4x4 Identity = new() { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
         /// <summary>
         /// Gets the scaling matrix
         /// </summary>
         /// <param name="scale">Scaling vector</param>
-        public static Matrix4X4 Scaling(Scale3 scale)
+        public static Matrix4x4 Scaling(Scale3 scale)
         {
-            return Matrix.Scaling(scale);
+            return Mathematics.Matrix4x4.Scaling(scale);
         }
         /// <summary>
         /// Gets the rotation matrix
         /// </summary>
         /// <param name="rotation">Rotation quaternion</param>
-        public static Matrix4X4 Rotation(RotationQ rotation)
+        public static Matrix4x4 Rotation(RotationQ rotation)
         {
-            return Matrix.RotationQuaternion(rotation);
+            return Mathematics.Matrix4x4.RotationQuaternion(rotation);
         }
         /// <summary>
         /// Gets the translation matrix
         /// </summary>
         /// <param name="position">Position</param>
-        public static Matrix4X4 Translation(Position3 position)
+        public static Matrix4x4 Translation(Position3 position)
         {
-            return Matrix.Translation(position);
+            return Mathematics.Matrix4x4.Translation(position);
         }
 
         /// <summary>
@@ -108,10 +106,21 @@ namespace Engine.Content
         public float M44 { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Matrix4X4"/> struct.
+        /// Gets a value indicating whether this instance is an identity matrix.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is an identity matrix; otherwise, <c>false</c>.
+        /// </value>
+        public readonly bool IsIdentity
+        {
+            get { return Equals(Identity); }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Matrix4x4"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
-        public Matrix4X4(float value)
+        public Matrix4x4(float value)
         {
             M11 = M12 = M13 = M14 =
             M21 = M22 = M23 = M24 =
@@ -119,17 +128,17 @@ namespace Engine.Content
             M41 = M42 = M43 = M44 = value;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Matrix4X4"/> struct.
+        /// Initializes a new instance of the <see cref="Matrix4x4"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the components of the matrix. This must be an array with sixteen elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than sixteen elements.</exception>
-        public Matrix4X4(float[] values)
+        public Matrix4x4(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
 
             if (values.Length != 16)
-                throw new ArgumentOutOfRangeException(nameof(values), "There must be sixteen and only sixteen input values for Matrix.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be sixteen and only sixteen input values for Matrix4x4.");
 
             M11 = values[0];
             M12 = values[1];
@@ -153,35 +162,35 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public static bool operator ==(Matrix4X4 left, Matrix4X4 right)
+        public static bool operator ==(Matrix4x4 left, Matrix4x4 right)
         {
             return left.Equals(right);
         }
         /// <inheritdoc/>
-        public static bool operator !=(Matrix4X4 left, Matrix4X4 right)
+        public static bool operator !=(Matrix4x4 left, Matrix4x4 right)
         {
             return !(left == right);
         }
 
         /// <inheritdoc/>
-        public static Matrix4X4 operator *(Matrix4X4 left, Matrix4X4 right)
+        public static Matrix4x4 operator *(Matrix4x4 left, Matrix4x4 right)
         {
-            return (Matrix)left * (Matrix)right;
+            return (Mathematics.Matrix4x4)left * (Mathematics.Matrix4x4)right;
         }
 
         /// <inheritdoc/>
-        public static implicit operator Matrix(Matrix4X4 value)
+        public static implicit operator Mathematics.Matrix4x4(Matrix4x4 value)
         {
-            return new Matrix(
+            return new(
                 value.M11, value.M12, value.M13, value.M14,
                 value.M21, value.M22, value.M23, value.M24,
                 value.M31, value.M32, value.M33, value.M34,
                 value.M41, value.M42, value.M43, value.M44);
         }
         /// <inheritdoc/>
-        public static implicit operator Matrix4X4(Matrix value)
+        public static implicit operator Matrix4x4(Mathematics.Matrix4x4 value)
         {
-            return new Matrix4X4
+            return new()
             {
                 M11 = value.M11,
                 M12 = value.M12,
@@ -206,14 +215,14 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public readonly bool Equals(Matrix4X4 other)
+        public readonly bool Equals(Matrix4x4 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            if (obj is not Matrix4X4 strongType)
+            if (obj is not Matrix4x4 strongType)
             {
                 return false;
             }
@@ -221,7 +230,7 @@ namespace Engine.Content
             return Equals(ref strongType);
         }
 
-        public readonly bool Equals(ref Matrix4X4 other)
+        public readonly bool Equals(ref Matrix4x4 other)
         {
             return
                 Helper.NearEqual(other.M11, M11) &&

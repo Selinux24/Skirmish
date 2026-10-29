@@ -257,7 +257,7 @@ namespace Engine.Mathematics
         /// <param name="x">X coordinate on 2d screen.</param>
         /// <param name="y">Y coordinate on 2d screen.</param>
         /// <param name="viewport"><see cref="ViewportF"/>.</param>
-        /// <param name="worldViewProjection">Transformation <see cref="Matrix"/>.</param>
+        /// <param name="worldViewProjection">Transformation <see cref="Matrix4x4"/>.</param>
         /// <returns>Resulting <see cref="Ray"/>.</returns>
         public static Ray GetPickRay(int x, int y, Vortice.Mathematics.Viewport viewport, Matrix4x4 worldViewProjection)
         {

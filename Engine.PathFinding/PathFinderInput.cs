@@ -66,7 +66,7 @@ namespace Engine.PathFinding
                 {
                     tris = tris.Where(t =>
                     {
-                        return Intersection.BoxContainsTriangle(bounds.Value, t) != Vortice.Mathematics.ContainmentType.Disjoint;
+                        return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
                     });
                 }
 
@@ -94,7 +94,7 @@ namespace Engine.PathFinding
             {
                 tris = tris.Where(t =>
                 {
-                    return Intersection.BoxContainsTriangle(bounds.Value, t) != Vortice.Mathematics.ContainmentType.Disjoint;
+                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
                 });
             }
 

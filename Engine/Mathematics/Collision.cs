@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {

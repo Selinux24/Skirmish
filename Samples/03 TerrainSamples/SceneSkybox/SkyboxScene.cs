@@ -281,7 +281,7 @@ namespace TerrainSamples.SceneSkybox
             };
             var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
-            groundDesc.Heightmap.Transform = Matrix4x4.Translation(0, -terrainHeight * 0.33f, 0);
+            groundDesc.Heightmap.Transform = Engine.Mathematics.Matrix4x4.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
 
             lakeBottom = await AddComponentEffect<Scenery, SceneryDescription>("Lake Bottom", "Lake Bottom", groundDesc);

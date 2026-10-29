@@ -78,7 +78,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Item</param>
         public void Insert(ICullingVolume itemBoundary, T item)
         {
-            if (itemBoundary.Contains(Boundary) == Vortice.Mathematics.ContainmentType.Disjoint)
+            if (itemBoundary.Contains(Boundary) == ContainmentType.Disjoint)
             {
                 return;
             }
@@ -99,7 +99,7 @@ namespace Engine.Collections.Generic
                 var child = GetNode(index);
                 if (child == null)
                 {
-                    if (itemBoundary.Contains(childBoundary) == Vortice.Mathematics.ContainmentType.Disjoint)
+                    if (itemBoundary.Contains(childBoundary) == ContainmentType.Disjoint)
                     {
                         continue;
                     }
@@ -214,13 +214,13 @@ namespace Engine.Collections.Generic
             }
 
             var containmentType = queryBoundary.Contains(node.Boundary);
-            if (containmentType == Vortice.Mathematics.ContainmentType.Disjoint)
+            if (containmentType == ContainmentType.Disjoint)
             {
                 // The query not contains the current node boundary. Exit
                 return;
             }
 
-            if (containmentType == Vortice.Mathematics.ContainmentType.Contains)
+            if (containmentType == ContainmentType.Contains)
             {
                 // The query contains the current node boundary. Return all items without any query
                 GetItems(node, results);

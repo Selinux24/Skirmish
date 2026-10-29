@@ -52,7 +52,7 @@ using System.Runtime.InteropServices;
 namespace Engine.Mathematics
 {
     /// <summary>
-    /// Represents a 3x3 Matrix ( contains only Scale and Rotation ).
+    /// Represents a Matrix3x3 ( contains only Scale and Rotation ).
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Matrix3x3 : IEquatable<Matrix3x3>, IFormattable
@@ -1925,9 +1925,9 @@ namespace Engine.Mathematics
             return !left.Equals(ref right);
         }
         /// <summary>
-        /// Convert the 3x3 Matrix to a 4x4 Matrix.
+        /// Convert the Matrix3x3 to a Matrix4x4.
         /// </summary>
-        /// <returns>A 4x4 Matrix with zero translation and M44=1</returns>
+        /// <returns>A Matrix4x4 with zero translation and M44=1</returns>
         public static explicit operator Matrix4x4(Matrix3x3 Value)
         {
             return new Matrix4x4(
@@ -1937,9 +1937,9 @@ namespace Engine.Mathematics
                 0, 0, 0, 1);
         }
         /// <summary>
-        /// Convert the 4x4 Matrix to a 3x3 Matrix.
+        /// Convert the Matrix4x4 to a Matrix3x3.
         /// </summary>
-        /// <returns>A 3x3 Matrix</returns>
+        /// <returns>A Matrix3x3</returns>
         public static explicit operator Matrix3x3(Matrix4x4 Value)
         {
             return new Matrix3x3(

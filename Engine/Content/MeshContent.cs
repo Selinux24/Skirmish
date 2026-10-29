@@ -10,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Intial transformation
         /// </summary>
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public System.Numerics.Matrix4x4 Transform { get; set; } = System.Numerics.Matrix4x4.Identity;
         /// <summary>
         /// Sub mesh names
         /// </summary>

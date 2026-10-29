@@ -1862,7 +1862,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Calc polygon bounds.
                 var tileBounds = tile.GetPolyBounds(p);
 
-                if (bounds.Contains(tileBounds) != Vortice.Mathematics.ContainmentType.Disjoint && polys.Count < maxPolys)
+                if (bounds.Contains(tileBounds) != ContainmentType.Disjoint && polys.Count < maxPolys)
                 {
                     polys.Add(bse | i);
                 }

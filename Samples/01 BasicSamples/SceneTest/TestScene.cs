@@ -732,7 +732,7 @@ namespace BasicSamples.SceneTest
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
             var cubeTris = Triangle.ComputeTriangleList(bbox);
-            cubeTris = Triangle.Transform(cubeTris, Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
+            cubeTris = Triangle.Transform(cubeTris, Engine.Mathematics.Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
             var desc = new GeometryColorDrawerDescription<Triangle>()
             {
@@ -794,7 +794,7 @@ namespace BasicSamples.SceneTest
                         MaximumDistance = 1000f,
                     });
 
-                markers.AddRange(Triangle.Transform(cubeTris, Matrix4x4.Translation(positions[i])));
+                markers.AddRange(Triangle.Transform(cubeTris, Engine.Mathematics.Matrix4x4.Translation(positions[i])));
             }
 
             var desc = new GeometryColorDrawerDescription<Triangle>()
