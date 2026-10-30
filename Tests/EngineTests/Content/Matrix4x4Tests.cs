@@ -137,7 +137,7 @@ namespace EngineTests.Content
         public void MatrixRotationTest()
         {
             Engine.Content.Matrix4x4 res = Engine.Content.Matrix4x4.Rotation(RotationQ.RotationAxis(Direction3.Up, 10));
-            Engine.Content.Matrix4x4 expected = Engine.Mathematics.Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Up, 10));
+            Engine.Content.Matrix4x4 expected = Engine.Mathematics.Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]

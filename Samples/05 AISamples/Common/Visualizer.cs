@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace AISamples.Common
 {
@@ -89,7 +88,7 @@ namespace AISamples.Common
                 float x = float.Lerp(left, right, GetX(i, inputCount));
 
                 float iv = level.GetInput(i);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3Extensions.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(iv), Triangle.ComputeTriangleList(gT));
             }
 
@@ -98,11 +97,11 @@ namespace AISamples.Common
                 float x = float.Lerp(left, right, GetX(o, outputCount));
 
                 float ov = level.GetOutput(o);
-                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3Extensions.ForwardLH);
+                var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
                 triangleDrawer.AddPrimitives(ColorFromValue(ov), Triangle.ComputeTriangleList(gT));
 
                 float bv = level.GetBias(o);
-                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3Extensions.ForwardLH);
+                var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3.ForwardLH);
                 lineDrawer.AddPrimitives(ColorFromValue(bv), Line3D.CreateFromVertices(gL));
             }
         }
@@ -114,7 +113,7 @@ namespace AISamples.Common
         private static Vector4 ColorFromValue(float v)
         {
             float alpha = Math.Clamp(MathF.Abs(v), 0f, 1f);
-            Vector3 color = v > 0 ? wPositiveColor.RGB() : wNegativeColor.RGB();
+            Vector3 color = v > 0 ? wPositiveColor.RGB : wNegativeColor.RGB;
 
             return new(color, alpha);
         }

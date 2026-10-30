@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Local boundary
     /// </summary>

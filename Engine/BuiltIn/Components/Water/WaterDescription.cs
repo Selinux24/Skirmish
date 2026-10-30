@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Water
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Water description
     /// </summary>

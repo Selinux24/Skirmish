@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using Vortice.Mathematics;
-
-namespace TerrainSamples.SceneNavMeshTest
+﻿namespace TerrainSamples.SceneNavMeshTest
 {
     using Engine.Mathematics;
 

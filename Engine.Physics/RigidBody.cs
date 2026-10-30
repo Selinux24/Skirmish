@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Physics
 {
@@ -94,7 +93,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetInitialState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3Extensions.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -127,7 +126,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3Extensions.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -494,12 +493,12 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public Vector3 GetPointInLocalSpace(Vector3 point)
         {
-            return Vector3.Transform(point, Matrix4x4.Invert(Transform));
+            return Vector3.TransformCoordinate(point, Matrix4x4.Invert(Transform));
         }
         /// <inheritdoc/>
         public Vector3 GetPointInWorldSpace(Vector3 point)
         {
-            return Vector3.Transform(point, Transform);
+            return Vector3.TransformCoordinate(point, Transform);
         }
         /// <inheritdoc/>
         public Vector3 GetDirectionInLocalSpace(Vector3 direction)

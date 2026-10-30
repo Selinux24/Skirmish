@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
@@ -22,7 +21,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly bool IntersectsRay(Ray ray)
         {
-            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3Extensions.Up, Radius))
+            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3.Up, Radius))
             {
                 return true;
             }

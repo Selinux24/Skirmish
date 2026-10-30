@@ -2,7 +2,6 @@
 using Moq;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 
 namespace EngineTests.Common
 {
@@ -84,8 +83,8 @@ namespace EngineTests.Common
 
 
             bbox1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
-            bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3Extensions.Left, (Vector3.One * 0.5f) + Vector3Extensions.Left);
-            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3Extensions.Left * 3), Vector3.One * 0.5f + (Vector3Extensions.Left * 3));
+            bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3.Left, (Vector3.One * 0.5f) + Vector3.Left);
+            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3.Left * 3), Vector3.One * 0.5f + (Vector3.Left * 3));
             bbox4 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
             bbox5 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
 
@@ -138,9 +137,9 @@ namespace EngineTests.Common
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Mesh)).Returns(mesh5);
 
             var proj = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1f, 0.1f, 1f);
-            var view1 = Matrix4x4.LookAtLH(new Vector3(-1, 0, 0), Vector3.Zero, Vector3Extensions.Up);
-            var view2 = Matrix4x4.LookAtLH(new Vector3(+1, 0, 0), Vector3.Zero, Vector3Extensions.Up);
-            var view3 = Matrix4x4.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3Extensions.Up);
+            var view1 = Matrix4x4.LookAtLH(new Vector3(-1, 0, 0), Vector3.Zero, Vector3.Up);
+            var view2 = Matrix4x4.LookAtLH(new Vector3(+1, 0, 0), Vector3.Zero, Vector3.Up);
+            var view3 = Matrix4x4.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3.Up);
 
             bfrustum1 = new BoundingFrustum(view1 * proj);
             bfrustum2 = new BoundingFrustum(view2 * proj);

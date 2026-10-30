@@ -1,10 +1,10 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.PathFinding;
-using System.Numerics;
-
+﻿
 namespace TerrainSamples.SceneRts.AI.Agents
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
     using TerrainSamples.SceneRts.AI.Behaviors;
     using TerrainSamples.SceneRts.Controllers;
 

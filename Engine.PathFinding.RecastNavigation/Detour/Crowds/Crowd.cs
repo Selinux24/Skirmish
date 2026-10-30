@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Provides local steering behaviors for a group of agents. 
     /// </summary>
@@ -459,7 +460,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // FIX: this can snap agents, how to handle that?
                 navquery.FindNearestPoly(
                     ag.NPos, agentPlacementHalfExtents, filters[ag.Settings.QueryFilterTypeIndex],
-                    out agentRef, out Vector3 nearest);
+                    out agentRef, out var nearest);
 
                 agentPos = nearest;
 
@@ -498,7 +499,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     // Current target is not valid, try to reposition.
                     navquery.FindNearestPoly(
                         ag.TargetPos, agentPlacementHalfExtents, filters[ag.Settings.QueryFilterTypeIndex],
-                        out int r, out Vector3 nearest);
+                        out int r, out var nearest);
 
                     ag.TargetRef = r;
                     ag.TargetPos = nearest;

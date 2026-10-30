@@ -1,12 +1,12 @@
-﻿using Engine.Common;
-using Engine.UI;
-using System;
-using System.Numerics;
+﻿using System;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Text area
     /// </summary>
@@ -494,7 +494,7 @@ namespace Engine.BuiltIn.UI
         {
             var size = textDrawer?.TextSize ?? Vector2.Zero;
 
-            return new Rect
+            return new()
             {
                 X = Left,
                 Y = Top,

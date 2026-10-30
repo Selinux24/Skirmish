@@ -1,9 +1,10 @@
-﻿using Engine;
-using System.Linq;
-using System.Numerics;
+﻿using System.Linq;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Patrolling behavior
     /// </summary>

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace AISamples.Common.Items
 {
     using AISamples.Common.Persistence;
@@ -31,7 +30,7 @@ namespace AISamples.Common.Items
 
         public float DistanceToPoint(Vector2 point)
         {
-            return Vector2.Distance(Position.XZ(), point);
+            return Vector2.Distance(Position.XZ, point);
         }
     }
 }

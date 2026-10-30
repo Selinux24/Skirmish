@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sliced find path helper
     /// </summary>

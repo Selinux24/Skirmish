@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -117,7 +116,7 @@ namespace Engine
 
                 var form = Game.Form;
                 Camera = Camera.CreateFree(
-                    Vector3Extensions.ForwardLH * -10f,
+                    Vector3.ForwardLH * -10f,
                     Vector3.Zero,
                     form.RenderWidth,
                     form.RenderHeight);
@@ -636,8 +635,8 @@ namespace Engine
             var nVector = new Vector3(mouseX, mouseY, nDistance);
             var fVector = new Vector3(mouseX, mouseY, fDistance);
 
-            var nPoint = Vector3Extensions.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-            var fPoint = Vector3Extensions.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new PickingRay(nPoint, Vector3.Normalize(fPoint - nPoint), pickingParams);
         }
@@ -694,7 +693,7 @@ namespace Engine
 
             float maxY = bbox.Maximum.Y + 1.0f;
 
-            return new PickingRay(new Vector3(x, maxY, z), Vector3Extensions.Down, pickingParams);
+            return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
         }
 
         /// <summary>

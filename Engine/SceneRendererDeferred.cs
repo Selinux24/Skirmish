@@ -7,7 +7,6 @@ using System.Linq;
 using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Deferred;
 using Engine.Common;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -393,7 +392,7 @@ namespace Engine
         /// <summary>
         /// View port
         /// </summary>
-        public Viewport Viewport { get; set; }
+        public Vortice.Mathematics.Viewport Viewport { get; set; }
 
         /// <summary>
         /// Constructor

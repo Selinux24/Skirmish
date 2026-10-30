@@ -1,10 +1,11 @@
-﻿using AISamples.Common.Persistence;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace AISamples.Common.Primitives
 {
+    using AISamples.Common.Persistence;
+    using Engine.Mathematics;
+
     class Envelope
     {
         private readonly Segment2 skeleton;

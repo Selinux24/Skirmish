@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Common
 {
@@ -181,7 +180,7 @@ namespace Engine.Common
 
                 if (!Transform.IsIdentity)
                 {
-                    p = Vector3.Transform(p, Transform);
+                    p = Vector3.TransformCoordinate(p, Transform);
                 }
 
                 return p;
@@ -214,7 +213,7 @@ namespace Engine.Common
             {
                 var p = VertexData.ApplyWeight(v, boneTransforms);
 
-                if (!Transform.IsIdentity) p = Vector3.Transform(p, Transform);
+                if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
 
                 return p;
             });

@@ -1,8 +1,9 @@
 ﻿using Engine;
-using System.Numerics;
 
 namespace TerrainSamples.SceneRts.AI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Agent weapon
     /// </summary>

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Foliage map
     /// </summary>

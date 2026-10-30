@@ -1,12 +1,13 @@
-﻿using AISamples.Common.Persistence;
-using Engine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common.Primitives
 {
+    using AISamples.Common.Persistence;
+    using Engine;
+    using Engine.Mathematics;
+
     class Polygon
     {
         private readonly Vector2[] vertices;
@@ -190,7 +191,7 @@ namespace AISamples.Common.Primitives
         private static (bool Exists, float Offset, Vector2 Point) GetIntersection(Vector2 s1p1, Vector2 s1p2, Vector2 s2p1, Vector2 s2p2)
         {
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
-            if (!Helper.NearEqual(0f, bottom, 0.01f))
+            if (!Helper.WithinEpsilon(0f, bottom, 0.01f))
             {
                 var tTop = (s2p2.X - s2p1.X) * (s1p1.Y - s2p1.Y) - (s2p2.Y - s2p1.Y) * (s1p1.X - s2p1.X);
                 var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding
 {
@@ -84,7 +83,7 @@ namespace Engine.PathFinding
             }
             else
             {
-                this.normals.AddRange(Helper.CreateArray(positions.Count(), Vector3Extensions.Up));
+                this.normals.AddRange(Helper.CreateArray(positions.Count(), Vector3.Up));
             }
         }
 

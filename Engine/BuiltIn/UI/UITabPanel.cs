@@ -1,13 +1,14 @@
-﻿using Engine.Common;
-using Engine.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Tab Panel
     /// </summary>

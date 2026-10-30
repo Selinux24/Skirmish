@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
@@ -407,7 +405,7 @@ namespace Engine.Common
             indices[4] = 3;
             indices[5] = 1;
 
-            return new GeometryDescriptor()
+            return new()
             {
                 Vertices = vertices,
                 Indices = indices,
@@ -580,8 +578,8 @@ namespace Engine.Common
             //North pole
             vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
 
-            float phiStep = MathHelper.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * MathHelper.Pi / sliceCount;
+            float phiStep = Helper.Pi / (stackCount + 1);
+            float thetaStep = 2.0f * Helper.Pi / sliceCount;
 
             //Compute vertices for each stack ring (do not count the poles as rings).
             for (int st = 1; st < (stackCount + 1); ++st)
@@ -634,8 +632,8 @@ namespace Engine.Common
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 0.0f));
 
-            float phiStep = MathHelper.Pi / stackCount;
-            float thetaStep = 2.0f * MathHelper.Pi / sliceCount;
+            float phiStep = Helper.Pi / stackCount;
+            float thetaStep = 2.0f * Helper.Pi / sliceCount;
 
             for (int st = 1; st <= stackCount - 1; ++st)
             {
@@ -658,8 +656,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / MathHelper.Pi * 2f;
-                    float v = phi / MathHelper.Pi;
+                    float u = theta / Helper.Pi * 2f;
+                    float v = phi / Helper.Pi;
 
                     var texture = new Vector2(u, v);
 
@@ -1054,7 +1052,7 @@ namespace Engine.Common
             if (!trn.IsIdentity)
             {
                 var vertices = geom.Vertices.ToArray();
-                Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+                Vector3.TransformCoordinate(vertices, ref trn, vertices);
                 geom.Vertices = vertices;
             }
 
@@ -1299,7 +1297,7 @@ namespace Engine.Common
             vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
             vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
-            float thetaStep = MathHelper.TwoPi / sliceCount;
+            float thetaStep = Helper.TwoPi / sliceCount;
 
             for (int sl = 0; sl < sliceCount; sl++)
             {
@@ -1511,7 +1509,7 @@ namespace Engine.Common
             ];
 
             Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
-            Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
         }
@@ -1611,7 +1609,7 @@ namespace Engine.Common
             ];
 
             Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
-            Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
         }
@@ -1734,7 +1732,7 @@ namespace Engine.Common
             ];
 
             Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
-            Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
         }
@@ -1907,7 +1905,7 @@ namespace Engine.Common
             ];
 
             Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
-            Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
         }
@@ -2104,7 +2102,7 @@ namespace Engine.Common
             ];
 
             Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
-            Vector3Extensions.TransformCoordinate(vertices, ref trn, vertices);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
         }
@@ -2250,10 +2248,10 @@ namespace Engine.Common
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = j / (float)sliceCount * 2 * MathHelper.Pi;
+                    float theta = j / (float)sliceCount * 2 * Helper.Pi;
                     float st = MathF.Sin(theta), ct = MathF.Cos(theta);
                     var v = new Vector3(radius * st, height * i, radius * ct);
-                    verts.Add(Vector3.Transform(v, trn));
+                    verts.Add(Vector3.TransformCoordinate(v, trn));
                 }
             }
             verts.AddRange([baseCenter, topCenter]);
@@ -2278,7 +2276,7 @@ namespace Engine.Common
                 norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
             }
 
-            norms.AddRange([Vector3Extensions.Down, Vector3Extensions.Up]);
+            norms.AddRange([Vector3.Down, Vector3.Up]);
 
             return (verts, norms.ToArray());
         }
@@ -2560,7 +2558,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount)
         {
-            return CreateCircle(topology, Vector3.Zero, radius, stackCount, Vector3Extensions.Up);
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount, Vector3.Up);
         }
         /// <summary>
         /// Creates a circle
@@ -2584,7 +2582,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
         {
-            return CreateCircle(topology, center, radius, stackCount, Vector3Extensions.Up);
+            return CreateCircle(topology, center, radius, stackCount, Vector3.Up);
         }
         /// <summary>
         /// Creates a circle
@@ -2624,9 +2622,9 @@ namespace Engine.Common
                 float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
 
-                if (up != Vector3Extensions.Up)
+                if (up != Vector3.Up)
                 {
-                    var axis = Vector3.Cross(up, Vector3Extensions.Up);
+                    var axis = Vector3.Cross(up, Vector3.Up);
 
                     v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, Helper.PiOver2));
                 }
@@ -2826,10 +2824,10 @@ namespace Engine.Common
 
             Vector3[] normals =
             [
-                Vector3Extensions.Up,
-                Vector3Extensions.Up,
-                Vector3Extensions.Up,
-                Vector3Extensions.Up,
+                Vector3.Up,
+                Vector3.Up,
+                Vector3.Up,
+                Vector3.Up,
             ];
 
             Vector2[] uvs =
@@ -2878,23 +2876,23 @@ namespace Engine.Common
             var geometry = CreateXZPlane(sizeX, sizeZ, height);
 
             var rotNormal = Vector3.Normalize(normal);
-            if (rotNormal == Vector3Extensions.Up)
+            if (rotNormal == Vector3.Up)
             {
                 //No need to transform
                 return geometry;
             }
 
-            float angle = Vector3Extensions.AngleSigned(Vector3Extensions.Up, rotNormal);
+            float angle = Vector3.AngleSigned(Vector3.Up, rotNormal);
 
             Vector3 axis;
             if (Helper.NearEqual(angle, Helper.Pi))
             {
                 //Parallel negative axis: Vector3.Down
-                axis = Vector3Extensions.Left;
+                axis = Vector3.Left;
             }
             else
             {
-                axis = Vector3.Normalize(Vector3.Cross(Vector3Extensions.Up, rotNormal));
+                axis = Vector3.Normalize(Vector3.Cross(Vector3.Up, rotNormal));
             }
 
             geometry.Transform(Matrix4x4.RotationAxis(axis, angle));
@@ -3050,10 +3048,10 @@ namespace Engine.Common
 
                     normals.AddRange(
                     [
-                        Vector3Extensions.Up,
-                        Vector3Extensions.Up,
-                        Vector3Extensions.Up,
-                        Vector3Extensions.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
                     ]);
 
                     //Interpolate uv values of the node
@@ -3352,13 +3350,13 @@ namespace Engine.Common
             var dir = Vector3.Normalize(vTop - vBase);
 
             //Find angle between dir and up vector
-            float angle = MathF.Acos(Vector3.Dot(dir, Vector3Extensions.Up));
+            float angle = MathF.Acos(Vector3.Dot(dir, Vector3.Up));
 
             Matrix4x4 matrix = Matrix4x4.Translation(-vBase);
             if (!Helper.IsZero(angle))
             {
                 //Find rotation axis
-                var axis = Vector3.Cross(dir, Vector3Extensions.Up);
+                var axis = Vector3.Cross(dir, Vector3.Up);
                 axis = Vector3.Normalize(axis);
 
                 //Create rotation matrix

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.Common.Dialogs
@@ -72,7 +71,7 @@ namespace AISamples.Common.Dialogs
             fileDlgButtonDesc.Width = 150;
             fileDlgButtonDesc.Height = 20;
             fileDlgButtonDesc.ColorReleased = ButtonColor;
-            fileDlgButtonDesc.ColorPressed = new(ButtonColor.RGB() * 1.2f, 1f);
+            fileDlgButtonDesc.ColorPressed = new(ButtonColor.RGB * 1.2f, 1f);
             fileDlgButtonDesc.TextForeColor = ButtonTextColor;
             fileDlgButtonDesc.StartsVisible = false;
 
@@ -118,7 +117,7 @@ namespace AISamples.Common.Dialogs
             var filePageButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
             filePageButtonDesc.ContentPath = resourcesFolder;
             filePageButtonDesc.ColorReleased = ButtonColor;
-            filePageButtonDesc.ColorPressed = new(ButtonColor.RGB() * 1.2f, 1f);
+            filePageButtonDesc.ColorPressed = new(ButtonColor.RGB * 1.2f, 1f);
             filePageButtonDesc.TextForeColor = ButtonTextColor;
             filePageButtonDesc.StartsVisible = false;
 

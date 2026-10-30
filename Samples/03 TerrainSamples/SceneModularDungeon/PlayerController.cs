@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
@@ -180,7 +179,7 @@ namespace TerrainSamples.SceneModularDungeon
         /// <param name="dt">Delta time</param>
         private void StopHeadSway(float dt)
         {
-            if (Vector3Extensions.NearEqual(headPositionDelta, Vector3.Zero, new(0.0001f)))
+            if (Vector3.NearEqual(headPositionDelta, Vector3.Zero, new(0.0001f)))
             {
                 return;
             }

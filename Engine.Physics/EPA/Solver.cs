@@ -22,10 +22,10 @@
 //-----------------------------------------------------------------------------
 
 using System;
-using System.Numerics;
 
 namespace Engine.Physics.EPA
 {
+    using Engine.Mathematics;
     using GJKSimplex = GJK.Simplex;
     using GJKSupportPoint = GJK.SupportPoint;
 

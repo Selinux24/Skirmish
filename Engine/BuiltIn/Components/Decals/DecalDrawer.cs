@@ -1,7 +1,5 @@
 ﻿using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Decals
 {

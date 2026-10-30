@@ -1,9 +1,10 @@
 ﻿using Engine.Tween;
 using System;
-using System.Numerics;
 
 namespace Engine.UI.Tween
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// UI control tween extensions
     /// </summary>

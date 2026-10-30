@@ -1,9 +1,10 @@
 ﻿using Engine.Common;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Decal data buffer
     /// </summary>

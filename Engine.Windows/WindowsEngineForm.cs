@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Numerics;
 using System.Windows.Forms;
 
 namespace Engine.Windows
@@ -63,11 +62,11 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public uint RenderHeight { get; private set; }
         /// <inheritdoc/>
-        public RectangleF RenderRectangle
+        public Rect RenderRectangle
         {
             get
             {
-                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+                return new Rect(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <inheritdoc/>
@@ -453,8 +452,8 @@ namespace Engine.Windows
         {
             Matrix4x4 view = Matrix4x4.LookAtLH(
                 Vector3.Zero,
-                Vector3Extensions.ForwardLH,
-                Vector3Extensions.Up);
+                Vector3.ForwardLH,
+                Vector3.Up);
 
             Matrix4x4 projection = Matrix4x4.OrthoLH(
                 RenderWidth,

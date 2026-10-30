@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -344,7 +343,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = nPoint;
 
             return
-                nPoint.XZ() == position.XZ() &&
+                nPoint.XZ == position.XZ &&
                 Vector3.Distance(nPoint, position) <= distanceThreshold;
         }
 

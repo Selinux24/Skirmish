@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.UI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sentence descriptor
     /// </summary>

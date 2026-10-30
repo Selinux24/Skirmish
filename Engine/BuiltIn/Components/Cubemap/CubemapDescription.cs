@@ -1,7 +1,8 @@
-﻿using Vortice.Mathematics;
-
+﻿
 namespace Engine.BuiltIn.Components.Cubemap
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cube-map description
     /// </summary>

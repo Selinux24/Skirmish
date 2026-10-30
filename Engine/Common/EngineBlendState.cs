@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
     using BlendState = Vortice.Direct3D11.ID3D11BlendState1;
 
     /// <summary>

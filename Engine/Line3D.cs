@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine
 {
@@ -46,8 +45,8 @@ namespace Engine
             }
 
             return new(
-                Vector3.Transform(line.Point1, transform),
-                Vector3.Transform(line.Point2, transform));
+                Vector3.TransformCoordinate(line.Point1, transform),
+                Vector3.TransformCoordinate(line.Point2, transform));
         }
         /// <summary>
         /// Transform line list coordinates
@@ -367,7 +366,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, float edgeSize)
         {
-            return CreateArrow(point, direction, Vector3Extensions.Up, edgeSize);
+            return CreateArrow(point, direction, Vector3.Up, edgeSize);
         }
         public static IEnumerable<Line3D> CreateArrow(Vector3 point, Vector3 direction, Vector3 up, float edgeSize)
         {

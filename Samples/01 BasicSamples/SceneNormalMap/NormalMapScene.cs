@@ -1,15 +1,16 @@
-﻿using BasicSamples.SceneStart;
-using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Common;
-using Engine.Content;
-using System.Drawing;
-using System.Numerics;
+﻿using System.Drawing;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
 {
+    using BasicSamples.SceneStart;
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Normal map test scene
     /// </summary>

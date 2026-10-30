@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Tanks
 {
@@ -159,7 +158,7 @@ namespace Tanks
 
                 float time = gameTime.ElapsedSeconds;
                 DurationSeconds -= time;
-                Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3Extensions.Down * time));
+                Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3.Down * time));
 
                 if (DurationSeconds <= 0)
                 {

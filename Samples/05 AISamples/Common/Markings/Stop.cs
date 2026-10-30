@@ -1,11 +1,12 @@
-﻿using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Format;
-using System.Numerics;
-
+﻿
 namespace AISamples.Common.Markings
 {
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Format;
+    using Engine.Mathematics;
+
     class Stop(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height)
     {
         public override IMarkingFile FromMarking()

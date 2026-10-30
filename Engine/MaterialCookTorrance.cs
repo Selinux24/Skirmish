@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Material description

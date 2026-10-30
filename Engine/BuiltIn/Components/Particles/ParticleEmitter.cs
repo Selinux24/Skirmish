@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -200,7 +198,7 @@ namespace Engine.BuiltIn.Components.Particles
         public ParticleEmitter()
         {
             Position = Vector3.Zero;
-            Velocity = Vector3Extensions.Up;
+            Velocity = Vector3.Up;
             Scale = 1f;
             EmissionRate = 1f;
             Duration = 0f;
@@ -288,7 +286,7 @@ namespace Engine.BuiltIn.Components.Particles
         {
             Vector3 velocity = Velocity * parameters.EmitterVelocitySensitivity;
 
-            float horizontalVelocity = MathHelper.Lerp(
+            float horizontalVelocity = float.Lerp(
                 parameters.HorizontalVelocity.X,
                 parameters.HorizontalVelocity.Y,
                 hVelVariance);
@@ -298,7 +296,7 @@ namespace Engine.BuiltIn.Components.Particles
             velocity.X += horizontalVelocity * MathF.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * MathF.Sin(horizontalAngle);
 
-            velocity.Y += MathHelper.Lerp(
+            velocity.Y += float.Lerp(
                 parameters.VerticalVelocity.X,
                 parameters.VerticalVelocity.Y,
                 vVelVariance);

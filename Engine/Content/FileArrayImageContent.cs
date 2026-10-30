@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Image content array from file
@@ -127,7 +127,7 @@ namespace Engine.Content
         {
             Name = name;
 
-            if (cropRectangle == Rect.Empty)
+            if (cropRectangle == RectI.Empty)
             {
                 return game.Graphics.LoadTextureArray($"{name}_{GetResourceKey()}", paths, mipAutogen, dynamic);
             }

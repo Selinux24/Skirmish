@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Flares
@@ -155,7 +154,7 @@ namespace Engine.BuiltIn.Components.Flares
 
             // Project the light position into 2D screen space.
             var projectedPosition = Game.Graphics.Viewport.Project(
-                -keyLight.Direction * (1f + camera.NearPlaneDistance), //Move position into near and far plane projection bounds
+                (System.Numerics.Vector3)(-keyLight.Direction * (1f + camera.NearPlaneDistance)), //Move position into near and far plane projection bounds
                 camera.Projection,
                 infiniteView,
                 Matrix4x4.Identity);
@@ -196,7 +195,7 @@ namespace Engine.BuiltIn.Components.Flares
                 var flareSpritePos = lightProjectedPosition + lightProjectedDirection * flare.Distance;
 
                 // Set the flare alpha based on the angle with view and light directions.
-                flare.FlareSprite.BaseColor = new Vector4(flare.Color.AsVector3(), 0.5f * transparency);
+                flare.FlareSprite.BaseColor = new Vector4(flare.Color.RGB, 0.5f * transparency);
                 flare.FlareSprite.Scale = flareScale;
                 flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                 flare.FlareSprite.Update(context);

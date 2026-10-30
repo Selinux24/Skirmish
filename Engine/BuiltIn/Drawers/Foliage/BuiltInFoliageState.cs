@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Drawers.Foliage
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Built-in foliage state
     /// </summary>

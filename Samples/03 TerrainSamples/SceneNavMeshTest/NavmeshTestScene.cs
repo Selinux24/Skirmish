@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -72,7 +71,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private UIPanel groupPanel = null;
         private UIPanel debugPanel = null;
 
-        private readonly Vector4 sceneButtonColor = Vector4Extensions.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
+        private readonly Vector4 sceneButtonColor = Vector4.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
         private readonly Vector4 sceneButtonTextColor = Color.WhiteSmoke.RGBA();
         private readonly Vector4 sceneBackgroundColor = Color.CornflowerBlue.RGBA();
 
@@ -88,8 +87,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd;
         private CrowdAgentSettings crowdAgentSettings;
-        private readonly Vector4 groupColor = Vector4Extensions.FromRgba(125, 97, 255, 255);
-        private readonly Vector4 groupTargetColor = Vector4Extensions.FromRgba(125, 197, 255, 255);
+        private readonly Vector4 groupColor = new Vector4(125, 97, 255, 255);
+        private readonly Vector4 groupTargetColor = new Vector4(125, 197, 255, 255);
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -122,9 +121,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
         private Vector3? pathFindingEnd = null;
-        private readonly Vector4 pathFindingColorPath = Vector4Extensions.FromRgba(128, 0, 255, 255);
-        private readonly Vector4 pathFindingColorStart = Vector4Extensions.FromRgba(97, 0, 255, 255);
-        private readonly Vector4 pathFindingColorEnd = Vector4Extensions.FromRgba(0, 97, 255, 255);
+        private readonly Vector4 pathFindingColorPath = new Vector4(128, 0, 255, 255);
+        private readonly Vector4 pathFindingColorStart = new Vector4(97, 0, 255, 255);
+        private readonly Vector4 pathFindingColorEnd = new Vector4(0, 97, 255, 255);
         private string addConnectionStartMessage = null;
         private Vector3? addConnectionStart = null;
         private readonly Vector4 connectionColor = Color.LightPink.RGBA();
@@ -247,8 +246,8 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             btnDesc.ContentPath = resourcesUIControls;
-            btnDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
-            btnDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            btnDesc.ColorReleased = new(sceneButtonColor.RGB, 0.8f);
+            btnDesc.ColorPressed = new(sceneButtonColor.RGB * 1.2f, 0.9f);
             btnDesc.TextForeColor = Color.Gold.RGBA();
             btnDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -1697,12 +1696,12 @@ namespace TerrainSamples.SceneNavMeshTest
             var gl = Line3D.CreateArc(con.From, con.To, 0.1f, 32);
             var glStart = Line3D.CreateCircle(con.From, con.Radius, 12);
             var glEnd = Line3D.CreateCircle(con.To, con.Radius, 12);
-            var glArrow = Line3D.CreateArrow(con.To, -dir, Vector3Extensions.Up, 0.25f);
+            var glArrow = Line3D.CreateArrow(con.To, -dir, Vector3.Up, 0.25f);
             lineDrawer.AddPrimitives(color, [.. gl, .. glStart, .. glEnd, .. glArrow]);
 
             if (con.BiDirectional)
             {
-                var glArrowB = Line3D.CreateArrow(con.From, dir, Vector3Extensions.Up, 0.25f);
+                var glArrowB = Line3D.CreateArrow(con.From, dir, Vector3.Up, 0.25f);
                 lineDrawer.AddPrimitives(color, [.. glArrowB]);
             }
         }
@@ -1725,7 +1724,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 foreach (var division in dpoly.Divisions.Where(d => d.SourcePoly.Length >= 3))
                 {
                     h += delta;
-                    var trn = Vector3Extensions.Up * h;
+                    var trn = Vector3.Up * h;
 
                     var sourcePoly = division.SourcePoly.Select(sp => sp + trn).Reverse();
                     DrawPolygon(sourcePoly, srcColor);

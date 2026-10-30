@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Represents an agent managed by a Crowd object.
     /// </summary>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.Physics.Colliders
 {
@@ -60,8 +59,8 @@ namespace Engine.Physics.Colliders
             }
 
             var trn = RigidBody.Transform;
-            bse = Vector3.Transform(bse, trn);
-            cap = Vector3.Transform(cap, trn);
+            bse = Vector3.TransformCoordinate(bse, trn);
+            cap = Vector3.TransformCoordinate(cap, trn);
 
             return [bse, cap];
         }

@@ -1,10 +1,10 @@
-﻿using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
     using Engine.Common;
     using Engine.Content;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Heightmap description
@@ -83,7 +83,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Transform matrix
         /// </summary>
-        public System.Numerics.Matrix4x4 Transform { get; set; } = System.Numerics.Matrix4x4.Identity;
+        public Engine.Mathematics.Matrix4x4 Transform { get; set; } = Engine.Mathematics.Matrix4x4.Identity;
 
         /// <summary>
         /// Constructor

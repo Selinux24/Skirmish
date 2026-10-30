@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Node
     /// </summary>

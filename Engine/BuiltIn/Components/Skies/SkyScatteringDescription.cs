@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Skies
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sky scattering description
     /// </summary>

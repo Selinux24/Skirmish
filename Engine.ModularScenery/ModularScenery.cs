@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Modular
@@ -369,7 +368,7 @@ namespace Engine.Modular
 
                 var emitter = new ParticleEmitter(obj.ParticleLight)
                 {
-                    Position = Vector3.Transform(lightPosition, trn),
+                    Position = Vector3.TransformCoordinate(lightPosition, trn),
                     Instance = instance,
                 };
 

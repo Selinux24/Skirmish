@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Grid pool item
     /// </summary>

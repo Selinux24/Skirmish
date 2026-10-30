@@ -1,7 +1,6 @@
 ﻿using Logger;
 using System;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneGardener
@@ -173,7 +172,7 @@ TAB - Change control between Camera and Agent
         }
         private async Task InitializeDirt()
         {
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceString + resourceDirtDiffuseString;
@@ -204,7 +203,7 @@ TAB - Change control between Camera and Agent
         }
         private async Task InitializeFoliageMap()
         {
-            var geo = GeometryUtil.CreatePlane(l * dirtInstances, h + 0.1f, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l * dirtInstances, h + 0.1f, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceFoliageString + resourceFoliageMap;
@@ -497,11 +496,11 @@ TAB - Change control between Camera and Agent
 
             if (Game.Input.ShiftPressed)
             {
-                pov.Manipulator.SetPosition(Vector3Extensions.Sum(r.PickingResult.Position, povHeight * 0.5f));
+                pov.Manipulator.SetPosition(r.PickingResult.Position + (povHeight * 0.5f));
             }
             else
             {
-                pov.Manipulator.LookAt(Vector3Extensions.Sum(r.PickingResult.Position, povHeight * 0.5f));
+                pov.Manipulator.LookAt(r.PickingResult.Position + (povHeight * 0.5f));
             }
         }
         private void UpdateHelp()
@@ -523,7 +522,7 @@ TAB - Change control between Camera and Agent
             var interest = position - pov.Manipulator.Forward;
 
             var proj = Engine.Mathematics.Matrix4x4.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
-            var view = Engine.Mathematics.Matrix4x4.LookAtLH(position, interest, Vector3Extensions.Up);
+            var view = Engine.Mathematics.Matrix4x4.LookAtLH(position, interest, Vector3.Up);
             var frustum = new BoundingFrustum(view * proj);
 
             grass.PointOfView = position;

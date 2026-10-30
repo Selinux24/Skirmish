@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
 
 namespace EngineTests.Common
 {
@@ -55,9 +54,9 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var ray = new Ray(Vector3.Zero, Vector3Extensions.ForwardLH);
-            var rayReverse = new Ray(Vector3Extensions.ForwardLH * 4, Vector3Extensions.BackwardLH);
-            var rayNoContact = new Ray(Vector3.Zero, Vector3Extensions.BackwardLH);
+            var ray = new Ray(Vector3.Zero, Vector3.ForwardLH);
+            var rayReverse = new Ray(Vector3.ForwardLH * 4, Vector3.BackwardLH);
+            var rayNoContact = new Ray(Vector3.Zero, Vector3.BackwardLH);
 
             rayDefault = new PickingRay(ray, PickingHullTypes.Default);
             rayDefaultReverse = new PickingRay(rayReverse, PickingHullTypes.Default);

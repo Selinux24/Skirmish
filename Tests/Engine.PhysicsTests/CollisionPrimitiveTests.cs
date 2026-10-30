@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -25,12 +24,12 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CollisionPlaneTest()
         {
-            var normal = Vector3Extensions.Up;
+            var normal = Vector3.Up;
             float distance = 1f;
             var sourcePlane = new Plane(normal, distance);
 
             var plane = new HalfSpaceCollider(sourcePlane);
-            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
+            Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -38,7 +37,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
             plane = new HalfSpaceCollider(normal, distance);
-            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
+            Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -47,7 +46,7 @@ namespace Engine.PhysicsTests
 
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             plane.Attach(rbody);
-            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
+            Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -58,7 +57,7 @@ namespace Engine.PhysicsTests
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
 
             plane.Attach(rbody);
-            Assert.AreEqual(plane.Normal, normal, Vector3Extensions.Comparer);
+            Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
@@ -69,20 +68,20 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CollisionBoxTest()
         {
-            var extents = Vector3Extensions.Up;
+            var extents = Vector3.Up;
             var sourceBox = new BoundingBox(-extents, extents);
             var sphere = BoundingSphere.FromPoints([.. sourceBox.GetVertices()]);
             var obb = new OrientedBoundingBox([.. sourceBox.GetVertices()]);
 
             var box = new BoxCollider(extents);
-            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
+            Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             box.Attach(rbody);
-            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
+            Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
@@ -93,7 +92,7 @@ namespace Engine.PhysicsTests
             sphere = BoundingSphere.Transform(sphere, trn);
             obb = OrientedBoundingBox.Transform(obb, trn);
             box.Attach(rbody);
-            Assert.AreEqual(box.Extents, extents, Vector3Extensions.Comparer);
+            Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);

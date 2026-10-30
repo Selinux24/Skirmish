@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Group interface
     /// </summary>

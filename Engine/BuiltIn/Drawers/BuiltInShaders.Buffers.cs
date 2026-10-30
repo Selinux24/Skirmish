@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers
@@ -71,7 +70,7 @@ namespace Engine.BuiltIn.Drawers
                     ViewProjection = Matrix4x4.Transpose(context.Camera.ViewProjection),
                     OrthoViewProjection = Matrix4x4.Transpose(context.Form.GetOrthoProjectionMatrix()),
                     EyePosition = context.Camera.Position,
-                    ScreenResolution = context.Form.RenderRectangle.BottomRight,
+                    ScreenResolution = (Vector2)context.Form.RenderRectangle.BottomRight,
                     TotalTime = context.GameTime.TotalSeconds,
                     ElapsedTime = context.GameTime.ElapsedSeconds,
                     LevelOfDetail = context.LevelOfDetail,

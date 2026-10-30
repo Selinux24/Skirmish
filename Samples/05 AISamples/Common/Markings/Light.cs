@@ -1,14 +1,15 @@
-﻿using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common.Markings
 {
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     class Light(Vector2 position, Vector2 direction, float width, float height) : Marking(position, direction, width, height, true)
     {
         public LightState LightState { get; set; } = LightState.None;

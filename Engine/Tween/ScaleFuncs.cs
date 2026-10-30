@@ -1,5 +1,4 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.Tween
 {
@@ -28,8 +27,8 @@ namespace Engine.Tween
     /// </remarks>
     public static class ScaleFuncs
     {
-        private const float Pi = MathHelper.Pi;
-        private const float HalfPi = Pi / 2f;
+        private const float Pi = Helper.Pi;
+        private const float PiOver2 = Helper.PiOver2;
 
         /// <summary>
         /// A linear progress scale function.
@@ -139,15 +138,15 @@ namespace Engine.Tween
 
         private static float SineEaseInImpl(float progress)
         {
-            return MathF.Sin(progress * HalfPi - HalfPi) + 1f;
+            return MathF.Sin(progress * PiOver2 - PiOver2) + 1f;
         }
         private static float SineEaseOutImpl(float progress)
         {
-            return MathF.Sin(progress * HalfPi);
+            return MathF.Sin(progress * PiOver2);
         }
         private static float SineEaseInOutImpl(float progress)
         {
-            return (MathF.Sin(progress * Pi - HalfPi) + 1f) / 2f;
+            return (MathF.Sin(progress * Pi - PiOver2) + 1f) / 2f;
         }
     }
 }

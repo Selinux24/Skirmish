@@ -1,9 +1,10 @@
-﻿using Engine.Common;
-using Engine.Content;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Geometry
 {
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Geometry drawer description
     /// </summary>

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph debug information helper
     /// </summary>

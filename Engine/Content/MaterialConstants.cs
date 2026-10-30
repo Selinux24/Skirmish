@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Material constant values
     /// </summary>

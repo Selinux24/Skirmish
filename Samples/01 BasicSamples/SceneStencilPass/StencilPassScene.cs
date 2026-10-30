@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStencilPass
@@ -83,7 +82,7 @@ namespace BasicSamples.SceneStencilPass
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -146,7 +145,7 @@ namespace BasicSamples.SceneStencilPass
 
             Lights.Add(new SceneLightPoint("Point1", false, Color.White.RGB(), Color.White.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            Lights.Add(new SceneLightSpot("Spot1", false, Color.White.RGB(), Color.White.RGB(), true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3Extensions.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color.White.RGB(), Color.White.RGB(), true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
         }
 
         public override void Update(IGameTime gameTime)

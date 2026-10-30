@@ -1,10 +1,11 @@
-﻿using Engine.UI;
-using Logger;
+﻿using Logger;
 using System;
-using System.Numerics;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// UIConsole description
     /// </summary>

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Common
 {
     using Engine.Animation;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Geometry helper

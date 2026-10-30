@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -54,7 +53,7 @@ namespace Engine.PhysicsTests
         {
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3Extensions.Up * 0.99f));
+            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3.Up * 0.99f));
 
             var p1 = new Vector3(0f, 0f, 100f);
             var p2 = new Vector3(100f, 0f, -100f);
@@ -76,8 +75,8 @@ namespace Engine.PhysicsTests
             var dataPln = new ContactResolver();
             var dataTri = new ContactResolver();
 
-            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3Extensions.Down));
-            var plane = FromPlane(new Plane(Vector3Extensions.Up, 0), Matrix4x4.Identity);
+            var box = FromAABB(Vector3.One, Matrix4x4.Translation(Vector3.Down));
+            var plane = FromPlane(new Plane(Vector3.Up, 0), Matrix4x4.Identity);
 
             var p1 = new Vector3(0f, -0.1f, 0f);
             var p2 = new Vector3(5f, 5f, 0f);
@@ -106,11 +105,11 @@ namespace Engine.PhysicsTests
 
                 var expectedPenetration = expectedContact.Penetration;
                 var expectedPosition = expectedContact.Position;
-                var expectedNormal = Vector3Extensions.Up;
+                var expectedNormal = Vector3.Up;
 
                 Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
-                Assert.IsTrue(Vector3Extensions.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
-                Assert.IsTrue(Vector3Extensions.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
+                Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
+                Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
             }
         }
     }

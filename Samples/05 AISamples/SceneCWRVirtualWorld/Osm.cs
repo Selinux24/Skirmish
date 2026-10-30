@@ -5,11 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Open street map data struct
     /// </summary>

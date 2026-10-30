@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
@@ -76,7 +75,7 @@ namespace Engine.PathFinding.AStar
                 {
                     GridCollisionInfo[] info;
 
-                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3Extensions.Down);
+                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
                     bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
                     if (intersects)

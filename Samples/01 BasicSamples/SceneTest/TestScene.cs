@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace BasicSamples.SceneTest
 {
@@ -305,18 +303,16 @@ namespace BasicSamples.SceneTest
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
-
-                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
-
-                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
                 ]
             });
 
@@ -373,7 +369,7 @@ namespace BasicSamples.SceneTest
             float l = spaceSize * 2;
             float h = baseHeight;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceFloor + "d_road_asphalt_stripes_diffuse.dds";
@@ -819,9 +815,9 @@ namespace BasicSamples.SceneTest
 
         private void PlantTrees()
         {
-            Vector3 delta = Vector3Extensions.Down;
+            Vector3 delta = Vector3.Down;
 
-            var topDownRay = new PickingRay(new Ray(new Vector3(350, 1000, 350), Vector3Extensions.Down));
+            var topDownRay = new PickingRay(new Ray(new Vector3(350, 1000, 350), Vector3.Down));
 
             scenery.PickFirst(topDownRay, out var treePos);
 
@@ -837,7 +833,7 @@ namespace BasicSamples.SceneTest
                 float s = Helper.RandomGenerator.NextSingle(1.8f, 3.5f);
 
                 topDownRay.Start = new Vector3(px, 1000, pz);
-                topDownRay.Direction = Vector3Extensions.Down;
+                topDownRay.Direction = Vector3.Down;
                 scenery.PickFirst(topDownRay, out var treeIPos);
 
                 t.SetPosition(treeIPos.Position + delta);
@@ -880,7 +876,7 @@ namespace BasicSamples.SceneTest
             if (Camera.Position.Y < waterHeight)
             {
                 Lights.HemisphericLigth.AmbientUp = Color.Black.RGB();
-                Lights.HemisphericLigth.AmbientDown = waterColor.AsVector3() * 1.5f;
+                Lights.HemisphericLigth.AmbientDown = waterColor.RGB * 1.5f;
 
                 float depth = waterHeight - Camera.Position.Y;
                 Lights.EnableFog(1, MathF.Max((1f - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
     using Engine.UI;
 
     /// <summary>

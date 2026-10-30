@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Cubic image content from file

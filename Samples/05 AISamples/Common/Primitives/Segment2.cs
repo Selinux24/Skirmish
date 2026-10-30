@@ -1,9 +1,10 @@
-﻿using AISamples.Common.Persistence;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace AISamples.Common.Primitives
 {
+    using AISamples.Common.Persistence;
+    using Engine.Mathematics;
+
     struct Segment2(Vector2 p1, Vector2 p2, bool oneWay = false) : IEquatable<Segment2>
     {
         public Vector2 P1 { get; set; } = p1;

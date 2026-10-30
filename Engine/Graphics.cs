@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Text;
 using Vortice.Direct3D;
 using Vortice.DXGI;
-using Vortice.Mathematics;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Helpers;
+    using Engine.Mathematics;
     using Vortice.Direct3D11;
     using Vortice.Direct3D11.Debug;
 
@@ -79,7 +78,7 @@ namespace Engine
         /// <summary>
         /// Screen viewport
         /// </summary>
-        public Viewport Viewport { get; private set; }
+        public Vortice.Mathematics.Viewport Viewport { get; private set; }
         /// <summary>
         /// Gets if the device was created with multi-sampling active
         /// </summary>
@@ -427,7 +426,7 @@ namespace Engine
 
             #region Viewport
 
-            Viewport = new Viewport()
+            Viewport = new()
             {
                 X = 0,
                 Y = 0,

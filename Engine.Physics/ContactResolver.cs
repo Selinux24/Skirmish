@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Contact resolver
     /// </summary>

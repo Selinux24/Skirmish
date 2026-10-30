@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
@@ -92,7 +91,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
             bool leftClicked = scene.Game.Input.MouseButtonJustPressed(MouseButtons.Left);
             bool rightClicked = scene.Game.Input.MouseButtonJustPressed(MouseButtons.Right);
-            var p = hit.PickingResult.Position.XZ();
+            var p = hit.PickingResult.Position.XZ;
 
             if (leftClicked)
             {

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.UI
 {
     using Engine.Mathematics;

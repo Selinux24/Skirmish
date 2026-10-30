@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding
 {

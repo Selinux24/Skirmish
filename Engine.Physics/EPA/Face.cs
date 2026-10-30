@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Physics.EPA
 {
+    using Engine.Mathematics;
     using GJKSupportPoint = GJK.SupportPoint;
 
     /// <summary>

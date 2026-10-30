@@ -1,9 +1,10 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Particles;
-using System.Numerics;
-
+﻿
 namespace TerrainSamples.SceneRts.Emitters
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Linear emitter
     /// </summary>

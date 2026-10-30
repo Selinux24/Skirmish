@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneWater
@@ -90,18 +89,16 @@ namespace BasicSamples.SceneWater
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 4.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 2.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 1.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
-
-                    new ( 0.1f, 1.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare3String),
-                    new ( 0.3f, 1.7f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 1.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 2.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
-
-                    new ( 1.2f, 3.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 4.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 6.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
+                    new (-0.7f, 4.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 2.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 1.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
+                    new ( 0.1f, 1.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare3String),
+                    new ( 0.3f, 1.7f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 1.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 2.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 3.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 4.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 6.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
                 ]
             };
 

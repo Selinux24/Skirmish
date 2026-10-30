@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph connection interface
     /// </summary>

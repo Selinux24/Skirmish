@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneCrowds
@@ -263,7 +262,7 @@ namespace TerrainSamples.SceneCrowds
 
             cameraPosition /= modelCount;
             Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-            Camera.LookTo(cameraPosition + Vector3Extensions.Up);
+            Camera.LookTo(cameraPosition + Vector3.Up);
             Camera.NearPlaneDistance = near;
             Camera.FarPlaneDistance = far;
 
@@ -331,7 +330,7 @@ namespace TerrainSamples.SceneCrowds
             {
                 if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
                 {
-                    trees[i].Manipulator.SetTransform(pos.Position, Vector3Extensions.Up, i, 0.5f);
+                    trees[i].Manipulator.SetTransform(pos.Position, Vector3.Up, i, 0.5f);
                 }
             }
         }
@@ -486,7 +485,7 @@ namespace TerrainSamples.SceneCrowds
                 var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3Extensions.NearEqual(aPos, pPos, new Vector3(0.001f)))
+                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
                 {
                     continue;
                 }

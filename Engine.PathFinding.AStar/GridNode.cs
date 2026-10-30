@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.AStar
 {
@@ -183,7 +182,7 @@ namespace Engine.PathFinding.AStar
 
             var c = (p0 + p1 + p2 + p3) / 4f;
 
-            float v = Vector3Extensions.Angle(Vector3Extensions.Up, va);
+            float v = Vector3.Angle(Vector3.Up, va);
 
             return new GridNode(ne, nw, sw, se, c, v);
         }

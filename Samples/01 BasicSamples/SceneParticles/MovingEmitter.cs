@@ -1,10 +1,11 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Particles;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace BasicSamples.SceneParticles
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Particles;
+    using Engine.Mathematics;
+
     public class MovingEmitter : ParticleEmitter
     {
         public float AngularVelocity { get; set; }

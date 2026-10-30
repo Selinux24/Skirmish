@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneRts.AI
@@ -409,7 +408,7 @@ namespace TerrainSamples.SceneRts.AI
             var s = p1 - p2;
             if (s.Length() < Stats.SightDistance)
             {
-                float a = Vector3Extensions.Angle(s, Manipulator.Forward);
+                float a = Vector3.Angle(s, Manipulator.Forward);
                 if (a < Stats.SightAngle)
                 {
                     return true;

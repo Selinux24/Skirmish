@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Indexed polygon
     /// </summary>
@@ -92,7 +93,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="ea">Resulting first merge value</param>
         /// <param name="eb">Resulting second merge value</param>
         /// <returns>Returns the best merge value</returns>
-        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, Int3[] verts, out int ea, out int eb)
+        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, Vector3I[] verts, out int ea, out int eb)
         {
             if (!PolygonsCanMerge(pa, pb, out ea, out eb))
             {
@@ -203,7 +204,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pareas">Area list</param>
         /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns the resulting merged polygon</returns>
-        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, int[] pareas, int[] pregs, Int3[] verts)
+        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) MergePolygons(IndexedPolygon[] polys, int[] pareas, int[] pregs, Vector3I[] verts)
         {
             if ((polys?.Length ?? 0) == 0)
             {
@@ -262,7 +263,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="polys">Polygon list</param>
         /// <param name="verts">Polygon vertex list</param>
         /// <returns>Returns the resulting merged polygon</returns>
-        public static IndexedPolygon[] MergePolygons(IndexedPolygon[] polys, Int3[] verts)
+        public static IndexedPolygon[] MergePolygons(IndexedPolygon[] polys, Vector3I[] verts)
         {
             var (mergedPolys, _, _) = MergePolygons(polys, null, null, verts);
 
@@ -276,7 +277,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="hreg">Region id list</param>
         /// <param name="harea">Area list</param>
         /// <returns>Returns the indexed polygons, regions and areas</returns>
-        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Int3[] tris, int[] harea, int[] hreg)
+        public static (IndexedPolygon[] Polys, int[] PAreas, int[] PRegs) CreateInitialPolygons(int[] indices, Vector3I[] tris, int[] harea, int[] hreg)
         {
             if ((tris?.Length ?? 0) == 0)
             {
@@ -337,7 +338,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tris">Triangle list</param>
         /// <param name="indices">Triangle indices</param>
         /// <returns>Returns the indexed polygon list and the number o polygons in the list</returns>
-        public static IndexedPolygon[] CreateInitialPolygons(int[] indices, Int3[] tris)
+        public static IndexedPolygon[] CreateInitialPolygons(int[] indices, Vector3I[] tris)
         {
             var (polys, _, _) = CreateInitialPolygons(indices, tris, null, null);
 
@@ -347,7 +348,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets whether the specified indexed triangle contains different indexes
         /// </summary>
         /// <param name="t">Indexed triangle</param>
-        private static bool ValidateIndex(Int3 t)
+        private static bool ValidateIndex(Vector3I t)
         {
             if (t.X == t.Y || t.X == t.Z || t.Y == t.Z)
             {
@@ -361,7 +362,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="hreg">Regions</param>
         /// <param name="t">Indexed triangle</param>
-        private static bool HastMultipleRegions(int[] hreg, Int3 t)
+        private static bool HastMultipleRegions(int[] hreg, Vector3I t)
         {
             return hreg[t.X] != hreg[t.Y] || hreg[t.Y] != hreg[t.Z];
         }
@@ -429,7 +430,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point a</param>
         /// <param name="b">Point b</param>
         /// <param name="c">Point c</param>
-        private static bool ULeft2D(Int3 a, Int3 b, Int3 c)
+        private static bool ULeft2D(Vector3I a, Vector3I b, Vector3I c)
         {
             return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z) < 0;
         }
@@ -497,7 +498,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nPolys">Number of polygons in the list</param>
         /// <param name="verts">Vertices</param>
         /// <returns>Returns the best merge value, and the polygon and edge indexes</returns>
-        public static (int BestMergeValue, int BestPa, int BestPb, int BestEa, int BestEb) GetBestMergePolygon(IndexedPolygon[] polys, int nPolys, Int3[] verts)
+        public static (int BestMergeValue, int BestPa, int BestPb, int BestEa, int BestEb) GetBestMergePolygon(IndexedPolygon[] polys, int nPolys, Vector3I[] verts)
         {
             // Find best polygons to merge.
             int bestMergeVal = 0;
@@ -927,7 +928,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the polygon center
         /// </summary>
         /// <param name="verts">Polygon vertices</param>
-        public (int X, int Y) GetCenter2D(Int3[] verts)
+        public (int X, int Y) GetCenter2D(Vector3I[] verts)
         {
             // Find center of the polygon
             int pcx = 0;

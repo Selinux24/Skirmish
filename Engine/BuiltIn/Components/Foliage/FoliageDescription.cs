@@ -1,9 +1,8 @@
-﻿using Engine.BuiltIn.Drawers.Foliage;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
+    using Engine.BuiltIn.Drawers.Foliage;
     using Engine.Mathematics;
 
     /// <summary>

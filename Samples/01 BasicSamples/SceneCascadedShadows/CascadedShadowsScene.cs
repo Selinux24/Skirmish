@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneCascadedShadows
@@ -139,16 +138,16 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUILevelsControl()
         {
-            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
-            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
-            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(Vector4Extensions.FromRgba(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
+            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(new Vector4(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
+            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(new Vector4(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
+            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(new Vector4(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
 
-            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(Vector4Extensions.FromRgba(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(new Vector4(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect1.EventsEnabled = true;
             spSelect1.MouseJustPressed += PbJustPressed;
             spSelect1.MouseJustReleased += PbJustReleased;
 
-            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(Vector4Extensions.FromRgba(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(new Vector4(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect2.EventsEnabled = true;
             spSelect2.MouseJustPressed += PbJustPressed;
             spSelect2.MouseJustReleased += PbJustReleased;
@@ -223,7 +222,7 @@ namespace BasicSamples.SceneCascadedShadows
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -271,16 +270,16 @@ namespace BasicSamples.SceneCascadedShadows
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
-                    new ( 0.0f, 5.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare4String),
-                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
-                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
+                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
+                    new ( 0.0f, 5.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare4String),
+                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }

@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Drawers.Particles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle state for particle effects
     /// </summary>

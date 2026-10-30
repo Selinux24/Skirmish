@@ -1,8 +1,9 @@
-﻿using Engine.UI;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Slider description
     /// </summary>

@@ -1,13 +1,14 @@
-using Engine;
-using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Numerics;
 
 namespace EngineTests.UI
 {
+    using Engine;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
     [OSCondition(OperatingSystems.Windows)]

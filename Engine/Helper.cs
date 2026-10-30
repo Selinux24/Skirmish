@@ -3,11 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -25,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Zero tolerance value
         /// </summary>
-        public const float ZeroTolerance = MathHelper.ZeroTolerance;
+        public const float ZeroTolerance = Vortice.Mathematics.MathHelper.ZeroTolerance;
         /// <summary>
         /// Zero tolerance vector
         /// </summary>
@@ -39,10 +37,10 @@ namespace Engine
         /// </summary>
         public static readonly Vector4 ZeroToleranceVector4 = new(ZeroTolerance);
 
-        public const float Pi = MathHelper.Pi;
-        public const float TwoPi = MathHelper.TwoPi;
-        public const float PiOver2 = MathHelper.PiOver2;
-        public const float PiOver4 = MathHelper.PiOver4;
+        public const float Pi = Vortice.Mathematics.MathHelper.Pi;
+        public const float TwoPi = Vortice.Mathematics.MathHelper.TwoPi;
+        public const float PiOver2 = Vortice.Mathematics.MathHelper.PiOver2;
+        public const float PiOver4 = Vortice.Mathematics.MathHelper.PiOver4;
 
         #region Maths
 
@@ -54,9 +52,51 @@ namespace Engine
         {
             return IsZero(a - 1.0f);
         }
-        public static bool NearEqual(float a, float b, float epsilon = ZeroTolerance)
+        /// <summary>
+        /// Checks if a and b are almost equals, taking into account the magnitude of floating point numbers (unlike <see cref="WithinEpsilon"/> method). See Remarks.
+        /// See remarks.
+        /// </summary>
+        /// <param name="a">The left value to compare.</param>
+        /// <param name="b">The right value to compare.</param>
+        /// <returns><c>true</c> if a almost equal to b, <c>false</c> otherwise</returns>
+        /// <remarks>
+        /// The code is using the technique described by Bruce Dawson in 
+        /// <a href="http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/">Comparing Floating point numbers 2012 edition</a>. 
+        /// </remarks>
+        public unsafe static bool NearEqual(float a, float b)
         {
-            return MathHelper.WithinEpsilon(a, b, epsilon);
+            // Check if the numbers are really close -- needed
+            // when comparing numbers near zero.
+            if (IsZero(a - b))
+                return true;
+
+            // Original from Bruce Dawson: http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+            int aInt = *(int*)&a;
+            int bInt = *(int*)&b;
+
+            // Different signs means they do not match.
+            if ((aInt < 0) != (bInt < 0))
+                return false;
+
+            // Find the difference in ULPs.
+            int ulp = Math.Abs(aInt - bInt);
+
+            // Choose of maxUlp = 4
+            // according to http://code.google.com/p/googletest/source/browse/trunk/include/gtest/internal/gtest-internal.h
+            const int maxUlp = 4;
+            return (ulp <= maxUlp);
+        }
+        /// <summary>
+        /// Checks if a - b are almost equals within a float epsilon.
+        /// </summary>
+        /// <param name="a">The left value to compare.</param>
+        /// <param name="b">The right value to compare.</param>
+        /// <param name="epsilon">Epsilon value</param>
+        /// <returns><c>true</c> if a almost equal to b within a float epsilon, <c>false</c> otherwise</returns>
+        public static bool WithinEpsilon(float a, float b, float epsilon)
+        {
+            float num = a - b;
+            return ((-epsilon <= num) && (num <= epsilon));
         }
 
         public static float Mod(float value, float mod)
@@ -68,11 +108,11 @@ namespace Engine
 
         public static float DegreesToRadians(float d)
         {
-            return MathHelper.ToRadians(d);
+            return Vortice.Mathematics.MathHelper.ToRadians(d);
         }
         public static float RadiansToDegrees(float d)
         {
-            return MathHelper.ToDegrees(d);
+            return Vortice.Mathematics.MathHelper.ToDegrees(d);
         }
 
         /// <summary>
@@ -825,12 +865,12 @@ namespace Engine
         /// <param name="wvp">World * View * Projection</param>
         /// <param name="isInsideScreen">Returns true if the resulting point is inside the screen</param>
         /// <returns>Returns the resulting screen coordinates</returns>
-        public static Vector2 UnprojectToScreen(Vector3 point, Viewport viewPort, Matrix4x4 wvp, out bool isInsideScreen)
+        public static Vector2 UnprojectToScreen(Vector3 point, Vortice.Mathematics.Viewport viewPort, Matrix4x4 wvp, out bool isInsideScreen)
         {
             isInsideScreen = true;
 
             // Go to projection space
-            var projected = Vector3Extensions.Transform(point, wvp);
+            var projected = Vector3.Transform(point, wvp);
 
             // Clip
             // 
@@ -877,34 +917,34 @@ namespace Engine
             projected.Y = ((float)(((1.0 - projected.Y) * 0.5) * viewPort.Height)) + viewPort.Y;
             projected.Z = (projected.Z * (viewPort.MaxDepth - viewPort.MinDepth)) + viewPort.MinDepth;
 
-            return projected.XY();
+            return projected.XY;
         }
 
         #endregion
 
         #region Rect & RectI
 
-        public static Vector2Int TopLeft(this RectI rectangle)
+        public static Vector2I TopLeft(this RectI rectangle)
         {
-            return new Vector2Int(rectangle.Top, rectangle.Left);
+            return new Vector2I(rectangle.Top, rectangle.Left);
         }
-        public static Vector2Int TopRight(this RectI rectangle)
+        public static Vector2I TopRight(this RectI rectangle)
         {
-            return new Vector2Int(rectangle.Top, rectangle.Right);
+            return new Vector2I(rectangle.Top, rectangle.Right);
         }
-        public static Vector2Int BottomLeft(this RectI rectangle)
+        public static Vector2I BottomLeft(this RectI rectangle)
         {
-            return new Vector2Int(rectangle.Bottom, rectangle.Left);
+            return new Vector2I(rectangle.Bottom, rectangle.Left);
         }
-        public static Vector2Int BottomRight(this RectI rectangle)
+        public static Vector2I BottomRight(this RectI rectangle)
         {
-            return new Vector2Int(rectangle.Bottom, rectangle.Right);
+            return new Vector2I(rectangle.Bottom, rectangle.Right);
         }
-        public static Vector2Int Center(this RectI rectangle)
+        public static Vector2I Center(this RectI rectangle)
         {
-            return new Vector2Int(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
+            return new Vector2I(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
         }
-        public static Vector2Int[] GetVertices(this RectI rectangle)
+        public static Vector2I[] GetVertices(this RectI rectangle)
         {
             return
             [
@@ -934,7 +974,7 @@ namespace Engine
             float left = rectangle.Left - (dWidth * 0.5f);
             float top = rectangle.Top - (dHeight * 0.5f);
 
-            return new Rect(left, top, width, height);
+            return new(left, top, width, height);
         }
 
         #endregion

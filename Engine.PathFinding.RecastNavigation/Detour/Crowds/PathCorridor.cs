@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Path corridor
     /// </summary>

@@ -1,8 +1,9 @@
 ﻿using Engine;
-using System.Numerics;
 
 namespace IntermediateSamples.SceneTransforms
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Falling tree controller
     /// </summary>

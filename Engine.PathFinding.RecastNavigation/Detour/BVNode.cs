@@ -1,8 +1,9 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Bounding volume node.
     /// </summary>
@@ -12,11 +13,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 BMin { get; set; }
+        public Vector3I BMin { get; set; }
         /// <summary>
         /// Maximum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 BMax { get; set; }
+        public Vector3I BMax { get; set; }
         /// <summary>
         /// The node's index. (Negative for escape sequence.)
         /// </summary>

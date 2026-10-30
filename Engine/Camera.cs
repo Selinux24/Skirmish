@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
@@ -299,15 +298,15 @@ namespace Engine
                 }
                 else if (mode == CameraModes.Free)
                 {
-                    return Vector3.Cross(Forward, Vector3Extensions.Up);
+                    return Vector3.Cross(Forward, Vector3.Up);
                 }
                 else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
                 {
-                    return Vector3.Cross(Forward, Vector3Extensions.Up);
+                    return Vector3.Cross(Forward, Vector3.Up);
                 }
                 else
                 {
-                    return Vector3.Cross(Forward, Vector3Extensions.Up);
+                    return Vector3.Cross(Forward, Vector3.Up);
                 }
             }
         }
@@ -349,7 +348,7 @@ namespace Engine
                 }
                 else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
                 {
-                    return Vector3Extensions.Up;
+                    return Vector3.Up;
                 }
                 else
                 {
@@ -734,7 +733,7 @@ namespace Engine
                 updateNeeded = true;
             }
 
-            if (Vector3Extensions.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
+            if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
             {
                 StopTranslations();
             }
@@ -1007,7 +1006,7 @@ namespace Engine
 
             if (clampY)
             {
-                float newAngle = Vector3Extensions.Angle(Vector3Extensions.Up, newDir) - Helper.PiOver2;
+                float newAngle = Vector3.Angle(Vector3.Up, newDir) - Helper.PiOver2;
                 if (newAngle >= Helper.DegreesToRadians(clampFrom) && newAngle <= Helper.DegreesToRadians(clampTo))
                 {
                     nextInterest = nextPosition + newDir;

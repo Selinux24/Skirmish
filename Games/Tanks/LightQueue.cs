@@ -1,9 +1,10 @@
 ﻿using Engine;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Tanks
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Light queue helper class
     /// </summary>

@@ -45,7 +45,6 @@
 
 using System;
 using System.Globalization;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -261,12 +260,12 @@ namespace Engine.Mathematics
         /// <returns>Resulting <see cref="Ray"/>.</returns>
         public static Ray GetPickRay(int x, int y, Vortice.Mathematics.Viewport viewport, Matrix4x4 worldViewProjection)
         {
-            var nearPoint = Vector3Extensions.Unproject(
+            var nearPoint = Vector3.Unproject(
                 new(x, y, 0), viewport.X, viewport.Y,
                 viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth,
                 worldViewProjection);
 
-            var farPoint = Vector3Extensions.Unproject(
+            var farPoint = Vector3.Unproject(
                 new(x, y, 1), viewport.X, viewport.Y,
                 viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth,
                 worldViewProjection);

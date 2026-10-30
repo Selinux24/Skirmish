@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -78,8 +77,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                startPos.IsInfinity() ||
-                endPos.IsInfinity() ||
+                startPos.IsInfinity ||
+                endPos.IsInfinity ||
                 filter == null ||
                 maxVisitedSize <= 0)
             {

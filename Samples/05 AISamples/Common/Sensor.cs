@@ -1,12 +1,13 @@
-﻿using AISamples.Common.Agents;
-using AISamples.Common.Primitives;
-using Engine;
-using System;
+﻿using System;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common
 {
+    using AISamples.Common.Agents;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.Mathematics;
+
     class Sensor(Car car, int rayCount, float rayLength, float raySpread = Helper.PiOver4)
     {
         private readonly Car car = car;

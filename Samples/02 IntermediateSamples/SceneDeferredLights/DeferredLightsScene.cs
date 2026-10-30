@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
@@ -297,7 +296,7 @@ F7 to F10: Toggle object visibility.";
 
             cameraPosition /= modelCount;
             Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-            Camera.LookTo(cameraPosition + Vector3Extensions.Up);
+            Camera.LookTo(cameraPosition + Vector3.Up);
             Camera.NearPlaneDistance = near;
             Camera.FarPlaneDistance = far;
 
@@ -465,7 +464,7 @@ F7 to F10: Toggle object visibility.";
         {
             if (Game.Input.KeyJustReleased(Keys.F))
             {
-                Lights.BaseFogColor = Vector4Extensions.FromRgb(54, 56, 68);
+                Lights.BaseFogColor = Vector4.FromColor3(54, 56, 68);
                 Lights.FogStart = Helper.IsZero(Lights.FogStart) ? far * fogStart : 0f;
                 Lights.FogRange = Helper.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
@@ -583,12 +582,12 @@ F7 to F10: Toggle object visibility.";
 
             if (Game.Input.KeyPressed(Keys.PageUp))
             {
-                spotLight.Position += Vector3Extensions.Up * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += Vector3.Up * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.PageDown))
             {
-                spotLight.Position += Vector3Extensions.Down * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += Vector3.Down * gameTime.ElapsedSeconds * 10f;
             }
 
             if (Game.Input.KeyPressed(Keys.Add))
@@ -908,7 +907,7 @@ F7 to F10: Toggle object visibility.";
                 Color.Yellow.RGB(),
                 Color.Yellow.RGB(),
                 true,
-                SceneLightSpotDescription.Create(lightPosition, Vector3Extensions.Down, 25, 25, 25f));
+                SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 
             Lights.Add(spotLight);
         }

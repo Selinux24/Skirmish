@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Bounding volume item.
     /// </summary>
@@ -97,11 +98,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Minimum bounds of the item's AABB. [(x, y, z)]
         /// </summary>
-        public Vortice.Mathematics.Int3 BMin { get; set; }
+        public Vector3I BMin { get; set; }
         /// <summary>
         /// Maximum bounds of the item's AABB. [(x, y, z)]
         /// </summary>
-        public Vortice.Mathematics.Int3 BMax { get; set; }
+        public Vector3I BMax { get; set; }
         /// <summary>
         /// The item's index. (Negative for escape sequence.)
         /// </summary>
@@ -149,7 +150,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="verts">Vertex list</param>
         /// <param name="ch">Cell height</param>
         /// <param name="cs">Cell size</param>
-        public void CalcPolygonBounds(IndexedPolygon p, int nvp, Vortice.Mathematics.Int3[] verts, float ch, float cs)
+        public void CalcPolygonBounds(IndexedPolygon p, int nvp, Vector3I[] verts, float ch, float cs)
         {
             int p0 = p.GetVertex(0);
             var v0 = verts[p0];

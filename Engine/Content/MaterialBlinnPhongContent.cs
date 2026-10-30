@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using System.Numerics;
-
+﻿
 namespace Engine.Content
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Material content
     /// </summary>

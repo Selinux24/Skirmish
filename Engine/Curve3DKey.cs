@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Key point on the <see cref="Curve3D"/>.
     /// </summary>

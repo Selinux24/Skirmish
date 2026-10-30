@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {

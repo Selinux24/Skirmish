@@ -46,7 +46,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -132,12 +131,12 @@ namespace Engine.Mathematics
         {
             var vertices = GetVertices();
 
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3Extensions.Up);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3Extensions.Down);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3Extensions.ForwardLH);
-            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3Extensions.BackwardLH);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3Extensions.Left);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3Extensions.Right);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
         }
         /// <summary>
         /// Gets the bounding box face plane
@@ -199,7 +198,7 @@ namespace Engine.Mathematics
         /// Gets the XY rectangle of the box
         /// </summary>
         /// <returns>Returns the XY rectangle of the box</returns>
-        public Vortice.Mathematics.Rect GetRectangleXY()
+        public Rect GetRectangleXY()
         {
             return new()
             {
@@ -213,7 +212,7 @@ namespace Engine.Mathematics
         /// Gets the XZ rectangle of the box
         /// </summary>
         /// <returns>Returns the XZ rectangle of the box</returns>
-        public Vortice.Mathematics.Rect GetRectangleXZ()
+        public Rect GetRectangleXZ()
         {
             return new()
             {
@@ -497,7 +496,7 @@ namespace Engine.Mathematics
             var center = bbox.Center;
 
             extents *= scale;
-            center = Vector3.Transform(center, Matrix4x4.Translation(translation));
+            center = Vector3.TransformCoordinate(center, Matrix4x4.Translation(translation));
 
             // Gets the new position
             var trnBox = new BoundingBox(-extents + center, +extents + center);

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Engine.Audio
 {
+    using Engine.Mathematics;
     using Vortice.XAudio2;
 
     /// <summary>
@@ -526,20 +526,20 @@ namespace Engine.Audio
         {
             listener ??= new Listener()
             {
-                OrientFront = Listener.Forward,
-                OrientTop = Listener.Up,
-                Position = Listener.Position,
-                Velocity = Vector3.Zero,
+                OrientFront = (System.Numerics.Vector3)Listener.Forward,
+                OrientTop = (System.Numerics.Vector3)Listener.Up,
+                Position = (System.Numerics.Vector3)Listener.Position,
+                Velocity = (System.Numerics.Vector3)Vector3.Zero,
             };
 
             if (elapsedSeconds > 0)
             {
-                listener.Velocity = (Listener.Position - listener.Position) / elapsedSeconds;
+                listener.Velocity = (System.Numerics.Vector3)(Listener.Position - (Vector3)listener.Position) / elapsedSeconds;
             }
 
-            listener.OrientFront = Listener.Forward;
-            listener.OrientTop = Listener.Up;
-            listener.Position = Listener.Position;
+            listener.OrientFront = (System.Numerics.Vector3)Listener.Forward;
+            listener.OrientTop = (System.Numerics.Vector3)Listener.Up;
+            listener.Position = (System.Numerics.Vector3)Listener.Position;
 
             if (Listener.Cone.HasValue)
             {
@@ -569,20 +569,20 @@ namespace Engine.Audio
         {
             emitter ??= new Emitter()
             {
-                OrientFront = Emitter.Forward,
-                OrientTop = Emitter.Up,
-                Position = Emitter.Position,
-                Velocity = Vector3.Zero
+                OrientFront = (System.Numerics.Vector3)Emitter.Forward,
+                OrientTop = (System.Numerics.Vector3)Emitter.Up,
+                Position = (System.Numerics.Vector3)Emitter.Position,
+                Velocity = (System.Numerics.Vector3)Vector3.Zero
             };
 
             if (elapsedSeconds > 0)
             {
-                emitter.Velocity = (Emitter.Position - emitter.Position) / elapsedSeconds;
+                emitter.Velocity = (System.Numerics.Vector3)(Emitter.Position - (Vector3)emitter.Position) / elapsedSeconds;
             }
 
-            emitter.Position = Emitter.Position;
-            emitter.OrientFront = Emitter.Forward;
-            emitter.OrientTop = Emitter.Up;
+            emitter.Position = (System.Numerics.Vector3)Emitter.Position;
+            emitter.OrientFront = (System.Numerics.Vector3)Emitter.Forward;
+            emitter.OrientTop = (System.Numerics.Vector3)Emitter.Up;
 
             emitter.ChannelCount = (uint)audioFile.WaveFormat.Channels;
             emitter.ChannelRadius = 1;

@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Defines polygon filtering and traversal costs for navigation mesh query operations.
     /// </summary>

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace AISamples.Common
 {
@@ -70,8 +68,8 @@ namespace AISamples.Common
         private const float carMaxReverseSpeed = 0.2f;
         private float carScale = 1f;
         private Car bestCar = null;
-        private readonly Vector4 bestCarColor = Vector4Extensions.FromRgba(252, 212, 32, 255);
-        private readonly Vector4 carColor = Vector4Extensions.FromRgba(252, 222, 200, 255);
+        private readonly Vector4 bestCarColor = new Vector4(252, 212, 32, 255);
+        private readonly Vector4 carColor = new Vector4(252, 222, 200, 255);
 
         public const int MaxCarInstances = 500;
         private ModelInstanced carDrawer = null;
@@ -313,7 +311,7 @@ namespace AISamples.Common
                 max.Y = Math.Max(max.Y, p.Y);
             }
 
-            return new Rect(min.X, min.Y, max.X - min.X, max.Y - min.Y);
+            return new(min.X, min.Y, max.X - min.X, max.Y - min.Y);
         }
 
         public IEnumerable<Task> Initialize(Scene scene)

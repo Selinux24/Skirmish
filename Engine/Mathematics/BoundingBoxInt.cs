@@ -12,16 +12,16 @@ namespace Engine.Mathematics
     /// <param name="minimum">The lower bound of the bounding box.</param>
     /// <param name="maximum">The upper bound of the bounding box.</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct BoundingBoxInt(Vector3Int minimum, Vector3Int maximum) : IEquatable<BoundingBoxInt>
+    public struct BoundingBoxInt(Vector3I minimum, Vector3I maximum) : IEquatable<BoundingBoxInt>
     {
         /// <summary>
         /// The lower bound of the bounding box.
         /// </summary>
-        public Vector3Int Minimum { get; set; } = minimum;
+        public Vector3I Minimum { get; set; } = minimum;
         /// <summary>
         /// The upper bound of the bounding box.
         /// </summary>
-        public Vector3Int Maximum { get; set; } = maximum;
+        public Vector3I Maximum { get; set; } = maximum;
 
         /// <summary>
         /// Checks whether two boudning boxes are intersecting.

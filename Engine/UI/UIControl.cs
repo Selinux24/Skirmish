@@ -1,14 +1,14 @@
-﻿using Engine.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.UI
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// User interface control
     /// </summary>
@@ -354,7 +354,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Rect(0, 0, Width, Height);
+                return new(0, 0, Width, Height);
             }
         }
         /// <inheritdoc/>
@@ -362,7 +362,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Rect(AbsoluteLeft, AbsoluteTop, Width, Height);
+                return new(AbsoluteLeft, AbsoluteTop, Width, Height);
             }
         }
         /// <inheritdoc/>
@@ -370,7 +370,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Rect(Left, Top, Width, Height);
+                return new(Left, Top, Width, Height);
             }
         }
         /// <inheritdoc/>
@@ -382,7 +382,7 @@ namespace Engine.UI
 
                 if (Root != null)
                 {
-                    return new Rect
+                    return new()
                     {
                         Left = rect.Left - Root.Left,
                         Top = rect.Top - Root.Top,
@@ -408,7 +408,7 @@ namespace Engine.UI
         {
             get
             {
-                return AbsoluteRectangle.Center;
+                return (Vector2)AbsoluteRectangle.Center;
             }
         }
 
@@ -719,11 +719,11 @@ namespace Engine.UI
             if (PivotAnchor.HasFlag(PivotAnchors.Parent)) rect = Parent.AbsoluteRectangle;
             return PivotAnchor switch
             {
-                PivotAnchors.TopLeft => rect.TopLeft,
-                PivotAnchors.TopRight => rect.TopRight,
-                PivotAnchors.BottomLeft => rect.BottomLeft,
-                PivotAnchors.BottomRight => rect.BottomRight,
-                _ => rect.Center,
+                PivotAnchors.TopLeft => (Vector2)rect.TopLeft,
+                PivotAnchors.TopRight => (Vector2)rect.TopRight,
+                PivotAnchors.BottomLeft => (Vector2)rect.BottomLeft,
+                PivotAnchors.BottomRight => (Vector2)rect.BottomRight,
+                _ => (Vector2)rect.Center,
             };
         }
 

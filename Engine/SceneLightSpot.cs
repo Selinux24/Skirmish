@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine
 {
@@ -89,8 +88,8 @@ namespace Engine
         /// <returns>Returns the transform matrix</returns>
         public static Matrix4x4 CreateFromPositionDirection(Vector3 position, Vector3 direction)
         {
-            float f = MathF.Abs(Vector3.Dot(direction, Vector3Extensions.Up));
-            Vector3 up = Helper.IsOne(f) ? Vector3Extensions.ForwardLH : Vector3Extensions.Up;
+            float f = MathF.Abs(Vector3.Dot(direction, Vector3.Up));
+            Vector3 up = Helper.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
             return Matrix4x4.CreateWorld(position, direction, up);
         }
 
@@ -170,7 +169,7 @@ namespace Engine
 
             var pos = Position;
             var look = Position + (Direction * Radius);
-            var view = Matrix4x4.LookAtLH(pos, look, Vector3Extensions.Up);
+            var view = Matrix4x4.LookAtLH(pos, look, Vector3.Up);
 
             var vp = view * projection;
 
@@ -217,8 +216,8 @@ namespace Engine
             Matrix4x4 rot = Matrix4x4.RotationX(Helper.PiOver2);
 
             //Then move and rotate the cone to light position and direction
-            float f = MathF.Abs(Vector3.Dot(Direction, Vector3Extensions.Up));
-            Matrix4x4 trn = Matrix4x4.CreateWorld(Position, Direction, Helper.IsOne(f) ? Vector3Extensions.ForwardLH : Vector3Extensions.Up);
+            float f = MathF.Abs(Vector3.Dot(Direction, Vector3.Up));
+            Matrix4x4 trn = Matrix4x4.CreateWorld(Position, Direction, Helper.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }

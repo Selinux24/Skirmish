@@ -1,5 +1,5 @@
 ﻿using AISamples.Common.Primitives;
-using System.Numerics;
+using Engine.Mathematics;
 
 namespace AISamples.Common
 {

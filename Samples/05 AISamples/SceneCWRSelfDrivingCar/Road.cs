@@ -1,10 +1,10 @@
 ﻿using AISamples.Common.Primitives;
 using System;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace AISamples.SceneCWRSelfDrivingCar
 {
+    using Engine.Mathematics;
+
     class Road
     {
         private readonly float laneWidth;
@@ -65,7 +65,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
             {
                 float x = float.Lerp(left, right, i / (float)LaneCount);
 
-                lanes[i] = new Rect(x, top, width / LaneCount, bottom - top);
+                lanes[i] = new(x, top, width / LaneCount, bottom - top);
             }
             return lanes;
         }

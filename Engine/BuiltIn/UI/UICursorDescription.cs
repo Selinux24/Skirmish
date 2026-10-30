@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cursor description
     /// </summary>

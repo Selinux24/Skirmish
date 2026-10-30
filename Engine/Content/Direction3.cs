@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Numerics;
-using Vortice.Direct2D1.Effects;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// 3D direction
     /// </summary>
@@ -173,7 +173,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Direction3 operator /(float scale, Direction3 value)
         {
-            return Vector3.Divide(new Vector3(scale), (Vector3)value);
+            return Vector3.Divide(scale, (Vector3)value);
         }
         /// <inheritdoc/>
         public static Direction3 operator /(Direction3 value, Direction3 scale)

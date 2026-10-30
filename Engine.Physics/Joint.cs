@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Joint between two bodies
     /// </summary>

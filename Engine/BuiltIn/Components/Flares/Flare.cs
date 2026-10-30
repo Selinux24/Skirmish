@@ -1,9 +1,10 @@
-﻿using Engine.BuiltIn.UI;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace Engine.BuiltIn.Components.Flares
 {
+    using Engine.BuiltIn.UI;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Flare
     /// </summary>

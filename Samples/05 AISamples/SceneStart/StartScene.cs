@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace AISamples.SceneStart
 {
@@ -122,8 +121,8 @@ namespace AISamples.SceneStart
             startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 35;
-            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB, 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = sceneButtonTextColor;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -139,8 +138,8 @@ namespace AISamples.SceneStart
             exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 35;
-            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB, 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB * 1.2f, 0.9f);
             exitButtonDesc.TextForeColor = exitButtonTextColor;
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;

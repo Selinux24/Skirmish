@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Contour vertex
     /// </summary>
@@ -15,9 +16,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Converts the specified collection
         /// </summary>
-        public static Int3[] ToInt3List(ContourVertex[] v)
+        public static Vector3I[] ToInt3List(ContourVertex[] v)
         {
-            return v?.Select(v => new Int3(v.X, v.Y, v.Z)).ToArray() ?? [];
+            return v?.Select(v => new Vector3I(v.X, v.Y, v.Z)).ToArray() ?? [];
         }
 
         /// <summary>
@@ -35,11 +36,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the x, y and z coordinates
         /// </summary>
-        public readonly Int3 Coords
+        public readonly Vector3I Coords
         {
             get
             {
-                return new Int3(X, Y, Z);
+                return new(X, Y, Z);
             }
         }
         /// <summary>
@@ -49,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the vertex position
         /// </summary>
-        public readonly Int3 Position
+        public readonly Vector3I Position
         {
             get
             {

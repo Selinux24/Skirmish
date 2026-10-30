@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -10,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public readonly struct ObstacleOrientedBox : IObstacle
     {
-        static readonly Vector3 epsilon = Vector3Extensions.Up * 0.0001f;
+        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
 
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix
@@ -43,12 +42,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Validates the angle and axis
             var yRotation = 0f;
 
-            if (Vector3Extensions.NearEqual(rotation.Axis, Vector3Extensions.Up, epsilon))
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
             {
                 yRotation = rotation.Angle;
             }
 
-            if (Vector3Extensions.NearEqual(rotation.Axis, Vector3Extensions.Down, epsilon))
+            if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
             {
                 yRotation = -rotation.Angle;
             }
@@ -204,8 +203,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return new BoundingBoxInt
             {
-                Minimum = new Vector3Int(minx, miny, minz),
-                Maximum = new Vector3Int(maxx, maxy, maxz),
+                Minimum = new Vector3I(minx, miny, minz),
+                Maximum = new Vector3I(maxx, maxy, maxz),
             };
         }
     }

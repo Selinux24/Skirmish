@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -85,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Iterates over contour triangles
         /// </summary>
-        public readonly IEnumerable<(int i, Int3 a, Int3 b, Int3 c)> IterateTriangles()
+        public readonly IEnumerable<(int i, Vector3I a, Vector3I b, Vector3I c)> IterateTriangles()
         {
             if (nvertices < 3)
             {
@@ -108,7 +106,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Triangulates the polygon's contour
         /// </summary>
         /// <returns>Returns the polygon indices, polygon triangles and number of triangles</returns>
-        public readonly Int3[] Triangulate()
+        public readonly Vector3I[] Triangulate()
         {
             var verts = ContourVertex.ToInt3List(vertices);
 
@@ -136,7 +134,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return Vector3.Zero;
             }
 
-            Int3 center = Int3.Zero;
+            Vector3I center = Vector3I.Zero;
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];

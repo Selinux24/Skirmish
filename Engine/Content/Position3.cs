@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// 3D position
     /// </summary>
@@ -92,7 +93,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator +(Position3 value, float scalar)
         {
-            return Vector3.Add(value, new(scalar));
+            return Vector3.Add(value, scalar);
         }
         /// <inheritdoc/>
         public static Position3 operator +(float scalar, Position3 value)
@@ -112,12 +113,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator -(Position3 value, float scalar)
         {
-            return Vector3.Subtract(value, new(scalar));
+            return Vector3.Subtract(value, scalar);
         }
         /// <inheritdoc/>
         public static Position3 operator -(float scalar, Position3 value)
         {
-            return Vector3.Subtract(new(scalar), value);
+            return Vector3.Subtract(scalar, value);
         }
         /// <inheritdoc/>
         public static Position3 operator *(Position3 left, Position3 right)
@@ -142,7 +143,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position3 operator /(float scale, Position3 value)
         {
-            return Vector3.Divide(new(scale), value);
+            return Vector3.Divide(scale, value);
         }
         /// <inheritdoc/>
         public static Position3 operator /(Position3 value, Position3 scale)

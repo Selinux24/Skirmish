@@ -1,8 +1,9 @@
 ﻿using System;
-using Vortice.Mathematics;
 
 namespace Engine.UI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Padding
     /// </summary>

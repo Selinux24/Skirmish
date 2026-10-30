@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneHeightmap
@@ -118,7 +117,7 @@ namespace TerrainSamples.SceneHeightmap
 
         private bool dialogVisible = false;
         private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        private readonly Vector4 dialogButtonColor = Vector4Extensions.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
+        private readonly Vector4 dialogButtonColor = Vector4.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
         private readonly Vector4 dialogButtonTextColor = Color.WhiteSmoke.RGBA();
         private readonly Vector4 dialogBackgroundColor = Color.CornflowerBlue.RGBA();
         private UISaveFileDialog saveFileDialog = null;
@@ -575,18 +574,16 @@ namespace TerrainSamples.SceneHeightmap
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare1File),
-
-                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlareFlare2File),
-
-                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
 
@@ -652,7 +649,7 @@ namespace TerrainSamples.SceneHeightmap
 
             GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
 
-            Lights.BaseFogColor = Vector4Extensions.FromRgb(95, 147, 233) * 0.5f;
+            Lights.BaseFogColor = Vector4.FromColor3(95, 147, 233) * 0.5f;
             ToggleFog();
 
             Camera.NearPlaneDistance = near;
@@ -1399,7 +1396,7 @@ namespace TerrainSamples.SceneHeightmap
                 else
                 {
                     var eyePos = new Vector3(0, agent.Height * 0.8f, 0);
-                    var offset = (eyePos * 1.25f) - (Vector3Extensions.Right * 1.25f) - (Vector3Extensions.BackwardLH * 10f);
+                    var offset = (eyePos * 1.25f) - (Vector3.Right * 1.25f) - (Vector3.BackwardLH * 10f);
                     var view = soldier.Manipulator.Forward;
 
                     Camera.Following = new CameraFollower(soldier.Manipulator, offset, view, 10f);
@@ -1416,7 +1413,7 @@ namespace TerrainSamples.SceneHeightmap
                 foreach (var t in troops.GetInstances())
                 {
                     var bbox = t.GetBoundingBox();
-                    var center = t.Manipulator.Position + (Vector3Extensions.Up * bbox.Height * 0.5f);
+                    var center = t.Manipulator.Position + (Vector3.Up * bbox.Height * 0.5f);
                     var bc = new BoundingCylinder(center, 1.5f, bbox.Height);
 
                     NavigationGraph.AddObstacle(bc);

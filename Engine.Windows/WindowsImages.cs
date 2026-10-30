@@ -2,7 +2,6 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Windows

@@ -1,10 +1,11 @@
-﻿using Engine.Common;
-using Engine.UI;
-using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Sprite progress bar
     /// </summary>

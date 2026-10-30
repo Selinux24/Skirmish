@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneModularDungeon
@@ -52,11 +51,11 @@ namespace TerrainSamples.SceneModularDungeon
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Vector4 ambientUp = Vector4Extensions.FromRgba(255, 224, 255, 255);
-        private readonly Vector4 ambientDown = Vector4Extensions.FromRgba(72, 72, 255, 255);
+        private readonly Vector4 ambientUp = new(255, 224, 255, 255);
+        private readonly Vector4 ambientDown = new(72, 72, 255, 255);
 
         private Player playerAgentType = null;
-        private readonly Vector3 agentTorchLight = Vector3Extensions.FromRgb(255, 201, 14);
+        private readonly Vector3 agentTorchLight = new(255, 201, 14);
         private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new(-1001, 1000, 1000);
 
@@ -618,7 +617,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB(), ambientUp.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB, ambientUp.RGB, true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
@@ -872,8 +871,8 @@ namespace TerrainSamples.SceneModularDungeon
                 return false;
             }
 
-            path.InsertControlPoint(0, from, Vector3Extensions.Up);
-            path.AddControlPoint(to, Vector3Extensions.Up);
+            path.InsertControlPoint(0, from, Vector3.Up);
+            path.AddControlPoint(to, Vector3.Up);
 
             ratController.Follow(new NormalPath(path.Positions, path.Normals));
             ratController.MaximumSpeed = ratAgentType.Velocity;
@@ -1412,7 +1411,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 float h = 1.5f;
                 float r = 0.8f;
-                var center = human[i].Manipulator.Position + (Vector3Extensions.Up * h * 0.5f);
+                var center = human[i].Manipulator.Position + (Vector3.Up * h * 0.5f);
                 var bc = new BoundingCylinder(center, r, h);
 
                 int index = AddObstacle(bc);

@@ -45,7 +45,6 @@
 
 using System;
 using System.Globalization;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -389,7 +388,7 @@ namespace Engine.Mathematics
         /// This plane is assumed to be normalized
         /// </summary>
         /// <param name="result">When the method completes, contains the reflection Matrix3x3.</param>
-        public readonly void Reflection(out Vortice.Mathematics.Matrix3x3 result)
+        public readonly void Reflection(out Matrix3x3 result)
         {
             float x = Normal.X;
             float y = Normal.Y;
@@ -414,9 +413,9 @@ namespace Engine.Mathematics
         /// This plane is assumed to be normalized
         /// </summary>
         /// <returns>The reflection Matrix3x3.</returns>
-        public readonly Vortice.Mathematics.Matrix3x3 Reflection3x3()
+        public readonly Matrix3x3 Reflection3x3()
         {
-            Reflection(out Vortice.Mathematics.Matrix3x3 result);
+            Reflection(out Matrix3x3 result);
             return result;
         }
 
@@ -427,7 +426,7 @@ namespace Engine.Mathematics
         /// W component is 1, the light is a point light.</param>
         /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
         /// <param name="result">When the method completes, contains the shadow Matrix3x3.</param>
-        public static void Shadow(ref Vector4 light, ref Plane plane, out Vortice.Mathematics.Matrix3x3 result)
+        public static void Shadow(ref Vector4 light, ref Plane plane, out Matrix3x3 result)
         {
             float dot = (plane.Normal.X * light.X) + (plane.Normal.Y * light.Y) + (plane.Normal.Z * light.Z) + (plane.D * light.W);
             float x = -plane.Normal.X;
@@ -452,9 +451,9 @@ namespace Engine.Mathematics
         /// W component is 1, the light is a point light.</param>
         /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
         /// <returns>The shadow Matrix3x3.</returns>
-        public static Vortice.Mathematics.Matrix3x3 Shadow(Vector4 light, Plane plane)
+        public static Matrix3x3 Shadow(Vector4 light, Plane plane)
         {
-            Shadow(ref light, ref plane, out Vortice.Mathematics.Matrix3x3 result);
+            Shadow(ref light, ref plane, out Matrix3x3 result);
             return result;
         }
 

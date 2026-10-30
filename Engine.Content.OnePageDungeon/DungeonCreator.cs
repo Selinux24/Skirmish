@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Content.OnePageDungeon
 {
     using Engine.Mathematics;
     using Engine.Modular;
     using Engine.Modular.Persistence;
-    using Rectangle = Vortice.Mathematics.RectI;
-    using RectangleF = Vortice.Mathematics.Rect;
 
     /// <summary>
     /// Dungeon creator helper
@@ -41,7 +38,7 @@ namespace Engine.Content.OnePageDungeon
         /// Gets the chamber tile list
         /// </summary>
         /// <param name="rect">Chamber rectangle</param>
-        private static IEnumerable<Rectangle> GetRects(Rect rect)
+        private static IEnumerable<RectI> GetRects(Rect rect)
         {
             for (int x = 0; x < rect.W; x++)
             {
@@ -50,7 +47,7 @@ namespace Engine.Content.OnePageDungeon
                     int vx = (int)rect.X + x;
                     int vy = (int)rect.Y + y;
 
-                    yield return new Rectangle(vx, vy, 1, 1);
+                    yield return new(vx, vy, 1, 1);
                 }
             }
         }
@@ -69,7 +66,7 @@ namespace Engine.Content.OnePageDungeon
                 inflatedCell.Inflate(1, 1);
 
                 //Find neighbors
-                var neis = cells.Where(c => c != cell && inflatedCell.IntersectsWith(c));
+                var neis = cells.Where(c => c != cell && inflatedCell.Intersects(c));
                 if (!neis.Any())
                 {
                     continue;
@@ -90,7 +87,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="cell">Cell</param>
         /// <param name="neis">Neighbor list</param>
         /// <returns>Returns the wall directions enumeration</returns>
-        private static WallDirections EvaluateDirection(Rectangle cell, IEnumerable<Rectangle> neis)
+        private static WallDirections EvaluateDirection(RectI cell, IEnumerable<RectI> neis)
         {
             var ctl = cell.TopLeft();
             var ctr = cell.TopRight();
@@ -283,7 +280,7 @@ namespace Engine.Content.OnePageDungeon
                 }
 
                 var neiRect = r.GetRectangle();
-                return roomRect.IntersectsWith(neiRect);
+                return roomRect.Intersects(neiRect);
             });
 
             if (!neis.Any())
@@ -311,7 +308,7 @@ namespace Engine.Content.OnePageDungeon
                     int ix = (int)one.X + x;
                     int iy = (int)one.Y + y;
 
-                    connections.AddRange(CreateConnection(two, new RectangleF(ix, iy, 1, 1), configuration));
+                    connections.AddRange(CreateConnection(two, new RectI(ix, iy, 1, 1), configuration));
                 }
             }
 
@@ -323,7 +320,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="two">Area</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnection(Rect rect, RectangleF two, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetConnection> CreateConnection(Rect rect, RectI two, DungeonAssetConfiguration configuration)
         {
             float tvx = two.X * configuration.BlockSize;
             float tvz = two.Y * configuration.BlockSize;
@@ -339,12 +336,12 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    var r1 = new RectangleF(ix, iy, 1, 1);
-                    var r2 = new RectangleF(ix, iy, 1, 1);
+                    var r1 = new RectI(ix, iy, 1, 1);
+                    var r2 = new RectI(ix, iy, 1, 1);
                     r1.Inflate(1, 0);
                     r2.Inflate(0, 1);
 
-                    if (two.IntersectsWith(r1))
+                    if (two.Intersects(r1))
                     {
                         //Connection
                         yield return new AssetConnection()
@@ -355,7 +352,7 @@ namespace Engine.Content.OnePageDungeon
                         };
                     }
 
-                    if (two.IntersectsWith(r2))
+                    if (two.Intersects(r2))
                     {
                         //Connection
                         yield return new AssetConnection()
@@ -528,19 +525,19 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="dir">Direction</param>
         private static RotationQ EvaluateRotation(Vector3 dir, int index)
         {
-            if (dir == Vector3Extensions.Left)
+            if (dir == Vector3.Left)
             {
                 return rotationStrings[index % 4];
             }
-            else if (dir == Vector3Extensions.ForwardLH)
+            else if (dir == Vector3.ForwardLH)
             {
                 return rotationStrings[(1 + index) % 4];
             }
-            else if (dir == Vector3Extensions.Right)
+            else if (dir == Vector3.Right)
             {
                 return rotationStrings[(2 + index) % 4];
             }
-            else if (dir == Vector3Extensions.BackwardLH)
+            else if (dir == Vector3.BackwardLH)
             {
                 return rotationStrings[(3 + index) % 4];
             }
@@ -585,7 +582,7 @@ namespace Engine.Content.OnePageDungeon
             /// <summary>
             /// Cell
             /// </summary>
-            public Rectangle Cell { get; set; }
+            public RectI Cell { get; set; }
             /// <summary>
             /// Wall direction
             /// </summary>
@@ -598,22 +595,22 @@ namespace Engine.Content.OnePageDungeon
             {
                 if (!Dir.HasFlag(WallDirections.N))
                 {
-                    return -Vector3Extensions.ForwardLH;
+                    return -Vector3.ForwardLH;
                 }
                 else if (!Dir.HasFlag(WallDirections.S))
                 {
-                    return -Vector3Extensions.BackwardLH;
+                    return -Vector3.BackwardLH;
                 }
                 else if (!Dir.HasFlag(WallDirections.E))
                 {
-                    return Vector3Extensions.Left;
+                    return Vector3.Left;
                 }
                 else if (!Dir.HasFlag(WallDirections.W))
                 {
-                    return Vector3Extensions.Right;
+                    return Vector3.Right;
                 }
 
-                return -Vector3Extensions.ForwardLH;
+                return -Vector3.ForwardLH;
             }
         }
 

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
 using System.Threading.Tasks;
 using Vortice.DXGI;
 
@@ -300,7 +299,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
+        public Game(string name, Vector2I screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, screenSize.X, screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
         {
 

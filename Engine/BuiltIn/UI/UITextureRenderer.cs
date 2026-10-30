@@ -1,14 +1,15 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Sprites;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.Content;
-using Engine.UI;
-using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Sprites;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Render to texture control
     /// </summary>

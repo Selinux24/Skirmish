@@ -1,11 +1,10 @@
-﻿using Engine.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace Engine.Collections.Generic
 {
     using Engine.Collections.Helpers;
+    using Engine.Common;
     using Engine.Mathematics;
 
     /// <summary>

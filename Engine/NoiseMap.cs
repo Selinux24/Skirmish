@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Noise map
     /// </summary>

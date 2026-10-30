@@ -1,13 +1,14 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Particles;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.Content;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace Engine.BuiltIn.Components.Particles
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Particles;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle system
     /// </summary>
@@ -184,7 +185,7 @@ namespace Engine.BuiltIn.Components.Particles
             {
                 Position = Emitter.Position,
                 Velocity = Emitter.Velocity,
-                RandomValues = new Vector4(),
+                RandomValues = new(),
                 MaxAge = 0,
 
                 Type = 0,

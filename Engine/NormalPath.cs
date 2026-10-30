@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine
 {
@@ -117,7 +116,7 @@ namespace Engine
         {
             if (NormalCount <= 0)
             {
-                return Vector3Extensions.Up;
+                return Vector3.Up;
             }
 
             if (Helper.IsZero(time))

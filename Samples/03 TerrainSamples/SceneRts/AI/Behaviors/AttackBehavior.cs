@@ -1,9 +1,10 @@
-﻿using Engine;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Attack behavior
     /// </summary>

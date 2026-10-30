@@ -1,10 +1,11 @@
 ﻿using Engine;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace IntermediateSamples.SceneTransforms
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tree controller
     /// </summary>

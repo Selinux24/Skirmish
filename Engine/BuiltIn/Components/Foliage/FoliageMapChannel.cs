@@ -1,10 +1,11 @@
-﻿using Engine.BuiltIn.Drawers.Foliage;
-using Engine.Common;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
+    using Engine.BuiltIn.Drawers.Foliage;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Foliage map channel
     /// </summary>

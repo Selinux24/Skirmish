@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using Vortice.Mathematics;
-
-namespace TerrainSamples.SceneNavMeshTest
+﻿namespace TerrainSamples.SceneNavMeshTest
 {
     using Engine.Mathematics;
 
@@ -15,12 +12,12 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly bool IntersectsRay(Ray ray)
         {
-            if (Intersection.RayIntersectsCircle3D(ref ray, From, Vector3Extensions.Up, Radius))
+            if (Intersection.RayIntersectsCircle3D(ref ray, From, Vector3.Up, Radius))
             {
                 return true;
             }
 
-            if (Intersection.RayIntersectsCircle3D(ref ray, To, Vector3Extensions.Up, Radius))
+            if (Intersection.RayIntersectsCircle3D(ref ray, To, Vector3.Up, Radius))
             {
                 return true;
             }

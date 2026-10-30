@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.Mathematics;
@@ -25,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nm">Navigation mesh</param>
         public readonly bool IsValid(NavMesh nm)
         {
-            return !Pos.IsInfinity() && nm.IsValidPolyRef(Ref);
+            return !Pos.IsInfinity && nm.IsValidPolyRef(Ref);
         }
 
         /// <inheritdoc/>

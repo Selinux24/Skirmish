@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Geometry descriptor
     /// </summary>
@@ -101,7 +102,7 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         public void Transform(Matrix4x4 transform)
         {
-            Vertices = Vertices?.Select(v => Vector3.Transform(v, transform));
+            Vertices = Vertices?.Select(v => Vector3.TransformCoordinate(v, transform));
             Normals = Normals?.Select(v => Vector3.TransformNormal(v, transform));
             Tangents = Tangents?.Select(v => Vector3.TransformNormal(v, transform));
             Binormals = Binormals?.Select(v => Vector3.TransformNormal(v, transform));

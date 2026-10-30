@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -76,7 +74,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             /// Updates the specified triangle collection
             /// </summary>
             /// <param name="tris">Triangle collection</param>
-            public void UpdateTris(Int3[] tris)
+            public void UpdateTris(Vector3I[] tris)
             {
                 if (Face1 >= 0)
                 {
@@ -203,7 +201,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns the filtered list</returns>
-        private static Int3[] FilterTris(Int3[] triangles)
+        private static Vector3I[] FilterTris(Vector3I[] triangles)
         {
             // Copy array
             var tris = triangles.ToArray();
@@ -240,9 +238,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return (p1, 0);
             }
 
-            float v1Sq = Vector2.Dot(v1.XZ(), v1.XZ());
-            float v2Sq = Vector2.Dot(v2.XZ(), v2.XZ());
-            float v3Sq = Vector2.Dot(v3.XZ(), v3.XZ());
+            float v1Sq = Vector2.Dot(v1.XZ, v1.XZ);
+            float v2Sq = Vector2.Dot(v2.XZ, v2.XZ);
+            float v3Sq = Vector2.Dot(v3.XZ, v3.XZ);
 
             float cX = (v1Sq * (v2.Z - v3.Z) + v2Sq * (v3.Z - v1.Z) + v3Sq * (v1.Z - v2.Z)) / (2 * cp);
             float cZ = (v1Sq * (v3.X - v2.X) + v2Sq * (v1.X - v3.X) + v3Sq * (v2.X - v1.X)) / (2 * cp);
@@ -257,9 +255,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Gets the triangle list
         /// </summary>
-        public Int3[] GetTris()
+        public Vector3I[] GetTris()
         {
-            Int3[] tris = Helper.CreateArray(faces, new Int3(-1, -1, -1));
+            Vector3I[] tris = Helper.CreateArray(faces, new Vector3I(-1, -1, -1));
 
             for (int i = 0; i < edges.Count; ++i)
             {

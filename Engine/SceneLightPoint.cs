@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine
 {
@@ -143,12 +142,12 @@ namespace Engine
 
             return
             [
-                GetFromPointLightViewProjection(Position, Vector3Extensions.Right,      Vector3Extensions.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3Extensions.Left,       Vector3Extensions.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3Extensions.Up,         Vector3Extensions.BackwardLH) * projection,
-                GetFromPointLightViewProjection(Position, Vector3Extensions.Down,       Vector3Extensions.ForwardLH)  * projection,
-                GetFromPointLightViewProjection(Position, Vector3Extensions.ForwardLH,  Vector3Extensions.Up)         * projection,
-                GetFromPointLightViewProjection(Position, Vector3Extensions.BackwardLH, Vector3Extensions.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Right,      Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Left,       Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Up,         Vector3.BackwardLH) * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
+                GetFromPointLightViewProjection(Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.BackwardLH, Vector3.Up)         * projection,
             ];
         }
         /// <inheritdoc/>

@@ -11,18 +11,18 @@ namespace Engine.Mathematics
         /// <summary>
         /// The minimum of the bounding box.
         /// </summary>
-        public Vector2Int Minimum { get; set; }
+        public Vector2I Minimum { get; set; }
         /// <summary>
         /// The maximum of the bounding box.
         /// </summary>
-        public Vector2Int Maximum { get; set; }
+        public Vector2I Maximum { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BBox2i"/> struct.
         /// </summary>
         /// <param name="min">A minimum bound.</param>
         /// <param name="max">A maximum bound.</param>
-        public BoundingRectangleInt(Vector2Int min, Vector2Int max)
+        public BoundingRectangleInt(Vector2I min, Vector2I max)
         {
             Minimum = min;
             Maximum = max;
@@ -36,8 +36,8 @@ namespace Engine.Mathematics
         /// <param name="maxY">The maximum Y bound.</param>
         public BoundingRectangleInt(int minX, int minY, int maxX, int maxY)
         {
-            Minimum = new Vector2Int(minX, minY);
-            Maximum = new Vector2Int(maxX, maxY);
+            Minimum = new Vector2I(minX, minY);
+            Maximum = new Vector2I(maxX, maxY);
         }
 
         /// <inheritdoc/>

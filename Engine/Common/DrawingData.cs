@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Common
@@ -329,7 +328,7 @@ namespace Engine.Common
 
             if (!transform.IsIdentity)
             {
-                Vector3Extensions.TransformCoordinate(points, ref transform, points);
+                Vector3.TransformCoordinate(points, ref transform, points);
             }
 
             return points;
@@ -360,7 +359,7 @@ namespace Engine.Common
 
             if (!transform.IsIdentity)
             {
-                Vector3Extensions.TransformCoordinate(points, ref transform, points);
+                Vector3.TransformCoordinate(points, ref transform, points);
             }
 
             return points;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
@@ -48,7 +47,7 @@ namespace Engine
         {
             Matrix4x4 rot = Matrix4x4.RotationYawPitchRoll(azimuth, elevation, 0);
 
-            return Vector3.TransformNormal(Vector3Extensions.Up, rot);
+            return Vector3.TransformNormal(Vector3.Up, rot);
         }
 
         /// <summary>

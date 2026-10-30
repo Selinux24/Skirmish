@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -1575,7 +1574,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="dir">Direction</param>
         /// <param name="neiarea">Neighbour area</param>
         /// <returns>Returns the limit bounds</returns>
-        private static Vector2Int? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
+        private static Vector2I? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
         {
             // Compress portal limits to an integer value.
             if (dir == 0 || dir == 4)
@@ -1587,7 +1586,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                var res = new Vector2Int
+                var res = new Vector2I
                 {
                     X = (int)(Math.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
                     Y = (int)(Math.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
@@ -1603,7 +1602,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                var res = new Vector2Int
+                var res = new Vector2I
                 {
                     X = (int)(Math.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
                     Y = (int)(Math.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
@@ -1789,8 +1788,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float qfac = tile.Header.BvQuantFactor;
 
             // Calculate quantized box
-            var bmin = new Vortice.Mathematics.Int3();
-            var bmax = new Vortice.Mathematics.Int3();
+            var bmin = new Vector3I();
+            var bmax = new Vector3I();
             // dtClamp query box to world box.
             float minx = Math.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
             float miny = Math.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
@@ -1934,7 +1933,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             closest = pos;
             posOverPoly = false;
 
-            if (!IsValidPolyRef(r) || pos.IsInfinity())
+            if (!IsValidPolyRef(r) || pos.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1981,7 +1980,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
-            if (pos.IsInfinity())
+            if (pos.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2012,8 +2011,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             // Validate input
             if (request.Filter == null ||
-                request.StartPos.IsInfinity() ||
-                request.EndPos.IsInfinity() ||
+                request.StartPos.IsInfinity ||
+                request.EndPos.IsInfinity ||
                 !IsValidPolyRef(request.StartRef) ||
                 request.PrevReference.HasValue && !IsValidPolyRef(request.PrevReference.Value))
             {
@@ -2056,7 +2055,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
-            if (pos.XZ().IsInfinity())
+            if (pos.XZ.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }

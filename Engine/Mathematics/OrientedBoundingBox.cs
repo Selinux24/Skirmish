@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -49,7 +48,7 @@ namespace Engine.Mathematics
 
             //Next, remove any point transform and set points to origin
             Matrix4x4.Invert(ref transform, out var inv);
-            Vector3Extensions.TransformCoordinate(ptArray, ref inv, ptArray);
+            Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
 
             //Create the OBB from origin points
             var obb = new OrientedBoundingBox(ptArray);

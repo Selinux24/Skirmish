@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using Vortice.Mathematics;
-
+﻿
 namespace Engine.Common
 {
     using Engine.Mathematics;

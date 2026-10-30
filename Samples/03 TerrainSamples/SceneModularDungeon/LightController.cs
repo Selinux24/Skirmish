@@ -1,9 +1,10 @@
 ﻿using Engine;
 using System;
-using System.Numerics;
 
 namespace TerrainSamples.SceneModularDungeon
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Light basic controller
     /// </summary>

@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
+﻿namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     using Engine.Mathematics;
 

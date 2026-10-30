@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneRts
@@ -143,7 +142,7 @@ namespace TerrainSamples.SceneRts
 
         private Model helicopter = null;
         private readonly HeliManipulatorController helicopterController = null;
-        private readonly Vector3 helicopterHeightOffset = Vector3Extensions.Up * 15f;
+        private readonly Vector3 helicopterHeightOffset = Vector3.Up * 15f;
         private readonly Vector4 curvesColor = Color.Red.RGBA();
         private readonly Vector4 pointsColor = Color.Blue.RGBA();
         private readonly Vector4 segmentsColor = new(Color.Cyan.RGB(), 0.8f);
@@ -509,18 +508,16 @@ namespace TerrainSamples.SceneRts
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare1File),
-
-                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlareFlare2File),
-
-                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -1280,7 +1277,7 @@ namespace TerrainSamples.SceneRts
                 {
                     if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        oks.Add(new Line3D(r.Position, r.Position + Vector3Extensions.Up));
+                        oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
                     }
                     else
                     {
@@ -1897,7 +1894,7 @@ namespace TerrainSamples.SceneRts
             else
             {
                 cPoints[0] = helicopter.Manipulator.Position;
-                cPoints[1] = helicopter.Manipulator.Position + (Vector3Extensions.Up * 5f) + (helicopter.Manipulator.Forward * 10f);
+                cPoints[1] = helicopter.Manipulator.Position + (Vector3.Up * 5f) + (helicopter.Manipulator.Forward * 10f);
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
@@ -2010,7 +2007,7 @@ namespace TerrainSamples.SceneRts
 
         private void AddExplosionSystem(AIAgent agent, Vector3 random)
         {
-            Vector3 velocity = Vector3Extensions.Up;
+            Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.1f;
 
@@ -2027,7 +2024,7 @@ namespace TerrainSamples.SceneRts
         }
         private void AddExplosionSystem(AIAgent agent)
         {
-            Vector3 velocity = Vector3Extensions.Up;
+            Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.1f;
 
@@ -2074,7 +2071,7 @@ namespace TerrainSamples.SceneRts
             {
                 var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3Extensions.Up,
+                    Velocity = Vector3.Up,
                     Duration = duration,
                     EmissionRate = rate * 0.5f,
                     InfiniteDuration = false,
@@ -2092,7 +2089,7 @@ namespace TerrainSamples.SceneRts
             {
                 var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3Extensions.Up,
+                    Velocity = Vector3.Up,
                     Duration = duration + (duration * 0.1f),
                     EmissionRate = rate,
                     InfiniteDuration = false,
@@ -2123,7 +2120,7 @@ namespace TerrainSamples.SceneRts
             {
                 var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
                 {
-                    Velocity = Vector3Extensions.Up,
+                    Velocity = Vector3.Up,
                     Duration = duration + (duration * 0.1f),
                     EmissionRate = Helper.RandomGenerator.NextSingle(0.1f, 1f),
                     InfiniteDuration = false,

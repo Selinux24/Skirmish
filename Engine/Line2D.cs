@@ -1,7 +1,7 @@
-﻿using System.Numerics;
-
-namespace Engine
+﻿namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// 2D Line
     /// </summary>
@@ -45,8 +45,8 @@ namespace Engine
         public static Line2D Transform(Line2D line, Matrix4x4 transform)
         {
             return new Line2D(
-                Vector2.Transform(line.Point1, transform),
-                Vector2.Transform(line.Point2, transform));
+                Vector2.TransformCoordinate(line.Point1, transform),
+                Vector2.TransformCoordinate(line.Point2, transform));
         }
         /// <summary>
         /// Transform line list coordinates

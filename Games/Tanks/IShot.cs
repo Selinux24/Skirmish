@@ -1,8 +1,8 @@
-﻿using Engine;
-using System.Numerics;
-
-namespace Tanks
+﻿namespace Tanks
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Shot interface
     /// </summary>

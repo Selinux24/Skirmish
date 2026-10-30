@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld
@@ -200,7 +199,7 @@ ESC - EXIT";
             editorButtonDesc.Width = editorButtonWidth;
             editorButtonDesc.Height = editorButtonHeight;
             editorButtonDesc.ColorReleased = editorButtonColor;
-            editorButtonDesc.ColorPressed = new (editorButtonColor.RGB() * 1.2f, 1f);
+            editorButtonDesc.ColorPressed = new(editorButtonColor.RGB * 1.2f, 1f);
             editorButtonDesc.TextForeColor = editorButtonTextColor;
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -458,12 +457,12 @@ ESC - EXIT";
 
             if (Game.Input.KeyPressed(Keys.C))
             {
-                Camera.Move(gameTime, Vector3Extensions.Down, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3.Down, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.Space))
             {
-                Camera.Move(gameTime, Vector3Extensions.Up, Game.Input.ShiftPressed);
+                Camera.Move(gameTime, Vector3.Up, Game.Input.ShiftPressed);
             }
         }
         private void UpdateWorld(IGameTime gameTime)

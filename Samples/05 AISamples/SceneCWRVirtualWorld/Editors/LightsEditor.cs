@@ -1,10 +1,11 @@
-﻿using AISamples.Common;
-using AISamples.Common.Markings;
-using AISamples.Common.Primitives;
-using System.Numerics;
-
+﻿
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
+    using AISamples.Common;
+    using AISamples.Common.Markings;
+    using AISamples.Common.Primitives;
+    using Engine.Mathematics;
+
     class LightsEditor(World world, float height) : MarkingEditor(nameof(LightsEditor), world, height, true)
     {
         protected override Segment2[] GetTargetSegments()

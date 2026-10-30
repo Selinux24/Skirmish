@@ -1,9 +1,10 @@
 ﻿using Engine;
 using System;
-using System.Numerics;
 
 namespace BasicSamples.SceneTest
 {
+    using Engine.Mathematics;
+
     struct GridParams
     {
         public int RowSize;

@@ -7,28 +7,36 @@ namespace Engine.Mathematics
     /// A 3d vector represented by integers.
     /// </summary>
     /// <remarks>
-    /// Initializes a new instance of the <see cref="Vector3Int"/> struct.
+    /// Initializes a new instance of the <see cref="Vector3I"/> struct.
     /// </remarks>
     /// <param name="x">The X coordinate.</param>
     /// <param name="y">The Y coordinate.</param>
     /// <param name="z">The Z coordinate.</param>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3Int(int x, int y, int z) : IEquatable<Vector3Int>
+    public struct Vector3I(int x, int y, int z) : IEquatable<Vector3I>
     {
+        /// <summary>
+        /// The size of the <see cref="Vector3I"/> type, in bytes.
+        /// </summary>
+        public static readonly int SizeInBytes = Marshal.SizeOf<Vector3I>();
+        /// <summary>
+        /// A <see cref="Vector3I"/> with all of its components set to zero.
+        /// </summary>
+        public static readonly Vector3I Zero = new();
+
         /// <summary>
         /// Calculates the component-wise minimum of two vertices.
         /// </summary>
         /// <param name="a">A vertex.</param>
         /// <param name="b">Another vertex.</param>
         /// <returns>The component-wise minimum of the two vertices.</returns>
-        public static Vector3Int ComponentMin(Vector3Int a, Vector3Int b)
+        public static Vector3I ComponentMin(Vector3I a, Vector3I b)
         {
             var x = a.X < b.X ? a.X : b.X;
             var y = a.Y < b.Y ? a.Y : b.Y;
             var z = a.Z < b.Z ? a.Z : b.Z;
 
-            return new Vector3Int(x, y, z);
+            return new Vector3I(x, y, z);
         }
         /// <summary>
         /// Calculates the component-wise maximum of two vertices.
@@ -36,13 +44,25 @@ namespace Engine.Mathematics
         /// <param name="a">A vertex.</param>
         /// <param name="b">Another vertex.</param>
         /// <returns>The component-wise maximum of the two vertices.</returns>
-        public static Vector3Int ComponentMax(Vector3Int a, Vector3Int b)
+        public static Vector3I ComponentMax(Vector3I a, Vector3I b)
         {
             var x = a.X > b.X ? a.X : b.X;
             var y = a.Y > b.Y ? a.Y : b.Y;
             var z = a.Z > b.Z ? a.Z : b.Z;
 
-            return new Vector3Int(x, y, z);
+            return new Vector3I(x, y, z);
+        }
+
+        public void Add(Vector3I value)
+        {
+            X += value.X;
+            Y += value.Y;
+            Z += value.Z;
+        }
+    
+        public static Vector3I Sum(Vector3I a, Vector3I b)
+        {
+            return new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
         /// <summary>
@@ -51,7 +71,7 @@ namespace Engine.Mathematics
         /// <param name="left">A vertex.</param>
         /// <param name="right">Another vertex.</param>
         /// <returns>A value indicating whether the two vertices are equal.</returns>
-        public static bool operator ==(Vector3Int left, Vector3Int right)
+        public static bool operator ==(Vector3I left, Vector3I right)
         {
             return left.Equals(right);
         }
@@ -61,7 +81,7 @@ namespace Engine.Mathematics
         /// <param name="left">A vertex.</param>
         /// <param name="right">Another vertex.</param>
         /// <returns>A value indicating whether the two vertices are not equal.</returns>
-        public static bool operator !=(Vector3Int left, Vector3Int right)
+        public static bool operator !=(Vector3I left, Vector3I right)
         {
             return !(left == right);
         }
@@ -80,14 +100,14 @@ namespace Engine.Mathematics
         public int Z { get; set; } = z;
 
         /// <inheritdoc/>
-        public readonly bool Equals(Vector3Int other)
+        public readonly bool Equals(Vector3I other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            Vector3Int? p = obj as Vector3Int?;
+            Vector3I? p = obj as Vector3I?;
             if (p.HasValue)
             {
                 return Equals(p.Value);

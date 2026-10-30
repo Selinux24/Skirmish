@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Models
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Instanced model description
     /// </summary>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneLighting
@@ -86,7 +85,7 @@ namespace BasicSamples.SceneLighting
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -149,7 +148,7 @@ namespace BasicSamples.SceneLighting
             var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
-            geo.Transform(Engine.Mathematics.Matrix4x4.RotationX(Helper.PiOver2) * Engine.Mathematics.Matrix4x4.Translation(Vector3Extensions.ForwardLH * 0.5f));
+            geo.Transform(Engine.Mathematics.Matrix4x4.RotationX(Helper.PiOver2) * Engine.Mathematics.Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
 
             var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {
@@ -180,7 +179,7 @@ namespace BasicSamples.SceneLighting
             var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
             Lights.Add(new SceneLightPoint("Point1", true, Color.White.RGB(), Color.White.RGB(), true, pointDesc));
 
-            var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3Extensions.Down, 50, 25, 25);
+            var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
             Lights.Add(new SceneLightSpot("Spot1", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
             Lights.Add(new SceneLightSpot("Spot2", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
             Lights.Add(new SceneLightSpot("Spot3", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));

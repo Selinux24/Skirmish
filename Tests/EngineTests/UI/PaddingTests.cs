@@ -1,12 +1,14 @@
-using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics.CodeAnalysis;
-using Vortice.Mathematics;
 
 namespace EngineTests.UI
 {
+    using Engine.Mathematics;
+    using Engine.UI;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class PaddingTests
     {
         [TestMethod]

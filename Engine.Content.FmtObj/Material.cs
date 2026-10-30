@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.Content.FmtObj
 {
+    using Engine.Mathematics;
+
     struct Material
     {
         public string Name { get; set; }

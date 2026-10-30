@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Effect sky scatter state
     /// </summary>

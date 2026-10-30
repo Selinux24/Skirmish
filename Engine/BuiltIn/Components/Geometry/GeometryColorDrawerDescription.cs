@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Geometry
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Geometry color drawer description
     /// </summary>

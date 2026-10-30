@@ -45,10 +45,8 @@
 
 using System;
 using System.Globalization;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Vortice.Mathematics;
 
 namespace Engine.Mathematics
 {
@@ -760,7 +758,7 @@ namespace Engine.Mathematics
         public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
         {
             float angle = GetAngle(from, to);
-            if (MathHelper.IsZero(angle))
+            if (Helper.IsZero(angle))
             {
                 return to;
             }
@@ -769,7 +767,7 @@ namespace Engine.Mathematics
 
             return Slerp(from, to, delta);
         }
-       
+
         /// <summary>
         /// Creates a rotation from the direction vector from the up vector
         /// </summary>
@@ -956,9 +954,9 @@ namespace Engine.Mathematics
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAtLH(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis)
         {
-            if (MathHelper.IsOne(Vector3.Dot(Vector3Extensions.Up, Vector3.Normalize(eyePosition - target))))
+            if (Helper.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target))))
             {
-                up = Vector3Extensions.Left;
+                up = Vector3.Left;
             }
 
             var q = Invert(LookAtLH(target, eyePosition, up));
@@ -1337,7 +1335,7 @@ namespace Engine.Mathematics
         /// Convert the System.Numerics.Quaternion to a Quaternion.
         /// </summary>
         /// <returns>A Quaternion</returns>
-        public static implicit operator Quaternion(System.Numerics.Quaternion Value)
+        public static explicit operator Quaternion(System.Numerics.Quaternion Value)
         {
             return new Quaternion(Value.X, Value.Y, Value.Z, Value.W);
         }
@@ -1345,7 +1343,7 @@ namespace Engine.Mathematics
         /// Convert the Quaternion to a System.Numerics.Quaternion.
         /// </summary>
         /// <returns>A System.Numerics.Quaternion</returns>
-        public static implicit operator System.Numerics.Quaternion(Quaternion Value)
+        public static explicit operator System.Numerics.Quaternion(Quaternion Value)
         {
             return new System.Numerics.Quaternion(Value.X, Value.Y, Value.Z, Value.W);
         }
@@ -1474,7 +1472,7 @@ namespace Engine.Mathematics
         public static bool NearEqual(Quaternion a, Quaternion b)
         {
             return
-                Vector3Extensions.NearEqual(a.Axis, b.Axis) &&
+                Vector3.NearEqual(a.Axis, b.Axis) &&
                 Helper.NearEqual(a.Angle, b.Angle);
         }
 

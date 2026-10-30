@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -39,7 +38,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Cell offsets list
         /// </summary>
-        static readonly Vortice.Mathematics.Int3[] cellOffsets =
+        static readonly Vector3I[] cellOffsets =
         [
             new(+0, +0, +0),
             new(-1, +0, -1),
@@ -255,7 +254,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="min">Minimum cell bounds</param>
         /// <param name="max">Maximum cell bounds</param>
         /// <returns>Returns each span index and span center to evaluate</returns>
-        private IEnumerable<(int SpanIndex, Vector3 SpanCenter)> IterateCellsSpansAreas(Vortice.Mathematics.Int3 min, Vortice.Mathematics.Int3 max)
+        private IEnumerable<(int SpanIndex, Vector3 SpanCenter)> IterateCellsSpansAreas(Vector3I min, Vector3I max)
         {
             foreach (var (col, row, i) in IterateCellsSpans(min.X, min.Z, max.X, max.Z))
             {
@@ -724,7 +723,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="area">Graph area</param>
         /// <param name="min">Resulting bounds min</param>
         /// <param name="max">Resulting bounds max</param>
-        private bool GetAreaBounds(IGraphArea area, out Vortice.Mathematics.Int3 min, out Vortice.Mathematics.Int3 max)
+        private bool GetAreaBounds(IGraphArea area, out Vector3I min, out Vector3I max)
         {
             var bbox = area.GetBounds();
 
@@ -757,7 +756,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="min">Minimum bound limits</param>
         /// <param name="max">Maximum bound limits</param>
         /// <param name="areaId">Area value to mark</param>
-        private void MarkArea(IGraphArea graphArea, Vortice.Mathematics.Int3 min, Vortice.Mathematics.Int3 max, int areaId)
+        private void MarkArea(IGraphArea graphArea, Vector3I min, Vector3I max, int areaId)
         {
             switch (graphArea)
             {
@@ -781,7 +780,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkBoxArea(Vortice.Mathematics.Int3 min, Vortice.Mathematics.Int3 max, int areaId)
+        private void MarkBoxArea(Vector3I min, Vector3I max, int areaId)
         {
             foreach (var (i, _) in IterateCellsSpansAreas(min, max))
             {
@@ -799,7 +798,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The value of spacial parameters are in world units.
         /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
         /// </remarks>
-        private void MarkConvexPolyArea(Vector3[] vertices, Vortice.Mathematics.Int3 min, Vortice.Mathematics.Int3 max, int areaId)
+        private void MarkConvexPolyArea(Vector3[] vertices, Vector3I min, Vector3I max, int areaId)
         {
             foreach (var (i, spanCenter) in IterateCellsSpansAreas(min, max))
             {
@@ -820,7 +819,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// The value of spacial parameters are in world units.
         /// </remarks>
-        private void MarkCylinderArea(Vector3 center, float r, Vortice.Mathematics.Int3 min, Vortice.Mathematics.Int3 max, int areaId)
+        private void MarkCylinderArea(Vector3 center, float r, Vector3I min, Vector3I max, int areaId)
         {
             float r2 = r * r;
 
@@ -1141,7 +1140,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
         /// </remarks>
         /// <returns>Returns the height patch</returns>
-        public HeightPatch GetHeightData(IndexedPolygon poly, int region, Vortice.Mathematics.Int3[] verts, Vortice.Mathematics.RectI rect)
+        public HeightPatch GetHeightData(IndexedPolygon poly, int region, Vector3I[] verts, RectI rect)
         {
             var queue = new List<HeightDataItem>(512);
 
@@ -1295,7 +1294,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hp">Height patch</param>
         /// <param name="outVerts">Resulting vertices</param>
         /// <param name="outTris">Resulting triangle indices</param>
-        public void BuildPolyDetail(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Vortice.Mathematics.Int3[] outTris)
+        public void BuildPolyDetail(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Vector3I[] outTris)
         {
             Vector3[] verts;
             int[] hull;
@@ -1452,13 +1451,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Create sample locations in a grid
         /// </summary>
-        private Vector3[] CreateGridSampleLocations(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, int[] hull, Vortice.Mathematics.Int3[] tris, out Vortice.Mathematics.Int3[] newTris)
+        private Vector3[] CreateGridSampleLocations(Vector3[] polygon, BuildPolyDetailParams param, HeightPatch hp, int[] hull, Vector3I[] tris, out Vector3I[] newTris)
         {
             float sampleDist = param.SampleDist;
             float sampleMaxError = param.SampleMaxError;
 
             var verts = new List<Vector3>(polygon);
-            var triList = new List<Vortice.Mathematics.Int3>(tris);
+            var triList = new List<Vector3I>(tris);
 
             // Create sample locations in a grid.
             var samples = InitializeSamples(polygon, param, hp);
@@ -1507,7 +1506,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="verts">Vertex list</param>
         /// <param name="hull">Hull indices</param>
-        private static Vortice.Mathematics.Int3[] TriangulateDelaunay(Vector3[] verts, int[] hull)
+        private static Vector3I[] TriangulateDelaunay(Vector3[] verts, int[] hull)
         {
             var dhull = DelaunayHull.Build(verts, hull);
 
@@ -1572,7 +1571,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="sampleDist">Sample distance</param>
         /// <param name="verts">Vertices</param>
         /// <param name="tris">Triangles</param>
-        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(List<SampleVertex> samples, float sampleDist, Vector3[] verts, Vortice.Mathematics.Int3[] tris)
+        private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(List<SampleVertex> samples, float sampleDist, Vector3[] verts, Vector3I[] tris)
         {
             var bestpt = Vector3.Zero;
             float bestd = 0;
@@ -1629,7 +1628,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Vortice.Mathematics.Int3[] verts, HeightPatch hp)
+        private HeightDataItem[] SeedArrayWithPolyCenter(IndexedPolygon poly, Vector3I[] verts, HeightPatch hp)
         {
             var (startCellX, startCellY, startSpanIndex) = FindClosestCellToPolyVertex2D(poly, verts, hp);
 
@@ -1751,7 +1750,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="poly">Polygon</param>
         /// <param name="verts">Polygon vertices</param>
         /// <param name="hp">Height patch</param>
-        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Vortice.Mathematics.Int3[] verts, HeightPatch hp)
+        private (int StartCellX, int StartCellY, int StartSpanIndex) FindClosestCellToPolyVertex2D(IndexedPolygon poly, Vector3I[] verts, HeightPatch hp)
         {
             // Find cell closest to a poly vertex
             var polyIndices = poly.GetVertices();
@@ -1766,7 +1765,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int k = 0; k < cellOffsets.Length && dmin > 0; ++k)
                 {
                     var offset = cellOffsets[k];
-                    var a = Int3Extensions.Sum(vert, offset);
+                    var a = Vector3I.Sum(vert, offset);
                     if (!hp.Contains(a.X, a.Z))
                     {
                         continue;

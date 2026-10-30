@@ -2,7 +2,6 @@
 using Moq;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 
 namespace EngineTests
 {
@@ -27,16 +26,16 @@ namespace EngineTests
         {
             Manipulator3D man = new();
 
-            Assert.AreEqual(Vector3Extensions.ForwardLH, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3Extensions.BackwardLH, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3Extensions.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3Extensions.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3Extensions.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(Vector3.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(Vector3.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(Vector3.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(Vector3.Zero, man.Position, "Position point error");
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
             Assert.AreEqual(Matrix4x4.Identity, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(Matrix4x4.Identity, man.GlobalTransform, "GlobalTransform error");
@@ -59,16 +58,16 @@ namespace EngineTests
         }
         private static void ValidateSetPosition(Vector3 point, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(Vector3Extensions.ForwardLH, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3Extensions.BackwardLH, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3Extensions.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3Extensions.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3Extensions.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(Vector3.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(Vector3.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(Vector3.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(point, man.Position, "Position point error");
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -82,7 +81,7 @@ namespace EngineTests
             var trn = Matrix4x4.RotationQuaternion(rot);
 
             man.Reset();
-            man.SetRotation(Vector3Extensions.Up, angle);
+            man.SetRotation(Vector3.Up, angle);
             ValidateSetRotation(rot, trn, man);
 
             man.Reset();
@@ -95,16 +94,16 @@ namespace EngineTests
         }
         private static void ValidateSetRotation(Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(-trn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-trn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(trn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(trn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(trn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(trn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-trn.Forward, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(-trn.Backward, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(trn.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(trn.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(trn.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(trn.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(Vector3.Zero, man.Position, "Position point error");
             Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -131,16 +130,16 @@ namespace EngineTests
         }
         private static void ValidateSetScaling(Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(Vector3Extensions.ForwardLH, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3Extensions.BackwardLH, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3Extensions.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3Extensions.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3Extensions.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(Vector3.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(Vector3.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(Vector3.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(Vector3.Zero, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(Vector3.Zero, man.Position, "Position point error");
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(scaling, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -158,11 +157,11 @@ namespace EngineTests
             var trn = Matrix4x4.Scaling(scaling) * rotTrn * Matrix4x4.Translation(point);
 
             man.Reset();
-            man.SetTransform(point, Vector3Extensions.Up, angle, scale);
+            man.SetTransform(point, Vector3.Up, angle, scale);
             ValidateSetTransform(point, rot, scaling, trn, man);
 
             man.Reset();
-            man.SetTransform(point, Vector3Extensions.Up, angle, scaling);
+            man.SetTransform(point, Vector3.Up, angle, scaling);
             ValidateSetTransform(point, rot, scaling, trn, man);
 
             man.Reset();
@@ -185,16 +184,16 @@ namespace EngineTests
         {
             var rotTrn = Matrix4x4.RotationQuaternion(rot);
 
-            Assert.AreEqual(-rotTrn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-rotTrn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(rotTrn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(rotTrn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(rotTrn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(rotTrn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-rotTrn.Forward, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(-rotTrn.Backward, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(rotTrn.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(rotTrn.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(rotTrn.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(rotTrn.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(point, man.Position, "Position point error");
             Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(scaling, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -211,7 +210,7 @@ namespace EngineTests
             ValidateLookAt(Vector3.Zero, dir, man);
 
             man.Reset();
-            man.LookAt(target, Vector3Extensions.Up);
+            man.LookAt(target, Vector3.Up);
             ValidateLookAt(Vector3.Zero, dir, man);
 
             var point = Vector3.One;
@@ -224,11 +223,11 @@ namespace EngineTests
 
             man.Reset();
             man.SetPosition(point);
-            man.LookAt(target, Vector3Extensions.Up);
+            man.LookAt(target, Vector3.Up);
             ValidateLookAt(point, dir, man);
 
             point = Vector3.One * 2f;
-            dir = Vector3Extensions.ForwardLH;
+            dir = Vector3.ForwardLH;
 
             man.Reset();
             man.SetPosition(point);
@@ -245,10 +244,10 @@ namespace EngineTests
         }
         private static void ValidateLookAt(Vector3 point, Vector3 dir, Manipulator3D man)
         {
-            Assert.AreEqual(dir, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(dir, man.Forward, "Forward direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(point, man.Position, "Position point error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
         }
         [TestMethod()]
         public void RotateToTest()
@@ -275,7 +274,7 @@ namespace EngineTests
             ValidateRotateTo(Vector3.Zero, dir, man);
 
             //Rotate on Z axis (No rotation at all)
-            dir = Vector3Extensions.ForwardLH;
+            dir = Vector3.ForwardLH;
             man.Reset();
             man.RotateTo(target, Axis.Z);
             ValidateRotateTo(Vector3.Zero, dir, man);
@@ -301,17 +300,17 @@ namespace EngineTests
             ValidateRotateTo(Vector3.Zero, dir, man);
 
             //Rotate on Z axis (No rotation at all)
-            dir = Vector3Extensions.ForwardLH;
+            dir = Vector3.ForwardLH;
             man.Reset();
             man.RotateTo(target, Axis.Z);
             ValidateRotateTo(Vector3.Zero, dir, man);
         }
         private static void ValidateRotateTo(Vector3 point, Vector3 dir, Manipulator3D man)
         {
-            Assert.AreEqual(dir, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
+            Assert.AreEqual(dir, man.Forward, "Forward direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(point, man.Position, "Position point error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
         }
         [TestMethod()]
         public void SetNormalTest()
@@ -319,7 +318,7 @@ namespace EngineTests
             Manipulator3D man = new();
 
             var point = Vector3.Zero;
-            var normal = Vector3Extensions.Up;
+            var normal = Vector3.Up;
             man.Reset();
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
@@ -329,18 +328,18 @@ namespace EngineTests
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
 
-            normal = Vector3.Normalize(Vector3Extensions.Left);
+            normal = Vector3.Normalize(Vector3.Left);
             man.Reset();
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
 
-            normal = Vector3.Normalize(Vector3Extensions.Down);
+            normal = Vector3.Normalize(Vector3.Down);
             man.Reset();
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
 
             point = Vector3.One;
-            normal = Vector3Extensions.Up;
+            normal = Vector3.Up;
             man.Reset();
             man.SetPosition(point);
             man.SetNormal(normal);
@@ -352,13 +351,13 @@ namespace EngineTests
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
 
-            normal = Vector3.Normalize(Vector3Extensions.Left);
+            normal = Vector3.Normalize(Vector3.Left);
             man.Reset();
             man.SetPosition(point);
             man.SetNormal(normal);
             ValidateSetNormal(point, normal, man);
 
-            normal = Vector3.Normalize(Vector3Extensions.Down);
+            normal = Vector3.Normalize(Vector3.Down);
             man.Reset();
             man.SetPosition(point);
             man.SetNormal(normal);
@@ -366,9 +365,9 @@ namespace EngineTests
         }
         private static void ValidateSetNormal(Vector3 point, Vector3 normal, Manipulator3D man)
         {
-            Assert.AreEqual(normal, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
+            Assert.AreEqual(normal, man.Up, "Up direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position vector error");
+            Assert.AreEqual(point, man.Position, "Position vector error");
         }
 
         [TestMethod()]
@@ -476,16 +475,16 @@ namespace EngineTests
         }
         private static void ValidateMove(Vector3 point, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(Vector3Extensions.ForwardLH, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3Extensions.BackwardLH, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3Extensions.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3Extensions.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3Extensions.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3Extensions.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(Vector3.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(Vector3.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(Vector3.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(point, man.Position, "Position point error");
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -584,16 +583,16 @@ namespace EngineTests
         }
         private static void ValidateRotate(Vector3 point, Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(-trn.Forward, man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(-trn.Backward, man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(trn.Left, man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(trn.Right, man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(trn.Up, man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(trn.Down, man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(-trn.Forward, man.Forward, "Forward direction vector error");
+            Assert.AreEqual(-trn.Backward, man.Backward, "Backward direction vector error");
+            Assert.AreEqual(trn.Left, man.Left, "Left direction vector error");
+            Assert.AreEqual(trn.Right, man.Right, "Right direction vector error");
+            Assert.AreEqual(trn.Up, man.Up, "Up direction vector error");
+            Assert.AreEqual(trn.Down, man.Down, "Down direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(point, man.Position, "Position point error");
             Assert.AreEqual(rot, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(Vector3.One, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");
@@ -657,16 +656,16 @@ namespace EngineTests
         }
         private static void ValidateScale(Vector3 point, Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
-            Assert.AreEqual(Vector3.Normalize(-trn.Forward), man.Forward, Vector3Extensions.Comparer, "Forward direction vector error");
-            Assert.AreEqual(Vector3.Normalize(-trn.Backward), man.Backward, Vector3Extensions.Comparer, "Backward direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.Left), man.Left, Vector3Extensions.Comparer, "Left direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.Right), man.Right, Vector3Extensions.Comparer, "Right direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.Up), man.Up, Vector3Extensions.Comparer, "Up direction vector error");
-            Assert.AreEqual(Vector3.Normalize(trn.Down), man.Down, Vector3Extensions.Comparer, "Down direction vector error");
+            Assert.AreEqual(Vector3.Normalize(-trn.Forward), man.Forward, "Forward direction vector error");
+            Assert.AreEqual(Vector3.Normalize(-trn.Backward), man.Backward, "Backward direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Left), man.Left, "Left direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Right), man.Right, "Right direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Up), man.Up, "Up direction vector error");
+            Assert.AreEqual(Vector3.Normalize(trn.Down), man.Down, "Down direction vector error");
 
-            Assert.AreEqual(point, man.Position, Vector3Extensions.Comparer, "Position point error");
+            Assert.AreEqual(point, man.Position, "Position point error");
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
-            Assert.AreEqual(scaling, man.Scaling, Vector3Extensions.Comparer, "Scaling error");
+            Assert.AreEqual(scaling, man.Scaling, "Scaling error");
 
             Assert.AreEqual(trn, man.LocalTransform, "LocalTransform error");
             Assert.AreEqual(trn, man.GlobalTransform, "GlobalTransform error");

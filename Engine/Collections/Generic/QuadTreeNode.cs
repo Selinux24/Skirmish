@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.Collections.Generic
 {

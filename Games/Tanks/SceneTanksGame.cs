@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Tanks
@@ -858,8 +857,8 @@ namespace Tanks
             uiTweener.Show(loadingBar, 500);
 
             var bbox = terrain.GetBoundingBox();
-            var min = bbox.Minimum.XZ();
-            var max = bbox.Maximum.XZ();
+            var min = bbox.Minimum.XZ;
+            var max = bbox.Maximum.XZ;
             var sph = new BoundingSphere(bbox.Center, bbox.Extents.X * 0.66f);
 
             uint totalTrees = (uint)treeModels.Sum(t => t.InstanceCount);
@@ -917,18 +916,18 @@ namespace Tanks
             treeModels.ForEach(t => t.Visible = true);
 
             var p1 = new Vector3(-140, 100, 0);
-            var n1 = Vector3Extensions.Up;
+            var n1 = Vector3.Up;
             var p2 = new Vector3(+140, 100, 0);
-            var n2 = Vector3Extensions.Up;
+            var n2 = Vector3.Up;
 
             if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
-                p1 = r1.Position - (Vector3Extensions.Up * 0.1f);
+                p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Primitive.Normal;
             }
             if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
-                p2 = r2.Position - (Vector3Extensions.Up * 0.1f);
+                p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Primitive.Normal;
             }
 
@@ -1309,7 +1308,7 @@ You will lost all the game progress.",
                 return;
             }
 
-            var ray = new PickingRay(nextPosition, Vector3Extensions.Down);
+            var ray = new PickingRay(nextPosition, Vector3.Down);
 
             if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= radius)
             {
@@ -1405,10 +1404,10 @@ You will lost all the game progress.",
             Vector3 interest = tanks[0].Manipulator.Position + (distV * dist * 0.5f);
 
             // Perpendicular to diff
-            Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3Extensions.Up, diffV));
+            Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3.Up, diffV));
             float y = MathF.Max(100f, dist * 0.5f);
             float z = MathF.Max(200f, dist);
-            Vector3 position = interest + (perp * z) + (Vector3Extensions.Up * y);
+            Vector3 position = interest + (perp * z) + (Vector3.Up * y);
 
             if (firstUpdate)
             {
@@ -1461,7 +1460,7 @@ You will lost all the game progress.",
                     continue;
                 }
 
-                var screenPos = Vector3Extensions.Project(
+                var screenPos = Vector3.Project(
                     markerPos,
                     Game.Graphics.Viewport.X,
                     Game.Graphics.Viewport.Y,
@@ -1485,7 +1484,7 @@ You will lost all the game progress.",
         {
             if (FindTopGroundPosition<Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
             {
-                model.Manipulator.SetPosition(r.Position - (Vector3Extensions.Up * 0.1f));
+                model.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
                 model.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
             }
         }
@@ -1534,7 +1533,7 @@ You will lost all the game progress.",
             //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
             var newDir = Vector3.Normalize(barrelPos - position);
 
-            var angle = Vector3Extensions.AngleSigned(barrelDir, newDir);
+            var angle = Vector3.AngleSigned(barrelDir, newDir);
             if (Helper.IsZero(angle))
             {
                 return;
@@ -1547,24 +1546,24 @@ You will lost all the game progress.",
             var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Engine.Mathematics.Matrix4x4.RotationAxis(c, angle));
 
             //Apply de local delta
-            barrelManipulator.RotateTo(localPos + localDir, Vector3Extensions.Up, Axis.Y, 0.01f);
+            barrelManipulator.RotateTo(localPos + localDir, Vector3.Up, Axis.Y, 0.01f);
         }
         private void PaintMinimap()
         {
             // Set wind velocity and direction
             windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
-            windDirectionArrow.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, windDirection);
+            windDirectionArrow.Rotation = Vector2.AngleSigned(Vector2.UnitY, windDirection);
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            Vortice.Mathematics.Rect terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
+            Rect terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
-            Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
-            Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
+            Vector2 tank1 = tanks[0].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
+            Vector2 tank2 = tanks[1].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
 
             // Get the mini map rectangle
-            Vortice.Mathematics.Rect miniMapRect = miniMapBackground.GetRenderArea(false);
+            Rect miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
             Vector2 markerBounds1 = new(miniMapTank1.Width, miniMapTank1.Height);
@@ -1581,16 +1580,16 @@ You will lost all the game progress.",
             Vector2 markerToMinimap2 = new(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
 
             // Translate and center into the minimap
-            Vector2 mt1Position = markerToMinimap1 + miniMapRect.TopLeft - (markerBounds1 * 0.5f);
-            Vector2 mt2Position = markerToMinimap2 + miniMapRect.TopLeft - (markerBounds2 * 0.5f);
+            Vector2 mt1Position = markerToMinimap1 + (Vector2)miniMapRect.TopLeft - (markerBounds1 * 0.5f);
+            Vector2 mt2Position = markerToMinimap2 + (Vector2)miniMapRect.TopLeft - (markerBounds2 * 0.5f);
 
             // Set marker position
             miniMapTank1.SetPosition(mt1Position);
             miniMapTank2.SetPosition(mt2Position);
 
             // Set marker rotation
-            miniMapTank1.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ()));
-            miniMapTank2.Rotation = Vector2Extensions.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
+            miniMapTank1.Rotation = Vector2.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ));
+            miniMapTank2.Rotation = Vector2.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ));
         }
 
         private void Shoot(float shotForce)
@@ -1648,7 +1647,7 @@ You will lost all the game progress.",
             shot = null;
             shooting = false;
 
-            Vector3 outPosition = Vector3Extensions.Up * (terrainTop + 1);
+            Vector3 outPosition = Vector3.Up * (terrainTop + 1);
             projectile.Manipulator.SetPosition(outPosition);
             projectile.Visible = false;
 
@@ -1871,7 +1870,7 @@ You will lost all the game progress.",
 
         private void AddExplosionSystem(Vector3 position)
         {
-            Vector3 velocity = Vector3Extensions.Up;
+            Vector3 velocity = Vector3.Up;
             float duration = explosionDurationSeconds;
             float rate = 0.01f;
 
@@ -1930,7 +1929,7 @@ You will lost all the game progress.",
         }
         private void AddSmokePlumeSystem(Vector3 position)
         {
-            Vector3 velocity = Vector3Extensions.Up;
+            Vector3 velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextSingle(10, 30);
             float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 

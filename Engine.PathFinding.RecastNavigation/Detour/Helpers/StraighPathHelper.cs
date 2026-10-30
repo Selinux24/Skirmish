@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -165,7 +164,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
             closestStartPos = Vector3.Zero;
             closestEndPos = Vector3.Zero;
 
-            if (startPos.IsInfinity() || endPos.IsInfinity())
+            if (startPos.IsInfinity || endPos.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }

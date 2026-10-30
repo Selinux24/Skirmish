@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStart
@@ -29,8 +28,8 @@ namespace BasicSamples.SceneStart
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-        private readonly Vector3 sceneButtonColor = Vector3Extensions.AdjustSaturation(Color.CornflowerBlue.RGB(), 1.5f);
-        private readonly Vector3 exitButtonColor = Vector3Extensions.AdjustSaturation(Color.Orange.RGB(), 1.5f);
+        private readonly Vector3 sceneButtonColor = Vector3.AdjustSaturation(Color.CornflowerBlue.RGB(), 1.5f);
+        private readonly Vector3 exitButtonColor = Vector3.AdjustSaturation(Color.Orange.RGB(), 1.5f);
 
         private bool sceneReady = false;
 
@@ -162,7 +161,7 @@ namespace BasicSamples.SceneStart
                 res.ThrowExceptions();
             }
 
-            Lights.KeyLight.Direction = Vector3Extensions.ForwardLH;
+            Lights.KeyLight.Direction = Vector3.ForwardLH;
 
             soundEffectsManager.Start(1f);
             soundEffectsManager.Play();

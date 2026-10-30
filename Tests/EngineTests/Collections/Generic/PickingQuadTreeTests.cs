@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace EngineTests.Collections.Generic
 {
@@ -72,7 +70,7 @@ namespace EngineTests.Collections.Generic
             t0PickingPoint = t0.GetCenter();
             t0PickingDistance = 10f;
             var r0Start = t0PickingPoint + new Vector3(0, t0PickingDistance, 0);
-            t0PickingRay = new Ray(r0Start, Vector3Extensions.Down);
+            t0PickingRay = new Ray(r0Start, Vector3.Down);
 
             t10 = mesh[0];
             t11 = mesh[31];
@@ -515,7 +513,7 @@ namespace EngineTests.Collections.Generic
             Assert.IsTrue(picked);
             Assert.AreEqual(t1PickingDistance0, t.Distance, 0.0001f);
             Assert.AreEqual(t10, t.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(t1PickingPoint0, t.Position);
 
             //Short pick
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
@@ -537,12 +535,12 @@ namespace EngineTests.Collections.Generic
             var t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t0.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(t1PickingPoint0, t0.Position);
 
             var t1 = tlist.ElementAt(1);
             Assert.AreEqual(t1PickingDistance1, t1.Distance, 0.0001f);
             Assert.AreEqual(t11, t1.Primitive);
-            Assert.AreEqual(t1PickingPoint1, t1.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(t1PickingPoint1, t1.Position);
 
             //Short pick
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
@@ -559,7 +557,7 @@ namespace EngineTests.Collections.Generic
             t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
-            Assert.AreEqual(t1PickingPoint0, t0.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(t1PickingPoint0, t0.Position);
         }
     }
 }

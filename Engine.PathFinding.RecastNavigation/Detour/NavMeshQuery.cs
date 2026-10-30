@@ -1,12 +1,13 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-using Engine.PathFinding.RecastNavigation.Detour.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.Mathematics;
+    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+    using Engine.PathFinding.RecastNavigation.Detour.Helpers;
+
     /// <summary>
     /// Provides the ability to perform pathfinding related queries against a navigation mesh.
     /// </summary>

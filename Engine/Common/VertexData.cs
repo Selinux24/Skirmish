@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Common
@@ -86,7 +85,7 @@ namespace Engine.Common
                 var boneTransform = transforms[index];
                 if (!boneTransform.IsIdentity)
                 {
-                    p = Vector3.Transform(position, boneTransform);
+                    p = Vector3.TransformCoordinate(position, boneTransform);
                 }
 
                 t += p * weight;
@@ -136,7 +135,7 @@ namespace Engine.Common
 
             if (result.Position.HasValue)
             {
-                result.Position = Vector3.Transform(result.Position.Value, transform);
+                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
             }
 
             if (result.Normal.HasValue)

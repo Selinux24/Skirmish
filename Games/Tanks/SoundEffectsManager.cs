@@ -2,11 +2,12 @@
 using Engine.Audio;
 using Engine.Common;
 using System;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Tanks
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sound effects manager
     /// </summary>

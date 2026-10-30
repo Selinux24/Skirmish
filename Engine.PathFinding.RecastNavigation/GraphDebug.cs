@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -20,8 +19,8 @@ namespace Engine.PathFinding.RecastNavigation
     /// <param name="agent">Agent</param>
     public struct GraphDebug(Graph graph, AgentType agent) : IGraphDebug
     {
-        private static readonly Vector4 DefaultNodeColor = new Vortice.Mathematics.Color(255, 255, 255, 32).ToVector4();
-        private static readonly Vector4 DefaultPrimitiveColor = new Vortice.Mathematics.Color(0, 192, 255, 128).ToVector4();
+        private static readonly Vector4 DefaultNodeColor = new(255, 255, 255, 32);
+        private static readonly Vector4 DefaultPrimitiveColor = new(0, 192, 255, 128);
 
         /// <summary>
         /// Internal graph
@@ -228,16 +227,16 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (walkable)
             {
-                Vector4 walkableColor = new Vortice.Mathematics.Color(64, 128, 160, 255).ToVector4();
-                Vector4 nullColor = new Vortice.Mathematics.Color(64, 64, 64, 255).ToVector4();
-                Vector4 multiColor = new Vortice.Mathematics.Color(0, 192, 255, 255).ToVector4();
+                Vector4 walkableColor = new(64, 128, 160, 255);
+                Vector4 nullColor = new(64, 64, 64, 255);
+                Vector4 multiColor = new(0, 192, 255, 255);
 
                 Dictionary<Vector4, IEnumerable<Vector3>> data = new()
                 {
-                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3Extensions.Up).SelectMany(t=>t.GetVertices()) },
-                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3Extensions.Up).SelectMany(t=>t.GetVertices()) },
-                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3Extensions.Up).SelectMany(t=>t.GetVertices()) },
-                    { Vector4.One, [.. walkableTriangles.Where(t => t.Normal != Vector3Extensions.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3Extensions.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3Extensions.Up).SelectMany(t => t.GetVertices())] },
+                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
+                    { Vector4.One, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())] },
                 };
                 return [new(name, Topology.TriangleList, data)];
             }
@@ -348,7 +347,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static IEnumerable<GraphDebugDataCollection> GetContourBorders(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
-            Vector4 bseColor = new Vortice.Mathematics.Color(255, 255, 255, a).ToVector4();
+            Vector4 bseColor = new(255, 255, 255, a);
 
             Dictionary<Vector4, List<Vector3>> lines = [];
 
@@ -423,7 +422,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Vortice.Mathematics.Color(32, 128, 128, 196).ToVector4();
+            Vector4 color = new(32, 128, 128, 196);
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -512,7 +511,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
+            Vector4 color = new(0, 48, 64, 255);
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -538,7 +537,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Vector4 col = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
+                Vector4 col = new(0, 48, 64, 255);
                 if (p.IsExternalLink(i0))
                 {
                     col = Vector4.One;
@@ -613,7 +612,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="dm">Detail mesh</param>
         private static IEnumerable<GraphDebugDataCollection> GetDetailMeshEdges(PolyMeshDetail dm)
         {
-            Vector3 delta = Vector3Extensions.Up * 0.001f;
+            Vector3 delta = Vector3.Up * 0.001f;
 
             Dictionary<Vector4, List<Vector3>> res = [];
 
@@ -624,7 +623,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (flag == DetailTriEdgeFlagTypes.Boundary)
                 {
                     // Ext edge
-                    color = new Vortice.Mathematics.Color(128, 128, 128, 220).ToVector4();
+                    color = new(128, 128, 128, 220);
                 }
                 else
                 {
@@ -634,7 +633,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Internal edge
-                    color = new Vortice.Mathematics.Color(0, 0, 0, 64).ToVector4();
+                    color = new(0, 0, 0, 64);
                 }
 
                 res.TryAdd(color, []);
@@ -731,11 +730,11 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector4 col;
                 if (area == AreaTypes.RC_WALKABLE_AREA)
                 {
-                    col = Vector4.Lerp(color, new Vortice.Mathematics.Color(0, 192, 255, 64).ToVector4(), 32);
+                    col = Vector4.Lerp(color, new(0, 192, 255, 64), 32);
                 }
                 else if (area == AreaTypes.RC_NULL_AREA)
                 {
-                    col = Vector4.Lerp(color, new Vortice.Mathematics.Color(0, 0, 0, 64).ToVector4(), 32);
+                    col = Vector4.Lerp(color, new(0, 0, 0, 64), 32);
                 }
                 else
                 {
@@ -889,7 +888,7 @@ namespace Engine.PathFinding.RecastNavigation
         private static IEnumerable<GraphDebugDataCollection> GetTileCacheContourBorders(TileCacheContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
-            Vector4 bseColor = new Vortice.Mathematics.Color(255, 255, 255, a).ToVector4();
+            Vector4 bseColor = new(255, 255, 255, a);
 
             Dictionary<Vector4, List<Vector3>> lines = [];
 
@@ -964,7 +963,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Vortice.Mathematics.Color(32, 128, 128, 196).ToVector4();
+            Vector4 color = new(32, 128, 128, 196);
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -1045,7 +1044,7 @@ namespace Engine.PathFinding.RecastNavigation
                 yield break;
             }
 
-            Vector4 color = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
+            Vector4 color = new(0, 48, 64, 255);
 
             var dict = new Dictionary<Vector4, IEnumerable<Vector3>>
             {
@@ -1071,7 +1070,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Vector4 col = new Vortice.Mathematics.Color(0, 48, 64, 255).ToVector4();
+                Vector4 col = new(0, 48, 64, 255);
                 if (p.IsExternalLink(i0))
                 {
                     col = Vector4.One;
@@ -1181,12 +1180,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<(Vector4, Vector3)> ReadTris(Vortice.Mathematics.Int3[] t, int area, Vector3 orig, float cs, float ch)
+        private static IEnumerable<(Vector4, Vector3)> ReadTris(Vector3I[] t, int area, Vector3 orig, float cs, float ch)
         {
             Vector4 col;
             if (area == 0)
             {
-                col = new Vortice.Mathematics.Color(0, 0, 0, 128).ToVector4();
+                col = new(0, 0, 0, 128);
             }
             else
             {
@@ -1211,7 +1210,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Vortice.Mathematics.Int3[] verts, Vector3 orig, float cs, float ch)
+        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Vector3I[] verts, Vector3 orig, float cs, float ch)
         {
             int[] vi = [p0, p1];
 
@@ -1236,7 +1235,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (area == 0)
             {
                 // Treat zero area type as default.
-                return new Vortice.Mathematics.Color(0, 192, 255, alpha).ToVector4();
+                return new(0, 192, 255, alpha);
             }
             else
             {

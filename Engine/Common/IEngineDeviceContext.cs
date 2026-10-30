@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Numerics;
 using Vortice.DXGI;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Engine device context interface
     /// </summary>
@@ -40,12 +40,12 @@ namespace Engine.Common
         /// Sets viewport
         /// </summary>
         /// <param name="viewport">Viewport</param>
-        void SetViewport(Viewport viewport);
+        void SetViewport(Vortice.Mathematics.Viewport viewport);
         /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        void SetViewports(Viewport[] viewports);
+        void SetViewports(Vortice.Mathematics.Viewport[] viewports);
 
         /// <summary>
         /// Set render target

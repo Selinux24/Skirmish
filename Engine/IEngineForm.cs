@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Numerics;
 
 namespace Engine
 {
@@ -66,7 +65,7 @@ namespace Engine
         /// <summary>
         /// Render rectangle
         /// </summary>
-        Vortice.Mathematics.Rect RenderRectangle
+        Rect RenderRectangle
         {
             get
             {

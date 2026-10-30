@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine
 {
@@ -191,7 +190,7 @@ namespace Engine
                 return;
             }
 
-            if (Vector3Extensions.NearEqual(direction, Vector3.Zero))
+            if (Vector3.NearEqual(direction, Vector3.Zero))
             {
                 return;
             }
@@ -445,7 +444,7 @@ namespace Engine
         /// <inheritdoc/>
         public void LookAt(Vector3 target)
         {
-            LookAt(target, Vector3Extensions.Up);
+            LookAt(target, Vector3.Up);
         }
         /// <inheritdoc/>
         public void LookAt(Vector3 target, Vector3 up)
@@ -455,10 +454,10 @@ namespace Engine
                 //Set parameters to local space
                 var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
-                target = Vector3Extensions.TransformCoordinate(target, parentTransform);
+                target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3Extensions.NearEqual(position, target))
+            if (Vector3.NearEqual(position, target))
             {
                 return;
             }
@@ -471,7 +470,7 @@ namespace Engine
         /// <inheritdoc/>
         public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0)
         {
-            RotateTo(target, Vector3Extensions.Up, axis, interpolationAmount);
+            RotateTo(target, Vector3.Up, axis, interpolationAmount);
         }
         /// <inheritdoc/>
         public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0)
@@ -481,10 +480,10 @@ namespace Engine
                 //Set parameters to local space
                 var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
-                target = Vector3Extensions.TransformCoordinate(target, parentTransform);
+                target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3Extensions.NearEqual(position, target))
+            if (Vector3.NearEqual(position, target))
             {
                 return;
             }
@@ -502,9 +501,9 @@ namespace Engine
         /// <inheritdoc/>
         public void SetNormal(Vector3 normal, float interpolationAmount = 0)
         {
-            float angle = Vector3Extensions.AngleSigned(Up, normal);
+            float angle = Vector3.AngleSigned(Up, normal);
 
-            var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3Extensions.Left : Vector3.Cross(Up, normal);
+            var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
 
             var newRotation = Quaternion.RotationAxis(Vector3.Normalize(axis), angle) * rotation;
 

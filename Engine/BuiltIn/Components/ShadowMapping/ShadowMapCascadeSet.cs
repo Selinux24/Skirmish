@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
@@ -118,7 +117,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             // Find the view matrix
             lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
             var lookAt = lightPosition + lightDirection * camera.FarPlaneDistance;
-            var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3Extensions.Left));
+            var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
             var shadowView = Matrix4x4.LookAtLH(lightPosition, lookAt, up);
 
             // Get the bounds for the shadow space

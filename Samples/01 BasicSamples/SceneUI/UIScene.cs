@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneUI
@@ -171,7 +170,7 @@ namespace BasicSamples.SceneUI
                 {
                     ContentPath = resourcesFolder,
                     Textures = ["pan_bw.png"],
-                    BaseColor = Vector4Extensions.FromRgb(176, 77, 45),
+                    BaseColor = Vector4.FromColor3(176, 77, 45),
                 },
                 StartsVisible = false,
             };

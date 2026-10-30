@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Content
 {
@@ -79,7 +78,7 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
-            Vector3 direction = Vector3.TransformNormal(Vector3Extensions.Up, Mathematics.Matrix4x4.RotationQuaternion(Rotation));
+            Vector3 direction = Vector3.TransformNormal(Vector3.Up, Mathematics.Matrix4x4.RotationQuaternion(Rotation));
             float radius = GetRadius(QuadraticAttenuation, 0.5f);
             float intensity = ConstantAttenuation * radius;
 

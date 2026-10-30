@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Particles
 {
     using Engine.Mathematics;
@@ -52,7 +51,7 @@ namespace Engine.BuiltIn.Components.Particles
         public ParticleEmitterDescription()
         {
             Position = Vector3.Zero;
-            Velocity = Vector3Extensions.Up;
+            Velocity = Vector3.Up;
             Scale = 1f;
             EmissionRate = 1f;
             Duration = 0f;

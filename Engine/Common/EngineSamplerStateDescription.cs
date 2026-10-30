@@ -1,7 +1,6 @@
-﻿using System.Numerics;
-
-namespace Engine.Common
+﻿namespace Engine.Common
 {
+    using Engine.Mathematics;
     using DXComparison = Vortice.Direct3D11.ComparisonFunction;
     using DXFilter = Vortice.Direct3D11.Filter;
     using DXSampleStateDescription = Vortice.Direct3D11.SamplerDescription;

@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Particles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Particle system dynamic parameters
     /// </summary>

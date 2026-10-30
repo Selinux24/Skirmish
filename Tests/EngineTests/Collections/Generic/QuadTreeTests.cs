@@ -2,8 +2,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace EngineTests.Collections.Generic
 {

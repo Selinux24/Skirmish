@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using TerrainSamples.SceneGrid.Rules;
 using TerrainSamples.SceneGrid.Rules.Enum;
@@ -40,11 +39,11 @@ namespace TerrainSamples.SceneGrid
         private UITextArea txtAction = null;
         private UIMinimap minimap = null;
 
-        private Vortice.Mathematics.Rect hudTextureSize;
-        private Vortice.Mathematics.Rect initialGameArea;
-        private Vortice.Mathematics.Rect gameArea;
-        private Vortice.Mathematics.Rect initialMinimapArea;
-        private Vortice.Mathematics.Rect minimapArea;
+        private Rect hudTextureSize;
+        private Rect initialGameArea;
+        private Rect gameArea;
+        private Rect initialMinimapArea;
+        private Rect minimapArea;
 
         private readonly string titleFontFileName = "ARMY RUST.TTF";
         private readonly string fontFileName = "JOYSTIX.TTF";
@@ -153,7 +152,7 @@ namespace TerrainSamples.SceneGrid
                 Color.White.RGB(),
                 Color.White.RGB(),
                 true,
-                SceneLightSpotDescription.Create(Vector3.Zero, Vector3Extensions.Down, 15f, 15f, 100f));
+                SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 
             Lights.Add(spotLight);
 

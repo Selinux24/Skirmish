@@ -1,15 +1,15 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Fonts;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.UI;
-using System.Linq;
-using System.Numerics;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Fonts;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Text drawer
     /// </summary>
@@ -317,7 +317,7 @@ namespace Engine.BuiltIn.UI
 
             var sca = Vector2.One * (Parent?.AbsoluteScale ?? 1f);
             float rot = Parent?.AbsoluteRotation ?? 0f;
-            var pos = renderArea.Center;
+            Vector2 pos = (Vector2)renderArea.Center;
             pos.Y += baseLineThr;
 
             // Apply scroll if any

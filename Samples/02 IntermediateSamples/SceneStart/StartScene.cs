@@ -1,15 +1,15 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.UI;
-using Engine.Content;
-using Engine.Tween;
-using Engine.UI;
-using System;
-using System.Numerics;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneStart
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.BuiltIn.UI;
+    using Engine.Content;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI;
     using Color = System.Drawing.Color;
 
     class StartScene : Scene

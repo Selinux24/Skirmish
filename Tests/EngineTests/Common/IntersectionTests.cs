@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 
 namespace EngineTests.Common
 {
@@ -106,17 +105,17 @@ namespace EngineTests.Common
             box5 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 3f), (Vector3.One * 0.5f) + (Vector3.One * 3f));
             box6 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 0.75f), (Vector3.One * 0.75f) + (Vector3.One * 3f));
 
-            Vector3 frustOrigin1 = Vector3Extensions.BackwardLH * +0.5f;
-            Vector3 frustOrigin2 = Vector3Extensions.BackwardLH * +1.0f;
-            Vector3 frustOrigin3 = Vector3Extensions.BackwardLH * +.25f;
-            Vector3 frustOrigin4 = (Vector3Extensions.BackwardLH * +0.5f) + Vector3.One * 0.5f;
-            Vector3 frustOrigin5 = (Vector3Extensions.BackwardLH * +0.5f) + (Vector3.One * 3f);
+            Vector3 frustOrigin1 = Vector3.BackwardLH * +0.5f;
+            Vector3 frustOrigin2 = Vector3.BackwardLH * +1.0f;
+            Vector3 frustOrigin3 = Vector3.BackwardLH * +.25f;
+            Vector3 frustOrigin4 = (Vector3.BackwardLH * +0.5f) + Vector3.One * 0.5f;
+            Vector3 frustOrigin5 = (Vector3.BackwardLH * +0.5f) + (Vector3.One * 3f);
 
-            frustum1 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin1, frustOrigin1 + Vector3Extensions.ForwardLH, Vector3Extensions.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
-            frustum2 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin2, frustOrigin2 + Vector3Extensions.ForwardLH, Vector3Extensions.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 2.0f));
-            frustum3 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin3, frustOrigin3 + Vector3Extensions.ForwardLH, Vector3Extensions.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 0.5f));
-            frustum4 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin4, frustOrigin4 + Vector3Extensions.ForwardLH, Vector3Extensions.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
-            frustum5 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin5, frustOrigin5 + Vector3Extensions.ForwardLH, Vector3Extensions.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
+            frustum1 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin1, frustOrigin1 + Vector3.ForwardLH, Vector3.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
+            frustum2 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin2, frustOrigin2 + Vector3.ForwardLH, Vector3.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 2.0f));
+            frustum3 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin3, frustOrigin3 + Vector3.ForwardLH, Vector3.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 0.5f));
+            frustum4 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin4, frustOrigin4 + Vector3.ForwardLH, Vector3.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
+            frustum5 = new BoundingFrustum(Matrix4x4.LookAtLH(frustOrigin5, frustOrigin5 + Vector3.ForwardLH, Vector3.Up) * Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, 1.0f));
 
             tri1 = new Triangle(new Vector3(-0.5f, 0.0f, 0.5f), new Vector3(0.5f, 0.0f, 0.5f), new Vector3(-0.5f, 0.0f, -0.5f));
             tri2 = new Triangle(new Vector3(-1.0f, 0.0f, 1.0f), new Vector3(1.0f, 0.0f, 1.0f), new Vector3(-1.0f, 0.0f, -1.0f));
@@ -133,15 +132,15 @@ namespace EngineTests.Common
             triOrigin = new Triangle(new Vector3(-0.5f, 0.0f, 0.5f), new Vector3(0.5f, 0.0f, 0.5f), new Vector3(-0.5f, 0.0f, -0.5f));
 
             rayIn = new(Vector3.One * -10f, Vector3.One * 20f);
-            rayOut = new(Vector3.One * -10f, Vector3Extensions.ForwardLH * 10f);
+            rayOut = new(Vector3.One * -10f, Vector3.ForwardLH * 10f);
 
             pointIn = Vector3.Zero;
-            pointOver = Vector3Extensions.Up;
-            pointBelow = Vector3Extensions.Down;
+            pointOver = Vector3.Up;
+            pointBelow = Vector3.Down;
 
-            pointRayLeft = (Vector3.One * -10f) - Vector3Extensions.Up;
+            pointRayLeft = (Vector3.One * -10f) - Vector3.Up;
             pointRayCenter = new Vector3(-1, 1, -1);
-            pointRayRigh = (Vector3.One * +10f) + Vector3Extensions.Up;
+            pointRayRigh = (Vector3.One * +10f) + Vector3.Up;
 
             triCenterPlane = new Vector3(0.2f, 0.0f, 0.2f);
             triCenterOver = new Vector3(0.2f, 1.0f, 0.2f);
@@ -494,7 +493,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, p.Distance);
-            Assert.AreEqual(Vector3.Zero, p.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, p.Position);
         }
 
         [TestMethod()]
@@ -1411,9 +1410,9 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.IsNotNull(segment);
-            Assert.AreNotEqual(segment.Value.Point2, segment.Value.Point1, Vector3Extensions.Comparer);
-            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Value.Point1, Vector3Extensions.Comparer);
-            Assert.AreEqual(new Vector3(0, 0, 0), segment.Value.Point2, Vector3Extensions.Comparer);
+            Assert.AreNotEqual(segment.Value.Point2, segment.Value.Point1);
+            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Value.Point1);
+            Assert.AreEqual(new Vector3(0, 0, 0), segment.Value.Point2);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultNotIntersectedTest()
@@ -1459,7 +1458,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri2, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(sph1.Center, pick.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(sph1.Center, pick.Position);
             Assert.AreEqual(0, pick.Distance);
             Assert.AreEqual(tri2, pick.Primitive);
         }
@@ -1469,7 +1468,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri3, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(sph1.Center, pick.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(sph1.Center, pick.Position);
             Assert.AreEqual(0, pick.Distance);
             Assert.AreEqual(tri3, pick.Primitive);
         }
@@ -1479,7 +1478,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri4, out var pick);
 
             Assert.IsTrue(res);
-            Assert.AreEqual(tri4.Point3, pick.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(tri4.Point3, pick.Position);
             Assert.AreEqual(Vector3.Distance(sph1.Center, tri4.Point3), pick.Distance);
             Assert.AreEqual(tri4, pick.Primitive);
         }
@@ -1489,7 +1488,7 @@ namespace EngineTests.Common
             var res = Intersection.SphereIntersectsTriangle(sph1, tri5, out var pick);
 
             Assert.IsFalse(res);
-            Assert.AreEqual(Vector3.Zero, pick.Position, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, pick.Position);
             Assert.AreEqual(float.MaxValue, pick.Distance);
             Assert.AreEqual(new Triangle(), pick.Primitive);
         }
@@ -1629,7 +1628,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreEqual(Vector3.Distance(rayIn.Position, Vector3.Zero), distance);
-            Assert.AreEqual(Vector3.Zero, position, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, position);
         }
         [TestMethod()]
         public void RayIntersectsTriangleNotIntersectedTest()
@@ -1638,7 +1637,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, position, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, position);
         }
 
         [TestMethod()]
@@ -1691,7 +1690,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, point);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultContainedTest()
@@ -1700,7 +1699,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreNotEqual(float.MaxValue, distance);
-            Assert.AreNotEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreNotEqual(Vector3.Zero, point);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultIntersectedTest()
@@ -1709,7 +1708,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(res);
             Assert.AreNotEqual(float.MaxValue, distance);
-            Assert.AreNotEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreNotEqual(Vector3.Zero, point);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest()
@@ -1718,7 +1717,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, point);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest2()
@@ -1727,7 +1726,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, point);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentResultNotIntersectedTest3()
@@ -1736,7 +1735,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
-            Assert.AreEqual(Vector3.Zero, point, Vector3Extensions.Comparer);
+            Assert.AreEqual(Vector3.Zero, point);
         }
 
         [TestMethod()]
@@ -1843,7 +1842,7 @@ namespace EngineTests.Common
         {
             var p = Intersection.ClosestPointInRay(rayIn, pointRayLeft);
 
-            Assert.AreEqual(rayIn.Position, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(rayIn.Position, p);
         }
         [TestMethod()]
         public void ClosestPointInRayCenterTest()
@@ -1852,7 +1851,7 @@ namespace EngineTests.Common
 
             float d = Vector3.Dot(pointRayCenter - rayIn.Position, Vector3.Normalize(rayIn.Direction));
             Vector3 tp = rayIn.Position + (Vector3.Normalize(rayIn.Direction) * d);
-            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(tp, p);
         }
         [TestMethod()]
         public void ClosestPointInRayRightTest()
@@ -1860,7 +1859,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayRigh);
 
             Vector3 tp = rayIn.Position + rayIn.Direction;
-            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(tp, p);
         }
 
         [TestMethod()]
@@ -1869,7 +1868,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayLeft, out float d);
 
             Vector3 tp = rayIn.Position;
-            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(tp, p);
             Assert.AreEqual(Vector3.Distance(pointRayLeft, p), d);
         }
         [TestMethod()]
@@ -1879,7 +1878,7 @@ namespace EngineTests.Common
 
             float td = Vector3.Dot(pointRayCenter - rayIn.Position, Vector3.Normalize(rayIn.Direction));
             Vector3 tp = rayIn.Position + (Vector3.Normalize(rayIn.Direction) * td);
-            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(tp, p);
             Assert.AreEqual(Vector3.Distance(pointRayCenter, p), d);
         }
         [TestMethod()]
@@ -1888,7 +1887,7 @@ namespace EngineTests.Common
             var p = Intersection.ClosestPointInRay(rayIn, pointRayRigh, out float d);
 
             Vector3 tp = rayIn.Position + rayIn.Direction;
-            Assert.AreEqual(tp, p, Vector3Extensions.Comparer);
+            Assert.AreEqual(tp, p);
             Assert.AreEqual(Vector3.Distance(pointRayRigh, p), d);
         }
 
@@ -1897,105 +1896,105 @@ namespace EngineTests.Common
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterPlane, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleCenterOverTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterOver, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleCenterBelowTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triCenterBelow, tri1);
 
-            Assert.AreEqual(triCenterPlane, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP1PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP1Perfect, tri1);
 
-            Assert.AreEqual(triP1Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP1Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP1Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP1, tri1);
 
-            Assert.AreEqual(triP1Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP1Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP2PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP2Perfect, tri1);
 
-            Assert.AreEqual(triP2Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP2Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP2Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP2, tri1);
 
-            Assert.AreEqual(triP2Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP2Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP3PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triP3Perfect, tri1);
 
-            Assert.AreEqual(triP3Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP3Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleP3Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triP3, tri1);
 
-            Assert.AreEqual(triP3Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP3Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS1PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS1Perfect, tri1);
 
-            Assert.AreEqual(triS1Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS1Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS1Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS1, tri1);
 
-            Assert.AreEqual(triS1Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS1Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS2PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS2Perfect, tri1);
 
-            Assert.AreEqual(triS2Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS2Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS2Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS2, tri1);
 
-            Assert.AreEqual(triS2Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS2Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS3PerfectTest()
         {
             var closest = Intersection.ClosestPointInTriangle(triS3Perfect, tri1);
 
-            Assert.AreEqual(triS3Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS3Perfect, closest);
         }
         [TestMethod()]
         public void ClosestPointInTriangleS3Test()
         {
             var closest = Intersection.ClosestPointInTriangle(triS3, tri1);
 
-            Assert.AreEqual(triS3Perfect, closest, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS3Perfect, closest);
         }
 
         [TestMethod()]
@@ -2004,7 +2003,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterPlane, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshCenterOverTest()
@@ -2012,7 +2011,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterOver, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshCenterBelowTest()
@@ -2020,7 +2019,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triCenterBelow, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.IsTrue(tri1 == closest || tri3 == closest);
-            Assert.AreEqual(triCenterPlane, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triCenterPlane, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP1PerfectTest()
@@ -2028,7 +2027,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP1Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP1Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP1Test()
@@ -2036,7 +2035,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP1Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP1Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP2PerfectTest()
@@ -2044,7 +2043,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP2Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP2Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP2Test()
@@ -2052,7 +2051,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP2Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP2Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP3PerfectTest()
@@ -2060,7 +2059,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP3Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP3Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshP3Test()
@@ -2068,7 +2067,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triP3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triP3Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triP3Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS1PerfectTest()
@@ -2076,7 +2075,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS1Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS1Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS1Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS1Test()
@@ -2084,7 +2083,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS1, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS1Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS1Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS2PerfectTest()
@@ -2092,7 +2091,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS2Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS2Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS2Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS2Test()
@@ -2100,7 +2099,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS2, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS2Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS2Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS3PerfectTest()
@@ -2108,7 +2107,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS3Perfect, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS3Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS3Perfect, closestPoint);
         }
         [TestMethod()]
         public void ClosestPointInMeshS3Test()
@@ -2116,7 +2115,7 @@ namespace EngineTests.Common
             Intersection.ClosestPointInMesh(triS3, [tri1, tri3, tri7, tri8], out var closest, out var closestPoint);
 
             Assert.AreEqual(tri1, closest);
-            Assert.AreEqual(triS3Perfect, closestPoint, Vector3Extensions.Comparer);
+            Assert.AreEqual(triS3Perfect, closestPoint);
         }
 
         [TestMethod()]
@@ -2768,9 +2767,9 @@ namespace EngineTests.Common
         {
             float r = 1;
             float h = 2;
-            var cylinder = new BoundingCylinder(Vector3Extensions.Up * (cylinderHeight + h * 0.5f), r, h);
+            var cylinder = new BoundingCylinder(Vector3.Up * (cylinderHeight + h * 0.5f), r, h);
 
-            var plane = new Plane(Vector3.Zero, Vector3.TransformNormal(Vector3Extensions.Up, Matrix4x4.RotationX(planeAngle)));
+            var plane = new Plane(Vector3.Zero, Vector3.TransformNormal(Vector3.Up, Matrix4x4.RotationX(planeAngle)));
 
             var res = Intersection.CylinderIntersectsPlane(cylinder, plane);
 

@@ -1,8 +1,9 @@
-﻿using System.Numerics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Per sprite data structure
     /// </summary>

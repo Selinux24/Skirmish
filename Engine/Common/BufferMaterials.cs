@@ -1,8 +1,9 @@
-﻿using System.Numerics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Material buffer
     /// </summary>

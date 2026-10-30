@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.UI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Font map parsed part
     /// </summary>

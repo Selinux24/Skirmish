@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Contains triangle meshes that represent detailed height data associated with the polygons in its associated polygon mesh object.
     /// </summary>

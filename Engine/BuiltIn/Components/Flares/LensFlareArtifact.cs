@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Flares
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Flare description
     /// </summary>

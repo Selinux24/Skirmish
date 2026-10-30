@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -122,8 +121,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return new BoundingBoxInt
             {
-                Minimum = new Vector3Int(minx, miny, minz),
-                Maximum = new Vector3Int(maxx, maxy, maxz),
+                Minimum = new Vector3I(minx, miny, minz),
+                Maximum = new Vector3I(maxx, maxy, maxz),
             };
         }
     }

@@ -1,6 +1,3 @@
-using System.Numerics;
-using Vortice.Mathematics;
-
 namespace Engine.Physics
 {
     using Engine.Mathematics;

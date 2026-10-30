@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
+    using Engine.Mathematics;
+
     public interface ISteeringAgent
     {
         Vector3 Position { get; set; }

@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Hemispheric light
     /// </summary>

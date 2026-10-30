@@ -2,7 +2,7 @@
 
 namespace Engine.Content
 {
-    using Vector3 = System.Numerics.Vector3;
+    using Engine.Mathematics;
 
     /// <summary>
     /// 3D scale
@@ -152,7 +152,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Scale3 operator /(float scale, Scale3 value)
         {
-            return Vector3.Divide(new Vector3(scale), value);
+            return Vector3.Divide(scale, value);
         }
 
         /// <inheritdoc/>

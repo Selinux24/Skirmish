@@ -1,8 +1,9 @@
-﻿using System.Numerics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Per mesh single data structure
     /// </summary>

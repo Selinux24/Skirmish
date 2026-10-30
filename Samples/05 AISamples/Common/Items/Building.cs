@@ -1,11 +1,10 @@
-﻿using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common.Items
 {
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
     using Engine;
     using Engine.BuiltIn.Format;
     using Engine.Common;
@@ -69,7 +68,7 @@ namespace AISamples.Common.Items
                 int index = (int)ceiling.Indices.ElementAt(i);
                 var p = ceiling.Vertices.ElementAt(index);
 
-                yield return new() { Position = p, Normal = Vector3Extensions.Up, Texture = uvC };
+                yield return new() { Position = p, Normal = Vector3.Up, Texture = uvC };
             }
         }
     }

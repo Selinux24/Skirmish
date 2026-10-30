@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 
 namespace Engine.PhysicsTests
 {
@@ -73,7 +72,7 @@ namespace Engine.PhysicsTests
             var t1 = new Triangle(new Vector3(-10, ah, -10), new Vector3(-10, ah, 10), new Vector3(10, ah, -10));
             var t2 = new Triangle(new Vector3(-10, ah, 10), new Vector3(10, ah, 10), new Vector3(10, ah, -10));
 
-            var c1 = FromPlane(new Vector3(0, ah, 0), Vector3Extensions.Up, trnA);
+            var c1 = FromPlane(new Vector3(0, ah, 0), Vector3.Up, trnA);
             var c2 = FromTriangle(t, trnA);
             var c3 = FromTriangles([t1, t2], trnA);
 
@@ -106,13 +105,13 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(penetrationHf, contact2.Penetration, Epsilon); //It's a half space calculation
             Assert.AreEqual(penetration, contact3.Penetration, Epsilon); //Not's a half space
 
-            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Up, contact1.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
-            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Down, contact2.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Down} != {contact2.Normal}");
-            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3Extensions.Down, contact3.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3Extensions.Down} != {contact3.Normal}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Up, contact1.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact2.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact2.Normal}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact3.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact3.Normal}");
 
-            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3.Zero, contact1.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact1.Position}");
-            Assert.IsTrue(Vector3Extensions.NearEqual(new Vector3(0, -r, 0), contact2.Position, new Vector3(Epsilon)), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
-            Assert.IsTrue(Vector3Extensions.NearEqual(Vector3.Zero, contact3.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact3.Position}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact1.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact1.Position}");
+            Assert.IsTrue(Vector3.NearEqual(new Vector3(0, -r, 0), contact2.Position, new Vector3(Epsilon)), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact3.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact3.Position}");
         }
     }
 }

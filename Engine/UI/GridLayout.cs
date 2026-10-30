@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.UI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Grid layout helper
     /// </summary>
@@ -155,7 +155,7 @@ namespace Engine.UI
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
         /// <returns>Returns the layout updated state</returns>
-        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size bounds, Padding padding, Spacing spacing)
+        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Vector2 bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {
@@ -192,8 +192,8 @@ namespace Engine.UI
                 cols = (int)MathF.Ceiling(controls.Count() / (float)rows);
             }
 
-            float cellWidth = bounds.Width / cols - spacing.Horizontal / cols * (cols - 1) - padding.Left / cols - padding.Right / cols;
-            float cellHeight = bounds.Height / rows - spacing.Vertical / rows * (rows - 1) - padding.Top / rows - padding.Bottom / rows;
+            float cellWidth = bounds.X / cols - spacing.Horizontal / cols * (cols - 1) - padding.Left / cols - padding.Right / cols;
+            float cellHeight = bounds.Y / rows - spacing.Vertical / rows * (rows - 1) - padding.Top / rows - padding.Bottom / rows;
 
             cellSize.X = fitX ? cellWidth : cellSize.X;
             cellSize.Y = fitY ? cellHeight : cellSize.Y;

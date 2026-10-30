@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.Direct3D;
-using Vortice.Mathematics;
 
 namespace Engine.Common
 {
+    using Engine.Mathematics;
     using Vortice.Direct3D11;
     using Format = Vortice.DXGI.Format;
 
@@ -115,7 +114,7 @@ namespace Engine.Common
         /// <summary>
         /// Current viewport
         /// </summary>
-        private Viewport[] currentViewports;
+        private Vortice.Mathematics.Viewport[] currentViewports;
 
         /// <summary>
         /// Current depth-stencil state
@@ -411,12 +410,12 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void SetViewport(Viewport viewport)
+        public void SetViewport(Vortice.Mathematics.Viewport viewport)
         {
             SetViewPorts([viewport]);
         }
         /// <inheritdoc/>
-        public void SetViewports(Viewport[] viewports)
+        public void SetViewports(Vortice.Mathematics.Viewport[] viewports)
         {
             SetViewPorts(viewports);
         }
@@ -424,7 +423,7 @@ namespace Engine.Common
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        private void SetViewPorts(Viewport[] viewports)
+        private void SetViewPorts(Vortice.Mathematics.Viewport[] viewports)
         {
             if (Helper.CompareEnumerables(currentViewports, viewports))
             {
@@ -466,7 +465,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], (Color4)clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -490,7 +489,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], (Color4)clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -547,7 +546,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OMSetBlendState(state.GetBlendState(), (Color4)state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), (Vortice.Mathematics.Color4)state.BlendFactor, state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;

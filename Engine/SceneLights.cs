@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine
 {
@@ -535,7 +533,7 @@ namespace Engine
             float b = MathF.Max(0f, -MathF.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
 
             Vector3 keyDir = timeOfDay.LightDirection;
-            Vector3 backDir = -Vector3.Reflect(keyDir, Vector3Extensions.Up);
+            Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
 
             float tan = MathF.Tan(timeOfDay.Elevation);
             Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace PhysicsSamples.SceneStart
@@ -32,8 +31,8 @@ namespace PhysicsSamples.SceneStart
         private readonly string resourcesFolder = "SceneStart";
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-        private readonly Vector4 sceneButtonColor = Vector4Extensions.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
-        private readonly Vector4 exitButtonColor = Vector4Extensions.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
+        private readonly Vector4 sceneButtonColor = Vector4.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
+        private readonly Vector4 exitButtonColor = Vector4.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
 
         private bool sceneReady = false;
 
@@ -115,8 +114,8 @@ namespace PhysicsSamples.SceneStart
             startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
-            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB, 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = Color.Gold.RGBA();
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -131,8 +130,8 @@ namespace PhysicsSamples.SceneStart
             exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
-            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB, 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 

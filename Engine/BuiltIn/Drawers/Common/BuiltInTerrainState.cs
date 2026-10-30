@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Drawers.Common
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Effect sky scatter state
     /// </summary>

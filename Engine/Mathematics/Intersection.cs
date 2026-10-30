@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Mathematics
 {
@@ -381,7 +380,7 @@ namespace Engine.Mathematics
         public static bool CylinderIntersectsPlane(BoundingCylinder cylinder, Plane plane)
         {
             // Bounding cylinder is axis aligned. The direction of the cylinder is the up vector
-            var cDir = Vector3Extensions.Up;
+            var cDir = Vector3.Up;
 
             // dir points towards the plane and -dir in the opposite direction
             var dir = Vector3.Cross(plane.Normal, cDir);

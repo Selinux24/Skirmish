@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.Physics.GJK
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// GJK simplex support point
     /// </summary>

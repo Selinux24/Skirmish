@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.ScenePerlinNoise
@@ -19,7 +18,7 @@ namespace TerrainSamples.ScenePerlinNoise
         const string fontFamily = "Microsoft Sans Serif";
         static readonly Vector4 pBackground = Color.RosyBrown.RGBA();
         static readonly Vector4 bColor1 = Color.Brown.RGBA();
-        static readonly Vector4 bColor2 = Vector4Extensions.AdjustSaturation(Color.Brown.RGBA(), 1.5f);
+        static readonly Vector4 bColor2 = Vector4.AdjustSaturation(Color.Brown.RGBA(), 1.5f);
         static readonly Vector4 pColor = Color.DeepSkyBlue.RGBA();
 
         const int dialogWidth = 600;
@@ -45,7 +44,7 @@ namespace TerrainSamples.ScenePerlinNoise
         UIButton btnSave;
         bool dialogVisible = false;
         string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        readonly Vector4 dialogButtonColor = Vector4Extensions.AdjustSaturation(bColor1, 1.5f);
+        readonly Vector4 dialogButtonColor = Vector4.AdjustSaturation(bColor1, 1.5f);
         readonly Vector4 dialogButtonTextColor = Color.WhiteSmoke.RGBA();
         readonly Vector4 dialogBackgroundColor = bColor1;
         UISaveFileDialog saveFileDialog = null;

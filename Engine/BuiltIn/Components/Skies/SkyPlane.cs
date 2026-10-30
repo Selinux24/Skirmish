@@ -1,14 +1,15 @@
-﻿using Engine.BuiltIn.Drawers;
-using Engine.BuiltIn.Drawers.Clouds;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using Engine.Content;
-using System;
-using System.Numerics;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
+    using Engine.BuiltIn.Drawers;
+    using Engine.BuiltIn.Drawers.Clouds;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sky plane
     /// </summary>

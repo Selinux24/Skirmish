@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Obstacle avoidance debug data
     /// </summary>

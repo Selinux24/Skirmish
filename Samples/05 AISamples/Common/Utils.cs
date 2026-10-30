@@ -1,12 +1,13 @@
-﻿using AISamples.Common.Primitives;
-using Engine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common
 {
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.Mathematics;
+
     static class Utils
     {
         public static bool SegmentIntersectsSegment(Segment2 s1, Segment2 s2, out Vector3 position, out float distance)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -130,7 +129,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             float l = 15f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;
@@ -305,7 +304,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             if (Game.Input.KeyJustReleased(Keys.M))
             {
                 soldier.Manipulator.SetPosition(soldierInitPosition);
-                Vector3 to = soldierInitPosition - (Vector3Extensions.ForwardLH * 31f);
+                Vector3 to = soldierInitPosition - (Vector3.ForwardLH * 31f);
 
                 MoveSoldierTo(gameTime, to, Game.Input.KeyPressed(Keys.ShiftKey));
             }

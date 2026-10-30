@@ -1,7 +1,7 @@
-﻿using System.Numerics;
-
-namespace Tanks
+﻿namespace Tanks
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Player status class
     /// </summary>

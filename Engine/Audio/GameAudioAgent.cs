@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.Audio
 {
     using Engine.Mathematics;
@@ -21,7 +20,7 @@ namespace Engine.Audio
         {
             get
             {
-                return agentTransform?.Forward ?? Vector3Extensions.ForwardLH;
+                return agentTransform?.Forward ?? Vector3.ForwardLH;
             }
         }
         /// <summary>
@@ -31,7 +30,7 @@ namespace Engine.Audio
         {
             get
             {
-                return agentTransform?.Up ?? Vector3Extensions.Up;
+                return agentTransform?.Up ?? Vector3.Up;
             }
         }
         /// <summary>

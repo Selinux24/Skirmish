@@ -2,12 +2,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace EngineTests.Common
 {
-    using Engine;
     using Engine.Mathematics;
 
     [ExcludeFromCodeCoverage]

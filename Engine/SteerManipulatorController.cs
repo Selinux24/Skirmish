@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Engine
+﻿namespace Engine
 {
     using Engine.Common;
     using Engine.Mathematics;

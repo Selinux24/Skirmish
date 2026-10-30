@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.Content.FmtColladaTests
@@ -155,8 +154,8 @@ namespace Engine.Content.FmtColladaTests
             //Sets the transform of the current instance
             Matrix4x4 instanceTrn = Matrix4x4.Translation(Vector3.One);
             Matrix4x4 hullTrn = Matrix4x4.Identity;
-            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Up, Helper.PiOver2));
-            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3Extensions.Left, Helper.PiOver4));
+            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, Helper.PiOver2));
+            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, Helper.PiOver4));
 
             model[0].Manipulator.SetTransform(instanceTrn);
             model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);

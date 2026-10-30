@@ -103,9 +103,9 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Gets the rectangle
         /// </summary>
-        public Vortice.Mathematics.Rect GetRectangle()
+        public Mathematics.Rect GetRectangle()
         {
-            return new Vortice.Mathematics.Rect(X, Y, W, H);
+            return new(X, Y, W, H);
         }
         /// <inheritdoc/>
         public override string ToString()

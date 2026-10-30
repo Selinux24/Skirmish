@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Engine.Physics.Colliders
 {
     using Engine.Mathematics;

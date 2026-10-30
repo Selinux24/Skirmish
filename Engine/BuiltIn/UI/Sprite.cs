@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
@@ -235,7 +234,7 @@ namespace Engine.BuiltIn.UI
             }
             else
             {
-                var color = Vector4Extensions.AdjustSaturation(BaseColor * TintColor, 1f);
+                var color = Vector4.AdjustSaturation(BaseColor * TintColor, 1f);
                 color.W *= Alpha;
 
                 state = new BuiltInSpriteState

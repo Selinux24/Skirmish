@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// 4D position
     /// </summary>
@@ -130,7 +131,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position4 operator /(float scale, Position4 value)
         {
-            return Vector4.Divide(new(scale), value);
+            return Vector4.Divide(scale, value);
         }
         /// <inheritdoc/>
         public static Position4 operator /(Position4 value, Position4 scale)
@@ -140,7 +141,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position4 operator +(Position4 value, float scalar)
         {
-            return Vector4.Add(value, new(scalar));
+            return Vector4.Add(value, scalar);
         }
         /// <inheritdoc/>
         public static Position4 operator +(float scalar, Position4 value)
@@ -150,12 +151,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static Position4 operator -(Position4 value, float scalar)
         {
-            return Vector4.Subtract(value, new(scalar));
+            return Vector4.Subtract(value, scalar);
         }
         /// <inheritdoc/>
         public static Position4 operator -(float scalar, Position4 value)
         {
-            return Vector4.Subtract(new(scalar), value);
+            return Vector4.Subtract(scalar, value);
         }
 
         /// <inheritdoc/>

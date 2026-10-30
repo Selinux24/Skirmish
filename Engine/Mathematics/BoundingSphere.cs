@@ -47,7 +47,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -382,7 +381,7 @@ namespace Engine.Mathematics
             var radius = sphere.Radius * MathF.Max(MathF.Max(scale.X, scale.Y), scale.Z);
 
             // Gets the new position
-            var center = Vector3.Transform(sphere.Center, transform);
+            var center = Vector3.TransformCoordinate(sphere.Center, transform);
 
             return new BoundingSphere(center, radius);
         }

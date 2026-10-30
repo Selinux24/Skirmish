@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -18,7 +17,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
         /// </summary>
-        public Vortice.Mathematics.Int3[] Verts { get; set; }
+        public Vector3I[] Verts { get; set; }
         /// <summary>
         /// The number vertices in the polygon mesh. [Limit: >= 3]
         /// </summary>

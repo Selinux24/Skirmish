@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace PhysicsSamples.ScenePhysics
 {
@@ -25,7 +24,7 @@ namespace PhysicsSamples.ScenePhysics
             Model.Manipulator.SetTransform(rbState.InitialTransform);
 
             float radius = Model.GetBoundingSphere().Radius * 3f;
-            Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
+            Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB, Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
         }
 
         public void UpdateBodyState(float elapsed, float bodyTime, float bodyDistance)
@@ -44,7 +43,7 @@ namespace PhysicsSamples.ScenePhysics
 
         public void SetLines(GeometryColorDrawer<Line3D> lineDrawer)
         {
-            lineDrawer.SetPrimitives(Vector4Extensions.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
+            lineDrawer.SetPrimitives(Vector4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
         }
 
         public void Reset()

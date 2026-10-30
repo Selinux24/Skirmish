@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneParticles
@@ -68,7 +67,7 @@ namespace BasicSamples.SceneParticles
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 5000f;
-            Camera.Goto(Vector3Extensions.ForwardLH * -15f + Vector3.UnitY * 10f);
+            Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             Camera.LookTo(Vector3.Zero);
 
             InitializeUIObjects();
@@ -153,7 +152,7 @@ namespace BasicSamples.SceneParticles
             float l = 20f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
             geo.Transform(Engine.Mathematics.Matrix4x4.RotationY(Helper.PiOver2));
 
@@ -351,7 +350,7 @@ namespace BasicSamples.SceneParticles
         private void AddExplosionSystem()
         {
             var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
-            var velocity = Vector3Extensions.Up;
+            var velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.01f;
 
@@ -406,7 +405,7 @@ namespace BasicSamples.SceneParticles
         private void AddSmokePlumeSystem()
         {
             var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
-            var velocity = Vector3Extensions.Up;
+            var velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextSingle(10, 60);
             float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
@@ -435,7 +434,7 @@ namespace BasicSamples.SceneParticles
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
-            Vector3 velocity = Vector3Extensions.Up;
+            Vector3 velocity = Vector3.Up;
             float duration = 60;
             float fireRate = 0.05f;
             float smokeRate = 0.1f;
@@ -451,7 +450,7 @@ namespace BasicSamples.SceneParticles
             };
             var emitter21 = new ParticleEmitter()
             {
-                Position = positionCPU + (Vector3Extensions.Up * 0.5f),
+                Position = positionCPU + (Vector3.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = smokeRate,
@@ -470,7 +469,7 @@ namespace BasicSamples.SceneParticles
             };
             var emitter22 = new ParticleEmitter()
             {
-                Position = positionGPU + (Vector3Extensions.Up * 0.5f),
+                Position = positionGPU + (Vector3.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = smokeRate,
@@ -489,7 +488,7 @@ namespace BasicSamples.SceneParticles
             var emitter = new ParticleEmitter()
             {
                 Position = new Vector3(0, 0, 0),
-                Velocity = Vector3Extensions.Up,
+                Velocity = Vector3.Up,
                 InfiniteDuration = true,
                 EmissionRate = 0.001f,
                 MaximumDistance = 1000f,

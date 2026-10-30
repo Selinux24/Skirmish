@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Engine
+﻿namespace Engine
 {
     using Engine.BuiltIn.Components.ShadowMapping;
     using Engine.Mathematics;
@@ -79,7 +77,7 @@ namespace Engine
         /// <summary>
         /// Initial light direction
         /// </summary>
-        private Vector3 initialDirection = Vector3Extensions.ForwardLH;
+        private Vector3 initialDirection = Vector3.ForwardLH;
         /// <summary>
         /// Light volume
         /// </summary>

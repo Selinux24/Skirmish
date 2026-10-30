@@ -1,9 +1,7 @@
-﻿using Engine;
-using System.Numerics;
-using Vortice.Mathematics;
-
-namespace TerrainSamples.SceneGrid.Rules
+﻿namespace TerrainSamples.SceneGrid.Rules
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Area
     /// </summary>

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine
 {
     using Engine.Mathematics;
@@ -20,7 +19,7 @@ namespace Engine
         /// <summary>
         /// View offset
         /// </summary>
-        private readonly Vector3 interestOffset = Vector3Extensions.ForwardLH;
+        private readonly Vector3 interestOffset = Vector3.ForwardLH;
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; }
@@ -57,7 +56,7 @@ namespace Engine
         {
             Matrix4x4 transform = manipulator.LocalTransform;
 
-            Vector3 desiredPosition = Vector3.Transform(positionOffset, transform);
+            Vector3 desiredPosition = Vector3.TransformCoordinate(positionOffset, transform);
             Vector3 position = Vector3.Lerp(Position, desiredPosition, Velocity * gameTime.ElapsedSeconds);
             Vector3 interest = position - Vector3.TransformNormal(interestOffset, transform);
 

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-
+﻿
 namespace IntermediateSamples.SceneTransforms
 {
     using Engine;
@@ -31,7 +30,7 @@ namespace IntermediateSamples.SceneTransforms
 
             float time = gameTime.ElapsedSeconds;
             DurationSeconds -= time;
-            Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3Extensions.Down * time));
+            Tree.Manipulator.SetPosition(Tree.Manipulator.Position + (Vector3.Down * time));
 
             if (DurationSeconds <= 0)
             {

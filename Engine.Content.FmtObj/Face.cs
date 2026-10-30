@@ -1,10 +1,11 @@
 ﻿using Engine.Common;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Content.FmtObj
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Face
     /// </summary>

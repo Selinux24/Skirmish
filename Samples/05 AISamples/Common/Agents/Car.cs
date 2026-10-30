@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Numerics;
 
 namespace AISamples.Common.Agents
 {
@@ -80,7 +79,7 @@ namespace AISamples.Common.Agents
             Segment2[] segments = new Segment2[points.Length];
             for (int i = 0; i < points.Length; i++)
             {
-                segments[i] = new Segment2(points[i].XZ(), points[(i + 1) % points.Length].XZ());
+                segments[i] = new Segment2(points[i].XZ, points[(i + 1) % points.Length].XZ);
             }
             return segments;
         }
@@ -175,7 +174,7 @@ namespace AISamples.Common.Agents
         }
         private bool AssessDamage(Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {
-            var points2d = points.Select(p => p.XZ()).ToArray();
+            var points2d = points.Select(p => p.XZ).ToArray();
 
             for (int i = 0; i < roadBorders.Length; i++)
             {

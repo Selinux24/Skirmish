@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.Physics.Colliders
 {
@@ -61,7 +60,7 @@ namespace Engine.Physics.Colliders
 
             var trn = RigidBody.Transform;
             var verts = vertices.ToArray();
-            Vector3Extensions.TransformCoordinate(verts, ref trn, verts);
+            Vector3.TransformCoordinate(verts, ref trn, verts);
             return verts;
         }
 

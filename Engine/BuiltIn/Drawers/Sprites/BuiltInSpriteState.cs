@@ -1,9 +1,9 @@
 ﻿using Engine.Common;
-using System.Numerics;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Texture sprite drawer state
     /// </summary>

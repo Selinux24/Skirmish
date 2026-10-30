@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
@@ -378,7 +377,7 @@ namespace Engine.PathFinding
         private PathFindingPath ComputeGroundPositions(IEnumerable<Vector3> path, bool useGround)
         {
             List<Vector3> positions = [.. path];
-            List<Vector3> normals = [.. Helper.CreateArray(path.Count(), Vector3Extensions.Up)];
+            List<Vector3> normals = [.. Helper.CreateArray(path.Count(), Vector3.Up)];
 
             if (useGround)
             {

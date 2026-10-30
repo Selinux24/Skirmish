@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.BuiltIn.Components.Ground
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Terrain textures
     /// </summary>

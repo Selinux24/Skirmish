@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Tanks
 {
@@ -38,7 +37,7 @@ namespace Tanks
         {
             initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
             var initialVelocity = shotDirection * shotForce;
-            horizontalVelocity = initialVelocity.XZ();
+            horizontalVelocity = initialVelocity.XZ;
             verticalVelocity = initialVelocity.Y;
             wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;
         }

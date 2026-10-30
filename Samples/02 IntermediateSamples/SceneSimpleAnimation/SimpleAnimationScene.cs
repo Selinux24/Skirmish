@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneSimpleAnimation
@@ -213,7 +212,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             float l = 15f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesAsphaltDiffuseFile;

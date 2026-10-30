@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine
 {
@@ -159,7 +158,7 @@ namespace Engine
         /// <inheritdoc/>
         public Vector3 GetNormal(float time)
         {
-            return Vector3Extensions.Up;
+            return Vector3.Up;
         }
         /// <inheritdoc/>
         public Vector3 GetNextControlPoint(float time)

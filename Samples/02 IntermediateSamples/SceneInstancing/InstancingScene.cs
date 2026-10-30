@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace IntermediateSamples.SceneInstancing
 {
@@ -157,7 +155,7 @@ namespace IntermediateSamples.SceneInstancing
             float h = 0f;
             uint side = 5;
 
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceGroundDiffuseTexture;

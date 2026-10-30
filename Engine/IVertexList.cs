@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Vertex list interface
     /// </summary>

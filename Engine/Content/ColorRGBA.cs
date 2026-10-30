@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Content
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// RGBA color
     /// </summary>

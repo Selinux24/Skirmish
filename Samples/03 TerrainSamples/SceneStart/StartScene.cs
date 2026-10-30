@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneStart
@@ -52,10 +51,10 @@ namespace TerrainSamples.SceneStart
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
         private readonly string largeControlsFont = "HelveticaNeue Medium.ttf";
-        private readonly Vector4 sceneButtonColor = Vector4Extensions.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
-        private readonly Vector4 exitButtonColor = Vector4Extensions.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
-        private Vector4 SceneButtonColorBase { get { return new(sceneButtonColor.RGB(), 0.8f); } }
-        private Vector4 SceneButtonColorHighlight { get { return new(sceneButtonColor.RGB() * 1.2f, 0.9f); } }
+        private readonly Vector4 sceneButtonColor = Vector4.AdjustSaturation(Color.DarkSeaGreen.RGBA(), 1.5f);
+        private readonly Vector4 exitButtonColor = Vector4.AdjustSaturation(Color.OrangeRed.RGBA(), 1.5f);
+        private Vector4 SceneButtonColorBase { get { return new(sceneButtonColor.RGB, 0.8f); } }
+        private Vector4 SceneButtonColorHighlight { get { return new(sceneButtonColor.RGB * 1.2f, 0.9f); } }
 
         private bool sceneReady = false;
 
@@ -140,8 +139,8 @@ namespace TerrainSamples.SceneStart
             startButtonDesc.ContentPath = resourceControlsFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
-            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new(sceneButtonColor.RGB, 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor.RGB * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = Color.Gold.RGBA();
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -164,8 +163,8 @@ namespace TerrainSamples.SceneStart
             exitButtonDesc.ContentPath = resourceControlsFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
-            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor.RGB, 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor.RGB * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             exitButtonDesc.StartsVisible = false;

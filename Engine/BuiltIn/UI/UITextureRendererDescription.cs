@@ -1,9 +1,9 @@
-﻿using Engine.UI;
-using System.Numerics;
-using Vortice.Mathematics;
-
+﻿
 namespace Engine.BuiltIn.UI
 {
+    using Engine.Mathematics;
+    using Engine.UI;
+
     /// <summary>
     /// Minimap description
     /// </summary>

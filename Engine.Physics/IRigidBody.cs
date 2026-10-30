@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Engine.Physics
+﻿namespace Engine.Physics
 {
     using Engine.Mathematics;
 

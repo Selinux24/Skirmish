@@ -4,11 +4,12 @@ using Engine.Content;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Geometry drawer
     /// </summary>

@@ -1,6 +1,5 @@
 ﻿using Logger;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneTransforms
@@ -117,7 +116,7 @@ namespace IntermediateSamples.SceneTransforms
         }
         private async Task InitializeFloor()
         {
-            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourcesTerrainDiffuseTexture;

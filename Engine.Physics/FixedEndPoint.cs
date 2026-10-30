@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Fixed end-point
     /// </summary>

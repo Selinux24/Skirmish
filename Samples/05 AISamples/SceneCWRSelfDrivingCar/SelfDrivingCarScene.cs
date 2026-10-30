@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRSelfDrivingCar
@@ -155,7 +154,7 @@ ESC - EXIT";
             float l = spaceSize;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
 
             var mat = MaterialBlinnPhongContent.Default;
@@ -494,7 +493,7 @@ ESC - EXIT";
             carModel.Manipulator.SetTransform(car.GetTransform());
 
             bool isBestCar = car == bestCar;
-            var betColor = isBestCar ? new(color.RGB(), 1f) : color;
+            var betColor = isBestCar ? new(color.RGB, 1f) : color;
             carModel.TintColor = car.Damaged ? carDamagedColor : betColor;
 
             if (!isBestCar)

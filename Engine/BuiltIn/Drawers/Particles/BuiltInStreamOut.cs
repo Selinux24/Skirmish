@@ -1,9 +1,10 @@
-﻿using Engine.Common;
-using System.Numerics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Stream-out drawer
     /// </summary>

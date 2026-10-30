@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -83,7 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                centerPos.IsInfinity() ||
+                centerPos.IsInfinity ||
                 radius < 0 || float.IsInfinity(radius) ||
                 filter == null ||
                 maxResult < 0)
@@ -375,8 +374,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
         /// <returns>The status flags for the query.</returns>
         private Status QueryPolygons(Vector3 center, Vector3 halfExtents, IGraphQueryFilter filter, IPolyQuery query)
         {
-            if (center.IsInfinity() ||
-                halfExtents.IsInfinity() ||
+            if (center.IsInfinity ||
+                halfExtents.IsInfinity ||
                 filter == null || query == null)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;

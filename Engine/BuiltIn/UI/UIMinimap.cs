@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Vortice.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -23,7 +21,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Viewport to match the minimap texture size
         /// </summary>
-        private Viewport viewport;
+        private Vortice.Mathematics.Viewport viewport;
         /// <summary>
         /// Surface to draw
         /// </summary>
@@ -85,7 +83,7 @@ namespace Engine.BuiltIn.UI
 
             BackColor = Description.BackColor;
 
-            viewport = new Viewport(0, 0, Description.Width, Description.Height);
+            viewport = new(0, 0, Description.Width, Description.Height);
 
             minimapBox = await CreateRenderer();
 

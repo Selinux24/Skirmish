@@ -7,44 +7,44 @@ namespace Engine.Mathematics
     /// A 2d vector represented by integers.
     /// </summary>
     /// <remarks>
-    /// Initializes a new instance of the <see cref="Vector2Int"/> struct with a specified coordinate.
+    /// Initializes a new instance of the <see cref="Vector2I"/> struct with a specified coordinate.
     /// </remarks>
     /// <param name="x">The X coordinate.</param>
     /// <param name="y">The Y coordinate.</param>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2Int(int x, int y) : IEquatable<Vector2Int>
+    public struct Vector2I(int x, int y) : IEquatable<Vector2I>
     {
         /// <summary>
 		/// A vector where both X and Y are <see cref="int.MinValue"/>.
 		/// </summary>
-		public static readonly Vector2Int Min = new(int.MinValue, int.MinValue);
+		public static readonly Vector2I Min = new(int.MinValue, int.MinValue);
         /// <summary>
         /// A vector where both X and Y are <see cref="int.MaxValue"/>.
         /// </summary>
-        public static readonly Vector2Int Max = new(int.MaxValue, int.MaxValue);
+        public static readonly Vector2I Max = new(int.MaxValue, int.MaxValue);
         /// <summary>
         /// A vector where both X and Y are 0.
         /// </summary>
-        public static readonly Vector2Int Zero = new(0, 0);
+        public static readonly Vector2I Zero = new(0, 0);
 
         /// <summary>
-        /// Compares two instances of <see cref="Vector2Int"/> for equality.
+        /// Compares two instances of <see cref="Vector2I"/> for equality.
         /// </summary>
-        /// <param name="left">An instance of <see cref="Vector2Int"/>.</param>
-        /// <param name="right">Another instance of <see cref="Vector2Int"/>.</param>
+        /// <param name="left">An instance of <see cref="Vector2I"/>.</param>
+        /// <param name="right">Another instance of <see cref="Vector2I"/>.</param>
         /// <returns>A value indicating whether the two instances are equal.</returns>
-        public static bool operator ==(Vector2Int left, Vector2Int right)
+        public static bool operator ==(Vector2I left, Vector2I right)
         {
             return left.Equals(right);
         }
         /// <summary>
-        /// Compares two instances of <see cref="Vector2Int"/> for inequality.
+        /// Compares two instances of <see cref="Vector2I"/> for inequality.
         /// </summary>
-        /// <param name="left">An instance of <see cref="Vector2Int"/>.</param>
-        /// <param name="right">Another instance of <see cref="Vector2Int"/>.</param>
+        /// <param name="left">An instance of <see cref="Vector2I"/>.</param>
+        /// <param name="right">Another instance of <see cref="Vector2I"/>.</param>
         /// <returns>A value indicating whether the two instances are unequal.</returns>
-        public static bool operator !=(Vector2Int left, Vector2Int right)
+        public static bool operator !=(Vector2I left, Vector2I right)
         {
             return !(left == right);
         }
@@ -61,7 +61,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            Vector2Int? objV = obj as Vector2Int?;
+            Vector2I? objV = obj as Vector2I?;
             if (objV != null)
             {
                 return Equals(objV);
@@ -70,7 +70,7 @@ namespace Engine.Mathematics
             return false;
         }
         /// <inheritdoc/>
-        public readonly bool Equals(Vector2Int other)
+        public readonly bool Equals(Vector2I other)
         {
             return X == other.X && Y == other.Y;
         }

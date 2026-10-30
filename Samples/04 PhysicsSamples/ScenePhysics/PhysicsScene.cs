@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace PhysicsSamples.ScenePhysics
@@ -149,8 +148,8 @@ namespace PhysicsSamples.ScenePhysics
             var jsphere1Model = await AddComponent<Model, ModelDescription>("jsphere1", "jsphere1", desc);
             var jsphere2Model = await AddComponent<Model, ModelDescription>("jsphere2", "jsphere2", desc);
 
-            jsphere1Model.TintColor = Vector4Extensions.AdjustSaturation(Color.DarkSlateGray.RGBA(), 10f);
-            jsphere2Model.TintColor = Vector4Extensions.AdjustSaturation(Color.SaddleBrown.RGBA(), 10f);
+            jsphere1Model.TintColor = Vector4.AdjustSaturation(Color.DarkSlateGray.RGBA(), 10f);
+            jsphere2Model.TintColor = Vector4.AdjustSaturation(Color.SaddleBrown.RGBA(), 10f);
 
             var rbState1 = new RigidBodyState
             {
@@ -178,8 +177,8 @@ namespace PhysicsSamples.ScenePhysics
             colliders.Add(jsphere1);
             colliders.Add(jsphere2);
 
-            var endPointOne = new BodyEndPoint(jsphere1.PhysicsObject.RigidBody, Vector3Extensions.Down * 0.5f);
-            var endPointTwo = new BodyEndPoint(jsphere2.PhysicsObject.RigidBody, Vector3Extensions.Up * 0.5f);
+            var endPointOne = new BodyEndPoint(jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
             joint = new Joint(endPointOne, endPointTwo, 2f);
 
             contactGenerators.Add(joint);
@@ -202,8 +201,8 @@ namespace PhysicsSamples.ScenePhysics
             var rsphere1Model = await AddComponent<Model, ModelDescription>("rsphere1", "rsphere1", desc);
             var rsphere2Model = await AddComponent<Model, ModelDescription>("rsphere2", "rsphere2", desc);
 
-            rsphere1Model.TintColor = Vector4Extensions.AdjustSaturation(Color.DarkCyan.RGBA(), 10f);
-            rsphere2Model.TintColor = Vector4Extensions.AdjustSaturation(Color.AntiqueWhite.RGBA(), 10f);
+            rsphere1Model.TintColor = Vector4.AdjustSaturation(Color.DarkCyan.RGBA(), 10f);
+            rsphere2Model.TintColor = Vector4.AdjustSaturation(Color.AntiqueWhite.RGBA(), 10f);
 
             var rbState1 = new RigidBodyState
             {
@@ -231,8 +230,8 @@ namespace PhysicsSamples.ScenePhysics
             colliders.Add(rsphere1);
             colliders.Add(rsphere2);
 
-            var endPointOne = new BodyEndPoint(rsphere1.PhysicsObject.RigidBody, Vector3Extensions.Down * 0.5f);
-            var endPointTwo = new BodyEndPoint(rsphere2.PhysicsObject.RigidBody, Vector3Extensions.Up * 0.5f);
+            var endPointOne = new BodyEndPoint(rsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(rsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
             rod = new Rod(endPointOne, endPointTwo, 2f, 0.0001f);
 
             contactGenerators.Add(rod);
@@ -255,7 +254,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState = new RigidBodyState
             {
                 Mass = 15,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(Vector3Extensions.Up * (10f + (index * 2f))),
+                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(Vector3.Up * (10f + (index * 2f))),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -299,7 +298,7 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeFrustums()
         {
-            var view = Engine.Mathematics.Matrix4x4.LookAtLH(Vector3.Zero, Vector3Extensions.Down, Vector3Extensions.ForwardLH);
+            var view = Engine.Mathematics.Matrix4x4.LookAtLH(Vector3.Zero, Vector3.Down, Vector3.ForwardLH);
             var proj = Engine.Mathematics.Matrix4x4.PerspectiveFovLH(Helper.PiOver4, 1, 2, 4);
             var bFrustum = new BoundingFrustum(view * proj);
             var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);

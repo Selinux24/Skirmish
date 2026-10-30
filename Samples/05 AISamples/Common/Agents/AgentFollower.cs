@@ -1,9 +1,10 @@
-﻿using Engine;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace AISamples.Common.Agents
 {
+    using Engine;
+    using Engine.Mathematics;
+
     class AgentFollower(float distance, float height) : IFollower
     {
         private readonly float distance = distance;

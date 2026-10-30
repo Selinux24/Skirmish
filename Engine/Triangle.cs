@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine
 {
@@ -182,9 +181,9 @@ namespace Engine
             }
 
             return new Triangle(
-                Vector3Extensions.TransformCoordinate(triangle.Point1, transform),
-                Vector3Extensions.TransformCoordinate(triangle.Point2, transform),
-                Vector3Extensions.TransformCoordinate(triangle.Point3, transform));
+                Vector3.TransformCoordinate(triangle.Point1, transform),
+                Vector3.TransformCoordinate(triangle.Point2, transform),
+                Vector3.TransformCoordinate(triangle.Point3, transform));
         }
         /// <summary>
         /// Transform triangle list coordinates
@@ -401,7 +400,7 @@ namespace Engine
         /// <returns>Returns the projection vector</returns>
         public readonly Vector3 ProjectToVector(Vector3 vector)
         {
-            if (!vector.IsNormalized())
+            if (!vector.IsNormalized)
             {
                 vector = Vector3.Normalize(vector);
             }
@@ -462,7 +461,7 @@ namespace Engine
         /// </summary>
         public readonly float GetInclination()
         {
-            return Vector3Extensions.Angle(Normal, Vector3Extensions.Down);
+            return Vector3.Angle(Normal, Vector3.Down);
         }
 
         /// <summary>

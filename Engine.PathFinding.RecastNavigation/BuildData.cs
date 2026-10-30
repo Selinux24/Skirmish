@@ -1,7 +1,7 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Mathematics;
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
     using Engine.PathFinding.RecastNavigation.Recast;
 

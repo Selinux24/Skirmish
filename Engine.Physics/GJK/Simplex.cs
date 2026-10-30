@@ -21,8 +21,6 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using System.Numerics;
-
 namespace Engine.Physics.GJK
 {
     using Engine.Mathematics;
@@ -104,16 +102,16 @@ namespace Engine.Physics.GJK
 
             // Search perpendicular to line segment towards origin
             SearchDir = Vector3.Cross(Vector3.Cross(C.Point - B.Point, -B.Point), C.Point - B.Point);
-            if (Vector3Extensions.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
+            if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
             {
                 // Origin is on this line segment, apparently any normal search vector will do?
 
                 // Normal with x-axis
-                SearchDir = Vector3.Cross(C.Point - B.Point, Vector3Extensions.Right);
-                if (Vector3Extensions.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
+                SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.Right);
+                if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
                 {
                     // Normal with z-axis
-                    SearchDir = Vector3.Cross(C.Point - B.Point, Vector3Extensions.BackwardLH);
+                    SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.BackwardLH);
                 }
             }
 

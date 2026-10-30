@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
@@ -74,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                centerPos.IsInfinity() ||
+                centerPos.IsInfinity ||
                 radius < 0 || float.IsInfinity(radius) ||
                 filter == null ||
                 maxResult < 0)

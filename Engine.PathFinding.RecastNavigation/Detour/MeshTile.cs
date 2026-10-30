@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -550,7 +549,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Calculate quantized box
         /// </summary>
-        public void CalculateQuantizedBox(BoundingBox bounds, out Vortice.Mathematics.Int3 bmin, out Vortice.Mathematics.Int3 bmax)
+        public void CalculateQuantizedBox(BoundingBox bounds, out Vector3I bmin, out Vector3I bmax)
         {
             var tb = Header.Bounds;
             float qfac = Header.BvQuantFactor;

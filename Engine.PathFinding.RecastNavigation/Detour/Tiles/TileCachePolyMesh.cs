@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Represents a polygon mesh suitable for use in building a tile cache navigation mesh.
     /// </summary>
@@ -30,7 +31,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Vertices of the mesh, 3 elements per vertex.
         /// </summary>
-        private Int3[] vertList;
+        private Vector3I[] vertList;
         /// <summary>
         /// Number of polygons.
         /// </summary>
@@ -65,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var mesh = new TileCachePolyMesh
             {
                 vertCount = 0,
-                vertList = new Int3[maxVertices],
+                vertList = new Vector3I[maxVertices],
 
                 polyCount = 0,
                 polyList = new IndexedPolygon[maxPolys],
@@ -442,7 +443,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="nedges">Number of edges</param>
         /// <param name="numRemovedVerts">Number of removed vertices</param>
         /// <returns>Returns the triangulated vertices and the triangulated hole</returns>
-        private readonly (bool Result, Int3[] TriVerts, int[] TriHole, int[] Hole, int[] HArea) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
+        private readonly (bool Result, Vector3I[] TriVerts, int[] TriHole, int[] Hole, int[] HArea) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
         {
             var hole = new int[numRemovedVerts * NVP];
             var harea = new int[numRemovedVerts * NVP];
@@ -468,7 +469,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
             }
 
-            var tverts = new Int3[nhole];
+            var tverts = new Vector3I[nhole];
             var thole = new int[nhole];
 
             // Generate temp vertex array for triangulation.
@@ -771,7 +772,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Return vertices
         /// </summary>
-        public readonly Int3[] GetVertices()
+        public readonly Vector3I[] GetVertices()
         {
             return [.. vertList];
         }
@@ -779,7 +780,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the vertex at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly Int3 GetVertex(int index)
+        public readonly Vector3I GetVertex(int index)
         {
             return vertList[index];
         }
@@ -876,7 +877,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Iterates over the mesh triangles
         /// </summary>
         /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
-        public readonly IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int a)> IteratePolyTriangles()
+        public readonly IEnumerable<(int i, Vector3I[] tri, IndexedPolygon p, int a)> IteratePolyTriangles()
         {
             for (int i = 0; i < polyCount; i++)
             {

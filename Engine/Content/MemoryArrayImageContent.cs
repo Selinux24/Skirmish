@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Vortice.Mathematics;
 
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Image content array from memory

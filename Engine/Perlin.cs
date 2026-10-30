@@ -1,7 +1,8 @@
-﻿using System.Numerics;
-
+﻿
 namespace Engine
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Perlin Noise
     /// </summary>

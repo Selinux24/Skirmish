@@ -1,12 +1,13 @@
-﻿using Engine;
-using Engine.BuiltIn.UI;
-using Engine.Tween;
-using Engine.UI.Tween;
-using System;
-using System.Numerics;
+﻿using System;
 
 namespace AISamples
 {
+    using Engine;
+    using Engine.BuiltIn.UI;
+    using Engine.Mathematics;
+    using Engine.Tween;
+    using Engine.UI.Tween;
+
     static class UIControlExtensions
     {
         public static void ScaleInScaleOut(this UIControlTweener tweener, IUIControl ctrl, float from, float to, long milliseconds)

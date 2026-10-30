@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneMaterials
@@ -134,18 +133,16 @@ namespace BasicSamples.SceneMaterials
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4Extensions.FromRgb( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, Vector4Extensions.FromRgb(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, Vector4Extensions.FromRgb(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare1String),
-
-                    new (-0.3f, 0.7f, Vector4Extensions.FromRgb(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, Vector4Extensions.FromRgb( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4Extensions.FromRgb( 50, 200, 200), resourceFlare2String),
-
-                    new (-0.7f, 0.7f, Vector4Extensions.FromRgb( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, Vector4Extensions.FromRgb( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, Vector4Extensions.FromRgb( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -155,7 +152,7 @@ namespace BasicSamples.SceneMaterials
             float t = 8f;
             float h = 0f;
 
-            var geo = GeometryUtil.CreatePlane(l, h, Vector3Extensions.Up);
+            var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * t);
 
             var mat = MaterialCookTorranceContent.Default;
@@ -318,7 +315,7 @@ namespace BasicSamples.SceneMaterials
                     {
                         var diffuse = new Vector3(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount);
                         var specular = diffuse + new Vector3(specularFactor);
-                        specular = Vector3Extensions.AdjustSaturation(specular, 1f);
+                        specular = Vector3.AdjustSaturation(specular, 1f);
 
                         yield return GenerateMaterial(diffuse, specular, matParams, nmap);
                     }
@@ -340,7 +337,7 @@ namespace BasicSamples.SceneMaterials
             else if (matParams.Algorithm == SpecularAlgorithms.BlinnPhong)
             {
                 MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-                mat.DiffuseColor = new (diffuse, 1f);
+                mat.DiffuseColor = new(diffuse, 1f);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
                 mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
@@ -350,7 +347,7 @@ namespace BasicSamples.SceneMaterials
             else if (matParams.Algorithm == SpecularAlgorithms.CookTorrance)
             {
                 MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
-                mat.DiffuseColor = new (diffuse, 1f);
+                mat.DiffuseColor = new(diffuse, 1f);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
                 mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;

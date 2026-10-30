@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Engine.Mathematics
 {
@@ -541,35 +540,35 @@ namespace Engine.Mathematics
             if ((nX > nZ) && (nX >= nY))
             {
                 // Project onto plane YZ
-                p1 = a.Point2.ZY();
-                q1 = a.Point1.ZY();
-                r1 = a.Point3.ZY();
+                p1 = a.Point2.ZY;
+                q1 = a.Point1.ZY;
+                r1 = a.Point3.ZY;
 
-                p2 = b.Point2.ZY();
-                q2 = b.Point1.ZY();
-                r2 = b.Point3.ZY();
+                p2 = b.Point2.ZY;
+                q2 = b.Point1.ZY;
+                r2 = b.Point3.ZY;
             }
             else if ((nY > nZ) && (nY >= nX))
             {
                 // Project onto plane XZ
-                p1 = a.Point2.XZ();
-                q1 = a.Point1.XZ();
-                r1 = a.Point3.XZ();
+                p1 = a.Point2.XZ;
+                q1 = a.Point1.XZ;
+                r1 = a.Point3.XZ;
 
-                p2 = b.Point2.XZ();
-                q2 = b.Point1.XZ();
-                r2 = b.Point3.XZ();
+                p2 = b.Point2.XZ;
+                q2 = b.Point1.XZ;
+                r2 = b.Point3.XZ;
             }
             else
             {
                 // Project onto plane XY
-                p1 = a.Point1.XY();
-                q1 = a.Point2.XY();
-                r1 = a.Point3.XY();
+                p1 = a.Point1.XY;
+                q1 = a.Point2.XY;
+                r1 = a.Point3.XY;
 
-                p2 = b.Point1.XY();
-                q2 = b.Point2.XY();
-                r2 = b.Point3.XY();
+                p2 = b.Point1.XY;
+                q2 = b.Point2.XY;
+                r2 = b.Point3.XY;
             }
 
             return Overlap2D(new(p1, q1, r1), new(p2, q2, r2));

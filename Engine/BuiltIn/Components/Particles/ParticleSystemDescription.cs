@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Numerics;
 
 namespace Engine.BuiltIn.Components.Particles
 {
@@ -16,7 +15,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Default gravity value
         /// </summary>
-        public static readonly Vector3 DefaultGravity = Vector3Extensions.Down;
+        public static readonly Vector3 DefaultGravity = Vector3.Down;
         /// <summary>
         /// Default minimum color variation
         /// </summary>
