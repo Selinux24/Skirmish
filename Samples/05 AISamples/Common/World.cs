@@ -1,28 +1,26 @@
-﻿using System;
+﻿using AISamples.Common.Agents;
+using AISamples.Common.Items;
+using AISamples.Common.Markings;
+using AISamples.Common.Persistence;
+using AISamples.Common.Primitives;
+using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace AISamples.Common
 {
-    using AISamples.Common.Agents;
-    using AISamples.Common.Items;
-    using AISamples.Common.Markings;
-    using AISamples.Common.Persistence;
-    using AISamples.Common.Primitives;
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Color = System.Drawing.Color;
-
     class World(Graph graph, float height)
     {
-        private static readonly Vector4 roadColor = new(0.3f, 0.3f, 0.3f, 1f);
-        private static readonly Vector4 roadMarksColor = new(0.9f, 0.9f, 0.9f, 1f);
+        private static readonly Color4 roadColor = new(0.3f, 0.3f, 0.3f, 1f);
+        private static readonly Color4 roadMarksColor = new(0.9f, 0.9f, 0.9f, 1f);
         private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
         private const string matDiffuseName = "diffuse";
@@ -68,14 +66,14 @@ namespace AISamples.Common
         private const float carMaxReverseSpeed = 0.2f;
         private float carScale = 1f;
         private Car bestCar = null;
-        private readonly Vector4 bestCarColor = new Vector4(252, 212, 32, 255);
-        private readonly Vector4 carColor = new Vector4(252, 222, 200, 255);
+        private readonly Color4 bestCarColor = new Color(252, 212, 32, 255);
+        private readonly Color4 carColor = new Color(252, 222, 200, 255);
 
         public const int MaxCarInstances = 500;
         private ModelInstanced carDrawer = null;
 
-        private readonly Vector4 carSensorColor = Color.YellowGreen.RGBA();
-        private readonly Vector4 carSensorContactColor = Color.OrangeRed.RGBA();
+        private readonly Color4 carSensorColor = Color.YellowGreen;
+        private readonly Color4 carSensorContactColor = Color.OrangeRed;
         private GeometryColorDrawer<Triangle> carSensorDrawer = null;
 
         public Graph Graph { get => graph; }
@@ -388,7 +386,7 @@ namespace AISamples.Common
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = materialB,
-                TintColor = Color.White.RGBA(),
+                TintColor = Color.White,
                 StartsVisible = false,
             };
 
@@ -440,7 +438,7 @@ namespace AISamples.Common
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Images = images,
                 Material = material3d,
-                TintColor = Color.White.RGBA(),
+                TintColor = Color.White,
                 StartsVisible = false,
             };
 
@@ -518,10 +516,10 @@ namespace AISamples.Common
             {
                 if (i >= cars.Count || cars[i].Damaged)
                 {
-                    if (carDrawer[i].TintColor != Color.Black.RGBA())
+                    if (carDrawer[i].TintColor != Color.Black)
                     {
-                        carDrawer[i].Manipulator.SetTransform(Engine.Mathematics.Matrix4x4.Translation(Vector3.One * 10000000f));
-                        carDrawer[i].TintColor = Color.Black.RGBA();
+                        carDrawer[i].Manipulator.SetTransform(Matrix4x4.Translation(Vector3.One * 10000000f));
+                        carDrawer[i].TintColor = Color.Black;
                     }
 
                     continue;
@@ -573,7 +571,7 @@ namespace AISamples.Common
 
             carSensorDrawer.Visible = true;
         }
-        private IEnumerable<(Vector4, Triangle)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
+        private IEnumerable<(Color4, Triangle)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
         {
             var p0 = new Vector3(r.P1.X, height, r.P1.Y);
             var p1 = new Vector3(r.P2.X, height, r.P2.Y);

@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Point light
     /// </summary>
@@ -87,7 +86,7 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
-        public SceneLightPoint(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, SceneLightPointDescription description)
+        public SceneLightPoint(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialTransform = description.Transform;

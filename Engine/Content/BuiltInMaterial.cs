@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Content
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Built-in material data
     /// </summary>
@@ -11,15 +10,15 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Vector3 AmbientColor { get; set; }
+        public Color3 AmbientColor { get; set; }
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Vector4 DiffuseColor { get; set; }
+        public Color4 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Vector3 SpecularColor { get; set; }
+        public Color3 SpecularColor { get; set; }
         /// <summary>
         /// Shininess factor
         /// </summary>

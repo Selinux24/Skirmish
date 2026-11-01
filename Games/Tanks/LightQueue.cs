@@ -1,10 +1,9 @@
 ﻿using Engine;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Tanks
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Light queue helper class
     /// </summary>
@@ -154,7 +153,7 @@ namespace Tanks
         /// <param name="startColor">Starting color</param>
         /// <param name="endColor">End color</param>
         /// <returns>Returns la explosion tween description</returns>
-        public static LightTweenDescription ExplosionTween(float radius, float intensity, Vector3 startColor, Vector3 endColor)
+        public static LightTweenDescription ExplosionTween(float radius, float intensity, Color3 startColor, Color3 endColor)
         {
             var intensityCurve = new Curve();
             intensityCurve.Keys.Add(0f, 1f);
@@ -188,7 +187,7 @@ namespace Tanks
         /// <param name="startColor">Starting color</param>
         /// <param name="endColor">End color</param>
         /// <returns>Returns la shot tween description</returns>
-        public static LightTweenDescription ShootTween(float radius, float intensity, Vector3 startColor, Vector3 endColor)
+        public static LightTweenDescription ShootTween(float radius, float intensity, Color3 startColor, Color3 endColor)
         {
             var intensityCurve = new Curve();
             intensityCurve.Keys.Add(0f, 1f);
@@ -232,10 +231,10 @@ namespace Tanks
         /// <summary>
         /// Light initial color
         /// </summary>
-        public Vector3 StartColor;
+        public Color3 StartColor;
         /// <summary>
         /// Light end color
         /// </summary>
-        public Vector3 EndColor;
+        public Color3 EndColor;
     }
 }

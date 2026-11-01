@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.Direct3D;
+using Vortice.Direct3D11;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-    using Vortice.Direct3D11;
     using Format = Vortice.DXGI.Format;
 
     /// <summary>
@@ -443,12 +443,12 @@ namespace Engine.Common
             frameCounters.RenderTargetSets++;
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
         {
             SetRenderTargets(renderTargets, clearRT, clearRTColor, false);
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, bool freeOMResources)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources)
         {
             if (freeOMResources)
             {
@@ -471,7 +471,7 @@ namespace Engine.Common
             }
         }
         /// <inheritdoc/>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
         {
             if (freeOMResources)
             {
@@ -546,7 +546,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OMSetBlendState(state.GetBlendState(), (Vortice.Mathematics.Color4)state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;

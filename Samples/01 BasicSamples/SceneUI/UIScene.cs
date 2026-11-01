@@ -1,17 +1,15 @@
-﻿using System;
-using System.Drawing;
+﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Mathematics;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneUI
 {
-    using Engine;
-    using Engine.BuiltIn.UI;
-    using Engine.Mathematics;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-
     public class UIScene : Scene
     {
         private const string resourcesFolder = "SceneUI/resources";
@@ -103,7 +101,7 @@ namespace BasicSamples.SceneUI
             var defaultFont = Engine.UI.FontDescription.FromFile(fontFamilyString, 10, true);
             defaultFont.ContentPath = resourcesFolder;
 
-            var desc = UIProgressBarDescription.Default(defaultFont, new(0, 0, 0, 0.5f), Color.Green.RGBA());
+            var desc = UIProgressBarDescription.Default(defaultFont, new(0, 0, 0, 0.5f), Color.Green);
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
@@ -170,7 +168,7 @@ namespace BasicSamples.SceneUI
                 {
                     ContentPath = resourcesFolder,
                     Textures = ["pan_bw.png"],
-                    BaseColor = Vector4.FromColor3(176, 77, 45),
+                    BaseColor = new Color(176, 77, 45),
                 },
                 StartsVisible = false,
             };
@@ -191,7 +189,7 @@ namespace BasicSamples.SceneUI
                     Top = height * 0.1f,
                     Bottom = height * 0.1f,
                 },
-                TextForeColor = Color.LightGoldenrodYellow.RGBA(),
+                TextForeColor = Color.LightGoldenrodYellow,
                 TextShadowColor = new(0, 0, 0, 0.2f),
                 TextShadowDelta = new(8, 5),
             };
@@ -216,7 +214,7 @@ namespace BasicSamples.SceneUI
                 {
                     ContentPath = resourcesFolder,
                     Textures = ["pan_bw.png"],
-                    BaseColor = Color.Pink.RGBA(),
+                    BaseColor = Color.Pink,
                 },
 
                 EventsEnabled = true,
@@ -274,7 +272,7 @@ namespace BasicSamples.SceneUI
             var font = Engine.UI.FontDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue.RGBA(), Color.Green.RGBA());
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);
             descButClose.Top = 250;
             descButClose.Left = 150;
             descButClose.Width = 200;
@@ -295,7 +293,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeScroll()
         {
-            var panelDesc = UIPanelDescription.Default(Color.Gray.RGBA());
+            var panelDesc = UIPanelDescription.Default(Color.Gray);
             panelDesc.Top = 400;
             panelDesc.Left = 50;
             panelDesc.Width = 500;
@@ -310,7 +308,7 @@ namespace BasicSamples.SceneUI
             areaDesc.ScrollbarSize = 20;
             areaDesc.ScrollbarMarkerSize = 100;
             areaDesc.ScrollbarBaseColor = new(0, 0, 0, 0.7f);
-            areaDesc.ScrollbarMarkerColor = Color.LightGray.RGBA();
+            areaDesc.ScrollbarMarkerColor = Color.LightGray;
             areaDesc.Padding = new Padding(5, 1, 1, 25);
 
             scrollTextArea = await CreateComponent<UITextArea, UITextAreaDescription>("scrollText", "scrollText", areaDesc);
@@ -496,12 +494,12 @@ Progress: {(int)(progressValue * 100f)}%";
             butTest2.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Right Button";
             butTest2.Visible = true;
             uiTweener.Show(butTest2, 250);
-            uiTweener.TweenBaseColorBounce(butTest2, Color.Yellow.RGBA(), Color.Red.RGBA(), 2000, ScaleFuncs.Linear);
+            uiTweener.TweenBaseColorBounce(butTest2, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
             butTest1.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Middle Button";
             butTest1.Visible = true;
             uiTweener.Show(butTest1, 250);
-            uiTweener.TweenBaseColorBounce(butTest1, Color.Yellow.RGBA(), Color.Red.RGBA(), 2000, ScaleFuncs.Linear);
+            uiTweener.TweenBaseColorBounce(butTest1, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
         private void ButTest1_Click(IUIControl sender, MouseEventArgs e)
@@ -541,7 +539,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 uiTweener.ClearTween(button);
                 uiTweener.TweenScale(button, button.Scale, 1, 150, ScaleFuncs.QuadraticEaseOut);
-                uiTweener.TweenBaseColorBounce(button, Color.Yellow.RGBA(), Color.Red.RGBA(), 2000, ScaleFuncs.Linear);
+                uiTweener.TweenBaseColorBounce(button, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
         private void ButTest_MouseEnter(IUIControl sender, MouseEventArgs e)
@@ -550,7 +548,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 uiTweener.ClearTween(button);
                 uiTweener.TweenScale(button, button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
-                uiTweener.TweenBaseColorBounce(button, button.BaseColor, Color.Yellow.RGBA(), 500, ScaleFuncs.Linear);
+                uiTweener.TweenBaseColorBounce(button, button.BaseColor, Color.Yellow, 500, ScaleFuncs.Linear);
             }
         }
     }

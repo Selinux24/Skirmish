@@ -43,19 +43,19 @@ namespace Engine
         /// <summary>
         /// Grounding box minimum point
         /// </summary>
-        public Position3? GroundBoundingBoxMin { get; set; }
+        public CntPosition3? GroundBoundingBoxMin { get; set; }
         /// <summary>
         /// Grounding box maximum point
         /// </summary>
-        public Position3? GroundBoundingBoxMax { get; set; }
+        public CntPosition3? GroundBoundingBoxMax { get; set; }
         /// <summary>
         /// Navigation box minimum point
         /// </summary>
-        public Position3? NavigationBoundingBoxMin { get; set; }
+        public CntPosition3? NavigationBoundingBoxMin { get; set; }
         /// <summary>
         /// Navigation box maximum point
         /// </summary>
-        public Position3? NavigationBoundingBoxMax { get; set; }
+        public CntPosition3? NavigationBoundingBoxMax { get; set; }
         /// <summary>
         /// Game environment state
         /// </summary>

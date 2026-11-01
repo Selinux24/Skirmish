@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Text area description
     /// </summary>
@@ -89,7 +88,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
@@ -98,11 +97,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
+        public Color4 TextShadowColor { get; set; } = Color.Transparent;
         /// <summary>
         /// Shadow position delta
         /// </summary>
@@ -126,11 +125,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Scroll bar base color
         /// </summary>
-        public Vector4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
+        public Color4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// Scroll bar marker color
         /// </summary>
-        public Vector4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
+        public Color4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
         /// <summary>
         /// Scroll bar marker size
         /// </summary>

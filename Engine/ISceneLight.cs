@@ -1,7 +1,7 @@
-﻿namespace Engine
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Scene light
     /// </summary>
@@ -26,11 +26,11 @@
         /// <summary>
         /// Diffuse color
         /// </summary>
-        Vector3 DiffuseColor { get; set; }
+        Color3 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        Vector3 SpecularColor { get; set; }
+        Color3 SpecularColor { get; set; }
         /// <summary>
         /// Shadow map index
         /// </summary>

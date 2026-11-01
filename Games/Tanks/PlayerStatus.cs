@@ -1,7 +1,7 @@
-﻿namespace Tanks
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Tanks
+{
     /// <summary>
     /// Player status class
     /// </summary>
@@ -34,11 +34,11 @@
         /// <summary>
         /// Player color
         /// </summary>
-        public Vector4 Color { get; set; }
+        public Color4 Color { get; set; }
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; }
+        public Color4 TintColor { get; set; }
         /// <summary>
         /// Health
         /// </summary>

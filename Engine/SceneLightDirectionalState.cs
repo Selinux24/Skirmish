@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Initial light direction
         /// </summary>
-        public Direction3 InitialDirection { get; set; }
+        public CntDirection3 InitialDirection { get; set; }
         /// <summary>
         /// Light direction
         /// </summary>
-        public Direction3 Direction { get; set; }
+        public CntDirection3 Direction { get; set; }
         /// <summary>
         /// Base brightness
         /// </summary>
@@ -30,18 +30,18 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public Matrix4x4 ToShadowSpace { get; set; }
+        public CntMatrix4x4 ToShadowSpace { get; set; }
         /// <summary>
         /// X cascade offset
         /// </summary>
-        public Position4 ToCascadeOffsetX { get; set; }
+        public CntPosition4 ToCascadeOffsetX { get; set; }
         /// <summary>
         /// Y cascade offset
         /// </summary>
-        public Position4 ToCascadeOffsetY { get; set; }
+        public CntPosition4 ToCascadeOffsetY { get; set; }
         /// <summary>
         /// Cascasde scale
         /// </summary>
-        public Position4 ToCascadeScale { get; set; }
+        public CntPosition4 ToCascadeScale { get; set; }
     }
 }

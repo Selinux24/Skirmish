@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using Vortice.DXGI;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Engine device context interface
     /// </summary>
@@ -59,7 +58,7 @@ namespace Engine.Common
         /// <param name="renderTargets">Render targets</param>
         /// <param name="clearRT">Indicates whether the target must be cleared</param>
         /// <param name="clearRTColor">Render target clear color</param>
-        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor);
+        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor);
         /// <summary>
         /// Set render targets
         /// </summary>
@@ -67,7 +66,7 @@ namespace Engine.Common
         /// <param name="clearRT">Indicates whether the target must be cleared</param>
         /// <param name="clearRTColor">Render target clear color</param>
         /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
-        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, bool freeOMResources);
+        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources);
         /// <summary>
         /// Set render targets
         /// </summary>
@@ -78,7 +77,7 @@ namespace Engine.Common
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
         /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
-        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Vector4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources);
+        void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources);
 
         /// <summary>
         /// Clear depth / stencil buffer

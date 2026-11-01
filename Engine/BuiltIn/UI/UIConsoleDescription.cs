@@ -1,11 +1,10 @@
-﻿using Logger;
+﻿using Engine.Mathematics;
+using Engine.UI;
+using Logger;
 using System;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// UIConsole description
     /// </summary>
@@ -28,7 +27,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default console description
         /// </summary>
         /// <param name="backgroundColor">Background color</param>
-        public static UIConsoleDescription Default(Vector4 backgroundColor)
+        public static UIConsoleDescription Default(Color4 backgroundColor)
         {
             return new()
             {

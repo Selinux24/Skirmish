@@ -1,18 +1,16 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 
 namespace AISamples.Common
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Color = System.Drawing.Color;
-
     class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
     {
-        private static readonly Vector4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
-        private static readonly Vector4 wPositiveColor = Color.Yellow.RGBA();
-        private static readonly Vector4 wNegativeColor = Color.Blue.RGBA();
+        private static readonly Color4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
+        private static readonly Color4 wPositiveColor = Color.Yellow;
+        private static readonly Color4 wNegativeColor = Color.Blue;
 
         private readonly GeometryColorDrawer<Triangle> opaqueDrawer = opaqueDrawer;
         private readonly GeometryColorDrawer<Triangle> triangleDrawer = triangleDrawer;
@@ -110,12 +108,12 @@ namespace AISamples.Common
         {
             return count == 1 ? 0.5f : (float)i / (count - 1);
         }
-        private static Vector4 ColorFromValue(float v)
+        private static Color4 ColorFromValue(float v)
         {
             float alpha = Math.Clamp(MathF.Abs(v), 0f, 1f);
-            Vector3 color = v > 0 ? wPositiveColor.RGB : wNegativeColor.RGB;
+            var color = v > 0 ? wPositiveColor : wNegativeColor;
 
-            return new(color, alpha);
+            return new((Color3)color, alpha);
         }
     }
 }

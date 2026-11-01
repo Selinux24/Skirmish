@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using Engine.Mathematics;
+using Engine.UI;
+using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Control interface
     /// </summary>
@@ -139,11 +137,11 @@ namespace Engine
         /// <summary>
         /// Gets or sets the base color
         /// </summary>
-        Vector4 BaseColor { get; set; }
+        Color4 BaseColor { get; set; }
         /// <summary>
         /// Gets or sets the tint color
         /// </summary>
-        Vector4 TintColor { get; set; }
+        Color4 TintColor { get; set; }
         /// <summary>
         /// Alpha color component
         /// </summary>
@@ -215,7 +213,7 @@ namespace Engine
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
-        bool Contains(Point point);
+        bool Contains(System.Drawing.Point point);
 
         /// <summary>
         /// Increments position component d distance along left vector

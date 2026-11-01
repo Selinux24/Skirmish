@@ -29,11 +29,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 StartPosition { get; set; } = Position3.Zero;
+        public CntPosition3 StartPosition { get; set; } = CntPosition3.Zero;
         /// <summary>
         /// Looking vector
         /// </summary>
-        public Direction3 LookingVector { get; set; } = Direction3.ForwardLH;
+        public CntDirection3 LookingVector { get; set; } = CntDirection3.ForwardLH;
         /// <summary>
         /// Assets map
         /// </summary>

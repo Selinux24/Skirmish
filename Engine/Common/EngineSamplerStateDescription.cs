@@ -1,6 +1,7 @@
-﻿namespace Engine.Common
+﻿using Engine.Mathematics;
+
+namespace Engine.Common
 {
-    using Engine.Mathematics;
     using DXComparison = Vortice.Direct3D11.ComparisonFunction;
     using DXFilter = Vortice.Direct3D11.Filter;
     using DXSampleStateDescription = Vortice.Direct3D11.SamplerDescription;
@@ -22,7 +23,7 @@
                 MipLODBias = obj.MipLodBias,
                 MaxAnisotropy = obj.MaximumAnisotropy,
                 ComparisonFunc = (DXComparison)obj.ComparisonFunction,
-                BorderColor = (Vortice.Mathematics.Color4)obj.BorderColor,
+                BorderColor = obj.BorderColor,
                 MinLOD = obj.MinimumLod,
                 MaxLOD = obj.MaximumLod,
             };
@@ -89,7 +90,7 @@
         /// Border color to use if D3D11_TEXTURE_ADDRESS_BORDER is specified for AddressU,
         /// AddressV, or AddressW. Range must be between 0.0 and 1.0 inclusive.
         /// </summary>
-        public Vector4 BorderColor { get; set; }
+        public Color4 BorderColor { get; set; }
         /// <summary>
         /// Lower end of the mipmap range to clamp access to, where 0 is the largest and
         /// most detailed mipmap level and any level higher than that is less detailed.

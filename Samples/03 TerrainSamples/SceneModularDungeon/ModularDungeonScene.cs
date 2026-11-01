@@ -1,4 +1,21 @@
-﻿using Logger;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Content;
+using Engine.Content.FmtObj.Fmt;
+using Engine.Content.OnePageDungeon;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
+using Engine.Modular;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,25 +24,6 @@ using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneModularDungeon
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.UI;
-    using Engine.Content;
-    using Engine.Content.FmtObj.Fmt;
-    using Engine.Content.OnePageDungeon;
-    using Engine.Content.Persistence;
-    using Engine.Mathematics;
-    using Engine.Modular;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-    using Color = System.Drawing.Color;
-
     public class ModularDungeonScene : WalkableScene
     {
         private const float maxDistance = 35;
@@ -51,8 +49,8 @@ namespace TerrainSamples.SceneModularDungeon
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Vector4 ambientUp = new(255, 224, 255, 255);
-        private readonly Vector4 ambientDown = new(72, 72, 255, 255);
+        private readonly Color3 ambientUp = new(255, 224, 255);
+        private readonly Color3 ambientDown = new(72, 72, 255);
 
         private Player playerAgentType = null;
         private readonly Vector3 agentTorchLight = new(255, 201, 14);
@@ -321,7 +319,7 @@ namespace TerrainSamples.SceneModularDungeon
             consoleDesc.LogFilterFunc = (l) => l.LogLevel == LogLevel.Debug;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui1", "Console", consoleDesc, LayerUI + 1);
 
-            var pvLevelsDesc = UIProgressBarDescription.Default(Color.Transparent.RGBA(), Color.Green.RGBA());
+            var pvLevelsDesc = UIProgressBarDescription.Default(Color.Transparent, Color.Green);
             pvLevelsDesc.StartsVisible = false;
             pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", pvLevelsDesc);
 
@@ -330,8 +328,8 @@ namespace TerrainSamples.SceneModularDungeon
             messagesDesc.StartsVisible = false;
             messages = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Messages", messagesDesc, LayerUI + 1);
             messages.Text = null;
-            messages.TextForeColor = Color.Red.RGBA();
-            messages.TextShadowColor = Color.DarkRed.RGBA();
+            messages.TextForeColor = Color.Red;
+            messages.TextShadowColor = Color.DarkRed;
             messages.SetPosition(new Vector2(0, 0));
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
@@ -617,12 +615,12 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB, ambientUp.RGB, true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
 
-            Lights.FogColor = GameEnvironment.Background = Color.Black.RGBA();
+            Lights.FogColor = GameEnvironment.Background = Color.Black;
             Lights.FogRange = 10f;
             Lights.FogStart = maxDistance - 15f;
 
@@ -805,8 +803,8 @@ namespace TerrainSamples.SceneModularDungeon
             var tris = selectedItem.Instance.GetGeometry();
             if (tris.Any())
             {
-                Vector4 sItemColor = Color.LightYellow.RGBA();
-                sItemColor.W = 0.3333f;
+                Color4 sItemColor = Color.LightYellow;
+                sItemColor.Alpha = 0.3333f;
 
                 Game.Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
 

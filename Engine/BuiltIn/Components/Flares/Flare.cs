@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.BuiltIn.UI;
+using Engine.Mathematics;
+using System;
 
 namespace Engine.BuiltIn.Components.Flares
 {
-    using Engine.BuiltIn.UI;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Flare
     /// </summary>
@@ -25,7 +24,7 @@ namespace Engine.BuiltIn.Components.Flares
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color { get; set; }
+        public Color3 Color { get; set; }
 
         /// <summary>
         /// Destructor

@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
-    using Engine;
-    using Engine.BuiltIn.UI;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Base editor
     /// </summary>
@@ -98,7 +97,8 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="name">Name</param>
         protected async Task<UIPanel> InitializePanel(string id, string name)
         {
-            var panelColor = new Vector4(UIConfiguration.BaseColor.RGB, 0.85f);
+            var panelColor = UIConfiguration.BaseColor;
+            panelColor.Alpha = 0.85f;
             var desc = UIPanelDescription.Default(panelColor);
             desc.StartsVisible = false;
 

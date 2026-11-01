@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Heightmap description
     /// </summary>
@@ -46,7 +45,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Color map
         /// </summary>
-        public Vector4[,] Colormap { get; set; } = null;
+        public Color4[,] Colormap { get; set; } = null;
         /// <summary>
         /// Color map file name
         /// </summary>
@@ -83,7 +82,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Transform matrix
         /// </summary>
-        public Engine.Mathematics.Matrix4x4 Transform { get; set; } = Engine.Mathematics.Matrix4x4.Identity;
+        public Mathematics.Matrix4x4 Transform { get; set; } = Mathematics.Matrix4x4.Identity;
 
         /// <summary>
         /// Constructor
@@ -126,7 +125,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var material = MaterialBlinnPhongContent.Default;
 
-                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Engine.Mathematics.Matrix4x4.Identity);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, CntMatrix4x4.Identity);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

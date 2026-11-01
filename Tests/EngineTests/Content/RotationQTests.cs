@@ -16,9 +16,9 @@ namespace EngineTests.Content
     {
         public TestContext TestContext { get; set; }
 
-        static RotationQ rotarion0 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(0));
-        static RotationQ rotarion33 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(33));
-        static RotationQ rotarion90 = RotationQ.RotationAxis(Direction3.Up, Helper.DegreesToRadians(90));
+        static CntRotationQ rotarion0 = CntRotationQ.RotationAxis(CntDirection3.Up, Helper.DegreesToRadians(0));
+        static CntRotationQ rotarion33 = CntRotationQ.RotationAxis(CntDirection3.Up, Helper.DegreesToRadians(33));
+        static CntRotationQ rotarion90 = CntRotationQ.RotationAxis(CntDirection3.Up, Helper.DegreesToRadians(90));
 
         static readonly string rotationString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", 0.1f, 0.2f, 0.3f, 0.4f);
 
@@ -31,57 +31,57 @@ namespace EngineTests.Content
         [TestMethod()]
         public void RotationZeroTest()
         {
-            var res = RotationQ.Zero;
+            var res = CntRotationQ.Zero;
 
-            Assert.AreEqual(new RotationQ(0, 0, 0, 0), res);
+            Assert.AreEqual(new CntRotationQ(0, 0, 0, 0), res);
         }
         [TestMethod()]
         public void RotationOneTest()
         {
-            var res = RotationQ.One;
+            var res = CntRotationQ.One;
 
-            Assert.AreEqual(new RotationQ(1, 1, 1, 1), res);
+            Assert.AreEqual(new CntRotationQ(1, 1, 1, 1), res);
         }
         [TestMethod()]
         public void RotationIdentityTest()
         {
-            var res = RotationQ.Identity;
+            var res = CntRotationQ.Identity;
 
-            Assert.AreEqual(new RotationQ(0, 0, 0, 1), res);
+            Assert.AreEqual(new CntRotationQ(0, 0, 0, 1), res);
         }
         [TestMethod()]
         public void RotationValueTest()
         {
-            var res = new RotationQ(2);
+            var res = new CntRotationQ(2);
 
-            Assert.AreEqual(new RotationQ(2, 2, 2, 2), res);
+            Assert.AreEqual(new CntRotationQ(2, 2, 2, 2), res);
         }
         [TestMethod()]
         public void RotationArrayTest()
         {
-            var res = new RotationQ([1, 2, 3, 4]);
+            var res = new CntRotationQ([1, 2, 3, 4]);
 
-            Assert.AreEqual(new RotationQ(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntRotationQ(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void RotationBadArrayTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new RotationQ(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new RotationQ([1, 2, 3, 4, 5]));
+            Assert.Throws<ArgumentNullException>(() => new CntRotationQ(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntRotationQ([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntRotationQ([1, 2, 3]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntRotationQ([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void RotationComponentsTest()
         {
-            var res = new RotationQ(1, 2, 3, 4);
+            var res = new CntRotationQ(1, 2, 3, 4);
 
-            Assert.AreEqual(new RotationQ(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntRotationQ(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void RotationSettesTest()
         {
-            var res = new RotationQ
+            var res = new CntRotationQ
             {
                 X = 1,
                 Y = 2,
@@ -89,20 +89,20 @@ namespace EngineTests.Content
                 W = 4
             };
 
-            Assert.AreEqual(new RotationQ(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntRotationQ(1, 2, 3, 4), res);
         }
 
         [TestMethod()]
         public void RotationEqualsTest()
         {
-            var res = RotationQ.Zero == new RotationQ(0);
+            var res = CntRotationQ.Zero == new CntRotationQ(0);
 
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void RotationDistinctTest()
         {
-            var res = RotationQ.Zero != new RotationQ(1);
+            var res = CntRotationQ.Zero != new CntRotationQ(1);
 
             Assert.IsTrue(res);
         }
@@ -110,58 +110,58 @@ namespace EngineTests.Content
         [TestMethod()]
         public void RotationAddTest()
         {
-            var res = new RotationQ(1, 2, 3, 4) + new RotationQ(1, 2, 3, 4);
-            Assert.AreEqual(new RotationQ(2, 4, 6, 8), res);
+            var res = new CntRotationQ(1, 2, 3, 4) + new CntRotationQ(1, 2, 3, 4);
+            Assert.AreEqual(new CntRotationQ(2, 4, 6, 8), res);
         }
         [TestMethod()]
         public void RotationSubstracTest()
         {
-            var res = new RotationQ(1, 2, 3, 4) - new RotationQ(1, 2, 3, 4);
-            Assert.AreEqual(new RotationQ(0, 0, 0, 0), res);
+            var res = new CntRotationQ(1, 2, 3, 4) - new CntRotationQ(1, 2, 3, 4);
+            Assert.AreEqual(new CntRotationQ(0, 0, 0, 0), res);
         }
         [TestMethod()]
         public void RotationMultiplyTest()
         {
-            RotationQ res = new RotationQ(1, 2, 3, 4) * new RotationQ(1, 2, 3, 4);
-            RotationQ expected = new Quaternion(1, 2, 3, 4) * new Quaternion(1, 2, 3, 4);
+            CntRotationQ res = new CntRotationQ(1, 2, 3, 4) * new CntRotationQ(1, 2, 3, 4);
+            CntRotationQ expected = new Quaternion(1, 2, 3, 4) * new Quaternion(1, 2, 3, 4);
             Assert.AreEqual(expected, res);
 
-            res = new RotationQ(1, 2, 3, 4) * 2;
+            res = new CntRotationQ(1, 2, 3, 4) * 2;
             expected = new Quaternion(1, 2, 3, 4) * 2;
             Assert.AreEqual(expected, res);
 
-            res = new RotationQ(1, 2, 3, 4) * 2;
+            res = new CntRotationQ(1, 2, 3, 4) * 2;
             expected = new Quaternion(1, 2, 3, 4) * 2;
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void RotationNegateTest()
         {
-            var res = -new RotationQ(1, 2, 3, 4);
+            var res = -new CntRotationQ(1, 2, 3, 4);
 
-            Assert.AreEqual(new RotationQ(-1, -2, -3, -4), res);
+            Assert.AreEqual(new CntRotationQ(-1, -2, -3, -4), res);
         }
 
         [TestMethod()]
         public void RotationToQuaternionTest()
         {
-            Quaternion res1 = new RotationQ(1, 2, 3, 4);
+            Quaternion res1 = new CntRotationQ(1, 2, 3, 4);
             Assert.AreEqual(new Quaternion(1, 2, 3, 4), res1);
 
-            RotationQ res2 = new Quaternion(1, 2, 3, 4);
-            Assert.AreEqual(new RotationQ(1, 2, 3, 4), res2);
+            CntRotationQ res2 = new Quaternion(1, 2, 3, 4);
+            Assert.AreEqual(new CntRotationQ(1, 2, 3, 4), res2);
         }
         [TestMethod()]
         public void RotationToStringTest()
         {
-            string res1 = new RotationQ(0.1f, 0.2f, 0.3f, 0.4f);
+            string res1 = new CntRotationQ(0.1f, 0.2f, 0.3f, 0.4f);
             Assert.AreEqual(rotationString, res1);
 
-            RotationQ res2 = rotationString;
-            Assert.AreEqual(new RotationQ(0.1f, 0.2f, 0.3f, 0.4f), res2);
+            CntRotationQ res2 = rotationString;
+            Assert.AreEqual(new CntRotationQ(0.1f, 0.2f, 0.3f, 0.4f), res2);
 
             res2 = "Identity";
-            Assert.AreEqual(RotationQ.Identity, res2);
+            Assert.AreEqual(CntRotationQ.Identity, res2);
             res2 = "Rot0";
             Assert.AreEqual(rotarion0, res2);
             res2 = "Rot33";
@@ -170,7 +170,7 @@ namespace EngineTests.Content
             Assert.AreEqual(rotarion90, res2);
 
             res2 = "Nothing parseable";
-            Assert.AreEqual(RotationQ.Identity, res2);
+            Assert.AreEqual(CntRotationQ.Identity, res2);
         }
     }
 }

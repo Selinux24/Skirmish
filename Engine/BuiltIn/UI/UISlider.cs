@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Slider control
     /// </summary>
@@ -131,7 +130,7 @@ namespace Engine.BuiltIn.UI
             AddChildren(bars, false);
             AddChildren(selectors, false);
         }
-        private async Task<Sprite> CreateBarSprite(int index, Vector4 barColor, float height)
+        private async Task<Sprite> CreateBarSprite(int index, Color4 barColor, float height)
         {
             var desc = SpriteDescription.Default(barColor);
             desc.EventsEnabled = true;
@@ -163,7 +162,7 @@ namespace Engine.BuiltIn.UI
 
             UpdateValue(sprite);
         }
-        private async Task<Sprite> CreateSelectorSprite(int index, Vector4 selectorColor, float width, float height)
+        private async Task<Sprite> CreateSelectorSprite(int index, Color4 selectorColor, float width, float height)
         {
             var desc = SpriteDescription.Default(selectorColor);
             desc.EventsEnabled = true;

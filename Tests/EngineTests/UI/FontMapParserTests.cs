@@ -1,14 +1,11 @@
+using Engine.Mathematics;
+using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 
 namespace EngineTests.UI
 {
-    using Engine;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     [ExcludeFromCodeCoverage]
     [TestClass]
     [OSCondition(OperatingSystems.Windows)]
@@ -27,8 +24,8 @@ namespace EngineTests.UI
         {
             // Arrange
             string text = string.Empty;
-            Vector4 defaultForeColor = new(1, 1, 1, 1); // Blanco
-            Vector4 defaultShadowColor = new(0, 0, 0, 1); // Negro
+            Color4 defaultForeColor = Color.White; // Blanco
+            Color4 defaultShadowColor = Color.Black; // Negro
 
             // Act
             var result = FontMapParser.ParseSentence(text, defaultForeColor, defaultShadowColor);
@@ -44,8 +41,8 @@ namespace EngineTests.UI
         {
             // Arrange
             string text = "Hello I'm your father";
-            Vector4 defaultForeColor = new(1, 1, 1, 1); // Blanco
-            Vector4 defaultShadowColor = new(0, 0, 0, 1); // Negro
+            Color4 defaultForeColor = Color.White; // Blanco
+            Color4 defaultShadowColor = Color.Black; // Negro
 
             // Act
             var result = FontMapParser.ParseSentence(text, defaultForeColor, defaultShadowColor);
@@ -68,8 +65,8 @@ namespace EngineTests.UI
         {
             // Arrange
             string text = $"{Color.Red}H{Color.White}ello";
-            Vector4 defaultForeColor = Color.White.RGBA();
-            Vector4 defaultShadowColor = Color.Transparent.RGBA();
+            Color4 defaultForeColor = Color.White;
+            Color4 defaultShadowColor = Color.Transparent;
 
             // Act
             var result = FontMapParser.ParseSentence(text, defaultForeColor, defaultShadowColor);
@@ -80,15 +77,15 @@ namespace EngineTests.UI
 
             Assert.HasCount(1, result.Colors);
             Assert.HasCount(5, result.Colors[0]);
-            Assert.AreSequenceEqual([Color.Red.RGBA(), Color.White.RGBA(), Color.White.RGBA(), Color.White.RGBA(), Color.White.RGBA()], result.Colors[0], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([Color.Red, Color.White, Color.White, Color.White, Color.White], result.Colors[0], SequenceOrder.InAnyOrder);
             Assert.HasCount(1, result.ShadowColors);
             Assert.HasCount(5, result.ShadowColors[0]);
-            Assert.AreSequenceEqual([Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA()], result.ShadowColors[0], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent], result.ShadowColors[0], SequenceOrder.InAnyOrder);
 
             var part = result.GetPart(0);
             Assert.AreEqual("Hello", part.Text);
-            Assert.AreSequenceEqual([Color.Red.RGBA(), Color.White.RGBA(), Color.White.RGBA(), Color.White.RGBA(), Color.White.RGBA()], part.Colors, SequenceOrder.InAnyOrder);
-            Assert.AreSequenceEqual([Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA(), Color.Transparent.RGBA()], part.ShadowColors, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([Color.Red, Color.White, Color.White, Color.White, Color.White], part.Colors, SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual([Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent], part.ShadowColors, SequenceOrder.InAnyOrder);
         }
     }
 }

@@ -1,9 +1,8 @@
-﻿using Engine.UI;
+﻿using Engine.Mathematics;
+using Engine.UI;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sprite description
     /// </summary>
@@ -28,7 +27,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="baseColor">Base color</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public static SpriteDescription Default(Vector4 baseColor, float width = 0, float height = 0)
+        public static SpriteDescription Default(Color4 baseColor, float width = 0, float height = 0)
         {
             return new()
             {
@@ -48,7 +47,7 @@ namespace Engine.BuiltIn.UI
             return new()
             {
                 Textures = [fileName],
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
                 Width = width,
                 Height = height,
             };
@@ -70,7 +69,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="baseColor">Base color</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public static SpriteDescription Background(Vector4 baseColor, float width = 0, float height = 0)
+        public static SpriteDescription Background(Color4 baseColor, float width = 0, float height = 0)
         {
             var desc = Default(baseColor, width, height);
             desc.FitParent = true;
@@ -92,19 +91,19 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// First color
         /// </summary>
-        public Vector4 Color1 { get; set; }
+        public Color4 Color1 { get; set; }
         /// <summary>
         /// Second color
         /// </summary>
-        public Vector4 Color2 { get; set; }
+        public Color4 Color2 { get; set; }
         /// <summary>
         /// Third color
         /// </summary>
-        public Vector4 Color3 { get; set; }
+        public Color4 Color3 { get; set; }
         /// <summary>
         /// Fourth color
         /// </summary>
-        public Vector4 Color4 { get; set; }
+        public Color4 Color4 { get; set; }
         /// <summary>
         /// First percentage
         /// </summary>

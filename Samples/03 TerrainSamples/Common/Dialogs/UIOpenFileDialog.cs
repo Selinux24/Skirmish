@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Helpers;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.Common.Dialogs
 {
-    using Engine;
-    using Engine.BuiltIn.UI;
-    using Engine.Helpers;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     class UIOpenFileDialog(Scene scene, string name, float width, float height, int itemsPerPage, int layer = Scene.LayerUI)
     {
         private const string dlgName = nameof(UIOpenFileDialog);
@@ -31,9 +30,9 @@ namespace TerrainSamples.Common.Dialogs
         public float Height { get; private set; } = height;
         public int Layer { get; private set; } = layer;
         public int ItemsPerPage { get; private set; } = itemsPerPage;
-        public Vector4 ButtonColor { get; set; }
-        public Vector4 ButtonTextColor { get; set; }
-        public Vector4 BackgroundColor { get; set; }
+        public Color4 ButtonColor { get; set; }
+        public Color4 ButtonTextColor { get; set; }
+        public Color4 BackgroundColor { get; set; }
         public string SelectedFileName
         {
             get
@@ -66,7 +65,7 @@ namespace TerrainSamples.Common.Dialogs
             fileDlgButtonDesc.Width = 150;
             fileDlgButtonDesc.Height = 20;
             fileDlgButtonDesc.ColorReleased = ButtonColor;
-            fileDlgButtonDesc.ColorPressed = new(ButtonColor.RGB * 1.2f, 1f);
+            fileDlgButtonDesc.ColorPressed = new((Color3)ButtonColor * 1.2f, 1f);
             fileDlgButtonDesc.TextForeColor = ButtonTextColor;
             fileDlgButtonDesc.StartsVisible = false;
 
@@ -112,7 +111,7 @@ namespace TerrainSamples.Common.Dialogs
             var filePageButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont);
             filePageButtonDesc.ContentPath = resourcesFolder;
             filePageButtonDesc.ColorReleased = ButtonColor;
-            filePageButtonDesc.ColorPressed = new Vector4(ButtonColor.RGB * 1.2f, 1f);
+            filePageButtonDesc.ColorPressed = new((Color3)ButtonColor * 1.2f, 1f);
             filePageButtonDesc.TextForeColor = ButtonTextColor;
             filePageButtonDesc.StartsVisible = false;
 

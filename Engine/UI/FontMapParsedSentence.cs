@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Font map parser sentence
     /// </summary>
@@ -44,11 +43,11 @@ namespace Engine.UI
         /// <summary>
         /// Colors by character of part list
         /// </summary>
-        public Vector4[][] Colors { get; set; }
+        public Color4[][] Colors { get; set; }
         /// <summary>
         /// Shadow colors by character of part list
         /// </summary>
-        public Vector4[][] ShadowColors { get; set; }
+        public Color4[][] ShadowColors { get; set; }
 
         /// <summary>
         /// Gets the number of part in the sentence

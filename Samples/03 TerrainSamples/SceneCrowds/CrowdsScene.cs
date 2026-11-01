@@ -1,28 +1,26 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Content.FmtCollada;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneCrowds
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Content.FmtCollada;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     public class CrowdsScene : WalkableScene
     {
         private const string resourceCursor = "Common/UI/Cursor/target.png";
@@ -103,13 +101,13 @@ namespace TerrainSamples.SceneCrowds
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
-            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() };
-            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 128 };
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
+            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 128 };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
 
-            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
+            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
         }
         private void InitializeUIComponentsComplete(LoadResourcesResult res)
         {
@@ -309,7 +307,7 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                var color = ColorExtensions.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -451,8 +449,8 @@ namespace TerrainSamples.SceneCrowds
             var tri = Line3D.CreateTriangle(r.PickingResult.Primitive);
             var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);
 
-            lineDrawer.SetPrimitives(Color.White.RGBA(), tri);
-            lineDrawer.SetPrimitives(Color.Red.RGBA(), cross);
+            lineDrawer.SetPrimitives(Color.White, tri);
+            lineDrawer.SetPrimitives(Color.Red, cross);
 
             if (Game.Input.ShiftPressed)
             {
@@ -531,7 +529,7 @@ namespace TerrainSamples.SceneCrowds
 
             lines.AddRange(Line3D.CreateCircle(rt.Position, r, 64));
 
-            lineDrawer.SetPrimitives(Color.Orange.RGBA(), lines);
+            lineDrawer.SetPrimitives(Color.Orange, lines);
         }
 
         public override void GameGraphicsResized()
@@ -583,7 +581,7 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                var color = ColorExtensions.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }

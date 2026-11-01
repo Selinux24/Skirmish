@@ -10,10 +10,10 @@ namespace Engine
         /// <summary>
         /// Ambient down color
         /// </summary>
-        public ColorRgba AmbientDown { get; set; }
+        public CntColor AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        public ColorRgba AmbientUp { get; set; }
+        public CntColor AmbientUp { get; set; }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Texture sprite drawer state
     /// </summary>
@@ -16,19 +15,19 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// First color
         /// </summary>
-        public Vector4 Color1 { get; set; }
+        public Color4 Color1 { get; set; }
         /// <summary>
         /// Secondo color
         /// </summary>
-        public Vector4 Color2 { get; set; }
+        public Color4 Color2 { get; set; }
         /// <summary>
         /// Third color
         /// </summary>
-        public Vector4 Color3 { get; set; }
+        public Color4 Color3 { get; set; }
         /// <summary>
         /// Fourth color
         /// </summary>
-        public Vector4 Color4 { get; set; }
+        public Color4 Color4 { get; set; }
         /// <summary>
         /// Color channel
         /// </summary>

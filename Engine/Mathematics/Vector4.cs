@@ -143,12 +143,6 @@ namespace Engine.Mathematics
         public readonly Vector2 ZY => new(Z, Y);
 
         /// <summary>
-        /// Returns rgb components from Vector4
-        /// </summary>
-        /// <param name="vector">Vector4</param>
-        /// <returns>Returns rgb components from Vector4</returns>
-        public readonly Vector3 RGB => new(X, Y, Z);
-        /// <summary>
         /// Returns xyz components from Vector4
         /// </summary>
         /// <param name="vector">Vector4</param>
@@ -238,40 +232,6 @@ namespace Engine.Mathematics
             Y = values[1];
             Z = values[2];
             W = values[3];
-        }
-
-        /// <summary>
-        /// Creates a new rgba color
-        /// </summary>
-        /// <param name="r">Red</param>
-        /// <param name="g">Green</param>
-        /// <param name="b">Blue</param>
-        /// <param name="a">Alpha</param>
-        public static Vector4 FromColor4(byte r, byte g, byte b, byte a)
-        {
-            return new()
-            {
-                X = r / 255f,
-                Y = g / 255f,
-                Z = b / 255f,
-                W = a / 255f,
-            };
-        }
-        /// <summary>
-        /// Creates a new rgb color
-        /// </summary>
-        /// <param name="r">Red</param>
-        /// <param name="g">Green</param>
-        /// <param name="b">Blue</param>
-        public static Vector4 FromColor3(byte r, byte g, byte b)
-        {
-            return new()
-            {
-                X = r / 255f,
-                Y = g / 255f,
-                Z = b / 255f,
-                W = 1f,
-            };
         }
 
         /// <summary>
@@ -1232,40 +1192,6 @@ namespace Engine.Mathematics
             }
         }
 
-        public static Vector4 AdjustContrast(Vector4 value, float contrast)
-        {
-            return new(
-                0.5f + contrast * (value.X - 0.5f),
-                0.5f + contrast * (value.Y - 0.5f),
-                0.5f + contrast * (value.Z - 0.5f),
-                value.W);
-        }
-        public static Vector4 AdjustSaturation(Vector4 value, float saturation)
-        {
-            float grey = value.X * 0.2125f + value.Y * 0.7154f + value.Z * 0.0721f;
-
-            return new Vector4(
-                grey + saturation * (value.X - grey),
-                grey + saturation * (value.Y - grey),
-                grey + saturation * (value.Z - grey),
-                value.W);
-        }
-
-        public readonly uint ToRgba()
-        {
-            uint r = (uint)(X * 255f) & 255;
-            uint g = (uint)(Y * 255f) & 255;
-            uint b = (uint)(Z * 255f) & 255;
-            uint a = (uint)(W * 255f) & 255;
-
-            uint value = r;
-            value |= g << 8;
-            value |= b << 16;
-            value |= a << 24;
-
-            return value;
-        }
-
         /// <summary>
         /// Adds two vectors.
         /// </summary>
@@ -1404,86 +1330,44 @@ namespace Engine.Mathematics
         {
             return new(scalar - value.X, scalar - value.Y, scalar - value.Z, scalar - value.W);
         }
-        /// <summary>
-        /// Tests for equality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector4 left, Vector4 right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Tests for inequality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector4 left, Vector4 right)
         {
             return !left.Equals(ref right);
         }
 
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector4"/> to <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+        /// <inheritdoc/>
         public static explicit operator Vector2(Vector4 value)
         {
             return new(value.X, value.Y);
         }
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector4"/> to <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector3(Vector4 value)
         {
             return new(value.X, value.Y, value.Z);
         }
-        /// <summary>
-        /// Convert the System.Numerics.Vector4 to a Vector4.
-        /// </summary>
-        /// <returns>A Vector4</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector4(System.Numerics.Vector4 Value)
         {
             return new(Value.X, Value.Y, Value.Z, Value.W);
         }
-        /// <summary>
-        /// Convert the Vector4 to a System.Numerics.Vector4.
-        /// </summary>
-        /// <returns>A System.Numerics.Vector4</returns>
+        /// <inheritdoc/>
         public static explicit operator System.Numerics.Vector4(Vector4 Value)
         {
             return new(Value.X, Value.Y, Value.Z, Value.W);
         }
-        /// <summary>
-        /// Convert the Color4 to a Vector4.
-        /// </summary>
-        /// <returns>A Vector4</returns>
-        public static implicit operator Vector4(Vortice.Mathematics.Color4 Value)
-        {
-            return new(Value.R, Value.G, Value.B, Value.A);
-        }
-        /// <summary>
-        /// Convert the Vector4 to a Color4.
-        /// </summary>
-        /// <returns>A Color4</returns>
-        public static implicit operator Vortice.Mathematics.Color4(Vector4 Value)
-        {
-            return new(Value.X, Value.Y, Value.Z, Value.W);
-        }
 
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return string.Format(
@@ -1491,13 +1375,7 @@ namespace Engine.Mathematics
                 Vector4Str,
                 X, Y, Z, W);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format)
         {
             if (format == null) return ToString();
@@ -1510,13 +1388,7 @@ namespace Engine.Mathematics
                 Z.ToString(format, CultureInfo.CurrentCulture),
                 W.ToString(format, CultureInfo.CurrentCulture));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
         {
             return string.Format(
@@ -1524,14 +1396,7 @@ namespace Engine.Mathematics
                 Vector4Str,
                 X, Y, Z, W);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) ToString(formatProvider);
@@ -1545,24 +1410,13 @@ namespace Engine.Mathematics
                 W.ToString(format, formatProvider));
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z, W);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector4"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly bool Equals(ref Vector4 other)
         {
             return
@@ -1571,25 +1425,13 @@ namespace Engine.Mathematics
                 Helper.NearEqual(other.Z, Z) &&
                 Helper.NearEqual(other.W, W);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector4"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Vector4 other)
         {
             return Equals(ref other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object value)
         {
             if (value is not Vector4) return false;
@@ -1598,19 +1440,44 @@ namespace Engine.Mathematics
             return Equals(ref strongValue);
         }
 
-
-        public static bool NearEqual(Vector4 a, Vector4 b)
+        /// <summary>
+        /// Tests whether one 4D vector is near another 4D vector.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <returns><c>true</c> if left and right are near another 4D, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Vector4 left, Vector4 right)
         {
-            return NearEqual(a, b, Helper.ZeroToleranceVector4);
+            return NearEqual(left, right, Helper.ZeroToleranceVector4);
         }
-
-        public static bool NearEqual(Vector4 a, Vector4 b, Vector4 epsilon)
+        /// <summary>
+        /// Tests whether one 4D vector is near another 4D vector.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <param name="epsilon">The epsilon.</param>
+        /// <returns><c>true</c> if left and right are near another 4D, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Vector4 left, Vector4 right, Vector4 epsilon)
         {
             return
-                Helper.WithinEpsilon(a.X, b.X, epsilon.X) &&
-                Helper.WithinEpsilon(a.Y, b.Y, epsilon.Y) &&
-                Helper.WithinEpsilon(a.Z, b.Z, epsilon.Z) &&
-                Helper.WithinEpsilon(a.W, b.W, epsilon.W);
+                Helper.WithinEpsilon(left.X, right.X, epsilon.X) &&
+                Helper.WithinEpsilon(left.Y, right.Y, epsilon.Y) &&
+                Helper.WithinEpsilon(left.Z, right.Z, epsilon.Z) &&
+                Helper.WithinEpsilon(left.W, right.W, epsilon.W);
+        }
+
+        /// <summary>
+        /// Gets vector description
+        /// </summary>
+        /// <returns>Return vector description</returns>
+        public readonly string GetDescription()
+        {
+            return string.Format(
+                "X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}; W:{3:0.000}",
+                MathF.Round(X, 3),
+                MathF.Round(Y, 3),
+                MathF.Round(Z, 3),
+                MathF.Round(W, 3));
         }
     }
 }

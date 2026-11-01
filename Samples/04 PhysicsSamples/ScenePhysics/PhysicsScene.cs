@@ -1,4 +1,14 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Physics;
+using Engine.UI;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,18 +16,6 @@ using System.Threading.Tasks;
 
 namespace PhysicsSamples.ScenePhysics
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     class PhysicsScene : Scene
     {
         private const float floorSize = 100f;
@@ -48,7 +46,7 @@ namespace PhysicsSamples.ScenePhysics
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
         }
 
         public override void Initialize()
@@ -93,15 +91,15 @@ namespace PhysicsSamples.ScenePhysics
             var defaultFont18 = FontDescription.FromFamily("Arial", 18);
             var defaultFont11 = FontDescription.FromFamily("Arial", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
 
             title.Text = "Physics test";
             runtimeText.Text = "";
             info.Text = "Press F1 for Help.";
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.66f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
         }
         private async Task InitializeLineDrawer()
@@ -133,7 +131,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeJoint()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 8;
@@ -148,8 +146,8 @@ namespace PhysicsSamples.ScenePhysics
             var jsphere1Model = await AddComponent<Model, ModelDescription>("jsphere1", "jsphere1", desc);
             var jsphere2Model = await AddComponent<Model, ModelDescription>("jsphere2", "jsphere2", desc);
 
-            jsphere1Model.TintColor = Vector4.AdjustSaturation(Color.DarkSlateGray.RGBA(), 10f);
-            jsphere2Model.TintColor = Vector4.AdjustSaturation(Color.SaddleBrown.RGBA(), 10f);
+            jsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkSlateGray, 10f);
+            jsphere2Model.TintColor = Color4.AdjustSaturation(Color.SaddleBrown, 10f);
 
             var rbState1 = new RigidBodyState
             {
@@ -186,7 +184,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeRod()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 8;
@@ -201,8 +199,8 @@ namespace PhysicsSamples.ScenePhysics
             var rsphere1Model = await AddComponent<Model, ModelDescription>("rsphere1", "rsphere1", desc);
             var rsphere2Model = await AddComponent<Model, ModelDescription>("rsphere2", "rsphere2", desc);
 
-            rsphere1Model.TintColor = Vector4.AdjustSaturation(Color.DarkCyan.RGBA(), 10f);
-            rsphere2Model.TintColor = Vector4.AdjustSaturation(Color.AntiqueWhite.RGBA(), 10f);
+            rsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkCyan, 10f);
+            rsphere2Model.TintColor = Color4.AdjustSaturation(Color.AntiqueWhite, 10f);
 
             var rbState1 = new RigidBodyState
             {
@@ -240,7 +238,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task CreateCollider(string componentName, int index, ColliderTypes colliderType, GeometryDescriptor geo, IEnumerable<Line3D> wired)
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var desc = new ModelDescription()
             {
@@ -249,7 +247,7 @@ namespace PhysicsSamples.ScenePhysics
             };
 
             var model = await AddComponent<Model, ModelDescription>(componentName, componentName, desc);
-            model.TintColor = ColorExtensions.IntToCol(index * 10, 255);
+            model.TintColor = Color4.IntToCol(index * 10, 255);
 
             var rbState = new RigidBodyState
             {
@@ -269,7 +267,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeSpheres()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 16;
@@ -532,7 +530,7 @@ namespace PhysicsSamples.ScenePhysics
 
             var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
             var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
-            lineDrawer.AddPrimitives(Color.White.RGBA(), [lJoint, rJoint]);
+            lineDrawer.AddPrimitives(Color.White, [lJoint, rJoint]);
         }
         private void UpdateText()
         {

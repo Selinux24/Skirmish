@@ -1,18 +1,17 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Content
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// 4D position
     /// </summary>
-    public struct Position4 : IEquatable<Position4>
+    public struct CntPosition4 : IEquatable<CntPosition4>
     {
         /// <summary>
         /// Position zero
         /// </summary>
-        public static readonly Position4 Zero = new();
+        public static readonly CntPosition4 Zero = new();
 
         /// <summary>
         /// The X component of the position.
@@ -32,10 +31,10 @@ namespace Engine.Content
         public float W { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Position4"/> struct.
+        /// Initializes a new instance of the <see cref="CntPosition4"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
-        public Position4(float value)
+        public CntPosition4(float value)
         {
             X = value;
             Y = value;
@@ -43,13 +42,13 @@ namespace Engine.Content
             W = value;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Position4"/> struct.
+        /// Initializes a new instance of the <see cref="CntPosition4"/> struct.
         /// </summary>
         /// <param name="x">Initial value for the X component of the position.</param>
         /// <param name="y">Initial value for the Y component of the position.</param>
         /// <param name="z">Initial value for the Z component of the position.</param>
         /// <param name="w">Initial value for the W component of the position.</param>
-        public Position4(float x, float y, float z, float w)
+        public CntPosition4(float x, float y, float z, float w)
         {
             X = x;
             Y = y;
@@ -57,12 +56,12 @@ namespace Engine.Content
             W = w;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Position4"/> struct.
+        /// Initializes a new instance of the <see cref="CntPosition4"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the X, Y, Z and W components of the position. This must be an array with four elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
-        public Position4(float[] values)
+        public CntPosition4(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
 
@@ -78,125 +77,125 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public static bool operator ==(Position4 left, Position4 right)
+        public static bool operator ==(CntPosition4 left, CntPosition4 right)
         {
             return left.Equals(ref right);
         }
         /// <inheritdoc/>
-        public static bool operator !=(Position4 left, Position4 right)
+        public static bool operator !=(CntPosition4 left, CntPosition4 right)
         {
             return !left.Equals(ref right);
         }
 
         /// <inheritdoc/>
-        public static Position4 operator +(Position4 left, Position4 right)
+        public static CntPosition4 operator +(CntPosition4 left, CntPosition4 right)
         {
-            return (Vector4)left + (Vector4)right;
+            return (CntPosition4)((Vector4)left + (Vector4)right);
         }
         /// <inheritdoc/>
-        public static Position4 operator *(Position4 left, Position4 right)
+        public static CntPosition4 operator *(CntPosition4 left, CntPosition4 right)
         {
-            return (Vector4)left * (Vector4)right;
+            return (CntPosition4)((Vector4)left * (Vector4)right);
         }
         /// <inheritdoc/>
-        public static Position4 operator +(Position4 value)
+        public static CntPosition4 operator +(CntPosition4 value)
         {
-            return +(Vector4)value;
+            return (CntPosition4)(+(Vector4)value);
         }
         /// <inheritdoc/>
-        public static Position4 operator -(Position4 left, Position4 right)
+        public static CntPosition4 operator -(CntPosition4 left, CntPosition4 right)
         {
-            return (Vector4)left - (Vector4)right;
+            return (CntPosition4)((Vector4)left - (Vector4)right);
         }
         /// <inheritdoc/>
-        public static Position4 operator -(Position4 value)
+        public static CntPosition4 operator -(CntPosition4 value)
         {
-            return -(Vector4)value;
+            return (CntPosition4)(-(Vector4)value);
         }
         /// <inheritdoc/>
-        public static Position4 operator *(float scale, Position4 value)
+        public static CntPosition4 operator *(float scale, CntPosition4 value)
         {
-            return scale * (Vector4)value;
+            return (CntPosition4)(scale * (Vector4)value);
         }
         /// <inheritdoc/>
-        public static Position4 operator *(Position4 value, float scale)
+        public static CntPosition4 operator *(CntPosition4 value, float scale)
         {
-            return (Vector4)value * scale;
+            return (CntPosition4)((Vector4)value * scale);
         }
         /// <inheritdoc/>
-        public static Position4 operator /(Position4 value, float scale)
+        public static CntPosition4 operator /(CntPosition4 value, float scale)
         {
-            return (Vector4)value / scale;
+            return (CntPosition4)((Vector4)value / scale);
         }
         /// <inheritdoc/>
-        public static Position4 operator /(float scale, Position4 value)
+        public static CntPosition4 operator /(float scale, CntPosition4 value)
         {
-            return Vector4.Divide(scale, value);
+            return (CntPosition4)Vector4.Divide(scale, value);
         }
         /// <inheritdoc/>
-        public static Position4 operator /(Position4 value, Position4 scale)
+        public static CntPosition4 operator /(CntPosition4 value, CntPosition4 scale)
         {
-            return (Vector4)value / (Vector4)scale;
+            return (CntPosition4)((Vector4)value / (Vector4)scale);
         }
         /// <inheritdoc/>
-        public static Position4 operator +(Position4 value, float scalar)
+        public static CntPosition4 operator +(CntPosition4 value, float scalar)
         {
-            return Vector4.Add(value, scalar);
+            return (CntPosition4)Vector4.Add(value, scalar);
         }
         /// <inheritdoc/>
-        public static Position4 operator +(float scalar, Position4 value)
+        public static CntPosition4 operator +(float scalar, CntPosition4 value)
         {
-            return Vector4.Add(new(scalar), value);
+            return (CntPosition4)Vector4.Add(new(scalar), value);
         }
         /// <inheritdoc/>
-        public static Position4 operator -(Position4 value, float scalar)
+        public static CntPosition4 operator -(CntPosition4 value, float scalar)
         {
-            return Vector4.Subtract(value, scalar);
+            return (CntPosition4)Vector4.Subtract(value, scalar);
         }
         /// <inheritdoc/>
-        public static Position4 operator -(float scalar, Position4 value)
+        public static CntPosition4 operator -(float scalar, CntPosition4 value)
         {
-            return Vector4.Subtract(scalar, value);
+            return (CntPosition4)Vector4.Subtract(scalar, value);
         }
 
         /// <inheritdoc/>
-        public static implicit operator Vector4(Position4 value)
+        public static implicit operator Vector4(CntPosition4 value)
         {
             return new Vector4(value.X, value.Y, value.Z, value.W);
         }
         /// <inheritdoc/>
-        public static implicit operator Position4(Vector4 value)
+        public static implicit operator CntPosition4(Vector4 value)
         {
-            return new Position4(value.X, value.Y, value.Z, value.W);
+            return new CntPosition4(value.X, value.Y, value.Z, value.W);
         }
 
         /// <inheritdoc/>
-        public static implicit operator string(Position4 value)
+        public static implicit operator string(CntPosition4 value)
         {
             return ContentHelper.WritePosition4(value);
         }
         /// <inheritdoc/>
-        public static implicit operator Position4(string value)
+        public static implicit operator CntPosition4(string value)
         {
             return ContentHelper.ReadPosition4(value) ?? Zero;
         }
 
         /// <inheritdoc/>
-        public readonly bool Equals(Position4 other)
+        public readonly bool Equals(CntPosition4 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            if (obj is not Position4)
+            if (obj is not CntPosition4)
                 return false;
 
-            var strongValue = (Position4)obj;
+            var strongValue = (CntPosition4)obj;
             return Equals(ref strongValue);
         }
-
-        public readonly bool Equals(ref Position4 other)
+        /// <inheritdoc/>
+        public readonly bool Equals(ref CntPosition4 other)
         {
             return
                 Helper.NearEqual(other.X, X) &&

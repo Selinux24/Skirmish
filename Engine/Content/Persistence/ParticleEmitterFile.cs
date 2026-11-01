@@ -13,11 +13,11 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
         /// <summary>
         /// Velocity
         /// </summary>
-        public Direction3 Velocity { get; set; } = Direction3.Up;
+        public CntDirection3 Velocity { get; set; } = CntDirection3.Up;
         /// <summary>
         /// Particle scale
         /// </summary>

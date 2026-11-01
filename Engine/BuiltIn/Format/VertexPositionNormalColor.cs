@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Position normal color vertex format
     /// </summary>
@@ -95,7 +94,7 @@ namespace Engine.BuiltIn.Format
                 {
                     Position = v.Position ?? Vector3.Zero,
                     Normal = v.Normal ?? Vector3.Zero,
-                    Color = v.Color ?? new(1, 1, 1, 1),
+                    Color = v.Color ?? Color4.White,
                 };
             });
 

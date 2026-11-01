@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// With text description interface
     /// </summary>
@@ -20,11 +19,11 @@ namespace Engine.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        Vector4 TextForeColor { get; set; }
+        Color4 TextForeColor { get; set; }
         /// <summary>
         /// Text shadow color
         /// </summary>
-        Vector4 TextShadowColor { get; set; }
+        Color4 TextShadowColor { get; set; }
         /// <summary>
         /// Shadow position delta
         /// </summary>

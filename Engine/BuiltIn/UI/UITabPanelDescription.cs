@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Tab Panel description
     /// </summary>
@@ -40,7 +39,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="backgroundColor">Back color</param>
         /// <param name="baseColor">Control color</param>
         /// <param name="selectedColor">Highlight color</param>
-        public static UITabPanelDescription Default(int tabs, Vector4 backgroundColor, Vector4 baseColor, Vector4 selectedColor)
+        public static UITabPanelDescription Default(int tabs, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
             return new()
             {
@@ -57,7 +56,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="backgroundColor">Back color</param>
         /// <param name="baseColor">Control color</param>
         /// <param name="selectedColor">Highlight color</param>
-        public static UITabPanelDescription Default(string[] tabCaptions, Vector4 backgroundColor, Vector4 baseColor, Vector4 selectedColor)
+        public static UITabPanelDescription Default(string[] tabCaptions, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
             var desc = Default(tabCaptions.Length, backgroundColor, baseColor, selectedColor);
             desc.TabCaptions = tabCaptions;

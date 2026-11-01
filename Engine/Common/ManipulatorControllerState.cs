@@ -18,7 +18,7 @@ namespace Engine.Common
         /// <summary>
         /// Current velocity
         /// </summary>
-        public Direction3 Velocity { get; set; }
+        public CntDirection3 Velocity { get; set; }
         /// <summary>
         /// Maximum speed
         /// </summary>

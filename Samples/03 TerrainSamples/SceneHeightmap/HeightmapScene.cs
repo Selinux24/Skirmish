@@ -1,33 +1,31 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Content.FmtObj.Fmt;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 
 namespace TerrainSamples.SceneHeightmap
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Flares;
-    using Engine.BuiltIn.Components.Foliage;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Content.FmtObj.Fmt;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-    using TerrainSamples.Common.Dialogs;
-    using Color = System.Drawing.Color;
-
     public class HeightmapScene : WalkableScene
     {
         private const string resourceCursor = "Common/UI/Cursor/target.png";
@@ -117,9 +115,9 @@ namespace TerrainSamples.SceneHeightmap
 
         private bool dialogVisible = false;
         private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        private readonly Vector4 dialogButtonColor = Vector4.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
-        private readonly Vector4 dialogButtonTextColor = Color.WhiteSmoke.RGBA();
-        private readonly Vector4 dialogBackgroundColor = Color.CornflowerBlue.RGBA();
+        private readonly Color4 dialogButtonColor = Color4.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
+        private readonly Color4 dialogBackgroundColor = Color.CornflowerBlue;
         private UISaveFileDialog saveFileDialog = null;
 
         private GeometryColorDrawer<Triangle> bboxesTriDrawer = null;
@@ -163,7 +161,7 @@ namespace TerrainSamples.SceneHeightmap
         private GeometryColorDrawer<Triangle> soldierTris = null;
         private GeometryColorDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
-        private readonly Vector4 soldierColorDEBUG = new(Color.Orange.RGB(), 0.6f);
+        private readonly Color4 soldierColorDEBUG = new(Color.Orange, 0.6f);
 
         private ModelInstanced troops = null;
 
@@ -255,13 +253,13 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeUICursor()
         {
-            var desc = UICursorDescription.Default(resourceCursor, 20, 20, true, Color.Red.RGBA());
+            var desc = UICursorDescription.Default(resourceCursor, 20, 20, true, Color.Red);
 
             cursor = await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
         }
         private async Task InitializeUIFadePanel()
         {
-            var desc = UIPanelDescription.Screen(this, Color.Black.RGBA() * 0.3333f);
+            var desc = UIPanelDescription.Screen(this, Color.Black * 0.3333f);
             desc.StartsVisible = false;
 
             fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", desc, LayerUIEffects);
@@ -273,17 +271,17 @@ namespace TerrainSamples.SceneHeightmap
             defaultFont18.LineAdjust = true;
             defaultFont11.LineAdjust = true;
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            help2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Help2", "Help2", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            help2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Help2", "Help2", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Orange, MaxTextLength = 256 });
 
             title.Text = "Heightmap Terrain test";
             stats.Text = "";
             help.Text = "";
             help2.Text = "";
 
-            var desc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var desc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
 
             panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, LayerUI - 1);
         }
@@ -344,7 +342,7 @@ namespace TerrainSamples.SceneHeightmap
 
             uiReady = true;
 
-            fadePanel.BaseColor = Color.Black.RGBA();
+            fadePanel.BaseColor = Color.Black;
             fadePanel.Visible = true;
 
             LoadingTaskGameAssets();
@@ -529,8 +527,8 @@ namespace TerrainSamples.SceneHeightmap
             pDust.MaxHorizontalVelocity = 15f;
             pDust.MinVerticalVelocity = 0f;
             pDust.MaxVerticalVelocity = 0f;
-            pDust.MinColor = new Vector4(Color.SandyBrown.RGB(), 0.05f);
-            pDust.MaxColor = new Vector4(Color.SandyBrown.RGB(), 0.10f);
+            pDust.MinColor = new Color4(Color.SandyBrown, 0.05f);
+            pDust.MaxColor = new Color4(Color.SandyBrown, 0.10f);
             pDust.MinEndSize = 2f;
             pDust.MaxEndSize = 20f;
         }
@@ -574,16 +572,16 @@ namespace TerrainSamples.SceneHeightmap
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare1File),
-                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlareFlare2File),
-                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
 
@@ -649,7 +647,7 @@ namespace TerrainSamples.SceneHeightmap
 
             GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
 
-            Lights.BaseFogColor = Vector4.FromColor3(95, 147, 233) * 0.5f;
+            Lights.BaseFogColor = new Color(95, 147, 233) * 0.5f;
             ToggleFog();
 
             Camera.NearPlaneDistance = near;
@@ -978,16 +976,16 @@ namespace TerrainSamples.SceneHeightmap
                 spotLight1 = new SceneLightSpot(
                     "Red Spot",
                     true,
-                    Color.Red.RGB(),
-                    Color.Red.RGB(),
+                    Color.Red,
+                    Color.Red,
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
                 spotLight2 = new SceneLightSpot(
                     "Blue Spot",
                     true,
-                    Color.Blue.RGB(),
-                    Color.Blue.RGB(),
+                    Color.Blue,
+                    Color.Blue,
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
@@ -1167,7 +1165,7 @@ namespace TerrainSamples.SceneHeightmap
             }
 
             var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
-            lantern = new SceneLightSpot("lantern", true, Color.White.RGB(), Color.White.RGB(), false, lanternDesc);
+            lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, false, lanternDesc);
             Lights.Add(lantern);
 
             SetPathFindingInfo();
@@ -1713,10 +1711,10 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void UpdateDebugDrawers()
         {
-            Vector4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
+            Color4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
 
-            Vector4 frustumLColor = new(Color.LightPink.RGB(), 0.75f);
-            Vector4 frustumTColor = new(Color.LightPink.RGB(), 0.25f);
+            Color4 frustumLColor = new(Color.LightPink, 0.75f);
+            Color4 frustumTColor = new(Color.LightPink, 0.25f);
 
             lightsVolumeDrawer.Clear();
             lightsVolumeDrawer.Clear();
@@ -1736,7 +1734,7 @@ namespace TerrainSamples.SceneHeightmap
                 UpdateCameraFrustum(frustumLColor, frustumTColor);
             }
         }
-        private void UpdateDebugTerrain(Vector4 color)
+        private void UpdateDebugTerrain(Color4 color)
         {
             if (terrainInitializedDEBUG)
             {
@@ -1749,7 +1747,7 @@ namespace TerrainSamples.SceneHeightmap
 
             terrainInitializedDEBUG = true;
         }
-        private void UpdateCameraFrustum(Vector4 lColor, Vector4 tColor)
+        private void UpdateCameraFrustum(Color4 lColor, Color4 tColor)
         {
             var lines = Line3D.CreateFrustum(cameraFrustum);
             var tris = GeometryUtil.CreateFrustum(Topology.TriangleList, cameraFrustum);
@@ -1787,8 +1785,8 @@ namespace TerrainSamples.SceneHeightmap
                 if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
                 var abox = Engine.Mathematics.BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
 
-                var colL = ColorExtensions.IntToCol(nodes[i].Id, 128);
-                var colT = ColorExtensions.IntToCol(nodes[i].Id, 64);
+                var colL = Color4.IntToCol(nodes[i].Id, 128);
+                var colT = Color4.IntToCol(nodes[i].Id, 64);
 
                 var lines = Line3D.CreateBox(abox);
                 bboxesDrawer.AddPrimitives(colL, lines);
@@ -1803,7 +1801,7 @@ namespace TerrainSamples.SceneHeightmap
             //Adjust gbox
             var gbbox = g.GetPlantingBounds();
             gbbox.Minimum.Y = minY;
-            var col = ColorExtensions.IntToCol(0, 128);
+            var col = Color4.IntToCol(0, 128);
             var glines = Line3D.CreateBox(gbbox);
             bboxesDrawer.AddPrimitives(col, glines);
         }
@@ -1861,21 +1859,21 @@ namespace TerrainSamples.SceneHeightmap
             {
                 var lines = spot.GetVolume(12);
 
-                lightsDrawer.AddPrimitives(new Vector4(spot.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(6, 12);
 
-                lightsDrawer.AddPrimitives(new Vector4(point.DiffuseColor, 0.15f), lines);
+                lightsDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
             }
         }
         private void UpdateDebugLightCullingVolumes()
         {
             lightsVolumeDrawer.Clear();
 
-            var lColor = new Vector4(Color.MediumPurple.RGB(), 0.15f);
+            var lColor = new Color4(Color.MediumPurple, 0.15f);
 
             BoundingSphere[] sphList =
             [
@@ -1925,7 +1923,7 @@ namespace TerrainSamples.SceneHeightmap
 
                     foreach (var node in nodes)
                     {
-                        var color = ColorExtensions.IntToCol(node.Id, 128);
+                        var color = Color4.IntToCol(node.Id, 128);
                         graphDrawer.AddPrimitives(color, node.Triangles);
                     }
                 }

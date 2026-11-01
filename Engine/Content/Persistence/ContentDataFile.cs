@@ -57,18 +57,18 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        public CntRotationQ Rotation { get; set; } = CntRotationQ.Identity;
         /// <summary>
         /// Rotation quaternion
         /// </summary>
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = Scale3.One;
+        public CntScale3 Scale { get; set; } = CntScale3.One;
 
         /// <summary>
         /// Meshes by level of detail in the file
@@ -104,12 +104,12 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Gets the initial transform matrix
         /// </summary>
-        public Matrix4x4 GetTransform()
+        public CntMatrix4x4 GetTransform()
         {
             return
-                Matrix4x4.Scaling(Scale) *
-                Matrix4x4.Rotation(Rotation) *
-                Matrix4x4.Translation(Position);
+                CntMatrix4x4.Scaling(Scale) *
+                CntMatrix4x4.Rotation(Rotation) *
+                CntMatrix4x4.Translation(Position);
         }
     }
 }

@@ -1,20 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using BasicSamples.SceneStart;
+using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneParticles
 {
-    using BasicSamples.SceneStart;
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particles scene test
     /// </summary>
@@ -63,7 +61,7 @@ namespace BasicSamples.SceneParticles
         {
             base.Initialize();
 
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 5000f;
@@ -88,8 +86,8 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont20,
                 Text = "Particle System Drawing",
-                TextForeColor = Color.Yellow.RGBA(),
-                TextShadowColor = Color.OrangeRed.RGBA()
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.OrangeRed
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "title", titleDesc);
 
@@ -97,8 +95,8 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont10,
                 MaxTextLength = 512,
-                TextForeColor = Color.LightBlue.RGBA(),
-                TextShadowColor = Color.DarkBlue.RGBA()
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
             };
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "runtime", runtimeDesc);
 
@@ -106,16 +104,16 @@ namespace BasicSamples.SceneParticles
             {
                 Font = defaultFont10,
                 MaxTextLength = 128,
-                TextForeColor = Color.LightBlue.RGBA(),
-                TextShadowColor = Color.DarkBlue.RGBA()
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
             };
             particle1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "particle1", particleDesc);
             particle2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "particle2", particleDesc);
 
-            var backPanelDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             backPanel = await AddComponentUI<Sprite, SpriteDescription>("ui5", "Backpanel", backPanelDesc, LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue.RGBA());
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
             consoleDesc.StartsVisible = false;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui6", "Console", consoleDesc, LayerUI + 1);
         }
@@ -126,7 +124,7 @@ namespace BasicSamples.SceneParticles
                 res.ThrowExceptions();
             }
 
-            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color.White.RGB(), Color.White.RGB(), true));
+            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color.White, Color.White, true));
 
             UpdateLayout();
 
@@ -158,7 +156,7 @@ namespace BasicSamples.SceneParticles
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFloor;
-            material.DiffuseColor = Color.White.RGBA();
+            material.DiffuseColor = Color.White;
 
             var desc = new ModelDescription()
             {
@@ -515,7 +513,7 @@ namespace BasicSamples.SceneParticles
                 lines.AddRange(Line3D.CreateBox(bbox));
             }
 
-            pManagerLineDrawer.SetPrimitives(Color.Red.RGBA(), [.. lines]);
+            pManagerLineDrawer.SetPrimitives(Color.Red, [.. lines]);
         }
 
         public override void Draw(IGameTime gameTime)

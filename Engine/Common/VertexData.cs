@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Vertex helper
     /// </summary>
@@ -44,7 +43,7 @@ namespace Engine.Common
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4? Color { get; set; }
+        public Color4? Color { get; set; }
 
         /// <summary>
         /// Apply weighted transforms to the vertext data

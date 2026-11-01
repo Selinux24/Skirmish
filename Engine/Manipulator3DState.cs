@@ -11,19 +11,19 @@ namespace Engine
         /// <summary>
         /// Final transform for the controller
         /// </summary>
-        public Matrix4x4 LocalTransform { get; set; }
+        public CntMatrix4x4 LocalTransform { get; set; }
         /// <summary>
         /// Rotation component
         /// </summary>
-        public RotationQ Rotation { get; set; }
+        public CntRotationQ Rotation { get; set; }
         /// <summary>
         /// Scaling component
         /// </summary>
-        public Scale3 Scaling { get; set; }
+        public CntScale3 Scaling { get; set; }
         /// <summary>
         /// Position component
         /// </summary>
-        public Position3 Position { get; set; }
+        public CntPosition3 Position { get; set; }
         /// <summary>
         /// Parent manipulator
         /// </summary>

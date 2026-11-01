@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Terrain vertex format
     /// </summary>
@@ -50,7 +49,7 @@ namespace Engine.BuiltIn.Format
                     Normal = v.Normal ?? Vector3.Zero,
                     Texture = v.Texture ?? Vector2.Zero,
                     Tangent = v.Tangent ?? Vector3.UnitX,
-                    Color = v.Color ?? new(1, 1, 1, 1),
+                    Color = v.Color ?? Color4.White,
                 };
             });
 
@@ -76,7 +75,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color;
+        public Color4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -105,7 +104,7 @@ namespace Engine.BuiltIn.Format
             else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
             else if (channel == VertexDataChannels.Tangent) Tangent = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 

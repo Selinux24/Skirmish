@@ -1,4 +1,20 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Components.Water;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,24 +22,6 @@ using System.Threading.Tasks;
 
 namespace BasicSamples.SceneTest
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Flares;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.Components.Water;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-    using Color = System.Drawing.Color;
-
     /// <summary>
     /// Components test scene
     /// </summary>
@@ -59,11 +57,11 @@ namespace BasicSamples.SceneTest
         private readonly float spaceSize = 40;
         private readonly Vector3 baseDelta = new(500, 7, 0);
 
-        private readonly Vector3 ambientUp = Color.Black.RGB();
-        private readonly Vector3 ambientDown = new Vector3(1f, 0.671f, 0.328f) * 0.2f;
+        private readonly Color3 ambientUp = Color.Black;
+        private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f) * 0.2f;
 
-        private readonly Vector3 waterBaseColor = new(0.067f, 0.065f, 0.003f);
-        private readonly Vector4 waterColor = new(0.003f, 0.267f, 0.096f, 0.95f);
+        private readonly Color3 waterBaseColor = new(0.067f, 0.065f, 0.003f);
+        private readonly Color4 waterColor = new(0.003f, 0.267f, 0.096f, 0.95f);
         private readonly float waterHeight = -50f;
 
         private UIControlTweener uiTweener;
@@ -155,8 +153,8 @@ namespace BasicSamples.SceneTest
 
             var titleDesc = UITextAreaDescription.Default(defaultFont18);
             titleDesc.Text = "All Components Types Scene";
-            titleDesc.TextForeColor = Color.Yellow.RGBA();
-            titleDesc.TextShadowColor = Color.Orange.RGBA();
+            titleDesc.TextForeColor = Color.Yellow;
+            titleDesc.TextShadowColor = Color.Orange;
 
             var title = await AddComponentUI<UITextArea, UITextAreaDescription>("UITitle", "Title", titleDesc);
             title.SetPosition(Vector2.Zero);
@@ -164,8 +162,8 @@ namespace BasicSamples.SceneTest
             var runtimeDesc = UITextAreaDescription.Default(defaultFont10);
             runtimeDesc.Text = "";
             runtimeDesc.MaxTextLength = 512;
-            runtimeDesc.TextForeColor = Color.Yellow.RGBA();
-            runtimeDesc.TextShadowColor = Color.Orange.RGBA();
+            runtimeDesc.TextForeColor = Color.Yellow;
+            runtimeDesc.TextShadowColor = Color.Orange;
 
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("UIRuntime", "Runtime", runtimeDesc);
             runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
@@ -183,8 +181,8 @@ namespace BasicSamples.SceneTest
             buttonDesc.Width = 100;
             buttonDesc.Height = 40;
             buttonDesc.Text = "Close";
-            buttonDesc.TextForeColor = Color.Yellow.RGBA();
-            buttonDesc.TextShadowColor = Color.Orange.RGBA();
+            buttonDesc.TextForeColor = Color.Yellow;
+            buttonDesc.TextShadowColor = Color.Orange;
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
@@ -202,7 +200,7 @@ namespace BasicSamples.SceneTest
             {
                 Background = new SpriteDescription
                 {
-                    BaseColor = Color.Black.RGBA(),
+                    BaseColor = Color.Black,
                 },
                 Left = 0,
                 Top = 0,
@@ -212,7 +210,7 @@ namespace BasicSamples.SceneTest
 
             var pbFont = FontDescription.FromFamily("Consolas", 18);
 
-            var pbDesc = UIProgressBarDescription.Default(pbFont, new Vector4(0, 0, 0, 0.5f), Color.Green.RGBA());
+            var pbDesc = UIProgressBarDescription.Default(pbFont, new(0, 0, 0, 0.5f), Color.Green);
             pbDesc.Top = Game.Form.RenderHeight - 60;
             pbDesc.Left = 100;
             pbDesc.Width = Game.Form.RenderWidth - 200;
@@ -303,16 +301,16 @@ namespace BasicSamples.SceneTest
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
-                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
 
@@ -733,7 +731,7 @@ namespace BasicSamples.SceneTest
             var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. cubeTris],
-                Color = Color.Red.RGBA(),
+                Color = Color.Red,
                 BlendMode = BlendModes.Alpha,
             };
 
@@ -796,7 +794,7 @@ namespace BasicSamples.SceneTest
             var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. markers],
-                Color = new(Color.Yellow.RGB(), 0.3333f),
+                Color = new(Color.Yellow, 0.3333f),
                 BlendMode = BlendModes.Alpha,
             };
             await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
@@ -875,8 +873,8 @@ namespace BasicSamples.SceneTest
 
             if (Camera.Position.Y < waterHeight)
             {
-                Lights.HemisphericLigth.AmbientUp = Color.Black.RGB();
-                Lights.HemisphericLigth.AmbientDown = waterColor.RGB * 1.5f;
+                Lights.HemisphericLigth.AmbientUp = Color.Black;
+                Lights.HemisphericLigth.AmbientDown = waterColor.ToVector3() * 1.5f;
 
                 float depth = waterHeight - Camera.Position.Y;
                 Lights.EnableFog(1, MathF.Max((1f - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);
@@ -1011,13 +1009,13 @@ namespace BasicSamples.SceneTest
         {
             volumeDrawer.Clear();
 
-            var spotLines = Lights.SpotLights.Select(l => new { Color = new Vector4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
+            var spotLines = Lights.SpotLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
             foreach (var spot in spotLines)
             {
                 volumeDrawer.AddPrimitives(spot.Color, spot.Volume);
             }
 
-            var pointLines = Lights.PointLights.Select(l => new { Color = new Vector4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
+            var pointLines = Lights.PointLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
             foreach (var point in pointLines)
             {
                 volumeDrawer.AddPrimitives(point.Color, point.Volume);
@@ -1025,7 +1023,7 @@ namespace BasicSamples.SceneTest
 
             var pBoxes = pManager.ParticleSystems.Select(s => s.Emitter.GetBoundingBox());
             var pLines = Line3D.CreateBoxes(pBoxes);
-            volumeDrawer.AddPrimitives(new Vector4(0, 0, 1, 0.75f), pLines);
+            volumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
             volumeDrawer.Active = volumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
@@ -1036,14 +1034,14 @@ namespace BasicSamples.SceneTest
             {
                 var lines = Line3D.CreateSphere(spot.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Vector4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red, 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = Line3D.CreateSphere(point.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Vector4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red, 0.55f), lines);
             }
 
             volumeDrawer.Active = volumeDrawer.Visible = true;
@@ -1055,7 +1053,7 @@ namespace BasicSamples.SceneTest
             var cameraFrustum = Camera.Frustum;
 
             var cameraLines = Line3D.CreateFrustum(cameraFrustum);
-            volumeDrawer.AddPrimitives(Color.White.RGBA(), cameraLines);
+            volumeDrawer.AddPrimitives(Color.White, cameraLines);
 
             AddModelCullingVolumes(cameraFrustum);
 
@@ -1079,7 +1077,7 @@ namespace BasicSamples.SceneTest
 
                     var contains = cameraFrustum.Contains(ref box);
 
-                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray.RGBA() : Color.Green.RGBA(), lines);
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
                 else if (model.CullingVolumeType == CullingVolumeTypes.SphericVolume)
                 {
@@ -1089,7 +1087,7 @@ namespace BasicSamples.SceneTest
 
                     var contains = cameraFrustum.Contains(ref sph);
 
-                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray.RGBA() : Color.Green.RGBA(), lines);
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
             }
         }
@@ -1107,7 +1105,7 @@ namespace BasicSamples.SceneTest
 
                     var contains = cameraFrustum.Contains(ref box);
 
-                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray.RGBA() : Color.Green.RGBA(), lines);
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
                 else if (model.CullingVolumeType == CullingVolumeTypes.SphericVolume)
                 {
@@ -1117,7 +1115,7 @@ namespace BasicSamples.SceneTest
 
                     var contains = cameraFrustum.Contains(ref sph);
 
-                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray.RGBA() : Color.Green.RGBA(), lines);
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
             }
         }

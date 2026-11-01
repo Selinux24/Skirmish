@@ -1,23 +1,21 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.Drawers.PostProcess.Tween;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Tween;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneInstancing
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.Drawers.PostProcess.Tween;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Tween;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     class InstancingScene : Scene
     {
         private const string resourceFolder = "Common/";
@@ -81,7 +79,7 @@ namespace IntermediateSamples.SceneInstancing
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
         }
 
         public override void Initialize()
@@ -118,18 +116,18 @@ namespace IntermediateSamples.SceneInstancing
             var defaultFont18 = FontDescription.FromFamily("Arial", 18);
             var defaultFont11 = FontDescription.FromFamily("Arial", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
             info.Text = "Press F1 for Help.";
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.66f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
 
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
             help.Visible = false;
             helpPanel = await AddComponentUI<Sprite, SpriteDescription>("HelpPanel", "Help panel", spDesc, LayerUI - 1);
             helpPanel.Visible = false;

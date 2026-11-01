@@ -26,11 +26,11 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public ColorRgba DiffuseColor { get; set; }
+        public CntColor DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public ColorRgba SpecularColor { get; set; }
+        public CntColor SpecularColor { get; set; }
         /// <summary>
         /// Shadow map index
         /// </summary>
@@ -45,6 +45,6 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        public Matrix4x4 ParentTransform { get; set; }
+        public CntMatrix4x4 ParentTransform { get; set; }
     }
 }

@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Common;
+using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Geometry
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry color drawer description
     /// </summary>
@@ -20,7 +19,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Initial color
         /// </summary>
-        public Vector4 Color { get; set; } = new(0f, 0f, 0f, 1f);
+        public Color4 Color { get; set; } = Color4.Black;
 
         /// <summary>
         /// Constructor

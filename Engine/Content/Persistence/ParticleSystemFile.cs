@@ -55,7 +55,7 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Gravity
         /// </summary>
-        public Direction3 Gravity { get; set; } = Direction3.Down;
+        public CntDirection3 Gravity { get; set; } = CntDirection3.Down;
 
         /// <summary>
         /// Velocity at end
@@ -65,11 +65,11 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public ColorRgba MinColor { get; set; }
+        public CntColor MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public ColorRgba MaxColor { get; set; }
+        public CntColor MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed

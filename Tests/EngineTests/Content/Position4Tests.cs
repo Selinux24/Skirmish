@@ -26,43 +26,43 @@ namespace EngineTests.Content
         [TestMethod()]
         public void PositionZeroTest()
         {
-            var res = Position4.Zero;
+            var res = CntPosition4.Zero;
 
-            Assert.AreEqual(new Position4(0, 0, 0, 0), res);
+            Assert.AreEqual(new CntPosition4(0, 0, 0, 0), res);
         }
         [TestMethod()]
         public void PositionValueTest()
         {
-            var res = new Position4(2);
+            var res = new CntPosition4(2);
 
-            Assert.AreEqual(new Position4(2, 2, 2, 2), res);
+            Assert.AreEqual(new CntPosition4(2, 2, 2, 2), res);
         }
         [TestMethod()]
         public void PositionArrayTest()
         {
-            var res = new Position4([1, 2, 3, 4]);
+            var res = new CntPosition4([1, 2, 3, 4]);
 
-            Assert.AreEqual(new Position4(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntPosition4(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void PositionBadArrayTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new Position4(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Position4([]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Position4([1, 2, 3]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Position4([1, 2, 3, 4, 5]));
+            Assert.Throws<ArgumentNullException>(() => new CntPosition4(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntPosition4([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntPosition4([1, 2, 3]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntPosition4([1, 2, 3, 4, 5]));
         }
         [TestMethod()]
         public void PositionComponentsTest()
         {
-            var res = new Position4(1, 2, 3, 4);
+            var res = new CntPosition4(1, 2, 3, 4);
 
-            Assert.AreEqual(new Position4(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntPosition4(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void PositionSettesTest()
         {
-            var res = new Position4
+            var res = new CntPosition4
             {
                 X = 1,
                 Y = 2,
@@ -70,20 +70,20 @@ namespace EngineTests.Content
                 W = 4
             };
 
-            Assert.AreEqual(new Position4(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntPosition4(1, 2, 3, 4), res);
         }
 
         [TestMethod()]
         public void PositionEqualsTest()
         {
-            var res = Position4.Zero == new Position4(0);
+            var res = CntPosition4.Zero == new CntPosition4(0);
 
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void PositionDistinctTest()
         {
-            var res = Position4.Zero != new Position4(1);
+            var res = CntPosition4.Zero != new CntPosition4(1);
 
             Assert.IsTrue(res);
         }
@@ -91,93 +91,93 @@ namespace EngineTests.Content
         [TestMethod()]
         public void PositionAddTest()
         {
-            var res = new Position4(1, 2, 3, 4) + new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(2, 4, 6, 8), res);
+            var res = new CntPosition4(1, 2, 3, 4) + new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(2, 4, 6, 8), res);
 
-            res = new Position4(1, 2, 3, 4) + 1;
-            Assert.AreEqual(new Position4(2, 3, 4, 5), res);
+            res = new CntPosition4(1, 2, 3, 4) + 1;
+            Assert.AreEqual(new CntPosition4(2, 3, 4, 5), res);
 
-            res = 1 + new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(2, 3, 4, 5), res);
+            res = 1 + new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(2, 3, 4, 5), res);
         }
         [TestMethod()]
         public void PositionSubstracTest()
         {
-            var res = new Position4(1, 2, 3, 4) - new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(0, 0, 0, 0), res);
+            var res = new CntPosition4(1, 2, 3, 4) - new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(0, 0, 0, 0), res);
 
-            res = new Position4(1, 2, 3, 4) - 1;
-            Assert.AreEqual(new Position4(0, 1, 2, 3), res);
+            res = new CntPosition4(1, 2, 3, 4) - 1;
+            Assert.AreEqual(new CntPosition4(0, 1, 2, 3), res);
 
-            res = 1 - new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(0, -1, -2, -3), res);
+            res = 1 - new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(0, -1, -2, -3), res);
         }
         [TestMethod()]
         public void PositionMultiplyTest()
         {
-            var res = new Position4(1, 2, 3, 4) * new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(1, 4, 9, 16), res);
+            var res = new CntPosition4(1, 2, 3, 4) * new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(1, 4, 9, 16), res);
 
-            res = new Position4(1, 2, 3, 4) * 2;
-            Assert.AreEqual(new Position4(2, 4, 6, 8), res);
+            res = new CntPosition4(1, 2, 3, 4) * 2;
+            Assert.AreEqual(new CntPosition4(2, 4, 6, 8), res);
 
-            res = 2 * new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(2, 4, 6, 8), res);
+            res = 2 * new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(2, 4, 6, 8), res);
         }
         [TestMethod()]
         public void PositionDivideTest()
         {
-            var res = new Position4(1, 2, 3, 4) / new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(1, 1, 1, 1), res);
+            var res = new CntPosition4(1, 2, 3, 4) / new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(1, 1, 1, 1), res);
 
-            res = new Position4(1, 2, 3, 4) / 2;
-            Assert.AreEqual(new Position4(0.5f, 1, 1.5f, 2), res);
+            res = new CntPosition4(1, 2, 3, 4) / 2;
+            Assert.AreEqual(new CntPosition4(0.5f, 1, 1.5f, 2), res);
 
-            res = 2 / new Position4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(2, 1, 2f / 3f, 0.5f), res);
+            res = 2 / new CntPosition4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(2, 1, 2f / 3f, 0.5f), res);
         }
         [TestMethod()]
         public void PositionPositiveTest()
         {
-            var res = +new Position4(1, 2, 3, 4);
+            var res = +new CntPosition4(1, 2, 3, 4);
 
-            Assert.AreEqual(new Position4(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntPosition4(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void PositionNegateTest()
         {
-            var res = -new Position4(1, 2, 3, 4);
+            var res = -new CntPosition4(1, 2, 3, 4);
 
-            Assert.AreEqual(new Position4(-1, -2, -3, -4), res);
+            Assert.AreEqual(new CntPosition4(-1, -2, -3, -4), res);
         }
 
         [TestMethod()]
         public void PositionToVector3Test()
         {
-            Vector4 res1 = new Position4(1, 2, 3, 4);
+            Vector4 res1 = new CntPosition4(1, 2, 3, 4);
             Assert.AreEqual(new Vector4(1, 2, 3, 4), res1);
 
-            Position4 res2 = new Vector4(1, 2, 3, 4);
-            Assert.AreEqual(new Position4(1, 2, 3, 4), res2);
+            CntPosition4 res2 = new Vector4(1, 2, 3, 4);
+            Assert.AreEqual(new CntPosition4(1, 2, 3, 4), res2);
         }
         [TestMethod()]
         public void PositionToStringTest()
         {
-            string res1 = new Position4(0.1f, 0.2f, 0.3f, 0.4f);
+            string res1 = new CntPosition4(0.1f, 0.2f, 0.3f, 0.4f);
             Assert.AreEqual(positionString, res1);
 
-            Position4 res2 = positionString;
-            Assert.AreEqual(new Position4(0.1f, 0.2f, 0.3f, 0.4f), res2);
+            CntPosition4 res2 = positionString;
+            Assert.AreEqual(new CntPosition4(0.1f, 0.2f, 0.3f, 0.4f), res2);
 
             res2 = "Zero";
-            Assert.AreEqual(new Position4(0), res2);
+            Assert.AreEqual(new CntPosition4(0), res2);
             res2 = "Max";
-            Assert.AreEqual(new Position4(float.MaxValue), res2);
+            Assert.AreEqual(new CntPosition4(float.MaxValue), res2);
             res2 = "Min";
-            Assert.AreEqual(new Position4(float.MinValue), res2);
+            Assert.AreEqual(new CntPosition4(float.MinValue), res2);
 
             res2 = "Nothing parseable";
-            Assert.AreEqual(new Position4(0), res2);
+            Assert.AreEqual(new CntPosition4(0), res2);
         }
     }
 }

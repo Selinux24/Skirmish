@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Content.FmtCollada.FX;
+using Engine.Content.FmtCollada.Types;
+using Engine.Content.Persistence;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +11,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Animation;
-    using Engine.Common;
-    using Engine.Content.FmtCollada.FX;
-    using Engine.Content.FmtCollada.Types;
-    using Engine.Content.Persistence;
     using Engine.Mathematics;
 
     /// <summary>
@@ -1220,16 +1220,16 @@ namespace Engine.Content.FmtCollada.Fmt
             }
 
             string diffuseTexture = GetTexture(profile, diffuse);
-            Vector4 diffuseColor = GetColor(diffuse, MaterialConstants.DiffuseColor);
+            Color4 diffuseColor = GetColor(diffuse, MaterialConstants.DiffuseColor);
 
             string emissiveTexture = GetTexture(profile, emissive);
-            Vector3 emissiveColor = GetColor(emissive, MaterialConstants.EmissiveColor);
+            Color3 emissiveColor = GetColor(emissive, MaterialConstants.EmissiveColor);
 
             string ambientTexture = GetTexture(profile, ambient);
-            Vector3 ambientColor = GetColor(ambient, MaterialConstants.AmbientColor);
+            Color3 ambientColor = GetColor(ambient, MaterialConstants.AmbientColor);
 
             string specularTexture = GetTexture(profile, specular);
-            Vector3 specularColor = GetColor(specular, MaterialConstants.SpecularColor);
+            Color3 specularColor = GetColor(specular, MaterialConstants.SpecularColor);
 
             float shininessValue = shininess?.Float?.Value ?? MaterialConstants.Shininess;
 
@@ -1296,14 +1296,14 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="colorOrTexture">Color or texture value</param>
         /// <param name="defaultColor">Default color value</param>
         /// <returns>Returns the color value</returns>
-        private static Vector4 GetColor(VarColorOrTexture colorOrTexture, Vector4 defaultColor)
+        private static Color4 GetColor(VarColorOrTexture colorOrTexture, Color4 defaultColor)
         {
             if (colorOrTexture == null)
             {
                 return defaultColor;
             }
 
-            return colorOrTexture.Color?.ToVector4() ?? defaultColor;
+            return (Color4?)colorOrTexture.Color?.ToVector4() ?? defaultColor;
         }
         /// <summary>
         /// Finds texture

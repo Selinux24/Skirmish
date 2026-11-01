@@ -1,28 +1,26 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Components.Water;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneSkybox
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Decals;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.Components.Water;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     public class SkyboxScene : WalkableScene
     {
         private const string resourceAudioFolder = "Common/Audio/Effects/";
@@ -50,10 +48,10 @@ namespace TerrainSamples.SceneSkybox
 
         private const float alpha = 0.25f;
 
-        private readonly Vector4 ruinsVolumeColor = new(Color.Green.RGB(), alpha);
-        private readonly Vector4 torchVolumeColor = new(Color.GreenYellow.RGB(), alpha);
-        private readonly Vector4 obeliskVolumeColor = new(Color.DarkGreen.RGB(), alpha);
-        private readonly Vector4 fountainVolumeColor = new(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly Color4 ruinsVolumeColor = new(Color.Green, alpha);
+        private readonly Color4 torchVolumeColor = new(Color.GreenYellow, alpha);
+        private readonly Color4 obeliskVolumeColor = new(Color.DarkGreen, alpha);
+        private readonly Color4 fountainVolumeColor = new(Color.DarkSeaGreen, alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions =
@@ -160,7 +158,7 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = UICursorDescription.Default(resourceCursorFile, 16, 16, true, Color.Purple.RGBA());
+            var cursorDesc = UICursorDescription.Default(resourceCursorFile, 16, 16, true, Color.Purple);
             cursorDesc.StartsVisible = false;
 
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
@@ -172,15 +170,15 @@ namespace TerrainSamples.SceneSkybox
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });
 
             title.Text = "Skybox scene";
             help.Text = "Loading...";
             fps.Text = "";
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDebug()
@@ -342,7 +340,7 @@ namespace TerrainSamples.SceneSkybox
         private async Task InitializeEmitter()
         {
             var mat = MaterialCookTorranceContent.Default;
-            mat.EmissiveColor = Color.Yellow.RGB();
+            mat.EmissiveColor = Color.Yellow;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 32);
 
@@ -405,10 +403,10 @@ namespace TerrainSamples.SceneSkybox
                     return;
                 }
 
-                var color = Color.Yellow.RGB();
-                if (i == 1) color = Color.Red.RGB();
-                if (i == 2) color = Color.Green.RGB();
-                if (i == 3) color = Color.LightBlue.RGB();
+                var color = Color.Yellow;
+                if (i == 1) color = Color.Red;
+                if (i == 2) color = Color.Green;
+                if (i == 3) color = Color.LightBlue;
 
                 FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 var firePositions3D = result.Position;
@@ -526,8 +524,8 @@ namespace TerrainSamples.SceneSkybox
                     var tri = Line3D.CreateTriangle(r.Primitive);
                     var cross = Line3D.CreateCross(r.Position, 0.1f);
 
-                    volumesDrawer.SetPrimitives(Color.White.RGBA(), tri);
-                    volumesDrawer.SetPrimitives(Color.YellowGreen.RGBA(), cross);
+                    volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.YellowGreen, cross);
                 }
             }
 
@@ -732,7 +730,7 @@ namespace TerrainSamples.SceneSkybox
 
             foreach (var node in nodes)
             {
-                var color = ColorExtensions.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 graphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -778,8 +776,8 @@ namespace TerrainSamples.SceneSkybox
             movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Orange.RGB(),
-                Color.Orange.RGB(),
+                Color.Orange,
+                Color.Orange,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 

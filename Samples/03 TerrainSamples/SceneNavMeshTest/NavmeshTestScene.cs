@@ -1,32 +1,30 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Content.FmtCollada;
+using Engine.InputMapping;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using Engine.PathFinding.RecastNavigation.Detour;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
+using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneNavMeshTest
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Content.FmtCollada;
-    using Engine.InputMapping;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Engine.PathFinding.RecastNavigation.Detour;
-    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-    using TerrainSamples.Common.Dialogs;
-    using TerrainSamples.SceneStart;
-    using Color = System.Drawing.Color;
-
     /// <summary>
     /// Navigation mesh test scene
     /// </summary>
@@ -71,9 +69,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private UIPanel groupPanel = null;
         private UIPanel debugPanel = null;
 
-        private readonly Vector4 sceneButtonColor = Vector4.AdjustSaturation(Color.CornflowerBlue.RGBA(), 1.5f);
-        private readonly Vector4 sceneButtonTextColor = Color.WhiteSmoke.RGBA();
-        private readonly Vector4 sceneBackgroundColor = Color.CornflowerBlue.RGBA();
+        private readonly Color4 sceneButtonColor = Color4.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color4 sceneButtonTextColor = Color.WhiteSmoke;
+        private readonly Color4 sceneBackgroundColor = Color.CornflowerBlue;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
         private GeometryColorDrawer<Triangle> triangleDrawer = null;
@@ -87,8 +85,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd;
         private CrowdAgentSettings crowdAgentSettings;
-        private readonly Vector4 groupColor = new Vector4(125, 97, 255, 255);
-        private readonly Vector4 groupTargetColor = new Vector4(125, 197, 255, 255);
+        private readonly Color4 groupColor = new Color(125, 97, 255, 255);
+        private readonly Color4 groupTargetColor = new Color(125, 197, 255, 255);
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -98,18 +96,18 @@ namespace TerrainSamples.SceneNavMeshTest
         private bool gameReady = false;
         private readonly StateManager stateManager = new();
 
-        private readonly Vector4 pointColor = new(Color.White.RGB(), 1f);
-        private readonly Vector4 walkableColor = new(Color.Green.RGB(), 0.75f);
-        private readonly Vector4 unwalkableColor = new(Color.Red.RGB(), 0.75f);
+        private readonly Color4 pointColor = new(Color.White, 1f);
+        private readonly Color4 walkableColor = new(Color.Green, 0.75f);
+        private readonly Color4 unwalkableColor = new(Color.Red, 0.75f);
 
-        private readonly Vector4 rndColor = new(Color.White.RGB(), 0.5f);
-        private readonly Vector4 circleColor = new(Color.Orange.RGB(), 0.5f);
-        private readonly Vector4 pickInColor = new(Color.LightGreen.RGB(), 0.5f);
-        private readonly Vector4 pickOutColor = new(Color.Pink.RGB(), 0.5f);
-        private readonly Vector4 obsColor = new(Color.Yellow.RGB(), 0.15f);
-        private readonly Vector4 obsStrongColor = new(Color.Yellow.RGB(), 0.35f);
-        private readonly Vector4 areaColor = new(Color.GreenYellow.RGB(), 0.1f);
-        private readonly Vector4 areaStrongColor = new(Color.GreenYellow.RGB(), 0.15f);
+        private readonly Color4 rndColor = new(Color.White, 0.5f);
+        private readonly Color4 circleColor = new(Color.Orange, 0.5f);
+        private readonly Color4 pickInColor = new(Color.LightGreen, 0.5f);
+        private readonly Color4 pickOutColor = new(Color.Pink, 0.5f);
+        private readonly Color4 obsColor = new(Color.Yellow, 0.15f);
+        private readonly Color4 obsStrongColor = new(Color.Yellow, 0.35f);
+        private readonly Color4 areaColor = new(Color.GreenYellow, 0.1f);
+        private readonly Color4 areaStrongColor = new(Color.GreenYellow, 0.15f);
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<IAreaMarker> areas = [];
@@ -121,14 +119,14 @@ namespace TerrainSamples.SceneNavMeshTest
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
         private Vector3? pathFindingEnd = null;
-        private readonly Vector4 pathFindingColorPath = new Vector4(128, 0, 255, 255);
-        private readonly Vector4 pathFindingColorStart = new Vector4(97, 0, 255, 255);
-        private readonly Vector4 pathFindingColorEnd = new Vector4(0, 97, 255, 255);
+        private readonly Color4 pathFindingColorPath = new Color(128, 0, 255, 255);
+        private readonly Color4 pathFindingColorStart = new Color(97, 0, 255, 255);
+        private readonly Color4 pathFindingColorEnd = new Color(0, 97, 255, 255);
         private string addConnectionStartMessage = null;
         private Vector3? addConnectionStart = null;
-        private readonly Vector4 connectionColor = Color.LightPink.RGBA();
-        private readonly Vector4 connectionColorStart = Color.Pink.RGBA();
-        private readonly Vector4 connectionColorEnd = Color.DeepPink.RGBA();
+        private readonly Color4 connectionColor = Color.LightPink;
+        private readonly Color4 connectionColorStart = Color.Pink;
+        private readonly Color4 connectionColorEnd = Color.DeepPink;
 
         private bool mapSelected = false;
         private string mapResourcesFolder;
@@ -205,14 +203,14 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 Font = defaultFont18,
                 Text = "Navigation Mesh Test Scene",
-                TextForeColor = Color.White.RGBA()
+                TextForeColor = Color.White
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
             var debugDesc = new UITextAreaDescription
             {
                 Font = defaultFont12,
-                TextForeColor = Color.Green.RGBA()
+                TextForeColor = Color.Green
             };
             debug = await AddComponentUI<UITextArea, UITextAreaDescription>("Debug", "Debug", debugDesc);
 
@@ -220,7 +218,7 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 Font = defaultFont12,
                 MaxTextLength = 256,
-                TextForeColor = Color.Yellow.RGBA(),
+                TextForeColor = Color.Yellow,
                 StartsVisible = false,
             };
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", helpDesc);
@@ -229,14 +227,14 @@ namespace TerrainSamples.SceneNavMeshTest
             {
                 Font = defaultFont12,
                 MaxTextLength = 256,
-                TextForeColor = Color.Orange.RGBA(),
+                TextForeColor = Color.Orange,
                 GrowControlWithText = false,
                 TextHorizontalAlign = TextHorizontalAlign.Right,
                 StartsVisible = false,
             };
             message = await AddComponentUI<UITextArea, UITextAreaDescription>("Message", "Message", messageDesc);
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDebugButtons()
@@ -246,9 +244,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             btnDesc.ContentPath = resourcesUIControls;
-            btnDesc.ColorReleased = new(sceneButtonColor.RGB, 0.8f);
-            btnDesc.ColorPressed = new(sceneButtonColor.RGB * 1.2f, 0.9f);
-            btnDesc.TextForeColor = Color.Gold.RGBA();
+            btnDesc.ColorReleased = new((Color3)sceneButtonColor, 0.8f);
+            btnDesc.ColorPressed = new((Color3)sceneButtonColor * 1.2f, 0.9f);
+            btnDesc.TextForeColor = Color.Gold;
             btnDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             btnDesc.StartsVisible = false;
@@ -275,7 +273,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UIButton[] mainBtns = [btnMesh, btnRasterizer, btnTiles, btnObstacle, btnArea, btnConn, btnPathFinding, btnGroups, btnDebug];
 
-            var panDesc = UIPanelDescription.Default(Color.Transparent.RGBA());
+            var panDesc = UIPanelDescription.Default(Color.Transparent);
             mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", panDesc);
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
@@ -343,7 +341,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UIButton[] btnList = [btnModel, btnAgent, btnNavMesh, btnBuild, btnSave, btnLoad, btnBack];
 
-            var desc = UIPanelDescription.Default(Color.Transparent.RGBA());
+            var desc = UIPanelDescription.Default(Color.Transparent);
             meshPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MeshPanel", "MeshPanel", desc);
             meshPanel.Spacing = 10;
             meshPanel.Padding = 15;
@@ -375,7 +373,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             UIButton[] btnList = [btnSettings, btnAddAgents, btnMoveTarget, btnBack];
 
-            var desc = UIPanelDescription.Default(Color.Transparent.RGBA());
+            var desc = UIPanelDescription.Default(Color.Transparent);
             groupPanel = await AddComponentUI<UIPanel, UIPanelDescription>("GroupPanel", "GroupPanel", desc);
             groupPanel.Spacing = 10;
             groupPanel.Padding = 15;
@@ -413,7 +411,7 @@ namespace TerrainSamples.SceneNavMeshTest
             });
             btnList.Add(btnBack);
 
-            var desc = UIPanelDescription.Default(Color.Transparent.RGBA());
+            var desc = UIPanelDescription.Default(Color.Transparent);
             debugPanel = await AddComponentUI<UIPanel, UIPanelDescription>("DebugPanel", "DebugPanel", desc);
             debugPanel.Spacing = 10;
             debugPanel.Padding = 15;
@@ -1192,20 +1190,20 @@ namespace TerrainSamples.SceneNavMeshTest
                 CellHeight = nmsettings.CellHeight,
             };
 
-            triangleDrawer.Clear(Color.CornflowerBlue.RGBA());
-            triangleDrawer.Clear(Color.OrangeRed.RGBA());
-            triangleDrawer.Clear(Color.Yellow.RGBA());
-            triangleDrawer.Clear(Color.Blue.RGBA());
+            triangleDrawer.Clear(Color.CornflowerBlue);
+            triangleDrawer.Clear(Color.OrangeRed);
+            triangleDrawer.Clear(Color.Yellow);
+            triangleDrawer.Clear(Color.Blue);
 
-            lineDrawer.Clear(Color.CornflowerBlue.RGBA());
-            lineDrawer.Clear(Color.OrangeRed.RGBA());
-            lineDrawer.Clear(Color.Yellow.RGBA());
-            lineDrawer.Clear(Color.Blue.RGBA());
+            lineDrawer.Clear(Color.CornflowerBlue);
+            lineDrawer.Clear(Color.OrangeRed);
+            lineDrawer.Clear(Color.Yellow);
+            lineDrawer.Clear(Color.Blue);
 
             var rData = Rasterizer.Rasterize([r.PickingResult.Primitive], settings).ToArray();
             if (rData.Length > 0)
             {
-                DrawDividedPolys(Color.CornflowerBlue.RGBA(), Color.OrangeRed.RGBA(), Color.Yellow.RGBA(), Color.Blue.RGBA());
+                DrawDividedPolys(Color.CornflowerBlue, Color.OrangeRed, Color.Yellow, Color.Blue);
             }
         }
 
@@ -1626,32 +1624,32 @@ namespace TerrainSamples.SceneNavMeshTest
             }
         }
 
-        private void DrawPoint(Vector3 position, float size, Vector4 color)
+        private void DrawPoint(Vector3 position, float size, Color4 color)
         {
             var cross = Line3D.CreateCross(position, size);
             lineDrawer.AddPrimitives(color, cross);
         }
-        private void DrawTriangle(Triangle triangle, Vector4 color)
+        private void DrawTriangle(Triangle triangle, Color4 color)
         {
             var tri = Line3D.CreateTriangle(triangle);
             lineDrawer.AddPrimitives(color, tri);
         }
-        private void DrawPolygon(IEnumerable<Vector3> points, Vector4 color)
+        private void DrawPolygon(IEnumerable<Vector3> points, Color4 color)
         {
             var poly = Line3D.CreatePolygon(points);
             lineDrawer.AddPrimitives(color, poly);
         }
-        private void DrawPolygonFill(IEnumerable<Vector3> points, Vector4 color)
+        private void DrawPolygonFill(IEnumerable<Vector3> points, Color4 color)
         {
             var poly = GeometryUtil.CreatePolygon(Topology.TriangleList, points);
             triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(poly.Vertices, poly.Indices));
         }
-        private void DrawCircle(Vector3 position, float radius, Vector4 color)
+        private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
             var circle = Line3D.CreateCircle(position, radius, 36);
             lineDrawer.AddPrimitives(color, circle);
         }
-        private void DrawPlayer(Player ag, Vector3 position, Vector4 color)
+        private void DrawPlayer(Player ag, Vector3 position, Color4 color)
         {
             var basePosition = position;
             basePosition.Y += ag.Height * 0.5f;
@@ -1659,7 +1657,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var cylinder = Line3D.CreateCylinder(basePosition, ag.Radius, ag.Height, 12);
             lineDrawer.AddPrimitives(color, cylinder);
         }
-        private void DrawArea(IAreaMarker area, Vector4 color, Vector4 strongColor)
+        private void DrawArea(IAreaMarker area, Color4 color, Color4 strongColor)
         {
             if (area is CylinderAreaMarker cylMarker)
             {
@@ -1681,7 +1679,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 }
             }
         }
-        private void DrawObstacle(ObstacleMarker obs, Vector4 color, Vector4 strongColor)
+        private void DrawObstacle(ObstacleMarker obs, Color4 color, Color4 strongColor)
         {
             var gt = Triangle.ComputeTriangleList(obs.Obstacle, 12);
             var gl = Line3D.CreateCylinder(obs.Obstacle, 12);
@@ -1689,7 +1687,7 @@ namespace TerrainSamples.SceneNavMeshTest
             triangleDrawer.AddPrimitives(color, gt);
             lineDrawer.AddPrimitives(strongColor, gl);
         }
-        private void DrawConnection(ConnectionMarker con, Vector4 color)
+        private void DrawConnection(ConnectionMarker con, Color4 color)
         {
             var dir = Vector3.Normalize(con.From - con.To);
 
@@ -1705,12 +1703,12 @@ namespace TerrainSamples.SceneNavMeshTest
                 lineDrawer.AddPrimitives(color, [.. glArrowB]);
             }
         }
-        private void DrawPath(PathFindingPath path, Vector4 color)
+        private void DrawPath(PathFindingPath path, Color4 color)
         {
             var pathLines = Line3D.CreateLineList(path?.Positions ?? []);
             lineDrawer.AddPrimitives(color, pathLines);
         }
-        private void DrawDividedPolys(Vector4 color, Vector4 srcColor, Vector4 div1Color, Vector4 div2Color)
+        private void DrawDividedPolys(Color4 color, Color4 srcColor, Color4 div1Color, Color4 div2Color)
         {
             const float delta = 0.05f;
 
@@ -1826,9 +1824,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var material = new MaterialPhongContent()
             {
-                DiffuseColor = Color.White.RGBA(),
+                DiffuseColor = Color.White,
                 EmissiveColor = MaterialConstants.EmissiveColor,
-                AmbientColor = Color.White.RGB(),
+                AmbientColor = Color.White,
                 SpecularColor = MaterialConstants.SpecularColor,
                 Shininess = MaterialConstants.Shininess,
                 IsTransparent = true,
@@ -1871,7 +1869,7 @@ namespace TerrainSamples.SceneNavMeshTest
             string id = $"debugGeometry_{DateTime.Now.Ticks}";
             debugGeometry = await AddComponentEffect<Model, ModelDescription>(id, "debugGeometry", desc);
         }
-        private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Vector4, IEnumerable<Vector3>> data)
+        private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Color4, IEnumerable<Vector3>> data)
         {
             if (topology == Topology.TriangleList)
             {

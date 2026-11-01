@@ -1,10 +1,9 @@
-﻿using Engine.Tween;
+﻿using Engine.Mathematics;
+using Engine.Tween;
 using System;
 
 namespace Engine.UI.Tween
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// UI control tween extensions
     /// </summary>
@@ -250,7 +249,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenBaseColor(IUIControl control, Vector4 from, Vector4 to, long duration, ScaleFunc fnc)
+        public void TweenBaseColor(IUIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -261,9 +260,9 @@ namespace Engine.UI.Tween
             FloatTween ftColorG = new();
             FloatTween ftColorB = new();
 
-            ftColorR.Start(from.X, to.X, duration, fnc);
-            ftColorG.Start(from.Y, to.Y, duration, fnc);
-            ftColorB.Start(from.Z, to.Z, duration, fnc);
+            ftColorR.Start(from.Red, to.Red, duration, fnc);
+            ftColorG.Start(from.Green, to.Green, duration, fnc);
+            ftColorB.Start(from.Blue, to.Blue, duration, fnc);
 
             AddBaseColorTween(control, ftColorR, ftColorG, ftColorB);
         }
@@ -275,7 +274,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public void TweenBaseColorBounce(IUIControl control, Vector4 from, Vector4 to, long duration, ScaleFunc fnc)
+        public void TweenBaseColorBounce(IUIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -286,9 +285,9 @@ namespace Engine.UI.Tween
             FloatTween ftColorG = new();
             FloatTween ftColorB = new();
 
-            ftColorR.Start(from.X, to.X, duration, fnc);
-            ftColorG.Start(from.Y, to.Y, duration, fnc);
-            ftColorB.Start(from.Z, to.Z, duration, fnc);
+            ftColorR.Start(from.Red, to.Red, duration, fnc);
+            ftColorG.Start(from.Green, to.Green, duration, fnc);
+            ftColorB.Start(from.Blue, to.Blue, duration, fnc);
 
             AddBaseColorBounce(control, ftColorR, ftColorG, ftColorB);
         }

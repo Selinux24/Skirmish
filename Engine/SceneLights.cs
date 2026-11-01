@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Scene lights
     /// </summary>
@@ -139,11 +138,11 @@ namespace Engine
         /// <summary>
         /// Base fog color
         /// </summary>
-        public Vector4 BaseFogColor { get; set; }
+        public Color4 BaseFogColor { get; set; }
         /// <summary>
         /// Fog color
         /// </summary>
-        public Vector4 FogColor { get; set; }
+        public Color4 FogColor { get; set; }
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -190,16 +189,16 @@ namespace Engine
         /// <summary>
         /// Sun color palette
         /// </summary>
-        public List<Tuple<float, Vector3>> SunColorPalette { get; set; } =
+        public List<Tuple<float, Color3>> SunColorPalette { get; set; } =
             [
                 .. new[]
                 {
-                    new Tuple<float, Vector3>(Helper.Pi * -1.00f, System.Drawing.Color.Black.RGB()),
-                    new Tuple<float, Vector3>(Helper.Pi * 0.02f, System.Drawing.Color.Orange.RGB()),
-                    new Tuple<float, Vector3>(Helper.Pi * 0.20f, System.Drawing.Color.White.RGB()),
-                    new Tuple<float, Vector3>(Helper.Pi * 0.70f, System.Drawing.Color.White.RGB()),
-                    new Tuple<float, Vector3>(Helper.Pi * 0.98f, System.Drawing.Color.Orange.RGB()),
-                    new Tuple<float, Vector3>(Helper.Pi * 2.00f, System.Drawing.Color.Black.RGB()),
+                    new Tuple<float, Color3>(Helper.Pi * -1.00f, Color.Black),
+                    new Tuple<float, Color3>(Helper.Pi * 0.02f, Color.Orange),
+                    new Tuple<float, Color3>(Helper.Pi * 0.20f, Color.White),
+                    new Tuple<float, Color3>(Helper.Pi * 0.70f, Color.White),
+                    new Tuple<float, Color3>(Helper.Pi * 0.98f, Color.Orange),
+                    new Tuple<float, Color3>(Helper.Pi * 2.00f, Color.Black),
                 },
             ];
         /// <summary>
@@ -610,7 +609,7 @@ namespace Engine
         /// <param name="start">Starting distance</param>
         /// <param name="end">End distance</param>
         /// <param name="color">Fog color</param>
-        public void EnableFog(float start, float end, Vector4 color)
+        public void EnableFog(float start, float end, Color4 color)
         {
             FogStart = start;
             FogRange = end - start;
@@ -623,7 +622,7 @@ namespace Engine
         {
             FogStart = 0;
             FogRange = 0;
-            BaseFogColor = FogColor = Vector4.Zero;
+            BaseFogColor = FogColor = Color.Transparent;
         }
 
         /// <inheritdoc/>

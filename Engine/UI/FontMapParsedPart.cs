@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Font map parsed part
     /// </summary>
@@ -57,11 +56,11 @@ namespace Engine.UI
         /// <summary>
         /// Colors by character of part
         /// </summary>
-        public Vector4[] Colors { get; set; }
+        public Color4[] Colors { get; set; }
         /// <summary>
         /// Shadow colors by character of part
         /// </summary>
-        public Vector4[] ShadowColors { get; set; }
+        public Color4[] ShadowColors { get; set; }
 
         /// <summary>
         /// Gets the number of characters in the part text
@@ -74,27 +73,27 @@ namespace Engine.UI
         /// Gets the color of the character at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly Vector4 GetColor(int index)
+        public readonly Color4 GetColor(int index)
         {
             if (index >= 0 && index < Colors.Length)
             {
                 return Colors[index];
             }
 
-            return Vector4.Zero;
+            return Color4.Transparent;
         }
         /// <summary>
         /// Gets the shadow color of the character at index
         /// </summary>
         /// <param name="index">Index</param>
-        public readonly Vector4 GetShadowColor(int index)
+        public readonly Color4 GetShadowColor(int index)
         {
             if (index >= 0 && index < ShadowColors.Length)
             {
                 return ShadowColors[index];
             }
 
-            return Vector4.Zero;
+            return Color4.Transparent;
         }
 
         /// <inheritdoc/>

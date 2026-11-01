@@ -1,15 +1,14 @@
-﻿using System.Linq;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Decals;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Decals;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Decal drawer class
     /// </summary>
@@ -74,7 +73,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Gets the active decal count
         /// </summary>

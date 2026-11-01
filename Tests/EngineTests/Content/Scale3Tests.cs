@@ -31,69 +31,69 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ScaleZeroTest()
         {
-            var res = Scale3.Zero;
+            var res = CntScale3.Zero;
 
-            Assert.AreEqual(new Scale3(0, 0, 0), res);
+            Assert.AreEqual(new CntScale3(0, 0, 0), res);
         }
         [TestMethod()]
         public void ScaleOneTest()
         {
-            var res = Scale3.One;
+            var res = CntScale3.One;
 
-            Assert.AreEqual(new Scale3(1, 1, 1), res);
+            Assert.AreEqual(new CntScale3(1, 1, 1), res);
         }
         [TestMethod()]
         public void ScaleValueTest()
         {
-            var res = new Scale3(2);
+            var res = new CntScale3(2);
 
-            Assert.AreEqual(new Scale3(2, 2, 2), res);
+            Assert.AreEqual(new CntScale3(2, 2, 2), res);
         }
         [TestMethod()]
         public void ScaleArrayTest()
         {
-            var res = new Scale3([1, 2, 3]);
+            var res = new CntScale3([1, 2, 3]);
 
-            Assert.AreEqual(new Scale3(1, 2, 3), res);
+            Assert.AreEqual(new CntScale3(1, 2, 3), res);
         }
         [TestMethod()]
         public void ScaleBadArrayTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new Scale3(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Scale3([]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Scale3([1, 2, 3, 4]));
+            Assert.Throws<ArgumentNullException>(() => new CntScale3(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntScale3([]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntScale3([1, 2, 3, 4]));
         }
         [TestMethod()]
         public void ScaleComponentsTest()
         {
-            var res = new Scale3(1, 2, 3);
+            var res = new CntScale3(1, 2, 3);
 
-            Assert.AreEqual(new Scale3(1, 2, 3), res);
+            Assert.AreEqual(new CntScale3(1, 2, 3), res);
         }
         [TestMethod()]
         public void ScaleSettesTest()
         {
-            var res = new Scale3
+            var res = new CntScale3
             {
                 X = 1,
                 Y = 2,
                 Z = 3
             };
 
-            Assert.AreEqual(new Scale3(1, 2, 3), res);
+            Assert.AreEqual(new CntScale3(1, 2, 3), res);
         }
 
         [TestMethod()]
         public void ScaleEqualsTest()
         {
-            var res = Scale3.Zero == new Scale3(0, 0, 0);
+            var res = CntScale3.Zero == new CntScale3(0, 0, 0);
 
             Assert.IsTrue(res);
         }
         [TestMethod()]
         public void ScaleDistinctTest()
         {
-            var res = Scale3.Zero != Scale3.One;
+            var res = CntScale3.Zero != CntScale3.One;
 
             Assert.IsTrue(res);
         }
@@ -101,100 +101,100 @@ namespace EngineTests.Content
         [TestMethod()]
         public void ScaleAddTest()
         {
-            var res = new Scale3(1, 2, 3) + new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(2, 4, 6), res);
+            var res = new CntScale3(1, 2, 3) + new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(2, 4, 6), res);
 
-            res = new Scale3(1, 2, 3) + 1;
-            Assert.AreEqual(new Scale3(2, 3, 4), res);
+            res = new CntScale3(1, 2, 3) + 1;
+            Assert.AreEqual(new CntScale3(2, 3, 4), res);
 
-            res = 1 + new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(2, 3, 4), res);
+            res = 1 + new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(2, 3, 4), res);
         }
         [TestMethod()]
         public void ScaleSubstracTest()
         {
-            var res = new Scale3(1, 2, 3) - new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(0, 0, 0), res);
+            var res = new CntScale3(1, 2, 3) - new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(0, 0, 0), res);
 
-            res = new Scale3(1, 2, 3) - 1;
-            Assert.AreEqual(new Scale3(0, 1, 2), res);
+            res = new CntScale3(1, 2, 3) - 1;
+            Assert.AreEqual(new CntScale3(0, 1, 2), res);
 
-            res = 1 - new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(0, -1, -2), res);
+            res = 1 - new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(0, -1, -2), res);
         }
         [TestMethod()]
         public void ScaleMultiplyTest()
         {
-            var res = new Scale3(1, 2, 3) * new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(1, 4, 9), res);
+            var res = new CntScale3(1, 2, 3) * new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(1, 4, 9), res);
 
-            res = new Scale3(1, 2, 3) * 2;
-            Assert.AreEqual(new Scale3(2, 4, 6), res);
+            res = new CntScale3(1, 2, 3) * 2;
+            Assert.AreEqual(new CntScale3(2, 4, 6), res);
 
-            res = 2 * new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(2, 4, 6), res);
+            res = 2 * new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(2, 4, 6), res);
         }
         [TestMethod()]
         public void ScaleDivideTest()
         {
-            var res = new Scale3(1, 2, 3) / new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(1, 1, 1), res);
+            var res = new CntScale3(1, 2, 3) / new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(1, 1, 1), res);
 
-            res = new Scale3(1, 2, 3) / 2;
-            Assert.AreEqual(new Scale3(0.5f, 1, 1.5f), res);
+            res = new CntScale3(1, 2, 3) / 2;
+            Assert.AreEqual(new CntScale3(0.5f, 1, 1.5f), res);
 
-            res = 2 / new Scale3(1, 2, 3);
-            Assert.AreEqual(new Scale3(2, 1, 2f / 3f), res);
+            res = 2 / new CntScale3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(2, 1, 2f / 3f), res);
         }
         [TestMethod()]
         public void ScalePositiveTest()
         {
-            var res = +new Scale3(1, 2, 3);
+            var res = +new CntScale3(1, 2, 3);
 
-            Assert.AreEqual(new Scale3(1, 2, 3), res);
+            Assert.AreEqual(new CntScale3(1, 2, 3), res);
         }
         [TestMethod()]
         public void ScaleNegateTest()
         {
-            var res = -new Scale3(1, 2, 3);
+            var res = -new CntScale3(1, 2, 3);
 
-            Assert.AreEqual(new Scale3(-1, -2, -3), res);
+            Assert.AreEqual(new CntScale3(-1, -2, -3), res);
         }
 
         [TestMethod()]
         public void ScaleToVector3Test()
         {
-            Vector3 res1 = new Scale3(1, 2, 3);
+            Vector3 res1 = new CntScale3(1, 2, 3);
             Assert.AreEqual(new Vector3(1, 2, 3), res1);
 
-            Scale3 res2 = new Vector3(1, 2, 3);
-            Assert.AreEqual(new Scale3(1, 2, 3), res2);
+            CntScale3 res2 = new Vector3(1, 2, 3);
+            Assert.AreEqual(new CntScale3(1, 2, 3), res2);
         }
         [TestMethod()]
         public void ScaleToStringTest()
         {
-            string res1 = new Scale3(0.1f, 0.2f, 0.3f);
+            string res1 = new CntScale3(0.1f, 0.2f, 0.3f);
             Assert.AreEqual(scaleString, res1);
 
-            Scale3 res2 = scaleString;
-            Assert.AreEqual(new Scale3(0.1f, 0.2f, 0.3f), res2);
+            CntScale3 res2 = scaleString;
+            Assert.AreEqual(new CntScale3(0.1f, 0.2f, 0.3f), res2);
 
             res2 = "One";
-            Assert.AreEqual(new Scale3(1), res2);
+            Assert.AreEqual(new CntScale3(1), res2);
             res2 = "Two";
-            Assert.AreEqual(new Scale3(2), res2);
+            Assert.AreEqual(new CntScale3(2), res2);
 
             res2 = "1/5";
-            Assert.AreEqual(new Scale3(scale1by5), res2);
+            Assert.AreEqual(new CntScale3(scale1by5), res2);
             res2 = "1/4";
-            Assert.AreEqual(new Scale3(scale1by4), res2);
+            Assert.AreEqual(new CntScale3(scale1by4), res2);
             res2 = "1/3";
-            Assert.AreEqual(new Scale3(scale1by3), res2);
+            Assert.AreEqual(new CntScale3(scale1by3), res2);
             res2 = "1/2";
-            Assert.AreEqual(new Scale3(scale1by2), res2);
+            Assert.AreEqual(new CntScale3(scale1by2), res2);
 
             res2 = "Nothing parseable";
-            Assert.AreEqual(new Scale3(1), res2);
+            Assert.AreEqual(new CntScale3(1), res2);
         }
     }
 }

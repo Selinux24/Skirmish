@@ -1,50 +1,49 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Content
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// 3D direction
     /// </summary>
-    public struct Direction3 : IEquatable<Direction3>
+    public struct CntDirection3 : IEquatable<CntDirection3>
     {
         /// <summary>
         /// Zero direction
         /// </summary>
-        public static readonly Direction3 Zero = new(0.0f, 0.0f, 0.0f);
+        public static readonly CntDirection3 Zero = new(0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating up (0, 1, 0).
+        /// A unit <see cref="CntDirection3"/> designating up (0, 1, 0).
         /// </summary>
-        public static readonly Direction3 Up = new(0.0f, 1.0f, 0.0f);
+        public static readonly CntDirection3 Up = new(0.0f, 1.0f, 0.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating down (0, -1, 0).
+        /// A unit <see cref="CntDirection3"/> designating down (0, -1, 0).
         /// </summary>
-        public static readonly Direction3 Down = new(0.0f, -1.0f, 0.0f);
+        public static readonly CntDirection3 Down = new(0.0f, -1.0f, 0.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating left (-1, 0, 0).
+        /// A unit <see cref="CntDirection3"/> designating left (-1, 0, 0).
         /// </summary>
-        public static readonly Direction3 Left = new(-1.0f, 0.0f, 0.0f);
+        public static readonly CntDirection3 Left = new(-1.0f, 0.0f, 0.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating right (1, 0, 0).
+        /// A unit <see cref="CntDirection3"/> designating right (1, 0, 0).
         /// </summary>
-        public static readonly Direction3 Right = new(1.0f, 0.0f, 0.0f);
+        public static readonly CntDirection3 Right = new(1.0f, 0.0f, 0.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating forward in a right-handed coordinate system (0, 0, -1).
+        /// A unit <see cref="CntDirection3"/> designating forward in a right-handed coordinate system (0, 0, -1).
         /// </summary>
-        public static readonly Direction3 ForwardRH = new(0.0f, 0.0f, -1.0f);
+        public static readonly CntDirection3 ForwardRH = new(0.0f, 0.0f, -1.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating forward in a left-handed coordinate system (0, 0, 1).
+        /// A unit <see cref="CntDirection3"/> designating forward in a left-handed coordinate system (0, 0, 1).
         /// </summary>
-        public static readonly Direction3 ForwardLH = new(0.0f, 0.0f, 1.0f);
+        public static readonly CntDirection3 ForwardLH = new(0.0f, 0.0f, 1.0f);
         /// <summary>
         /// A unit <see cref="Vector3"/> designating backward in a right-handed coordinate system (0, 0, 1).
         /// </summary>
-        public static readonly Direction3 BackwardRH = new(0.0f, 0.0f, 1.0f);
+        public static readonly CntDirection3 BackwardRH = new(0.0f, 0.0f, 1.0f);
         /// <summary>
-        /// A unit <see cref="Direction3"/> designating backward in a left-handed coordinate system (0, 0, -1).
+        /// A unit <see cref="CntDirection3"/> designating backward in a left-handed coordinate system (0, 0, -1).
         /// </summary>
-        public static readonly Direction3 BackwardLH = new(0.0f, 0.0f, -1.0f);
+        public static readonly CntDirection3 BackwardLH = new(0.0f, 0.0f, -1.0f);
 
         /// <summary>
         /// The X component of the direction.
@@ -60,34 +59,34 @@ namespace Engine.Content
         public float Z { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Direction3"/> struct.
+        /// Initializes a new instance of the <see cref="CntDirection3"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
-        public Direction3(float value)
+        public CntDirection3(float value)
         {
             X = value;
             Y = value;
             Z = value;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Direction3"/> struct.
+        /// Initializes a new instance of the <see cref="CntDirection3"/> struct.
         /// </summary>
         /// <param name="x">Initial value for the X component of the direction.</param>
         /// <param name="y">Initial value for the Y component of the direction.</param>
         /// <param name="z">Initial value for the Z component of the direction.</param>
-        public Direction3(float x, float y, float z)
+        public CntDirection3(float x, float y, float z)
         {
             X = x;
             Y = y;
             Z = z;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Direction3"/> struct.
+        /// Initializes a new instance of the <see cref="CntDirection3"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the X, Y, and Z components of the direction. This must be an array with three elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than three elements.</exception>
-        public Direction3(float[] values)
+        public CntDirection3(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
 
@@ -100,125 +99,125 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public static bool operator ==(Direction3 left, Direction3 right)
+        public static bool operator ==(CntDirection3 left, CntDirection3 right)
         {
             return left.Equals(ref right);
         }
         /// <inheritdoc/>
-        public static bool operator !=(Direction3 left, Direction3 right)
+        public static bool operator !=(CntDirection3 left, CntDirection3 right)
         {
             return !left.Equals(ref right);
         }
 
         /// <inheritdoc/>
-        public static Direction3 operator +(Direction3 left, Direction3 right)
+        public static CntDirection3 operator +(CntDirection3 left, CntDirection3 right)
         {
-            return (Vector3)left + (Vector3)right;
+            return (CntDirection3)((Vector3)left + (Vector3)right);
         }
         /// <inheritdoc/>
-        public static Direction3 operator +(Direction3 value)
+        public static CntDirection3 operator +(CntDirection3 value)
         {
-            return +(Vector3)value;
+            return (CntDirection3)(+(Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator +(Direction3 value, float scalar)
+        public static CntDirection3 operator +(CntDirection3 value, float scalar)
         {
-            return Vector3.Add((Vector3)value, new Vector3(scalar));
+            return (CntDirection3)Vector3.Add((Vector3)value, new Vector3(scalar));
         }
         /// <inheritdoc/>
-        public static Direction3 operator +(float scalar, Direction3 value)
+        public static CntDirection3 operator +(float scalar, CntDirection3 value)
         {
-            return Vector3.Add(new Vector3(scalar), (Vector3)value);
+            return (CntDirection3)Vector3.Add(new Vector3(scalar), (Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator -(Direction3 left, Direction3 right)
+        public static CntDirection3 operator -(CntDirection3 left, CntDirection3 right)
         {
-            return (Vector3)left - (Vector3)right;
+            return (CntDirection3)((Vector3)left - (Vector3)right);
         }
         /// <inheritdoc/>
-        public static Direction3 operator -(Direction3 value)
+        public static CntDirection3 operator -(CntDirection3 value)
         {
-            return -(Vector3)value;
+            return (CntDirection3)(-(Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator -(Direction3 value, float scalar)
+        public static CntDirection3 operator -(CntDirection3 value, float scalar)
         {
-            return Vector3.Subtract((Vector3)value, new Vector3(scalar));
+            return (CntDirection3)Vector3.Subtract((Vector3)value, new Vector3(scalar));
         }
         /// <inheritdoc/>
-        public static Direction3 operator -(float scalar, Direction3 value)
+        public static CntDirection3 operator -(float scalar, CntDirection3 value)
         {
-            return Vector3.Subtract(new Vector3(scalar), (Vector3)value);
+            return (CntDirection3)Vector3.Subtract(new Vector3(scalar), (Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator *(Direction3 left, Direction3 right)
+        public static CntDirection3 operator *(CntDirection3 left, CntDirection3 right)
         {
-            return (Vector3)left * (Vector3)right;
+            return (CntDirection3)((Vector3)left * (Vector3)right);
         }
         /// <inheritdoc/>
-        public static Direction3 operator *(float scale, Direction3 value)
+        public static CntDirection3 operator *(float scale, CntDirection3 value)
         {
-            return scale * (Vector3)value;
+            return (CntDirection3)(scale * (Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator *(Direction3 value, float scale)
+        public static CntDirection3 operator *(CntDirection3 value, float scale)
         {
-            return (Vector3)value * scale;
+            return (CntDirection3)((Vector3)value * scale);
         }
         /// <inheritdoc/>
-        public static Direction3 operator /(Direction3 value, float scale)
+        public static CntDirection3 operator /(CntDirection3 value, float scale)
         {
-            return (Vector3)value / scale;
+            return (CntDirection3)((Vector3)value / scale);
         }
         /// <inheritdoc/>
-        public static Direction3 operator /(float scale, Direction3 value)
+        public static CntDirection3 operator /(float scale, CntDirection3 value)
         {
-            return Vector3.Divide(scale, (Vector3)value);
+            return (CntDirection3)Vector3.Divide(scale, (Vector3)value);
         }
         /// <inheritdoc/>
-        public static Direction3 operator /(Direction3 value, Direction3 scale)
+        public static CntDirection3 operator /(CntDirection3 value, CntDirection3 scale)
         {
-            return (Vector3)value / (Vector3)scale;
+            return (CntDirection3)((Vector3)value / (Vector3)scale);
         }
 
         /// <inheritdoc/>
-        public static implicit operator Vector3(Direction3 value)
+        public static implicit operator Vector3(CntDirection3 value)
         {
             return new Vector3(value.X, value.Y, value.Z);
         }
         /// <inheritdoc/>
-        public static implicit operator Direction3(Vector3 value)
+        public static implicit operator CntDirection3(Vector3 value)
         {
-            return new Direction3(value.X, value.Y, value.Z);
+            return new CntDirection3(value.X, value.Y, value.Z);
         }
 
         /// <inheritdoc/>
-        public static implicit operator string(Direction3 value)
+        public static implicit operator string(CntDirection3 value)
         {
             return ContentHelper.WriteDirection3(value);
         }
         /// <inheritdoc/>
-        public static implicit operator Direction3(string value)
+        public static implicit operator CntDirection3(string value)
         {
             return ContentHelper.ReadDirection3(value) ?? ForwardLH;
         }
 
         /// <inheritdoc/>
-        public readonly bool Equals(Direction3 other)
+        public readonly bool Equals(CntDirection3 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            if (obj is not Direction3)
+            if (obj is not CntDirection3)
                 return false;
 
-            var strongValue = (Direction3)obj;
+            var strongValue = (CntDirection3)obj;
             return Equals(ref strongValue);
         }
-
-        public readonly bool Equals(ref Direction3 other)
+        /// <inheritdoc/>
+        public readonly bool Equals(ref CntDirection3 other)
         {
             return Helper.NearEqual(other.X, X) && Helper.NearEqual(other.Y, Y) && Helper.NearEqual(other.Z, Z);
         }
@@ -277,7 +276,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="value">The vector to normalize.</param>
         /// <param name="result">When the method completes, contains the normalized vector.</param>
-        public static void Normalize(ref Direction3 value, out Direction3 result)
+        public static void Normalize(ref CntDirection3 value, out CntDirection3 result)
         {
             result = value;
             result.Normalize();

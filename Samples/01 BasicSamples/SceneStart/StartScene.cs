@@ -1,19 +1,17 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStart
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-
     class StartScene : Scene
     {
         private SoundEffectsManager soundEffectsManager;
@@ -28,8 +26,8 @@ namespace BasicSamples.SceneStart
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-        private readonly Vector3 sceneButtonColor = Vector3.AdjustSaturation(Color.CornflowerBlue.RGB(), 1.5f);
-        private readonly Vector3 exitButtonColor = Vector3.AdjustSaturation(Color.Orange.RGB(), 1.5f);
+        private readonly Color3 sceneButtonColor = Color3.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color3 exitButtonColor = Color3.AdjustSaturation(Color.Orange, 1.5f);
 
         private bool sceneReady = false;
 
@@ -38,7 +36,7 @@ namespace BasicSamples.SceneStart
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
         }
 
         public override void Initialize()
@@ -89,8 +87,8 @@ namespace BasicSamples.SceneStart
             var titleFont = Engine.UI.FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
-            titleDesc.TextForeColor = Color.Gold.RGBA();
-            titleDesc.TextShadowColor = new(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextForeColor = Color.Gold;
+            titleDesc.TextShadowColor = new(Color.LightYellow, 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -102,7 +100,7 @@ namespace BasicSamples.SceneStart
         {
             const int cols = 4;
 
-            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent.RGBA()));
+            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
             buttonPanel.SetGridLayout(GridLayout.FixedColumns(cols));
             buttonPanel.Spacing = 40;
             buttonPanel.EventsEnabled = true;
@@ -139,7 +137,7 @@ namespace BasicSamples.SceneStart
         private async Task<UIButton> CreateButton(string name, UIButtonDescription desc, string title, char keyChar, MouseEventHandler onClick)
         {
             var button = await CreateComponent<UIButton, UIButtonDescription>(name, name, desc);
-            button.Caption.SetTextWithKeyChar(title, keyChar, Color.Gold.RGBA(), Color.Red.RGBA());
+            button.Caption.SetTextWithKeyChar(title, keyChar, Color.Gold, Color.Red);
 
             button.MouseClick += onClick;
             button.MouseEnter += SceneButtonMouseEnter;

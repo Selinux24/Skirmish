@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Animation;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Model instance
     /// </summary>
@@ -60,7 +59,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Texture index
         /// </summary>

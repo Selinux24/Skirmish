@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Hemispheric light interface
     /// </summary>
@@ -11,10 +10,10 @@ namespace Engine
         /// <summary>
         /// Ambient down color
         /// </summary>
-        Vector3 AmbientDown { get; set; }
+        Color3 AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        Vector3 AmbientUp { get; set; }
+        Color3 AmbientUp { get; set; }
     }
 }

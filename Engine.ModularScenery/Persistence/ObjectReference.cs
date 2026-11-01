@@ -70,15 +70,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        public CntRotationQ Rotation { get; set; } = CntRotationQ.Identity;
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = Scale3.One;
+        public CntScale3 Scale { get; set; } = CntScale3.One;
         /// <summary>
         /// Load model lights into scene
         /// </summary>

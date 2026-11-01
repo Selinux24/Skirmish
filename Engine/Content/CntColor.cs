@@ -1,26 +1,25 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Content
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// RGBA color
     /// </summary>
-    public struct ColorRgba : IEquatable<ColorRgba>
+    public struct CntColor : IEquatable<CntColor>
     {
         /// <summary>
         /// Transparent
         /// </summary>
-        public static readonly ColorRgba Transparent = new(0, 0, 0, 0);
+        public static readonly CntColor Transparent = new(0, 0, 0, 0);
         /// <summary>
         /// White
         /// </summary>
-        public static readonly ColorRgba White = new(0, 0, 0, 1);
+        public static readonly CntColor White = new(0, 0, 0, 1);
         /// <summary>
         /// Black
         /// </summary>
-        public static readonly ColorRgba Black = new(1, 1, 1, 1);
+        public static readonly CntColor Black = new(1, 1, 1, 1);
 
         /// <summary>
         /// The red component of the color.
@@ -40,10 +39,10 @@ namespace Engine.Content
         public float A { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ColorRgba"/> struct.
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
-        public ColorRgba(float value)
+        public CntColor(float value)
         {
             R = value;
             G = value;
@@ -51,13 +50,13 @@ namespace Engine.Content
             A = value;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ColorRgba"/> struct.
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
         /// </summary>
         /// <param name="r">Initial value for the red component of the color.</param>
         /// <param name="g">Initial value for the green component of the color.</param>
         /// <param name="b">Initial value for the blue component of the color.</param>
         /// <param name="a">Initial value for the alpha component of the color.</param>
-        public ColorRgba(float r, float g, float b, float a)
+        public CntColor(float r, float g, float b, float a)
         {
             R = r;
             G = g;
@@ -65,12 +64,12 @@ namespace Engine.Content
             A = a;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ColorRgba"/> struct.
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the R, G, B and A components of the color. This must be an array with four elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
-        public ColorRgba(float[] values)
+        public CntColor(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
 
@@ -86,65 +85,76 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public static bool operator ==(ColorRgba left, ColorRgba right)
+        public static bool operator ==(CntColor left, CntColor right)
         {
             return left.Equals(ref right);
         }
         /// <inheritdoc/>
-        public static bool operator !=(ColorRgba left, ColorRgba right)
+        public static bool operator !=(CntColor left, CntColor right)
         {
             return !left.Equals(ref right);
         }
 
         /// <inheritdoc/>
-        public static implicit operator Vector4(ColorRgba value)
+        public static implicit operator Color4(CntColor value)
         {
-            return new Vector4(value.R, value.G, value.B, value.A);
+            return new(value.R, value.G, value.B, value.A);
         }
         /// <inheritdoc/>
-        public static implicit operator ColorRgba(Vector4 value)
+        public static implicit operator CntColor(Color4 value)
         {
-            return new ColorRgba(value.X, value.Y, value.Z, value.W);
-        }
-
-        /// <inheritdoc/>
-        public static implicit operator Vector3(ColorRgba value)
-        {
-            return new Vector3(value.R, value.G, value.B);
-        }
-        /// <inheritdoc/>
-        public static implicit operator ColorRgba(Vector3 value)
-        {
-            return new ColorRgba(value.X, value.Y, value.Z, 1f);
+            return new(value.Red, value.Green, value.Blue, value.Alpha);
         }
 
         /// <inheritdoc/>
-        public static implicit operator string(ColorRgba value)
+        public static implicit operator Color3(CntColor value)
+        {
+            return new(value.R, value.G, value.B);
+        }
+        /// <inheritdoc/>
+        public static implicit operator CntColor(Color3 value)
+        {
+            return new(value.Red, value.Green, value.Blue, 1f);
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator Color(CntColor value)
+        {
+            return new(value.R, value.G, value.B, value.A);
+        }
+        /// <inheritdoc/>
+        public static implicit operator CntColor(Color value)
+        {
+            return new(value.R / 255f, value.G / 255f, value.B / 255f, value.A / 255f);
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator string(CntColor value)
         {
             return ContentHelper.WriteColorRgba(value);
         }
         /// <inheritdoc/>
-        public static implicit operator ColorRgba(string value)
+        public static implicit operator CntColor(string value)
         {
             return ContentHelper.ReadColorRgba(value) ?? Black;
         }
 
         /// <inheritdoc/>
-        public readonly bool Equals(ColorRgba other)
+        public readonly bool Equals(CntColor other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            if (obj is not ColorRgba)
+            if (obj is not CntColor)
                 return false;
 
-            var strongValue = (ColorRgba)obj;
+            var strongValue = (CntColor)obj;
             return Equals(ref strongValue);
         }
 
-        public readonly bool Equals(ref ColorRgba other)
+        public readonly bool Equals(ref CntColor other)
         {
             return Helper.NearEqual(other.R, R) && Helper.NearEqual(other.G, G) && Helper.NearEqual(other.B, B) && Helper.NearEqual(other.A, A);
         }

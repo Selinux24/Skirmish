@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.SkyScattering;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.SkyScattering;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Scattered sky
     /// </summary>
@@ -379,9 +378,9 @@ namespace Engine.BuiltIn.Components.Skies
         /// </summary>
         /// <param name="lightDirection">Light direction</param>
         /// <returns>Returns the fog color</returns>
-        public Vector4 GetFogColor(Vector3 lightDirection)
+        public Color4 GetFogColor(Vector3 lightDirection)
         {
-            var outColor = Vector4.Zero;
+            var outColor = Color4.Transparent;
 
             Vector3.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
@@ -425,7 +424,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <param name="scatterPosition">Scatter position</param>
         /// <param name="lightDirection">Light direction</param>
         /// <param name="outColor">Resulting color</param>
-        private void GetColor(Vector3 scatterPosition, Vector3 lightDirection, out Vector4 outColor)
+        private void GetColor(Vector3 scatterPosition, Vector3 lightDirection, out Color4 outColor)
         {
             float viewerHeight = 1f;
             var eyePosition = new Vector3(0, viewerHeight, 0);
@@ -450,7 +449,7 @@ namespace Engine.BuiltIn.Components.Skies
 
             var samplePoint = eyePosition + sampleRay * 0.5f;
 
-            var frontColor = Vector3.Zero;
+            var frontColor = Color3.Black;
 
             for (uint i = 0; i < 2; i++)
             {
@@ -462,7 +461,7 @@ namespace Engine.BuiltIn.Components.Skies
 
                 float scatter = startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle));
 
-                var attenuate = Vector3.Zero;
+                var attenuate = Color3.Black;
                 attenuate[0] = MathF.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[1] = MathF.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[2] = MathF.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
@@ -472,7 +471,7 @@ namespace Engine.BuiltIn.Components.Skies
                 samplePoint += sampleRay;
             }
 
-            var rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
+            var rayleighColor = frontColor * ((Color3)InvWaveLength4 * rayleighBrightness);
 
             var direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));
@@ -481,12 +480,12 @@ namespace Engine.BuiltIn.Components.Skies
             var color = rayleighColor + miePhase * mieColor;
 
             var expColor = Vector3.Zero;
-            expColor.X = 1.0f - MathF.Exp(-HDRExposure * color.X);
-            expColor.Y = 1.0f - MathF.Exp(-HDRExposure * color.Y);
-            expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Z);
+            expColor.X = 1.0f - MathF.Exp(-HDRExposure * color.Red);
+            expColor.Y = 1.0f - MathF.Exp(-HDRExposure * color.Green);
+            expColor.Z = 1.0f - MathF.Exp(-HDRExposure * color.Blue);
             expColor.Normalize();
 
-            outColor = new(expColor, 1f);
+            outColor = new Color4(expColor, 1f);
         }
     }
 }

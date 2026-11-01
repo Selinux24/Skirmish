@@ -1,16 +1,14 @@
-﻿using System.Drawing;
+﻿using BasicSamples.SceneStart;
+using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
 {
-    using BasicSamples.SceneStart;
-    using Engine;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Normal map test scene
     /// </summary>
@@ -69,7 +67,7 @@ namespace BasicSamples.SceneNormalMap
             {
                 Font = defaultFont18,
                 Text = "Tiled Wall Test Scene",
-                TextForeColor = Color.White.RGBA(),
+                TextForeColor = Color.White,
             };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
@@ -78,12 +76,12 @@ namespace BasicSamples.SceneNormalMap
             {
                 Font = defaultFont12,
                 MaxTextLength = 256,
-                TextForeColor = Color.Yellow.RGBA(),
+                TextForeColor = Color.Yellow,
             };
 
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", runtimeDesc);
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("BackPanel", "BackPanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDungeonWall()
@@ -114,7 +112,7 @@ namespace BasicSamples.SceneNormalMap
         private async Task InitializeEmitter()
         {
             var mat = MaterialPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 15);
 
@@ -149,11 +147,11 @@ namespace BasicSamples.SceneNormalMap
         }
         private void StartEnvironment()
         {
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
 
             var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
 
-            pointLight = new SceneLightPoint("light", false, Color.White.RGB(), Color.White.RGB(), true, desc);
+            pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
 
             Lights.Add(pointLight);
         }

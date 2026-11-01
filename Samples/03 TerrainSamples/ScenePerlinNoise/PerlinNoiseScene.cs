@@ -1,25 +1,23 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.IO;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
+using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
-    using Engine;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using TerrainSamples.Common.Dialogs;
-    using TerrainSamples.SceneStart;
-    using Color = System.Drawing.Color;
-
     class PerlinNoiseScene : Scene
     {
         const string fontFamily = "Microsoft Sans Serif";
-        static readonly Vector4 pBackground = Color.RosyBrown.RGBA();
-        static readonly Vector4 bColor1 = Color.Brown.RGBA();
-        static readonly Vector4 bColor2 = Vector4.AdjustSaturation(Color.Brown.RGBA(), 1.5f);
-        static readonly Vector4 pColor = Color.DeepSkyBlue.RGBA();
+        static readonly Color4 pBackground = Color.RosyBrown;
+        static readonly Color4 bColor1 = Color.Brown;
+        static readonly Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
+        static readonly Color4 pColor = Color.DeepSkyBlue;
 
         const int dialogWidth = 600;
         const int dialogHeight = 350;
@@ -44,9 +42,9 @@ namespace TerrainSamples.ScenePerlinNoise
         UIButton btnSave;
         bool dialogVisible = false;
         string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        readonly Vector4 dialogButtonColor = Vector4.AdjustSaturation(bColor1, 1.5f);
-        readonly Vector4 dialogButtonTextColor = Color.WhiteSmoke.RGBA();
-        readonly Vector4 dialogBackgroundColor = bColor1;
+        readonly Color4 dialogButtonColor = Color4.AdjustSaturation(bColor1, 1.5f);
+        readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
+        readonly Color4 dialogBackgroundColor = bColor1;
         UISaveFileDialog saveFileDialog = null;
 
         UITextureRenderer perlinRenderer;

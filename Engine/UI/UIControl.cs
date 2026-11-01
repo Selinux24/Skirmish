@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// User interface control
     /// </summary>
@@ -92,11 +91,11 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        private Vector4 baseColor;
+        private Color4 baseColor;
         /// <summary>
         /// Tint color
         /// </summary>
-        private Vector4 tintColor;
+        private Color4 tintColor;
         /// <summary>
         /// Alpha color component
         /// </summary>
@@ -482,7 +481,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual Vector4 BaseColor
+        public virtual Color4 BaseColor
         {
             get
             {
@@ -503,7 +502,7 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public virtual Vector4 TintColor
+        public virtual Color4 TintColor
         {
             get
             {

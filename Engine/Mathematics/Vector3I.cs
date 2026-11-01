@@ -53,51 +53,42 @@ namespace Engine.Mathematics
             return new Vector3I(x, y, z);
         }
 
+        /// <summary>
+        /// The X coordinate.
+        /// </summary>
+        public int X = x;
+        /// <summary>
+        /// The Y coordinate.
+        /// </summary>
+        public int Y = y;
+        /// <summary>
+        /// The Z coordinate.
+        /// </summary>
+        public int Z = z;
+
+
         public void Add(Vector3I value)
         {
             X += value.X;
             Y += value.Y;
             Z += value.Z;
         }
-    
+
         public static Vector3I Sum(Vector3I a, Vector3I b)
         {
             return new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
-        /// <summary>
-        /// Compares two vertices for equality.
-        /// </summary>
-        /// <param name="left">A vertex.</param>
-        /// <param name="right">Another vertex.</param>
-        /// <returns>A value indicating whether the two vertices are equal.</returns>
+        /// <inheritdoc/>
         public static bool operator ==(Vector3I left, Vector3I right)
         {
             return left.Equals(right);
         }
-        /// <summary>
-        /// Compares two vertices for inequality.
-        /// </summary>
-        /// <param name="left">A vertex.</param>
-        /// <param name="right">Another vertex.</param>
-        /// <returns>A value indicating whether the two vertices are not equal.</returns>
+        /// <inheritdoc/>
         public static bool operator !=(Vector3I left, Vector3I right)
         {
             return !(left == right);
         }
-
-        /// <summary>
-        /// The X coordinate.
-        /// </summary>
-        public int X { get; set; } = x;
-        /// <summary>
-        /// The Y coordinate.
-        /// </summary>
-        public int Y { get; set; } = y;
-        /// <summary>
-        /// The Z coordinate.
-        /// </summary>
-        public int Z { get; set; } = z;
 
         /// <inheritdoc/>
         public readonly bool Equals(Vector3I other)
@@ -115,11 +106,13 @@ namespace Engine.Mathematics
 
             return false;
         }
+
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
+
         /// <inheritdoc/>
         public override readonly string ToString()
         {

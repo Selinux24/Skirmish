@@ -1,19 +1,17 @@
-﻿using System;
-using System.Drawing;
+﻿using Engine;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneCascadedShadows
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Flares;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Cascade shadows scene test
     /// </summary>
@@ -108,8 +106,8 @@ namespace BasicSamples.SceneCascadedShadows
             {
                 Font = defaultFont20,
                 Text = "Cascaded Shadows",
-                TextForeColor = Color.Yellow.RGBA(),
-                TextShadowColor = Color.OrangeRed.RGBA()
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.OrangeRed
             };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
 
@@ -117,37 +115,37 @@ namespace BasicSamples.SceneCascadedShadows
             {
                 Font = defaultFont14,
                 Text = helpText1,
-                TextForeColor = Color.LightBlue.RGBA(),
-                TextShadowColor = Color.DarkBlue.RGBA()
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue
             };
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", helpDesc);
 
             var selectorDesc = new UITextAreaDescription
             {
                 Font = defaultFont12,
-                TextForeColor = Color.LightBlue.RGBA(),
+                TextForeColor = Color.LightBlue,
             };
             selector = await AddComponentUI<UITextArea, UITextAreaDescription>("SelectorText", "SelectorText", selectorDesc);
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue.RGBA());
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
             consoleDesc.MaxTextLength = 5000;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
         }
         private async Task InitializeUILevelsControl()
         {
-            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(new Vector4(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
-            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(new Vector4(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
-            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(new Vector4(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
+            spLevel1 = await AddComponentUI<Sprite, SpriteDescription>("High Level", "High Level", SpriteDescription.Default(new Color(0x17, 0x3F, 0x5F, 0xFF)), LayerUI);
+            spLevel2 = await AddComponentUI<Sprite, SpriteDescription>("Medium Level", "Medium Level", SpriteDescription.Default(new Color(0x20, 0x63, 0x9B, 0xFF)), LayerUI);
+            spLevel3 = await AddComponentUI<Sprite, SpriteDescription>("Low Level", "Low Level", SpriteDescription.Default(new Color(0x3C, 0xAE, 0xA3, 0xFF)), LayerUI);
 
-            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(new Vector4(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect1 = await AddComponentUI<Sprite, SpriteDescription>("First selector", "First selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect1.EventsEnabled = true;
             spSelect1.MouseJustPressed += PbJustPressed;
             spSelect1.MouseJustReleased += PbJustReleased;
 
-            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(new Vector4(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
+            spSelect2 = await AddComponentUI<Sprite, SpriteDescription>("Second selector", "Second selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), LayerUI + 1);
             spSelect2.EventsEnabled = true;
             spSelect2.MouseJustPressed += PbJustPressed;
             spSelect2.MouseJustReleased += PbJustReleased;
@@ -177,8 +175,8 @@ namespace BasicSamples.SceneCascadedShadows
             var captionDesc = new UITextAreaDescription
             {
                 Font = defaultFont14,
-                TextForeColor = Color.LightBlue.RGBA(),
-                TextShadowColor = Color.DarkBlue.RGBA(),
+                TextForeColor = Color.LightBlue,
+                TextShadowColor = Color.DarkBlue,
                 GrowControlWithText = false,
                 StartsVisible = false,
             };
@@ -270,16 +268,16 @@ namespace BasicSamples.SceneCascadedShadows
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
-                    new ( 0.0f, 5.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare4String),
-                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
-                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.0f, 5.6f, new( 25,  25,  25), resourceFlare4String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -298,7 +296,7 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private void StartLights()
         {
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
 
             Lights.KeyLight.Enabled = true;
             Lights.KeyLight.CastShadow = true;

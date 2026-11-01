@@ -1,4 +1,13 @@
-﻿using Logger;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,17 +15,6 @@ using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneSimpleAnimation
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     public class SimpleAnimationScene : Scene
     {
         private const string resourcesAsphaltFolder = "Common/Asphalt/";
@@ -69,8 +67,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Vector4 itemTrisColor = new(Color.Yellow.RGB(), 0.6f);
-        private readonly Vector4 itemLinesColor = new(Color.Red.RGB(), 1f);
+        private readonly Color4 itemTrisColor = new(Color.Yellow, 0.6f);
+        private readonly Color4 itemLinesColor = new(Color.Red, 1f);
         private bool showItemDEBUG = false;
         private bool showItem = true;
         private int itemIndex = 0;
@@ -136,7 +134,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override void Initialize()
@@ -160,19 +158,19 @@ namespace IntermediateSamples.SceneSimpleAnimation
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 128 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 128 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -520,7 +518,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             var bbox = new BoundingBox();
             animObjects.ForEach(item =>

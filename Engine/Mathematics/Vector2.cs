@@ -1403,85 +1403,55 @@ namespace Engine.Mathematics
         {
             return new Vector2(scalar - value.X, scalar - value.Y);
         }
-        /// <summary>
-        /// Tests for equality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector2 left, Vector2 right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Tests for inequality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector2 left, Vector2 right)
         {
             return !left.Equals(ref right);
         }
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector2"/> to <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector3(Vector2 value)
         {
             return new(value, 0.0f);
         }
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector2"/> to <see cref="Vector4"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector4(Vector2 value)
         {
             return new(value, 0.0f, 0.0f);
         }
-        /// <summary>
-        /// Convert the System.Numerics.Vector2 to a Vector2.
-        /// </summary>
-        /// <returns>A Vector2</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector2(System.Numerics.Vector2 Value)
         {
             return new(Value.X, Value.Y);
         }
-        /// <summary>
-        /// Convert the Vector2 to a System.Numerics.Vector2.
-        /// </summary>
-        /// <returns>A System.Numerics.Vector2</returns>
+        /// <inheritdoc/>
         public static explicit operator System.Numerics.Vector2(Vector2 Value)
         {
             return new(Value.X, Value.Y);
         }
-        /// <summary>
-        /// Convert the Vortice.Mathematics.Size to a Vector2.
-        /// </summary>
-        /// <returns>A Vector2</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector2(Vortice.Mathematics.Size Value)
         {
             return new(Value.Width, Value.Height);
         }
-        /// <summary>
-        /// Convert the Vector2 to a Vortice.Mathematics.Size.
-        /// </summary>
-        /// <returns>A Vortice.Mathematics.Size</returns>
+        /// <inheritdoc/>
         public static explicit operator Vortice.Mathematics.Size(Vector2 Value)
         {
             return new(Value.X, Value.Y);
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return string.Format(
@@ -1489,13 +1459,7 @@ namespace Engine.Mathematics
                 Vector2Str,
                 X, Y);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format)
         {
             if (format == null) return ToString();
@@ -1506,13 +1470,7 @@ namespace Engine.Mathematics
                 X.ToString(format, CultureInfo.CurrentCulture),
                 Y.ToString(format, CultureInfo.CurrentCulture));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
         {
             return string.Format(
@@ -1520,14 +1478,7 @@ namespace Engine.Mathematics
                 Vector2Str,
                 X, Y);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) ToString(formatProvider);
@@ -1539,24 +1490,13 @@ namespace Engine.Mathematics
                 Y.ToString(format, formatProvider));
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector2"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector2"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="Vector2"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Vector2 other)
         {
@@ -1564,25 +1504,14 @@ namespace Engine.Mathematics
                 Helper.NearEqual(other.X, X) &&
                 Helper.NearEqual(other.Y, Y);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector2"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector2"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="Vector2"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <inheritdoc/>
         public readonly bool Equals(Vector2 other)
         {
             return Equals(ref other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object value)
         {
             if (value is not Vector2) return false;
@@ -1591,15 +1520,40 @@ namespace Engine.Mathematics
             return Equals(ref strongValue);
         }
 
-        public static bool NearEqual(Vector2 a, Vector2 b)
+        /// <summary>
+        /// Tests whether one 2D vector is near another 2D vector.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <returns><c>true</c> if left and right are near another 2D, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Vector2 left, Vector2 right)
         {
-            return NearEqual(a, b, Helper.ZeroToleranceVector2);
+            return NearEqual(left, right, Helper.ZeroToleranceVector2);
         }
-        public static bool NearEqual(Vector2 a, Vector2 b, Vector2 epsilon)
+        /// <summary>
+        /// Tests whether one 2D vector is near another 2D vector.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <param name="epsilon">The epsilon.</param>
+        /// <returns><c>true</c> if left and right are near another 2D, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Vector2 left, Vector2 right, Vector2 epsilon)
         {
             return
-                Helper.WithinEpsilon(a.X, b.X, epsilon.X) &&
-                Helper.WithinEpsilon(a.Y, b.Y, epsilon.Y);
+                Helper.WithinEpsilon(left.X, right.X, epsilon.X) &&
+                Helper.WithinEpsilon(left.Y, right.Y, epsilon.Y);
+        }
+    
+        /// <summary>
+        /// Gets vector description
+        /// </summary>
+        /// <returns>Return vector description</returns>
+        public readonly string GetDescription()
+        {
+            return string.Format(
+                "X:{0:0.000}; Y:{1:0.000}",
+                MathF.Round(X, 3),
+                MathF.Round(Y, 3));
         }
     }
 }

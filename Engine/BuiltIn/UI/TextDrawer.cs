@@ -1,15 +1,14 @@
-﻿using System.Linq;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Fonts;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Fonts;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Text drawer
     /// </summary>
@@ -59,11 +58,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        private Vector4 textColor;
+        private Color4 textColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        private Vector4 shadowColor;
+        private Color4 shadowColor;
 
         /// <summary>
         /// Horizontal align
@@ -165,7 +164,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets text fore color
         /// </summary>
-        public Vector4 ForeColor
+        public Color4 ForeColor
         {
             get
             {
@@ -184,7 +183,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets text shadow color
         /// </summary>
-        public Vector4 ShadowColor
+        public Color4 ShadowColor
         {
             get
             {
@@ -331,7 +330,7 @@ namespace Engine.BuiltIn.UI
             Manipulator.SetPosition(pos);
             Manipulator.Update2D(parentPos);
 
-            if (ShadowColor != Vector4.Zero)
+            if (ShadowColor != Color4.Transparent)
             {
                 ShadowManipulator.SetScale(sca);
                 ShadowManipulator.SetRotation(rot);
@@ -423,7 +422,7 @@ namespace Engine.BuiltIn.UI
 
             bool drawn = false;
 
-            if (ShadowColor != Vector4.Zero)
+            if (ShadowColor != Color4.Transparent)
             {
                 //Draw with shadows
                 uint offset = indexDrawCount / 2;
@@ -495,7 +494,7 @@ namespace Engine.BuiltIn.UI
 
             TextSize = sentenceDescriptor.GetSize();
 
-            if (ShadowColor != Vector4.Zero)
+            if (ShadowColor != Color4.Transparent)
             {
                 fontMap.MapSentence(
                     parsed,

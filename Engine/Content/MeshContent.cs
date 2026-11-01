@@ -11,7 +11,7 @@ namespace Engine.Content
         /// <summary>
         /// Intial transformation
         /// </summary>
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public CntMatrix4x4 Transform { get; set; } = CntMatrix4x4.Identity;
         /// <summary>
         /// Sub mesh names
         /// </summary>

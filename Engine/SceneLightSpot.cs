@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Spot light
     /// </summary>
@@ -110,7 +109,7 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
-        public SceneLightSpot(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, SceneLightSpotDescription description)
+        public SceneLightSpot(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             Position = description.Position;

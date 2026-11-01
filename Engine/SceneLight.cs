@@ -1,7 +1,7 @@
-﻿namespace Engine
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Scene ligth
     /// </summary>
@@ -16,9 +16,9 @@
         /// <inheritdoc/>
         public bool CastShadowsMarked { get; set; } = false;
         /// <inheritdoc/>
-        public Vector3 DiffuseColor { get; set; }
+        public Color3 DiffuseColor { get; set; }
         /// <inheritdoc/>
-        public Vector3 SpecularColor { get; set; }
+        public Color3 SpecularColor { get; set; }
         /// <inheritdoc/>
         public int ShadowMapIndex { get; set; } = 0;
         /// <inheritdoc/>

@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Minimap description
     /// </summary>
@@ -31,7 +30,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Vector4 BackColor { get; set; } = Vector4.Zero;
+        public Color4 BackColor { get; set; } = Color.Transparent;
         /// <summary>
         /// Minimap render area
         /// </summary>

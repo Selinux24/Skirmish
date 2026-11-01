@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Image
     /// </summary>
@@ -15,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Image pixel colors
         /// </summary>
-        private readonly Vector4[,] colors = new Vector4[width, height];
+        private readonly Color4[,] colors = new Color4[width, height];
 
         /// <summary>
         /// Gets the image width in pixels
@@ -32,7 +31,7 @@ namespace Engine
         /// <param name="width">Width value</param>
         /// <param name="height">Height value</param>
         /// <param name="color">Color value</param>
-        public readonly void SetPixel(int width, int height, Vector3 color)
+        public readonly void SetPixel(int width, int height, Color3 color)
         {
             colors[width, height] = new(color, 1f);
         }
@@ -42,7 +41,7 @@ namespace Engine
         /// <param name="width">Width value</param>
         /// <param name="height">Height value</param>
         /// <param name="color">Color value</param>
-        public readonly void SetPixel(int width, int height, Vector4 color)
+        public readonly void SetPixel(int width, int height, Color4 color)
         {
             colors[width, height] = color;
         }
@@ -51,16 +50,16 @@ namespace Engine
         /// </summary>
         /// <param name="width">Width value</param>
         /// <param name="height">Height value</param>
-        public readonly Vector4 GetPixel(int width, int height)
+        public readonly Color4 GetPixel(int width, int height)
         {
             return colors[width, height];
         }
         /// <summary>
         /// Flattens the image pixel into a one-dimension array
         /// </summary>
-        public readonly IEnumerable<Vector4> Flatten()
+        public readonly IEnumerable<Color4> Flatten()
         {
-            Vector4[] flatColors = new Vector4[Width * Height];
+            Color4[] flatColors = new Color4[Width * Height];
 
             int index = 0;
             for (int h = 0; h < Height; h++)

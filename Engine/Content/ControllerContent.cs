@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using System.Collections.Generic;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Controller content
     /// </summary>

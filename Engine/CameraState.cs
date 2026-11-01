@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; }
+        public CntPosition3 Position { get; set; }
         /// <summary>
         /// Interest
         /// </summary>
-        public Direction3 Interest { get; set; }
+        public CntDirection3 Interest { get; set; }
         /// <summary>
         /// Field of view angle
         /// </summary>
@@ -50,7 +50,7 @@ namespace Engine
         /// <summary>
         /// Velocity vector
         /// </summary>
-        public Direction3 Velocity { get; set; }
+        public CntDirection3 Velocity { get; set; }
         /// <summary>
         /// Isometric axis
         /// </summary>
@@ -63,19 +63,19 @@ namespace Engine
         /// <summary>
         /// Isometric current forward
         /// </summary>
-        public Direction3 IsoMetricForward { get; set; }
+        public CntDirection3 IsoMetricForward { get; set; }
         /// <summary>
         /// Isometric current backward
         /// </summary>
-        public Direction3 IsoMetricBackward { get; set; }
+        public CntDirection3 IsoMetricBackward { get; set; }
         /// <summary>
         /// Isometric current left
         /// </summary>
-        public Direction3 IsoMetricLeft { get; set; }
+        public CntDirection3 IsoMetricLeft { get; set; }
         /// <summary>
         /// Isometric current right
         /// </summary>
-        public Direction3 IsoMetricRight { get; set; }
+        public CntDirection3 IsoMetricRight { get; set; }
         /// <summary>
         /// Translation mode
         /// </summary>
@@ -84,7 +84,7 @@ namespace Engine
         /// <summary>
         /// Translation destination
         /// </summary>
-        public Direction3 TranslationInterest { get; set; }
+        public CntDirection3 TranslationInterest { get; set; }
         /// <summary>
         /// Movement delta
         /// </summary>
@@ -120,15 +120,15 @@ namespace Engine
         /// <summary>
         /// Perspective view matrix
         /// </summary>
-        public Matrix4x4 View { get; set; }
+        public CntMatrix4x4 View { get; set; }
         /// <summary>
         /// Perspective projection matrix
         /// </summary>
-        public Matrix4x4 Projection { get; set; }
+        public CntMatrix4x4 Projection { get; set; }
         /// <summary>
         /// Camera frustum
         /// </summary>
-        public Matrix4x4 Frustum { get; set; }
+        public CntMatrix4x4 Frustum { get; set; }
         /// <summary>
         /// Following object id
         /// </summary>

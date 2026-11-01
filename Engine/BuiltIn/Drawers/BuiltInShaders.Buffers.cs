@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Built-in shaders
     /// </summary>
@@ -75,7 +74,7 @@ namespace Engine.BuiltIn.Drawers
                     ElapsedTime = context.GameTime.ElapsedSeconds,
                     LevelOfDetail = context.LevelOfDetail,
                     ShadowIntensity = context.Lights?.ShadowIntensity ?? 0,
-                    FogColor = context.Lights?.FogColor ?? new(0, 0, 0, 0),
+                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
                     FogStart = context.Lights?.FogStart ?? 0,
                     FogRange = context.Lights?.FogRange ?? 0,
                 };
@@ -167,8 +166,8 @@ namespace Engine.BuiltIn.Drawers
             {
                 return new BufferLightHemispheric
                 {
-                    AmbientDown = light?.AmbientDown ?? new(0, 0, 0),
-                    AmbientUp = light?.AmbientUp ?? new(0, 0, 0),
+                    AmbientDown = light?.AmbientDown ?? Color3.Black,
+                    AmbientUp = light?.AmbientUp ?? Color3.Black,
                 };
             }
 

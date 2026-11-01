@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Flares
 {
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Lens flare
     /// </summary>
@@ -195,7 +194,7 @@ namespace Engine.BuiltIn.Components.Flares
                 var flareSpritePos = lightProjectedPosition + lightProjectedDirection * flare.Distance;
 
                 // Set the flare alpha based on the angle with view and light directions.
-                flare.FlareSprite.BaseColor = new Vector4(flare.Color.RGB, 0.5f * transparency);
+                flare.FlareSprite.BaseColor = new(flare.Color, 0.5f * transparency);
                 flare.FlareSprite.Scale = flareScale;
                 flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                 flare.FlareSprite.Update(context);

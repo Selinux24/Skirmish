@@ -1,10 +1,9 @@
-﻿
+﻿using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Geometry
 {
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry drawer description
     /// </summary>
@@ -25,7 +24,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = new(0f, 0f, 0f, 1f);
+        public Color4 TintColor { get; set; } = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// Texture index
         /// </summary>

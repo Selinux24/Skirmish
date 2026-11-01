@@ -1,4 +1,16 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using Engine.PathFinding.AStar;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,20 +19,6 @@ using TerrainSamples.SceneGrid.Rules.Enum;
 
 namespace TerrainSamples.SceneGrid
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using Engine.PathFinding.AStar;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     public class GridScene : WalkableScene
     {
         private const string resourcesLocalUI = "SceneGrid/Resources";
@@ -79,8 +77,8 @@ namespace TerrainSamples.SceneGrid
         private readonly float soldierAssaultSpeed = 6f;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
-        private readonly Vector4 bsphColor = new(Color.LightYellow.RGB(), 0.25f);
-        private readonly Vector4 frstColor = new(Color.Yellow.RGB(), 1f);
+        private readonly Color4 bsphColor = new(Color.LightYellow, 0.25f);
+        private readonly Color4 frstColor = new(Color.Yellow, 1f);
         private readonly int bsphSlices = 50;
         private readonly int bsphStacks = 25;
 
@@ -137,7 +135,7 @@ namespace TerrainSamples.SceneGrid
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
         }
 
         public override void Initialize()
@@ -149,8 +147,8 @@ namespace TerrainSamples.SceneGrid
             spotLight = new SceneLightSpot(
                 "Current soldier",
                 false,
-                Color.White.RGB(),
-                Color.White.RGB(),
+                Color.White,
+                Color.White,
                 true,
                 SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 
@@ -194,30 +192,30 @@ namespace TerrainSamples.SceneGrid
             buttonsFont.ContentPath = resourcesFonts;
 
             txtTitle = await AddComponentUI<UITextArea, UITextAreaDescription>("txtTitle", "txtTitle", UITextAreaDescription.Default(titleFont), LayerUI + 1);
-            txtTitle.TextForeColor = Color.White.RGBA();
-            txtTitle.TextShadowColor = Color.Gray.RGBA();
+            txtTitle.TextForeColor = Color.White;
+            txtTitle.TextShadowColor = Color.Gray;
 
             txtGame = await AddComponentUI<UITextArea, UITextAreaDescription>("txtGame", "txtGame", UITextAreaDescription.Default(gameFont), LayerUI);
-            txtGame.TextForeColor = Color.LightBlue.RGBA();
-            txtGame.TextShadowColor = Color.DarkBlue.RGBA();
+            txtGame.TextForeColor = Color.LightBlue;
+            txtGame.TextShadowColor = Color.DarkBlue;
 
             txtTeam = await AddComponentUI<UITextArea, UITextAreaDescription>("txtTeam", "txtTeam", UITextAreaDescription.Default(textFont), LayerUI);
-            txtTeam.TextForeColor = Color.Yellow.RGBA();
+            txtTeam.TextForeColor = Color.Yellow;
 
             txtSoldier = await AddComponentUI<UITextArea, UITextAreaDescription>("txtSoldier", "txtSoldier", UITextAreaDescription.Default(textFont), LayerUI);
-            txtSoldier.TextForeColor = Color.Yellow.RGBA();
+            txtSoldier.TextForeColor = Color.Yellow;
 
             txtActionList = await AddComponentUI<UITextArea, UITextAreaDescription>("txtActionList", "txtActionList", UITextAreaDescription.Default(textFont), LayerUI);
-            txtActionList.TextForeColor = Color.Yellow.RGBA();
+            txtActionList.TextForeColor = Color.Yellow;
 
             txtAction = await AddComponentUI<UITextArea, UITextAreaDescription>("txtAction", "txtAction", UITextAreaDescription.Default(textFont), LayerUI);
-            txtAction.TextForeColor = Color.Yellow.RGBA();
+            txtAction.TextForeColor = Color.Yellow;
 
             var butCloseDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, buttonOnString, buttonOffString);
             butCloseDesc.ContentPath = resourcesLocalUI;
             butCloseDesc.Width = 60;
             butCloseDesc.Height = 20;
-            butCloseDesc.TextForeColor = Color.Yellow.RGBA();
+            butCloseDesc.TextForeColor = Color.Yellow;
             butCloseDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             butCloseDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             butCloseDesc.Text = "Exit";
@@ -236,7 +234,7 @@ namespace TerrainSamples.SceneGrid
                 Text = "Next Phase",
             };
             butNext = await AddComponentUI<UIButton, UIButtonDescription>("butNext", "butNext", butNextDesc, LayerUI);
-            butNext.Caption.TextForeColor = Color.Yellow.RGBA();
+            butNext.Caption.TextForeColor = Color.Yellow;
 
             var butPrevSoldierDesc = new UIButtonDescription()
             {
@@ -250,7 +248,7 @@ namespace TerrainSamples.SceneGrid
                 Text = "Prev.Soldier",
             };
             butPrevSoldier = await AddComponentUI<UIButton, UIButtonDescription>("butPrevSoldier", "butPrevSoldier", butPrevSoldierDesc, LayerUI);
-            butPrevSoldier.Caption.TextForeColor = Color.Yellow.RGBA();
+            butPrevSoldier.Caption.TextForeColor = Color.Yellow;
 
             var butNextSoldierDesc = new UIButtonDescription()
             {
@@ -264,7 +262,7 @@ namespace TerrainSamples.SceneGrid
                 Text = "Next Soldier",
             };
             butNextSoldier = await AddComponentUI<UIButton, UIButtonDescription>("butNextSoldier", "butNextSoldier", butNextSoldierDesc, LayerUI);
-            butNextSoldier.Caption.TextForeColor = Color.Yellow.RGBA();
+            butNextSoldier.Caption.TextForeColor = Color.Yellow;
 
             var butPrevActionDesc = new UIButtonDescription()
             {
@@ -278,7 +276,7 @@ namespace TerrainSamples.SceneGrid
                 Text = "Prev.Action",
             };
             butPrevAction = await AddComponentUI<UIButton, UIButtonDescription>("butPrevAction", "butPrevAction", butPrevActionDesc, LayerUI);
-            butPrevAction.Caption.TextForeColor = Color.Yellow.RGBA();
+            butPrevAction.Caption.TextForeColor = Color.Yellow;
 
             var butNextActionDesc = new UIButtonDescription()
             {
@@ -292,7 +290,7 @@ namespace TerrainSamples.SceneGrid
                 Text = "Next Action",
             };
             butNextAction = await AddComponentUI<UIButton, UIButtonDescription>("butNextAction", "butNextAction", butNextActionDesc, LayerUI);
-            butNextAction.Caption.TextForeColor = Color.Yellow.RGBA();
+            butNextAction.Caption.TextForeColor = Color.Yellow;
 
             butClose.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) Game.SetScene<SceneStart.StartScene>(); };
             butNext.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextPhase(); };
@@ -321,7 +319,7 @@ namespace TerrainSamples.SceneGrid
                 Left = (int)q.X,
                 Width = minimapWidth,
                 Height = minimapHeight,
-                BackColor = Color.LightSlateGray.RGBA(),
+                BackColor = Color.LightSlateGray,
             };
 
             minimap = await AddComponentUI<UIMinimap, UIMinimapDescription>("Minimap", "Minimap", minimapDesc, LayerUI + 10);

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Content.FmtCollada.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Common;
-    using Engine.Content.FmtCollada.Types;
     using Engine.Mathematics;
 
     /// <summary>
@@ -546,7 +546,7 @@ namespace Engine.Content.FmtCollada.Fmt
             if (colorsInput != null)
             {
                 int cIndex = indices[index + colorsInput.Offset];
-                vert.Color = new Vector4(colors[cIndex], 1);
+                vert.Color = new Color4(colors[cIndex], 1);
             }
 
             return vert;

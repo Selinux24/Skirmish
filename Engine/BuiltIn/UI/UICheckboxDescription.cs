@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Checkbox description
     /// </summary>
@@ -21,7 +20,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="colorOn">State on color</param>
         /// <param name="colorOff">State off color</param>
-        public static UICheckboxDescription Default(Vector4 colorOn, Vector4 colorOff)
+        public static UICheckboxDescription Default(Color4 colorOn, Color4 colorOff)
         {
             return new()
             {
@@ -40,8 +39,8 @@ namespace Engine.BuiltIn.UI
             {
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Vector4.One,
-                StateOffColor = Vector4.One,
+                StateOnColor = Color.White,
+                StateOffColor = Color.White,
             };
         }
         /// <summary>
@@ -59,15 +58,15 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Vector4.One,
-                StateOffColor = Vector4.One,
+                StateOnColor = Color.White,
+                StateOffColor = Color.White,
             };
         }
         /// <summary>
         /// Gets the default checkbox description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UICheckboxDescription Default(Engine.UI.FontDescription font)
+        public static UICheckboxDescription Default(FontDescription font)
         {
             return new()
             {
@@ -80,7 +79,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="colorOn">State on color</param>
         /// <param name="colorOff">State off color</param>
-        public static UICheckboxDescription Default(Engine.UI.FontDescription font, Vector4 colorOn, Vector4 colorOff)
+        public static UICheckboxDescription Default(FontDescription font, Color4 colorOn, Color4 colorOff)
         {
             return new()
             {
@@ -95,15 +94,15 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="stateOnTextureFileName">State on texture file name</param>
         /// <param name="stateOffTextureFileName">State off texture file name</param>
-        public static UICheckboxDescription Default(Engine.UI.FontDescription font, string stateOnTextureFileName, string stateOffTextureFileName)
+        public static UICheckboxDescription Default(FontDescription font, string stateOnTextureFileName, string stateOffTextureFileName)
         {
             return new()
             {
                 Font = font,
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Vector4.One,
-                StateOffColor = Vector4.One,
+                StateOnColor = Color.White,
+                StateOffColor = Color.White,
             };
         }
         /// <summary>
@@ -114,7 +113,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="stateOnTextureRect">State on texture rectangle</param>
         /// <param name="stateOffTextureFileName">State off texture file name</param>
         /// <param name="stateOffTextureRect">State off texture rectangle</param>
-        public static UICheckboxDescription Default(Engine.UI.FontDescription font, string stateOnTextureFileName, Vector4 stateOnTextureRect, string stateOffTextureFileName, Vector4 stateOffTextureRect)
+        public static UICheckboxDescription Default(FontDescription font, string stateOnTextureFileName, Vector4 stateOnTextureRect, string stateOffTextureFileName, Vector4 stateOffTextureRect)
         {
             return new()
             {
@@ -123,15 +122,15 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Vector4.One,
-                StateOffColor = Vector4.One,
+                StateOnColor = Color.White,
+                StateOffColor = Color.White,
             };
         }
 
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
@@ -140,11 +139,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
+        public Color4 TextShadowColor { get; set; } = Color.Transparent;
         /// <summary>
         /// Shadow position delta
         /// </summary>
@@ -165,7 +164,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// State on button color
         /// </summary>
-        public Vector4 StateOnColor { get; set; } = UIConfiguration.HighlightColor;
+        public Color4 StateOnColor { get; set; } = UIConfiguration.HighlightColor;
         /// <summary>
         /// State on texture UV map
         /// </summary>
@@ -178,7 +177,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// State off button color
         /// </summary>
-        public Vector4 StateOffColor { get; set; } = UIConfiguration.BaseColor;
+        public Color4 StateOffColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// State off texture UV map
         /// </summary>

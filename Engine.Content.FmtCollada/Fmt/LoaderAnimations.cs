@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.Content.FmtCollada.Types;
+using Engine.Content.Persistence;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Animation;
-    using Engine.Content.FmtCollada.Types;
-    using Engine.Content.Persistence;
     using Engine.Mathematics;
 
     /// <summary>

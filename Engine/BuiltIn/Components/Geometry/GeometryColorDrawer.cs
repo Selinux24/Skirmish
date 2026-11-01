@@ -2,6 +2,7 @@
 using Engine.BuiltIn.Drawers.Forward;
 using Engine.BuiltIn.Format;
 using Engine.Common;
+using Engine.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry color list drawer
     /// </summary>
@@ -135,7 +134,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitive">Primitive</param>
-        public void SetPrimitives(Vector4 color, T primitive)
+        public void SetPrimitives(Color4 color, T primitive)
         {
             SetPrimitives(color, [primitive]);
         }
@@ -144,7 +143,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitives">Primitives list</param>
-        public void SetPrimitives(Vector4 color, IEnumerable<T> primitives)
+        public void SetPrimitives(Color4 color, IEnumerable<T> primitives)
         {
             if (primitives?.Any() ?? false)
             {
@@ -176,7 +175,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Set primitives list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void SetPrimitives(IDictionary<Vector4, IEnumerable<T>> primitivesDict)
+        public void SetPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -188,7 +187,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitive">primitive</param>
-        public void AddPrimitives(Vector4 color, T primitive)
+        public void AddPrimitives(Color4 color, T primitive)
         {
             AddPrimitives(color, [primitive]);
         }
@@ -197,7 +196,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="primitives">Primitives list</param>
-        public void AddPrimitives(Vector4 color, IEnumerable<T> primitives)
+        public void AddPrimitives(Color4 color, IEnumerable<T> primitives)
         {
             if (!dictionary.ContainsKey(color))
             {
@@ -212,7 +211,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Add primitives to list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void AddPrimitives(IDictionary<Vector4, IEnumerable<T>> primitivesDict)
+        public void AddPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -223,7 +222,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Add primitives to list
         /// </summary>
         /// <param name="primitivesEnum">Primitives by color enumerable</param>
-        public void AddPrimitives(IEnumerable<(Vector4, IEnumerable<T>)> primitivesEnum)
+        public void AddPrimitives(IEnumerable<(Color4, IEnumerable<T>)> primitivesEnum)
         {
             foreach (var primitive in primitivesEnum)
             {
@@ -234,7 +233,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Remove by color
         /// </summary>
         /// <param name="color">Color</param>
-        public void Clear(Vector4 color)
+        public void Clear(Color4 color)
         {
             if (dictionary.ContainsKey(color))
             {

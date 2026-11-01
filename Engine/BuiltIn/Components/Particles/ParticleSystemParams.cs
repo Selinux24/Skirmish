@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particle system dynamic parameters
     /// </summary>
@@ -165,11 +164,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public Vector4 MinColor { get; set; }
+        public Color4 MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public Vector4 MaxColor { get; set; }
+        public Color4 MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed

@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.Mathematics;
+using Engine.Physics;
+using System.Collections.Generic;
 
 namespace PhysicsSamples.ScenePhysics
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Color = System.Drawing.Color;
-
     class ColliderData(RigidBodyState rbState, Model model)
     {
         private readonly RigidBodyState rbState = rbState;
@@ -24,7 +22,7 @@ namespace PhysicsSamples.ScenePhysics
             Model.Manipulator.SetTransform(rbState.InitialTransform);
 
             float radius = Model.GetBoundingSphere().Radius * 3f;
-            Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB, Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
+            Light = new SceneLightPoint(Model.Name, true, (Color3)Model.TintColor, Color.Yellow, true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
         }
 
         public void UpdateBodyState(float elapsed, float bodyTime, float bodyDistance)
@@ -43,7 +41,7 @@ namespace PhysicsSamples.ScenePhysics
 
         public void SetLines(GeometryColorDrawer<Line3D> lineDrawer)
         {
-            lineDrawer.SetPrimitives(Vector4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
         }
 
         public void Reset()

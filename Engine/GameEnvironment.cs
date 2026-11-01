@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Global variables 
     /// </summary>
@@ -26,7 +25,7 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public Vector4 Background { get; set; } = new(0f, 0f, 0f, 1f);
+        public Color4 Background { get; set; } = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// Gravity
         /// </summary>

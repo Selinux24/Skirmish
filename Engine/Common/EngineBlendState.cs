@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
     using BlendState = Vortice.Direct3D11.ID3D11BlendState1;
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace Engine.Common
         /// <summary>
         /// Blend factor
         /// </summary>
-        public Vector4 BlendFactor { get; set; }
+        public Color4 BlendFactor { get; set; }
         /// <summary>
         /// Sample mask
         /// </summary>

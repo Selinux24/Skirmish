@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Slider description
     /// </summary>
@@ -49,7 +48,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Bar colors
         /// </summary>
-        public Vector4[] BarColors { get; set; } = [UIConfiguration.BaseColor, UIConfiguration.BaseColor];
+        public Color4[] BarColors { get; set; } = [UIConfiguration.BaseColor, UIConfiguration.BaseColor];
         /// <summary>
         /// Range values array
         /// </summary>
@@ -58,7 +57,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Selector colors
         /// </summary>
-        public Vector4[] SelectorColors { get; set; } = [UIConfiguration.HighlightColor];
+        public Color4[] SelectorColors { get; set; } = [UIConfiguration.HighlightColor];
         /// <summary>
         /// Selector height
         /// </summary>

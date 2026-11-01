@@ -1,17 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneAnimationParts
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     class AnimationPartsScene : Scene
     {
         private const string resourcesLeopardFolder = "Common/Leopard/";
@@ -28,12 +26,12 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Vector4 sphTrisColor = new(Color.Red.RGB(), 0.25f);
-        private readonly Vector4 sphLinesColor = new(Color.Red.RGB(), 1f);
-        private readonly Vector4 boxTrisColor = new(Color.Green.RGB(), 0.25f);
-        private readonly Vector4 boxLinesColor = new(Color.Green.RGB(), 1f);
-        private readonly Vector4 obbTrisColor = new(Color.Blue.RGB(), 0.25f);
-        private readonly Vector4 obbLinesColor = new(Color.Blue.RGB(), 1f);
+        private readonly Color4 sphTrisColor = new(Color.Red, 0.25f);
+        private readonly Color4 sphLinesColor = new(Color.Red, 1f);
+        private readonly Color4 boxTrisColor = new(Color.Green, 0.25f);
+        private readonly Color4 boxLinesColor = new(Color.Green, 1f);
+        private readonly Color4 obbTrisColor = new(Color.Blue, 0.25f);
+        private readonly Color4 obbLinesColor = new(Color.Blue, 1f);
 
         private Model tank;
 
@@ -50,7 +48,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override void Initialize()
@@ -72,11 +70,11 @@ namespace IntermediateSamples.SceneAnimationParts
         {
             var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new(0.35f, 0.35f, 0.35f, 1f));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
@@ -184,7 +182,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             BoundingBox bbox = tank.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

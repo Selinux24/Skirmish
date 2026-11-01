@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public ColorRgba Background { get; set; }
+        public CntColor Background { get; set; }
         /// <summary>
         /// Gravity
         /// </summary>
-        public Direction3 Gravity { get; set; }
+        public CntDirection3 Gravity { get; set; }
 
         /// <summary>
         /// Maximum distance for high level of detail models

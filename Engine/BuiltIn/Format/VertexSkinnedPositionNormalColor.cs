@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Skinned position normal color vertex format
     /// </summary>
@@ -49,7 +48,7 @@ namespace Engine.BuiltIn.Format
 
                 var p = v.Position ?? Vector3.Zero;
                 var n = v.Normal ?? Vector3.Zero;
-                var c = v.Color ?? new(1, 1, 1, 1);
+                var c = v.Color ?? Color4.White;
 
                 var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
                 int vwCount = vw?.Length ?? 0;

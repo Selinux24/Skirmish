@@ -1,19 +1,17 @@
-﻿using Logger;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using Logger;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneTransforms
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     public class TransformsScene : Scene
     {
         private const float s = 10f;
@@ -49,7 +47,7 @@ namespace IntermediateSamples.SceneTransforms
             Game.LockMouse = true;
 #endif
 
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override void Initialize()
@@ -73,17 +71,17 @@ namespace IntermediateSamples.SceneTransforms
             var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
             var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
-            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange.RGBA(), MaxTextLength = 256 });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange, MaxTextLength = 256 });
 
             title.Text = "Transforms";
             runtime.Text = "";
             messages.Text = "";
 
-            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Vector4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
@@ -167,7 +165,7 @@ namespace IntermediateSamples.SceneTransforms
             var geom = GeometryUtil.CreateSphere(Topology.TriangleList, radius, sliceCount, stackCount);
 
             var mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseColor = Color.White.RGBA();
+            mat.DiffuseColor = Color.White;
 
             var desc = new ModelInstancedDescription()
             {
@@ -186,11 +184,11 @@ namespace IntermediateSamples.SceneTransforms
 
             for (int i = 0; i < 5; i++)
             {
-                markers[i].TintColor = Color.Yellow.RGBA();
+                markers[i].TintColor = Color.Yellow;
             }
 
             marker = markers[5];
-            marker.TintColor = Color.Red.RGBA();
+            marker.TintColor = Color.Red;
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -214,7 +212,7 @@ namespace IntermediateSamples.SceneTransforms
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 1000;

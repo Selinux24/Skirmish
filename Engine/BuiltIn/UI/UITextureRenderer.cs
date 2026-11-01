@@ -1,15 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Sprites;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Sprites;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Render to texture control
     /// </summary>
@@ -127,7 +126,7 @@ namespace Engine.BuiltIn.UI
             spriteDrawer.UpdateSprite(dc, new BuiltInSpriteState
             {
                 Local = Manipulator.LocalTransform,
-                Color1 = Vector4.One,
+                Color1 = Color.White,
                 Texture = Texture,
                 TextureIndex = TextureIndex,
                 Channel = Channel,

@@ -1,19 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.Common;
+using Engine.Mathematics;
+using Engine.Modular;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneModularDungeon
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.Modular;
-    using Engine.PathFinding;
-    using Engine.PathFinding.RecastNavigation;
-    using Color = System.Drawing.Color;
-
     internal class DebugDrawers(Scene scene, string id, string name) : BaseSceneObject<SceneObjectDescription>(scene, id, name)
     {
         private GeometryColorDrawer<Line3D> bboxesDrawer = null;
@@ -22,8 +20,8 @@ namespace TerrainSamples.SceneModularDungeon
         private GeometryColorDrawer<Triangle> obstacleDrawer = null;
         private GeometryColorDrawer<Line3D> connectionDrawer = null;
 
-        private readonly Vector4 connectionColor = new(Color.LightBlue.RGB(), 1f);
-        private readonly Vector4 obstacleColor = new(Color.Pink.RGB(), 0.5f);
+        private readonly Color4 connectionColor = new(Color.LightBlue, 1f);
+        private readonly Color4 obstacleColor = new(Color.Pink, 0.5f);
 
         private Player[] agents;
         private int currentAgentIndex = 0;
@@ -93,13 +91,13 @@ namespace TerrainSamples.SceneModularDungeon
             bboxesDrawer.Clear();
 
             //Objects
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance.GetBoundingBox()), Color.PaleVioletRed.RGBA());
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance.GetBoundingBox()), Color.ForestGreen.RGBA());
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance.GetBoundingBox()), Color.Cyan.RGBA());
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow.RGBA());
-            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple.RGBA());
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance.GetBoundingBox()), Color.PaleVioletRed);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance.GetBoundingBox()), Color.ForestGreen);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance.GetBoundingBox()), Color.Cyan);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow);
+            DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple);
         }
-        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Vector4 color)
+        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color4 color)
         {
             if (!boxes.Any())
             {
@@ -113,7 +111,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var frustum = Line3D.CreateFrustum(camera.Frustum);
 
-            bboxesDrawer.SetPrimitives(Color.White.RGBA(), frustum);
+            bboxesDrawer.SetPrimitives(Color.White, frustum);
         }
         public void DrawObstacles(IEnumerable<ObstacleInfo> obstacles)
         {
@@ -174,7 +172,7 @@ namespace TerrainSamples.SceneModularDungeon
             graphDrawer.Clear();
             graphDrawer.SetPrimitives(nodes);
         }
-        private static Dictionary<Vector4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
+        private static Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
         {
             var nodes = scene.GetNodes(agent).OfType<GraphNode>();
             if (!nodes.Any())
@@ -182,11 +180,11 @@ namespace TerrainSamples.SceneModularDungeon
                 return [];
             }
 
-            Dictionary<Vector4, IEnumerable<Triangle>> res = [];
+            Dictionary<Color4, IEnumerable<Triangle>> res = [];
 
             foreach (var node in nodes)
             {
-                var color = ColorExtensions.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
                 if (!res.TryGetValue(color, out var value))
@@ -211,7 +209,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var bbox = model.GetBoundingBox();
 
-            modelDrawer.SetPrimitives(Color.White.RGBA(), Line3D.CreateBox(bbox));
+            modelDrawer.SetPrimitives(Color.White, Line3D.CreateBox(bbox));
         }
         public void DrawPath(PathFindingPath path)
         {
@@ -220,7 +218,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            modelDrawer.SetPrimitives(Color.Red.RGBA(), Line3D.CreateLineList(path.Positions));
+            modelDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.Positions));
         }
 
         public void ToggleConnections()

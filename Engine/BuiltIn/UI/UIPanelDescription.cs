@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Panel description
     /// </summary>
@@ -23,7 +22,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default panel description
         /// </summary>
         /// <param name="color">Tint color</param>
-        public static UIPanelDescription Default(Vector4 color)
+        public static UIPanelDescription Default(Color4 color)
         {
             return new()
             {
@@ -61,7 +60,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="color">Tint color</param>
-        public static UIPanelDescription Screen(Scene scene, Vector4 color)
+        public static UIPanelDescription Screen(Scene scene, Color4 color)
         {
             return new()
             {

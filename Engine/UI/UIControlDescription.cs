@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// User interface control description
     /// </summary>
@@ -47,11 +46,11 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        public Vector4 BaseColor { get; set; } = UIConfiguration.BaseColor;
+        public Color4 BaseColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = Vector4.One;
+        public Color4 TintColor { get; set; } = Color.White;
         /// <summary>
         /// Events enabled
         /// </summary>

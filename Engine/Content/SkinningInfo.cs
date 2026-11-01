@@ -11,7 +11,7 @@ namespace Engine.Content
         /// <summary>
         /// Bind shape matrix
         /// </summary>
-        public Matrix4x4 BindShapeMatrix { get; set; }
+        public CntMatrix4x4 BindShapeMatrix { get; set; }
         /// <summary>
         /// Weight list
         /// </summary>

@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Minimap description
     /// </summary>
@@ -21,7 +20,7 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
         /// <summary>
@@ -38,7 +37,7 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
         /// <summary>
@@ -54,7 +53,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
         /// <summary>
@@ -72,7 +71,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
         /// <summary>
@@ -91,7 +90,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
         /// <summary>
@@ -112,7 +111,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Vector4.One,
+                BaseColor = Color.White,
             };
         }
 

@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix4x4 InitialTransform { get; set; }
+        public CntMatrix4x4 InitialTransform { get; set; }
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -22,11 +22,11 @@ namespace Engine
         /// <summary>
         /// Ligth position
         /// </summary>
-        public Position3 Position { get; set; }
+        public CntPosition3 Position { get; set; }
         /// <summary>
         /// Ligth direction
         /// </summary>
-        public Position3 Direction { get; set; }
+        public CntPosition3 Direction { get; set; }
         /// <summary>
         /// Cone angle in degrees
         /// </summary>
@@ -46,6 +46,6 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public Matrix4x4[] FromLightVP { get; set; }
+        public CntMatrix4x4[] FromLightVP { get; set; }
     }
 }

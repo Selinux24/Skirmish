@@ -1,4 +1,15 @@
-﻿using System;
+﻿using AISamples.Common;
+using AISamples.Common.Agents;
+using AISamples.Common.Primitives;
+using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,19 +17,6 @@ using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRSelfDrivingCar
 {
-    using AISamples.Common;
-    using AISamples.Common.Agents;
-    using AISamples.Common.Primitives;
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     /// <summary>
     /// Coding with Radu scene
     /// </summary>
@@ -81,15 +79,15 @@ ESC - EXIT";
         private const int maxCarInstances = 10;
         private const int maxTrafficInstances = 3;
 
-        private readonly Vector4 carColor = new(0.1f, 0.1f, 0.6f, 0.2f);
-        private readonly Vector4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
-        private readonly Vector4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
-        private readonly Vector4 carSensorColor = Color.Yellow.RGBA();
-        private readonly Vector4 carSensorContactColor = Color.OrangeRed.RGBA();
+        private readonly Color4 carColor = new(0.1f, 0.1f, 0.6f, 0.2f);
+        private readonly Color4 carTrafficColor = new(0.6f, 0.1f, 0.1f, 1f);
+        private readonly Color4 carDamagedColor = new(0.5f, 0.5f, 0.5f, 1f);
+        private readonly Color4 carSensorColor = Color.Yellow;
+        private readonly Color4 carSensorContactColor = Color.OrangeRed;
 
         private readonly Road road = new(0, 20, 3, spaceSize * 0.5f);
-        private readonly Vector4 roadColor = Color.DarkGray.RGBA();
-        private readonly Vector4 roadLaneColor = Color.WhiteSmoke.RGBA();
+        private readonly Color4 roadColor = Color.DarkGray;
+        private readonly Color4 roadLaneColor = Color.WhiteSmoke;
 
         private bool followCar = true;
         private readonly AgentFollower carFollower = new(100, 50);
@@ -99,9 +97,9 @@ ESC - EXIT";
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
 
-            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color.White.RGB(), Color.Black.RGB(), true));
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color.White, Color.Black, true));
         }
 
         public override void Initialize()
@@ -132,19 +130,19 @@ ESC - EXIT";
         {
             var defaultFont18 = FontDescription.FromFamily(fontFamily, 18);
 
-            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA() });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = titleText;
 
-            var spDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.66f));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
         }
         private async Task InitializeTexts()
         {
             var defaultFont11 = FontDescription.FromFamily(fontFamily, 11);
 
-            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
-            brain = await AddComponentUI<UITextArea, UITextAreaDescription>("Brain", "Brain", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow.RGBA(), MaxTextLength = 256 });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
+            brain = await AddComponentUI<UITextArea, UITextAreaDescription>("Brain", "Brain", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
 
             runtimeText.Text = "";
             info.Text = infoText;
@@ -481,7 +479,7 @@ ESC - EXIT";
                 UpdateCar(gameTime, cars[i], carModels[i], traffic, false, carColor);
             }
         }
-        private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, bool damageTraffic, Vector4 color)
+        private void UpdateCar(IGameTime gameTime, Car car, ModelInstance carModel, Car[] tr, bool damageTraffic, Color4 color)
         {
             if (car.Damaged)
             {
@@ -493,7 +491,7 @@ ESC - EXIT";
             carModel.Manipulator.SetTransform(car.GetTransform());
 
             bool isBestCar = car == bestCar;
-            var betColor = isBestCar ? new(color.RGB, 1f) : color;
+            var betColor = isBestCar ? new((Color3)color, 1f) : color;
             carModel.TintColor = car.Damaged ? carDamagedColor : betColor;
 
             if (!isBestCar)
@@ -554,7 +552,7 @@ ESC - EXIT";
 
             sensorDrawer.AddPrimitives(rayList ?? []);
         }
-        private IEnumerable<(Vector4, Line3D)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
+        private IEnumerable<(Color4, Line3D)> DrawSensorRay(Segment2 r, float height, SensorReading[] readings)
         {
             var p0 = new Vector3(r.P1.X, height + 0.5f, r.P1.Y);
             var p1 = new Vector3(r.P2.X, height + 0.5f, r.P2.Y);

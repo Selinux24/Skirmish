@@ -1,11 +1,10 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sprite scroll bar
     /// </summary>
@@ -24,7 +23,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Base color
         /// </summary>
-        private Vector4 baseColor;
+        private Color4 baseColor;
 
         /// <summary>
         /// Scroll mode
@@ -41,7 +40,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the progress color
         /// </summary>
-        public Vector4 MarkerColor
+        public Color4 MarkerColor
         {
             get
             {
@@ -53,7 +52,7 @@ namespace Engine.BuiltIn.UI
             }
         }
         /// <inheritdoc/>
-        public override Vector4 BaseColor
+        public override Color4 BaseColor
         {
             get
             {

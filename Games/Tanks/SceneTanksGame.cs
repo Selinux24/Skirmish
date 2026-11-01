@@ -1,26 +1,24 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Tween;
+using Engine.UI;
+using Engine.UI.Tween;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Tanks
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Decals;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Tween;
-    using Engine.UI;
-    using Engine.UI.Tween;
-    using Color = System.Drawing.Color;
-
     /// <summary>
     /// Tanks game scene
     /// </summary>
@@ -46,8 +44,8 @@ namespace Tanks
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
-        private readonly Vector4 gameMessageForeColor = Color.Yellow.RGBA();
-        private readonly Vector4 gameMessageShadowColor = Color.Yellow.RGBA() * 0.5f;
+        private readonly Color4 gameMessageForeColor = Color.Yellow;
+        private readonly Color4 gameMessageShadowColor = Color.Yellow * 0.5f;
         private UITextArea gameKeyHelp;
 
         private UIPanel dialog;
@@ -86,9 +84,9 @@ namespace Tanks
         private UITextArea keyPitchDownText;
 
         private UIProgressBar pbFire;
-        private readonly Vector4 pbFireBaseColor = Color.Yellow.RGBA();
-        private readonly Vector4 pbFireHBaseColor = Color.Red.RGBA();
-        private readonly Vector4 pbFireProgressColor = new(Color.Yellow.RGB(), 0.9f);
+        private readonly Color4 pbFireBaseColor = Color.Yellow;
+        private readonly Color4 pbFireHBaseColor = Color.Red;
+        private readonly Color4 pbFireProgressColor = new(Color.Yellow, 0.9f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -121,8 +119,8 @@ namespace Tanks
         private ParticleManager particleManager = null;
         private readonly float explosionDurationSeconds = 0.5f;
         private readonly float shotDurationSeconds = 0.2f;
-        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow.RGB(), Color.Yellow.RGB());
-        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow.RGB(), Color.Yellow.RGB());
+        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow, Color.Yellow);
+        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow, Color.Yellow);
 
         private bool shooting = false;
         private bool gameEnding = false;
@@ -158,7 +156,7 @@ namespace Tanks
         }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.Black.RGBA();
+            GameEnvironment.Background = Color.Black;
 
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -202,21 +200,21 @@ namespace Tanks
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color.Black.RGBA() * 0.3333f), LayerUIEffects);
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
             loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            loadingText.TextForeColor = Color.Yellow.RGBA();
-            loadingText.TextShadowColor = Color.Orange.RGBA();
+            loadingText.TextForeColor = Color.Yellow;
+            loadingText.TextShadowColor = Color.Orange;
             loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
             loadingText.TextVerticalAlign = TextVerticalAlign.Middle;
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
             loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            loadingBar.ProgressColor = Color.CornflowerBlue.RGBA();
-            loadingBar.BaseColor = Color.Yellow.RGBA();
-            loadingBar.Caption.TextForeColor = Color.Black.RGBA();
+            loadingBar.ProgressColor = Color.CornflowerBlue;
+            loadingBar.BaseColor = Color.Yellow;
+            loadingBar.Caption.TextForeColor = Color.Black;
             loadingBar.Caption.Text = "0%";
             loadingBar.ProgressValue = 0;
             loadingBar.Visible = false;
@@ -230,7 +228,7 @@ namespace Tanks
 
             UpdateLayoutLoadingUI();
 
-            fadePanel.BaseColor = Color.Black.RGBA();
+            fadePanel.BaseColor = Color.Black;
             fadePanel.Visible = true;
 
             await Task.Delay(1000);
@@ -298,7 +296,7 @@ namespace Tanks
             gameMessage.Visible = false;
 
             gameKeyHelp = await AddComponentUI<UITextArea, UITextAreaDescription>("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
-            gameKeyHelp.TextForeColor = Color.Yellow.RGBA();
+            gameKeyHelp.TextForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to begin a new game, or escape to exit";
             gameKeyHelp.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameKeyHelp.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -307,14 +305,14 @@ namespace Tanks
         }
         private async Task InitializeUIModalDialog()
         {
-            var descPan = UIPanelDescription.Default(Color.DarkGreen.RGBA());
+            var descPan = UIPanelDescription.Default(Color.DarkGreen);
             descPan.BlendMode = BlendModes.OpaqueTransparent;
             dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
             var font = FontDescription.FromFile(fontFilename, 20, true);
 
-            Vector4 releasedColor = new((Color.DarkGray.RGB() * 0.6666f), 1f);
-            Vector4 pressedColor = new((Color.DarkGray.RGB() * 0.7777f), 1f);
+            Color4 releasedColor = new(Color.DarkGray * 0.6666f, 1f);
+            Color4 pressedColor = new(Color.DarkGray * 0.7777f, 1f);
             var descButton = UIButtonDescription.DefaultTwoStateButton(font, releasedColor, pressedColor);
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -354,9 +352,9 @@ namespace Tanks
             player1Points.Visible = false;
 
             player1Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
-            player1Life.ProgressColor = Color.DarkRed.RGBA();
+            player1Life.ProgressColor = Color.DarkRed;
             player1Life.BaseColor = player1Status.Color;
-            player1Life.Caption.TextForeColor = Color.White.RGBA();
+            player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
@@ -375,28 +373,28 @@ namespace Tanks
             player2Points.Visible = false;
 
             player2Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
-            player2Life.ProgressColor = Color.DarkRed.RGBA();
+            player2Life.ProgressColor = Color.DarkRed;
             player2Life.BaseColor = player2Status.Color;
-            player2Life.Caption.TextForeColor = Color.White.RGBA();
+            player2Life.Caption.TextForeColor = Color.White;
             player2Life.Caption.Text = "0%";
             player2Life.Visible = false;
         }
         private async Task InitializeUITurn()
         {
             turnText = await AddComponentUI<UITextArea, UITextAreaDescription>("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true));
-            turnText.TextForeColor = Color.Yellow.RGBA();
-            turnText.TextShadowColor = Color.Yellow.RGBA() * 0.5f;
+            turnText.TextForeColor = Color.Yellow;
+            turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = TextHorizontalAlign.Center;
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
             gameIcon = await AddComponentUI<Sprite, SpriteDescription>("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"));
-            gameIcon.BaseColor = Color.Yellow.RGBA();
+            gameIcon.BaseColor = Color.Yellow;
             gameIcon.Visible = false;
             uiTweener.TweenRotateBounce(gameIcon, -0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await AddComponentUI<Sprite, SpriteDescription>("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"));
-            playerTurnMarker.BaseColor = Color.Turquoise.RGBA();
+            playerTurnMarker.BaseColor = Color.Turquoise;
             playerTurnMarker.Visible = false;
             uiTweener.TweenScaleBounce(playerTurnMarker, 1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
@@ -406,48 +404,48 @@ namespace Tanks
             int layerSprites = layerPanel + 1;
             int layerKeys = layerSprites + 1;
 
-            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color.Black.RGBA() * 0.3333f), layerPanel);
+            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color.Black * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
             keyRotate = await AddComponentUI<Sprite, SpriteDescription>("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), layerSprites);
-            keyRotate.BaseColor = Color.Turquoise.RGBA();
+            keyRotate.BaseColor = Color.Turquoise;
             keyRotate.Visible = false;
 
             keyMove = await AddComponentUI<Sprite, SpriteDescription>("KeyMove", "KeyMove", SpriteDescription.Default("Resources/Move.png"), layerSprites);
-            keyMove.BaseColor = Color.Turquoise.RGBA();
+            keyMove.BaseColor = Color.Turquoise;
             keyMove.Visible = false;
 
             KeyPitch = await AddComponentUI<Sprite, SpriteDescription>("KeyPitch", "KeyPitch", SpriteDescription.Default("Resources/Pitch.png"), layerSprites);
-            KeyPitch.BaseColor = Color.Turquoise.RGBA();
+            KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
             keyRotateLeftText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyRotateLeftText.TextForeColor = Color.Yellow.RGBA();
+            keyRotateLeftText.TextForeColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Visible = false;
 
             keyRotateRightText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyRotateRightText.TextForeColor = Color.Yellow.RGBA();
+            keyRotateRightText.TextForeColor = Color.Yellow;
             keyRotateRightText.Text = "D";
             keyRotateRightText.Visible = false;
 
             keyMoveForwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyMoveForwardText.TextForeColor = Color.Yellow.RGBA();
+            keyMoveForwardText.TextForeColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Visible = false;
 
             keyMoveBackwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyMoveBackwardText.TextForeColor = Color.Yellow.RGBA();
+            keyMoveBackwardText.TextForeColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Visible = false;
 
             keyPitchUpText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyPitchUpText.TextForeColor = Color.Yellow.RGBA();
+            keyPitchUpText.TextForeColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Visible = false;
 
             keyPitchDownText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
-            keyPitchDownText.TextForeColor = Color.Yellow.RGBA();
+            keyPitchDownText.TextForeColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Visible = false;
         }
@@ -460,7 +458,7 @@ namespace Tanks
             pbFire.Visible = false;
 
             fireKeyText = await AddComponentUI<UITextArea, UITextAreaDescription>("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
-            fireKeyText.TextForeColor = Color.Yellow.RGBA();
+            fireKeyText.TextForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.TextHorizontalAlign = TextHorizontalAlign.Center;
             fireKeyText.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -478,22 +476,22 @@ namespace Tanks
             miniMapBackground.Visible = false;
 
             miniMapTank1 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
-            miniMapTank1.BaseColor = Color.Blue.RGBA();
+            miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
             miniMapTank2 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
-            miniMapTank2.BaseColor = Color.Red.RGBA();
+            miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
             windVelocity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("WindVelocity", "WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
             windVelocity.Caption.Text = "Wind velocity";
-            windVelocity.Caption.TextForeColor = Color.Yellow.RGBA() * 0.85f;
-            windVelocity.BaseColor = Color.DeepSkyBlue.RGBA();
-            windVelocity.ProgressColor = new(Color.DarkBlue.RGB(), 0.5f);
+            windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
+            windVelocity.BaseColor = Color.DeepSkyBlue;
+            windVelocity.ProgressColor = new(Color.DarkBlue, 0.5f);
             windVelocity.Visible = false;
 
             windDirectionArrow = await AddComponentUI<Sprite, SpriteDescription>("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), layerMarkers);
-            windDirectionArrow.BaseColor = Color.Green.RGBA();
+            windDirectionArrow.BaseColor = Color.Green;
             windDirectionArrow.Visible = false;
         }
         private async Task InitializeUIShotPath()
@@ -504,7 +502,7 @@ namespace Tanks
                 var trajectoryMarker = await AddComponentUI<Sprite, SpriteDescription>($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("Resources/Dot_w.png"));
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
-                trajectoryMarker.BaseColor = Color.Transparent.RGBA();
+                trajectoryMarker.BaseColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
                 uiTweener.TweenRotateRepeat(trajectoryMarker, 0, Helper.TwoPi, 1000, ScaleFuncs.Linear);
@@ -595,7 +593,7 @@ namespace Tanks
         {
             var sphereDesc = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 5, 5);
             var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseColor = Color.Black.RGBA();
+            material.DiffuseColor = Color.Black;
 
             var content = new ModelDescription
             {
@@ -625,7 +623,7 @@ namespace Tanks
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
             var pShotExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleFireFileName, 5);
-            pShotExplosion.Gravity = Direction3.Zero;
+            pShotExplosion.Gravity = CntDirection3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             pShotExplosion.MinVerticalVelocity = 0f;
             pShotExplosion.MaxVerticalVelocity = 0f;
@@ -634,7 +632,7 @@ namespace Tanks
             particleDescriptions.Add("ShotExplosion", pShotExplosion);
 
             var pShotSmoke = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleSmokeFileName, 5);
-            pShotSmoke.Gravity = Direction3.Zero;
+            pShotSmoke.Gravity = CntDirection3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             particleDescriptions.Add("ShotSmoke", pShotSmoke);
         }
@@ -644,7 +642,7 @@ namespace Tanks
             desc.BlendMode = BlendModes.OpaqueAlpha;
 
             decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
-            decalDrawer.TintColor = Color.FromArgb(170, 90, 77, 72).RGBA();
+            decalDrawer.TintColor = new Color(170, 90, 77, 72);
         }
         private async Task InitializeAudio()
         {
@@ -659,7 +657,7 @@ namespace Tanks
 
             for (int i = 0; i < 8; i++)
             {
-                var light = new SceneLightPoint($"Explosion_{i}", true, Color.Black.RGB(), Color.Black.RGB(), false, lightDesc);
+                var light = new SceneLightPoint($"Explosion_{i}", true, Color.Black, Color.Black, false, lightDesc);
 
                 pointLights.Add(light);
             }
@@ -951,8 +949,8 @@ namespace Tanks
         }
         private void PrepareLighting()
         {
-            GameEnvironment.Background = Color.Gray.RGBA();
-            Lights.EnableFog(300, 1000, Color.Gray.RGBA());
+            GameEnvironment.Background = Color.Gray;
+            Lights.EnableFog(300, 1000, Color.Gray);
         }
 
         private void LoadNewGame()
@@ -1022,7 +1020,7 @@ namespace Tanks
                 CurrentLife = 100,
                 MaxMove = 25,
                 CurrentMove = 25,
-                Color = Color.Blue.RGBA(),
+                Color = Color.Blue,
                 TintColor = new(0.5f, 0.5f, 1f, 1f),
             };
 
@@ -1034,7 +1032,7 @@ namespace Tanks
                 CurrentLife = 100,
                 MaxMove = 25,
                 CurrentMove = 25,
-                Color = Color.Red.RGBA(),
+                Color = Color.Red,
                 TintColor = new(1f, 0.5f, 0.5f, 1f),
             };
         }
@@ -1233,7 +1231,7 @@ You will lost all the game progress.",
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
-                pbFire.BaseColor = pbFire.ProgressValue < 0.75f ? pbFireBaseColor : Vector4.Lerp(pbFireBaseColor, pbFireHBaseColor, (pbFire.ProgressValue - 0.75f) / 0.25f);
+                pbFire.BaseColor = pbFire.ProgressValue < 0.75f ? pbFireBaseColor : Color4.Lerp(pbFireBaseColor, pbFireHBaseColor, (pbFire.ProgressValue - 0.75f) / 0.25f);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Space))
@@ -1347,7 +1345,7 @@ You will lost all the game progress.",
             }
 
             boundsDrawer.Clear();
-            boundsDrawer.SetPrimitives(Color.Red.RGBA(), lines);
+            boundsDrawer.SetPrimitives(Color.Red, lines);
         }
 
         private void UpdateTurnStatus()

@@ -20,11 +20,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
         /// <summary>
         /// Direction
         /// </summary>
-        public Direction3 Direction { get; set; } = Direction3.ForwardLH;
+        public CntDirection3 Direction { get; set; } = CntDirection3.ForwardLH;
 
         /// <inheritdoc/>
         public override string ToString()

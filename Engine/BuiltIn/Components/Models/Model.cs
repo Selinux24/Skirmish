@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.BuiltIn.Drawers;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Animation;
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Basic Model
     /// </summary>
@@ -66,7 +65,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Level of detail
         /// </summary>

@@ -1,24 +1,22 @@
-﻿using System;
+﻿using Engine;
+using Engine.Animation;
+using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
 {
-    using Engine;
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Foliage;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Skies;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.BuiltIn.UI;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.UI;
-    using Color = System.Drawing.Color;
-
     /// <summary>
     /// Deferred lights scene test
     /// </summary>
@@ -137,16 +135,16 @@ F7 to F10: Toggle object visibility.";
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
-            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White.RGBA(), StartsVisible = false, Text = titleText };
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White, StartsVisible = false, Text = titleText };
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
 
-            var dBufferText = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow.RGBA(), StartsVisible = false };
+            var dBufferText = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, StartsVisible = false };
             bufferText = await AddComponentUI<UITextArea, UITextAreaDescription>("BufferText", "BufferText", dBufferText);
 
-            var dHelpText = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Yellow.RGBA(), StartsVisible = false, Text = helpText1, MaxTextLength = 512 };
+            var dHelpText = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Yellow, StartsVisible = false, Text = helpText1, MaxTextLength = 512 };
             help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelpText);
 
-            var upperPanelDesc = SpriteDescription.Default(new Vector4(0, 0, 0, 0.75f));
+            var upperPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", upperPanelDesc, LayerUI - 1);
 
             var bufferDwDesc = UITextureRendererDescription.Default();
@@ -456,7 +454,7 @@ F7 to F10: Toggle object visibility.";
 
             if (Game.Input.KeyPressed(Keys.Tab))
             {
-                lineDrawer.SetPrimitives(Color.Yellow.RGBA(), Line3D.CreateFrustum(Camera.Frustum));
+                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateFrustum(Camera.Frustum));
                 lineDrawer.Visible = true;
             }
         }
@@ -464,7 +462,7 @@ F7 to F10: Toggle object visibility.";
         {
             if (Game.Input.KeyJustReleased(Keys.F))
             {
-                Lights.BaseFogColor = Vector4.FromColor3(54, 56, 68);
+                Lights.BaseFogColor = new Color(54, 56, 68);
                 Lights.FogStart = Helper.IsZero(Lights.FogStart) ? far * fogStart : 0f;
                 Lights.FogRange = Helper.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
@@ -611,11 +609,11 @@ F7 to F10: Toggle object visibility.";
         {
             if (spotLight != null)
             {
-                lineDrawer.SetPrimitives(Color.White.RGBA(), spotLight.GetVolume(10));
+                lineDrawer.SetPrimitives(Color.White, spotLight.GetVolume(10));
             }
             else
             {
-                lineDrawer.Clear(Color.White.RGBA());
+                lineDrawer.Clear(Color.White);
             }
 
             if (animateLights && Lights.PointLights.Length > 0)
@@ -904,8 +902,8 @@ F7 to F10: Toggle object visibility.";
             spotLight = new SceneLightSpot(
                 "Spot the dog",
                 castShadows,
-                Color.Yellow.RGB(),
-                Color.Yellow.RGB(),
+                Color.Yellow,
+                Color.Yellow,
                 true,
                 SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 

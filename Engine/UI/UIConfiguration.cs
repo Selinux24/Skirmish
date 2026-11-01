@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// User interface configuration
     /// </summary>
@@ -11,31 +10,31 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        public static Vector4 BaseColor { get; set; } = System.Drawing.Color.CornflowerBlue.RGBA();
+        public static Color4 BaseColor { get; set; } = Color.CornflowerBlue;
         /// <summary>
         /// Control fore color
         /// </summary>
-        public static Vector4 ForeColor { get; set; } = System.Drawing.Color.DeepSkyBlue.RGBA();
+        public static Color4 ForeColor { get; set; } = Color.DeepSkyBlue;
         /// <summary>
         /// Control highlight color
         /// </summary>
-        public static Vector4 HighlightColor { get; set; } = System.Drawing.Color.LightBlue.RGBA();
+        public static Color4 HighlightColor { get; set; } = Color.LightBlue;
         /// <summary>
         /// Control shadow color
         /// </summary>
-        public static Vector4 ShadowColor { get; set; } = System.Drawing.Color.DarkBlue.RGBA();
+        public static Color4 ShadowColor { get; set; } = Color.DarkBlue;
         /// <summary>
         /// Text color
         /// </summary>
-        public static Vector4 TextColor { get; set; } = System.Drawing.Color.LightGray.RGBA();
+        public static Color4 TextColor { get; set; } = Color.LightGray;
         /// <summary>
         /// Highlight text color
         /// </summary>
-        public static Vector4 HighlightTextColor { get; set; } = System.Drawing.Color.Yellow.RGBA();
+        public static Color4 HighlightTextColor { get; set; } = Color.Yellow;
         /// <summary>
         /// Text background color
         /// </summary>
-        public static Vector4 TextBackgroundColor { get; set; } = new Vector4(0, 0, 0, 0.75f);
+        public static Color4 TextBackgroundColor { get; set; } = new(0, 0, 0, 0.75f);
         /// <summary>
         /// Default Font
         /// </summary>

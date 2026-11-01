@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Content.Persistence;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,11 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content.FmtObj.Fmt
 {
-    using Engine;
-    using Engine.Content;
-    using Engine.Content.Persistence;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Loader for .obj files
     /// </summary>
@@ -197,7 +193,7 @@ namespace Engine.Content.FmtObj.Fmt
             }
             else
             {
-                matContent.DiffuseColor = new Vector4(mat.Kd, 1f);
+                matContent.DiffuseColor = new(mat.Kd, 1f);
             }
 
             if (mat.MapKs != null)

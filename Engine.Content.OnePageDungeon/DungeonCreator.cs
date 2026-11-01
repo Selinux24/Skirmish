@@ -19,7 +19,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Rotation string list
         /// </summary>
-        private static readonly string[] rotationStrings = [RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270];
+        private static readonly string[] rotationStrings = [CntRotationQ.Rotation0, CntRotationQ.Rotation90, CntRotationQ.Rotation180, CntRotationQ.Rotation270];
 
         /// <summary>
         /// Creates an asset map
@@ -169,9 +169,9 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, CntRotationQ.Identity));
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, CntRotationQ.Identity));
 
                     var cellWalls = walls
                         .Where(w => w.Cell.X == ix && w.Cell.Y == iy)
@@ -189,7 +189,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="assetType"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Position3 position, RotationQ rotation)
+        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, CntPosition3 position, CntRotationQ rotation)
         {
             if (prop?.Assets?.Any() != true)
             {
@@ -225,7 +225,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.N))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz - blockDelta);
+                var position = new CntPosition3(-vx, 0, vz - blockDelta);
                 var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -234,7 +234,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.S))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz + blockDelta);
+                var position = new CntPosition3(-vx, 0, vz + blockDelta);
                 var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -243,7 +243,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.E))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx - blockDelta, 0, vz);
+                var position = new CntPosition3(-vx - blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -252,7 +252,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.W))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx + blockDelta, 0, vz);
+                var position = new CntPosition3(-vx + blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -385,7 +385,7 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = column.X * configuration.BlockSize;
                 float vz = column.Y * configuration.BlockSize;
-                var position = new Position3(-vx + half, 0, vz - half);
+                var position = new CntPosition3(-vx + half, 0, vz - half);
 
                 var dColumn = configuration.GetRandonColumn();
 
@@ -478,8 +478,8 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = door.X * configuration.BlockSize;
                 float vz = door.Y * configuration.BlockSize;
-                var dir = new Position3(door.Dir.X, 0, -door.Dir.Y);
-                var pos = new Position3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
+                var dir = new CntPosition3(door.Dir.X, 0, -door.Dir.Y);
+                var pos = new CntPosition3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
                 var rot = EvaluateRotation(dir, configuration.RotationDelta);
 
                 if (dDoor.Door != null)
@@ -523,7 +523,7 @@ namespace Engine.Content.OnePageDungeon
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static RotationQ EvaluateRotation(Vector3 dir, int index)
+        private static CntRotationQ EvaluateRotation(Vector3 dir, int index)
         {
             if (dir == Vector3.Left)
             {
@@ -550,7 +550,7 @@ namespace Engine.Content.OnePageDungeon
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static RotationQ EvaluateRotation(WallDirections dir, int index)
+        private static CntRotationQ EvaluateRotation(WallDirections dir, int index)
         {
             if (dir.HasFlag(WallDirections.E))
             {

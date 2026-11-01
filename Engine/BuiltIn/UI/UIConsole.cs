@@ -1,4 +1,5 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
 using Logger;
 using System;
@@ -144,12 +145,12 @@ namespace Engine.BuiltIn.UI
         private string FormatLog(LogEntry logEntry)
         {
             var defColor = textArea.TextForeColor;
-            var logColor = logEntry.LogLevel switch
+            Color4 logColor = logEntry.LogLevel switch
             {
-                LogLevel.Debug => System.Drawing.Color.White.RGBA(),
-                LogLevel.Information => System.Drawing.Color.Blue.RGBA(),
-                LogLevel.Warning => System.Drawing.Color.Yellow.RGBA(),
-                LogLevel.Error => System.Drawing.Color.Red.RGBA(),
+                LogLevel.Debug => Color.White,
+                LogLevel.Information => Color.Blue,
+                LogLevel.Warning => Color.Yellow,
+                LogLevel.Error => Color.Red,
                 _ => textArea.TextForeColor,
             };
             return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{Environment.NewLine}";

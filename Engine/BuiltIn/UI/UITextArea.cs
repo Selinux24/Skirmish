@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Text area
     /// </summary>
@@ -98,11 +97,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the text color
         /// </summary>
-        public Vector4 TextForeColor
+        public Color4 TextForeColor
         {
             get
             {
-                return textDrawer?.ForeColor ?? Vector4.Zero;
+                return textDrawer?.ForeColor ?? Color.Transparent;
             }
             set
             {
@@ -117,11 +116,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the shadow color
         /// </summary>
-        public Vector4 TextShadowColor
+        public Color4 TextShadowColor
         {
             get
             {
-                return textDrawer?.ShadowColor ?? Vector4.Zero;
+                return textDrawer?.ShadowColor ?? Color.Transparent;
             }
             set
             {
@@ -510,7 +509,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="keyChar">Key character</param>
         /// <param name="textColor">Text color</param>
         /// <param name="keyColor">Key color</param>
-        public void SetTextWithKeyChar(string text, char keyChar, Vector4 textColor, Vector4 keyColor)
+        public void SetTextWithKeyChar(string text, char keyChar, Color4 textColor, Color4 keyColor)
         {
             string res;
             int keyIndex = text.IndexOf(keyChar);

@@ -1,18 +1,16 @@
-﻿using System;
-using System.Drawing;
+﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneLighting
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Lights scene test
     /// </summary>
@@ -128,7 +126,7 @@ namespace BasicSamples.SceneLighting
         private async Task InitializeEmitter()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var geo = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
 
@@ -152,7 +150,7 @@ namespace BasicSamples.SceneLighting
 
             var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {
-                v.Color = Color.Gray.RGBA();
+                v.Color = Color.Gray;
                 return v;
             });
 
@@ -177,12 +175,12 @@ namespace BasicSamples.SceneLighting
             Lights.FillLight.CastShadow = false;
 
             var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
-            Lights.Add(new SceneLightPoint("Point1", true, Color.White.RGB(), Color.White.RGB(), true, pointDesc));
+            Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, pointDesc));
 
             var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
-            Lights.Add(new SceneLightSpot("Spot1", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot2", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot3", true, Color.White.RGB(), Color.White.RGB(), true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, spotDesc));
 
             await Task.CompletedTask;
         }
@@ -391,7 +389,7 @@ namespace BasicSamples.SceneLighting
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Vector4(spot.DiffuseColor, 0.25f);
+                    var color = new Color4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -400,7 +398,7 @@ namespace BasicSamples.SceneLighting
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Vector4(point.DiffuseColor, 0.25f);
+                    var color = new Color4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 
@@ -410,8 +408,8 @@ namespace BasicSamples.SceneLighting
 
             if (drawCullVolumes)
             {
-                var spotColor = new Vector4(Color.Red.RGB(), 0.50f);
-                var pointColor = new Vector4(Color.Green.RGB(), 0.50f);
+                var spotColor = new Color4(Color.Red, 0.5f);
+                var pointColor = new Color4(Color.Green, 0.5f);
 
                 foreach (var spot in Lights.SpotLights)
                 {

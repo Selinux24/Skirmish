@@ -1,19 +1,17 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneMaterials
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Flares;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.UI;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Materials scene test
     /// </summary>
@@ -67,7 +65,7 @@ namespace BasicSamples.SceneMaterials
 
             Lights.KeyLight.CastShadow = false;
 
-            GameEnvironment.Background = Color.CornflowerBlue.RGBA();
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override void Initialize()
@@ -97,7 +95,7 @@ namespace BasicSamples.SceneMaterials
         {
             var spDesc = new SpriteDescription()
             {
-                BaseColor = new Vector4(0, 0, 0, 0.75f),
+                BaseColor = new(0, 0, 0, 0.75f),
             };
             backpanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
@@ -108,8 +106,8 @@ namespace BasicSamples.SceneMaterials
             {
                 Font = defaultFont18,
                 Text = "Scene Test - Materials",
-                TextForeColor = Color.White.RGBA(),
-                TextShadowColor = Color.Orange.RGBA()
+                TextForeColor = Color.White,
+                TextShadowColor = Color.Orange
             };
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
@@ -118,8 +116,8 @@ namespace BasicSamples.SceneMaterials
             {
                 Font = defaultFont10,
                 Text = "",
-                TextForeColor = Color.Yellow.RGBA(),
-                TextShadowColor = Color.Orange.RGBA(),
+                TextForeColor = Color.Yellow,
+                TextShadowColor = Color.Orange,
                 MaxTextLength = 1024,
             };
 
@@ -133,16 +131,16 @@ namespace BasicSamples.SceneMaterials
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, Vector4.FromColor3( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, Vector4.FromColor3(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, Vector4.FromColor3(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, Vector4.FromColor3( 50, 100,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, Vector4.FromColor3(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, Vector4.FromColor3( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, Vector4.FromColor3( 50, 200, 200), resourceFlare2String),
-                    new (-0.7f, 0.7f, Vector4.FromColor3( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, Vector4.FromColor3( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, Vector4.FromColor3( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -173,7 +171,7 @@ namespace BasicSamples.SceneMaterials
         private async Task InitializeEmitters()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.25f, 32, 32);
 
@@ -265,8 +263,8 @@ namespace BasicSamples.SceneMaterials
             for (int i = 0; i < itemsPerRow; i++)
             {
                 var mat = MaterialCookTorranceContent.Default;
-                mat.DiffuseColor = Color.Gold.RGBA();
-                mat.SpecularColor = Color.Gold.RGB() * 1.25f;
+                mat.DiffuseColor = Color.Gold;
+                mat.SpecularColor = Color.Gold * 1.25f;
                 mat.Metallic = 0.9f;
                 mat.Roughness = roughness * (i + 1);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
@@ -279,8 +277,8 @@ namespace BasicSamples.SceneMaterials
             for (int i = 0; i < itemsPerRow; i++)
             {
                 var mat = MaterialCookTorranceContent.Default;
-                mat.DiffuseColor = Color.Gold.RGBA();
-                mat.SpecularColor = Color.Gold.RGB() * 1.25f;
+                mat.DiffuseColor = Color.Gold;
+                mat.SpecularColor = Color.Gold * 1.25f;
                 mat.Metallic = metalness * (i + 1);
                 mat.Roughness = 0.1f;
                 mat.DiffuseTexture = resourceDefaultDiffuse;
@@ -313,9 +311,9 @@ namespace BasicSamples.SceneMaterials
                 {
                     for (int b = 0; b < colorCount; b += n)
                     {
-                        var diffuse = new Vector3(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount);
-                        var specular = diffuse + new Vector3(specularFactor);
-                        specular = Vector3.AdjustSaturation(specular, 1f);
+                        var diffuse = new Color3(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount);
+                        var specular = diffuse + new Color3(specularFactor);
+                        specular = Color3.AdjustSaturation(specular, 1f);
 
                         yield return GenerateMaterial(diffuse, specular, matParams, nmap);
                     }
@@ -416,8 +414,8 @@ namespace BasicSamples.SceneMaterials
             movingLight1 = new SceneLightPoint(
                 "Emitter 1 light",
                 false,
-                Color.Yellow.RGB() * 1.25f,
-                Color.White.RGB(),
+                Color.Yellow * 1.25f,
+                Color.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
@@ -426,8 +424,8 @@ namespace BasicSamples.SceneMaterials
             movingLight2 = new SceneLightPoint(
                 "Emitter 2 light",
                 false,
-                Color.White.RGB(),
-                Color.White.RGB(),
+                Color.White,
+                Color.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 10f, 5f));
 

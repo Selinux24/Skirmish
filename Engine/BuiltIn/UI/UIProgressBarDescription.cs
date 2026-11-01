@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.UI;
+
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Progress bar description
     /// </summary>
@@ -21,7 +20,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(Vector4 baseColor, Vector4 progressColor)
+        public static UIProgressBarDescription Default(Color4 baseColor, Color4 progressColor)
         {
             return new()
             {
@@ -46,7 +45,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(FontDescription font, Vector4 baseColor, Vector4 progressColor)
+        public static UIProgressBarDescription Default(FontDescription font, Color4 baseColor, Color4 progressColor)
         {
             return new()
             {
@@ -102,7 +101,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Progress color
         /// </summary>
-        public Vector4 ProgressColor { get; set; } = UIConfiguration.HighlightColor;
+        public Color4 ProgressColor { get; set; } = UIConfiguration.HighlightColor;
 
         /// <summary>
         /// Font description
@@ -116,15 +115,15 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Text fore color
         /// </summary>
-        public Vector4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
         /// <summary>
         /// Text shadow color
         /// </summary>
-        public Vector4 TextShadowColor { get; set; } = Vector4.Zero;
+        public Color4 TextShadowColor { get; set; } = Color.Transparent;
         /// <summary>
         /// Shadow position delta
         /// </summary>
-        public Vector2 TextShadowDelta { get; set; } = new Vector2(1, 1);
+        public Vector2 TextShadowDelta { get; set; } = Vector2.One;
         /// <summary>
         /// Text horizontal alignement
         /// </summary>

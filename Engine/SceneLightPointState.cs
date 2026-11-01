@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix4x4 InitialTransform { get; set; }
+        public CntMatrix4x4 InitialTransform { get; set; }
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Ligth position
         /// </summary>
-        public Position3 Position { get; set; }
+        public CntPosition3 Position { get; set; }
         /// <summary>
         /// Light radius
         /// </summary>

@@ -131,13 +131,6 @@ namespace Engine.Mathematics
         public float Z;
 
         /// <summary>
-        /// Returns rgba components from Vector3
-        /// </summary>
-        /// <param name="vector">Vector3</param>
-        /// <returns>Returns rgba components from Vector3</returns>
-        public readonly Vector4 RGBA => new(X, Y, Z, 1f);
-
-        /// <summary>
         /// Returns xxx components from Vector3
         /// </summary>
         /// <param name="vector">Vector3</param>
@@ -242,22 +235,6 @@ namespace Engine.Mathematics
             X = values[0];
             Y = values[1];
             Z = values[2];
-        }
-
-        /// <summary>
-        /// Creates a new rgb color
-        /// </summary>
-        /// <param name="r">Red</param>
-        /// <param name="g">Green</param>
-        /// <param name="b">Blue</param>
-        public static Vector3 FromColor3(byte r, byte g, byte b)
-        {
-            return new()
-            {
-                X = r / 255f,
-                Y = g / 255f,
-                Z = b / 255f,
-            };
         }
 
         /// <summary>
@@ -1638,23 +1615,6 @@ namespace Engine.Mathematics
             vec = TransformCoordinate(Up, mat);
         }
 
-        public static Vector3 AdjustContrast(Vector3 value, float contrast)
-        {
-            return new(
-                0.5f + contrast * (value.X - 0.5f),
-                0.5f + contrast * (value.Y - 0.5f),
-                0.5f + contrast * (value.Z - 0.5f));
-        }
-        public static Vector3 AdjustSaturation(Vector3 value, float saturation)
-        {
-            float grey = value.X * 0.2125f + value.Y * 0.7154f + value.Z * 0.0721f;
-
-            return new(
-                grey + saturation * (value.X - grey),
-                grey + saturation * (value.Y - grey),
-                grey + saturation * (value.Z - grey));
-        }
-
         /// <summary>
         /// Adds two vectors.
         /// </summary>
@@ -1793,70 +1753,44 @@ namespace Engine.Mathematics
         {
             return new(scalar - value.X, scalar - value.Y, scalar - value.Z);
         }
-        /// <summary>
-        /// Tests for equality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+   
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector3 left, Vector3 right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Tests for inequality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector3 left, Vector3 right)
         {
             return !left.Equals(ref right);
         }
 
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector3"/> to <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+        /// <inheritdoc/>
         public static explicit operator Vector2(Vector3 value)
         {
             return new(value.X, value.Y);
         }
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector3"/> to <see cref="Vector4"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector4(Vector3 value)
         {
             return new(value, 0.0f);
         }
-        /// <summary>
-        /// Convert the System.Numerics.Vector3 to a Vector3.
-        /// </summary>
-        /// <returns>A Vector3</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Vector3(System.Numerics.Vector3 Value)
         {
             return new Vector3(Value.X, Value.Y, Value.Z);
         }
-        /// <summary>
-        /// Convert the Vector3 to a System.Numerics.Vector3.
-        /// </summary>
-        /// <returns>A System.Numerics.Vector3</returns>
+        /// <inheritdoc/>
         public static explicit operator System.Numerics.Vector3(Vector3 Value)
         {
             return new System.Numerics.Vector3(Value.X, Value.Y, Value.Z);
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return string.Format(
@@ -1864,13 +1798,7 @@ namespace Engine.Mathematics
                 Vector3Str,
                 X, Y, Z);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format)
         {
             if (format == null) return ToString();
@@ -1882,13 +1810,7 @@ namespace Engine.Mathematics
                 Y.ToString(format, CultureInfo.CurrentCulture),
                 Z.ToString(format, CultureInfo.CurrentCulture));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
         {
             return string.Format(
@@ -1896,14 +1818,7 @@ namespace Engine.Mathematics
                 Vector3Str,
                 X, Y, Z);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) return ToString(formatProvider);
@@ -1916,24 +1831,13 @@ namespace Engine.Mathematics
                 Z.ToString(format, formatProvider));
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector3"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector3"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="Vector3"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Vector3 other)
         {
@@ -1942,25 +1846,13 @@ namespace Engine.Mathematics
                 Helper.NearEqual(other.Y, Y) &&
                 Helper.NearEqual(other.Z, Z);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector3"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector3"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="Vector3"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Vector3 other)
         {
             return Equals(ref other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object value)
         {
             if (value is not Vector3) return false;
@@ -1974,7 +1866,6 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="left">The left vector.</param>
         /// <param name="right">The right vector.</param>
-        /// <param name="epsilon">The epsilon.</param>
         /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
         public static bool NearEqual(Vector3 left, Vector3 right)
         {
@@ -2023,7 +1914,6 @@ namespace Engine.Mathematics
         /// <summary>
         /// Gets vector description
         /// </summary>
-        /// <param name="vector">Vector</param>
         /// <returns>Return vector description</returns>
         public readonly string GetDescription()
         {
