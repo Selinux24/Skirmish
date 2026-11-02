@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh interface
     /// </summary>
@@ -46,7 +45,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the primitive count of the mesh
         /// </summary>
-        int Count { get; }
+        uint Count { get; }
 
         /// <summary>
         /// Initializes a mesh

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 using System.Linq;
-using Vortice.DXGI;
 
 namespace Engine
 {
-    using Engine.Common;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Render target

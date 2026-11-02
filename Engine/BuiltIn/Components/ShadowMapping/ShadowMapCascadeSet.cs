@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Cascade shadow map matrix set
     /// </summary>
@@ -160,7 +159,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <param name="shadowView">Shadow view</param>
         private void UpdateAntiFlicker(Camera camera, Matrix4x4 shadowView)
         {
-            Matrix4x4.Invert(ref shadowView, out var shadowViewInv);
+            var shadowViewInv = Matrix4x4.Invert(shadowView);
 
             // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
@@ -209,7 +208,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             }
 
             // Get the cascade center in shadow space
-            var cascadeCenterShadowSpace = Vector3.Transform(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
+            var cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
 
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
@@ -261,7 +260,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             var max = new Vector3(float.MinValue);
             for (int i = 0; i < frustumPoints.Length; i++)
             {
-                var pointInShadowSpace = Vector3.Transform(frustumPoints[i], worldToShadowSpace);
+                var pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
 
                 for (int j = 0; j < 3; j++)
                 {
@@ -330,8 +329,8 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             offset = Vector3.Zero;
 
             // Find the offset between the new and old bound ceter
-            var oldCenterInCascade = Vector3.Transform(cascadeBoundCenter[cascadeIdx], shadowView);
-            var newCenterInCascade = Vector3.Transform(newCenter, shadowView);
+            var oldCenterInCascade = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], shadowView);
+            var newCenterInCascade = Vector3.TransformCoordinate(newCenter, shadowView);
             var centerDiff = newCenterInCascade - oldCenterInCascade;
 
             // Find the pixel size based on the diameters and map pixel size

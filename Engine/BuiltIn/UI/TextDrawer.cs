@@ -233,7 +233,7 @@ namespace Engine.BuiltIn.UI
         /// Clipping rectangle
         /// </summary>
         /// <remarks>Defines an area outside which all text is clipped</remarks>
-        public Rect? ClippingRectangle { get; set; } = null;
+        public RectI? ClippingRectangle { get; set; } = null;
         /// <summary>
         /// Parent control
         /// </summary>
@@ -316,7 +316,7 @@ namespace Engine.BuiltIn.UI
 
             var sca = Vector2.One * (Parent?.AbsoluteScale ?? 1f);
             float rot = Parent?.AbsoluteRotation ?? 0f;
-            Vector2 pos = (Vector2)renderArea.Center;
+            var pos = renderArea.Center;
             pos.Y += baseLineThr;
 
             // Apply scroll if any
@@ -414,7 +414,7 @@ namespace Engine.BuiltIn.UI
                 UseRectangle = ClippingRectangle.HasValue,
                 FineSampling = FineSampling,
                 FontTexture = fontMap.Texture,
-                ClippingRectangle = ClippingRectangle ?? Rect.Empty,
+                ClippingRectangle = ClippingRectangle ?? RectI.Empty,
             };
             fontDrawer.UpdateFont(dc, state);
 

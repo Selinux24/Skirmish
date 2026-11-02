@@ -1,6 +1,7 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry drawer
     /// </summary>
@@ -74,7 +73,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = Color4.White;
         /// <summary>
         /// Texture index
         /// </summary>

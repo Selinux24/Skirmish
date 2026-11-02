@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        public Rect ClippingRectangle { get; set; }
+        public RectI ClippingRectangle { get; set; }
         /// <summary>
         /// Font texture
         /// </summary>

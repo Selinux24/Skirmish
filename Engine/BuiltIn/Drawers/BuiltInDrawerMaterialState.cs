@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Drawer material state
     /// </summary>
@@ -18,7 +17,7 @@ namespace Engine.BuiltIn.Drawers
                 Material = null,
                 UseAnisotropic = false,
                 TextureIndex = 0,
-                TintColor = new(1f, 1f, 1f, 1f),
+                TintColor = Color4.White,
             };
         }
 
@@ -35,6 +34,6 @@ namespace Engine.BuiltIn.Drawers
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; }
+        public Color4 TintColor { get; set; }
     }
 }

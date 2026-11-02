@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Common;
+using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Built-in foliage state
     /// </summary>
@@ -20,7 +19,7 @@ namespace Engine.BuiltIn.Drawers.Foliage
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; }
+        public Color4 TintColor { get; set; }
         /// <summary>
         /// Material index
         /// </summary>

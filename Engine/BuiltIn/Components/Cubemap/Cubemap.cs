@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Cubemap;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Cubemap;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Cube-map drawer
     /// </summary>

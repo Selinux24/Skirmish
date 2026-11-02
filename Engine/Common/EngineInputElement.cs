@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using Vortice.DXGI;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Initializes a new instance of the Direct3D11 InputElement struct.

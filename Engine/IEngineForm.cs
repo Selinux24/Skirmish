@@ -1,10 +1,8 @@
-﻿using System;
-using System.Drawing;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Engine form interface
     /// </summary>
@@ -75,11 +73,11 @@ namespace Engine
         /// <summary>
         /// Render area center
         /// </summary>
-        Point RenderCenter { get; }
+        System.Drawing.Point RenderCenter { get; }
         /// <summary>
         /// Screen center
         /// </summary>
-        Point ScreenCenter { get; }
+        System.Drawing.Point ScreenCenter { get; }
         /// <summary>
         /// The form is manually resizing
         /// </summary>
@@ -146,10 +144,10 @@ namespace Engine
         /// <summary>
         ///  Computes the location of the screen point p in client coordinates.
         /// </summary>
-        Point PointToClient(Point p);
+        System.Drawing.Point PointToClient(System.Drawing.Point p);
         /// <summary>
         ///  Computes the location of the client point p in screen coordinates.
         /// </summary>
-        Point PointToScreen(Point p);
+        System.Drawing.Point PointToScreen(System.Drawing.Point p);
     }
 }

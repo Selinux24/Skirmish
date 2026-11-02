@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Scroll layout helper
     /// </summary>

@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Billboard vertex format
     /// </summary>

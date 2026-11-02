@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Particles;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Particles;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particle system
     /// </summary>

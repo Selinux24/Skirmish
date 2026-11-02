@@ -1,10 +1,9 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particle data buffer
     /// </summary>

@@ -1,12 +1,12 @@
 ﻿
 namespace Engine.Common
 {
-    using Vortice.Direct3D11;
+    using GeometryShader = Vortice.Direct3D11.ID3D11GeometryShader;
 
     /// <summary>
     /// Geometry shader description
     /// </summary>
-    public class EngineGeometryShader : EngineShader<ID3D11GeometryShader>
+    public class EngineGeometryShader : EngineShader<GeometryShader>
     {
         /// <summary>
         /// Constructor
@@ -14,6 +14,6 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="vertexShader">Vertex shader</param>
         /// <param name="byteCode">Shader byte code</param>
-        internal EngineGeometryShader(string name, ID3D11GeometryShader vertexShader, byte[] byteCode) : base(name, vertexShader, byteCode) { }
+        internal EngineGeometryShader(string name, GeometryShader vertexShader, byte[] byteCode) : base(name, vertexShader, byteCode) { }
     }
 }

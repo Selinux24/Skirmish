@@ -10,7 +10,7 @@ namespace EngineTests.Content
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]
-    public class ColorRgbaTests
+    public class CntColorTests
     {
         public TestContext TestContext { get; set; }
 
@@ -28,21 +28,21 @@ namespace EngineTests.Content
         {
             var res = CntColor.Transparent;
 
-            Assert.AreEqual(new CntColor(0, 0, 0, 0), res);
+            Assert.AreEqual(new CntColor(0f, 0f, 0f, 0f), res);
         }
         [TestMethod()]
         public void ColorWhiteTest()
         {
             var res = CntColor.White;
 
-            Assert.AreEqual(new CntColor(0, 0, 0, 1), res);
+            Assert.AreEqual(new CntColor(0f, 0f, 0f, 1f), res);
         }
         [TestMethod()]
         public void ColorBlackTest()
         {
             var res = CntColor.Black;
 
-            Assert.AreEqual(new CntColor(1, 1, 1, 1), res);
+            Assert.AreEqual(new CntColor(1f, 1f, 1f, 1f), res);
         }
         [TestMethod()]
         public void ColorValueTest()
@@ -52,19 +52,60 @@ namespace EngineTests.Content
             Assert.AreEqual(new CntColor(2, 2, 2, 2), res);
         }
         [TestMethod()]
-        public void ColorArrayTest()
+        public void ColorByteArrayTest()
+        {
+            byte r = 32;
+            byte g = 64;
+            byte b = 128;
+            byte a = 255;
+
+            var res = new CntColor([r, g, b, a]);
+
+            Assert.AreEqual(new CntColor(r, g, b, a), res);
+        }
+        [TestMethod()]
+        public void ColorIntArrayTest()
         {
             var res = new CntColor([1, 2, 3, 4]);
 
             Assert.AreEqual(new CntColor(1, 2, 3, 4), res);
         }
         [TestMethod()]
+        public void ColorFloatArrayTest()
+        {
+            var res = new CntColor([1f, 2f, 3f, 4f]);
+
+            Assert.AreEqual(new CntColor(1f, 2f, 3f, 4f), res);
+        }
+        [TestMethod()]
         public void ColorBadArrayTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new CntColor(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor([]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor([1, 2, 3]));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor([1, 2, 3, 4, 5]));
+            byte[] bytes = null;
+            Assert.Throws<ArgumentNullException>(() => new CntColor(bytes));
+            bytes = [];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(bytes));
+            bytes = [1, 2, 3];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(bytes));
+            bytes = [1, 2, 3, 4, 5];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(bytes));
+
+            int[] ints = null;
+            Assert.Throws<ArgumentNullException>(() => new CntColor(ints));
+            ints = [];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(ints));
+            ints = [1, 2, 3];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(ints));
+            bytes = [1, 2, 3, 4, 5];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(bytes));
+
+            float[] floats = null;
+            Assert.Throws<ArgumentNullException>(() => new CntColor(floats));
+            floats = [];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(floats));
+            floats = [1f, 2f, 3f];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(floats));
+            bytes = [1, 2, 3, 4, 5];
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CntColor(bytes));
         }
         [TestMethod()]
         public void ColorComponentsTest()
@@ -78,13 +119,13 @@ namespace EngineTests.Content
         {
             var res = new CntColor
             {
-                R = 1,
-                G = 2,
-                B = 3,
-                A = 4
+                R = 1f,
+                G = 2f,
+                B = 3f,
+                A = 4f
             };
 
-            Assert.AreEqual(new CntColor(1, 2, 3, 4), res);
+            Assert.AreEqual(new CntColor(1f, 2f, 3f, 4f), res);
         }
 
         [TestMethod()]

@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Content
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh content
     /// </summary>
@@ -11,7 +10,7 @@ namespace Engine.Content
         /// <summary>
         /// Intial transformation
         /// </summary>
-        public CntMatrix4x4 Transform { get; set; } = CntMatrix4x4.Identity;
+        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
         /// <summary>
         /// Sub mesh names
         /// </summary>

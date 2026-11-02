@@ -195,6 +195,17 @@ namespace Engine.Mathematics
         /// <value>The bottom-right corner of the rectangle.</value>
         public readonly Vector2 BottomRight { get { return new Vector2(Right, Bottom); } }
 
+        public readonly Vector2[] GetVertices()
+        {
+            return
+            [
+                new (Left, Top),
+                new (Right, Top),
+                new (Right, Bottom),
+                new (Left, Bottom),
+            ];
+        }
+
         /// <summary>Changes the position of the rectangle.</summary>
         /// <param name="amount">The values to adjust the position of the rectangle by.</param>
         public void Offset(System.Drawing.Point amount)
@@ -352,12 +363,35 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+        /// Scales the specified rectangle by the specified amount.
         /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <param name="rectangle">Rectangle</param>
+        /// <param name="scale">Scale</param>
+        public static Rect Scale(Rect rectangle, float scale)
+        {
+            Scale(ref rectangle, ref scale, out var result);
+            return result;
+        }
+        /// <summary>
+        /// Scales the specified rectangle by the specified amount.
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="result">Return value</param>
+        public static void Scale(ref Rect rectangle, ref float scale, out Rect result)
+        {
+            float width = rectangle.Width * scale;
+            float height = rectangle.Height * scale;
+            float dWidth = width - rectangle.Width;
+            float dHeight = height - rectangle.Height;
+
+            float left = rectangle.Left - (dWidth * 0.5f);
+            float top = rectangle.Top - (dHeight * 0.5f);
+
+            result = new(left, top, width, height);
+        }
+
+        /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
             if (obj is not Rect) return false;
@@ -365,13 +399,7 @@ namespace Engine.Mathematics
             var strongValue = (Rect)obj;
             return Equals(ref strongValue);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Rect"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Rect"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Rect"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly bool Equals(ref Rect other)
         {
             return
@@ -380,80 +408,68 @@ namespace Engine.Mathematics
                 Helper.NearEqual(other.Top, Top) &&
                 Helper.NearEqual(other.Bottom, Bottom);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Rect"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Rect"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Rect"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Rect other)
         {
             return Equals(ref other);
         }
 
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="left">The left.</param>
-        /// <param name="right">The right.</param>
-        /// <returns>The result of the operator.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Rect left, Rect right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="left">The left.</param>
-        /// <param name="right">The right.</param>
-        /// <returns>The result of the operator.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Rect left, Rect right)
         {
             return !left.Equals(ref right);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="System.Drawing.Rectangle"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="System.Drawing.Rectangle"/> structure.</returns>
+
+        /// <inheritdoc/>
+        public static implicit operator RectI(Rect value)
+        {
+            return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
+        }
+        /// <inheritdoc/>
+        public static explicit operator Rect(RectI value)
+        {
+            return new(value.X, value.Y, value.Width, value.Height);
+        }
+
+        /// <inheritdoc/>
         public static explicit operator System.Drawing.Rectangle(Rect value)
         {
             return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="Vortice.Mathematics.RectI"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="Vortice.Mathematics.RectI"/> structure.</returns>
-        public static explicit operator Vortice.Mathematics.RectI(Rect value)
-        {
-            return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
-        }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="System.Drawing.RectangleF"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="System.Drawing.RectangleF"/> structure.</returns>
+        /// <inheritdoc/>
         public static explicit operator System.Drawing.RectangleF(Rect value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="Vortice.Mathematics.Rect"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="Vortice.Mathematics.Rect"/> structure.</returns>
+
+        /// <inheritdoc/>
+        public static explicit operator Vortice.Mathematics.RectI(Rect value)
+        {
+            return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
+        }
+        /// <inheritdoc/>
         public static explicit operator Vortice.Mathematics.Rect(Rect value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator Vortice.RawRect(Rect value)
+        {
+            return new((int)value.Left, (int)value.Top, (int)value.Right, (int)value.Bottom);
+        }
+        /// <inheritdoc/>
+        public static implicit operator Rect(Vortice.RawRect value)
+        {
+            return new(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
         }
 
         /// <summary>

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Particle system
     /// </summary>

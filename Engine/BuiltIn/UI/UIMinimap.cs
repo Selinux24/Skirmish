@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Minimap
     /// </summary>
@@ -50,7 +49,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Vector4 BackColor { get; set; }
+        public Color4 BackColor { get; set; }
 
         /// <summary>
         /// Destructor
@@ -183,7 +182,7 @@ namespace Engine.BuiltIn.UI
             }
 
             dc.SetViewport(graphics.Viewport);
-            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, new(0));
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, Color4.Transparent);
 
             minimapBox.Texture = renderTexture;
             bool drawn = minimapBox.Draw(drawContext);

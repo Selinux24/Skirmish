@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.UI
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Padding
     /// </summary>

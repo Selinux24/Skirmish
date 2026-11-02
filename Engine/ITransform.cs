@@ -1,7 +1,7 @@
-﻿namespace Engine
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Manipulator interface
     /// </summary>

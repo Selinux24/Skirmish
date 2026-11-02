@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = new(0f, 0f, 0f, 1f);
+        public Color4 TintColor { get; set; } = Color4.White;
         /// <summary>
         /// Texture index
         /// </summary>

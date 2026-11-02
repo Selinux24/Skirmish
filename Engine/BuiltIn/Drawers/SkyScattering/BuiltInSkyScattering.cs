@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sky scattering drawer
     /// </summary>
@@ -71,7 +70,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
             /// Backcolor
             /// </summary>
             [FieldOffset(64)]
-            public Vector4 BackColor;
+            public Color4 BackColor;
 
             /// <summary>
             /// Light direction

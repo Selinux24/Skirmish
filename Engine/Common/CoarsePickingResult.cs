@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Coarse picking result
     /// </summary>

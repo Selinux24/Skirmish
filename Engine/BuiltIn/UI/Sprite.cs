@@ -164,7 +164,7 @@ namespace Engine.BuiltIn.UI
             {
                 geom = GeometryUtil.CreateUnitSprite();
 
-                var vertices = VertexPositionColor.Generate(geom.Vertices, Vector4.One);
+                var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
                 vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             }
 

@@ -1,8 +1,8 @@
-﻿namespace Engine
-{
-    using Engine.Common;
-    using Engine.Mathematics;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Helicopter controller
     /// </summary>

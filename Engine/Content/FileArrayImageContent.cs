@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Text;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Image content array from file
     /// </summary>

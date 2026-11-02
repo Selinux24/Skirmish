@@ -1,9 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Per material data structure
     /// </summary>
@@ -26,7 +25,7 @@ namespace Engine.BuiltIn.Drawers.Foliage
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Vector4 TintColor;
+        public Color4 TintColor;
 
         /// <summary>
         /// Material index

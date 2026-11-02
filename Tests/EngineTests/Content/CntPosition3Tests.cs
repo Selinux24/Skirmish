@@ -1,17 +1,16 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Content;
+using Engine.Mathematics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace EngineTests.Content
 {
-    using Engine.Content;
-    using Engine.Mathematics;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]
-    public class Position3Tests
+    public class CntPosition3Tests
     {
         public TestContext TestContext { get; set; }
 

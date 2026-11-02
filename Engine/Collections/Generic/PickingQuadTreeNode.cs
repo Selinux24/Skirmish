@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Collections.Helpers;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Picking quad tree node
     /// </summary>

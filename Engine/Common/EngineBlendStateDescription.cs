@@ -293,6 +293,30 @@ namespace Engine.Common
         /// The pre-blend operation inverts the blend factor, generating 1 - blend_factor.
         /// </summary>
         InverseBlendFactor = DXBlendOption.InverseBlendFactor,
+        /// <summary>
+        /// The blend factor is data sources both as color data output by a pixel shader.
+        /// There is no pre-blend operation.
+        /// This blend factor supports dual-source color blending.
+        /// </summary>
+        SecondarySourceColor = DXBlendOption.Source1Color,
+        /// <summary>
+        /// The blend factor is data sources both as color data output by a pixel shader.
+        /// The pre-blend operation inverts the data, generating 1 - RGB.
+        /// This blend factor supports dual-source color blending.
+        /// </summary>
+        InverseSecondarySourceColor = DXBlendOption.InverseSource1Color,
+        /// <summary>
+        /// The blend factor is data sources as alpha data output by a pixel shader.
+        /// There is no pre-blend operation.
+        /// This blend factor supports dual-source color blending.
+        /// </summary>
+        SecondarySourceAlpha = DXBlendOption.Source1Alpha,
+        /// <summary>
+        /// The blend factor is data sources as alpha data output by a pixel shader.
+        /// The pre-blend operation inverts the data, generating 1 - A.
+        /// This blend factor supports dual-source color blending.
+        /// </summary>
+        InverseSecondarySourceAlpha = DXBlendOption.InverseSource1Alpha
     }
 
     /// <summary>
@@ -320,6 +344,14 @@ namespace Engine.Common
         /// Subtract source 2 from source 1.
         /// </summary>
         ReverseSubtract = DXBlendOperation.ReverseSubtract,
+        /// <summary>
+        /// Find the minimum of source 1 and source 2.
+        /// </summary>
+        Minimum = DXBlendOperation.Min,
+        /// <summary>
+        /// Find the maximum of source 1 and source 2.
+        /// </summary>
+        Maximum = DXBlendOperation.Max
     }
 
     /// <summary>

@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Drawer mesh state interface
     /// </summary>

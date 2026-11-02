@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Render scene
     /// </summary>
@@ -319,8 +318,7 @@ namespace Engine
         /// <returns>Returns the screen coordinates</returns>
         public Vector2 GetScreenCoordinates(Vector3 position, out bool inside)
         {
-            return Helper.UnprojectToScreen(
-                position,
+            return position.UnprojectToScreen(
                 Game.Graphics.Viewport,
                 Camera.ViewProjection,
                 out inside);

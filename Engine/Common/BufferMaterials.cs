@@ -1,9 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Material buffer
     /// </summary>
@@ -41,19 +40,19 @@ namespace Engine.Common
         /// <summary>
         /// Material block 5 - Diffuse color
         /// </summary>
-        public Vector4 Diffuse;
+        public Color4 Diffuse;
         /// <summary>
         /// Material block 6 - Emissive color
         /// </summary>
-        public Vector4 Emissive;
+        public Color4 Emissive;
         /// <summary>
         /// Material block 7 - Ambient color
         /// </summary>
-        public Vector4 Ambient;
+        public Color4 Ambient;
         /// <summary>
         /// Material block 8 - Specular color
         /// </summary>
-        public Vector4 Specular;
+        public Color4 Specular;
 
         /// <summary>
         /// Packs current instance into a Vector4 array

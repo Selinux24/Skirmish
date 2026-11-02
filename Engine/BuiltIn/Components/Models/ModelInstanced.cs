@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,11 +11,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Instaced model
     /// </summary>
@@ -363,7 +362,7 @@ namespace Engine.BuiltIn.Components.Models
                     Material = meshMaterial,
                     UseAnisotropic = false,
                     TextureIndex = 0,
-                    TintColor = new(1f, 1f, 1f, 1f),
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
@@ -492,7 +491,7 @@ namespace Engine.BuiltIn.Components.Models
                     Material = meshMaterial,
                     UseAnisotropic = UseAnisotropicFiltering,
                     TextureIndex = 0,
-                    TintColor = new(1f, 1f, 1f, 1f),
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(dc, materialState);
 

@@ -1,9 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Per sprite data structure
     /// </summary>
@@ -46,22 +45,22 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// Color 1
         /// </summary>
         [FieldOffset(80)]
-        public Vector4 Color1;
+        public Color4 Color1;
         /// <summary>
         /// Color 2
         /// </summary>
         [FieldOffset(96)]
-        public Vector4 Color2;
+        public Color4 Color2;
         /// <summary>
         /// Color 3
         /// </summary>
         [FieldOffset(112)]
-        public Vector4 Color3;
+        public Color4 Color3;
         /// <summary>
         /// Color 4
         /// </summary>
         [FieldOffset(128)]
-        public Vector4 Color4;
+        public Color4 Color4;
 
         /// <summary>
         /// Use percent values

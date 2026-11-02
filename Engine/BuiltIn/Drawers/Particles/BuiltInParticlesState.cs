@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particle state for particle effects
     /// </summary>
@@ -63,11 +62,11 @@ namespace Engine.BuiltIn.Drawers.Particles
         /// <summary>
         /// Minimum color
         /// </summary>
-        public Vector4 MinColor { get; set; }
+        public Color4 MinColor { get; set; }
         /// <summary>
         /// Maximum color
         /// </summary>
-        public Vector4 MaxColor { get; set; }
+        public Color4 MaxColor { get; set; }
         /// <summary>
         /// Use texture rotation
         /// </summary>

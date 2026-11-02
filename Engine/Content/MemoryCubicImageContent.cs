@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.IO;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Cubic image content from memory
     /// </summary>

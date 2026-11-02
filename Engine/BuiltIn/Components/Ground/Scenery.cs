@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.Collections.Generic;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,12 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Terrain model
     /// </summary>
@@ -129,7 +128,7 @@ namespace Engine.BuiltIn.Components.Ground
                     return false;
                 }
 
-                int count = 0;
+                uint count = 0;
 
                 foreach (var matData in DrawingData.IterateMaterials())
                 {
@@ -157,7 +156,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="blendMode">Blend mode</param>
             public bool DrawScenery(DrawContext context, BlendModes blendMode)
             {
-                int count = 0;
+                uint count = 0;
 
                 foreach (var matData in DrawingData.IterateMaterials())
                 {
@@ -197,7 +196,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    TintColor = new(1f, 1f, 1f, 1f),
+                    TintColor = Color4.White,
                     Material = material,
                     TextureIndex = 0,
                     UseAnisotropic = true,

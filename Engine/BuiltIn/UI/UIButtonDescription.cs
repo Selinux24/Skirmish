@@ -35,8 +35,8 @@ namespace Engine.BuiltIn.UI
             return new()
             {
                 TextureReleased = textureFileName,
-                ColorReleased = Color.White,
-                ColorPressed = Color.White,
+                ColorReleased = Color4.White,
+                ColorPressed = Color4.White,
             };
         }
         /// <summary>
@@ -44,14 +44,14 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="textureRect">Texture rectangle</param>
-        public static UIButtonDescription Default(string textureFileName, Color4 textureRect)
+        public static UIButtonDescription Default(string textureFileName, Vector4 textureRect)
         {
             return new()
             {
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = textureRect,
-                ColorReleased = Color.White,
-                ColorPressed = Color.White,
+                ColorReleased = Color4.White,
+                ColorPressed = Color4.White,
             };
         }
         /// <summary>
@@ -89,8 +89,8 @@ namespace Engine.BuiltIn.UI
             {
                 Font = font,
                 TextureReleased = textureFileName,
-                ColorReleased = Color.White,
-                ColorPressed = Color.White,
+                ColorReleased = Color4.White,
+                ColorPressed = Color4.White,
             };
         }
         /// <summary>
@@ -106,8 +106,8 @@ namespace Engine.BuiltIn.UI
                 Font = font,
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = textureRect,
-                ColorReleased = Color.White,
-                ColorPressed = Color.White,
+                ColorReleased = Color4.White,
+                ColorPressed = Color4.White,
             };
         }
 
@@ -157,17 +157,17 @@ namespace Engine.BuiltIn.UI
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="releasedTextureRect">Released texture rectangle</param>
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
-        public static UIButtonDescription DefaultTwoStateButton(string textureFileName, Color4 releasedTextureRect, Color4 pressedTextureRect)
+        public static UIButtonDescription DefaultTwoStateButton(string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect)
         {
             return new()
             {
                 TwoStateButton = true,
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = releasedTextureRect,
-                ColorReleased = Color.White,
+                ColorReleased = Color4.White,
                 TexturePressed = textureFileName,
                 TexturePressedUVMap = pressedTextureRect,
-                ColorPressed = Color.White,
+                ColorPressed = Color4.White,
             };
         }
         /// <summary>
@@ -231,10 +231,10 @@ namespace Engine.BuiltIn.UI
                 Font = font,
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = releasedTextureRect,
-                ColorReleased = Color.White,
+                ColorReleased = Color4.White,
                 TexturePressed = textureFileName,
                 TexturePressedUVMap = pressedTextureRect,
-                ColorPressed = Color.White,
+                ColorPressed = Color4.White,
             };
         }
 

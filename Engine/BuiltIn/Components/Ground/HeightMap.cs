@@ -91,7 +91,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                     //Flip coordinates
                     heights[h, w] = heightBitmap.GetPixel(ww, hh).Blue;
-                    colors[h, w] = colorBitmap?.GetPixel(ww, hh) ?? new(0.5f, 0.5f, 0.5f, 1f);
+                    colors[h, w] = colorBitmap?.GetPixel(ww, hh) ?? Color.Gray;
                 }
             }
         }
@@ -436,7 +436,7 @@ namespace Engine.BuiltIn.Components.Ground
                 h = Math.Clamp(h - m_FalloffData[depth, width], 0, 1);
             }
 
-            Color4 c = m_ColorData != null ? m_ColorData[depth, width] : new(Vector3.Lerp(Vector3.Zero, Vector3.One, h), 1f);
+            Color4 c = m_ColorData != null ? m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);
 
             float posX = depth * cellSize - totalDepth * 0.5f;
             float posY = h * cellHeight;

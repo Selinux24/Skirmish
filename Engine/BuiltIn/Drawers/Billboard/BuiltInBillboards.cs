@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Billboard
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Billboards drawer
     /// </summary>
@@ -37,7 +36,7 @@ namespace Engine.BuiltIn.Drawers.Billboard
             /// Tint color
             /// </summary>
             [FieldOffset(0)]
-            public Vector4 TintColor;
+            public Color4 TintColor;
 
             /// <summary>
             /// Material index

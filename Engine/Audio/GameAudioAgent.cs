@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Audio
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Audio agent
     /// </summary>

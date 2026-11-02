@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Manipulator controller base class
     /// </summary>

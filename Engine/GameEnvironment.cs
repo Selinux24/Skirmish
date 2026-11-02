@@ -25,7 +25,7 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public Color4 Background { get; set; } = new(0f, 0f, 0f, 1f);
+        public Color4 Background { get; set; } = Color4.Black;
         /// <summary>
         /// Gravity
         /// </summary>

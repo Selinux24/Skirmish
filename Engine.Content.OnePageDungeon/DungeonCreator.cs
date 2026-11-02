@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.Modular;
+using Engine.Modular.Persistence;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
-    using Engine.Mathematics;
-    using Engine.Modular;
-    using Engine.Modular.Persistence;
-
     /// <summary>
     /// Dungeon creator helper
     /// </summary>
@@ -89,19 +88,19 @@ namespace Engine.Content.OnePageDungeon
         /// <returns>Returns the wall directions enumeration</returns>
         private static WallDirections EvaluateDirection(RectI cell, IEnumerable<RectI> neis)
         {
-            var ctl = cell.TopLeft();
-            var ctr = cell.TopRight();
-            var cbl = cell.BottomLeft();
-            var cbr = cell.BottomRight();
+            var ctl = cell.TopLeft;
+            var ctr = cell.TopRight;
+            var cbl = cell.BottomLeft;
+            var cbr = cell.BottomRight;
 
             var cDirs = WallDirections.N | WallDirections.S | WallDirections.E | WallDirections.W;
 
             foreach (var nei in neis)
             {
-                var ntl = nei.TopLeft();
-                var ntr = nei.TopRight();
-                var nbl = nei.BottomLeft();
-                var nbr = nei.BottomRight();
+                var ntl = nei.TopLeft;
+                var ntr = nei.TopRight;
+                var nbl = nei.BottomLeft;
+                var nbr = nei.BottomRight;
 
                 if (ctl == nbl && ctr == nbr)
                 {

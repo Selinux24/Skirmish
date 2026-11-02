@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// 3D manipulator
     /// </summary>
@@ -505,7 +504,7 @@ namespace Engine
 
             var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
 
-            var newRotation = Quaternion.RotationAxis(Vector3.Normalize(axis), angle) * rotation;
+            var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 
             if (interpolationAmount > 0)
             {

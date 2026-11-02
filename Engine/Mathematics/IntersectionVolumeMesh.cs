@@ -59,16 +59,12 @@ namespace Engine.Mathematics
             return Intersection.MeshContainsMesh(this.mesh, mesh);
         }
 
-        /// <summary>
-        /// Implicit conversion between Triangle[] and IntersectionVolumeMesh
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator Triangle[](IntersectionVolumeMesh value)
         {
             return value.mesh?.ToArray();
         }
-        /// <summary>
-        /// Implicit conversion between IntersectionVolumeMesh and Triangle[]
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator IntersectionVolumeMesh(Triangle[] value)
         {
             return new IntersectionVolumeMesh(value);

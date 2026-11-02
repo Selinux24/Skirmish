@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Position texture format
     /// </summary>

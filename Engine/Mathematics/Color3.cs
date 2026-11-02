@@ -644,6 +644,21 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        public static implicit operator System.Drawing.Color(Color3 value)
+        {
+            return System.Drawing.Color.FromArgb(
+                255, 
+                (int)(value.Red * 255f), 
+                (int)(value.Green * 255f), 
+                (int)(value.Blue * 255f));
+        }
+        /// <inheritdoc/>
+        public static implicit operator Color3(System.Drawing.Color value)
+        {
+            return new(value.R, value.G, value.B);
+        }
+
+        /// <inheritdoc/>
         public static implicit operator Vortice.Mathematics.Color3(Color3 value)
         {
             return new(value.Red, value.Green, value.Blue);

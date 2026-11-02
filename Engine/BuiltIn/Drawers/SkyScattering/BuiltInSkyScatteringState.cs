@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Effect sky scatter state
     /// </summary>
@@ -47,7 +46,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
         /// <summary>
         /// Inverse light wave length
         /// </summary>
-        public Vector3 InvWaveLength4 { get; set; }
+        public Color3 InvWaveLength4 { get; set; }
         /// <summary>
         /// Scale
         /// </summary>
@@ -59,7 +58,7 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
         /// <summary>
         /// Back color
         /// </summary>
-        public Vector4 BackColor { get; set; }
+        public Color4 BackColor { get; set; }
         /// <summary>
         /// HDR exposure
         /// </summary>

@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Ray picking helper
     /// </summary>

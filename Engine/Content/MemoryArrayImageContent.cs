@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Image content array from memory
     /// </summary>

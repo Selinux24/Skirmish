@@ -204,7 +204,7 @@ namespace Engine
         /// <summary>
         /// Sun color
         /// </summary>
-        public Vector3 SunColor { get; set; } = Vector3.One;
+        public Color3 SunColor { get; set; } = Color3.White;
         /// <summary>
         /// Gets or sets the shadow intensity value
         /// </summary>
@@ -578,7 +578,7 @@ namespace Engine
         /// </summary>
         /// <param name="timeOfDay">Time of day class</param>
         /// <returns>Returns the color base on time of day meridian angle</returns>
-        private Vector3 GetSunColor(TimeOfDay timeOfDay)
+        private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
             float angle = Math.Clamp(timeOfDay.MeridianAngle - Helper.PiOver2, 0, Helper.Pi);
 
@@ -591,7 +591,7 @@ namespace Engine
                         var from = SunColorPalette[i - 1];
                         var to = SunColorPalette[i];
                         float amount = (angle - from.Item1) / (to.Item1 - from.Item1);
-                        return Vector3.Lerp(from.Item2, to.Item2, amount);
+                        return Color3.Lerp(from.Item2, to.Item2, amount);
                     }
                     else
                     {
@@ -600,7 +600,7 @@ namespace Engine
                 }
             }
 
-            return Vector3.One;
+            return Color3.White;
         }
 
         /// <summary>
@@ -622,7 +622,7 @@ namespace Engine
         {
             FogStart = 0;
             FogRange = 0;
-            BaseFogColor = FogColor = Color.Transparent;
+            BaseFogColor = FogColor = Color.Black;
         }
 
         /// <inheritdoc/>

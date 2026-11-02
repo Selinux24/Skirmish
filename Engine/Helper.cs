@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -9,21 +10,22 @@ using System.Threading;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Helper functions
     /// </summary>
     public static class Helper
     {
+        #region Maths
+
         /// <summary>
         /// One radian
         /// </summary>
         public const float Radian = 0.0174532924f;
+
         /// <summary>
         /// Zero tolerance value
         /// </summary>
-        public const float ZeroTolerance = Vortice.Mathematics.MathHelper.ZeroTolerance;
+        public const float ZeroTolerance = 1e-6f;
         /// <summary>
         /// Zero tolerance vector
         /// </summary>
@@ -37,20 +39,54 @@ namespace Engine
         /// </summary>
         public static readonly Vector4 ZeroToleranceVector4 = new(ZeroTolerance);
 
-        public const float Pi = Vortice.Mathematics.MathHelper.Pi;
-        public const float TwoPi = Vortice.Mathematics.MathHelper.TwoPi;
-        public const float PiOver2 = Vortice.Mathematics.MathHelper.PiOver2;
-        public const float PiOver4 = Vortice.Mathematics.MathHelper.PiOver4;
+        /// <summary>
+        /// Pi number
+        /// </summary>
+        public const float Pi = MathF.PI;
+        /// <summary>
+        /// Two Pi number
+        /// </summary>
+        public const float TwoPi = MathF.PI * 2f;
+        /// <summary>
+        /// Pi over 2 number
+        /// </summary>
+        public const float PiOver2 = MathF.PI * 0.5f;
+        /// <summary>
+        /// Pi over 4 number
+        /// </summary>
+        public const float PiOver4 = MathF.PI * 0.25f;
 
-        #region Maths
-
+        /// <summary>
+        /// Checks if a - b are almost equals within a float epsilon.
+        /// </summary>
+        /// <param name="a">The left value to compare.</param>
+        /// <param name="b">The right value to compare.</param>
+        /// <param name="epsilon">Epsilon value</param>
+        /// <returns><c>true</c> if a almost equal to b within a float epsilon, <c>false</c> otherwise</returns>
+        public static bool WithinEpsilon(float a, float b, float epsilon)
+        {
+            float num = a - b;
+            return ((-epsilon <= num) && (num <= epsilon));
+        }
+        /// <summary>
+        /// Gets whether the specified value is almost zero, within a float epsilon.
+        /// </summary>
+        /// <param name="a">The value to check.</param>
+        /// <param name="epsilon">The epsilon value.</param>
+        /// <returns><c>true</c> if the value is almost zero, <c>false</c> otherwise.</returns>
         public static bool IsZero(float a, float epsilon = ZeroTolerance)
         {
             return Math.Abs(a) < epsilon;
         }
-        public static bool IsOne(float a)
+        /// <summary>
+        /// Gets whether the specified value is almost one, within a float epsilon.
+        /// </summary>
+        /// <param name="a">The value to check.</param>
+        /// <param name="epsilon">The epsilon value.</param>
+        /// <returns><c>true</c> if the value is almost one, <c>false</c> otherwise.</returns>
+        public static bool IsOne(float a, float epsilon = ZeroTolerance)
         {
-            return IsZero(a - 1.0f);
+            return IsZero(a - 1.0f, epsilon);
         }
         /// <summary>
         /// Checks if a and b are almost equals, taking into account the magnitude of floating point numbers (unlike <see cref="WithinEpsilon"/> method). See Remarks.
@@ -86,19 +122,13 @@ namespace Engine
             const int maxUlp = 4;
             return (ulp <= maxUlp);
         }
-        /// <summary>
-        /// Checks if a - b are almost equals within a float epsilon.
-        /// </summary>
-        /// <param name="a">The left value to compare.</param>
-        /// <param name="b">The right value to compare.</param>
-        /// <param name="epsilon">Epsilon value</param>
-        /// <returns><c>true</c> if a almost equal to b within a float epsilon, <c>false</c> otherwise</returns>
-        public static bool WithinEpsilon(float a, float b, float epsilon)
-        {
-            float num = a - b;
-            return ((-epsilon <= num) && (num <= epsilon));
-        }
 
+        /// <summary>
+        /// Gets the remainder of the division of the specified value by the specified divisor.
+        /// </summary>
+        /// <param name="value">The value to divide.</param>
+        /// <param name="mod">The divisor.</param>
+        /// <returns>The remainder of the division.</returns>
         public static float Mod(float value, float mod)
         {
             if (mod == 0f) return value;
@@ -106,13 +136,23 @@ namespace Engine
             return value % mod;
         }
 
-        public static float DegreesToRadians(float d)
+        /// <summary>
+        /// Converts degrees to radians.
+        /// </summary>
+        /// <param name="degree">The degree value to convert.</param>
+        /// <returns>The equivalent value in radians.</returns>
+        public static float DegreesToRadians(float degree)
         {
-            return Vortice.Mathematics.MathHelper.ToRadians(d);
+            return degree * (Pi / 180.0f);
         }
-        public static float RadiansToDegrees(float d)
+        /// <summary>
+        /// Converts radians to degrees
+        /// </summary>
+        /// <param name="radians">The radian value to convert.</param>
+        /// <returns>The equivalent value in degrees.</returns>
+        public static float RadiansToDegrees(float radians)
         {
-            return Vortice.Mathematics.MathHelper.ToDegrees(d);
+            return radians * (180.0f / Pi);
         }
 
         /// <summary>
@@ -851,130 +891,6 @@ namespace Engine
             {
                 source.TryTake(out T _);
             }
-        }
-
-        #endregion
-
-        #region Transforms
-
-        /// <summary>
-        /// Gets the screen coordinates from the specified 3D point
-        /// </summary>
-        /// <param name="point">3D point</param>
-        /// <param name="viewPort">View port</param>
-        /// <param name="wvp">World * View * Projection</param>
-        /// <param name="isInsideScreen">Returns true if the resulting point is inside the screen</param>
-        /// <returns>Returns the resulting screen coordinates</returns>
-        public static Vector2 UnprojectToScreen(Vector3 point, Vortice.Mathematics.Viewport viewPort, Matrix4x4 wvp, out bool isInsideScreen)
-        {
-            isInsideScreen = true;
-
-            // Go to projection space
-            var projected = Vector3.Transform(point, wvp);
-
-            // Clip
-            // 
-            //  -Wp < Xp <= Wp 
-            //  -Wp < Yp <= Wp 
-            //  0 < Zp <= Wp 
-            // 
-            if (projected.X < -projected.W)
-            {
-                projected.X = -projected.W;
-                isInsideScreen = false;
-            }
-            if (projected.X > projected.W)
-            {
-                projected.X = projected.W;
-                isInsideScreen = false;
-            }
-            if (projected.Y < -projected.W)
-            {
-                projected.Y = -projected.W;
-                isInsideScreen = false;
-            }
-            if (projected.Y > projected.W)
-            {
-                projected.Y = projected.W;
-                isInsideScreen = false;
-            }
-            if (projected.Z < 0)
-            {
-                projected.Z = 0;
-                isInsideScreen = false;
-            }
-            if (projected.Z > projected.W)
-            {
-                projected.Z = projected.W;
-                isInsideScreen = false;
-            }
-
-            // Divide by w, to move from homogeneous coordinates to 3D coordinates again 
-            projected /= projected.W;
-
-            // Perform the viewport scaling, to get the appropiate coordinates inside the viewport 
-            projected.X = ((float)(((projected.X + 1.0) * 0.5) * viewPort.Width)) + viewPort.X;
-            projected.Y = ((float)(((1.0 - projected.Y) * 0.5) * viewPort.Height)) + viewPort.Y;
-            projected.Z = (projected.Z * (viewPort.MaxDepth - viewPort.MinDepth)) + viewPort.MinDepth;
-
-            return projected.XY;
-        }
-
-        #endregion
-
-        #region Rect & RectI
-
-        public static Vector2I TopLeft(this RectI rectangle)
-        {
-            return new Vector2I(rectangle.Top, rectangle.Left);
-        }
-        public static Vector2I TopRight(this RectI rectangle)
-        {
-            return new Vector2I(rectangle.Top, rectangle.Right);
-        }
-        public static Vector2I BottomLeft(this RectI rectangle)
-        {
-            return new Vector2I(rectangle.Bottom, rectangle.Left);
-        }
-        public static Vector2I BottomRight(this RectI rectangle)
-        {
-            return new Vector2I(rectangle.Bottom, rectangle.Right);
-        }
-        public static Vector2I Center(this RectI rectangle)
-        {
-            return new Vector2I(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
-        }
-        public static Vector2I[] GetVertices(this RectI rectangle)
-        {
-            return
-            [
-                new (rectangle.Left, rectangle.Top),
-                new (rectangle.Right, rectangle.Top),
-                new (rectangle.Right, rectangle.Bottom),
-                new (rectangle.Left, rectangle.Bottom),
-            ];
-        }
-        public static Vector2[] GetVertices(this Rect rectangle)
-        {
-            return
-            [
-                new (rectangle.Left, rectangle.Top),
-                new (rectangle.Right, rectangle.Top),
-                new (rectangle.Right, rectangle.Bottom),
-                new (rectangle.Left, rectangle.Bottom),
-            ];
-        }
-        public static Rect Scale(this Rect rectangle, float scale)
-        {
-            float width = rectangle.Width * scale;
-            float height = rectangle.Height * scale;
-            float dWidth = width - rectangle.Width;
-            float dHeight = height - rectangle.Height;
-
-            float left = rectangle.Left - (dWidth * 0.5f);
-            float top = rectangle.Top - (dHeight * 0.5f);
-
-            return new(left, top, width, height);
         }
 
         #endregion

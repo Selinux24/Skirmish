@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Noise map
     /// </summary>
@@ -149,7 +148,7 @@ namespace Engine
             {
                 for (int x = 0; x < width; x++)
                 {
-                    image.SetPixel(x, y, Vector3.Lerp(Vector3.One, Vector3.Zero, Map[x, y]));
+                    image.SetPixel(x, y, Color4.Lerp(Color4.White, Color4.Black, Map[x, y]));
                 }
             }
 

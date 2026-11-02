@@ -1,4 +1,5 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Position normal texure and tangent vertex format
     /// </summary>

@@ -50,16 +50,12 @@ namespace Engine.Mathematics
             return Intersection.BoxContainsMesh(bbox, mesh);
         }
 
-        /// <summary>
-        /// Implicit conversion between BoundingBox and IntersectionVolumeAxisAlignedBox
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator BoundingBox(IntersectionVolumeAxisAlignedBox value)
         {
             return value.bbox;
         }
-        /// <summary>
-        /// Implicit conversion between IntersectionVolumeAxisAlignedBox and BoundingBox
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator IntersectionVolumeAxisAlignedBox(BoundingBox value)
         {
             return new IntersectionVolumeAxisAlignedBox(value);

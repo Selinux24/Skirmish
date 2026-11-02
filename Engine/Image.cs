@@ -31,9 +31,19 @@ namespace Engine
         /// <param name="width">Width value</param>
         /// <param name="height">Height value</param>
         /// <param name="color">Color value</param>
+        public readonly void SetPixel(int width, int height, Color color)
+        {
+            colors[width, height] = color;
+        }
+        /// <summary>
+        /// Sets the pixel color value at position
+        /// </summary>
+        /// <param name="width">Width value</param>
+        /// <param name="height">Height value</param>
+        /// <param name="color">Color value</param>
         public readonly void SetPixel(int width, int height, Color3 color)
         {
-            colors[width, height] = new(color, 1f);
+            colors[width, height] = (Color4)color;
         }
         /// <summary>
         /// Sets the pixel color value at position

@@ -11,15 +11,15 @@ namespace Engine.Content
         /// <summary>
         /// Transparent
         /// </summary>
-        public static readonly CntColor Transparent = new(0, 0, 0, 0);
+        public static readonly CntColor Transparent = new(0f, 0f, 0f, 0f);
         /// <summary>
         /// White
         /// </summary>
-        public static readonly CntColor White = new(0, 0, 0, 1);
+        public static readonly CntColor White = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// Black
         /// </summary>
-        public static readonly CntColor Black = new(1, 1, 1, 1);
+        public static readonly CntColor Black = new(1f, 1f, 1f, 1f);
 
         /// <summary>
         /// The red component of the color.
@@ -42,6 +42,28 @@ namespace Engine.Content
         /// Initializes a new instance of the <see cref="CntColor"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
+        public CntColor(byte value)
+        {
+            R = value / 255f;
+            G = value / 255f;
+            B = value / 255f;
+            A = value / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="value">The value that will be assigned to all components.</param>
+        public CntColor(int value)
+        {
+            R = value / 255f;
+            G = value / 255f;
+            B = value / 255f;
+            A = value / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="value">The value that will be assigned to all components.</param>
         public CntColor(float value)
         {
             R = value;
@@ -56,12 +78,80 @@ namespace Engine.Content
         /// <param name="g">Initial value for the green component of the color.</param>
         /// <param name="b">Initial value for the blue component of the color.</param>
         /// <param name="a">Initial value for the alpha component of the color.</param>
+        public CntColor(byte r, byte g, byte b, byte a)
+        {
+            R = r / 255f;
+            G = g / 255f;
+            B = b / 255f;
+            A = a / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="r">Initial value for the red component of the color.</param>
+        /// <param name="g">Initial value for the green component of the color.</param>
+        /// <param name="b">Initial value for the blue component of the color.</param>
+        /// <param name="a">Initial value for the alpha component of the color.</param>
+        public CntColor(int r, int g, int b, int a)
+        {
+            R = r / 255f;
+            G = g / 255f;
+            B = b / 255f;
+            A = a / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="r">Initial value for the red component of the color.</param>
+        /// <param name="g">Initial value for the green component of the color.</param>
+        /// <param name="b">Initial value for the blue component of the color.</param>
+        /// <param name="a">Initial value for the alpha component of the color.</param>
         public CntColor(float r, float g, float b, float a)
         {
             R = r;
             G = g;
             B = b;
             A = a;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the R, G, B and A components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public CntColor(byte[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+
+            if (values.Length != 4)
+            {
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for ColorRGBA.");
+            }
+
+            R = values[0] / 255f;
+            G = values[1] / 255f;
+            B = values[2] / 255f;
+            A = values[3] / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CntColor"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the R, G, B and A components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public CntColor(int[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+
+            if (values.Length != 4)
+            {
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for ColorRGBA.");
+            }
+
+            R = values[0] / 255f;
+            G = values[1] / 255f;
+            B = values[2] / 255f;
+            A = values[3] / 255f;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="CntColor"/> struct.
@@ -147,17 +237,17 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
-            if (obj is not CntColor)
-                return false;
+            if (obj is not CntColor) return false;
 
             var strongValue = (CntColor)obj;
             return Equals(ref strongValue);
         }
-
+        /// <inheritdoc/>
         public readonly bool Equals(ref CntColor other)
         {
             return Helper.NearEqual(other.R, R) && Helper.NearEqual(other.G, G) && Helper.NearEqual(other.B, B) && Helper.NearEqual(other.A, A);
         }
+
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {

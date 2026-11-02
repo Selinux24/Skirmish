@@ -1,9 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Per mesh single data structure
     /// </summary>
@@ -96,7 +95,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Vector4 TintColor;
+        public Color4 TintColor;
 
         /// <summary>
         /// Material index
@@ -131,7 +130,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Vector4 TintColor;
+        public Color4 TintColor;
 
         /// <summary>
         /// Material index
@@ -202,7 +201,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// Tint color
         /// </summary>
         [FieldOffset(0)]
-        public Vector4 TintColor;
+        public Color4 TintColor;
 
         /// <summary>
         /// Scattering coefficients

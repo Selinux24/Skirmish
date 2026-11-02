@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// OcTree node
     /// </summary>

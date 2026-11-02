@@ -69,6 +69,27 @@ namespace Engine.Mathematics
         public int Bottom = y + height;
 
         /// <summary>
+        /// Gets the top left corner of the rectangle.
+        /// </summary>
+        public readonly Vector2I TopLeft => new(Top, Left);
+        /// <summary>
+        /// Gets the top right corner of the rectangle.
+        /// </summary>
+        public readonly Vector2I TopRight => new(Top, Right);
+        /// <summary>
+        /// Gets the bottom left corner of the rectangle.
+        /// </summary>
+        public readonly Vector2I BottomLeft => new(Bottom, Left);
+        /// <summary>
+        /// Gets the bottom right corner of the rectangle.
+        /// </summary>
+        public readonly Vector2I BottomRight => new(Bottom, Right);
+        /// <summary>
+        /// Gets the center of the rectangle.
+        /// </summary>
+        public readonly Vector2I Center => new(Left + (Width / 2), Top + (Height / 2));
+
+        /// <summary>
         /// Gets or sets the X position.
         /// </summary>
         /// <value>The X position.</value>
@@ -112,6 +133,7 @@ namespace Engine.Mathematics
             readonly get => Bottom - Top;
             set { Bottom = Top + value; }
         }
+
         /// <summary>
         /// Gets a value that indicates whether the rectangle is empty.
         /// </summary>
@@ -119,6 +141,20 @@ namespace Engine.Mathematics
         ///   <c>true</c> if [is empty]; otherwise, <c>false</c>.
         /// </value>
         public readonly bool IsEmpty => (Width == 0) && (Height == 0) && (X == 0) && (Y == 0);
+
+        /// <summary>
+        /// Get the vertices of the rectangle in clockwise order starting from top left.
+        /// </summary>
+        public readonly Vector2I[] GetVertices()
+        {
+            return
+            [
+                new (Left, Top),
+                new (Right, Top),
+                new (Right, Bottom),
+                new (Left, Bottom),
+            ];
+        }
 
         /// <summary>Changes the position of the rectangle.</summary>
         /// <param name="offsetX">Change in the x-position.</param>
@@ -247,13 +283,7 @@ namespace Engine.Mathematics
             result = new(left, top, right - left, bottom - top);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
             if (obj is not RectI) return false;
@@ -261,100 +291,77 @@ namespace Engine.Mathematics
             var strongValue = (RectI)obj;
             return Equals(ref strongValue);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="RectI"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="RectI"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="RectI"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref RectI other)
         {
             return other.Left == Left && other.Top == Top && other.Right == Right && other.Bottom == Bottom;
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="RectI"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="RectI"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="RectI"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(RectI other)
         {
             return Equals(ref other);
         }
 
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="left">The left.</param>
-        /// <param name="right">The right.</param>
-        /// <returns>The result of the operator.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(RectI left, RectI right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="left">The left.</param>
-        /// <param name="right">The right.</param>
-        /// <returns>The result of the operator.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(RectI left, RectI right)
         {
             return !left.Equals(ref right);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="System.Drawing.Rectangle"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="System.Drawing.Rectangle"/> structure.</returns>
+
+        /// <inheritdoc/>
+        public static implicit operator Rect(RectI value)
+        {
+            return new(value.X, value.Y, value.Width, value.Height);
+        }
+        /// <inheritdoc/>
+        public static explicit operator RectI(Rect value)
+        {
+            return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
+        }
+
+        /// <inheritdoc/>
         public static explicit operator System.Drawing.Rectangle(RectI value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="Vortice.Mathematics.RectI"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="Vortice.Mathematics.RectI"/> structure.</returns>
-        public static explicit operator Vortice.Mathematics.RectI(RectI value)
-        {
-            return new(value.X, value.Y, value.Width, value.Height);
-        }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="System.Drawing.RectangleF"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="System.Drawing.RectangleF"/> structure.</returns>
+        /// <inheritdoc/>
         public static explicit operator System.Drawing.RectangleF(RectI value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
-        /// <summary>
-        /// Performs an explicit conversion to <see cref="Vortice.Mathematics.Rect"/> structure.
-        /// </summary>
-        /// <remarks>Performs direct float to int conversion, any fractional data is truncated.</remarks>
-        /// <param name="value">The source <see cref="Rect"/> value.</param>
-        /// <returns>A converted <see cref="Vortice.Mathematics.Rect"/> structure.</returns>
+
+        /// <inheritdoc/>
+        public static explicit operator Vortice.Mathematics.RectI(RectI value)
+        {
+            return new(value.X, value.Y, value.Width, value.Height);
+        }
+        /// <inheritdoc/>
         public static explicit operator Vortice.Mathematics.Rect(RectI value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
-        /// </returns>
+        /// <inheritdoc/>
+        public static implicit operator Vortice.RawRect(RectI value)
+        {
+            return new(value.Left, value.Top, value.Right, value.Bottom);
+        }
+        /// <inheritdoc/>
+        public static implicit operator RectI(Vortice.RawRect value)
+        {
+            return new(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
+        }
+
+        /// <inheritdoc/>
         public readonly override int GetHashCode()
         {
             return HashCode.Combine(Left, Top, Right, Bottom);

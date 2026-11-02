@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Instancing data
     /// </summary>
@@ -19,7 +18,7 @@ namespace Engine.BuiltIn.Format
     /// <param name="animationOffsetB">Second animation offset</param>
     /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInstancingData(Matrix4x4 local, Vector4 tintColor, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f) : IInstacingData
+    public struct VertexInstancingData(Matrix4x4 local, Color4 tintColor, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f) : IInstacingData
     {
         private const string LocalTransformString = "localTransform";
         private const string TintColorString = "tintColor";
@@ -37,7 +36,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor = tintColor;
+        public Color4 TintColor = tintColor;
         /// <summary>
         /// Texture index
         /// </summary>
@@ -69,7 +68,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="animationOffsetB">Second animation offset</param>
         /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
         public VertexInstancingData(Matrix4x4 local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f)
-            : this(local, new(1, 1, 1, 1), textureIndex, materialIndex, animationOffset, animationOffsetB, animationInterpolation)
+            : this(local, Color4.White, textureIndex, materialIndex, animationOffset, animationOffsetB, animationInterpolation)
         {
 
         }

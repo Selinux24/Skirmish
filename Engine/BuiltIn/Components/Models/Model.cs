@@ -65,7 +65,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = Color4.White;
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -194,7 +194,7 @@ namespace Engine.BuiltIn.Components.Models
                 return false;
             }
 
-            int count = 0;
+            uint count = 0;
 
             var dc = context.DeviceContext;
 
@@ -231,7 +231,7 @@ namespace Engine.BuiltIn.Components.Models
                     Material = meshMaterial,
                     UseAnisotropic = false,
                     TextureIndex = TextureIndex,
-                    TintColor = new(1f, 1f, 1f, 1f),
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
@@ -258,7 +258,7 @@ namespace Engine.BuiltIn.Components.Models
                 return false;
             }
 
-            int count = 0;
+            uint count = 0;
 
             var dc = context.DeviceContext;
 

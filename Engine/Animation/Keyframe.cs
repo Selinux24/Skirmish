@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Animation
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Animation keyframe
     /// </summary>

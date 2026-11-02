@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Drawer mesh state
     /// </summary>

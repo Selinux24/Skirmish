@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using Vortice.Direct3D11;
+    using StreamOutputElement = Vortice.Direct3D11.SODeclarationEntry;
 
     /// <summary>
     /// Description of a vertex element in a vertex buffer in an output slot.
@@ -11,9 +11,9 @@ namespace Engine.Common
     /// </remarks>
     public struct EngineStreamOutputElement(string semanticName, uint semanticIndex, byte startComponent, byte componentCount, byte outputSlot)
     {
-        public static explicit operator SODeclarationEntry(EngineStreamOutputElement obj)
+        public static explicit operator StreamOutputElement(EngineStreamOutputElement obj)
         {
-            return new SODeclarationEntry
+            return new()
             {
                 Stream = obj.Stream,
                 SemanticName = obj.SemanticName,
@@ -23,9 +23,9 @@ namespace Engine.Common
                 OutputSlot = obj.OutputSlot,
             };
         }
-        public static explicit operator EngineStreamOutputElement(SODeclarationEntry obj)
+        public static explicit operator EngineStreamOutputElement(StreamOutputElement obj)
         {
-            return new EngineStreamOutputElement
+            return new()
             {
                 Stream = obj.Stream,
                 SemanticName = obj.SemanticName,

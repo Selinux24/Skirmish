@@ -53,16 +53,12 @@ namespace Engine.Mathematics
             return Intersection.FrustumContainsMesh(frustum, mesh);
         }
 
-        /// <summary>
-        /// Implicit conversion between BoundingFrustum and IntersectionVolumeFrustum
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator BoundingFrustum(IntersectionVolumeFrustum value)
         {
             return value.frustum;
         }
-        /// <summary>
-        /// Implicit conversion between IntersectionVolumeFrustum and BoundingFrustum
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator IntersectionVolumeFrustum(BoundingFrustum value)
         {
             return new IntersectionVolumeFrustum(value);

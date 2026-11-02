@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Scene point light without direction
     /// </summary>

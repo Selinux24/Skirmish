@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Quad-tree node interface
     /// </summary>

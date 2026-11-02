@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// User interface panel
     /// </summary>

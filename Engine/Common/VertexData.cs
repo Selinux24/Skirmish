@@ -198,7 +198,7 @@ namespace Engine.Common
             if (result.HasChannel(VertexDataChannels.Position))
             {
                 var position = result.GetChannelValue<Vector3>(VertexDataChannels.Position);
-                result.SetChannelValue(VertexDataChannels.Position, Vector3.Transform(position, transform));
+                result.SetChannelValue(VertexDataChannels.Position, Vector3.TransformCoordinate(position, transform));
             }
 
             if (result.HasChannel(VertexDataChannels.Normal))

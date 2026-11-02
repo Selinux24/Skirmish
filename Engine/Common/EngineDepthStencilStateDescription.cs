@@ -161,11 +161,11 @@ namespace Engine.Common
         /// </summary>
         Replace = DXStencilOperation.Replace,
         /// <summary>
-        /// Increment the stencil value by 1, and clamp the result.
+        /// Increment the stencil value by 1, and compress the result.
         /// </summary>
         IncrementSaturate = DXStencilOperation.IncrementSaturate,
         /// <summary>
-        /// Decrement the stencil value by 1, and clamp the result.
+        /// Decrement the stencil value by 1, and compress the result.
         /// </summary>
         DecrementSaturate = DXStencilOperation.DecrementSaturate,
         /// <summary>

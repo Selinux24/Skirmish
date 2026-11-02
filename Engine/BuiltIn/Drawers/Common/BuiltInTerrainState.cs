@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Common;
+using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Effect sky scatter state
     /// </summary>
@@ -12,7 +11,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// <summary>
         /// Tint color
         /// </summary>
-        public Vector4 TintColor { get; set; }
+        public Color4 TintColor { get; set; }
         /// <summary>
         /// Scattering coefficients
         /// </summary>

@@ -37,7 +37,7 @@ namespace Engine.Common
         {
             var desc = EngineBlendStateDescription.Default();
 
-            return graphics.CreateBlendState(nameof(Default), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(Default), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates an alpha enabled blend state
@@ -59,7 +59,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(nameof(AlphaBlend), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(AlphaBlend), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates an alpha enabled conservative blend state
@@ -81,7 +81,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
 
-            return graphics.CreateBlendState(nameof(AlphaConservativeBlend), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(AlphaConservativeBlend), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a transparent enabled blend state
@@ -106,7 +106,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(nameof(Transparent), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(Transparent), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a transparent enabled conservative blend state
@@ -131,7 +131,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
 
-            return graphics.CreateBlendState(nameof(TransparentConservative), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(TransparentConservative), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates an additive blend state
@@ -153,7 +153,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(nameof(Additive), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(Additive), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a deferred composer blend state
@@ -188,7 +188,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(nameof(DeferredComposer), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(DeferredComposer), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a deferred composer transparent enabled blend state
@@ -225,7 +225,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(nameof(DeferredComposerTransparent), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(DeferredComposerTransparent), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a deferred composer alpha enabled blend state
@@ -261,7 +261,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(nameof(DeferredComposerAlpha), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(DeferredComposerAlpha), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a deferred composer additive enabled blend state
@@ -299,7 +299,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(nameof(DeferredComposerAdditive), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(DeferredComposerAdditive), desc, Color4.Transparent, uint.MaxValue);
         }
         /// <summary>
         /// Creates a deferred lighting blend state
@@ -319,7 +319,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-            return graphics.CreateBlendState(nameof(DeferredLighting), desc, Vector4.Zero, uint.MaxValue);
+            return graphics.CreateBlendState(nameof(DeferredLighting), desc, Color4.Transparent, uint.MaxValue);
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace Engine.Common
         /// <param name="blendState">Blend state</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
-        internal EngineBlendState(string name, BlendState blendState, Vector4 blendFactor, uint sampleMask)
+        internal EngineBlendState(string name, BlendState blendState, Color4 blendFactor, uint sampleMask)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A blend state name must be specified.");
             state = blendState ?? throw new ArgumentNullException(nameof(blendState), "A blend state must be specified.");

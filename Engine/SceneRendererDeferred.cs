@@ -1,15 +1,17 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using Vortice.DXGI;
-using System.Collections.Generic;
-using System.Linq;
 using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Deferred;
 using Engine.Common;
+using Engine.Mathematics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Deferred renderer class
     /// </summary>
@@ -617,7 +619,7 @@ namespace Engine
                 {
                     Target = Targets.UI,
                     ClearRT = true,
-                    ClearRTColor = new(0),
+                    ClearRTColor = Color4.Transparent,
                 };
                 DoForward(rt, uiComponents, CullUI, UIPass);
             });
@@ -798,7 +800,7 @@ namespace Engine
 
             //Set g-buffer render targets
             dc.SetRenderTargets(
-                geometryBuffer.Targets, true, new(0),
+                geometryBuffer.Targets, true, Color4.Transparent,
                 Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
         }
@@ -813,7 +815,7 @@ namespace Engine
 
             //Set light buffer to draw lights
             dc.SetRenderTargets(
-                lightBuffer.Targets, true, new(0),
+                lightBuffer.Targets, true, Color4.Transparent,
                 false);
         }
 

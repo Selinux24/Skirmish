@@ -1,8 +1,8 @@
-﻿namespace Engine
-{
-    using Engine.BuiltIn.Components.ShadowMapping;
-    using Engine.Mathematics;
+﻿using Engine.BuiltIn.Components.ShadowMapping;
+using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Directional light
     /// </summary>
@@ -21,7 +21,7 @@
             get
             {
                 float brightness = 0.8f;
-                var lightColor = new Vector3(1, 0.9607844f, 0.8078432f) * brightness;
+                var lightColor = new Color3(1, 0.9607844f, 0.8078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Key light",
@@ -41,13 +41,13 @@
             get
             {
                 float brightness = 0.5f;
-                var lightColor = new Vector3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
+                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Fill light",
                     false,
                     lightColor,
-                    Vector3.Zero,
+                    Color3.Black,
                     true,
                     new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
                     brightness);
@@ -61,7 +61,7 @@
             get
             {
                 float brightness = 0.1f;
-                var lightColor = new Vector3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
+                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
 
                 return new SceneLightDirectional(
                     "Back light",
@@ -130,7 +130,7 @@
         /// <param name="enabled">Lights is enabled</param>
         /// <param name="direction">Direction</param>
         /// <param name="brigthness">Brightness</param>
-        public SceneLightDirectional(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled, Vector3 direction, float brigthness)
+        public SceneLightDirectional(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialDirection = direction;

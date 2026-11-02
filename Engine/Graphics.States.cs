@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Graphic states management
     /// </summary>

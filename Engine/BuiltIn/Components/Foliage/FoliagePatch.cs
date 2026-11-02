@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.BuiltIn.Format;
+using Engine.Collections;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Format;
-    using Engine.Collections;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Foliage patch
     /// </summary>

@@ -720,6 +720,7 @@ namespace Engine.Mathematics
         {
             return new(left.Red * right.Red, left.Green * right.Green, left.Blue * right.Blue, left.Alpha * right.Alpha);
         }
+
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Color4 left, Color4 right)
@@ -770,6 +771,21 @@ namespace Engine.Mathematics
         public static implicit operator Color4(Vector4 value)
         {
             return new(value.X, value.Y, value.Z, value.W);
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator System.Drawing.Color(Color4 value)
+        {
+            return System.Drawing.Color.FromArgb(
+                (int)(value.Alpha * 255f), 
+                (int)(value.Red * 255f), 
+                (int)(value.Green * 255f), 
+                (int)(value.Blue * 255f));
+        }
+        /// <inheritdoc/>
+        public static implicit operator Color4(System.Drawing.Color value)
+        {
+            return new(value.R, value.G, value.B, value.A);
         }
 
         /// <inheritdoc/>

@@ -1,6 +1,10 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
+using Engine.BuiltIn.Components.ShadowMapping;
+using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,11 +13,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Components.ShadowMapping;
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.PostProcess;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Base scene renderer
     /// </summary>
@@ -63,7 +62,7 @@ namespace Engine.Common
             /// <summary>
             /// Render target clear color
             /// </summary>
-            public Vector4 ClearRTColor { get; set; }
+            public Color4 ClearRTColor { get; set; }
             /// <summary>
             /// Clears the depth buffer
             /// </summary>
@@ -1235,7 +1234,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindDefaultTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
+        private void BindDefaultTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -1251,7 +1250,7 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindObjectsTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindObjectsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -1264,7 +1263,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
+        private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
@@ -1275,7 +1274,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Vector4 clearRTColor)
+        private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
@@ -1287,7 +1286,7 @@ namespace Engine.Common
         /// <param name="target">Render target</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Vector4 clearRTColor)
+        private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(target.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Form.GetViewport()); //Set local viewport
@@ -1384,7 +1383,7 @@ namespace Engine.Common
                 var target = GetPostProcessingTargets(targetIndex);
 
                 //Bind the buffer as render target
-                BindPostProcessingTarget(dc, target, false, Vector4.Zero);
+                BindPostProcessingTarget(dc, target, false, Color4.Transparent);
 
                 //Draw effect into target, using the source texture
                 processingDrawer.Draw(dc, source, effect, state.State);

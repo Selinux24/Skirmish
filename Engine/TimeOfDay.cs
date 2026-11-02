@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Time of day
     /// </summary>

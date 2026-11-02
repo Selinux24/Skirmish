@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Common
 {
@@ -80,7 +81,7 @@ namespace Engine.Common
             desc.Filter = Filter.ComparisonMinMagMipLinear;
             desc.AddressU = TextureAddressMode.Border;
             desc.AddressV = TextureAddressMode.Border;
-            desc.BorderColor = new(1.0f, 1.0f, 1.0f, 1.0f);
+            desc.BorderColor = Color4.White;
             desc.ComparisonFunction = Comparison.LessEqual;
 
             return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualBorder)}", desc);

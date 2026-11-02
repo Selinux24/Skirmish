@@ -69,7 +69,7 @@ namespace Engine.BuiltIn.Drawers
                     ViewProjection = Matrix4x4.Transpose(context.Camera.ViewProjection),
                     OrthoViewProjection = Matrix4x4.Transpose(context.Form.GetOrthoProjectionMatrix()),
                     EyePosition = context.Camera.Position,
-                    ScreenResolution = (Vector2)context.Form.RenderRectangle.BottomRight,
+                    ScreenResolution = context.Form.RenderRectangle.BottomRight,
                     TotalTime = context.GameTime.TotalSeconds,
                     ElapsedTime = context.GameTime.ElapsedSeconds,
                     LevelOfDetail = context.LevelOfDetail,
@@ -129,7 +129,7 @@ namespace Engine.BuiltIn.Drawers
             /// Fog color
             /// </summary>
             [FieldOffset(176)]
-            public Vector4 FogColor;
+            public Color4 FogColor;
 
             /// <summary>
             /// Fog start distance
@@ -175,12 +175,12 @@ namespace Engine.BuiltIn.Drawers
             /// Ambient Up
             /// </summary>
             [FieldOffset(0)]
-            public Vector3 AmbientDown;
+            public Color3 AmbientDown;
             /// <summary>
             /// Ambient Down
             /// </summary>
             [FieldOffset(16)]
-            public Vector3 AmbientUp;
+            public Color3 AmbientUp;
 
             /// <inheritdoc/>
             public readonly uint GetStride()
@@ -285,13 +285,13 @@ namespace Engine.BuiltIn.Drawers
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Vector3 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Vector3 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light direction vector
@@ -446,13 +446,13 @@ namespace Engine.BuiltIn.Drawers
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Vector3 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Vector3 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light position
@@ -621,13 +621,13 @@ namespace Engine.BuiltIn.Drawers
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Vector3 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Vector3 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light position

@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private readonly ConcurrentDictionary<Vector4, List<T>> dictionary = new();
+        private readonly ConcurrentDictionary<Color4, List<T>> dictionary = new();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>

@@ -1,10 +1,9 @@
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Path of bezier curves
     /// </summary>

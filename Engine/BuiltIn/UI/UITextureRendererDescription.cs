@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace Engine.BuiltIn.UI
                 Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -53,7 +53,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -71,7 +71,7 @@ namespace Engine.BuiltIn.UI
                 Top = bounds.Top,
                 Width = bounds.Width,
                 Height = bounds.Height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -90,7 +90,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -111,7 +111,7 @@ namespace Engine.BuiltIn.UI
                 Top = top,
                 Width = width,
                 Height = height,
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
             };
         }
 

@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Water
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Water state
     /// </summary>
@@ -11,11 +10,11 @@ namespace Engine.BuiltIn.Components.Water
         /// <summary>
         /// Base color
         /// </summary>
-        public Vector3 BaseColor { get; set; }
+        public Color3 BaseColor { get; set; }
         /// <summary>
         /// Water color
         /// </summary>
-        public Vector4 WaterColor { get; set; }
+        public Color4 WaterColor { get; set; }
         /// <summary>
         /// Wave heigth
         /// </summary>

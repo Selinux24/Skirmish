@@ -50,7 +50,7 @@ namespace Engine.UI
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color.White;
+        public Color4 TintColor { get; set; } = Color4.White;
         /// <summary>
         /// Events enabled
         /// </summary>

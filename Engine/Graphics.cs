@@ -1,17 +1,16 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Helpers;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Vortice.Direct3D;
+using Vortice.Direct3D11;
+using Vortice.Direct3D11.Debug;
 using Vortice.DXGI;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Helpers;
-    using Engine.Mathematics;
-    using Vortice.Direct3D11;
-    using Vortice.Direct3D11.Debug;
-
     /// <summary>
     /// Graphics class
     /// </summary>
@@ -357,6 +356,27 @@ namespace Engine
             }
 
             return bestIndex;
+        }
+
+        /// <summary>
+        /// Gets desktop mode description
+        /// </summary>
+        /// <returns>Returns current desktop mode description</returns>
+        public static RectI GetDesktopMode()
+        {
+            using var factory = DXGI.CreateDXGIFactory1<IDXGIFactory1>();
+            using var factory5 = factory.QueryInterface<IDXGIFactory5>();
+            factory5.EnumAdapters1(0, out var adapter);
+            using (adapter)
+            {
+                using var adapter4 = adapter.QueryInterface<IDXGIAdapter4>();
+                adapter4.EnumOutputs(0, out var adapterOutput);
+                using (adapterOutput)
+                {
+                    using var adapterOutput6 = adapterOutput.QueryInterface<IDXGIOutput6>();
+                    return adapterOutput6.Description1.DesktopCoordinates;
+                }
+            }
         }
 
         /// <summary>

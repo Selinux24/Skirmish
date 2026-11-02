@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Animation;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry helper
     /// </summary>

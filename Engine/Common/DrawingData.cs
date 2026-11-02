@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh data
     /// </summary>
@@ -311,7 +310,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            return GetPoints(Mathematics.Matrix4x4.Identity, refresh);
+            return GetPoints(Matrix4x4.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -319,7 +318,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Mathematics.Matrix4x4 transform, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(refresh))
@@ -339,9 +338,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Mathematics.Matrix4x4> boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
-            return GetPoints(Mathematics.Matrix4x4.Identity, boneTransforms, refresh);
+            return GetPoints(Matrix4x4.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -350,7 +349,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Mathematics.Matrix4x4 transform, IEnumerable<Mathematics.Matrix4x4> boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(boneTransforms, refresh))
@@ -372,7 +371,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            return GetTriangles(Mathematics.Matrix4x4.Identity, refresh);
+            return GetTriangles(Matrix4x4.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -380,7 +379,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Mathematics.Matrix4x4 transform, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix4x4 transform, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(refresh))
@@ -399,9 +398,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(IEnumerable<Mathematics.Matrix4x4> boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
-            return GetTriangles(Mathematics.Matrix4x4.Identity, boneTransforms, refresh);
+            return GetTriangles(Matrix4x4.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -410,7 +409,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Mathematics.Matrix4x4 transform, IEnumerable<Mathematics.Matrix4x4> boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(boneTransforms, refresh))

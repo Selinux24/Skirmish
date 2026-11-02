@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Fonts drawer
     /// </summary>

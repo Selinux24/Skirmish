@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-    using Vortice.DXGI;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Drawing methods of buffer manager

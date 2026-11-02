@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Vortice.D3DCompiler;
+using Vortice.Direct3D;
+using Vortice.Direct3D11;
 
 namespace Engine
 {
-    using Vortice.D3DCompiler;
-    using Vortice.Direct3D;
-    using Vortice.Direct3D11;
-
     /// <summary>
     /// Graphics shaders management
     /// </summary>

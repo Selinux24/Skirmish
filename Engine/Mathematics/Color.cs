@@ -948,6 +948,17 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        public static implicit operator System.Drawing.Color(Color value)
+        {
+            return System.Drawing.Color.FromArgb(value.A, value.R, value.G, value.B);
+        }
+        /// <inheritdoc/>
+        public static implicit operator Color(System.Drawing.Color value)
+        {
+            return new(value.R, value.G, value.B, value.A);
+        }
+
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return ToString(CultureInfo.CurrentCulture);

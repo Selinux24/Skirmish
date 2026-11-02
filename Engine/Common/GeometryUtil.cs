@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Geometry utilities
     /// </summary>
@@ -3363,8 +3362,7 @@ namespace Engine.Common
                 matrix *= Matrix4x4.RotationAxis(axis, angle);
             }
 
-            Matrix4x4.Invert(ref matrix, out var result);
-            return result;
+            return Matrix4x4.Invert(matrix);
         }
     }
 }

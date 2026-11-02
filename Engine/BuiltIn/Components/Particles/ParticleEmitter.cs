@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Content.Persistence;
+using Engine.Mathematics;
+using System;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Content.Persistence;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Particle emitter
     /// </summary>
@@ -313,7 +312,7 @@ namespace Engine.BuiltIn.Components.Particles
         {
             float maxActiveParticles = maxParticleDuration * (1f / EmissionRate);
 
-            return (uint)(maxActiveParticles > (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
+            return (uint)(maxActiveParticles > (uint)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
 
         /// <inheritdoc/>

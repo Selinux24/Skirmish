@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,10 +9,6 @@ using System.Linq;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Font map
     /// </summary>
@@ -492,7 +491,7 @@ namespace Engine.UI
         /// <param name="indexList">Index list to fill</param>
         private void MapChar(
             FontMapChar chr,
-            Vector4 color,
+            Color4 color,
             ref Vector2 pos,
             ref FontMapSentenceDescriptor<T> desc)
         {

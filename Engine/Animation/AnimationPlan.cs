@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Animation
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Animation plan for animation controller
     /// </summary>

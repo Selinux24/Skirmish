@@ -47,7 +47,7 @@ namespace Engine.BuiltIn.UI
             return new()
             {
                 Textures = [fileName],
-                BaseColor = Color.White,
+                BaseColor = Color4.White,
                 Width = width,
                 Height = height,
             };

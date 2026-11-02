@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Model part
     /// </summary>
@@ -25,8 +24,7 @@ namespace Engine.BuiltIn.Components.Models
                 var parentTransform = Parent?.InitialWorldTransform ?? Matrix4x4.Identity;
 
                 // Transform to local
-                Matrix4x4.Invert(ref parentTransform, out var inv);
-                return inv * InitialWorldTransform;
+                return Matrix4x4.Invert(parentTransform) * InitialWorldTransform;
             }
         }
         /// <inheritdoc/>
@@ -64,8 +62,7 @@ namespace Engine.BuiltIn.Components.Models
         public Matrix4x4 GetPartTransform()
         {
             // Calculate the part's world transform
-            var inv = Matrix4x4.Invert(InitialWorldTransform);
-            var worldTransform = inv * Manipulator.LocalTransform * InitialWorldTransform;
+            var worldTransform = Matrix4x4.Invert(InitialWorldTransform) * Manipulator.LocalTransform * InitialWorldTransform;
 
             // Get the parent's part world transform, if any
             var parentTransform = Parent?.GetPartTransform() ?? Matrix4x4.Identity;

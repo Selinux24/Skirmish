@@ -67,7 +67,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Wave length
         /// </summary>
-        private Vector3 wavelength;
+        private Color3 wavelength;
         /// <summary>
         /// Sphere inner radius
         /// </summary>
@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Inverse wave length * 4
         /// </summary>
-        public Vector3 InvWaveLength4 { get; private set; }
+        public Color3 InvWaveLength4 { get; private set; }
         /// <summary>
         /// Scattering Scale
         /// </summary>
@@ -147,7 +147,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Vector3 WaveLength
+        public Color3 WaveLength
         {
             get
             {
@@ -156,10 +156,10 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 wavelength = value;
-                InvWaveLength4 = new Vector3(
-                    1f / MathF.Pow(value.X, 4.0f),
-                    1f / MathF.Pow(value.Y, 4.0f),
-                    1f / MathF.Pow(value.Z, 4.0f));
+                InvWaveLength4 = new Color3(
+                    1f / MathF.Pow(value.Red, 4.0f),
+                    1f / MathF.Pow(value.Green, 4.0f),
+                    1f / MathF.Pow(value.Blue, 4.0f));
             }
         }
         /// <summary>
@@ -471,7 +471,7 @@ namespace Engine.BuiltIn.Components.Skies
                 samplePoint += sampleRay;
             }
 
-            var rayleighColor = frontColor * ((Color3)InvWaveLength4 * rayleighBrightness);
+            var rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
 
             var direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));

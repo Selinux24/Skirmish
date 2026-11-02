@@ -1,17 +1,15 @@
-﻿using Logger;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using Logger;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Vortice.DXGI;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Game class
     /// </summary>
@@ -231,27 +229,6 @@ namespace Engine
         public event GameStatusCollectedHandler GameStatusCollected;
 
         /// <summary>
-        /// Gets desktop mode description
-        /// </summary>
-        /// <returns>Returns current desktop mode description</returns>
-        private static OutputDescription1 GetDesktopMode()
-        {
-            using var factory = DXGI.CreateDXGIFactory1<IDXGIFactory1>();
-            using var factory5 = factory.QueryInterface<IDXGIFactory5>();
-            factory5.EnumAdapters1(0, out var adapter);
-            using (adapter)
-            {
-                using var adapter4 = adapter.QueryInterface<IDXGIAdapter4>();
-                adapter4.EnumOutputs(0, out var adapterOutput);
-                using (adapterOutput)
-                {
-                    using var adapterOutput6 = adapterOutput.QueryInterface<IDXGIOutput6>();
-                    return adapterOutput6.Description1;
-                }
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Name, for the game form</param>
@@ -342,11 +319,11 @@ namespace Engine
             bool isFullScreen = fullScreen;
             if (screenWidth == 0 || screenHeight == 0)
             {
-                var mode = GetDesktopMode();
+                var coords = Graphics.GetDesktopMode();
 
                 isFullScreen = true;
-                screenWidth = mode.DesktopCoordinates.Right - mode.DesktopCoordinates.Left;
-                screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
+                screenWidth = coords.Width;
+                screenHeight = coords.Height;
             }
 
             Form = EngineServiceFactory.Instance<IEngineForm>();

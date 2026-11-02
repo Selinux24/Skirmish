@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Audio
 {
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Audio manager
     /// </summary>

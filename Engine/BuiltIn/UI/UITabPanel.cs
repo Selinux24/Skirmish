@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.UI;
-
     /// <summary>
     /// Tab Panel
     /// </summary>
@@ -67,7 +66,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Selected button color
         /// </summary>
-        private Vector4 selectedColor;
+        private Color4 selectedColor;
 
         /// <summary>
         /// Background
@@ -227,7 +226,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Gets or sets the button selected color
         /// </summary>
-        public Vector4 SelectedColor
+        public Color4 SelectedColor
         {
             get
             {

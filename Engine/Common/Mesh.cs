@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh
     /// </summary>
@@ -66,11 +65,11 @@ namespace Engine.Common
             }
         }
         /// <inheritdoc/>
-        public int Count
+        public uint Count
         {
             get
             {
-                int count = (int)(IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0);
+                uint count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
                 return Topology switch
                 {
                     Topology.LineList => count / 2,

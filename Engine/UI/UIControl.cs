@@ -2,7 +2,6 @@
 using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -407,7 +406,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Vector2)AbsoluteRectangle.Center;
+                return AbsoluteRectangle.Center;
             }
         }
 
@@ -718,11 +717,11 @@ namespace Engine.UI
             if (PivotAnchor.HasFlag(PivotAnchors.Parent)) rect = Parent.AbsoluteRectangle;
             return PivotAnchor switch
             {
-                PivotAnchors.TopLeft => (Vector2)rect.TopLeft,
-                PivotAnchors.TopRight => (Vector2)rect.TopRight,
-                PivotAnchors.BottomLeft => (Vector2)rect.BottomLeft,
-                PivotAnchors.BottomRight => (Vector2)rect.BottomRight,
-                _ => (Vector2)rect.Center,
+                PivotAnchors.TopLeft => rect.TopLeft,
+                PivotAnchors.TopRight => rect.TopRight,
+                PivotAnchors.BottomLeft => rect.BottomLeft,
+                PivotAnchors.BottomRight => rect.BottomRight,
+                _ => rect.Center,
             };
         }
 
@@ -758,7 +757,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseOverEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseOverEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseOver?.Invoke(this, new MouseEventArgs
             {
@@ -771,7 +770,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseEnterEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseEnterEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseEnter?.Invoke(this, new MouseEventArgs
             {
@@ -784,7 +783,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseLeaveEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseLeaveEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseLeave?.Invoke(this, new MouseEventArgs
             {
@@ -797,7 +796,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FirePressedEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FirePressedEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MousePressed?.Invoke(this, new MouseEventArgs
             {
@@ -810,7 +809,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="justPressedButtons">Just pressed buttons</param>
-        protected virtual void FireJustPressedEvent(Point pointerPosition, MouseButtons justPressedButtons)
+        protected virtual void FireJustPressedEvent(System.Drawing.Point pointerPosition, MouseButtons justPressedButtons)
         {
             MouseJustPressed?.Invoke(this, new MouseEventArgs
             {
@@ -823,7 +822,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="justReleasedButtons">Just released buttons</param>
-        protected virtual void FireJustReleasedEvent(Point pointerPosition, MouseButtons justReleasedButtons)
+        protected virtual void FireJustReleasedEvent(System.Drawing.Point pointerPosition, MouseButtons justReleasedButtons)
         {
             MouseJustReleased?.Invoke(this, new MouseEventArgs
             {
@@ -836,7 +835,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="clickedButtons">Clicked buttons</param>
-        protected virtual void FireMouseClickEvent(Point pointerPosition, MouseButtons clickedButtons)
+        protected virtual void FireMouseClickEvent(System.Drawing.Point pointerPosition, MouseButtons clickedButtons)
         {
             MouseClick?.Invoke(this, new MouseEventArgs
             {
@@ -866,7 +865,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="doubleClickedButtons">Double clicked buttons</param>
-        protected virtual void FireMouseDoubleClickEvent(Point pointerPosition, MouseButtons doubleClickedButtons)
+        protected virtual void FireMouseDoubleClickEvent(System.Drawing.Point pointerPosition, MouseButtons doubleClickedButtons)
         {
             MouseDoubleClick?.Invoke(this, new MouseEventArgs
             {
@@ -1130,11 +1129,11 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual bool Contains(Point point)
+        public virtual bool Contains(System.Drawing.Point point)
         {
             var rect = GetRenderArea(false);
 
-            var contains = rect.Scale(AbsoluteScale).Contains(point.X, point.Y);
+            var contains = Rect.Scale(rect, AbsoluteScale).Contains(point.X, point.Y);
 
             return contains;
         }

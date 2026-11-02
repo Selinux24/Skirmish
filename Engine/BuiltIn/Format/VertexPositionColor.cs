@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -6,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Position color vertex format
     /// </summary>
@@ -34,7 +33,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, Vector4 color)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, Color4 color)
         {
             var vArray = vertices.ToArray();
 
@@ -53,7 +52,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector4> colors)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Color4> colors)
         {
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
@@ -86,7 +85,7 @@ namespace Engine.BuiltIn.Format
                 res[index] = new VertexPositionColor
                 {
                     Position = v.Position ?? Vector3.Zero,
-                    Color = v.Color ?? Vector4.One,
+                    Color = v.Color ?? Color4.White,
                 };
             });
 
@@ -100,7 +99,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color;
+        public Color4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -120,7 +119,7 @@ namespace Engine.BuiltIn.Format
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 

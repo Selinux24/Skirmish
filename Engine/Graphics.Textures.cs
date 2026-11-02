@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.TextureReader;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,10 +11,6 @@ using Vortice.DXGI;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-    using Engine.TextureReader;
-
     /// <summary>
     /// Graphic textures management
     /// </summary>

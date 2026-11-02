@@ -51,7 +51,7 @@ namespace Engine.Common
         /// <returns></returns>
         public static EngineSamplerStateDescription Default()
         {
-            return (EngineSamplerStateDescription)DXSampleStateDescription.PointClamp;
+            return (EngineSamplerStateDescription)DXSampleStateDescription.PointWrap;
         }
 
         /// <summary>

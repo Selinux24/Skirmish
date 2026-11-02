@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Animation;
-    using Engine.Content.Persistence;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Skinning data interface
     /// </summary>

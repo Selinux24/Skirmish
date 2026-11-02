@@ -1,4 +1,5 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Content
@@ -11,7 +12,7 @@ namespace Engine.Content
         /// <summary>
         /// Bind shape matrix
         /// </summary>
-        public CntMatrix4x4 BindShapeMatrix { get; set; }
+        public Matrix4x4 BindShapeMatrix { get; set; }
         /// <summary>
         /// Weight list
         /// </summary>

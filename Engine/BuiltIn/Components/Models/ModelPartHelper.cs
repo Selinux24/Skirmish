@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn.Components.Models
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Model part helper
     /// </summary>

@@ -29,7 +29,7 @@ namespace Engine.Common
         {
             get
             {
-                return BufferDescriptionIndex >= 0 && BufferOffset >= 0;
+                return BufferDescriptionIndex >= 0;
             }
         }
 

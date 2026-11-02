@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 
 namespace Engine
 {
@@ -35,7 +34,7 @@ namespace Engine
         /// <summary>
         /// Absolute Mouse position
         /// </summary>
-        Point MousePosition { get; }
+        System.Drawing.Point MousePosition { get; }
         /// <summary>
         /// Mouse wheel value
         /// </summary>
@@ -155,7 +154,7 @@ namespace Engine
         /// Sets mouse position
         /// </summary>
         /// <param name="location">Position</param>
-        void SetMousePosition(Point location);
+        void SetMousePosition(System.Drawing.Point location);
         /// <summary>
         /// Updates input state
         /// </summary>

@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using Vortice.Direct3D11;
+    using Buffer = Vortice.Direct3D11.ID3D11Buffer;
 
     /// <summary>
     /// Properties defining the way a buffer is bound to the pipeline as a target for stream output operations.
@@ -30,9 +30,9 @@ namespace Engine.Common
         /// <summary>
         /// Gets the stream output buffer binding
         /// </summary>
-        internal readonly (ID3D11Buffer Buffer, uint Offset) GetStreamOutputBufferBinding()
+        internal readonly (Buffer Buffer, uint Offset) GetStreamOutputBufferBinding()
         {
-            return new (Buffer?.GetBuffer(), Offset);
+            return new(Buffer?.GetBuffer(), Offset);
         }
     }
 }

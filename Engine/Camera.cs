@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// 3D Camera
     /// </summary>
@@ -1401,7 +1400,7 @@ namespace Engine
                 SlowZoomDelta = SlowZoomDelta,
                 View = View,
                 Projection = Projection,
-                Frustum = ViewProjection,
+                Frustum = Frustum.Matrix,
                 Following = -1,
                 InvertY = InvertY,
                 CameraRadius = CameraRadius,

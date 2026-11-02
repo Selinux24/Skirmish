@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Content;
+
 namespace Engine
 {
-    using Engine.Content;
-
     /// <summary>
     /// Manipulator 3D state
     /// </summary>

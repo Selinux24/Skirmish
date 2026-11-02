@@ -59,7 +59,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
+        public Color4 TintColor { get; set; } = Color4.White;
         /// <summary>
         /// Texture index
         /// </summary>

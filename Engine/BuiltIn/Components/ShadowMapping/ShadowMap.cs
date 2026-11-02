@@ -1,6 +1,7 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Shadows;
 using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +88,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
 
             //Set shadow map depth map without render target
             dc.SetRenderTargets(
-                null, false, new(0),
+                null, false, Color.Transparent,
                 DepthMap.ElementAtOrDefault(LightSource?.ShadowMapIndex ?? -1), true, false,
                 true);
         }

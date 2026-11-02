@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// OcTree
     /// </summary>

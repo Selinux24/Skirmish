@@ -39,8 +39,8 @@ namespace Engine.BuiltIn.UI
             {
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Color.White,
-                StateOffColor = Color.White,
+                StateOnColor = Color4.White,
+                StateOffColor = Color4.White,
             };
         }
         /// <summary>
@@ -58,8 +58,8 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Color.White,
-                StateOffColor = Color.White,
+                StateOnColor = Color4.White,
+                StateOffColor = Color4.White,
             };
         }
         /// <summary>
@@ -101,8 +101,8 @@ namespace Engine.BuiltIn.UI
                 Font = font,
                 StateOnTexture = stateOnTextureFileName,
                 StateOffTexture = stateOffTextureFileName,
-                StateOnColor = Color.White,
-                StateOffColor = Color.White,
+                StateOnColor = Color4.White,
+                StateOffColor = Color4.White,
             };
         }
         /// <summary>
@@ -122,8 +122,8 @@ namespace Engine.BuiltIn.UI
                 StateOffTexture = stateOffTextureFileName,
                 StateOnTextureUVMap = stateOnTextureRect,
                 StateOffTextureUVMap = stateOffTextureRect,
-                StateOnColor = Color.White,
-                StateOffColor = Color.White,
+                StateOnColor = Color4.White,
+                StateOffColor = Color4.White,
             };
         }
 

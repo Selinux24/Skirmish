@@ -1,18 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Common;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Common;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Terrain class
     /// </summary>
@@ -205,7 +204,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var meshState = new BuiltInDrawerMeshState
             {
-                Local = Engine.Mathematics.Matrix4x4.Identity,
+                Local = Matrix4x4.Identity,
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 
@@ -267,7 +266,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             return new BuiltInTerrainState
             {
-                TintColor = Vector4.One,
+                TintColor = Color.White,
                 MaterialIndex = terrainMaterial.ResourceIndex,
                 Mode = terrainMode,
                 TextureResolution = textureResolution,

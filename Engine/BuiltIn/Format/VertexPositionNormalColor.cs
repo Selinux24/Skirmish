@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Vector4 color)
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Color4 color)
         {
             if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
 
@@ -58,7 +58,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector4> colors)
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Color4> colors)
         {
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
             if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
@@ -112,7 +112,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color;
+        public Color4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -135,7 +135,7 @@ namespace Engine.BuiltIn.Format
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 

@@ -2,8 +2,7 @@
 
 namespace Engine.Common
 {
-    using Vortice.Direct3D;
-    using Vortice.Direct3D11;
+    using ShaderResourceView1 = Vortice.Direct3D11.ID3D11ShaderResourceView1;
 
     /// <summary>
     /// Texture view
@@ -13,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Shader resource view
         /// </summary>
-        private ID3D11ShaderResourceView1 srv = null;
+        private ShaderResourceView1 srv = null;
 
         /// <summary>
         /// Name
@@ -33,7 +32,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="view">Shader resource view</param>
-        public EngineShaderResourceView(string name, ID3D11ShaderResourceView1 view)
+        public EngineShaderResourceView(string name, ShaderResourceView1 view)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A shader resource name must be specified.");
 
@@ -73,7 +72,7 @@ namespace Engine.Common
         /// Get the internal shader resource view
         /// </summary>
         /// <returns>Returns the internal shader resource view</returns>
-        internal ID3D11ShaderResourceView1 GetResource()
+        internal ShaderResourceView1 GetResource()
         {
             return srv;
         }
@@ -81,7 +80,7 @@ namespace Engine.Common
         /// Sets the internal shader resource view
         /// </summary>
         /// <param name="view">Resource view</param>
-        internal void SetResource(ID3D11ShaderResourceView1 view)
+        internal void SetResource(ShaderResourceView1 view)
         {
             srv = view ?? throw new ArgumentNullException(nameof(view), "A shader resource must be specified.");
 
@@ -101,11 +100,11 @@ namespace Engine.Common
                 return;
             }
 
-            if (srv.Description1.ViewDimension == ShaderResourceViewDimension.Texture1D)
+            if (srv.Description1.ViewDimension == Vortice.Direct3D.ShaderResourceViewDimension.Texture1D)
             {
                 dc.UpdateTexture1D(this, data);
             }
-            else if (srv.Description1.ViewDimension == ShaderResourceViewDimension.Texture2D)
+            else if (srv.Description1.ViewDimension == Vortice.Direct3D.ShaderResourceViewDimension.Texture2D)
             {
                 dc.UpdateTexture2D(this, data);
             }

@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Collections.Helpers;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Quad tree
     /// </summary>

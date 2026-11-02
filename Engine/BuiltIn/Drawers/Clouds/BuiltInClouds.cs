@@ -1,10 +1,9 @@
 ﻿using Engine.Common;
 using System.Runtime.InteropServices;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Clouds drawer
     /// </summary>
@@ -69,7 +68,7 @@ namespace Engine.BuiltIn.Drawers.Clouds
             /// Color
             /// </summary>
             [FieldOffset(32)]
-            public Vector3 Color;
+            public Color3 Color;
             /// <summary>
             /// Brightness
             /// </summary>

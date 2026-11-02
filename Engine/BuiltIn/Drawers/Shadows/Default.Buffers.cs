@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Per-shadow casting light data structure
     /// </summary>

@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Clouds;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Skies
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Clouds;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sky plane
     /// </summary>
@@ -60,7 +59,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Clouds color
         /// </summary>
-        private Vector3 color;
+        private Color3 color;
         /// <summary>
         /// Clouds drawer
         /// </summary>
@@ -97,7 +96,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Vector3 CloudsBaseColor { get; set; }
+        public Color3 CloudsBaseColor { get; set; }
         /// <summary>
         /// Returns true if the buffers were ready
         /// </summary>

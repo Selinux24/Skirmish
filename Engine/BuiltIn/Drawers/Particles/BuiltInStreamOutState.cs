@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Built-in stream-out state
     /// </summary>

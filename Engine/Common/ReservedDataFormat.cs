@@ -1,9 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Reserved format
     /// </summary>

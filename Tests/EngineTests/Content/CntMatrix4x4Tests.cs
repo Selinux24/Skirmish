@@ -1,16 +1,15 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Content;
+using Engine.Mathematics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.Content
 {
-    using Engine.Content;
-    using Engine.Mathematics;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]
-    public class Matrix4x4Tests
+    public class CntMatrix4x4Tests
     {
         public TestContext TestContext { get; set; }
 

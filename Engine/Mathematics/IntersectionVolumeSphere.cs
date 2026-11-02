@@ -50,16 +50,12 @@ namespace Engine.Mathematics
             return Intersection.SphereContainsMesh(sphere, mesh);
         }
 
-        /// <summary>
-        /// Implicit conversion between BoundingSphere and IntersectionVolumeSphere
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator BoundingSphere(IntersectionVolumeSphere value)
         {
             return value.sphere;
         }
-        /// <summary>
-        /// Implicit conversion between IntersectionVolumeSphere and BoundingSphere
-        /// </summary>
+        /// <inheritdoc/>
         public static implicit operator IntersectionVolumeSphere(BoundingSphere value)
         {
             return new IntersectionVolumeSphere(value);

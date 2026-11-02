@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.BuiltIn.Components.Skies
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sky plane description
     /// </summary>
@@ -32,7 +31,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Vector3 CloudBaseColor { get; set; }
+        public Color3 CloudBaseColor { get; set; }
         /// <summary>
         /// Clouds quad size
         /// </summary>
@@ -85,7 +84,7 @@ namespace Engine.BuiltIn.Components.Skies
 
             MaxBrightness = 0.75f;
             MinBrightness = 0.15f;
-            CloudBaseColor = new(1f, 1f, 1f);
+            CloudBaseColor = Color3.White;
             Size = 100;
             Repeat = 2;
             PlaneWidth = 50;

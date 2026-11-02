@@ -1,9 +1,10 @@
 ﻿using Engine.Mathematics;
 using System;
-using Vortice.DXGI;
 
 namespace Engine.Common
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Engine device context interface
     /// </summary>

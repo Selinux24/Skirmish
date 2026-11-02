@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.BuiltIn.Format;
+using Engine.Collections.Generic;
+using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Format;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Map grid
     /// </summary>
@@ -392,7 +391,6 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="nodeList">Node list</param>
         private static bool DrawNodeList(IEngineDeviceContext dc, IDrawer drawer, TerrainGridNode[] nodeList)
         {
-            int instanceCount = 0;
             uint primitiveCount = 0;
 
             for (int i = 0; i < nodeList.Length; i++)
@@ -414,7 +412,6 @@ namespace Engine.BuiltIn.Components.Ground
                     continue;
                 }
 
-                instanceCount++;
                 primitiveCount += gNode.IBDesc.Count / 3;
             }
 

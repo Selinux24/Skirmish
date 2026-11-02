@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Curve 3D controller path
     /// </summary>

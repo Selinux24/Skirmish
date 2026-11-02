@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Material description
     /// </summary>
@@ -65,19 +64,19 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Vector4 DiffuseColor { get; set; }
+        public Color4 DiffuseColor { get; set; }
         /// <summary>
         /// Emissive color
         /// </summary>
-        public Vector3 EmissiveColor { get; set; }
+        public Color3 EmissiveColor { get; set; }
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Vector3 AmbientColor { get; set; }
+        public Color3 AmbientColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Vector3 SpecularColor { get; set; }
+        public Color3 SpecularColor { get; set; }
         /// <summary>
         /// Metallic
         /// </summary>
@@ -102,9 +101,9 @@ namespace Engine
                 Block3 = Vector4.Zero,
                 Block4 = Vector4.Zero,
                 Diffuse = DiffuseColor,
-                Emissive = new Vector4(EmissiveColor, 0),
-                Ambient = new Vector4(AmbientColor, 0),
-                Specular = new Vector4(SpecularColor, 0),
+                Emissive = new(EmissiveColor, 0),
+                Ambient = new(AmbientColor, 0),
+                Specular = new(SpecularColor, 0),
             };
         }
         /// <inheritdoc/>

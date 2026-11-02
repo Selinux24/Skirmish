@@ -1,9 +1,8 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Clouds drawer state
     /// </summary>
@@ -36,7 +35,7 @@ namespace Engine.BuiltIn.Drawers.Clouds
         /// <summary>
         /// Color
         /// </summary>
-        public Vector3 Color { get; set; }
+        public Color3 Color { get; set; }
         /// <summary>
         /// Brightness
         /// </summary>

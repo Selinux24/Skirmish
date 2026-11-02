@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Water
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Water drawer
     /// </summary>
@@ -62,13 +61,13 @@ namespace Engine.BuiltIn.Drawers.Water
             /// Water color
             /// </summary>
             [FieldOffset(16)]
-            public Vector4 WaterColor;
+            public Color4 WaterColor;
 
             /// <summary>
             /// Base color
             /// </summary>
             [FieldOffset(32)]
-            public Vector3 BaseColor;
+            public Color3 BaseColor;
 
             /// <summary>
             /// Steps

@@ -1525,6 +1525,68 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Gets the screen coordinates from the specified 3D point
+        /// </summary>
+        /// <param name="viewPort">View port</param>
+        /// <param name="wvp">World * View * Projection</param>
+        /// <param name="isInsideScreen">Returns true if the resulting point is inside the screen</param>
+        /// <returns>Returns the resulting screen coordinates</returns>
+        public readonly Vector2 UnprojectToScreen(Vortice.Mathematics.Viewport viewPort, Matrix4x4 wvp, out bool isInsideScreen)
+        {
+            isInsideScreen = true;
+
+            // Go to projection space
+            var projected = Transform(this, wvp);
+
+            // Clip
+            // 
+            //  -Wp < Xp <= Wp 
+            //  -Wp < Yp <= Wp 
+            //  0 < Zp <= Wp 
+            // 
+            if (projected.X < -projected.W)
+            {
+                projected.X = -projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.X > projected.W)
+            {
+                projected.X = projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Y < -projected.W)
+            {
+                projected.Y = -projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Y > projected.W)
+            {
+                projected.Y = projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Z < 0)
+            {
+                projected.Z = 0;
+                isInsideScreen = false;
+            }
+            if (projected.Z > projected.W)
+            {
+                projected.Z = projected.W;
+                isInsideScreen = false;
+            }
+
+            // Divide by w, to move from homogeneous coordinates to 3D coordinates again 
+            projected /= projected.W;
+
+            // Perform the viewport scaling, to get the appropiate coordinates inside the viewport 
+            projected.X = ((float)(((projected.X + 1.0) * 0.5) * viewPort.Width)) + viewPort.X;
+            projected.Y = ((float)(((1.0 - projected.Y) * 0.5) * viewPort.Height)) + viewPort.Y;
+            projected.Z = (projected.Z * (viewPort.MaxDepth - viewPort.MinDepth)) + viewPort.MinDepth;
+
+            return projected.XY;
+        }
+
+        /// <summary>
         /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
@@ -1753,7 +1815,7 @@ namespace Engine.Mathematics
         {
             return new(scalar - value.X, scalar - value.Y, scalar - value.Z);
         }
-   
+
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector3 left, Vector3 right)

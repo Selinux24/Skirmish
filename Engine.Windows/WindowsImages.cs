@@ -1,5 +1,4 @@
-﻿using Engine.Mathematics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -24,9 +23,8 @@ namespace Engine.Windows
                 for (int w = 0; w < bitmap.Width; w++)
                 {
                     var pixel = bitmap.GetPixel(w, h);
-                    Color3 color = new(pixel.R / 255f, pixel.G / 255f, pixel.B / 255f);
 
-                    image.SetPixel(w, h, color);
+                    image.SetPixel(w, h, pixel);
                 }
             }
 

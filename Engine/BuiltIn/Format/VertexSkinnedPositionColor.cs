@@ -84,7 +84,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color;
+        public Color4 Color;
         /// <summary>
         /// Weight 1
         /// </summary>
@@ -136,7 +136,7 @@ namespace Engine.BuiltIn.Format
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else if (channel == VertexDataChannels.Weights)
             {
                 float[] weights = (float[])(object)value;

@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Normal path
     /// </summary>

@@ -1,15 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EngineTests.Content
 {
-    using Engine;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]

@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh information
     /// </summary>
@@ -89,7 +88,7 @@ namespace Engine.Content
         /// <param name="Weights">Weight data</param>
         /// <param name="BoneNames">Bone names</param>
         /// <param name="Indices">Indices</param>
-        record MeshCreateParams(string Name, Topology Topology, Mathematics.Matrix4x4 Transform, IEnumerable<VertexData> Vertices, IEnumerable<Weight> Weights, IEnumerable<string> BoneNames, IEnumerable<uint> Indices);
+        record MeshCreateParams(string Name, Topology Topology, Matrix4x4 Transform, IEnumerable<VertexData> Vertices, IEnumerable<Weight> Weights, IEnumerable<string> BoneNames, IEnumerable<uint> Indices);
 
         /// <summary>
         /// Try to create a new mesh

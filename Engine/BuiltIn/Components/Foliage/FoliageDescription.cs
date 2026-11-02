@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.BuiltIn.Drawers.Foliage;
+using Engine.Mathematics;
+using System;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Drawers.Foliage;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Foliage description
     /// </summary>

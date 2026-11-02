@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Font format
     /// </summary>
@@ -35,7 +34,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="color">Color</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Vector4 color)
+        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
         {
             if (!vertices.Any())
             {
@@ -53,7 +52,7 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Vector4> colors)
+        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Color4> colors)
         {
             if (!vertices.Any())
             {
@@ -77,7 +76,7 @@ namespace Engine.BuiltIn.Format
         /// <summary>
         /// Color
         /// </summary>
-        public Vector4 Color;
+        public Color4 Color;
 
         /// <inheritdoc/>
         public readonly bool HasChannel(VertexDataChannels channel)
@@ -100,7 +99,7 @@ namespace Engine.BuiltIn.Format
         {
             if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
-            else if (channel == VertexDataChannels.Color) Color = (Vector4)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
             else throw new EngineException($"Channel data not found: {channel}");
         }
 

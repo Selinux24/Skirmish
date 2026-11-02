@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Common;
+using Engine.Mathematics;
+
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// 2D manipulator
     /// </summary>

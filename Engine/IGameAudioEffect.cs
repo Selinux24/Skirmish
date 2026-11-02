@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Audio;
+using System;
 
 namespace Engine
 {
-    using Engine.Audio;
-
     /// <summary>
     /// Audio effect interface
     /// </summary>

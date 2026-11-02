@@ -246,7 +246,7 @@ namespace Engine.Common
         /// <param name="binding">Binding flags</param>
         /// <param name="sizeInBytes">Size in bytes</param>
         /// <param name="length">Number of elements</param>
-        public static void RegBuffer(string name, int usage, int binding, uint sizeInBytes, uint length)
+        public static void RegBuffer(string name, int usage, int binding, long sizeInBytes, uint length)
         {
             Buffers++;
 
@@ -272,7 +272,7 @@ namespace Engine.Common
         /// <param name="binding">Binding flags</param>
         /// <param name="sizeInBytes">Size in bytes</param>
         /// <param name="length">Number of elements</param>
-        public static void RegBuffer<T>(string name, int usage, int binding, uint sizeInBytes, uint length)
+        public static void RegBuffer<T>(string name, int usage, int binding, long sizeInBytes, uint length)
         {
             Buffers++;
 

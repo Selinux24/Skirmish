@@ -82,7 +82,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Transform matrix
         /// </summary>
-        public Mathematics.Matrix4x4 Transform { get; set; } = Mathematics.Matrix4x4.Identity;
+        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
 
         /// <summary>
         /// Constructor
@@ -125,7 +125,7 @@ namespace Engine.BuiltIn.Components.Ground
 
                 var material = MaterialBlinnPhongContent.Default;
 
-                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, CntMatrix4x4.Identity);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false, Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

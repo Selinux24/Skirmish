@@ -1,7 +1,7 @@
-﻿namespace Engine
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Engine
+{
     /// <summary>
     /// Light point description
     /// </summary>

@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
-    using Engine.Common;
-    using Engine.Content.Persistence;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Model content
     /// </summary>
@@ -197,7 +196,7 @@ namespace Engine.Content
                 textured = false;
             }
 
-            SubMeshContent geo = new(topology, materialName, textured, false, Mathematics.Matrix4x4.Identity);
+            SubMeshContent geo = new(topology, materialName, textured, false, Matrix4x4.Identity);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
@@ -812,7 +811,7 @@ namespace Engine.Content
                 }
                 else
                 {
-                    joint.Offset = Mathematics.Matrix4x4.Identity;
+                    joint.Offset = Matrix4x4.Identity;
                 }
             }
 

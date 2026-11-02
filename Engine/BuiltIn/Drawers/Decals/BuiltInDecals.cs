@@ -1,10 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Decals
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Decals drawer
     /// </summary>
@@ -18,7 +17,7 @@ namespace Engine.BuiltIn.Drawers.Decals
         [StructLayout(LayoutKind.Explicit, Size = 32)]
         struct PerDecal : IBufferData
         {
-            public static PerDecal Build(bool rotation, uint textureCount, Vector4 tintColor)
+            public static PerDecal Build(bool rotation, uint textureCount, Color4 tintColor)
             {
                 return new PerDecal
                 {
@@ -43,7 +42,7 @@ namespace Engine.BuiltIn.Drawers.Decals
             /// Tint color
             /// </summary>
             [FieldOffset(16)]
-            public Vector4 TintColor;
+            public Color4 TintColor;
 
             /// <inheritdoc/>
             public readonly uint GetStride()
@@ -79,7 +78,7 @@ namespace Engine.BuiltIn.Drawers.Decals
         /// <param name="textureCount">Texture count</param>
         /// <param name="tintColor">Tint color</param>
         /// <param name="textures">Texture array</param>
-        public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Vector4 tintColor, EngineShaderResourceView textures)
+        public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
         {
             dc.UpdateConstantBuffer(cbPerDecal, PerDecal.Build(rotation, textureCount, tintColor));
 

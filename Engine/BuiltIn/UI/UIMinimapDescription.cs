@@ -30,7 +30,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Color4 BackColor { get; set; } = Color.Transparent;
+        public Color4 BackColor { get; set; } = Color.Black;
         /// <summary>
         /// Minimap render area
         /// </summary>

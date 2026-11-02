@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Segment
     /// </summary>

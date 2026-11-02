@@ -21,7 +21,7 @@ namespace Engine.Helpers
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public uint Size;
+        public long Size;
         /// <summary>
         /// Number of elements
         /// </summary>

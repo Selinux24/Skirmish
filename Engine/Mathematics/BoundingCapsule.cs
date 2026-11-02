@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Mathematics
 {
-    using Engine;
-    using Engine.Common;
-
     /// <summary>
     /// Axis aligned bounding capsule
     /// </summary>

@@ -78,7 +78,7 @@ namespace Engine.UI
         /// <param name="vertices">Vertex list</param>
         /// <param name="uvs">Uvs</param>
         /// <param name="color">Color</param>
-        public void Add(IEnumerable<uint> indices, IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Vector4 color)
+        public void Add(IEnumerable<uint> indices, IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
         {
             Vector3[] vArray = [.. vertices];
             Vector2[] uvArray = [.. uvs];
