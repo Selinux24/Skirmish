@@ -265,7 +265,8 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static EngineConstantBuffer<T> GetConstantBuffer<T>(string id = null, bool singleton = true) where T : struct, IBufferData
+        public static EngineConstantBuffer<T> GetConstantBuffer<T>(string id = null, bool singleton = true)
+            where T : struct, IBufferData
         {
             string name = id ?? nameof(BuiltInShaders) + "." + typeof(T).FullName;
 

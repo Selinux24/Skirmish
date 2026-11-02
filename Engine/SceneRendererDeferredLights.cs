@@ -277,7 +277,7 @@ namespace Engine
             if (lightGeometryVertexBuffer == null)
             {
                 lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", lightGeometryVertices, true);
-                lightGeometryVertexBufferBinding = new EngineVertexBufferBinding(lightGeometryVertexBuffer, (uint)lightGeometryVertices[0].GetStride(), 0);
+                lightGeometryVertexBufferBinding = new EngineVertexBufferBinding(lightGeometryVertexBuffer, lightGeometryVertices[0].GetStride(), 0);
             }
             else
             {

@@ -51,7 +51,20 @@ namespace Engine.Common
         /// <returns></returns>
         public static EngineSamplerStateDescription Default()
         {
-            return (EngineSamplerStateDescription)DXSampleStateDescription.PointWrap;
+            var result = new DXSampleStateDescription
+            {
+                Filter = DXFilter.MinMagMipLinear,
+                AddressU = DXTextureAddressMode.Clamp,
+                AddressV = DXTextureAddressMode.Clamp,
+                AddressW = DXTextureAddressMode.Clamp,
+                MinLOD = float.MinValue,
+                MaxLOD = float.MaxValue,
+                MipLODBias = 0f,
+                MaxAnisotropy = 16,
+                ComparisonFunc = DXComparison.Never,
+                BorderColor = default
+            };
+            return (EngineSamplerStateDescription)result;
         }
 
         /// <summary>

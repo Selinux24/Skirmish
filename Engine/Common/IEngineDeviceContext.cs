@@ -427,7 +427,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="constantBuffer">Constant buffer</param>
         /// <param name="data">Data</param>
-        bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : unmanaged, IBufferData;
+        bool UpdateConstantBuffer<T>(IEngineConstantBuffer constantBuffer, T data) where T : unmanaged;
         /// <summary>
         /// Updates a constant buffer in the device context
         /// </summary>

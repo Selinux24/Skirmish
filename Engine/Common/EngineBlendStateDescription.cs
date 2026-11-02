@@ -1,4 +1,5 @@
 ﻿using System;
+using Vortice.Direct3D11;
 
 namespace Engine.Common
 {
@@ -77,7 +78,31 @@ namespace Engine.Common
         /// </summary>
         public static EngineBlendStateDescription Default()
         {
-            return (EngineBlendStateDescription)DXBlendStateDescription.Opaque;
+            DXBlendStateDescription result = new()
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+
+            var rt = result.RenderTarget;
+            for (int i = 0; i < rt.Length; i++)
+            {
+                rt[i] = new()
+                {
+                    BlendEnable = false,
+                    LogicOpEnable = false,
+                    SourceBlend = DXBlendOption.One,
+                    DestinationBlend = DXBlendOption.Zero,
+                    BlendOperation = DXBlendOperation.Add,
+                    SourceBlendAlpha = DXBlendOption.One,
+                    DestinationBlendAlpha = DXBlendOption.Zero,
+                    BlendOperationAlpha = DXBlendOperation.Add,
+                    RenderTargetWriteMask = DXColorWriteMaskFlags.All,
+                    LogicOp = DXLogicOperation.Noop
+                };
+            }
+
+            return (EngineBlendStateDescription)result;
         }
 
         /// <summary>

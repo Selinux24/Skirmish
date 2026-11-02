@@ -241,6 +241,11 @@ namespace Engine
         public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> values, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
             where T : unmanaged
         {
+            if (!values.Any())
+            {
+                return null;
+            }
+
             var buffer = CreateWithSubresource(
                 name, values,
                 (ResourceUsage)usage, (BindFlags)binding, (CpuAccessFlags)access,
@@ -298,7 +303,14 @@ namespace Engine
 
             fixed (T* ptr = array)
             {
-                return createResourceFunc(desc, new((IntPtr)ptr, rowPitch, slicePitch));
+                var srData = new SubresourceData()
+                {
+                    DataPointer = (IntPtr)ptr,
+                    RowPitch = rowPitch,
+                    SlicePitch = slicePitch
+                };
+
+                return createResourceFunc(desc, srData);
             }
         }
     }

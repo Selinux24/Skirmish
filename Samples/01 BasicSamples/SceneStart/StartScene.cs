@@ -149,8 +149,8 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
-            soundEffectsManager.InitializeAudio("SceneStart");
+            //soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            //soundEffectsManager.InitializeAudio("SceneStart");
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -161,8 +161,8 @@ namespace BasicSamples.SceneStart
 
             Lights.KeyLight.Direction = Vector3.ForwardLH;
 
-            soundEffectsManager.Start(1f);
-            soundEffectsManager.Play();
+            //soundEffectsManager.Start(1f);
+            //soundEffectsManager.Play();
 
             backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 

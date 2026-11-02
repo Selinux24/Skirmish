@@ -482,7 +482,7 @@ namespace Engine.Common
             var rtv = renderTargets?.GetRenderTargets() ?? [];
             uint rtvCount = (uint)rtv.Length;
 
-            deviceContext.OMSetRenderTargets(0, rtv, dsv);
+            deviceContext.OMSetRenderTargets(rtvCount, rtv, dsv);
             frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
@@ -1012,11 +1012,19 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : unmanaged, IBufferData
+        public bool UpdateConstantBuffer<T>(IEngineConstantBuffer constantBuffer, T data) where T : unmanaged
         {
-            IEngineConstantBuffer buffer = constantBuffer;
+            if (constantBuffer == null)
+            {
+                return false;
+            }
 
-            return UpdateConstantBuffer(buffer, data);
+            var buffer = constantBuffer.Buffer.GetBuffer();
+            deviceContext.UpdateSubresource(data, buffer);
+
+            frameCounters.SubresourceUpdates++;
+
+            return true;
         }
         /// <inheritdoc/>
         public bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer, IBufferData data)
@@ -1026,13 +1034,24 @@ namespace Engine.Common
                 return false;
             }
 
-            var dataStream = constantBuffer.DataStream.GetDataStream();
-            var buffer = constantBuffer.Buffer.GetBuffer();
+            int size = Marshal.SizeOf(data);
 
-            Marshal.StructureToPtr(data, dataStream.BasePointer, false);
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            try
+            {
+                Marshal.StructureToPtr(data, ptr, false);
+                unsafe
+                {
+                    var span = new ReadOnlySpan<byte>(ptr.ToPointer(), size);
+                    var buffer = constantBuffer.Buffer.GetBuffer();
+                    deviceContext.UpdateSubresource(span, buffer);
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
 
-            var dataBox = new DataBox(dataStream.BasePointer, 0, 0);
-            deviceContext.UpdateSubresource(dataBox, buffer, 0);
             frameCounters.SubresourceUpdates++;
 
             return true;
