@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Minimap
     /// </summary>
@@ -20,7 +22,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Viewport to match the minimap texture size
         /// </summary>
-        private Vortice.Mathematics.Viewport viewport;
+        private Viewport viewport;
         /// <summary>
         /// Surface to draw
         /// </summary>
@@ -88,7 +90,7 @@ namespace Engine.BuiltIn.UI
 
             var rt = Game.Graphics.CreateRenderTargetTexture(
                 $"RenderTexture_{Name}",
-                Vortice.DXGI.Format.R8G8B8A8_UNorm,
+                Format.R8G8B8A8_UNorm,
                 Description.Width, Description.Height, false);
 
             renderTarget = rt.RenderTarget;

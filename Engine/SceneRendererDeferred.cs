@@ -394,7 +394,7 @@ namespace Engine
         /// <summary>
         /// View port
         /// </summary>
-        public Vortice.Mathematics.Viewport Viewport { get; set; }
+        public Viewport Viewport { get; set; }
 
         /// <summary>
         /// Constructor

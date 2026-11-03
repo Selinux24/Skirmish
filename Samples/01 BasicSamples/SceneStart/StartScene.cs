@@ -84,7 +84,7 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = Engine.UI.FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
@@ -105,7 +105,7 @@ namespace BasicSamples.SceneStart
             buttonPanel.Spacing = 40;
             buttonPanel.EventsEnabled = true;
 
-            var buttonsFont = Engine.UI.FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             startButtonDesc.ColorReleased = new(sceneButtonColor, 0.8f);
@@ -149,8 +149,8 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeMusic()
         {
-            //soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
-            //soundEffectsManager.InitializeAudio("SceneStart");
+            soundEffectsManager = await AddComponent<SoundEffectsManager>("audioManager", "audioManager");
+            soundEffectsManager.InitializeAudio("SceneStart");
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -161,12 +161,12 @@ namespace BasicSamples.SceneStart
 
             Lights.KeyLight.Direction = Vector3.ForwardLH;
 
-            //soundEffectsManager.Start(1f);
-            //soundEffectsManager.Play();
+            soundEffectsManager.Start(1f);
+            soundEffectsManager.Play();
 
             backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 
-            var shadow = new Vector4(0, 0, 0, 0.5f);
+            Color shadow = new(0f, 0f, 0f, 0.5f);
             title.Text = $"{Color.Red}|{shadow}B{Color.Cyan}a{Color.Red}s{Color.Cyan}i{Color.Red}c {Color.Green}S{Color.Orange}a{Color.Green}m{Color.Orange}p{Color.Green}l{Color.Orange}e{Color.Green}s";
 
             UpdateLayout();

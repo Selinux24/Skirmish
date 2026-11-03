@@ -258,7 +258,7 @@ namespace Engine.Mathematics
         /// <param name="viewport"><see cref="ViewportF"/>.</param>
         /// <param name="worldViewProjection">Transformation <see cref="Matrix4x4"/>.</param>
         /// <returns>Resulting <see cref="Ray"/>.</returns>
-        public static Ray GetPickRay(int x, int y, Vortice.Mathematics.Viewport viewport, Matrix4x4 worldViewProjection)
+        public static Ray GetPickRay(int x, int y, Viewport viewport, Matrix4x4 worldViewProjection)
         {
             var nearPoint = Vector3.Unproject(
                 new(x, y, 0), viewport.X, viewport.Y,

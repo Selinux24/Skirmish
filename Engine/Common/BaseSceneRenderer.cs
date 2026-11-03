@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Base scene renderer
     /// </summary>
@@ -439,7 +441,7 @@ namespace Engine.Common
 
             cullManager = new SceneCullManager();
 
-            var targetFormat = Vortice.DXGI.Format.R32G32B32A32_Float;
+            var targetFormat = Format.R32G32B32A32_Float;
 
             sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
             sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);

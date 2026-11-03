@@ -5,6 +5,7 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Mathematics;
+using Engine.UI;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
@@ -58,8 +59,8 @@ namespace BasicSamples.SceneNormalMap
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = Engine.UI.FontDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 

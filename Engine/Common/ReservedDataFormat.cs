@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Reserved format
     /// </summary>
@@ -40,7 +42,7 @@ namespace Engine.Common
         {
             return
             [
-                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 

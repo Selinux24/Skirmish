@@ -523,7 +523,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
             var bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
-                bbox = Engine.Mathematics.BoundingBox.Merge(bbox, item.GetBoundingBox());
+                bbox = BoundingBox.Merge(bbox, item.GetBoundingBox());
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 

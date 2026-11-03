@@ -119,7 +119,7 @@ namespace Engine
         /// Gets the render viewport
         /// </summary>
         /// <returns></returns>
-        Vortice.Mathematics.Viewport GetViewport();
+        Viewport GetViewport();
         /// <summary>
         /// Gets the current ortho-projection matrix
         /// </summary>

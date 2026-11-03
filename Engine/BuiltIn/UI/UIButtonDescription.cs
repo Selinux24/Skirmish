@@ -248,7 +248,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = Engine.UI.FontDescription.FromFamily(fontFamilyName, size, fineSampling),
+                Font = FontDescription.FromFamily(fontFamilyName, size, fineSampling),
             };
         }
         /// <summary>

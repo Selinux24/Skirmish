@@ -50,7 +50,7 @@ namespace Engine
         /// <summary>
         /// Scene bounding box
         /// </summary>
-        protected BoundingBox? BoundingBox;
+        protected BoundingBox? Bounds;
         /// <summary>
         /// Scene renderer
         /// </summary>
@@ -318,10 +318,7 @@ namespace Engine
         /// <returns>Returns the screen coordinates</returns>
         public Vector2 GetScreenCoordinates(Vector3 position, out bool inside)
         {
-            return position.UnprojectToScreen(
-                Game.Graphics.Viewport,
-                Camera.ViewProjection,
-                out inside);
+            return Game.Graphics.Viewport.UnprojectToScreen(position, Camera.ViewProjection, out inside);
         }
 
         /// <summary>
@@ -572,9 +569,9 @@ namespace Engine
         /// <returns>Returns the whole ground bounding box.</returns>
         public BoundingBox GetBoundingBox(SceneObjectUsages usage)
         {
-            if (BoundingBox.HasValue && BoundingBox != new BoundingBox())
+            if (Bounds.HasValue && Bounds != new BoundingBox())
             {
-                return BoundingBox.Value;
+                return Bounds.Value;
             }
 
             var boxes = GetBoundingBoxes(usage);
@@ -583,9 +580,9 @@ namespace Engine
                 return new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
             }
 
-            BoundingBox = Mathematics.BoundingBox.Merge(boxes);
+            Bounds = Mathematics.BoundingBox.Merge(boxes);
 
-            return BoundingBox.Value;
+            return Bounds.Value;
         }
         /// <summary>
         /// Gets the bounding box list
@@ -805,8 +802,8 @@ namespace Engine
                 Active = Active,
                 Order = Order,
                 SceneMode = sceneMode,
-                GroundBoundingBoxMin = BoundingBox?.Minimum,
-                GroundBoundingBoxMax = BoundingBox?.Maximum,
+                GroundBoundingBoxMin = Bounds?.Minimum,
+                GroundBoundingBoxMax = Bounds?.Maximum,
                 GameEnvironment = GameEnvironment.GetState(),
                 SceneLights = Lights.GetState(),
                 Camera = Camera.GetState(),
@@ -828,7 +825,7 @@ namespace Engine
             sceneMode = sceneState.SceneMode;
             if (sceneState.GroundBoundingBoxMin.HasValue && sceneState.GroundBoundingBoxMax.HasValue)
             {
-                BoundingBox = new BoundingBox(
+                Bounds = new BoundingBox(
                     sceneState.GroundBoundingBoxMin.Value,
                     sceneState.GroundBoundingBoxMax.Value);
             }

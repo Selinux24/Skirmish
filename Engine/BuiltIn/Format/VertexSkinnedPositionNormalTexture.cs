@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Skinned position normal texture vertex format
     /// </summary>
@@ -23,11 +25,11 @@ namespace Engine.BuiltIn.Format
         {
             return
             [
-                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("NORMAL", 0, Vortice.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new ("TEXCOORD", 0, Vortice.DXGI.Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
-                new ("WEIGHTS", 0, Vortice.DXGI.Format.R32G32B32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
-                new ("BONEINDICES", 0, Vortice.DXGI.Format.R8G8B8A8_UInt, 44, slot, EngineInputClassification.PerVertexData, 0 ),
+                new ("POSITION", 0, Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("TEXCOORD", 0, Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("WEIGHTS", 0, Format.R32G32B32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
+                new ("BONEINDICES", 0, Format.R8G8B8A8_UInt, 44, slot, EngineInputClassification.PerVertexData, 0 ),
             ];
         }
         /// <summary>

@@ -82,12 +82,12 @@ namespace Engine.Audio
                 XAudio2.MinimumFrequencyRatio,
                 XAudio2.MaximumFilterFrequency);
 
-            sourceVoice.SetFrequencyRatio(targetRatio, gameAudio.OperationSet);
+            sourceVoice.SetFrequencyRatio(targetRatio, gameAudio.OperationSet).CheckError();
         }
         /// <inheritdoc/>
         public void SetVolume(float value)
         {
-            sourceVoice.SetVolume(Math.Clamp(value, 0.0f, 1.0f), gameAudio.OperationSet);
+            sourceVoice.SetVolume(Math.Clamp(value, 0.0f, 1.0f), gameAudio.OperationSet).CheckError();
         }
 
         /// <inheritdoc/>
@@ -148,7 +148,7 @@ namespace Engine.Audio
 
             // LPF direct-path
             var sendDescriptor = new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = audioState.MasteringVoice };
-            sourceVoice.SetOutputVoices(new Span<VoiceSendDescriptor>(ref sendDescriptor));
+            sourceVoice.SetOutputVoices(new Span<VoiceSendDescriptor>(ref sendDescriptor)).CheckError();
 
             UseAudio3D = effectParameters.UseAudio3D;
             if (UseAudio3D)
@@ -244,7 +244,7 @@ namespace Engine.Audio
             {
                 nextPlayPosition = start;
 
-                sourceVoice.Start(0);
+                sourceVoice.Start(0).CheckError();
 
                 playCounter++;
                 waitForPlayToOutput.Reset();
@@ -267,7 +267,7 @@ namespace Engine.Audio
 
             if (State != GameAudioState.Stopped)
             {
-                sourceVoice.Stop(0);
+                sourceVoice.Stop(0).CheckError();
 
                 playPosition = TimeSpan.Zero;
                 nextPlayPosition = TimeSpan.Zero;
@@ -288,7 +288,7 @@ namespace Engine.Audio
 
             if (State == GameAudioState.Playing)
             {
-                sourceVoice.Stop();
+                sourceVoice.Stop().CheckError();
 
                 clock.Stop();
                 State = GameAudioState.Paused;
@@ -305,7 +305,7 @@ namespace Engine.Audio
 
             if (State == GameAudioState.Paused)
             {
-                sourceVoice.Start();
+                sourceVoice.Start().CheckError();
 
                 clock.Start();
                 State = GameAudioState.Playing;
@@ -324,7 +324,7 @@ namespace Engine.Audio
         /// </summary>
         private void PlayAsync()
         {
-            AudioStart?.Invoke(this, new GameAudioEventArgs(this));
+            AudioStart?.Invoke(this, new(this));
 
             DueToDispose = false;
 
@@ -360,13 +360,13 @@ namespace Engine.Audio
                 {
                     if (!IsLooped)
                     {
-                        AudioEnd?.Invoke(this, new GameAudioEventArgs(this));
+                        AudioEnd?.Invoke(this, new(this));
                         Stop();
                         DueToDispose = true;
                     }
                     else
                     {
-                        LoopEnd?.Invoke(this, new GameAudioEventArgs(this));
+                        LoopEnd?.Invoke(this, new(this));
                     }
                 }
             }
@@ -397,7 +397,7 @@ namespace Engine.Audio
                 isFirstTime = false;
 
                 // Fires the progress event
-                PlayProgress?.Invoke(this, new GameAudioProgressEventArgs(this, Duration, playPosition));
+                PlayProgress?.Invoke(this, new(this, Duration, playPosition));
             }
         }
         /// <summary>
@@ -747,15 +747,15 @@ namespace Engine.Audio
                     // LPF direct-path
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
                 ];
-                sourceVoice.SetOutputVoices(sendDescriptors);
+                sourceVoice.SetOutputVoices(sendDescriptors).CheckError();
 
-                submixVoice.DisableEffect(0, gameAudio.OperationSet);
+                submixVoice.DisableEffect(0, gameAudio.OperationSet).CheckError();
             }
 
             if (reverb.HasValue)
             {
-                submixVoice.SetEffectParameters(0, GameAudioPresets.Convert(reverb.Value), true, gameAudio.OperationSet);
-                submixVoice.EnableEffect(0, gameAudio.OperationSet);
+                submixVoice.SetEffectParameters(0, GameAudioPresets.Convert(reverb.Value), true, gameAudio.OperationSet).CheckError();
+                submixVoice.EnableEffect(0, gameAudio.OperationSet).CheckError();
             }
 
             reverbPreset = reverb;

@@ -114,7 +114,7 @@ namespace Engine.Common
         /// <summary>
         /// Current viewport
         /// </summary>
-        private Vortice.Mathematics.Viewport[] currentViewports;
+        private Viewport[] currentViewports;
 
         /// <summary>
         /// Current depth-stencil state
@@ -410,12 +410,12 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void SetViewport(Vortice.Mathematics.Viewport viewport)
+        public void SetViewport(Viewport viewport)
         {
             SetViewPorts([viewport]);
         }
         /// <inheritdoc/>
-        public void SetViewports(Vortice.Mathematics.Viewport[] viewports)
+        public void SetViewports(Viewport[] viewports)
         {
             SetViewPorts(viewports);
         }
@@ -423,7 +423,7 @@ namespace Engine.Common
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        private void SetViewPorts(Vortice.Mathematics.Viewport[] viewports)
+        private void SetViewPorts(Viewport[] viewports)
         {
             if (Helper.CompareEnumerables(currentViewports, viewports))
             {

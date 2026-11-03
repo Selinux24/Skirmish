@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Particle data buffer
     /// </summary>
@@ -18,10 +20,10 @@ namespace Engine.BuiltIn.Format
         {
             return
             [
-                new ("POSITION", 0, Vortice.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("VELOCITY", 0, Vortice.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new ("RANDOM", 0, Vortice.DXGI.Format.R32G32B32A32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
-                new ("MAX_AGE", 0, Vortice.DXGI.Format.R32_Float, 40, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("VELOCITY", 0, Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("RANDOM", 0, Format.R32G32B32A32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("MAX_AGE", 0, Format.R32_Float, 40, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 

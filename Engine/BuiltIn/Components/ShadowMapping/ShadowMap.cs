@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <summary>
         /// Viewport
         /// </summary>
-        protected Vortice.Mathematics.Viewport[] Viewports { get; set; } = Helper.CreateArray(arraySize, new Vortice.Mathematics.Viewport(0, 0, width, height, 0, 1.0f));
+        protected Viewport[] Viewports { get; set; } = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
         /// <summary>
         /// Depth map
         /// </summary>

@@ -128,22 +128,22 @@ namespace EngineTests.Content
         [TestMethod()]
         public void MatrixScalingTest()
         {
-            Engine.Content.CntMatrix4x4 res = Engine.Content.CntMatrix4x4.Scaling(new CntScale3(2));
-            Engine.Content.CntMatrix4x4 expected = Engine.Mathematics.Matrix4x4.Scaling(2);
+            CntMatrix4x4 res = CntMatrix4x4.Scaling(new CntScale3(2));
+            CntMatrix4x4 expected = Matrix4x4.Scaling(2);
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixRotationTest()
         {
-            Engine.Content.CntMatrix4x4 res = Engine.Content.CntMatrix4x4.Rotation(CntRotationQ.RotationAxis(CntDirection3.Up, 10));
-            Engine.Content.CntMatrix4x4 expected = Engine.Mathematics.Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, 10));
+            CntMatrix4x4 res = CntMatrix4x4.Rotation(CntRotationQ.RotationAxis(CntDirection3.Up, 10));
+            CntMatrix4x4 expected = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, 10));
             Assert.AreEqual(expected, res);
         }
         [TestMethod()]
         public void MatrixTranslationTest()
         {
-            Engine.Content.CntMatrix4x4 res = Engine.Content.CntMatrix4x4.Translation(new CntPosition3(2));
-            Engine.Content.CntMatrix4x4 expected = Engine.Mathematics.Matrix4x4.Translation(2, 2, 2);
+            CntMatrix4x4 res = CntMatrix4x4.Translation(new CntPosition3(2));
+            CntMatrix4x4 expected = Matrix4x4.Translation(2, 2, 2);
             Assert.AreEqual(expected, res);
         }
     }

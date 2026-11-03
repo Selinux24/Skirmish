@@ -7,6 +7,7 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Mathematics;
+using Engine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -79,8 +80,8 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeUI()
         {
-            var defaultFont20 = Engine.UI.FontDescription.FromFamily("Arial", 20);
-            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
+            var defaultFont20 = FontDescription.FromFamily("Arial", 20);
+            var defaultFont10 = FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -152,7 +153,7 @@ namespace BasicSamples.SceneParticles
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
-            geo.Transform(Engine.Mathematics.Matrix4x4.RotationY(Helper.PiOver2));
+            geo.Transform(Matrix4x4.RotationY(Helper.PiOver2));
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFloor;

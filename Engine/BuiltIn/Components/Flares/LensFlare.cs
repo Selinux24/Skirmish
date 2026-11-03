@@ -153,7 +153,7 @@ namespace Engine.BuiltIn.Components.Flares
 
             // Project the light position into 2D screen space.
             var projectedPosition = Game.Graphics.Viewport.Project(
-                (System.Numerics.Vector3)(-keyLight.Direction * (1f + camera.NearPlaneDistance)), //Move position into near and far plane projection bounds
+                -keyLight.Direction * (1f + camera.NearPlaneDistance), //Move position into near and far plane projection bounds
                 camera.Projection,
                 infiniteView,
                 Matrix4x4.Identity);

@@ -146,7 +146,7 @@ namespace BasicSamples.SceneLighting
             var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
-            geo.Transform(Engine.Mathematics.Matrix4x4.RotationX(Helper.PiOver2) * Engine.Mathematics.Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
+            geo.Transform(Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
 
             var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {

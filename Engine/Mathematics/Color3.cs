@@ -647,9 +647,9 @@ namespace Engine.Mathematics
         public static implicit operator System.Drawing.Color(Color3 value)
         {
             return System.Drawing.Color.FromArgb(
-                255, 
-                (int)(value.Red * 255f), 
-                (int)(value.Green * 255f), 
+                255,
+                (int)(value.Red * 255f),
+                (int)(value.Green * 255f),
                 (int)(value.Blue * 255f));
         }
         /// <inheritdoc/>

@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Format
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Instancing data
     /// </summary>
@@ -78,16 +80,16 @@ namespace Engine.BuiltIn.Format
         {
             return
             [
-                new (LocalTransformString, 0, Vortice.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 1, Vortice.DXGI.Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 2, Vortice.DXGI.Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
-                new (LocalTransformString, 3, Vortice.DXGI.Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TintColorString, 0, Vortice.DXGI.Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
-                new (TextureIndexString, 0, Vortice.DXGI.Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
-                new (MaterialIndexString, 0, Vortice.DXGI.Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetString, 0, Vortice.DXGI.Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationOffsetBString, 0, Vortice.DXGI.Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
-                new (AnimationInterpolationString, 0, Vortice.DXGI.Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 0, Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 1, Format.R32G32B32A32_Float, 16, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 2, Format.R32G32B32A32_Float, 32, slot, EngineInputClassification.PerInstanceData, 1),
+                new (LocalTransformString, 3, Format.R32G32B32A32_Float, 48, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TintColorString, 0, Format.R32G32B32A32_Float, 64, slot, EngineInputClassification.PerInstanceData, 1),
+                new (TextureIndexString, 0, Format.R32_UInt, 80, slot, EngineInputClassification.PerInstanceData, 1),
+                new (MaterialIndexString, 0, Format.R32_UInt, 84, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetString, 0, Format.R32_UInt, 88, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationOffsetBString, 0, Format.R32_UInt, 92, slot, EngineInputClassification.PerInstanceData, 1),
+                new (AnimationInterpolationString, 0, Format.R32_Float, 96, slot, EngineInputClassification.PerInstanceData, 1),
             ];
         }
 

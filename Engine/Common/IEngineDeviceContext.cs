@@ -40,12 +40,12 @@ namespace Engine.Common
         /// Sets viewport
         /// </summary>
         /// <param name="viewport">Viewport</param>
-        void SetViewport(Vortice.Mathematics.Viewport viewport);
+        void SetViewport(Viewport viewport);
         /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
-        void SetViewports(Vortice.Mathematics.Viewport[] viewports);
+        void SetViewports(Viewport[] viewports);
 
         /// <summary>
         /// Set render target

@@ -5,6 +5,7 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Mathematics;
+using Engine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,8 +100,8 @@ namespace BasicSamples.SceneMaterials
             };
             backpanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
-            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Arial", 18);
-            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
+            var defaultFont18 = FontDescription.FromFamily("Arial", 18);
+            var defaultFont10 = FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {

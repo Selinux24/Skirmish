@@ -336,6 +336,55 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="a">First rectangle.</param>
+        /// <param name="b">Second rectangle.</param>
+        /// <returns>The intersection area.</returns>
+        public static float ComputeIntersectionArea(Rect a, Rect b)
+        {
+            return ComputeIntersectionArea(ref a, ref b);
+        }
+        /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="a">First rectangle.</param>
+        /// <param name="b">Second rectangle.</param>
+        /// <returns>The intersection area.</returns>
+        public static float ComputeIntersectionArea(ref Rect a, ref Rect b)
+        {
+            float ax1 = a.X;
+            float ay1 = a.Y;
+            float ax2 = a.Right;
+            float ay2 = a.Bottom;
+
+            float bx1 = b.X;
+            float by1 = b.Y;
+            float bx2 = b.Right;
+            float by2 = b.Bottom;
+
+            return ComputeIntersectionArea(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2);
+        }
+        /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="ax1">X coordinate of the first rectangle's left edge.</param>
+        /// <param name="ay1">Y coordinate of the first rectangle's top edge.</param>
+        /// <param name="ax2">X coordinate of the first rectangle's right edge.</param>
+        /// <param name="ay2">Y coordinate of the first rectangle's bottom edge.</param>
+        /// <param name="bx1">X coordinate of the second rectangle's left edge.</param>
+        /// <param name="by1">Y coordinate of the second rectangle's top edge.</param>
+        /// <param name="bx2">X coordinate of the second rectangle's right edge.</param>
+        /// <param name="by2">Y coordinate of the second rectangle's bottom edge.</param>
+        /// <returns>The intersection area.</returns>
+        private static float ComputeIntersectionArea(
+            float ax1, float ay1, float ax2, float ay2,
+            float bx1, float by1, float bx2, float by2)
+        {
+            return Math.Max(0, Math.Min(ax2, bx2) - Math.Max(ax1, bx1)) * Math.Max(0, Math.Min(ay2, by2) - Math.Max(ay1, by1));
+        }
+
+        /// <summary>
         /// Creates a new rectangle that exactly contains two other rectangles.
         /// </summary>
         /// <param name="value1">The first rectangle to contain.</param>

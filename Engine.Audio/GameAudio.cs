@@ -109,7 +109,7 @@ namespace Engine.Audio
         /// </summary>
         public GameAudio(uint sampleRate)
         {
-            XAudio2.XAudio2Create(ProcessorSpecifier.DefaultProcessor, out device);
+            XAudio2.XAudio2Create(ProcessorSpecifier.DefaultProcessor, out device).CheckError();
             device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new()
@@ -132,7 +132,7 @@ namespace Engine.Audio
                 speakers = GameAudioSpeakers.Stereo;
             }
 
-            MasteringVoice.SetVolume(1f);
+            MasteringVoice.SetVolume(1f).CheckError();
         }
         /// <summary>
         /// Destructor
@@ -207,7 +207,7 @@ namespace Engine.Audio
                     Release = release
                 };
 
-                MasteringVoice?.SetEffectParameters(0, parameters);
+                MasteringVoice?.SetEffectParameters(0, parameters).CheckError();
             }
         }
         /// <summary>
@@ -224,14 +224,14 @@ namespace Engine.Audio
                 OutputChannelCount = InputChannelCount,
             };
 
-            MasteringVoice?.SetEffectChain(descriptor);
+            MasteringVoice?.SetEffectChain(descriptor).CheckError();
         }
         /// <summary>
         /// Disables the mastering limiter
         /// </summary>
         private void DisableMasteringLimiter()
         {
-            MasteringVoice?.DisableEffect(0);
+            MasteringVoice?.DisableEffect(0).CheckError();
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Engine.Audio
                 InitialState = true,
                 OutputChannelCount = InputChannelCount,
             };
-            submixVoice.SetEffectChain(desc);
+            submixVoice.SetEffectChain(desc).CheckError();
 
             return submixVoice;
         }

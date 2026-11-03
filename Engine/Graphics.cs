@@ -33,9 +33,9 @@ namespace Engine
 #endif
 
         /// <summary>
-        /// Vertical sync enabled
+        /// Sync interval
         /// </summary>
-        private readonly bool vsyncEnabled = false;
+        private readonly uint syncInterval = 0;
         /// <summary>
         /// Multisample count
         /// </summary>
@@ -44,6 +44,10 @@ namespace Engine
         /// Multisample quality
         /// </summary>
         private readonly uint msQuality = 0;
+        /// <summary>
+        /// Graphics factory
+        /// </summary>
+        private IDXGIFactory2 factory = null;
         /// <summary>
         /// Graphics device
         /// </summary>
@@ -64,6 +68,10 @@ namespace Engine
         /// Depth buffer format
         /// </summary>
         private readonly Format depthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
+        /// <summary>
+        /// Color space
+        /// </summary>
+        private ColorSpaceType colorSpace = ColorSpaceType.RgbFullG22NoneP709;
 
         /// <summary>
         /// Device description
@@ -77,7 +85,7 @@ namespace Engine
         /// <summary>
         /// Screen viewport
         /// </summary>
-        public Vortice.Mathematics.Viewport Viewport { get; private set; }
+        public Viewport Viewport { get; private set; }
         /// <summary>
         /// Gets if the device was created with multi-sampling active
         /// </summary>
@@ -99,112 +107,6 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Finds mode description
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="refreshRate">Refresh date</param>
-        /// <param name="mode">Returns found mode description</param>
-        private static void FindModeDescription(ID3D11Device3 device, Format format, uint width, uint height, uint refreshRate, out ModeDescription1 mode)
-        {
-#if DEBUG
-            using var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true);
-#else
-            using var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false);
-#endif
-            using var factory = tmpFactory.QueryInterface<IDXGIFactory5>();
-            factory.EnumAdapters1(0, out IDXGIAdapter1 tmpAdapter);
-            using (tmpAdapter)
-            {
-                using var adapter = tmpAdapter.QueryInterface<IDXGIAdapter4>();
-                adapter.EnumOutputs(0, out IDXGIOutput tmpOutput);
-                using (tmpOutput)
-                {
-                    using var output = tmpOutput.QueryInterface<IDXGIOutput6>();
-                    try
-                    {
-                        var displayModeList = output.GetDisplayModeList1(
-                            format,
-                            DisplayModeEnumerationFlags.Interlaced);
-
-                        displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
-                        if (displayModeList.Length > 0)
-                        {
-                            if (refreshRate > 0)
-                            {
-                                Array.Sort(displayModeList, (d1, d2) =>
-                                {
-                                    float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                    float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                    f1 = MathF.Abs(refreshRate - f1);
-                                    f2 = MathF.Abs(refreshRate - f2);
-
-                                    return f1.CompareTo(f2);
-                                });
-                            }
-                            else
-                            {
-                                Array.Sort(displayModeList, (d1, d2) =>
-                                {
-                                    float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                    float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                    return f2.CompareTo(f1);
-                                });
-                            }
-
-                            mode = displayModeList[0];
-
-                            return;
-                        }
-
-                        mode = new ModeDescription1()
-                        {
-                            Width = width,
-                            Height = height,
-                            Format = format,
-                            RefreshRate = new Rational(0, 1),
-                            Scaling = ModeScaling.Unspecified,
-                            ScanlineOrdering = ModeScanlineOrder.Unspecified,
-                        };
-
-                        //var desc = new ModeDescription1()
-                        //{
-                        //    Width = width,
-                        //    Height = height,
-                        //    Format = format,
-                        //};
-                        //output.FindClosestMatchingMode1(
-                        //    ref desc,
-                        //    out mode,
-                        //    device);
-
-                        //mode.Width = width;
-                        //mode.Height = height;
-
-                        return;
-                    }
-                    catch
-                    {
-                        // Display mode not found
-                    }
-                }
-            }
-
-            mode = new ModeDescription1()
-            {
-                Width = width,
-                Height = height,
-                Format = format,
-                RefreshRate = new Rational(0, 1),
-                Scaling = ModeScaling.Unspecified,
-                ScanlineOrdering = ModeScanlineOrder.Unspecified,
-            };
-        }
         /// <summary>
         /// Checks the multi-sample specified count
         /// </summary>
@@ -239,100 +141,195 @@ namespace Engine
         /// <param name="multiSampling">Enable multisampling</param>
         public Graphics(IEngineForm form, bool vsyncEnabled = false, uint refreshRate = 0, uint multiSampling = 0)
         {
-            FindModeDescription(
-                device,
-                bufferFormat,
-                form.RenderWidth,
-                form.RenderHeight,
-                refreshRate,
-                out var displayMode);
+            ArgumentNullException.ThrowIfNull(form);
 
-            this.vsyncEnabled = vsyncEnabled && (displayMode.RefreshRate.Numerator != 0 || displayMode.RefreshRate.Denominator != 1);
+            syncInterval = vsyncEnabled ? 1u : 0u;
 
 #if DEBUG
-            using (var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true))
+            factory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true);
 #else
-            using (var tmpFactory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false))
+            factory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false);
 #endif
-            using (var factory = tmpFactory.QueryInterface<IDXGIFactory5>())
+            if (factory == null) throw new InvalidOperationException($"Cannot detect {nameof(IDXGIFactory2)}.");
+            factory.DebugName = "Graphics Factory6";
+
+            using (var adapter = GetHardwareAdapter())
             {
-                uint adapterIndex = SelectBestAdapter(factory);
-
-                factory.EnumAdapters1(adapterIndex, out var tmpAdapter);
-                using (tmpAdapter)
-                using (var adapter = tmpAdapter.QueryInterface<IDXGIAdapter4>())
-                {
-                    DeviceDescription = adapter.Description2.Description;
-
-                    DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
-
+                DeviceCreationFlags creationFlags = DeviceCreationFlags.BgraSupport;
 #if DEBUG
+                if (D3D11.SdkLayersAvailable())
+                {
                     creationFlags |= DeviceCreationFlags.Debug;
+                }
 #endif
-                    var res = D3D11.D3D11CreateDevice(
-                        adapter,
-                        DriverType.Unknown,
+                if (D3D11.D3D11CreateDevice(
+                    adapter,
+                    DriverType.Unknown,
+                    creationFlags,
+                    [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0],
+                    out ID3D11Device tmpDevice, out FeatureLevel _, out ID3D11DeviceContext tempContext).Failure)
+                {
+                    // If the initialization fails, fall back to the WARP device.
+                    // For more information on WARP, see:
+                    // http://go.microsoft.com/fwlink/?LinkId=286690
+                    D3D11.D3D11CreateDevice(
+                        IntPtr.Zero,
+                        DriverType.Warp,
                         creationFlags,
                         [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0],
-                        out var tmpDevice, out FeatureLevel featureLevel);
-                    if (res.Failure)
-                    {
-                        throw new EngineException(res.ToString());
-                    }
-
-                    device = tmpDevice.QueryInterface<ID3D11Device3>();
-                    device.DebugName = "Graphics Device";
+                        out tmpDevice, out FeatureLevel _, out tempContext).CheckError();
                 }
 
-                if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
-                {
-                    throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, bufferFormat));
-                }
-
-                var desc = new SwapChainDescription1()
-                {
-                    BufferCount = 2,
-                    Format = displayMode.Format,
-                    Width = displayMode.Width,
-                    Height = displayMode.Height,
-                    Stereo = displayMode.Stereo,
-                    SampleDescription = CurrentSampleDescription,
-                    AlphaMode = AlphaMode.Ignore,
-                    Scaling = Scaling.Stretch,
-                    BufferUsage = Usage.RenderTargetOutput,
-                    SwapEffect = SwapEffect.Sequential,
-                    Flags = SwapChainFlags.None,
-                };
-                var fsdesc = new SwapChainFullscreenDescription()
-                {
-                    RefreshRate = displayMode.RefreshRate,
-                    Scaling = displayMode.Scaling,
-                    ScanlineOrdering = displayMode.ScanlineOrdering,
-                    Windowed = !form.IsFullscreen,
-                };
-
-                using var tmpSwapChain = factory.CreateSwapChainForHwnd(device, form.Handle, desc, fsdesc);
-                swapChain = tmpSwapChain.QueryInterface<IDXGISwapChain4>();
-                swapChain.DebugName = "Graphics Swap Chain";
+                device = tmpDevice.QueryInterface<ID3D11Device3>();
+                device.DebugName = "Graphics Device";
             }
+
+            if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
+            {
+                throw new EngineException($"The specified multisampling value [{multiSampling}] is not supported for {bufferFormat}");
+            }
+
+            var scdesc = new SwapChainDescription1()
+            {
+                Width = form.RenderWidth,
+                Height = form.RenderHeight,
+                Format = bufferFormat,
+                BufferCount = 2,
+                BufferUsage = Usage.RenderTargetOutput,
+                SampleDescription = CurrentSampleDescription,
+                Scaling = Scaling.Stretch,
+                SwapEffect = SwapEffect.FlipDiscard,
+                AlphaMode = AlphaMode.Ignore,
+            };
+
+            var fsdesc = new SwapChainFullscreenDescription()
+            {
+                Windowed = !form.IsFullscreen,
+            };
+
+            using var tmpSwapChain = factory.CreateSwapChainForHwnd(device, form.Handle, scdesc, fsdesc);
+            swapChain = tmpSwapChain.QueryInterface<IDXGISwapChain4>() ?? throw new InvalidOperationException($"Cannot create swap chain {nameof(IDXGISwapChain4)}.");
+            swapChain.DebugName = "Graphics Swap Chain";
+
+            UpdateColorSpace(form);
 
             immediateContext = new("Immediate Context", true, -1, device.ImmediateContext3);
 
-            PrepareDevice(displayMode.Width, displayMode.Height, false);
+            PrepareDevice(form.RenderWidth, form.RenderHeight, false);
+
+            factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
 
 #if DEBUG
             ConfigureDebugLayer();
 #endif
+        }
+        /// <summary>
+        /// Gets the hardware adapter
+        /// </summary>
+        private IDXGIAdapter1 GetHardwareAdapter()
+        {
+            using var factory6 = factory.QueryInterface<IDXGIFactory6>() ?? throw new InvalidOperationException($"Cannot detect {nameof(IDXGIFactory6)}.");
+            factory6.DebugName = "Graphics Factory6";
 
-            #region Alt + Enter
-
-            using (var factory = swapChain.GetParent<IDXGIFactory5>())
+            for (uint idx = 0; factory6.EnumAdapterByGpuPreference(idx, GpuPreference.HighPerformance, out IDXGIAdapter1 adapter1).Success; idx++)
             {
-                factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
+                if (adapter1 == null) continue;
+
+                var desc = adapter1.Description1;
+
+                if ((desc.Flags & AdapterFlags.Software) != AdapterFlags.None)
+                {
+                    adapter1.Dispose();
+                    continue;
+                }
+
+                adapter1.DebugName = $"Graphics Adapter - {desc.Description}";
+                return adapter1;
             }
 
-            #endregion
+            for (uint idx = 0; factory.EnumAdapters1(idx, out IDXGIAdapter1 adapter1).Success; idx++)
+            {
+                if (adapter1 == null) continue;
+
+                var desc = adapter1.Description1;
+
+                if ((desc.Flags & AdapterFlags.Software) != AdapterFlags.None)
+                {
+                    adapter1.Dispose();
+                    continue;
+                }
+
+                adapter1.DebugName = $"Graphics Adapter - {desc.Description}";
+                return adapter1;
+            }
+
+            throw new InvalidOperationException("Cannot detect D3D11 adapter.");
         }
+        private void UpdateColorSpace(IEngineForm form)
+        {
+            bool isDisplayHDR10 = false;
+
+            var windowBounds = form.RenderRectangle;
+
+            IDXGIOutput bestOutput = default;
+            long bestIntersectArea = -1;
+
+            for (uint idx = 0; factory.EnumAdapters1(idx, out IDXGIAdapter1 adapter).Success; idx++)
+            {
+                for (uint outIdx = 0; adapter.EnumOutputs(outIdx, out IDXGIOutput output).Success; outIdx++)
+                {
+                    // Get the rectangle bounds of current output.
+                    var r = output.Description.DesktopCoordinates;
+
+                    // Compute the intersection.
+                    int intersectArea = RectI.ComputeIntersectionArea(windowBounds, r);
+                    if (intersectArea > bestIntersectArea)
+                    {
+                        bestOutput = output;
+                        bestIntersectArea = intersectArea;
+                    }
+                    else
+                    {
+                        output?.Dispose();
+                    }
+                }
+
+                adapter.Dispose();
+            }
+
+            using var output6 = bestOutput?.QueryInterfaceOrNull<IDXGIOutput6>();
+            if (output6 != null)
+            {
+                var outputDesc = output6.Description1;
+                if (outputDesc.ColorSpace == ColorSpaceType.RgbFullG2084NoneP2020)
+                {
+                    // Display output is HDR10.
+                    isDisplayHDR10 = true;
+                }
+            }
+
+            if (isDisplayHDR10)
+            {
+                colorSpace = bufferFormat switch
+                {
+                    // The application creates the HDR10 signal.
+                    Format.R10G10B10A2_UNorm => ColorSpaceType.RgbFullG2084NoneP2020,
+                    // The system creates the HDR10 signal, application uses linear values.
+                    Format.R16G16B16A16_Float => ColorSpaceType.RgbFullG10NoneP709,
+                    _ => ColorSpaceType.RgbFullG22NoneP709,
+                };
+            }
+
+            using var swapChain3 = swapChain.QueryInterfaceOrNull<IDXGISwapChain3>();
+            if (swapChain3 == null) return;
+
+            var colorSpaceSupport = swapChain3.CheckColorSpaceSupport(colorSpace);
+            if ((colorSpaceSupport & SwapChainColorSpaceSupportFlags.Present) != SwapChainColorSpaceSupportFlags.None)
+            {
+                swapChain3.SetColorSpace1(colorSpace);
+            }
+        }
+
         /// <summary>
         /// Selects the best adapter based in dedicated video memory
         /// </summary>
@@ -415,6 +412,9 @@ namespace Engine
             swapChain = null;
 
             DisposeResources();
+
+            factory?.Dispose();
+            factory = null;
 
             device?.Dispose();
             device = null;
@@ -569,7 +569,6 @@ namespace Engine
         /// </summary>
         public void Present()
         {
-            uint syncInterval = vsyncEnabled ? 1u : 0u;
             var res = swapChain.Present(syncInterval, PresentFlags.None);
 
             if (!res.Success)

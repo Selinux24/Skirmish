@@ -283,6 +283,55 @@ namespace Engine.Mathematics
             result = new(left, top, right - left, bottom - top);
         }
 
+        /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="a">First rectangle.</param>
+        /// <param name="b">Second rectangle.</param>
+        /// <returns>The intersection area.</returns>
+        public static int ComputeIntersectionArea(RectI a, RectI b)
+        {
+            return ComputeIntersectionArea(ref a, ref b);
+        }
+        /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="a">First rectangle.</param>
+        /// <param name="b">Second rectangle.</param>
+        /// <returns>The intersection area.</returns>
+        public static int ComputeIntersectionArea(ref RectI a, ref RectI b)
+        {
+            int ax1 = a.Left;
+            int ay1 = a.Top;
+            int ax2 = a.Right;
+            int ay2 = a.Bottom;
+
+            int bx1 = b.Left;
+            int by1 = b.Top;
+            int bx2 = b.Right;
+            int by2 = b.Bottom;
+
+            return ComputeIntersectionArea(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2);
+        }
+        /// <summary>
+        /// Computes the intersection area of two rectangles.
+        /// </summary>
+        /// <param name="ax1">X coordinate of the first rectangle's left edge.</param>
+        /// <param name="ay1">Y coordinate of the first rectangle's top edge.</param>
+        /// <param name="ax2">X coordinate of the first rectangle's right edge.</param>
+        /// <param name="ay2">Y coordinate of the first rectangle's bottom edge.</param>
+        /// <param name="bx1">X coordinate of the second rectangle's left edge.</param>
+        /// <param name="by1">Y coordinate of the second rectangle's top edge.</param>
+        /// <param name="bx2">X coordinate of the second rectangle's right edge.</param>
+        /// <param name="by2">Y coordinate of the second rectangle's bottom edge.</param>
+        /// <returns>The intersection area.</returns>
+        private static int ComputeIntersectionArea(
+            int ax1, int ay1, int ax2, int ay2,
+            int bx1, int by1, int bx2, int by2)
+        {
+            return Math.Max(0, Math.Min(ax2, bx2) - Math.Max(ax1, bx1)) * Math.Max(0, Math.Min(ay2, by2) - Math.Max(ay1, by1));
+        }
+
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {

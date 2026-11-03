@@ -337,7 +337,7 @@ namespace Engine.BuiltIn.UI
         }
         private async Task<TextDrawer> CreateTextDrawer()
         {
-            var td = await Scene.CreateComponent<TextDrawer, Engine.UI.FontDescription>(
+            var td = await Scene.CreateComponent<TextDrawer, FontDescription>(
                 $"{Id}.TextDrawer",
                 $"{Name}.TextDrawer",
                 Description.Font,

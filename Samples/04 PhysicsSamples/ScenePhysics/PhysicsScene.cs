@@ -152,7 +152,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(new Vector3(-15, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(-15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -160,7 +160,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(new Vector3(-20, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(-20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -205,7 +205,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(new Vector3(15, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -213,7 +213,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(new Vector3(20, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -252,7 +252,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState = new RigidBodyState
             {
                 Mass = 15,
-                InitialTransform = Engine.Mathematics.Matrix4x4.Translation(Vector3.Up * (10f + (index * 2f))),
+                InitialTransform = Matrix4x4.Translation(Vector3.Up * (10f + (index * 2f))),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -296,8 +296,8 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeFrustums()
         {
-            var view = Engine.Mathematics.Matrix4x4.LookAtLH(Vector3.Zero, Vector3.Down, Vector3.ForwardLH);
-            var proj = Engine.Mathematics.Matrix4x4.PerspectiveFovLH(Helper.PiOver4, 1, 2, 4);
+            var view = Matrix4x4.LookAtLH(Vector3.Zero, Vector3.Down, Vector3.ForwardLH);
+            var proj = Matrix4x4.PerspectiveFovLH(Helper.PiOver4, 1, 2, 4);
             var bFrustum = new BoundingFrustum(view * proj);
             var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);
             var wired = Line3D.CreateFrustum(bFrustum);

@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.Windows.Helpers;
+using Engine.Windows.Properties;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Engine.Windows
 {
-    using Engine.Mathematics;
-    using Engine.Windows.Helpers;
-    using Engine.Windows.Properties;
-
     /// <summary>
     /// Engine render form
     /// </summary>
@@ -443,7 +442,7 @@ namespace Engine.Windows
         }
 
         /// <inheritdoc/>
-        public Vortice.Mathematics.Viewport GetViewport()
+        public Viewport GetViewport()
         {
             return new(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
         }

@@ -1783,7 +1783,7 @@ namespace TerrainSamples.SceneHeightmap
                 if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
-                var abox = Engine.Mathematics.BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
+                var abox = BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
 
                 var colL = Color4.IntToCol(nodes[i].Id, 128);
                 var colT = Color4.IntToCol(nodes[i].Id, 64);

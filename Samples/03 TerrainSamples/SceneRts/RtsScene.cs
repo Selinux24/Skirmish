@@ -1294,7 +1294,7 @@ namespace TerrainSamples.SceneRts
             }
 
             // Axis
-            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Engine.Mathematics.Matrix4x4.Identity, 20f));
+            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix4x4.Identity, 20f));
             curveLineDrawer.Visible = false;
         }
         private void BeginToggleGarageLights()
@@ -1728,9 +1728,9 @@ namespace TerrainSamples.SceneRts
 
             if (curveLineDrawer.Visible)
             {
-                Engine.Mathematics.Matrix4x4 rot =
-                    Engine.Mathematics.Matrix4x4.RotationQuaternion(helicopter.Manipulator.Rotation) *
-                    Engine.Mathematics.Matrix4x4.Translation(helicopter.Manipulator.Position);
+                Matrix4x4 rot =
+                    Matrix4x4.RotationQuaternion(helicopter.Manipulator.Rotation) *
+                    Matrix4x4.Translation(helicopter.Manipulator.Position);
 
                 curveLineDrawer.SetPrimitives(hAxisColor, Line3D.CreateAxis(rot, 5f));
             }

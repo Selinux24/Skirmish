@@ -28,7 +28,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="text">Text</param>
-        public static UITextAreaDescription Default(Engine.UI.FontDescription font, string text = null)
+        public static UITextAreaDescription Default(FontDescription font, string text = null)
         {
             return new()
             {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,9 +8,6 @@ using System.Linq;
 
 namespace Engine.Content.FmtObj.Fmt
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     static class Reader
     {
         /// <summary>
@@ -103,7 +102,7 @@ namespace Engine.Content.FmtObj.Fmt
         }
         private static int[] FindAllIndexOf(this IEnumerable<string> values, string val)
         {
-            return values.Select((b, i) => b.StartsWith(val, StringComparison.OrdinalIgnoreCase) ? i : -1).Where(i => i != -1).ToArray();
+            return [.. values.Select((b, i) => b.StartsWith(val, StringComparison.OrdinalIgnoreCase) ? i : -1).Where(i => i != -1)];
         }
         private static SubMeshContent CreateMesh(IEnumerable<string> submeshLines, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals)
         {
@@ -335,7 +334,7 @@ namespace Engine.Content.FmtObj.Fmt
                 faceIndex++;
             }
 
-            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Engine.Mathematics.Matrix4x4.Identity);
+            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix4x4.Identity);
 
             content.SetVertices(vertexList);
             content.SetIndices(indexList);
