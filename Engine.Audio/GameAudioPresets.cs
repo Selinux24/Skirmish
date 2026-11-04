@@ -69,9 +69,9 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="preset">Preset value</param>
         /// <returns>Returns the ReverbParameters type</returns>
-        public static ReverbI3DL2Parameters Convert(GameAudioReverbPresets preset)
+        public static ReverbParameters Convert(GameAudioReverbPresets preset)
         {
-            return presetParams[(int)preset];
+            return Fx.ReverbConvertI3DL2ToNative(presetParams[(int)preset], true);
         }
     }
 }

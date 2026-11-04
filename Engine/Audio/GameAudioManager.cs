@@ -148,16 +148,14 @@ namespace Engine.Audio
         public void Update(IGameTime gameTime)
         {
             //Extract a remove the effects due to dispose
-            var toDispose = effectInstances
-                .FindAll(i => i.Effect.DueToDispose)
-                .ToArray();
+            var toDispose = effectInstances.FindAll(i => i.Effect.DueToDispose);
 
-            if (toDispose.Length != 0)
+            if (toDispose.Count != 0)
             {
                 effectInstances.RemoveAll(i => i.Effect.DueToDispose);
                 Task.Run(() =>
                 {
-                    toDispose.ToList().ForEach(i =>
+                    toDispose.ForEach(i =>
                     {
                         i.Effect.Stop(true);
                         i.Effect.Dispose();
@@ -165,11 +163,9 @@ namespace Engine.Audio
                 });
             }
 
-            var toUpdate = effectInstances
-                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == GameAudioState.Playing && i.Effect.UseAudio3D)
-                .ToArray();
+            var toUpdate = effectInstances.FindAll(i => !i.Effect.DueToDispose && i.Effect.State == GameAudioState.Playing && i.Effect.UseAudio3D);
 
-            int effectCount = toUpdate.Length;
+            int effectCount = toUpdate.Count;
             if (effectCount == 0)
             {
                 return;

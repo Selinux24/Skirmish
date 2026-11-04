@@ -2,6 +2,7 @@
 using Vortice.Multimedia;
 using Vortice.XAPO;
 using Vortice.XAudio2;
+using Vortice.XAudio2.Fx;
 
 namespace Engine.Audio
 {
@@ -35,13 +36,19 @@ namespace Engine.Audio
         /// Audio speakers
         /// </summary>
         private readonly GameAudioSpeakers speakers;
+        /// <summary>
+        /// Current operation set id
+        /// </summary>
         private uint operationSet = 0;
+        /// <summary>
+        /// Operation set active flag
+        /// </summary>
         private bool operationSetActive = false;
 
         /// <summary>
         /// Mastering voice
         /// </summary>
-        public IXAudio2MasteringVoice MasteringVoice { get; private set; }
+        internal IXAudio2MasteringVoice MasteringVoice { get; private set; }
         /// <inheritdoc/>
         public uint InputSampleRate { get; private set; }
         /// <inheritdoc/>
@@ -267,10 +274,7 @@ namespace Engine.Audio
         public IXAudio2SubmixVoice CreateReverbVoice()
         {
             // Create reverb effect
-            using var reverbEffect = XAPO.CreateFX(XAPO.CLSID_FXReverb);
-
-            // Create a submix voice
-            var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
+            using var reverbEffect = Fx.XAudio2CreateReverb();
 
             // Performance tip: you need not run global FX with the sample number
             // of channels as the final mix.  For example, this sample runs
@@ -280,6 +284,9 @@ namespace Engine.Audio
                 InitialState = true,
                 OutputChannelCount = InputChannelCount,
             };
+
+            // Create a submix voice
+            var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
             submixVoice.SetEffectChain(desc).CheckError();
 
             return submixVoice;

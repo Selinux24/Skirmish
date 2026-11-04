@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Vortice.XAudio2;
 
 namespace Engine.Audio
 {
-    using Engine.Mathematics;
-    using Vortice.XAudio2;
-
     /// <summary>
     /// Game audio effect
     /// </summary>
@@ -754,7 +753,8 @@ namespace Engine.Audio
 
             if (reverb.HasValue)
             {
-                submixVoice.SetEffectParameters(0, GameAudioPresets.Convert(reverb.Value), true, gameAudio.OperationSet).CheckError();
+                var effect = GameAudioPresets.Convert(reverb.Value);
+                submixVoice.SetEffectParameters(0, effect, gameAudio.OperationSet).CheckError();
                 submixVoice.EnableEffect(0, gameAudio.OperationSet).CheckError();
             }
 

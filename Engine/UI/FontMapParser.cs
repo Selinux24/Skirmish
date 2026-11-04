@@ -71,8 +71,8 @@ namespace Engine.UI
                     charShadowColors = charShadowColors.Skip(part.Length + 1);
 
                     sentenceParts.Add(part);
-                    colorParts.Add(partColors.ToArray());
-                    shadowColorParts.Add(partShadowColors.ToArray());
+                    colorParts.Add([.. partColors]);
+                    shadowColorParts.Add([.. partShadowColors]);
 
                     if (lastPart)
                     {
