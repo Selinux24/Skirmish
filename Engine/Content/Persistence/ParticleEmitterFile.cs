@@ -1,4 +1,5 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Content.Persistence
 {
     /// <summary>
@@ -13,11 +14,11 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Velocity
         /// </summary>
-        public CntDirection3 Velocity { get; set; } = CntDirection3.Up;
+        public Vector3 Velocity { get; set; } = Vector3.Up;
         /// <summary>
         /// Particle scale
         /// </summary>

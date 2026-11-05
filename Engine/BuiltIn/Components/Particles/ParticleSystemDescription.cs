@@ -1,5 +1,4 @@
-﻿using Engine.Content;
-using Engine.Content.Persistence;
+﻿using Engine.Content.Persistence;
 using Engine.Mathematics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -18,11 +17,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Default minimum color variation
         /// </summary>
-        public static readonly Color3 DefaultMinColor = Color3.Black;
+        public static readonly Color DefaultMinColor = Color.Black;
         /// <summary>
         /// Default maximum color variation
         /// </summary>
-        public static readonly Color3 DefaultMaxColor = Color3.White;
+        public static readonly Color DefaultMaxColor = Color.White;
 
         /// <summary>
         /// Creates a new particle description from another one
@@ -382,7 +381,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Gravity
         /// </summary>
-        public CntDirection3 Gravity { get; set; }
+        public Vector3 Gravity { get; set; }
 
         /// <summary>
         /// Velocity at end
@@ -392,11 +391,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public CntColor MinColor { get; set; }
+        public Color4 MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public CntColor MaxColor { get; set; }
+        public Color4 MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed

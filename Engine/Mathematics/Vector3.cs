@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;

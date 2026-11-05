@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -1309,6 +1310,7 @@ namespace Engine.Mathematics
             Multiply(ref left, ref right, out var result);
             return result;
         }
+    
         /// <summary>
         /// Tests for equality between two objects.
         /// </summary>
@@ -1331,6 +1333,7 @@ namespace Engine.Mathematics
         {
             return !left.Equals(ref right);
         }
+
         /// <summary>
         /// Convert the System.Numerics.Quaternion to a Quaternion.
         /// </summary>

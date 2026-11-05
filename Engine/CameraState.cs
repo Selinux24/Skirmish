@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -12,11 +12,11 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        public CntPosition3 Position { get; set; }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Interest
         /// </summary>
-        public CntDirection3 Interest { get; set; }
+        public Vector3 Interest { get; set; }
         /// <summary>
         /// Field of view angle
         /// </summary>
@@ -49,7 +49,7 @@ namespace Engine
         /// <summary>
         /// Velocity vector
         /// </summary>
-        public CntDirection3 Velocity { get; set; }
+        public Vector3 Velocity { get; set; }
         /// <summary>
         /// Isometric axis
         /// </summary>
@@ -62,19 +62,19 @@ namespace Engine
         /// <summary>
         /// Isometric current forward
         /// </summary>
-        public CntDirection3 IsoMetricForward { get; set; }
+        public Vector3 IsoMetricForward { get; set; }
         /// <summary>
         /// Isometric current backward
         /// </summary>
-        public CntDirection3 IsoMetricBackward { get; set; }
+        public Vector3 IsoMetricBackward { get; set; }
         /// <summary>
         /// Isometric current left
         /// </summary>
-        public CntDirection3 IsoMetricLeft { get; set; }
+        public Vector3 IsoMetricLeft { get; set; }
         /// <summary>
         /// Isometric current right
         /// </summary>
-        public CntDirection3 IsoMetricRight { get; set; }
+        public Vector3 IsoMetricRight { get; set; }
         /// <summary>
         /// Translation mode
         /// </summary>
@@ -83,7 +83,7 @@ namespace Engine
         /// <summary>
         /// Translation destination
         /// </summary>
-        public CntDirection3 TranslationInterest { get; set; }
+        public Vector3 TranslationInterest { get; set; }
         /// <summary>
         /// Movement delta
         /// </summary>
@@ -119,15 +119,15 @@ namespace Engine
         /// <summary>
         /// Perspective view matrix
         /// </summary>
-        public CntMatrix4x4 View { get; set; }
+        public Matrix4x4 View { get; set; }
         /// <summary>
         /// Perspective projection matrix
         /// </summary>
-        public CntMatrix4x4 Projection { get; set; }
+        public Matrix4x4 Projection { get; set; }
         /// <summary>
         /// Camera frustum
         /// </summary>
-        public CntMatrix4x4 Frustum { get; set; }
+        public Matrix4x4 Frustum { get; set; }
         /// <summary>
         /// Following object id
         /// </summary>

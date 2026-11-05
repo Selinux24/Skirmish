@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Initial light direction
         /// </summary>
-        public CntDirection3 InitialDirection { get; set; }
+        public Vector3 InitialDirection { get; set; }
         /// <summary>
         /// Light direction
         /// </summary>
-        public CntDirection3 Direction { get; set; }
+        public Vector3 Direction { get; set; }
         /// <summary>
         /// Base brightness
         /// </summary>
@@ -30,18 +30,18 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public CntMatrix4x4 ToShadowSpace { get; set; }
+        public Matrix4x4 ToShadowSpace { get; set; }
         /// <summary>
         /// X cascade offset
         /// </summary>
-        public CntPosition4 ToCascadeOffsetX { get; set; }
+        public Vector4 ToCascadeOffsetX { get; set; }
         /// <summary>
         /// Y cascade offset
         /// </summary>
-        public CntPosition4 ToCascadeOffsetY { get; set; }
+        public Vector4 ToCascadeOffsetY { get; set; }
         /// <summary>
         /// Cascasde scale
         /// </summary>
-        public CntPosition4 ToCascadeScale { get; set; }
+        public Vector4 ToCascadeScale { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -26,11 +26,11 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public CntColor DiffuseColor { get; set; }
+        public Color3 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public CntColor SpecularColor { get; set; }
+        public Color3 SpecularColor { get; set; }
         /// <summary>
         /// Shadow map index
         /// </summary>
@@ -45,6 +45,6 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        public CntMatrix4x4 ParentTransform { get; set; }
+        public Matrix4x4 ParentTransform { get; set; }
     }
 }

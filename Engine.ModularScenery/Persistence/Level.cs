@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,11 +29,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public CntPosition3 StartPosition { get; set; } = CntPosition3.Zero;
+        public Vector3 StartPosition { get; set; } = Vector3.Zero;
         /// <summary>
         /// Looking vector
         /// </summary>
-        public CntDirection3 LookingVector { get; set; } = CntDirection3.ForwardLH;
+        public Vector3 LookingVector { get; set; } = Vector3.ForwardLH;
         /// <summary>
         /// Assets map
         /// </summary>

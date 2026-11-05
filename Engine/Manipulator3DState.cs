@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -10,19 +10,19 @@ namespace Engine
         /// <summary>
         /// Final transform for the controller
         /// </summary>
-        public CntMatrix4x4 LocalTransform { get; set; }
+        public Matrix4x4 LocalTransform { get; set; }
         /// <summary>
         /// Rotation component
         /// </summary>
-        public CntRotationQ Rotation { get; set; }
+        public Quaternion Rotation { get; set; }
         /// <summary>
         /// Scaling component
         /// </summary>
-        public CntScale3 Scaling { get; set; }
+        public Vector3 Scaling { get; set; }
         /// <summary>
         /// Position component
         /// </summary>
-        public CntPosition3 Position { get; set; }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Parent manipulator
         /// </summary>

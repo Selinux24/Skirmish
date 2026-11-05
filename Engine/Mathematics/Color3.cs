@@ -711,9 +711,9 @@ namespace Engine.Mathematics
         public readonly bool Equals(ref Color3 other)
         {
             return
-                Red == other.Red &&
-                Green == other.Green &&
-                Blue == other.Blue;
+                Helper.NearEqual(Red, other.Red) &&
+                Helper.NearEqual(Green, other.Green) &&
+                Helper.NearEqual(Blue, other.Blue);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

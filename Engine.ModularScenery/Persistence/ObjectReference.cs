@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Animation;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
-    using Engine.Animation;
-    using Engine.Content;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Object reference
     /// </summary>
@@ -70,15 +69,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public CntPosition3 Position { get; set; } = CntPosition3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public CntRotationQ Rotation { get; set; } = CntRotationQ.Identity;
+        public Quaternion Rotation { get; set; } = Quaternion.Identity;
         /// <summary>
         /// Scale
         /// </summary>
-        public CntScale3 Scale { get; set; } = CntScale3.One;
+        public Vector3 Scale { get; set; } = Vector3.One;
         /// <summary>
         /// Load model lights into scene
         /// </summary>

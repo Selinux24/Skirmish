@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine.Common
 {
@@ -18,7 +18,7 @@ namespace Engine.Common
         /// <summary>
         /// Current velocity
         /// </summary>
-        public CntDirection3 Velocity { get; set; }
+        public Vector3 Velocity { get; set; }
         /// <summary>
         /// Maximum speed
         /// </summary>

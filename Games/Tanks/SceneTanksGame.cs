@@ -623,7 +623,7 @@ namespace Tanks
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
             var pShotExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleFireFileName, 5);
-            pShotExplosion.Gravity = CntDirection3.Zero;
+            pShotExplosion.Gravity = Vector3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             pShotExplosion.MinVerticalVelocity = 0f;
             pShotExplosion.MaxVerticalVelocity = 0f;
@@ -632,7 +632,7 @@ namespace Tanks
             particleDescriptions.Add("ShotExplosion", pShotExplosion);
 
             var pShotSmoke = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleSmokeFileName, 5);
-            pShotSmoke.Gravity = CntDirection3.Zero;
+            pShotSmoke.Gravity = Vector3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             particleDescriptions.Add("ShotSmoke", pShotSmoke);
         }

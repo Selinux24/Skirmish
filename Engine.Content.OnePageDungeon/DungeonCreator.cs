@@ -16,9 +16,26 @@ namespace Engine.Content.OnePageDungeon
     public static class DungeonCreator
     {
         /// <summary>
+        /// Zero rotation
+        /// </summary>
+        const string Rotation0 = "Rot0";
+        /// <summary>
+        /// 90º rotation
+        /// </summary>
+        const string Rotation90 = "Rot90";
+        /// <summary>
+        /// 180º rotation
+        /// </summary>
+        const string Rotation180 = "Rot180";
+        /// <summary>
+        /// 270º rotation
+        /// </summary>
+        const string Rotation270 = "Rot270";
+
+        /// <summary>
         /// Rotation string list
         /// </summary>
-        private static readonly string[] rotationStrings = [CntRotationQ.Rotation0, CntRotationQ.Rotation90, CntRotationQ.Rotation180, CntRotationQ.Rotation270];
+        private static readonly string[] rotationStrings = [Rotation0, Rotation90, Rotation180, Rotation270];
 
         /// <summary>
         /// Creates an asset map
@@ -168,9 +185,9 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, CntRotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, Quaternion.Identity));
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, CntRotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, Quaternion.Identity));
 
                     var cellWalls = walls
                         .Where(w => w.Cell.X == ix && w.Cell.Y == iy)
@@ -188,7 +205,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="assetType"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, CntPosition3 position, CntRotationQ rotation)
+        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Vector3 position, Quaternion rotation)
         {
             if (prop?.Assets?.Any() != true)
             {
@@ -224,7 +241,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.N))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new CntPosition3(-vx, 0, vz - blockDelta);
+                var position = new Vector3(-vx, 0, vz - blockDelta);
                 var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -233,7 +250,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.S))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new CntPosition3(-vx, 0, vz + blockDelta);
+                var position = new Vector3(-vx, 0, vz + blockDelta);
                 var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -242,7 +259,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.E))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new CntPosition3(-vx - blockDelta, 0, vz);
+                var position = new Vector3(-vx - blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -251,7 +268,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.W))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new CntPosition3(-vx + blockDelta, 0, vz);
+                var position = new Vector3(-vx + blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -384,7 +401,7 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = column.X * configuration.BlockSize;
                 float vz = column.Y * configuration.BlockSize;
-                var position = new CntPosition3(-vx + half, 0, vz - half);
+                var position = new Vector3(-vx + half, 0, vz - half);
 
                 var dColumn = configuration.GetRandonColumn();
 
@@ -477,8 +494,8 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = door.X * configuration.BlockSize;
                 float vz = door.Y * configuration.BlockSize;
-                var dir = new CntPosition3(door.Dir.X, 0, -door.Dir.Y);
-                var pos = new CntPosition3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
+                var dir = new Vector3(door.Dir.X, 0, -door.Dir.Y);
+                var pos = new Vector3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
                 var rot = EvaluateRotation(dir, configuration.RotationDelta);
 
                 if (dDoor.Door != null)
@@ -522,55 +539,55 @@ namespace Engine.Content.OnePageDungeon
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static CntRotationQ EvaluateRotation(Vector3 dir, int index)
+        private static Quaternion EvaluateRotation(Vector3 dir, int index)
         {
+            Quaternion? res = null;
+
             if (dir == Vector3.Left)
             {
-                return rotationStrings[index % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[index % 4]);
             }
             else if (dir == Vector3.ForwardLH)
             {
-                return rotationStrings[(1 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(1 + index) % 4]);
             }
             else if (dir == Vector3.Right)
             {
-                return rotationStrings[(2 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(2 + index) % 4]);
             }
             else if (dir == Vector3.BackwardLH)
             {
-                return rotationStrings[(3 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(3 + index) % 4]);
             }
-            else
-            {
-                return null;
-            }
+
+            return res ?? Quaternion.Identity;
         }
         /// <summary>
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static CntRotationQ EvaluateRotation(WallDirections dir, int index)
+        private static Quaternion EvaluateRotation(WallDirections dir, int index)
         {
+            Quaternion? res = null;
+
             if (dir.HasFlag(WallDirections.E))
             {
-                return rotationStrings[index % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[index % 4]);
             }
             else if (dir.HasFlag(WallDirections.S))
             {
-                return rotationStrings[(1 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(1 + index) % 4]);
             }
             else if (dir.HasFlag(WallDirections.W))
             {
-                return rotationStrings[(2 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(2 + index) % 4]);
             }
             else if (dir.HasFlag(WallDirections.N))
             {
-                return rotationStrings[(3 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(3 + index) % 4]);
             }
-            else
-            {
-                return "";
-            }
+
+            return res ?? Quaternion.Identity;
         }
 
         /// <summary>

@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -268,6 +269,22 @@ namespace Engine.Mathematics
             G = values[1];
             B = values[2];
             A = values[3];
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the alpha, red, green, and blue components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color(int[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+
+            R = (byte)values[0];
+            G = (byte)values[1];
+            B = (byte)values[2];
+            A = (byte)values[3];
         }
 
         /// <summary>
@@ -1000,7 +1017,11 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Color other)
         {
-            return R == other.R && G == other.G && B == other.B && A == other.A;
+            return 
+                R == other.R && 
+                G == other.G && 
+                B == other.B && 
+                A == other.A;
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

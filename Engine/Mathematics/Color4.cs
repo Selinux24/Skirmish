@@ -202,6 +202,38 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
+        /// <param name="values">The values to assign to the red, green, blue, and alpha components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color4(byte[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+
+            Red = values[0] / 255f;
+            Green = values[1] / 255f;
+            Blue = values[2] / 255f;
+            Alpha = values[3] / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the red, green, blue, and alpha components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color4(int[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+
+            Red = values[0] / 255f;
+            Green = values[1] / 255f;
+            Blue = values[2] / 255f;
+            Alpha = values[3] / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
         /// <param name="color"><see cref="Color3"/> used to initialize the color.</param>
         public Color4(Color3 color)
         {
@@ -777,9 +809,9 @@ namespace Engine.Mathematics
         public static implicit operator System.Drawing.Color(Color4 value)
         {
             return System.Drawing.Color.FromArgb(
-                (int)(value.Alpha * 255f), 
-                (int)(value.Red * 255f), 
-                (int)(value.Green * 255f), 
+                (int)(value.Alpha * 255f),
+                (int)(value.Red * 255f),
+                (int)(value.Green * 255f),
                 (int)(value.Blue * 255f));
         }
         /// <inheritdoc/>
@@ -842,10 +874,10 @@ namespace Engine.Mathematics
         public readonly bool Equals(ref Color4 other)
         {
             return
-                Alpha == other.Alpha &&
-                Red == other.Red &&
-                Green == other.Green &&
-                Blue == other.Blue;
+                Helper.NearEqual(Alpha, other.Alpha) &&
+                Helper.NearEqual(Red, other.Red) &&
+                Helper.NearEqual(Green, other.Green) &&
+                Helper.NearEqual(Blue, other.Blue);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
