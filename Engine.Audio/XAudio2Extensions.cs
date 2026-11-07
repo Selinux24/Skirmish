@@ -1,13 +1,12 @@
 ﻿using System.Linq;
+using Vortice.XAudio2;
 
 namespace Engine.Audio
 {
-    using Vortice.XAudio2;
-
     /// <summary>
     /// Vortice extensions
     /// </summary>
-    static class VorticeExtensions
+    static class XAudio2Extensions
     {
         /// <summary>
         /// Converts the game curve to the SharpDX curve

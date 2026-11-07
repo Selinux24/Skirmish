@@ -41,22 +41,22 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public readonly ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.MeshContainsBox(mesh, bbox);
+            return Collision.MeshContainsBox(mesh, ref bbox);
         }
         /// <inheritdoc/>
         public readonly ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.MeshContainsSphere(mesh, sphere);
+            return Collision.MeshContainsSphere(mesh, ref sphere);
         }
         /// <inheritdoc/>
         public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Intersection.MeshContainsFrustum(mesh, frustum);
+            return Collision.MeshContainsFrustum(mesh, ref frustum);
         }
         /// <inheritdoc/>
         public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return Intersection.MeshContainsMesh(this.mesh, mesh);
+            return Collision.MeshContainsMesh(this.mesh, [.. mesh]);
         }
 
         /// <inheritdoc/>

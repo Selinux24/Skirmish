@@ -126,7 +126,8 @@ namespace Engine
                 // Brute force
                 var mesh = GetGeometry(GeometryTypes.Picking);
 
-                return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
+                BoundingSphere sph = sphere;
+                return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
             }
 
             result = new PickingResult<Triangle>()
@@ -145,7 +146,8 @@ namespace Engine
             float minDistance = float.MaxValue;
             foreach (var node in nodes)
             {
-                if (Intersection.SphereIntersectsMesh(sphere, node.Items, out var res))
+                BoundingSphere sph = sphere;
+                if (Collision.SphereIntersectsMesh(ref sph, node.Items, out var res))
                 {
                     intersects = true;
 
@@ -163,12 +165,12 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return Intersection.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

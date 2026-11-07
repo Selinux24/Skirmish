@@ -1,11 +1,11 @@
-﻿using NAudio.Wave;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Vortice.Multimedia;
+using Vortice.XAudio2;
 
 namespace Engine.Audio
 {
-    using Vortice.Multimedia;
-    using Vortice.XAudio2;
+    using AudioFileReader = NAudio.Wave.AudioFileReader;
 
     /// <summary>
     /// Game audio file
@@ -59,7 +59,7 @@ namespace Engine.Audio
             FileName = fileName;
 
             // Initialize NAudio universal decoder
-            audioDecoder = new AudioFileReader(fileName);
+            audioDecoder = new(fileName);
 
             // Convert and map the NAudio format to the native Vortice WaveFormat
             WaveFormat = WaveFormat.CreateCustomFormat(

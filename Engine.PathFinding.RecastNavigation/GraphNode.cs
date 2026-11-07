@@ -153,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var dtris = tile.GetDetailTris(p);
 
-                if (!Intersection.PointInMesh(point, dtris))
+                if (!Collision.MeshIntersectsPoint(dtris, ref point))
                 {
                     continue;
                 }
@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
-            return Intersection.PointInMesh(point, Triangles);
+            return Collision.MeshIntersectsPoint(Triangles, ref point);
         }
         /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()

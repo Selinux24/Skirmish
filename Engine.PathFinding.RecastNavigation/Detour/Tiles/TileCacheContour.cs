@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Tile cache contour
     /// </summary>
@@ -138,7 +137,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];
-                center.Add(v.Position);
+                center += v.Position;
             }
 
             Vector3 res = new(center.X, center.Y, center.Z);

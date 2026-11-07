@@ -89,6 +89,65 @@ namespace Engine.Mathematics
         public float Alpha;
 
         /// <summary>
+        /// Gets or sets the component at the specified index.
+        /// </summary>
+        /// <value>The value of the red, green, blue, and alpha components, depending on the index.</value>
+        /// <param name="index">The index of the component to access. Use 0 for the alpha component, 1 for the red component, 2 for the green component, and 3 for the blue component.</param>
+        /// <returns>The value of the component at the specified index.</returns>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 3].</exception>
+        public float this[int index]
+        {
+            readonly get => index switch
+            {
+                0 => Red,
+                1 => Green,
+                2 => Blue,
+                3 => Alpha,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive."),
+            };
+
+            set
+            {
+                switch (index)
+                {
+                    case 0: Red = value; break;
+                    case 1: Green = value; break;
+                    case 2: Blue = value; break;
+                    case 3: Alpha = value; break;
+                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
+        public Color4(byte rgba)
+        {
+            Alpha = ((rgba >> 24) & 255) / 255f;
+            Blue = ((rgba >> 16) & 255) / 255f;
+            Green = ((rgba >> 8) & 255) / 255f;
+            Red = (rgba & 255) / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
+        public Color4(int rgba)
+            : this((uint)rgba) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
+        public Color4(uint rgba)
+        {
+            Alpha = ((rgba >> 24) & 255) / 255f;
+            Blue = ((rgba >> 16) & 255) / 255f;
+            Green = ((rgba >> 8) & 255) / 255f;
+            Red = (rgba & 255) / 255f;
+        }
+        /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
@@ -153,6 +212,17 @@ namespace Engine.Mathematics
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
+        public Color4(Vector3 value)
+        {
+            Red = value.X;
+            Green = value.Y;
+            Blue = value.Z;
+            Alpha = 1f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="value">The red, green, and blue components of the color.</param>
         /// <param name="alpha">The alpha component of the color.</param>
         public Color4(Vector3 value, float alpha)
         {
@@ -164,40 +234,25 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color4(uint rgba)
+        /// <param name="color"><see cref="Color3"/> used to initialize the color.</param>
+        public Color4(Color3 color)
         {
-            Alpha = ((rgba >> 24) & 255) / 255.0f;
-            Blue = ((rgba >> 16) & 255) / 255.0f;
-            Green = ((rgba >> 8) & 255) / 255.0f;
-            Red = (rgba & 255) / 255.0f;
+            Red = color.Red;
+            Green = color.Green;
+            Blue = color.Blue;
+            Alpha = 1f;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color4(int rgba)
+        /// <param name="color"><see cref="Color3"/> used to initialize the color.</param>
+        /// <param name="alpha">The alpha component of the color.</param>
+        public Color4(Color3 color, float alpha)
         {
-            Alpha = ((rgba >> 24) & 255) / 255.0f;
-            Blue = ((rgba >> 16) & 255) / 255.0f;
-            Green = ((rgba >> 8) & 255) / 255.0f;
-            Red = (rgba & 255) / 255.0f;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color4"/> struct.
-        /// </summary>
-        /// <param name="values">The values to assign to the red, green, blue, and alpha components of the color. This must be an array with four elements.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
-        public Color4(float[] values)
-        {
-            ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
-
-            Red = values[0];
-            Green = values[1];
-            Blue = values[2];
-            Alpha = values[3];
+            Red = color.Red;
+            Green = color.Green;
+            Blue = color.Blue;
+            Alpha = alpha;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -234,56 +289,18 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
-        /// <param name="color"><see cref="Color3"/> used to initialize the color.</param>
-        public Color4(Color3 color)
+        /// <param name="values">The values to assign to the red, green, blue, and alpha components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color4(float[] values)
         {
-            Red = color.Red;
-            Green = color.Green;
-            Blue = color.Blue;
-            Alpha = 1.0f;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color4"/> struct.
-        /// </summary>
-        /// <param name="color"><see cref="Color3"/> used to initialize the color.</param>
-        /// <param name="alpha">The alpha component of the color.</param>
-        public Color4(Color3 color, float alpha)
-        {
-            Red = color.Red;
-            Green = color.Green;
-            Blue = color.Blue;
-            Alpha = alpha;
-        }
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
 
-        /// <summary>
-        /// Gets or sets the component at the specified index.
-        /// </summary>
-        /// <value>The value of the red, green, blue, and alpha components, depending on the index.</value>
-        /// <param name="index">The index of the component to access. Use 0 for the alpha component, 1 for the red component, 2 for the green component, and 3 for the blue component.</param>
-        /// <returns>The value of the component at the specified index.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 3].</exception>
-        public float this[int index]
-        {
-            readonly get => index switch
-            {
-                0 => Red,
-                1 => Green,
-                2 => Blue,
-                3 => Alpha,
-                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive."),
-            };
-
-            set
-            {
-                switch (index)
-                {
-                    case 0: Red = value; break;
-                    case 1: Green = value; break;
-                    case 2: Blue = value; break;
-                    case 3: Alpha = value; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive.");
-                }
-            }
+            Red = values[0];
+            Green = values[1];
+            Blue = values[2];
+            Alpha = values[3];
         }
 
         /// <summary>
@@ -307,11 +324,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color4 Add(Color4 left, Color4 right)
         {
-            return new(
-                left.Red + right.Red,
-                left.Green + right.Green,
-                left.Blue + right.Blue,
-                left.Alpha + right.Alpha);
+            Add(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -335,11 +349,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color4 Subtract(Color4 left, Color4 right)
         {
-            return new(
-                left.Red - right.Red,
-                left.Green - right.Green,
-                left.Blue - right.Blue,
-                left.Alpha - right.Alpha);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -363,11 +374,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color4 Modulate(Color4 left, Color4 right)
         {
-            return new(
-                left.Red * right.Red,
-                left.Green * right.Green,
-                left.Blue * right.Blue,
-                left.Alpha * right.Alpha);
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -391,11 +399,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color4 Scale(Color4 value, float scale)
         {
-            return new(
-                value.Red * scale,
-                value.Green * scale,
-                value.Blue * scale,
-                value.Alpha * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
 
         /// <summary>
@@ -417,11 +422,8 @@ namespace Engine.Mathematics
         /// <returns>The negated color.</returns>
         public static Color4 Negate(Color4 value)
         {
-            return new(
-                1.0f - value.Red,
-                1.0f - value.Green,
-                1.0f - value.Blue,
-                1.0f - value.Alpha);
+            Negate(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -593,11 +595,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color4 AdjustContrast(Color4 value, float contrast)
         {
-            return new(
-                0.5f + contrast * (value.Red - 0.5f),
-                0.5f + contrast * (value.Green - 0.5f),
-                0.5f + contrast * (value.Blue - 0.5f),
-                value.Alpha);
+            AdjustContrast(ref value, contrast, out var result);
+            return result;
         }
 
         /// <summary>
@@ -623,13 +622,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color4 AdjustSaturation(Color4 value, float saturation)
         {
-            float grey = value.Red * 0.2125f + value.Green * 0.7154f + value.Blue * 0.0721f;
-
-            return new(
-                grey + saturation * (value.Red - grey),
-                grey + saturation * (value.Green - grey),
-                grey + saturation * (value.Blue - grey),
-                value.Alpha);
+            AdjustSaturation(ref value, saturation, out var result);
+            return result;
         }
 
         /// <summary>
@@ -668,10 +662,10 @@ namespace Engine.Mathematics
             int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
 
             return new(
-                1 - r * 63.0f / 255.0f,
-                1 - g * 63.0f / 255.0f,
-                1 - b * 63.0f / 255.0f,
-                alpha / 255.0f);
+                1 - r * 63f / 255f,
+                1 - g * 63f / 255f,
+                1 - b * 63f / 255f,
+                alpha / 255f);
         }
         /// <summary>
         /// Bitwise secret wisdoms
@@ -692,7 +686,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color4 operator +(Color4 left, Color4 right)
         {
-            return new(left.Red + right.Red, left.Green + right.Green, left.Blue + right.Blue, left.Alpha + right.Alpha);
+            Add(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Assert a color (return it unchanged).
@@ -711,7 +706,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color4 operator -(Color4 left, Color4 right)
         {
-            return new(left.Red - right.Red, left.Green - right.Green, left.Blue - right.Blue, left.Alpha - right.Alpha);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Negates a color.
@@ -720,7 +716,8 @@ namespace Engine.Mathematics
         /// <returns>A negated color.</returns>
         public static Color4 operator -(Color4 value)
         {
-            return new(-value.Red, -value.Green, -value.Blue, -value.Alpha);
+            Negate(ref value, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -730,7 +727,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color4 operator *(float scale, Color4 value)
         {
-            return new(value.Red * scale, value.Green * scale, value.Blue * scale, value.Alpha * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -740,7 +738,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color4 operator *(Color4 value, float scale)
         {
-            return new(value.Red * scale, value.Green * scale, value.Blue * scale, value.Alpha * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Modulates two colors.
@@ -750,7 +749,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color4 operator *(Color4 left, Color4 right)
         {
-            return new(left.Red * right.Red, left.Green * right.Green, left.Blue * right.Blue, left.Alpha * right.Alpha);
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -769,35 +769,13 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Color3(Color4 value)
         {
-            return new(value.Red, value.Green, value.Blue);
-        }
-
-        /// <inheritdoc/>
-        public static explicit operator uint(Color4 value)
-        {
-            return value.ToRgba();
-        }
-        /// <inheritdoc/>
-        public static explicit operator Color4(int value)
-        {
-            return new(value);
-        }
-
-        /// <inheritdoc/>
-        public static explicit operator Vector3(Color4 value)
-        {
-            return new(value.Red, value.Green, value.Blue);
-        }
-        /// <inheritdoc/>
-        public static explicit operator Color4(Vector3 value)
-        {
-            return new(value.X, value.Y, value.Z, 1.0f);
+            return value.ToColor3();
         }
 
         /// <inheritdoc/>
         public static implicit operator Vector4(Color4 value)
         {
-            return new(value.Red, value.Green, value.Blue, value.Alpha);
+            return value.ToVector4();
         }
         /// <inheritdoc/>
         public static implicit operator Color4(Vector4 value)
@@ -916,17 +894,6 @@ namespace Engine.Mathematics
         /// Converts the color into a packed integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public readonly void ToBgra(out byte r, out byte g, out byte b, out byte a)
-        {
-            a = (byte)(Alpha * 255.0f);
-            r = (byte)(Red * 255.0f);
-            g = (byte)(Green * 255.0f);
-            b = (byte)(Blue * 255.0f);
-        }
-        /// <summary>
-        /// Converts the color into a packed integer.
-        /// </summary>
-        /// <returns>A packed integer containing all four color components.</returns>
         public readonly uint ToRgba()
         {
             uint a = (uint)(Alpha * 255.0f) & 255;
@@ -956,6 +923,14 @@ namespace Engine.Mathematics
         public readonly Vector4 ToVector4()
         {
             return new(Red, Green, Blue, Alpha);
+        }
+        /// <summary>
+        /// Converts the color into a three component color.
+        /// </summary>
+        /// <returns>A three component color containing the red, green, and blue components of the color.</returns>
+        public readonly Color3 ToColor3()
+        {
+            return new(Red, Green, Blue);
         }
         /// <summary>
         /// Creates an array containing the elements of the color.

@@ -268,7 +268,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Ray ray, out Vector3 point)
         {
-            return Collision.RayIntersectsBox(ref ray, ref this, out point);
+            return Collision.RayIntersectsBox(ref ray, ref this, out _, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="Plane"/>.

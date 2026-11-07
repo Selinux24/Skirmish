@@ -502,17 +502,18 @@ namespace Engine.BuiltIn.Components.Models
 
             var mesh = GetGeometry(GeometryTypes.Picking);
 
-            return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
+            BoundingSphere sph = sphere;
+            return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return Intersection.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

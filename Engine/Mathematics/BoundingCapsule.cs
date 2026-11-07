@@ -109,7 +109,7 @@ namespace Engine.Mathematics
             var p2 = CapPosition;
 
             // Find closest point of point in axis
-            Intersection.ClosestPointInSegment(p1, p2, point, out float distance);
+            Collision.ClosestPointInSegment(ref p1, ref p2, ref point, out float distance, out _);
             if (distance > Radius)
             {
                 // Outside capsule radius
@@ -142,7 +142,7 @@ namespace Engine.Mathematics
         {
             var geom = GeometryUtil.CreateCapsule(Topology.TriangleList, Center, Radius, Height, sliceCount, stackCount);
 
-            return geom.Vertices.ToArray();
+            return [.. geom.Vertices];
         }
 
         /// <inheritdoc/>

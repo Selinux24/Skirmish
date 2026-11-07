@@ -14,7 +14,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Bounding box
         /// </summary>
-        private readonly BoundingBox bbox = bbox;
+        private BoundingBox bbox = bbox;
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = bbox.Center;
@@ -30,24 +30,24 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingSphere sphere)
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.BoxContainsSphere(bbox, sphere);
+            return Collision.BoxContainsSphere(ref bbox, ref sphere);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingBox bbox)
+        public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.BoxContainsBox(this.bbox, bbox);
+            return Collision.BoxContainsBox(ref this.bbox, ref bbox);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingFrustum frustum)
+        public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Intersection.BoxContainsFrustum(bbox, frustum);
+            return Collision.BoxContainsFrustum(ref bbox, ref frustum);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return Intersection.BoxContainsMesh(bbox, mesh);
+            return Collision.BoxContainsMesh(ref bbox, mesh);
         }
 
         /// <inheritdoc/>

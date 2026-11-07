@@ -166,6 +166,7 @@ namespace Engine
 
             return ComputeTriangleList(geom.Vertices, geom.Indices);
         }
+
         /// <summary>
         /// Transform triangle coordinates
         /// </summary>
@@ -202,6 +203,7 @@ namespace Engine
                 yield return Transform(tri, transform);
             }
         }
+
         /// <summary>
         /// Reverses the normal of all the triangles of the list
         /// </summary>
@@ -244,6 +246,7 @@ namespace Engine
 
             return ReverseNormalIterator(indices);
         }
+
         /// <summary>
         /// Triangles reverse lazy iterator
         /// </summary>
@@ -285,6 +288,7 @@ namespace Engine
                 yield return iArray[i + 1];
             }
         }
+
         /// <summary>
         /// Gets the barycentric coordinates of a triangle, given a reference point
         /// </summary>
@@ -377,19 +381,8 @@ namespace Engine
         /// <inheritdoc/>
         public readonly bool Intersects(PickingRay ray, out Vector3 point, out float distance)
         {
-            if (ray.FacingOnly)
-            {
-                bool cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
-                if (cull)
-                {
-                    point = Vector3.Zero;
-                    distance = float.MaxValue;
-
-                    return false;
-                }
-            }
-
-            return Intersection.RayIntersectsTriangle(ray, this, out point, out distance);
+            var tri = this;
+            return Collision.RayIntersectsTriangle(ref ray, ref tri, out distance, out point);
         }
 
         /// <summary>
@@ -405,9 +398,9 @@ namespace Engine
             }
 
             // Calculate the projection of each vertex
-            var projectedVertex1 = vector.ProjectPoint(Point1);
-            var projectedVertex2 = vector.ProjectPoint(Point2);
-            var projectedVertex3 = vector.ProjectPoint(Point3);
+            var projectedVertex1 = Vector3.Project(vector, Point1);
+            var projectedVertex2 = Vector3.Project(vector, Point2);
+            var projectedVertex3 = Vector3.Project(vector, Point3);
 
             // Calculate the minimum and maximum projected points
             var minPoint = Vector3.Min(Vector3.Min(projectedVertex1, projectedVertex2), projectedVertex3);
@@ -467,11 +460,13 @@ namespace Engine
         /// Retrieves the three edges of the triangle.
         /// </summary>
         /// <returns>An array of vectors representing the three edges of the triangle.</returns>
-        public readonly IEnumerable<Segment> GetEdgeSegments()
+        public readonly Segment[] GetEdgeSegments()
         {
-            yield return new Segment(Point2, Point1);
-            yield return new Segment(Point3, Point2);
-            yield return new Segment(Point1, Point3);
+            return [
+                new Segment(Point2, Point1),
+                new Segment(Point3, Point2),
+                new Segment(Point1, Point3)
+            ];
         }
         /// <summary>
         /// Gets the edge direction vector between points 2 and 1
@@ -525,7 +520,7 @@ namespace Engine
         /// </summary>
         public readonly Vector3 GetCenter()
         {
-            return Vector3.Multiply(Point1 + Point2 + Point3, 1.0f / 3.0f);
+            return Vector3.Divide(Point1 + Point2 + Point3, 3f);
         }
         /// <summary>
         /// Gets the barycenter

@@ -394,7 +394,9 @@ namespace Engine.BuiltIn.Components.Models
             if (bsph.Intersects(sphere))
             {
                 var mesh = GetGeometry(GeometryTypes.Picking);
-                if (Intersection.SphereIntersectsMesh(sphere, mesh, out var res))
+
+                BoundingSphere sph = sphere;
+                if (Collision.SphereIntersectsMesh(ref sph, mesh, out var res))
                 {
                     result = res;
 
@@ -412,12 +414,12 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return Intersection.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

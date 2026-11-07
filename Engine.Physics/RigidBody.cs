@@ -93,7 +93,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetInitialState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroTolerance))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -126,7 +126,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroTolerance))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }

@@ -277,7 +277,7 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                if (Intersection.Intersects(queryBoundary, node.items[i].volume))
+                if (Collision.Intersects(queryBoundary, node.items[i].volume))
                 {
                     results.Add(node.items[i].item);
                 }

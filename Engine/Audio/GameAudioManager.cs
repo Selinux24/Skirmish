@@ -56,28 +56,16 @@ namespace Engine.Audio
         /// <remarks>From 0 to 1</remarks>
         public float MasterVolume
         {
-            get
-            {
-                return gameAudio.MasterVolume;
-            }
-            set
-            {
-                gameAudio.MasterVolume = value;
-            }
+            get => gameAudio.MasterVolume;
+            set => gameAudio.MasterVolume = value;
         }
         /// <summary>
         /// Gets or sets whether the master voice uses a limiter or not
         /// </summary>
         public bool UseMasteringLimiter
         {
-            get
-            {
-                return gameAudio.UseMasteringLimiter;
-            }
-            set
-            {
-                gameAudio.UseMasteringLimiter = value;
-            }
+            get => gameAudio.UseMasteringLimiter;
+            set => gameAudio.UseMasteringLimiter = value;
         }
 
         /// <summary>

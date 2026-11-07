@@ -109,7 +109,8 @@ namespace Engine.Mathematics
             var p2 = CapPosition;
 
             // Find closest point of point in axis
-            var closest = Intersection.ClosestPointInRay(p1, p2, point, out float distance);
+            var ray = Ray.FromPoints(p1, p2);
+            Collision.ClosestPointInRay(ref ray, ref point, out float distance, out var closest);
             if (distance > Radius)
             {
                 // Outside cylinder radius
@@ -158,7 +159,7 @@ namespace Engine.Mathematics
         {
             var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, Center, Radius, Height, sliceCount);
 
-            return geom.Vertices.ToArray();
+            return [.. geom.Vertices];
         }
 
         /// <inheritdoc/>

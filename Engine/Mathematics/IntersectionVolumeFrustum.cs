@@ -14,7 +14,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Internal volume
         /// </summary>
-        private readonly BoundingFrustum frustum = frustum;
+        private BoundingFrustum frustum = frustum;
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = frustum.GetCameraParams().Position;
@@ -33,24 +33,24 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingSphere sphere)
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.FrustumContainsSphere(frustum, sphere);
+            return Collision.FrustumContainsSphere(ref frustum, ref sphere);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingBox bbox)
+        public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.FrustumContainsBox(frustum, bbox);
+            return Collision.FrustumContainsBox(ref frustum, ref bbox);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingFrustum frustum)
+        public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Intersection.FrustumContainsFrustum(this.frustum, frustum);
+            return Collision.FrustumContainsFrustum(ref this.frustum, ref frustum);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return Intersection.FrustumContainsMesh(frustum, mesh);
+            return Collision.FrustumContainsMesh(ref frustum, mesh);
         }
 
         /// <inheritdoc/>

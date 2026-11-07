@@ -21,12 +21,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
         public readonly bool IntersectsRay(Ray ray)
         {
-            if (Intersection.RayIntersectsCircle3D(ref ray, Center, Vector3.Up, Radius))
-            {
-                return true;
-            }
-
-            return false;
+            var center = Center;
+            var up = Vector3.Up;
+            return Collision.RayIntersectsCircle3D(ref ray, ref center, ref up, Radius, out _, out _);
         }
     }
 

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -101,6 +100,23 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
+        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
+        public Color(int rgba)
+            : this((uint)rgba) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.
+        /// </summary>
+        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
+        public Color(uint rgba)
+        {
+            A = (byte)((rgba >> 24) & 255);
+            B = (byte)((rgba >> 16) & 255);
+            G = (byte)((rgba >> 8) & 255);
+            R = (byte)(rgba & 255);
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.
+        /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
         public Color(float value)
         {
@@ -127,12 +143,7 @@ namespace Engine.Mathematics
         /// <param name="green">The green component of the color.</param>
         /// <param name="blue">The blue component of the color.</param>
         public Color(byte red, byte green, byte blue)
-        {
-            R = red;
-            G = green;
-            B = blue;
-            A = 255;
-        }
+            : this(red, green, blue, (byte)255) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.  Passed values are clamped within byte range.
         /// </summary>
@@ -176,12 +187,7 @@ namespace Engine.Mathematics
         /// <param name="green">The green component of the color.</param>
         /// <param name="blue">The blue component of the color.</param>
         public Color(float red, float green, float blue)
-        {
-            R = FloatToByte(red);
-            G = FloatToByte(green);
-            B = FloatToByte(blue);
-            A = 255;
-        }
+            : this(red, green, blue, 1.0f) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
@@ -210,50 +216,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
         public Color(Vector3 value)
-        {
-            R = FloatToByte(value.X);
-            G = FloatToByte(value.Y);
-            B = FloatToByte(value.Z);
-            A = 255;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.
-        /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color(uint rgba)
-        {
-            A = (byte)((rgba >> 24) & 255);
-            B = (byte)((rgba >> 16) & 255);
-            G = (byte)((rgba >> 8) & 255);
-            R = (byte)(rgba & 255);
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.
-        /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color(int rgba)
-        {
-            A = (byte)((rgba >> 24) & 255);
-            B = (byte)((rgba >> 16) & 255);
-            G = (byte)((rgba >> 8) & 255);
-            R = (byte)(rgba & 255);
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.
-        /// </summary>
-        /// <param name="values">The values to assign to the red, green, and blue, alpha components of the color. This must be an array with four elements.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
-        public Color(float[] values)
-        {
-            ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
-
-            R = FloatToByte(values[0]);
-            G = FloatToByte(values[1]);
-            B = FloatToByte(values[2]);
-            A = FloatToByte(values[3]);
-        }
+            : this(value, 1.0f) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
@@ -281,10 +244,26 @@ namespace Engine.Mathematics
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
 
-            R = (byte)values[0];
-            G = (byte)values[1];
-            B = (byte)values[2];
-            A = (byte)values[3];
+            R = IntToByte(values[0]);
+            G = IntToByte(values[1]);
+            B = IntToByte(values[2]);
+            A = IntToByte(values[3]);
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the red, green, and blue, alpha components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color(float[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+
+            R = FloatToByte(values[0]);
+            G = FloatToByte(values[1]);
+            B = FloatToByte(values[2]);
+            A = FloatToByte(values[3]);
         }
 
         /// <summary>
@@ -414,11 +393,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color Add(Color left, Color right)
         {
-            return new(
-                left.R + right.R,
-                left.G + right.G,
-                left.B + right.B,
-                left.A + right.A);
+            Add(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -442,11 +418,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color Subtract(Color left, Color right)
         {
-            return new(
-                left.R - right.R,
-                left.G - right.G,
-                left.B - right.B,
-                left.A - right.A);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -457,10 +430,10 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the modulated color.</param>
         public static void Modulate(ref Color left, ref Color right, out Color result)
         {
-            result.A = (byte)(left.A * right.A / 255.0f);
-            result.R = (byte)(left.R * right.R / 255.0f);
-            result.G = (byte)(left.G * right.G / 255.0f);
-            result.B = (byte)(left.B * right.B / 255.0f);
+            result.A = (byte)(left.A * right.A / 255f);
+            result.R = (byte)(left.R * right.R / 255f);
+            result.G = (byte)(left.G * right.G / 255f);
+            result.B = (byte)(left.B * right.B / 255f);
         }
         /// <summary>
         /// Modulates two colors.
@@ -470,11 +443,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color Modulate(Color left, Color right)
         {
-            return new(
-                left.R * right.R,
-                left.G * right.G,
-                left.B * right.B,
-                left.A * right.A);
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -498,11 +468,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color Scale(Color value, float scale)
         {
-            return new(
-                (byte)(value.R * scale),
-                (byte)(value.G * scale),
-                (byte)(value.B * scale),
-                (byte)(value.A * scale));
+            Scale(ref value, scale, out var result);
+            return result;
         }
 
         /// <summary>
@@ -524,11 +491,8 @@ namespace Engine.Mathematics
         /// <returns>The negated color.</returns>
         public static Color Negate(Color value)
         {
-            return new(
-                255 - value.R,
-                255 - value.G,
-                255 - value.B,
-                255 - value.A);
+            Negate(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -557,6 +521,18 @@ namespace Engine.Mathematics
             blue = (blue < min.B) ? min.B : blue;
 
             result = new(red, green, blue, alpha);
+        }
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Color Clamp(Color value, Color min, Color max)
+        {
+            Clamp(ref value, ref min, ref max, out var result);
+            return result;
         }
 
         /// <summary>
@@ -646,19 +622,6 @@ namespace Engine.Mathematics
         public static Color FromRgba(uint color)
         {
             return new(color);
-        }
-
-        /// <summary>
-        /// Restricts a value to be within a specified range.
-        /// </summary>
-        /// <param name="value">The value to clamp.</param>
-        /// <param name="min">The minimum value.</param>
-        /// <param name="max">The maximum value.</param>
-        /// <returns>The clamped value.</returns>
-        public static Color Clamp(Color value, Color min, Color max)
-        {
-            Clamp(ref value, ref min, ref max, out var result);
-            return result;
         }
 
         /// <summary>
@@ -790,11 +753,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color AdjustContrast(Color value, float contrast)
         {
-            return new(
-                FloatToByte(0.5f + contrast * (value.R / 255.0f - 0.5f)),
-                FloatToByte(0.5f + contrast * (value.G / 255.0f - 0.5f)),
-                FloatToByte(0.5f + contrast * (value.B / 255.0f - 0.5f)),
-                value.A);
+            AdjustContrast(ref value, contrast, out var result);
+            return result;
         }
 
         /// <summary>
@@ -820,13 +780,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color AdjustSaturation(Color value, float saturation)
         {
-            float grey = value.R / 255.0f * 0.2125f + value.G / 255.0f * 0.7154f + value.B / 255.0f * 0.0721f;
-
-            return new(
-                FloatToByte(grey + saturation * (value.R / 255.0f - grey)),
-                FloatToByte(grey + saturation * (value.G / 255.0f - grey)),
-                FloatToByte(grey + saturation * (value.B / 255.0f - grey)),
-                value.A);
+            AdjustSaturation(ref value, saturation, out var result);
+            return result;
         }
 
         /// <summary>
@@ -837,7 +792,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color operator +(Color left, Color right)
         {
-            return new(left.R + right.R, left.G + right.G, left.B + right.B, left.A + right.A);
+            Add(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Assert a color (return it unchanged).
@@ -856,7 +812,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color operator -(Color left, Color right)
         {
-            return new(left.R - right.R, left.G - right.G, left.B - right.B, left.A - right.A);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Negates a color.
@@ -865,7 +822,8 @@ namespace Engine.Mathematics
         /// <returns>A negated color.</returns>
         public static Color operator -(Color value)
         {
-            return new(-value.R, -value.G, -value.B, -value.A);
+            Negate(ref value, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -875,7 +833,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color operator *(float scale, Color value)
         {
-            return new((byte)(value.R * scale), (byte)(value.G * scale), (byte)(value.B * scale), (byte)(value.A * scale));
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -885,7 +844,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color operator *(Color value, float scale)
         {
-            return new((byte)(value.R * scale), (byte)(value.G * scale), (byte)(value.B * scale), (byte)(value.A * scale));
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Modulates two colors.
@@ -895,7 +855,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color operator *(Color left, Color right)
         {
-            return new((byte)(left.R * right.R / 255.0f), (byte)(left.G * right.G / 255.0f), (byte)(left.B * right.B / 255.0f), (byte)(left.A * right.A / 255.0f));
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -912,20 +873,9 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public static explicit operator int(Color value)
-        {
-            return value.ToRgba();
-        }
-        /// <inheritdoc/>
-        public static explicit operator Color(int value)
-        {
-            return new(value);
-        }
-
-        /// <inheritdoc/>
         public static explicit operator Vector3(Color value)
         {
-            return new(value.R / 255.0f, value.G / 255.0f, value.B / 255.0f);
+            return value.ToVector3();
         }
         /// <inheritdoc/>
         public static explicit operator Color(Vector3 value)
@@ -946,7 +896,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Vector4(Color value)
         {
-            return new(value.R / 255.0f, value.G / 255.0f, value.B / 255.0f, value.A / 255.0f);
+            return value.ToVector4();
         }
         /// <inheritdoc/>
         public static explicit operator Color(Vector4 value)
@@ -971,6 +921,21 @@ namespace Engine.Mathematics
         }
         /// <inheritdoc/>
         public static implicit operator Color(System.Drawing.Color value)
+        {
+            return new(value.R, value.G, value.B, value.A);
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator Vortice.Mathematics.Color4(Color value)
+        {
+            return new(
+                value.R / 255f,
+                value.G / 255f,
+                value.B / 255f,
+                value.A / 255f);
+        }
+        /// <inheritdoc/>
+        public static implicit operator Color(Vortice.Mathematics.Color4 value)
         {
             return new(value.R, value.G, value.B, value.A);
         }
@@ -1017,10 +982,10 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Color other)
         {
-            return 
-                R == other.R && 
-                G == other.G && 
-                B == other.B && 
+            return
+                R == other.R &&
+                G == other.G &&
+                B == other.B &&
                 A == other.A;
         }
         /// <inheritdoc/>

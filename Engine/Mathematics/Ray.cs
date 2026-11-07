@@ -167,7 +167,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point)
         {
-            return Collision.RayIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3, out point);
+            return Collision.RayIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3, out _, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="BoundingBox"/>.
@@ -207,7 +207,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref BoundingBox box, out Vector3 point)
         {
-            return Collision.RayIntersectsBox(ref this, ref box, out point);
+            return Collision.RayIntersectsBox(ref this, ref box, out _, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
@@ -250,6 +250,16 @@ namespace Engine.Mathematics
             return Collision.RayIntersectsSphere(ref this, ref sphere, out point);
         }
 
+        /// <summary>
+        /// Creates a ray from two points
+        /// </summary>
+        /// <param name="start">Start point</param>
+        /// <param name="end">End point</param>
+        /// <returns>The ray from the start point in the direction of the end point</returns>
+        public static Ray FromPoints(Vector3 start, Vector3 end)
+        {
+            return new(start, Vector3.Normalize(end - start));
+        }
         /// <summary>
         /// Calculates a world space <see cref="Ray"/> from 2d screen coordinates.
         /// </summary>

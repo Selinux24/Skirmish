@@ -483,7 +483,7 @@ namespace TerrainSamples.SceneCrowds
                 var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
+                if (Vector3.NearEqual(aPos, pPos, 0.001f))
                 {
                     continue;
                 }

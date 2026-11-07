@@ -16,7 +16,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly Vector3 Epsilon = new(Helper.ZeroTolerance);
+        static readonly float Epsilon = Helper.ZeroTolerance;
 
         static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix4x4 transform)
         {

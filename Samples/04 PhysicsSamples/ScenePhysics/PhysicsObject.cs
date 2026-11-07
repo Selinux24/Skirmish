@@ -106,7 +106,7 @@ namespace PhysicsSamples.ScenePhysics
         {
             var cullingVolume = obj.GetBroadPhaseBounds();
 
-            return Colliders.Where(c => Intersection.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
+            return Colliders.Where(c => Collision.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
         }
         /// <inheritdoc/>
         public ICullingVolume GetBroadPhaseBounds()

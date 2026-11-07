@@ -249,7 +249,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <returns>Returns the number of maximum instances to draw</returns>
         private uint GetMaxCount()
         {
-            return MaximumCount >= 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
+            return MaximumCount > 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
         }
 
         /// <inheritdoc/>

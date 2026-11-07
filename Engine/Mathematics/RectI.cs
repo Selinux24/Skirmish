@@ -41,15 +41,15 @@ namespace Engine.Mathematics
     {
         const string RectIStr = "X:{0} Y:{1} Width:{2} Height:{3}";
 
-        /// <summary>
-        /// An empty rectangle.
-        /// </summary>
-        public static readonly RectI Empty;
-
         static RectI()
         {
             Empty = new RectI();
         }
+
+        /// <summary>
+        /// An empty rectangle.
+        /// </summary>
+        public static readonly RectI Empty;
 
         /// <summary>
         /// The left.
@@ -135,6 +135,35 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Gets or sets the location.
+        /// </summary>
+        /// <value>
+        /// The location.
+        /// </value>
+        public Vector2I Location
+        {
+            readonly get => new(X, Y);
+            set
+            {
+                X = value.X;
+                Y = value.Y;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the size of the rectangle.
+        /// </summary>
+        /// <value>The size of the rectangle.</value>
+        public Vector2I Size
+        {
+            readonly get => new(Width, Height);
+            set
+            {
+                Width = value.X;
+                Height = value.Y;
+            }
+        }
+
+        /// <summary>
         /// Gets a value that indicates whether the rectangle is empty.
         /// </summary>
         /// <value>
@@ -157,6 +186,18 @@ namespace Engine.Mathematics
         }
 
         /// <summary>Changes the position of the rectangle.</summary>
+        /// <param name="amount">The values to adjust the position of the rectangle by.</param>
+        public void Offset(System.Drawing.Point amount)
+        {
+            Offset(amount.X, amount.Y);
+        }
+        /// <summary>Changes the position of the rectangle.</summary>
+        /// <param name="amount">The values to adjust the position of the rectangle by.</param>
+        public void Offset(Vector2I amount)
+        {
+            Offset(amount.X, amount.Y);
+        }
+        /// <summary>Changes the position of the rectangle.</summary>
         /// <param name="offsetX">Change in the x-position.</param>
         /// <param name="offsetY">Change in the y-position.</param>
         public void Offset(int offsetX, int offsetY)
@@ -176,12 +217,49 @@ namespace Engine.Mathematics
             Height += verticalAmount * 2;
         }
 
-        /// <summary>Determines whether this rectangle contains a specified point represented by its x- and y-coordinates.</summary>
-        /// <param name="x">The x-coordinate of the specified point.</param>
-        /// <param name="y">The y-coordinate of the specified point.</param>
-        public readonly bool Contains(int x, int y)
+        /// <summary>Determines whether this rectangle contains a specified Point.</summary>
+        /// <param name="value">The Point to evaluate.</param>
+        /// <param name="result">[OutAttribute] true if the specified Point is contained within this rectangle; false otherwise.</param>
+        public readonly void Contains(ref Vector2I value, out bool result)
         {
-            return (X <= x) && (x < Right) && (Y <= y) && (y < Bottom);
+            result = (value.X >= Left && value.X <= Right && value.Y >= Top && value.Y <= Bottom);
+        }
+        /// <summary>
+        /// Checks, if specified <see cref="Vector2I"/> is inside <see cref="Rect"/>.
+        /// </summary>
+        /// <param name="vector">Coordinate <see cref="Vector2I"/>.</param>
+        /// <returns><c>true</c> if <see cref="Vector2I"/> is inside <see cref="Rect"/>, otherwise <c>false</c>.</returns>
+        public readonly bool Contains(Vector2I vector)
+        {
+            Contains(ref vector, out var result);
+            return result;
+        }
+        /// <summary>
+        /// Checks, if specified <see cref="System.Drawing.Point"/> is inside <see cref="Rect"/>.
+        /// </summary>
+        /// <param name="point">Coordinate <see cref="System.Drawing.Point"/>.</param>
+        /// <returns><c>true</c> if <see cref="System.Drawing.Point"/> is inside <see cref="Rect"/>, otherwise <c>false</c>.</returns>
+        public readonly void Contains(ref System.Drawing.Point point, out bool result)
+        {
+            result = Contains(point.X, point.Y);
+        }
+        /// <summary>
+        /// Checks, if specified <see cref="System.Drawing.Point"/> is inside <see cref="Rect"/>.
+        /// </summary>
+        /// <param name="point">Coordinate <see cref="System.Drawing.Point"/>.</param>
+        /// <returns><c>true</c> if <see cref="System.Drawing.Point"/> is inside <see cref="Rect"/>, otherwise <c>false</c>.</returns>
+        public readonly bool Contains(System.Drawing.Point point)
+        {
+            Contains(ref point, out bool result);
+            return result;
+        }
+
+        /// <summary>Determines whether this rectangle entirely contains a specified rectangle.</summary>
+        /// <param name="value">The rectangle to evaluate.</param>
+        /// <param name="result">[OutAttribute] On exit, is true if this rectangle entirely contains the specified rectangle, or false if not.</param>
+        public readonly void Contains(ref RectI value, out bool result)
+        {
+            result = (X <= value.X) && (value.Right <= Right) && (Y <= value.Y) && (value.Bottom <= Bottom);
         }
         /// <summary>Determines whether this rectangle entirely contains a specified rectangle.</summary>
         /// <param name="value">The rectangle to evaluate.</param>
@@ -192,11 +270,18 @@ namespace Engine.Mathematics
         }
         /// <summary>Determines whether this rectangle entirely contains a specified rectangle.</summary>
         /// <param name="value">The rectangle to evaluate.</param>
-        /// <param name="result">[OutAttribute] On exit, is true if this rectangle entirely contains the specified rectangle, or false if not.</param>
-        public readonly void Contains(ref RectI value, out bool result)
+        public readonly void Contains(ref System.Drawing.Rectangle value, out bool result)
         {
             result = (X <= value.X) && (value.Right <= Right) && (Y <= value.Y) && (value.Bottom <= Bottom);
         }
+        /// <summary>Determines whether this rectangle entirely contains a specified rectangle.</summary>
+        /// <param name="value">The rectangle to evaluate.</param>
+        public readonly bool Contains(System.Drawing.Rectangle value)
+        {
+            Contains(ref value, out bool result);
+            return result;
+        }
+
         /// <summary>
         /// Checks, if specified point is inside <see cref="RectI"/>.
         /// </summary>
@@ -207,14 +292,14 @@ namespace Engine.Mathematics
         {
             return (x >= Left && x <= Right && y >= Top && y <= Bottom);
         }
-
-        /// <summary>Determines whether a specified rectangle intersects with this rectangle.</summary>
-        /// <param name="value">The rectangle to evaluate.</param>
-        public readonly bool Intersects(RectI value)
+        /// <summary>Determines whether this rectangle contains a specified point represented by its x- and y-coordinates.</summary>
+        /// <param name="x">The x-coordinate of the specified point.</param>
+        /// <param name="y">The y-coordinate of the specified point.</param>
+        public readonly bool Contains(int x, int y)
         {
-            Intersects(ref value, out bool result);
-            return result;
+            return (X <= x) && (x < Right) && (Y <= y) && (y < Bottom);
         }
+
         /// <summary>
         /// Determines whether a specified rectangle intersects with this rectangle.
         /// </summary>
@@ -224,15 +309,11 @@ namespace Engine.Mathematics
         {
             result = (value.X < Right) && (X < value.Right) && (value.Y < Bottom) && (Y < value.Bottom);
         }
-        /// <summary>
-        /// Creates a rectangle defining the area where one rectangle overlaps with another rectangle.
-        /// </summary>
-        /// <param name="value1">The first rectangle to compare.</param>
-        /// <param name="value2">The second rectangle to compare.</param>
-        /// <returns>The intersection rectangle.</returns>
-        public static RectI Intersect(RectI value1, RectI value2)
+        /// <summary>Determines whether a specified rectangle intersects with this rectangle.</summary>
+        /// <param name="value">The rectangle to evaluate.</param>
+        public readonly bool Intersects(RectI value)
         {
-            Intersect(ref value1, ref value2, out var result);
+            Intersects(ref value, out bool result);
             return result;
         }
         /// <summary>Creates a rectangle defining the area where one rectangle overlaps with another rectangle.</summary>
@@ -255,32 +336,16 @@ namespace Engine.Mathematics
                 result = Empty;
             }
         }
-
         /// <summary>
-        /// Creates a new rectangle that exactly contains two other rectangles.
+        /// Creates a rectangle defining the area where one rectangle overlaps with another rectangle.
         /// </summary>
-        /// <param name="value1">The first rectangle to contain.</param>
-        /// <param name="value2">The second rectangle to contain.</param>
-        /// <returns>The union rectangle.</returns>
-        public static RectI Union(RectI value1, RectI value2)
+        /// <param name="value1">The first rectangle to compare.</param>
+        /// <param name="value2">The second rectangle to compare.</param>
+        /// <returns>The intersection rectangle.</returns>
+        public static RectI Intersect(RectI value1, RectI value2)
         {
-            Union(ref value1, ref value2, out var result);
+            Intersect(ref value1, ref value2, out var result);
             return result;
-        }
-        /// <summary>
-        /// Creates a new rectangle that exactly contains two other rectangles.
-        /// </summary>
-        /// <param name="value1">The first rectangle to contain.</param>
-        /// <param name="value2">The second rectangle to contain.</param>
-        /// <param name="result">[OutAttribute] The rectangle that must be the union of the first two rectangles.</param>
-        public static void Union(ref RectI value1, ref RectI value2, out RectI result)
-        {
-            var left = Math.Min(value1.Left, value2.Left);
-            var right = Math.Max(value1.Right, value2.Right);
-            var top = Math.Min(value1.Top, value2.Top);
-            var bottom = Math.Max(value1.Bottom, value2.Bottom);
-
-            result = new(left, top, right - left, bottom - top);
         }
 
         /// <summary>
@@ -332,6 +397,78 @@ namespace Engine.Mathematics
             return Math.Max(0, Math.Min(ax2, bx2) - Math.Max(ax1, bx1)) * Math.Max(0, Math.Min(ay2, by2) - Math.Max(ay1, by1));
         }
 
+        /// <summary>
+        /// Creates a new rectangle that exactly contains two other rectangles.
+        /// </summary>
+        /// <param name="value1">The first rectangle to contain.</param>
+        /// <param name="value2">The second rectangle to contain.</param>
+        /// <param name="result">[OutAttribute] The rectangle that must be the union of the first two rectangles.</param>
+        public static void Union(ref RectI value1, ref RectI value2, out RectI result)
+        {
+            var left = Math.Min(value1.Left, value2.Left);
+            var right = Math.Max(value1.Right, value2.Right);
+            var top = Math.Min(value1.Top, value2.Top);
+            var bottom = Math.Max(value1.Bottom, value2.Bottom);
+
+            result = new(left, top, right - left, bottom - top);
+        }
+        /// <summary>
+        /// Creates a new rectangle that exactly contains two other rectangles.
+        /// </summary>
+        /// <param name="value1">The first rectangle to contain.</param>
+        /// <param name="value2">The second rectangle to contain.</param>
+        /// <returns>The union rectangle.</returns>
+        public static RectI Union(RectI value1, RectI value2)
+        {
+            Union(ref value1, ref value2, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Scales the specified rectangle by the specified amount.
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="result">Return value</param>
+        public static void Scale(ref RectI rectangle, int scale, out Rect result)
+        {
+            float width = rectangle.Width * scale;
+            float height = rectangle.Height * scale;
+            float dWidth = width - rectangle.Width;
+            float dHeight = height - rectangle.Height;
+
+            float left = rectangle.Left - (dWidth * 0.5f);
+            float top = rectangle.Top - (dHeight * 0.5f);
+
+            result = new(left, top, width, height);
+        }
+        /// <summary>
+        /// Scales the specified rectangle by the specified amount.
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        /// <param name="scale">Scale</param>
+        public static RectI Scale(RectI rectangle, int scale)
+        {
+            Scale(ref rectangle, scale, out var result);
+            return result;
+        }
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(ref RectI other)
+        {
+            return
+                other.Left == Left &&
+                other.Top == Top &&
+                other.Right == Right &&
+                other.Bottom == Bottom;
+        }
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(RectI other)
+        {
+            return Equals(ref other);
+        }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)
         {
@@ -339,18 +476,6 @@ namespace Engine.Mathematics
 
             var strongValue = (RectI)obj;
             return Equals(ref strongValue);
-        }
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(ref RectI other)
-        {
-            return other.Left == Left && other.Top == Top && other.Right == Right && other.Bottom == Bottom;
-        }
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(RectI other)
-        {
-            return Equals(ref other);
         }
 
         /// <inheritdoc/>
@@ -370,11 +495,6 @@ namespace Engine.Mathematics
         public static implicit operator Rect(RectI value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
-        }
-        /// <inheritdoc/>
-        public static explicit operator RectI(Rect value)
-        {
-            return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
         }
 
         /// <inheritdoc/>

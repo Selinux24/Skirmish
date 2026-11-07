@@ -382,7 +382,7 @@ namespace Engine.BuiltIn.Components.Skies
         {
             var outColor = Color4.Transparent;
 
-            Vector3.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
+            Vector3.AnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
 
             float pitch = Helper.DegreesToRadians(10.0f);
@@ -391,7 +391,7 @@ namespace Engine.BuiltIn.Components.Skies
 
             for (uint i = 0; i < samples; i++)
             {
-                Vector3.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
+                Vector3.VectorFromAngles(yaw, pitch, out Vector3 scatterPos);
 
                 scatterPos *= PlanetRadius + PlanetAtmosphereRadius;
                 scatterPos.Y -= PlanetRadius;

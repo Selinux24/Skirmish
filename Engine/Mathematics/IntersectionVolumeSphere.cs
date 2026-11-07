@@ -14,7 +14,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Bounding sphere
         /// </summary>
-        private readonly BoundingSphere sphere = sphere;
+        private BoundingSphere sphere = sphere;
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = sphere.Center;
@@ -30,24 +30,24 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingSphere sphere)
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.SphereContainsSphere(this.sphere, sphere);
+            return Collision.SphereContainsSphere(ref this.sphere, ref sphere);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingBox bbox)
+        public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.SphereContainsBox(sphere, bbox);
+            return Collision.SphereContainsBox(ref this.sphere, ref bbox);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(BoundingFrustum frustum)
+        public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Intersection.SphereContainsFrustum(sphere, frustum);
+            return Collision.SphereContainsFrustum(ref this.sphere, ref frustum);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return Intersection.SphereContainsMesh(sphere, mesh);
+            return Collision.SphereContainsMesh(ref sphere, mesh);
         }
 
         /// <inheritdoc/>

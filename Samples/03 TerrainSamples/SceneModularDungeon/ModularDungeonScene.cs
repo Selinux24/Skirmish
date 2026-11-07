@@ -953,7 +953,8 @@ namespace TerrainSamples.SceneModularDungeon
             else
             {
                 var sph = item.Instance.GetBoundingSphere();
-                Intersection.ClosestPointInRay(ray, sph.Center, out float distance);
+                Ray r = ray;
+                Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
                 return distance;
             }
         }

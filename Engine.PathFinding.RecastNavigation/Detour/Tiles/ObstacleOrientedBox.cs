@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public readonly struct ObstacleOrientedBox : IObstacle
     {
-        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
+        static readonly float epsilon = 0.0001f;
 
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix

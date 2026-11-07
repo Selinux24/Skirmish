@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Represents a simple, non-overlapping contour in field space.
     /// </summary>
@@ -237,7 +236,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];
-                center.Add(v.Position);
+                center += v.Position;
             }
 
             Vector3 res = new(center.X, center.Y, center.Z);

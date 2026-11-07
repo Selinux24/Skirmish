@@ -1,14 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Mathematics;
+using Engine.Physics;
+using Engine.Physics.Colliders;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Engine.PhysicsTests
 {
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.Physics.Colliders;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ContactDetectorBoxAndBoxTests
@@ -63,10 +62,12 @@ namespace Engine.PhysicsTests
             var contactsWith3 = data3.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
             Assert.IsNotEmpty(contactsWith3);
 
-            var pointInBox2 = Intersection.ClosestPointInBox(contactsWith2[0].Position, box1.OrientedBoundingBox);
+            var obb = box1.OrientedBoundingBox;
+
+            Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);
 
-            var pointInBox3 = Intersection.ClosestPointInBox(contactsWith3[0].Position, box1.OrientedBoundingBox);
+            Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
             Assert.AreEqual(contactsWith3[0].Position, pointInBox3);
         }
     }

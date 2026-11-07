@@ -265,7 +265,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return [Position.Value];
+            yield return Position.Value;
         }
         /// <inheritdoc/>
         public readonly uint GetStride()

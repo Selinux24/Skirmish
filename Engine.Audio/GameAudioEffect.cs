@@ -593,9 +593,9 @@ namespace Engine.Audio
             emitter.InnerRadius = Emitter.InnerRadius;
             emitter.InnerRadiusAngle = Emitter.InnerRadiusAngle;
 
-            emitter.VolumeCurve = VorticeExtensions.ConvertCurve(Emitter.VolumeCurve);
-            emitter.LfeCurve = VorticeExtensions.ConvertCurve(Emitter.LfeCurve);
-            emitter.ReverbCurve = VorticeExtensions.ConvertCurve(Emitter.ReverbCurve);
+            emitter.VolumeCurve = XAudio2Extensions.ConvertCurve(Emitter.VolumeCurve);
+            emitter.LfeCurve = XAudio2Extensions.ConvertCurve(Emitter.LfeCurve);
+            emitter.ReverbCurve = XAudio2Extensions.ConvertCurve(Emitter.ReverbCurve);
 
             emitter.CurveDistanceScaler = GameAudio.DistanceScale * Emitter.Radius;
             emitter.DopplerScaler = GameAudio.DopplerScale;

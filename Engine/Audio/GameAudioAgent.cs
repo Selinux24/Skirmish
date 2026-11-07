@@ -15,43 +15,19 @@ namespace Engine.Audio
         /// <summary>
         /// Forward vector
         /// </summary>
-        public Vector3 Forward
-        {
-            get
-            {
-                return agentTransform?.Forward ?? Vector3.ForwardLH;
-            }
-        }
+        public Vector3 Forward => agentTransform?.Forward ?? Vector3.ForwardLH;
         /// <summary>
         /// Up vector
         /// </summary>
-        public Vector3 Up
-        {
-            get
-            {
-                return agentTransform?.Up ?? Vector3.Up;
-            }
-        }
+        public Vector3 Up => agentTransform?.Up ?? Vector3.Up;
         /// <summary>
         /// Position coordinate
         /// </summary>
-        public Vector3 Position
-        {
-            get
-            {
-                return agentTransform?.Position ?? Vector3.Zero;
-            }
-        }
+        public Vector3 Position => agentTransform?.Position ?? Vector3.Zero;
         /// <summary>
         /// Velocity vector
         /// </summary>
-        public Vector3 Velocity
-        {
-            get
-            {
-                return agentTransform?.Velocity ?? Vector3.Zero;
-            }
-        }
+        public Vector3 Velocity => agentTransform?.Velocity ?? Vector3.Zero;
 
         /// <summary>
         /// Constructor

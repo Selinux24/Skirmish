@@ -30,7 +30,7 @@ namespace Engine.Physics.GJK
     /// </summary>
     public struct Simplex
     {
-        private static readonly Vector3 ZeroTolerance = new(0.0001f);
+        private static readonly float ZeroTolerance = 0.0001f;
 
         /// <summary>
         /// Point A. Last added point

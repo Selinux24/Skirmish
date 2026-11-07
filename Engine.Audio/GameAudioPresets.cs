@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Vortice.XAudio2.Fx;
 
 namespace Engine.Audio
 {
-    using Vortice.XAudio2.Fx;
-
     /// <summary>
     /// Game audio presets
     /// </summary>

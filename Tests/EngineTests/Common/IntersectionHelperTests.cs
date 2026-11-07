@@ -159,21 +159,21 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableTest()
         {
-            Assert.IsFalse(Intersection.Intersects(null, null));
+            Assert.IsFalse(Collision.Intersects(null, null));
 
-            Assert.IsFalse(Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, null));
-            Assert.IsFalse(Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, null, IntersectDetectionMode.Sphere));
+            Assert.IsFalse(Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, null));
+            Assert.IsFalse(Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, null, IntersectDetectionMode.Sphere));
 
-            Assert.IsFalse(Intersection.Intersects(null, IntersectDetectionMode.Sphere, i1.Object, IntersectDetectionMode.Sphere));
+            Assert.IsFalse(Collision.Intersects(null, IntersectDetectionMode.Sphere, i1.Object, IntersectDetectionMode.Sphere));
         }
 
         [TestMethod()]
         public void IntersectsIntersectableSphereTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, i2.Object, IntersectDetectionMode.Sphere);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, i3.Object, IntersectDetectionMode.Sphere);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, i4.Object, IntersectDetectionMode.Sphere);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, i5.Object, IntersectDetectionMode.Sphere);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i2.Object, IntersectDetectionMode.Sphere);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i3.Object, IntersectDetectionMode.Sphere);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i4.Object, IntersectDetectionMode.Sphere);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i5.Object, IntersectDetectionMode.Sphere);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -183,10 +183,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableBoxTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, i2.Object, IntersectDetectionMode.Box);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, i3.Object, IntersectDetectionMode.Box);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, i4.Object, IntersectDetectionMode.Box);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, i5.Object, IntersectDetectionMode.Box);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, i2.Object, IntersectDetectionMode.Box);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, i3.Object, IntersectDetectionMode.Box);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, i4.Object, IntersectDetectionMode.Box);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, i5.Object, IntersectDetectionMode.Box);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -196,10 +196,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableMeshTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, i2.Object, IntersectDetectionMode.Mesh);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, i3.Object, IntersectDetectionMode.Mesh);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, i4.Object, IntersectDetectionMode.Mesh);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, i5.Object, IntersectDetectionMode.Mesh);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, i2.Object, IntersectDetectionMode.Mesh);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, i3.Object, IntersectDetectionMode.Mesh);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, i4.Object, IntersectDetectionMode.Mesh);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, i5.Object, IntersectDetectionMode.Mesh);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -210,10 +210,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableVolumeSphereTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph2);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph3);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph4);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph5);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph2);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph3);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph4);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, sph5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -223,10 +223,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableVolumeBoxTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, box2);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, box3);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, box4);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Box, box5);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, box2);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, box3);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, box4);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Box, box5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -236,10 +236,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsIntersectableVolumeMeshTest()
         {
-            bool res1 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh2);
-            bool res2 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh3);
-            bool res3 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh4);
-            bool res4 = Intersection.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh5);
+            bool res1 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh2);
+            bool res2 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh3);
+            bool res3 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh4);
+            bool res4 = Collision.Intersects(i1.Object, IntersectDetectionMode.Mesh, mesh5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -250,10 +250,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsVolumeSphereTest()
         {
-            bool res1 = Intersection.Intersects(sph1, sph2);
-            bool res2 = Intersection.Intersects(sph1, sph3);
-            bool res3 = Intersection.Intersects(sph1, sph4);
-            bool res4 = Intersection.Intersects(sph1, sph5);
+            bool res1 = Collision.Intersects(sph1, sph2);
+            bool res2 = Collision.Intersects(sph1, sph3);
+            bool res3 = Collision.Intersects(sph1, sph4);
+            bool res4 = Collision.Intersects(sph1, sph5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -263,10 +263,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsVolumeBoxTest()
         {
-            bool res1 = Intersection.Intersects(box1, box2);
-            bool res2 = Intersection.Intersects(box1, box3);
-            bool res3 = Intersection.Intersects(box1, box4);
-            bool res4 = Intersection.Intersects(box1, box5);
+            bool res1 = Collision.Intersects(box1, box2);
+            bool res2 = Collision.Intersects(box1, box3);
+            bool res3 = Collision.Intersects(box1, box4);
+            bool res4 = Collision.Intersects(box1, box5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -276,10 +276,10 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsVolumeMeshTest()
         {
-            bool res1 = Intersection.Intersects(mesh1, mesh2);
-            bool res2 = Intersection.Intersects(mesh1, mesh3);
-            bool res3 = Intersection.Intersects(mesh1, mesh4);
-            bool res4 = Intersection.Intersects(mesh1, mesh5);
+            bool res1 = Collision.Intersects(mesh1, mesh2);
+            bool res2 = Collision.Intersects(mesh1, mesh3);
+            bool res3 = Collision.Intersects(mesh1, mesh4);
+            bool res4 = Collision.Intersects(mesh1, mesh5);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
@@ -289,8 +289,8 @@ namespace EngineTests.Common
         [TestMethod()]
         public void IntersectsVolumeFrustumTest()
         {
-            bool res1 = Intersection.Intersects(frustum1, frustum2);
-            bool res2 = Intersection.Intersects(frustum1, frustum3);
+            bool res1 = Collision.Intersects(frustum1, frustum2);
+            bool res2 = Collision.Intersects(frustum1, frustum3);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);

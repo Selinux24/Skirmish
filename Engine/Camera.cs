@@ -732,7 +732,7 @@ namespace Engine
                 updateNeeded = true;
             }
 
-            if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
+            if (Vector3.NearEqual(nextInterest, translationInterest, 0.1f))
             {
                 StopTranslations();
             }
@@ -1349,12 +1349,12 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return Intersection.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return Intersection.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

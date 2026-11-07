@@ -112,6 +112,35 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
         /// </summary>
+        /// <param name="rgb">A packed integer containing all three color components in RGB order.
+        /// The alpha component is ignored.</param>
+        public Color3(byte rgb)
+        {
+            Blue = ((rgb >> 16) & 255) / 255f;
+            Green = ((rgb >> 8) & 255) / 255f;
+            Red = (rgb & 255) / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
+        /// <param name="rgb">A packed integer containing all three color components in RGB order.
+        /// The alpha component is ignored.</param>
+        public Color3(int rgb)
+            : this((uint)rgb) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
+        /// <param name="rgb">A packed integer containing all three color components in RGB order.
+        /// The alpha component is ignored.</param>
+        public Color3(uint rgb)
+        {
+            Blue = ((rgb >> 16) & 255) / 255f;
+            Green = ((rgb >> 8) & 255) / 255f;
+            Red = (rgb & 255) / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
         public Color3(float value)
         {
@@ -166,13 +195,32 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
         /// </summary>
-        /// <param name="rgb">A packed integer containing all three color components in RGB order.
-        /// The alpha component is ignored.</param>
-        public Color3(int rgb)
+        /// <param name="values">The values to assign to the red, green, and blue components of the color. This must be an array with three elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color3(byte[] values)
         {
-            Blue = ((rgb >> 16) & 255) / 255.0f;
-            Green = ((rgb >> 8) & 255) / 255.0f;
-            Red = (rgb & 255) / 255.0f;
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+
+            Red = values[0] / 255f;
+            Green = values[1] / 255f;
+            Blue = values[2] / 255f;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the red, green, and blue components of the color. This must be an array with three elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color3(int[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+
+            Red = values[0] / 255f;
+            Green = values[1] / 255f;
+            Blue = values[2] / 255f;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -210,10 +258,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color3 Add(Color3 left, Color3 right)
         {
-            return new(
-                left.Red + right.Red,
-                left.Green + right.Green,
-                left.Blue + right.Blue);
+            Add(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -236,10 +282,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color3 Subtract(Color3 left, Color3 right)
         {
-            return new(
-                left.Red - right.Red,
-                left.Green - right.Green,
-                left.Blue - right.Blue);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -262,10 +306,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color3 Modulate(Color3 left, Color3 right)
         {
-            return new(
-                left.Red * right.Red,
-                left.Green * right.Green,
-                left.Blue * right.Blue);
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -288,10 +330,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color3 Scale(Color3 value, float scale)
         {
-            return new(
-                value.Red * scale,
-                value.Green * scale,
-                value.Blue * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
 
         /// <summary>
@@ -312,10 +352,8 @@ namespace Engine.Mathematics
         /// <returns>The negated color.</returns>
         public static Color3 Negate(Color3 value)
         {
-            return new(
-                1.0f - value.Red,
-                1.0f - value.Green,
-                1.0f - value.Blue);
+            Negate(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -479,10 +517,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color3 AdjustContrast(Color3 value, float contrast)
         {
-            return new(
-                0.5f + contrast * (value.Red - 0.5f),
-                0.5f + contrast * (value.Green - 0.5f),
-                0.5f + contrast * (value.Blue - 0.5f));
+            AdjustContrast(ref value, contrast, out var result);
+            return result;
         }
 
         /// <summary>
@@ -507,12 +543,8 @@ namespace Engine.Mathematics
         /// <returns>The adjusted color.</returns>
         public static Color3 AdjustSaturation(Color3 value, float saturation)
         {
-            float grey = value.Red * 0.2125f + value.Green * 0.7154f + value.Blue * 0.0721f;
-
-            return new(
-                grey + saturation * (value.Red - grey),
-                grey + saturation * (value.Green - grey),
-                grey + saturation * (value.Blue - grey));
+            AdjustSaturation(ref value, saturation, out var result);
+            return result;
         }
 
         /// <summary>
@@ -547,7 +579,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two colors.</returns>
         public static Color3 operator +(Color3 left, Color3 right)
         {
-            return new(left.Red + right.Red, left.Green + right.Green, left.Blue + right.Blue);
+            Add(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Assert a color (return it unchanged).
@@ -566,7 +599,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two colors.</returns>
         public static Color3 operator -(Color3 left, Color3 right)
         {
-            return new(left.Red - right.Red, left.Green - right.Green, left.Blue - right.Blue);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Negates a color.
@@ -575,7 +609,8 @@ namespace Engine.Mathematics
         /// <returns>A negated color.</returns>
         public static Color3 operator -(Color3 value)
         {
-            return new(-value.Red, -value.Green, -value.Blue);
+            Negate(ref value, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -585,7 +620,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color3 operator *(float scale, Color3 value)
         {
-            return new(value.Red * scale, value.Green * scale, value.Blue * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a color.
@@ -595,7 +631,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled color.</returns>
         public static Color3 operator *(Color3 value, float scale)
         {
-            return new(value.Red * scale, value.Green * scale, value.Blue * scale);
+            Scale(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Modulates two colors.
@@ -605,7 +642,8 @@ namespace Engine.Mathematics
         /// <returns>The modulated color.</returns>
         public static Color3 operator *(Color3 left, Color3 right)
         {
-            return new(left.Red * right.Red, left.Green * right.Green, left.Blue * right.Blue);
+            Modulate(ref left, ref right, out var result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -624,18 +662,13 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Color4(Color3 value)
         {
-            return new(value.Red, value.Green, value.Blue, 1.0f);
-        }
-        /// <inheritdoc/>
-        public static explicit operator Color3(int value)
-        {
-            return new(value);
+            return value.ToColor4();
         }
 
         /// <inheritdoc/>
         public static implicit operator Vector3(Color3 value)
         {
-            return new(value.Red, value.Green, value.Blue);
+            return value.ToVector3();
         }
         /// <inheritdoc/>
         public static implicit operator Color3(Vector3 value)
@@ -767,6 +800,14 @@ namespace Engine.Mathematics
             value |= a << 24;
 
             return (int)value;
+        }
+        /// <summary>
+        /// Converts the color into a four component color.
+        /// </summary>
+        /// <returns>A four component color containing the red, green, and blue components of the color.</returns>
+        public readonly Color4 ToColor4()
+        {
+            return new Color4(Red, Green, Blue, 1f);
         }
         /// <summary>
         /// Converts the color into a three component vector.

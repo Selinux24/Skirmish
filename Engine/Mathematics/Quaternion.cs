@@ -43,7 +43,6 @@
 * THE SOFTWARE.
 */
 
-using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -58,6 +57,7 @@ namespace Engine.Mathematics
     public struct Quaternion : IEquatable<Quaternion>, IFormattable
     {
         const string QuaternionStr = "X:{0} Y:{1} Z:{2} W:{3}";
+        const string QuaternionDescStr = "Angle: {0:0.00} in axis {1}";
 
         /// <summary>
         /// The size of the <see cref="Quaternion"/> type, in bytes.
@@ -66,7 +66,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// A <see cref="Quaternion"/> with all of its components set to zero.
         /// </summary>
-        public static readonly Quaternion Zero = new();
+        public static readonly Quaternion Zero = new(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
         /// A <see cref="Quaternion"/> with all of its components set to one.
         /// </summary>
@@ -99,17 +99,11 @@ namespace Engine.Mathematics
         /// <value>
         /// <c>true</c> if this instance is an identity quaternion; otherwise, <c>false</c>.
         /// </value>
-        public readonly bool IsIdentity
-        {
-            get { return Equals(Identity); }
-        }
+        public readonly bool IsIdentity => Equals(Identity);
         /// <summary>
         /// Gets a value indicting whether this instance is normalized.
         /// </summary>
-        public readonly bool IsNormalized
-        {
-            get { return Helper.IsOne((X * X) + (Y * Y) + (Z * Z) + (W * W)); }
-        }
+        public readonly bool IsNormalized => Helper.IsOne((X * X) + (Y * Y) + (Z * Z) + (W * W));
         /// <summary>
         /// Gets the angle of the quaternion.
         /// </summary>
@@ -136,7 +130,7 @@ namespace Engine.Mathematics
                 if (Helper.IsZero(length)) return Vector3.UnitX;
 
                 float inv = 1.0f / MathF.Sqrt(length);
-                return new Vector3(X * inv, Y * inv, Z * inv);
+                return new(X * inv, Y * inv, Z * inv);
             }
         }
 
@@ -304,19 +298,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Gets the angle between two quaternions
-        /// </summary>
-        /// <param name="one">First quaternions</param>
-        /// <param name="two">Second quaternions</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float GetAngle(Quaternion one, Quaternion two)
-        {
-            float dot = Dot(one, two);
-
-            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f)) * 2f;
-        }
-
-        /// <summary>
         /// Converts the quaternion into a unit quaternion.
         /// </summary>
         public void Normalize()
@@ -329,6 +310,34 @@ namespace Engine.Mathematics
                 Y *= inverse;
                 Z *= inverse;
                 W *= inverse;
+            }
+        }
+
+        /// <summary>
+        /// Clamps the rotation to the specified axis
+        /// </summary>
+        /// <param name="q">Quaternion</param>
+        /// <param name="axis">Axis</param>
+        /// <returns>Returns the clamped quaternion</returns>
+        public void ClampToAxis(Axis axis)
+        {
+            switch (axis)
+            {
+                case Engine.Axis.X:
+                    Y = 0;
+                    Z = 0;
+                    Normalize();
+                    break;
+                case Engine.Axis.Y:
+                    X = 0;
+                    Z = 0;
+                    Normalize();
+                    break;
+                case Engine.Axis.Z:
+                    X = 0;
+                    Y = 0;
+                    Normalize();
+                    break;
             }
         }
 
@@ -547,7 +556,8 @@ namespace Engine.Mathematics
         /// <returns>The dot product of the two quaternions.</returns>
         public static float Dot(Quaternion left, Quaternion right)
         {
-            return (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z) + (left.W * right.W);
+            Dot(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -717,38 +727,30 @@ namespace Engine.Mathematics
         /// <returns>The normalized quaternion.</returns>
         public static Quaternion Normalize(Quaternion value)
         {
-            value.Normalize();
-            return value;
+            Normalize(ref value, out var result);
+            return result;
         }
 
         /// <summary>
-        /// Clamps the rotation to the specified axis
+        /// Finds the quaternion between from and to quaternions traveling maxDelta radians
         /// </summary>
-        /// <param name="q">Quaternion</param>
-        /// <param name="axis">Axis</param>
-        /// <returns>Returns the clamped quaternion</returns>
-        public void ClampToAxis(Axis axis)
+        /// <param name="from">From</param>
+        /// <param name="to">To</param>
+        /// <param name="maxDelta">Maximum radians</param>
+        /// <param name="result">Gets the quaternion between from and to quaternions traveling maxDelta radians</param>
+        public static void RotateTowards(ref Quaternion from, ref Quaternion to, float maxDelta, out Quaternion result)
         {
-            switch (axis)
+            float angle = GetAngle(from, to);
+            if (Helper.IsZero(angle))
             {
-                case Engine.Axis.X:
-                    Y = 0;
-                    Z = 0;
-                    Normalize();
-                    break;
-                case Engine.Axis.Y:
-                    X = 0;
-                    Z = 0;
-                    Normalize();
-                    break;
-                case Engine.Axis.Z:
-                    X = 0;
-                    Y = 0;
-                    Normalize();
-                    break;
+                result = to;
+                return;
             }
-        }
 
+            float delta = MathF.Min(1f, maxDelta / angle);
+
+            result = Slerp(from, to, delta);
+        }
         /// <summary>
         /// Finds the quaternion between from and to quaternions traveling maxDelta radians
         /// </summary>
@@ -758,17 +760,22 @@ namespace Engine.Mathematics
         /// <returns>Gets the quaternion between from and to quaternions traveling maxDelta radians</returns>
         public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
         {
-            float angle = GetAngle(from, to);
-            if (Helper.IsZero(angle))
-            {
-                return to;
-            }
-
-            float delta = MathF.Min(1f, maxDelta / angle);
-
-            return Slerp(from, to, delta);
+            RotateTowards(ref from, ref to, maxDelta, out var result);
+            return result;
         }
 
+        /// <summary>
+        /// Creates a rotation from the direction vector from the up vector
+        /// </summary>
+        /// <param name="direction">Direction vector</param>
+        /// <param name="up">Up vector</param>
+        /// <param name="result">Returns a rotation quaternion</param>
+        public static void RotateFromDirection(ref Vector3 direction, ref Vector3 up, out Quaternion result)
+        {
+            var a = Vector3.Cross(direction, up);
+            var w = MathF.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
+            result = Normalize(new(a, w));
+        }
         /// <summary>
         /// Creates a rotation from the direction vector from the up vector
         /// </summary>
@@ -777,12 +784,8 @@ namespace Engine.Mathematics
         /// <returns>Returns a rotation quaternion</returns>
         public static Quaternion RotateFromDirection(Vector3 direction, Vector3 up)
         {
-            var a = Vector3.Cross(direction, up);
-            var w = MathF.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
-            Quaternion q = new(a, w);
-            q = Normalize(q);
-
-            return q;
+            RotateFromDirection(ref direction, ref up, out var result);
+            return result;
         }
 
         /// <summary>
@@ -872,6 +875,17 @@ namespace Engine.Mathematics
         /// Creates a quaternion given a rotation matrix.
         /// </summary>
         /// <param name="matrix">The rotation matrix.</param>
+        /// <returns>The newly created quaternion.</returns>
+        public static Quaternion RotationMatrix(Matrix4x4 matrix)
+        {
+            RotationMatrix(ref matrix, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a quaternion given a rotation matrix.
+        /// </summary>
+        /// <param name="matrix">The rotation matrix.</param>
         /// <param name="result">When the method completes, contains the newly created quaternion.</param>
         public static void RotationMatrix(ref Matrix3x3 matrix, out Quaternion result)
         {
@@ -920,6 +934,16 @@ namespace Engine.Mathematics
                 result.W = (matrix.M12 - matrix.M21) * half;
             }
         }
+        /// <summary>
+        /// Creates a quaternion given a rotation matrix.
+        /// </summary>
+        /// <param name="matrix">The rotation matrix.</param>
+        /// <returns>The newly created quaternion.</returns>
+        public static Quaternion RotationMatrix(Matrix3x3 matrix)
+        {
+            RotationMatrix(ref matrix, out var result);
+            return result;
+        }
 
         /// <summary>
         /// Creates a left-handed, look-at quaternion.
@@ -946,28 +970,39 @@ namespace Engine.Mathematics
             return result;
         }
         /// <summary>
-        /// Look at target
+        /// Creates a left-handed, look-at quaternion.
         /// </summary>
-        /// <param name="eyePosition">Eye position</param>
-        /// <param name="target">Target</param>
-        /// <param name="up">Up vector</param>
+        /// <param name="eye">The position of the viewer's eye.</param>
+        /// <param name="target">The camera look-at target.</param>
+        /// <param name="up">The camera's up vector.</param>
         /// <param name="axis">Relative rotation axis</param>
-        /// <returns>Returns rotation quaternion</returns>
-        public static Quaternion LookAtLH(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis)
+        /// <param name="result">When the method completes, contains the created look-at quaternion.</param>
+        public static void LookAtLH(ref Vector3 eye, ref Vector3 target, ref Vector3 up, Axis axis, out Quaternion result)
         {
-            if (Helper.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target))))
+            if (Helper.IsOne(Vector3.Dot(Vector3.Up, Vector3.Normalize(eye - target))))
             {
                 up = Vector3.Left;
             }
 
-            var q = Invert(LookAtLH(target, eyePosition, up));
+            result = Invert(LookAtLH(target, eye, up));
 
             if (axis != Engine.Axis.None)
             {
-                q.ClampToAxis(axis);
+                result.ClampToAxis(axis);
             }
-
-            return q;
+        }
+        /// <summary>
+        /// Creates a left-handed, look-at quaternion.
+        /// </summary>
+        /// <param name="eye">The position of the viewer's eye.</param>
+        /// <param name="target">The camera look-at target.</param>
+        /// <param name="up">The camera's up vector.</param>
+        /// <param name="axis">Relative rotation axis</param>
+        /// <returns>The created look-at quaternion.</returns>
+        public static Quaternion LookAtLH(Vector3 eye, Vector3 target, Vector3 up, Axis axis)
+        {
+            LookAtLH(ref eye, ref target, ref up, axis, out var result);
+            return result;
         }
 
         /// <summary>
@@ -1092,17 +1127,6 @@ namespace Engine.Mathematics
         public static Quaternion BillboardRH(Vector3 objectPosition, Vector3 cameraPosition, Vector3 cameraUpVector, Vector3 cameraForwardVector)
         {
             BillboardRH(ref objectPosition, ref cameraPosition, ref cameraUpVector, ref cameraForwardVector, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Creates a quaternion given a rotation matrix.
-        /// </summary>
-        /// <param name="matrix">The rotation matrix.</param>
-        /// <returns>The newly created quaternion.</returns>
-        public static Quaternion RotationMatrix(Matrix4x4 matrix)
-        {
-            RotationMatrix(ref matrix, out var result);
             return result;
         }
 
@@ -1246,6 +1270,30 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Gets the angle between two quaternions
+        /// </summary>
+        /// <param name="left">Left quaternion</param>
+        /// <param name="right">Right quaternion</param>
+        /// <param name="result">The angle value in radians</param>
+        public static void GetAngle(ref Quaternion left, ref Quaternion right, out float result)
+        {
+            Dot(ref left, ref right, out float dot);
+
+            result = MathF.Acos(MathF.Min(MathF.Abs(dot), 1f)) * 2f;
+        }
+        /// <summary>
+        /// Gets the angle between two quaternions
+        /// </summary>
+        /// <param name="left">Left quaternion</param>
+        /// <param name="right">Right quaternion</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float GetAngle(Quaternion left, Quaternion right)
+        {
+            GetAngle(ref left, ref right, out float result);
+            return result;
+        }
+
+        /// <summary>
         /// Adds two quaternions.
         /// </summary>
         /// <param name="left">The first quaternion to add.</param>
@@ -1310,7 +1358,7 @@ namespace Engine.Mathematics
             Multiply(ref left, ref right, out var result);
             return result;
         }
-    
+
         /// <summary>
         /// Tests for equality between two objects.
         /// </summary>
@@ -1340,7 +1388,7 @@ namespace Engine.Mathematics
         /// <returns>A Quaternion</returns>
         public static explicit operator Quaternion(System.Numerics.Quaternion Value)
         {
-            return new Quaternion(Value.X, Value.Y, Value.Z, Value.W);
+            return new(Value.X, Value.Y, Value.Z, Value.W);
         }
         /// <summary>
         /// Convert the Quaternion to a System.Numerics.Quaternion.
@@ -1348,7 +1396,7 @@ namespace Engine.Mathematics
         /// <returns>A System.Numerics.Quaternion</returns>
         public static explicit operator System.Numerics.Quaternion(Quaternion Value)
         {
-            return new System.Numerics.Quaternion(Value.X, Value.Y, Value.Z, Value.W);
+            return new(Value.X, Value.Y, Value.Z, Value.W);
         }
 
         /// <summary>
@@ -1439,11 +1487,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Quaternion other)
         {
-            return
-                Helper.NearEqual(other.X, X) &&
-                Helper.NearEqual(other.Y, Y) &&
-                Helper.NearEqual(other.Z, Z) &&
-                Helper.NearEqual(other.W, W);
+            return NearEqual(this, other);
         }
         /// <summary>
         /// Determines whether the specified <see cref="Quaternion"/> is equal to this instance.
@@ -1472,11 +1516,20 @@ namespace Engine.Mathematics
             return Equals(ref strongValue);
         }
 
-        public static bool NearEqual(Quaternion a, Quaternion b)
+        /// <summary>
+        /// Tests whether one Quaternion is near another Quaternion.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <param name="epsilon">Toleranze epsilon</param>
+        /// <returns><c>true</c> if left and right are near another, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Quaternion left, Quaternion right, float epsilon = Helper.ZeroTolerance)
         {
             return
-                Vector3.NearEqual(a.Axis, b.Axis) &&
-                Helper.NearEqual(a.Angle, b.Angle);
+                Helper.WithinEpsilon(left.X, right.X, epsilon) &&
+                Helper.WithinEpsilon(left.Y, right.Y, epsilon) &&
+                Helper.WithinEpsilon(left.Z, right.Z, epsilon) &&
+                Helper.WithinEpsilon(left.W, right.W, epsilon);
         }
 
         /// <summary>
@@ -1486,7 +1539,10 @@ namespace Engine.Mathematics
         /// <returns>Return quaternion description</returns>
         public readonly string GetDescription()
         {
-            return string.Format("Angle: {0:0.00} in axis {1}", Angle, Axis.GetDescription());
+            return string.Format(
+                QuaternionDescStr,
+                Angle,
+                Axis.GetDescription());
         }
     }
 }

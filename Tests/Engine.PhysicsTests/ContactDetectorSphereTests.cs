@@ -105,13 +105,13 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(penetrationHf, contact2.Penetration, Epsilon); //It's a half space calculation
             Assert.AreEqual(penetration, contact3.Penetration, Epsilon); //Not's a half space
 
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Up, contact1.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact2.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact2.Normal}");
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact3.Normal, new Vector3(Epsilon)), $"Expected normal {Vector3.Down} != {contact3.Normal}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Up, contact1.Normal, Epsilon), $"Expected normal {Vector3.Up} != {contact1.Normal}"); //Engine reverses the colliders order when half spaces colliders
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact2.Normal, Epsilon), $"Expected normal {Vector3.Down} != {contact2.Normal}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Down, contact3.Normal, Epsilon), $"Expected normal {Vector3.Down} != {contact3.Normal}");
 
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact1.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact1.Position}");
-            Assert.IsTrue(Vector3.NearEqual(new Vector3(0, -r, 0), contact2.Position, new Vector3(Epsilon)), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
-            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact3.Position, new Vector3(Epsilon)), $"Expected position {Vector3.Zero} != {contact3.Position}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact1.Position, Epsilon), $"Expected position {Vector3.Zero} != {contact1.Position}");
+            Assert.IsTrue(Vector3.NearEqual(new Vector3(0, -r, 0), contact2.Position, Epsilon), $"Expected position {new Vector3(0, -r, 0)} != {contact2.Position}");
+            Assert.IsTrue(Vector3.NearEqual(Vector3.Zero, contact3.Position, Epsilon), $"Expected position {Vector3.Zero} != {contact3.Position}");
         }
     }
 }

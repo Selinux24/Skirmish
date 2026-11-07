@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Path finder input
     /// </summary>
@@ -65,7 +64,8 @@ namespace Engine.PathFinding
                 {
                     tris = tris.Where(t =>
                     {
-                        return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                        var bb = bounds.Value;
+                        return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                     });
                 }
 
@@ -93,7 +93,8 @@ namespace Engine.PathFinding
             {
                 tris = tris.Where(t =>
                 {
-                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                    var bb = bounds.Value;
+                    return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                 });
             }
 

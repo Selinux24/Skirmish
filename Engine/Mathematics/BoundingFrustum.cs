@@ -162,15 +162,6 @@ namespace Engine.Mathematics
             far.Normalize();
         }
 
-        private static Vector3 Get3PlanesInterPoint(ref Plane p1, ref Plane p2, ref Plane p3)
-        {
-            //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
-            var p1p2 = Vector3.Cross(p1.Normal, p2.Normal);
-            var p2p3 = Vector3.Cross(p2.Normal, p3.Normal);
-            var p3p1 = Vector3.Cross(p3.Normal, p1.Normal);
-            return -p1.D * p2p3 / Vector3.Dot(p1.Normal, p2p3) - p2.D * p3p1 / Vector3.Dot(p2.Normal, p3p1) - p3.D * p1p2 / Vector3.Dot(p3.Normal, p1p2);
-        }
-
         /// <summary>
         /// Creates a new frustum relaying on perspective camera parameters
         /// </summary>
@@ -284,6 +275,14 @@ namespace Engine.Mathematics
             corners[5] = Get3PlanesInterPoint(ref pFar, ref pTop, ref pRight);       //Far2
             corners[6] = Get3PlanesInterPoint(ref pFar, ref pTop, ref pLeft);        //Far3
             corners[7] = Get3PlanesInterPoint(ref pFar, ref pBottom, ref pLeft);     //Far3
+        }
+        private static Vector3 Get3PlanesInterPoint(ref Plane p1, ref Plane p2, ref Plane p3)
+        {
+            //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
+            var p1p2 = Vector3.Cross(p1.Normal, p2.Normal);
+            var p2p3 = Vector3.Cross(p2.Normal, p3.Normal);
+            var p3p1 = Vector3.Cross(p3.Normal, p1.Normal);
+            return -p1.D * p2p3 / Vector3.Dot(p1.Normal, p2p3) - p2.D * p3p1 / Vector3.Dot(p2.Normal, p3p1) - p3.D * p1p2 / Vector3.Dot(p3.Normal, p1p2);
         }
 
         /// <summary>
@@ -412,25 +411,8 @@ namespace Engine.Mathematics
         /// <returns>Type of the containment</returns>
         public readonly ContainmentType Contains(ref Vector3 point)
         {
-            var result = PlaneIntersectionType.Front;
-            for (int i = 0; i < 6; i++)
-            {
-                var planeResult = GetPlane(i).Intersects(ref point);
-                switch (planeResult)
-                {
-                    case PlaneIntersectionType.Back:
-                        return ContainmentType.Disjoint;
-                    case PlaneIntersectionType.Intersecting:
-                        result = PlaneIntersectionType.Intersecting;
-                        break;
-                }
-            }
-
-            return result switch
-            {
-                PlaneIntersectionType.Intersecting => ContainmentType.Intersects,
-                _ => ContainmentType.Contains,
-            };
+            var f = this;
+            return Collision.FrustumContainsPoint(ref f, ref point);
         }
         /// <summary>
         /// Checks whether a point lay inside, intersects or lay outside the frustum.
@@ -448,26 +430,8 @@ namespace Engine.Mathematics
         /// <returns>Type of the containment</returns>
         public readonly ContainmentType Contains(ref BoundingBox box)
         {
-            var result = ContainmentType.Contains;
-
-            for (int i = 0; i < 6; i++)
-            {
-                var plane = GetPlane(i);
-
-                GetBoxToPlanePVertexNVertex(ref box, ref plane.Normal, out Vector3 p, out Vector3 n);
-
-                if (Collision.PlaneIntersectsPoint(ref plane, ref p) == PlaneIntersectionType.Back)
-                {
-                    return ContainmentType.Disjoint;
-                }
-
-                if (Collision.PlaneIntersectsPoint(ref plane, ref n) == PlaneIntersectionType.Back)
-                {
-                    result = ContainmentType.Intersects;
-                }
-            }
-
-            return result;
+            var f = this;
+            return Collision.BoxContainsFrustum(ref box, ref f);
         }
         /// <summary>
         /// Determines the intersection relationship between the frustum and a bounding box.
@@ -494,25 +458,8 @@ namespace Engine.Mathematics
         /// <returns>Type of the containment</returns>
         public readonly ContainmentType Contains(ref BoundingSphere sphere)
         {
-            var result = PlaneIntersectionType.Front;
-            for (int i = 0; i < 6; i++)
-            {
-                var planeResult = GetPlane(i).Intersects(ref sphere);
-                switch (planeResult)
-                {
-                    case PlaneIntersectionType.Back:
-                        return ContainmentType.Disjoint;
-                    case PlaneIntersectionType.Intersecting:
-                        result = PlaneIntersectionType.Intersecting;
-                        break;
-                }
-            }
-
-            return result switch
-            {
-                PlaneIntersectionType.Intersecting => ContainmentType.Intersects,
-                _ => ContainmentType.Contains,
-            };
+            var f = this;
+            return Collision.SphereContainsFrustum(ref sphere, ref f);
         }
         /// <summary>
         /// Determines the intersection relationship between the frustum and a bounding sphere.
@@ -576,7 +523,7 @@ namespace Engine.Mathematics
         /// <returns>Plane intersection type.</returns>
         public PlaneIntersectionType Intersects(ref Plane plane)
         {
-            return PlaneIntersectsPoints(ref plane, GetCorners());
+            return Collision.PlaneIntersectsPoints(ref plane, GetCorners());
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Plane.
@@ -585,7 +532,7 @@ namespace Engine.Mathematics
         /// <param name="result">Plane intersection type.</param>
         public void Intersects(ref Plane plane, out PlaneIntersectionType result)
         {
-            result = PlaneIntersectsPoints(ref plane, GetCorners());
+            result = Collision.PlaneIntersectsPoints(ref plane, GetCorners());
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Ray.
@@ -605,86 +552,8 @@ namespace Engine.Mathematics
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
         public readonly bool Intersects(ref Ray ray, out float? inDistance, out float? outDistance)
         {
-            if (Contains(ray.Position) != ContainmentType.Disjoint)
-            {
-                float nearstPlaneDistance = float.MaxValue;
-
-                for (int i = 0; i < 6; i++)
-                {
-                    var plane = GetPlane(i);
-
-                    if (Collision.RayIntersectsPlane(ref ray, ref plane, out float distance) && distance < nearstPlaneDistance)
-                    {
-                        nearstPlaneDistance = distance;
-                    }
-                }
-
-                inDistance = nearstPlaneDistance;
-                outDistance = null;
-                return true;
-            }
-            else
-            {
-                //We will find the two points at which the ray enters and exists the frustum
-                //These two points make a line which center inside the frustum if the ray intersects it
-                //Or outside the frustum if the ray intersects frustum planes outside it.
-                float minDist = float.MaxValue;
-                float maxDist = float.MinValue;
-                for (int i = 0; i < 6; i++)
-                {
-                    var plane = GetPlane(i);
-
-                    if (Collision.RayIntersectsPlane(ref ray, ref plane, out float distance))
-                    {
-                        minDist = Math.Min(minDist, distance);
-                        maxDist = Math.Max(maxDist, distance);
-                    }
-                }
-
-                Vector3 minPoint = ray.Position + ray.Direction * minDist;
-                Vector3 maxPoint = ray.Position + ray.Direction * maxDist;
-                Vector3 center = (minPoint + maxPoint) / 2f;
-                if (Contains(ref center) != ContainmentType.Disjoint)
-                {
-                    inDistance = minDist;
-                    outDistance = maxDist;
-                    return true;
-                }
-                else
-                {
-                    inDistance = null;
-                    outDistance = null;
-                    return false;
-                }
-            }
-        }
-
-        private static void GetBoxToPlanePVertexNVertex(ref BoundingBox box, ref Vector3 planeNormal, out Vector3 p, out Vector3 n)
-        {
-            p = box.Minimum;
-            if (planeNormal.X >= 0) p.X = box.Maximum.X;
-            if (planeNormal.Y >= 0) p.Y = box.Maximum.Y;
-            if (planeNormal.Z >= 0) p.Z = box.Maximum.Z;
-
-            n = box.Maximum;
-            if (planeNormal.X >= 0) n.X = box.Minimum.X;
-            if (planeNormal.Y >= 0) n.Y = box.Minimum.Y;
-            if (planeNormal.Z >= 0) n.Z = box.Minimum.Z;
-        }
-
-        private static PlaneIntersectionType PlaneIntersectsPoints(ref Plane plane, Vector3[] points)
-        {
-            var result = Collision.PlaneIntersectsPoint(ref plane, ref points[0]);
-
-            for (int i = 1; i < points.Length; i++)
-            {
-                if (Collision.PlaneIntersectsPoint(ref plane, ref points[i]) != result)
-                {
-                    return PlaneIntersectionType.Intersecting;
-                }
-            }
-
-            return result;
+            var f = this;
+            return Collision.RayIntersectsFrustum(ref ray, ref f, out inDistance, out outDistance);
         }
 
         /// <inheritdoc/>

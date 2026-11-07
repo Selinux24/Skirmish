@@ -12,12 +12,15 @@
 
         public readonly bool IntersectsRay(Ray ray)
         {
-            if (Intersection.RayIntersectsCircle3D(ref ray, From, Vector3.Up, Radius))
+            var from = From;
+            var up = Vector3.Up;
+            if (Collision.RayIntersectsCircle3D(ref ray, ref from, ref up, Radius, out _, out _))
             {
                 return true;
             }
 
-            if (Intersection.RayIntersectsCircle3D(ref ray, To, Vector3.Up, Radius))
+            var to = To;
+            if (Collision.RayIntersectsCircle3D(ref ray, ref to, ref up, Radius, out _, out _))
             {
                 return true;
             }

@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Content.FmtCollada.FX;
 using Engine.Content.FmtCollada.Types;
 using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,8 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Loader for collada
     /// </summary>
@@ -240,7 +239,7 @@ namespace Engine.Content.FmtCollada.Fmt
             var content = new LightContent()
             {
                 LightType = LightContentTypes.Directional,
-                Color = light.Color.ToVector3(),
+                Color = light.Color.ToColor3(),
             };
 
             modelContent.AddLightContent(id, content);
@@ -261,7 +260,7 @@ namespace Engine.Content.FmtCollada.Fmt
             var content = new LightContent()
             {
                 LightType = LightContentTypes.Point,
-                Color = light.Color.ToVector3(),
+                Color = light.Color.ToColor3(),
                 ConstantAttenuation = light.ConstantAttenuation.Value,
                 LinearAttenuation = light.LinearAttenuation.Value,
                 QuadraticAttenuation = light.QuadraticAttenuation.Value,
@@ -285,7 +284,7 @@ namespace Engine.Content.FmtCollada.Fmt
             var content = new LightContent()
             {
                 LightType = LightContentTypes.Spot,
-                Color = light.Color.ToVector3(),
+                Color = light.Color.ToColor3(),
                 ConstantAttenuation = light.ConstantAttenuation.Value,
                 LinearAttenuation = light.LinearAttenuation.Value,
                 QuadraticAttenuation = light.QuadraticAttenuation.Value,
@@ -610,7 +609,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
 
             int inputCount = triangle.Inputs.Length;
 
@@ -710,8 +709,8 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
-            var colors = colorsInput != null ? meshSources.ElementAt(colorsInput.Offset).ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
+            var colors = colorsInput != null ? meshSources.ElementAt(colorsInput.Offset).ReadColor3() : null;
 
             int index = 0;
             int inputCount = polyList.Inputs.Length;
@@ -836,7 +835,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
 
             int inputCount = polygon.Inputs.Length;
 
@@ -1023,7 +1022,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             ProcessVertexWeights(morph, out var wgList);
 
-            res.Weights = wgList.ToArray();
+            res.Weights = [.. wgList];
 
             return res;
         }
@@ -1281,14 +1280,14 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="colorOrTexture">Color or texture value</param>
         /// <param name="defaultColor">Default color value</param>
         /// <returns>Returns the color value</returns>
-        private static Vector3 GetColor(VarColorOrTexture colorOrTexture, Vector3 defaultColor)
+        private static Color3 GetColor(VarColorOrTexture colorOrTexture, Color3 defaultColor)
         {
             if (colorOrTexture == null)
             {
                 return defaultColor;
             }
 
-            return colorOrTexture.Color?.ToVector3() ?? defaultColor;
+            return colorOrTexture.Color?.ToColor3() ?? defaultColor;
         }
         /// <summary>
         /// Gets the color value
@@ -1303,7 +1302,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 return defaultColor;
             }
 
-            return (Color4?)colorOrTexture.Color?.ToVector4() ?? defaultColor;
+            return colorOrTexture.Color?.ToColor4() ?? defaultColor;
         }
         /// <summary>
         /// Finds texture

@@ -16,7 +16,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly Vector3 Epsilon = Helper.ZeroToleranceVector3;
+        static readonly float Epsilon = Helper.ZeroTolerance;
 
         static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {

@@ -43,7 +43,6 @@
 * THE SOFTWARE.
 */
 
-using Engine.Content;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -58,29 +57,17 @@ namespace Engine.Mathematics
     public struct Vector3 : IEquatable<Vector3>, IFormattable
     {
         const string Vector3Str = "X:{0} Y:{1} Z:{2}";
+        const string Vector3DescStr = "X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}";
 
         /// <summary>
         /// The size of the <see cref="Vector3"/> type, in bytes.
         /// </summary>
         public static readonly int SizeInBytes = Marshal.SizeOf<Vector3>();
+
         /// <summary>
         /// A <see cref="Vector3"/> with all of its components set to zero.
         /// </summary>
         public static readonly Vector3 Zero = new();
-
-        /// <summary>
-        /// The X unit <see cref="Vector3"/> (1, 0, 0).
-        /// </summary>
-        public static readonly Vector3 UnitX = new(1.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// The Y unit <see cref="Vector3"/> (0, 1, 0).
-        /// </summary>
-        public static readonly Vector3 UnitY = new(0.0f, 1.0f, 0.0f);
-        /// <summary>
-        /// The Z unit <see cref="Vector3"/> (0, 0, 1).
-        /// </summary>
-        public static readonly Vector3 UnitZ = new(0.0f, 0.0f, 1.0f);
-
         /// <summary>
         /// A <see cref="Vector3"/> with all of its components set to one.
         /// </summary>
@@ -117,6 +104,19 @@ namespace Engine.Mathematics
         /// A unit <see cref="Vector3"/> designating backward in a left-handed coordinate system (0, 0, -1).
         /// </summary>
         public static readonly Vector3 BackwardLH = new(0.0f, 0.0f, -1.0f);
+
+        /// <summary>
+        /// The X unit <see cref="Vector3"/> (1, 0, 0).
+        /// </summary>
+        public static readonly Vector3 UnitX = new(1.0f, 0.0f, 0.0f);
+        /// <summary>
+        /// The Y unit <see cref="Vector3"/> (0, 1, 0).
+        /// </summary>
+        public static readonly Vector3 UnitY = new(0.0f, 1.0f, 0.0f);
+        /// <summary>
+        /// The Z unit <see cref="Vector3"/> (0, 0, 1).
+        /// </summary>
+        public static readonly Vector3 UnitZ = new(0.0f, 0.0f, 1.0f);
 
         /// <summary>
         /// The X component of the vector.
@@ -190,6 +190,53 @@ namespace Engine.Mathematics
         public readonly Vector2 ZY => new(Z, Y);
 
         /// <summary>
+        /// Gets a value indicting whether this instance is normalized.
+        /// </summary>
+        public readonly bool IsNormalized => Helper.IsOne((X * X) + (Y * Y) + (Z * Z));
+        /// <summary>
+        /// Gets a value indicting whether this vector is zero
+        /// </summary>
+        public readonly bool IsZero => X == 0 && Y == 0 && Z == 0;
+        /// <summary>
+        /// Gets whether almost one of the instance attributes is infinity
+        /// </summary>
+        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
+        public readonly bool IsInfinity => float.IsInfinity(X) || float.IsInfinity(Y) || float.IsInfinity(Z);
+        /// <summary>
+        /// Gets whether almost one of the instance attributes is not a number
+        /// </summary>
+        /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
+        public readonly bool IsNaN => float.IsNaN(X) || float.IsNaN(Y) || float.IsNaN(Z);
+
+        /// <summary>
+        /// Gets or sets the component at the specified index.
+        /// </summary>
+        /// <value>The value of the X, Y, or Z component, depending on the index.</value>
+        /// <param name="index">The index of the component to access. Use 0 for the X component, 1 for the Y component, and 2 for the Z component.</param>
+        /// <returns>The value of the component at the specified index.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 2].</exception>
+        public float this[int index]
+        {
+            readonly get => index switch
+            {
+                0 => X,
+                1 => Y,
+                2 => Z,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Vector3 run from 0 to 2, inclusive."),
+            };
+            set
+            {
+                switch (index)
+                {
+                    case 0: X = value; break;
+                    case 1: Y = value; break;
+                    case 2: Z = value; break;
+                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Vector3 run from 0 to 2, inclusive.");
+                }
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Vector3"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
@@ -239,53 +286,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Gets a value indicting whether this instance is normalized.
-        /// </summary>
-        public readonly bool IsNormalized => Helper.IsOne((X * X) + (Y * Y) + (Z * Z));
-        /// <summary>
-        /// Gets a value indicting whether this vector is zero
-        /// </summary>
-        public readonly bool IsZero => X == 0 && Y == 0 && Z == 0;
-        /// <summary>
-        /// Gets whether almost one of the instance attributes is not a number
-        /// </summary>
-        /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
-        public readonly bool IsNaN => float.IsNaN(X) || float.IsNaN(Y) || float.IsNaN(Z);
-        /// <summary>
-        /// Gets whether almost one of the instance attributes is infinity
-        /// </summary>
-        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
-        public readonly bool IsInfinity => float.IsInfinity(X) || float.IsInfinity(Y) || float.IsInfinity(Z);
-
-        /// <summary>
-        /// Gets or sets the component at the specified index.
-        /// </summary>
-        /// <value>The value of the X, Y, or Z component, depending on the index.</value>
-        /// <param name="index">The index of the component to access. Use 0 for the X component, 1 for the Y component, and 2 for the Z component.</param>
-        /// <returns>The value of the component at the specified index.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 2].</exception>
-        public float this[int index]
-        {
-            readonly get => index switch
-            {
-                0 => X,
-                1 => Y,
-                2 => Z,
-                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Vector3 run from 0 to 2, inclusive."),
-            };
-            set
-            {
-                switch (index)
-                {
-                    case 0: X = value; break;
-                    case 1: Y = value; break;
-                    case 2: Z = value; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Vector3 run from 0 to 2, inclusive.");
-                }
-            }
-        }
-
-        /// <summary>
         /// Calculates the length of the vector.
         /// </summary>
         /// <returns>The length of the vector.</returns>
@@ -297,7 +297,6 @@ namespace Engine.Mathematics
         {
             return MathF.Sqrt((X * X) + (Y * Y) + (Z * Z));
         }
-
         /// <summary>
         /// Calculates the squared length of the vector.
         /// </summary>
@@ -327,6 +326,22 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Limits the vector length to specified magnitude
+        /// </summary>
+        /// <param name="vector">Vector to limit</param>
+        /// <param name="magnitude">Magnitude</param>
+        /// <returns>Returned vector with limited length</returns>
+        public readonly Vector3 Limit(float magnitude)
+        {
+            if (Length() > magnitude)
+            {
+                return Normalize(this) * magnitude;
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Creates an array containing the elements of the vector.
         /// </summary>
         /// <returns>A three-element array containing the components of the vector.</returns>
@@ -343,7 +358,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the sum of the two vectors.</param>
         public static void Add(ref Vector3 left, ref Vector3 right, out Vector3 result)
         {
-            result = new Vector3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+            result = new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
         /// <summary>
         /// Adds two vectors.
@@ -353,7 +368,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two vectors.</returns>
         public static Vector3 Add(Vector3 left, Vector3 right)
         {
-            return new Vector3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+            Add(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise addition
@@ -361,9 +377,9 @@ namespace Engine.Mathematics
         /// <param name="left">The input vector</param>
         /// <param name="right">The scalar value to be added to elements</param>
         /// <param name="result">The vector with added scalar for each element.</param>
-        public static void Add(ref Vector3 left, ref float right, out Vector3 result)
+        public static void Add(ref Vector3 left, float right, out Vector3 result)
         {
-            result = new Vector3(left.X + right, left.Y + right, left.Z + right);
+            result = new(left.X + right, left.Y + right, left.Z + right);
         }
         /// <summary>
         /// Perform a component-wise addition
@@ -373,7 +389,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with added scalar for each element.</returns>
         public static Vector3 Add(Vector3 left, float right)
         {
-            return new Vector3(left.X + right, left.Y + right, left.Z + right);
+            Add(ref left, right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -384,7 +401,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the difference of the two vectors.</param>
         public static void Subtract(ref Vector3 left, ref Vector3 right, out Vector3 result)
         {
-            result = new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+            result = new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
         /// <summary>
         /// Subtracts two vectors.
@@ -394,7 +411,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two vectors.</returns>
         public static Vector3 Subtract(Vector3 left, Vector3 right)
         {
-            return new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -402,9 +420,9 @@ namespace Engine.Mathematics
         /// <param name="left">The input vector</param>
         /// <param name="right">The scalar value to be subtraced from elements</param>
         /// <param name="result">The vector with subtracted scalar for each element.</param>
-        public static void Subtract(ref Vector3 left, ref float right, out Vector3 result)
+        public static void Subtract(ref Vector3 left, float right, out Vector3 result)
         {
-            result = new Vector3(left.X - right, left.Y - right, left.Z - right);
+            result = new(left.X - right, left.Y - right, left.Z - right);
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -414,7 +432,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with subtracted scalar for each element.</returns>
         public static Vector3 Subtract(Vector3 left, float right)
         {
-            return new Vector3(left.X - right, left.Y - right, left.Z - right);
+            Subtract(ref left, right, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -422,9 +441,9 @@ namespace Engine.Mathematics
         /// <param name="left">The scalar value to be subtraced from elements</param>
         /// <param name="right">The input vector.</param>
         /// <param name="result">The vector with subtracted scalar for each element.</param>
-        public static void Subtract(ref float left, ref Vector3 right, out Vector3 result)
+        public static void Subtract(float left, ref Vector3 right, out Vector3 result)
         {
-            result = new Vector3(left - right.X, left - right.Y, left - right.Z);
+            result = new(left - right.X, left - right.Y, left - right.Z);
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -434,7 +453,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with subtracted scalar for each element.</returns>
         public static Vector3 Subtract(float left, Vector3 right)
         {
-            return new Vector3(left - right.X, left - right.Y, left - right.Z);
+            Subtract(left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -445,7 +465,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the scaled vector.</param>
         public static void Multiply(ref Vector3 value, float scale, out Vector3 result)
         {
-            result = new Vector3(value.X * scale, value.Y * scale, value.Z * scale);
+            result = new(value.X * scale, value.Y * scale, value.Z * scale);
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -455,7 +475,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 Multiply(Vector3 value, float scale)
         {
-            return new Vector3(value.X * scale, value.Y * scale, value.Z * scale);
+            Multiply(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Multiply a vector with another by performing component-wise multiplication.
@@ -465,7 +486,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the multiplied vector.</param>
         public static void Multiply(ref Vector3 left, ref Vector3 right, out Vector3 result)
         {
-            result = new Vector3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+            result = new(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
         }
         /// <summary>
         /// Multiply a vector with another by performing component-wise multiplication.
@@ -475,7 +496,8 @@ namespace Engine.Mathematics
         /// <returns>The multiplied vector.</returns>
         public static Vector3 Multiply(Vector3 left, Vector3 right)
         {
-            return new Vector3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+            Multiply(ref left, ref right, out var result);
+            return result;
         }
 
         /// <summary>
@@ -486,7 +508,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the scaled vector.</param>
         public static void Divide(ref Vector3 value, float scale, out Vector3 result)
         {
-            result = new Vector3(value.X / scale, value.Y / scale, value.Z / scale);
+            result = new(value.X / scale, value.Y / scale, value.Z / scale);
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -496,7 +518,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 Divide(Vector3 value, float scale)
         {
-            return new Vector3(value.X / scale, value.Y / scale, value.Z / scale);
+            Divide(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -506,7 +529,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the scaled vector.</param>
         public static void Divide(float scale, ref Vector3 value, out Vector3 result)
         {
-            result = new Vector3(scale / value.X, scale / value.Y, scale / value.Z);
+            result = new(scale / value.X, scale / value.Y, scale / value.Z);
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -516,7 +539,29 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 Divide(float scale, Vector3 value)
         {
-            return new Vector3(scale / value.X, scale / value.Y, scale / value.Z);
+            Divide(scale, ref value, out var result);
+            return result;
+        }
+        /// <summary>
+        /// Scales a vector by the given value.
+        /// </summary>
+        /// <param name="value">The vector to scale.</param>
+        /// <param name="scale">The amount by which to scale the vector.</param>
+        /// <param name="result">When the method completes, contains the scaled vector.</param>
+        public static void Divide(ref Vector3 value, ref Vector3 scale, out Vector3 result)
+        {
+            result = new(value.X / scale.X, value.Y / scale.Y, value.Z / scale.Z);
+        }
+        /// <summary>
+        /// Scales a vector by the given value.
+        /// </summary>
+        /// <param name="value">The vector to scale.</param>
+        /// <param name="scale">The amount by which to scale the vector.</param>
+        /// <returns>The scaled vector.</returns>
+        public static Vector3 Divide(Vector3 value, Vector3 scale)
+        {
+            Divide(ref value, ref scale, out var result);
+            return result;
         }
 
         /// <summary>
@@ -526,7 +571,7 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains a vector facing in the opposite direction.</param>
         public static void Negate(ref Vector3 value, out Vector3 result)
         {
-            result = new Vector3(-value.X, -value.Y, -value.Z);
+            result = new(-value.X, -value.Y, -value.Z);
         }
         /// <summary>
         /// Reverses the direction of a given vector.
@@ -535,7 +580,8 @@ namespace Engine.Mathematics
         /// <returns>A vector facing in the opposite direction.</returns>
         public static Vector3 Negate(Vector3 value)
         {
-            return new Vector3(-value.X, -value.Y, -value.Z);
+            Negate(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -557,10 +603,8 @@ namespace Engine.Mathematics
         /// <returns>A vector with each component being the absolute value of the input component</returns>
         public static Vector3 Abs(Vector3 value)
         {
-            return new(
-                MathF.Abs(value.X),
-                MathF.Abs(value.Y),
-                MathF.Abs(value.Z));
+            Abs(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -685,11 +729,8 @@ namespace Engine.Mathematics
         /// </remarks>
         public static float Distance(Vector3 value1, Vector3 value2)
         {
-            float x = value1.X - value2.X;
-            float y = value1.Y - value2.Y;
-            float z = value1.Z - value2.Z;
-
-            return MathF.Sqrt((x * x) + (y * y) + (z * z));
+            Distance(ref value1, ref value2, out float result);
+            return result;
         }
 
         /// <summary>
@@ -728,11 +769,8 @@ namespace Engine.Mathematics
         /// </remarks>
         public static float DistanceSquared(Vector3 value1, Vector3 value2)
         {
-            float x = value1.X - value2.X;
-            float y = value1.Y - value2.Y;
-            float z = value1.Z - value2.Z;
-
-            return (x * x) + (y * y) + (z * z);
+            DistanceSquared(ref value1, ref value2, out float result);
+            return result;
         }
 
         /// <summary>
@@ -753,7 +791,8 @@ namespace Engine.Mathematics
         /// <returns>The dot product of the two vectors.</returns>
         public static float Dot(Vector3 left, Vector3 right)
         {
-            return (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z);
+            Dot(ref left, ref right, out float result);
+            return result;
         }
 
         /// <summary>
@@ -773,8 +812,8 @@ namespace Engine.Mathematics
         /// <returns>The normalized vector.</returns>
         public static Vector3 Normalize(Vector3 value)
         {
-            value.Normalize();
-            return value;
+            Normalize(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -1028,6 +1067,38 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Projects the point over the vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="point">Point</param>
+        /// <param name="result">The projected vector.</param>
+        public static void Project(ref Vector3 vector, ref Vector3 point, out Vector3 result)
+        {
+            // Normalize the projection vector
+            if (!vector.IsNormalized)
+            {
+                vector.Normalize();
+            }
+
+            // Calculate the dot product between the point and the projection vector
+            float dotProduct = Dot(point, vector);
+
+            // Calculate the projection of the point onto the projection vector
+            result = dotProduct * vector;
+        }
+        /// <summary>
+        /// Projects the point over the vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="point">Point</param>
+        /// <returns>The projected vector.</returns>
+        public static Vector3 Project(Vector3 vector, Vector3 point)
+        {
+            Project(ref vector, ref point, out var result);
+            return result;
+        }
+
+        /// <summary>
         /// Projects a 3D vector from screen space into object space. 
         /// </summary>
         /// <param name="vector">The vector to project.</param>
@@ -1141,7 +1212,6 @@ namespace Engine.Mathematics
                 destination[i] = newvector;
             }
         }
-
         /// <summary>
         /// Orthonormalizes a list of vectors.
         /// </summary>
@@ -1185,44 +1255,6 @@ namespace Engine.Mathematics
                 newvector.Normalize();
                 destination[i] = newvector;
             }
-        }
-
-        /// <summary>
-        /// Project the point in the vector
-        /// </summary>
-        /// <param name="vector">Vector</param>
-        /// <param name="point">Point</param>
-        public readonly Vector3 ProjectPoint(Vector3 point)
-        {
-            var vector = this;
-
-            // Normalize the projection vector
-            if (!IsNormalized)
-            {
-                vector = Normalize(vector);
-            }
-
-            // Calculate the dot product between the point and the projection vector
-            float dotProduct = Dot(point, vector);
-
-            // Calculate the projection of the point onto the projection vector
-            return dotProduct * vector;
-        }
-
-        /// <summary>
-        /// Limits the vector length to specified magnitude
-        /// </summary>
-        /// <param name="vector">Vector to limit</param>
-        /// <param name="magnitude">Magnitude</param>
-        /// <returns></returns>
-        public readonly Vector3 Limit(float magnitude)
-        {
-            if (Length() > magnitude)
-            {
-                return Normalize(this) * magnitude;
-            }
-
-            return this;
         }
 
         /// <summary>
@@ -1337,17 +1369,6 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="transform">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="result">When the method completes, contains the transformed <see cref="Vector3"/>.</param>
-        public static void Transform(ref Vector3 vector, ref Matrix4x4 transform, out Vector3 result)
-        {
-            Transform(ref vector, ref transform, out Vector4 intermediate);
-            result = intermediate.XYZ;
-        }
-        /// <summary>
-        /// Transforms a 3D vector by the given <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="vector">The source vector.</param>
-        /// <param name="transform">The transformation <see cref="Matrix"/>.</param>
         /// <param name="result">When the method completes, contains the transformed <see cref="Vector4"/>.</param>
         public static void Transform(ref Vector3 vector, ref Matrix4x4 transform, out Vector4 result)
         {
@@ -1356,6 +1377,17 @@ namespace Engine.Mathematics
                 (vector.X * transform.M12) + (vector.Y * transform.M22) + (vector.Z * transform.M32) + transform.M42,
                 (vector.X * transform.M13) + (vector.Y * transform.M23) + (vector.Z * transform.M33) + transform.M43,
                 (vector.X * transform.M14) + (vector.Y * transform.M24) + (vector.Z * transform.M34) + transform.M44);
+        }
+        /// <summary>
+        /// Transforms a 3D vector by the given <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="transform">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">When the method completes, contains the transformed <see cref="Vector3"/>.</param>
+        public static void Transform(ref Vector3 vector, ref Matrix4x4 transform, out Vector3 result)
+        {
+            Transform(ref vector, ref transform, out Vector4 tmp);
+            result = tmp.XYZ;
         }
         /// <summary>
         /// Transforms a 3D vector by the given <see cref="Matrix"/>.
@@ -1528,58 +1560,92 @@ namespace Engine.Mathematics
         /// <summary>
         /// Gets the angle between two vectors
         /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float Angle(Vector3 one, Vector3 two)
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
+        /// <param name="result">The angle value in radians</param>
+        public static void Angle(ref Vector3 left, ref Vector3 right, out float result)
         {
-            float dot = Dot(one, two);
+            Dot(ref left, ref right, out float dot);
 
-            return MathF.Acos(MathF.Min(MathF.Abs(dot), 1f));
+            result = MathF.Acos(MathF.Min(MathF.Abs(dot), 1f));
+        }
+        /// <summary>
+        /// Gets the angle between two vectors
+        /// </summary>
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float Angle(Vector3 left, Vector3 right)
+        {
+            Angle(ref left, ref right, out float result);
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
+        /// <param name="result">The angle value in radians</param>
+        public static void AngleSigned(ref Vector3 left, ref Vector3 right, out float result)
+        {
+            Dot(ref left, ref right, out float dot);
+
+            result = MathF.Acos(Math.Clamp(dot, -1f, 1f));
         }
         /// <summary>
         /// Gets the signed angle between two vectors
         /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
         /// <returns>Returns the angle value in radians</returns>
-        public static float AngleSigned(Vector3 one, Vector3 two)
+        public static float AngleSigned(Vector3 left, Vector3 right)
         {
-            float dot = Dot(one, two);
-
-            return MathF.Acos(Math.Clamp(dot, -1f, 1f));
+            AngleSigned(ref left, ref right, out float result);
+            return result;
         }
         /// <summary>
         /// Gets the angle between two vectors in the same plane
         /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
         /// <param name="planeNormal">Plane normal</param>
-        /// <returns>Returns the angle value in radians</returns>
-        public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
+        /// <param name="result">The angle value in radians</param>
+        public static void AngleSigned(ref Vector3 left, ref Vector3 right, ref Vector3 planeNormal, out float result)
         {
             var p = new Plane(planeNormal, 0);
 
-            float dot = Dot(Normalize(one), Normalize(two));
+            float dot = Dot(Normalize(left), Normalize(right));
 
             float angle = MathF.Acos(Math.Clamp(dot, 0, 1));
 
-            var cross = Cross(one, two);
-
-            if (Dot(p.Normal, cross) > 0)
+            if (Dot(p.Normal, Cross(left, right)) > 0)
             {
                 angle = -angle;
             }
 
-            return angle;
+            result = angle;
         }
+        /// <summary>
+        /// Gets the angle between two vectors in the same plane
+        /// </summary>
+        /// <param name="left">First vector</param>
+        /// <param name="right">Second vector</param>
+        /// <param name="planeNormal">Plane normal</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 left, Vector3 right, Vector3 planeNormal)
+        {
+            AngleSigned(ref left, ref right, ref planeNormal, out float result);
+            return result;
+        }
+
         /// <summary>
         /// Gets the yaw and pitch values from vector
         /// </summary>
         /// <param name="vec">Vector</param>
         /// <param name="yaw">Yaw value</param>
         /// <param name="pitch">Pitch value</param>
-        public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
+        public static void AnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
             yaw = MathF.Atan2(vec.X, vec.Y);
 
@@ -1608,7 +1674,7 @@ namespace Engine.Mathematics
         /// <param name="yaw">Yaw angle</param>
         /// <param name="pitch">Pitch angle</param>
         /// <param name="vec">Vector</param>
-        public static void GetVectorFromAngles(float yaw, float pitch, out Vector3 vec)
+        public static void VectorFromAngles(float yaw, float pitch, out Vector3 vec)
         {
             var rot = Quaternion.RotationYawPitchRoll(-yaw, pitch, 0.0f);
             var mat = Matrix4x4.RotationQuaternion(rot);
@@ -1624,7 +1690,8 @@ namespace Engine.Mathematics
         /// <returns>The sum of the two vectors.</returns>
         public static Vector3 operator +(Vector3 left, Vector3 right)
         {
-            return new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+            Add(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Multiplies a vector with another by performing component-wise multiplication equivalent to <see cref="Multiply(ref Vector3,ref Vector3,out Vector3)"/>.
@@ -1634,7 +1701,8 @@ namespace Engine.Mathematics
         /// <returns>The multiplication of the two vectors.</returns>
         public static Vector3 operator *(Vector3 left, Vector3 right)
         {
-            return new(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+            Multiply(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Assert a vector (return it unchanged).
@@ -1653,7 +1721,8 @@ namespace Engine.Mathematics
         /// <returns>The difference of the two vectors.</returns>
         public static Vector3 operator -(Vector3 left, Vector3 right)
         {
-            return new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+            Subtract(ref left, ref right, out var result);
+            return result;
         }
         /// <summary>
         /// Reverses the direction of a given vector.
@@ -1662,7 +1731,8 @@ namespace Engine.Mathematics
         /// <returns>A vector facing in the opposite direction.</returns>
         public static Vector3 operator -(Vector3 value)
         {
-            return new(-value.X, -value.Y, -value.Z);
+            Negate(ref value, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -1672,7 +1742,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 operator *(float scale, Vector3 value)
         {
-            return new(value.X * scale, value.Y * scale, value.Z * scale);
+            Multiply(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -1682,7 +1753,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 operator *(Vector3 value, float scale)
         {
-            return new(value.X * scale, value.Y * scale, value.Z * scale);
+            Multiply(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -1692,7 +1764,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 operator /(Vector3 value, float scale)
         {
-            return new(value.X / scale, value.Y / scale, value.Z / scale);
+            Divide(ref value, scale, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -1702,7 +1775,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 operator /(float scale, Vector3 value)
         {
-            return new(scale / value.X, scale / value.Y, scale / value.Z);
+            Divide(scale, ref value, out var result);
+            return result;
         }
         /// <summary>
         /// Scales a vector by the given value.
@@ -1712,7 +1786,8 @@ namespace Engine.Mathematics
         /// <returns>The scaled vector.</returns>
         public static Vector3 operator /(Vector3 value, Vector3 scale)
         {
-            return new(value.X / scale.X, value.Y / scale.Y, value.Z / scale.Z);
+            Divide(ref value, ref scale, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise addition
@@ -1722,7 +1797,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with added scalar for each element.</returns>
         public static Vector3 operator +(Vector3 value, float scalar)
         {
-            return new(value.X + scalar, value.Y + scalar, value.Z + scalar);
+            Add(ref value, scalar, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise addition
@@ -1732,7 +1808,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with added scalar for each element.</returns>
         public static Vector3 operator +(float scalar, Vector3 value)
         {
-            return new(scalar + value.X, scalar + value.Y, scalar + value.Z);
+            Add(ref value, scalar, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -1742,7 +1819,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with added scalar from each element.</returns>
         public static Vector3 operator -(Vector3 value, float scalar)
         {
-            return new(value.X - scalar, value.Y - scalar, value.Z - scalar);
+            Subtract(ref value, scalar, out var result);
+            return result;
         }
         /// <summary>
         /// Perform a component-wise subtraction
@@ -1752,7 +1830,8 @@ namespace Engine.Mathematics
         /// <returns>The vector with subtraced scalar from each element.</returns>
         public static Vector3 operator -(float scalar, Vector3 value)
         {
-            return new(scalar - value.X, scalar - value.Y, scalar - value.Z);
+            Subtract(scalar, ref value, out var result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -1777,18 +1856,18 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Vector4(Vector3 value)
         {
-            return new(value, 0.0f);
+            return new(value, 0f);
         }
 
         /// <inheritdoc/>
         public static explicit operator Vector3(System.Numerics.Vector3 Value)
         {
-            return new Vector3(Value.X, Value.Y, Value.Z);
+            return new(Value.X, Value.Y, Value.Z);
         }
         /// <inheritdoc/>
         public static explicit operator System.Numerics.Vector3(Vector3 Value)
         {
-            return new System.Numerics.Vector3(Value.X, Value.Y, Value.Z);
+            return new(Value.X, Value.Y, Value.Z);
         }
 
         /// <inheritdoc/>
@@ -1842,10 +1921,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Vector3 other)
         {
-            return
-                Helper.NearEqual(other.X, X) &&
-                Helper.NearEqual(other.Y, Y) &&
-                Helper.NearEqual(other.Z, Z);
+            return NearEqual(this, other);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1867,49 +1943,14 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="left">The left vector.</param>
         /// <param name="right">The right vector.</param>
-        /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
-        public static bool NearEqual(Vector3 left, Vector3 right)
-        {
-            return NearEqual(ref left, ref right);
-        }
-        /// <summary>
-        /// Tests whether one 3D vector is near another 3D vector.
-        /// </summary>
-        /// <param name="left">The left vector.</param>
-        /// <param name="right">The right vector.</param>
         /// <param name="epsilon">The epsilon.</param>
         /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
-        public static bool NearEqual(Vector3 left, Vector3 right, Vector3 epsilon)
-        {
-            return NearEqual(ref left, ref right, ref epsilon);
-        }
-        /// <summary>
-        /// Tests whether one 3D vector is near another 3D vector.
-        /// </summary>
-        /// <param name="left">The left vector.</param>
-        /// <param name="right">The right vector.</param>
-        /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
-        public static bool NearEqual(ref Vector3 left, ref Vector3 right)
-        {
-            var epsilon = Helper.ZeroToleranceVector3;
-            return
-                Helper.WithinEpsilon(left.X, right.X, epsilon.X) &&
-                Helper.WithinEpsilon(left.Y, right.Y, epsilon.Y) &&
-                Helper.WithinEpsilon(left.Z, right.Z, epsilon.Z);
-        }
-        /// <summary>
-        /// Tests whether one 3D vector is near another 3D vector.
-        /// </summary>
-        /// <param name="left">The left vector.</param>
-        /// <param name="right">The right vector.</param>
-        /// <param name="epsilon">The epsilon.</param>
-        /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
-        public static bool NearEqual(ref Vector3 left, ref Vector3 right, ref Vector3 epsilon)
+        public static bool NearEqual(Vector3 left, Vector3 right, float epsilon = Helper.ZeroTolerance)
         {
             return
-                Helper.WithinEpsilon(left.X, right.X, epsilon.X) &&
-                Helper.WithinEpsilon(left.Y, right.Y, epsilon.Y) &&
-                Helper.WithinEpsilon(left.Z, right.Z, epsilon.Z);
+                Helper.WithinEpsilon(left.X, right.X, epsilon) &&
+                Helper.WithinEpsilon(left.Y, right.Y, epsilon) &&
+                Helper.WithinEpsilon(left.Z, right.Z, epsilon);
         }
 
         /// <summary>
@@ -1919,7 +1960,7 @@ namespace Engine.Mathematics
         public readonly string GetDescription()
         {
             return string.Format(
-                "X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}",
+                Vector3DescStr,
                 MathF.Round(X, 3),
                 MathF.Round(Y, 3),
                 MathF.Round(Z, 3));
