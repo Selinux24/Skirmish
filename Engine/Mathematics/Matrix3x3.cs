@@ -57,11 +57,13 @@ namespace Engine.Mathematics
     public struct Matrix3x3 : IEquatable<Matrix3x3>, IFormattable
     {
         const string Matrix3x3Str = "[M11:{0} M12:{1} M13:{2}] [M21:{3} M22:{4} M23:{5}] [M31:{6} M32:{7} M33:{8}]";
+        const string Matrix3x3DescStr = "S:{0,-30} R:{1,-30}";
 
         /// <summary>
         /// The size of the <see cref="Matrix3x3"/> type, in bytes.
         /// </summary>
         public static readonly int SizeInBytes = Marshal.SizeOf<Matrix3x3>();
+
         /// <summary>
         /// A <see cref="Matrix3x3"/> with all of its components set to zero.
         /// </summary>
@@ -302,6 +304,15 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Creates an array containing the elements of the Matrix3x3.
+        /// </summary>
+        /// <returns>A 9-element array containing the components of the Matrix3x3.</returns>
+        public readonly float[] ToArray()
+        {
+            return [M11, M12, M13, M21, M22, M23, M31, M32, M33];
+        }
+
+        /// <summary>
         /// Calculates the determinant of the Matrix3x3.
         /// </summary>
         /// <returns>The determinant of the Matrix3x3.</returns>
@@ -318,101 +329,11 @@ namespace Engine.Mathematics
             Invert(ref this, out this);
         }
         /// <summary>
-        /// Calculates the inverse of the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 whose inverse is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the inverse of the specified Matrix3x3.</param>
-        public static void Invert(ref Matrix3x3 value, out Matrix3x3 result)
-        {
-            float d11 = value.M22 * value.M33 + value.M23 * -value.M32;
-            float d12 = value.M21 * value.M33 + value.M23 * -value.M31;
-            float d13 = value.M21 * value.M32 + value.M22 * -value.M31;
-
-            float det = value.M11 * d11 - value.M12 * d12 + value.M13 * d13;
-            if (Math.Abs(det) == 0.0f)
-            {
-                result = Zero;
-                return;
-            }
-
-            det = 1f / det;
-
-            float d21 = value.M12 * value.M33 + value.M13 * -value.M32;
-            float d22 = value.M11 * value.M33 + value.M13 * -value.M31;
-            float d23 = value.M11 * value.M32 + value.M12 * -value.M31;
-
-            float d31 = (value.M12 * value.M23) - (value.M13 * value.M22);
-            float d32 = (value.M11 * value.M23) - (value.M13 * value.M21);
-            float d33 = (value.M11 * value.M22) - (value.M12 * value.M21);
-
-            result.M11 = +d11 * det; result.M12 = -d21 * det; result.M13 = +d31 * det;
-            result.M21 = -d12 * det; result.M22 = +d22 * det; result.M23 = -d32 * det;
-            result.M31 = +d13 * det; result.M32 = -d23 * det; result.M33 = +d33 * det;
-        }
-        /// <summary>
-        /// Calculates the inverse of the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 whose inverse is to be calculated.</param>
-        /// <returns>The inverse of the specified Matrix3x3.</returns>
-        public static Matrix3x3 Invert(Matrix3x3 value)
-        {
-            value.Invert();
-            return value;
-        }
-
-        /// <summary>
         /// Transposes the Matrix3x3.
         /// </summary>
         public void Transpose()
         {
             Transpose(ref this, out this);
-        }
-        /// <summary>
-        /// Calculates the transpose of the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 whose transpose is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the transpose of the specified Matrix3x3.</param>
-        public static void Transpose(ref Matrix3x3 value, out Matrix3x3 result)
-        {
-            result = new()
-            {
-                M11 = value.M11,
-                M12 = value.M21,
-                M13 = value.M31,
-                M21 = value.M12,
-                M22 = value.M22,
-                M23 = value.M32,
-                M31 = value.M13,
-                M32 = value.M23,
-                M33 = value.M33
-            };
-        }
-        /// <summary>
-        /// Calculates the transpose of the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 whose transpose is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the transpose of the specified Matrix3x3.</param>
-        public static void TransposeByRef(ref Matrix3x3 value, ref Matrix3x3 result)
-        {
-            result.M11 = value.M11;
-            result.M12 = value.M21;
-            result.M13 = value.M31;
-            result.M21 = value.M12;
-            result.M22 = value.M22;
-            result.M23 = value.M32;
-            result.M31 = value.M13;
-            result.M32 = value.M23;
-            result.M33 = value.M33;
-        }
-        /// <summary>
-        /// Calculates the transpose of the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 whose transpose is to be calculated.</param>
-        /// <returns>The transpose of the specified Matrix3x3.</returns>
-        public static Matrix3x3 Transpose(Matrix3x3 value)
-        {
-            Transpose(ref value, out var result);
-            return result;
         }
 
         /// <summary>
@@ -434,59 +355,6 @@ namespace Engine.Mathematics
             Orthogonalize(ref this, out this);
         }
         /// <summary>
-        /// Orthogonalizes the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 to orthogonalize.</param>
-        /// <param name="result">When the method completes, contains the orthogonalized Matrix3x3.</param>
-        /// <remarks>
-        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
-        /// means that any given row in the Matrix3x3 will be orthogonal to any other given row in the
-        /// Matrix3x3.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static void Orthogonalize(ref Matrix3x3 value, out Matrix3x3 result)
-        {
-            //Uses the modified Gram-Schmidt process.
-            //q1 = m1
-            //q2 = m2 - ((q1 ⋅ m2) / (q1 ⋅ q1)) * q1
-            //q3 = m3 - ((q1 ⋅ m3) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m3) / (q2 ⋅ q2)) * q2
-
-            //By separating the above algorithm into multiple lines, we actually increase accuracy.
-            result = value;
-
-            result.Row2 -= (Vector3.Dot(result.Row1, result.Row2) / Vector3.Dot(result.Row1, result.Row1)) * result.Row1;
-
-            result.Row3 -= (Vector3.Dot(result.Row1, result.Row3) / Vector3.Dot(result.Row1, result.Row1)) * result.Row1;
-            result.Row3 -= (Vector3.Dot(result.Row2, result.Row3) / Vector3.Dot(result.Row2, result.Row2)) * result.Row2;
-        }
-        /// <summary>
-        /// Orthogonalizes the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 to orthogonalize.</param>
-        /// <returns>The orthogonalized Matrix3x3.</returns>
-        /// <remarks>
-        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
-        /// means that any given row in the Matrix3x3 will be orthogonal to any other given row in the
-        /// Matrix3x3.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static Matrix3x3 Orthogonalize(Matrix3x3 value)
-        {
-            Orthogonalize(ref value, out var result);
-            return result;
-        }
-
-        /// <summary>
         /// Orthonormalizes the specified Matrix3x3.
         /// </summary>
         /// <remarks>
@@ -505,68 +373,6 @@ namespace Engine.Mathematics
         public void Orthonormalize()
         {
             Orthonormalize(ref this, out this);
-        }
-        /// <summary>
-        /// Orthonormalizes the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 to orthonormalize.</param>
-        /// <param name="result">When the method completes, contains the orthonormalized Matrix3x3.</param>
-        /// <remarks>
-        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
-        /// other and making all rows and columns of unit length. This means that any given row will
-        /// be orthogonal to any other given row and any given column will be orthogonal to any other
-        /// given column. Any given row will not be orthogonal to any given column. Every row and every
-        /// column will be of unit length.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static void Orthonormalize(ref Matrix3x3 value, out Matrix3x3 result)
-        {
-            //Uses the modified Gram-Schmidt process.
-            //Because we are making unit vectors, we can optimize the math for orthonormalization
-            //and simplify the projection operation to remove the division.
-            //q1 = m1 / |m1|
-            //q2 = (m2 - (q1 ⋅ m2) * q1) / |m2 - (q1 ⋅ m2) * q1|
-            //q3 = (m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2) / |m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2|
-
-            //By separating the above algorithm into multiple lines, we actually increase accuracy.
-            result = value;
-
-            result.Row1 = Vector3.Normalize(result.Row1);
-
-            result.Row2 -= Vector3.Dot(result.Row1, result.Row2) * result.Row1;
-            result.Row2 = Vector3.Normalize(result.Row2);
-
-            result.Row3 -= Vector3.Dot(result.Row1, result.Row3) * result.Row1;
-            result.Row3 -= Vector3.Dot(result.Row2, result.Row3) * result.Row2;
-            result.Row3 = Vector3.Normalize(result.Row3);
-        }
-        /// <summary>
-        /// Orthonormalizes the specified Matrix3x3.
-        /// </summary>
-        /// <param name="value">The Matrix3x3 to orthonormalize.</param>
-        /// <returns>The orthonormalized Matrix3x3.</returns>
-        /// <remarks>
-        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
-        /// other and making all rows and columns of unit length. This means that any given row will
-        /// be orthogonal to any other given row and any given column will be orthogonal to any other
-        /// given column. Any given row will not be orthogonal to any given column. Every row and every
-        /// column will be of unit length.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static Matrix3x3 Orthonormalize(Matrix3x3 value)
-        {
-            Orthonormalize(ref value, out var result);
-            return result;
         }
 
         /// <summary>
@@ -592,7 +398,6 @@ namespace Engine.Mathematics
                 M33 = Vector3.Dot(Q.Column3, Column3)
             };
         }
-
         /// <summary>
         /// Decomposes a Matrix3x3 into a lower triangular Matrix3x3 L and an orthonormalized Matrix3x3 Q.
         /// </summary>
@@ -614,7 +419,6 @@ namespace Engine.Mathematics
                 M33 = Vector3.Dot(Q.Row3, Row3)
             };
         }
-
         /// <summary>
         /// Decomposes a Matrix3x3 into a scale, rotation, and translation.
         /// </summary>
@@ -623,7 +427,7 @@ namespace Engine.Mathematics
         /// <remarks>
         /// This method is designed to decompose an SRT transformation Matrix3x3 only.
         /// </remarks>
-        public bool Decompose(out Vector3 scale, out Quaternion rotation)
+        public readonly bool Decompose(out Vector3 scale, out Quaternion rotation)
         {
             //Source: Unknown
             //References: http://www.gamedev.net/community/forums/topic.asp?topic_id=441695
@@ -758,12 +562,193 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Creates an array containing the elements of the Matrix3x3.
+        /// Calculates the inverse of the specified Matrix3x3.
         /// </summary>
-        /// <returns>A 9-element array containing the components of the Matrix3x3.</returns>
-        public readonly float[] ToArray()
+        /// <param name="value">The Matrix3x3 whose inverse is to be calculated.</param>
+        /// <param name="result">When the method completes, contains the inverse of the specified Matrix3x3.</param>
+        public static void Invert(ref Matrix3x3 value, out Matrix3x3 result)
         {
-            return [M11, M12, M13, M21, M22, M23, M31, M32, M33];
+            float d11 = value.M22 * value.M33 + value.M23 * -value.M32;
+            float d12 = value.M21 * value.M33 + value.M23 * -value.M31;
+            float d13 = value.M21 * value.M32 + value.M22 * -value.M31;
+
+            float det = value.M11 * d11 - value.M12 * d12 + value.M13 * d13;
+            if (Math.Abs(det) == 0.0f)
+            {
+                result = Zero;
+                return;
+            }
+
+            det = 1f / det;
+
+            float d21 = value.M12 * value.M33 + value.M13 * -value.M32;
+            float d22 = value.M11 * value.M33 + value.M13 * -value.M31;
+            float d23 = value.M11 * value.M32 + value.M12 * -value.M31;
+
+            float d31 = (value.M12 * value.M23) - (value.M13 * value.M22);
+            float d32 = (value.M11 * value.M23) - (value.M13 * value.M21);
+            float d33 = (value.M11 * value.M22) - (value.M12 * value.M21);
+
+            result.M11 = +d11 * det; result.M12 = -d21 * det; result.M13 = +d31 * det;
+            result.M21 = -d12 * det; result.M22 = +d22 * det; result.M23 = -d32 * det;
+            result.M31 = +d13 * det; result.M32 = -d23 * det; result.M33 = +d33 * det;
+        }
+        /// <summary>
+        /// Calculates the inverse of the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 whose inverse is to be calculated.</param>
+        /// <returns>The inverse of the specified Matrix3x3.</returns>
+        public static Matrix3x3 Invert(Matrix3x3 value)
+        {
+            Invert(ref value, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Calculates the transpose of the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 whose transpose is to be calculated.</param>
+        /// <param name="result">When the method completes, contains the transpose of the specified Matrix3x3.</param>
+        public static void Transpose(ref Matrix3x3 value, out Matrix3x3 result)
+        {
+            result = new()
+            {
+                M11 = value.M11,
+                M12 = value.M21,
+                M13 = value.M31,
+                M21 = value.M12,
+                M22 = value.M22,
+                M23 = value.M32,
+                M31 = value.M13,
+                M32 = value.M23,
+                M33 = value.M33
+            };
+        }
+        /// <summary>
+        /// Calculates the transpose of the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 whose transpose is to be calculated.</param>
+        /// <returns>The transpose of the specified Matrix3x3.</returns>
+        public static Matrix3x3 Transpose(Matrix3x3 value)
+        {
+            Transpose(ref value, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Orthogonalizes the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 to orthogonalize.</param>
+        /// <param name="result">When the method completes, contains the orthogonalized Matrix3x3.</param>
+        /// <remarks>
+        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
+        /// means that any given row in the Matrix3x3 will be orthogonal to any other given row in the
+        /// Matrix3x3.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static void Orthogonalize(ref Matrix3x3 value, out Matrix3x3 result)
+        {
+            //Uses the modified Gram-Schmidt process.
+            //q1 = m1
+            //q2 = m2 - ((q1 ⋅ m2) / (q1 ⋅ q1)) * q1
+            //q3 = m3 - ((q1 ⋅ m3) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m3) / (q2 ⋅ q2)) * q2
+
+            //By separating the above algorithm into multiple lines, we actually increase accuracy.
+            result = value;
+
+            result.Row2 -= (Vector3.Dot(result.Row1, result.Row2) / Vector3.Dot(result.Row1, result.Row1)) * result.Row1;
+
+            result.Row3 -= (Vector3.Dot(result.Row1, result.Row3) / Vector3.Dot(result.Row1, result.Row1)) * result.Row1;
+            result.Row3 -= (Vector3.Dot(result.Row2, result.Row3) / Vector3.Dot(result.Row2, result.Row2)) * result.Row2;
+        }
+        /// <summary>
+        /// Orthogonalizes the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 to orthogonalize.</param>
+        /// <returns>The orthogonalized Matrix3x3.</returns>
+        /// <remarks>
+        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
+        /// means that any given row in the Matrix3x3 will be orthogonal to any other given row in the
+        /// Matrix3x3.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static Matrix3x3 Orthogonalize(Matrix3x3 value)
+        {
+            Orthogonalize(ref value, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Orthonormalizes the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 to orthonormalize.</param>
+        /// <param name="result">When the method completes, contains the orthonormalized Matrix3x3.</param>
+        /// <remarks>
+        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
+        /// other and making all rows and columns of unit length. This means that any given row will
+        /// be orthogonal to any other given row and any given column will be orthogonal to any other
+        /// given column. Any given row will not be orthogonal to any given column. Every row and every
+        /// column will be of unit length.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static void Orthonormalize(ref Matrix3x3 value, out Matrix3x3 result)
+        {
+            //Uses the modified Gram-Schmidt process.
+            //Because we are making unit vectors, we can optimize the math for orthonormalization
+            //and simplify the projection operation to remove the division.
+            //q1 = m1 / |m1|
+            //q2 = (m2 - (q1 ⋅ m2) * q1) / |m2 - (q1 ⋅ m2) * q1|
+            //q3 = (m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2) / |m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2|
+
+            //By separating the above algorithm into multiple lines, we actually increase accuracy.
+            result = value;
+
+            result.Row1 = Vector3.Normalize(result.Row1);
+
+            result.Row2 -= Vector3.Dot(result.Row1, result.Row2) * result.Row1;
+            result.Row2 = Vector3.Normalize(result.Row2);
+
+            result.Row3 -= Vector3.Dot(result.Row1, result.Row3) * result.Row1;
+            result.Row3 -= Vector3.Dot(result.Row2, result.Row3) * result.Row2;
+            result.Row3 = Vector3.Normalize(result.Row3);
+        }
+        /// <summary>
+        /// Orthonormalizes the specified Matrix3x3.
+        /// </summary>
+        /// <param name="value">The Matrix3x3 to orthonormalize.</param>
+        /// <returns>The orthonormalized Matrix3x3.</returns>
+        /// <remarks>
+        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
+        /// other and making all rows and columns of unit length. This means that any given row will
+        /// be orthogonal to any other given row and any given column will be orthogonal to any other
+        /// given column. Any given row will not be orthogonal to any given column. Every row and every
+        /// column will be of unit length.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting Matrix3x3
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the Matrix3x3 rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static Matrix3x3 Orthonormalize(Matrix3x3 value)
+        {
+            Orthonormalize(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -1790,18 +1775,60 @@ namespace Engine.Mathematics
             res.M33 = trn.M31 * transform.M31 + trn.M32 * transform.M32 + trn.M33 * transform.M33;
             return res;
         }
+
         /// <summary>
         /// Transforms the vector to the space that represents the transpose of the matrix
         /// </summary>
-        /// <param name="matrix">Matrix</param>
         /// <param name="vector">Vector</param>
         /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
         public readonly Vector3 TransformTranspose(Vector3 vector)
         {
+            return TransformTranspose(this, vector);
+        }
+        /// <summary>
+        /// Transforms the vector to the space that represents the transpose of the matrix
+        /// </summary>
+        /// <param name="transform">Matrix</param>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
+        public static Vector3 TransformTranspose(Matrix3x3 transform, Vector3 vector)
+        {
             Vector3 result;
-            result.X = vector.X * M11 + vector.Y * M21 + vector.Z * M31;
-            result.Y = vector.X * M12 + vector.Y * M22 + vector.Z * M32;
-            result.Z = vector.X * M13 + vector.Y * M23 + vector.Z * M33;
+            result.X = vector.X * transform.M11 + vector.Y * transform.M21 + vector.Z * transform.M31;
+            result.Y = vector.X * transform.M12 + vector.Y * transform.M22 + vector.Z * transform.M32;
+            result.Z = vector.X * transform.M13 + vector.Y * transform.M23 + vector.Z * transform.M33;
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the symmetric matrix based on the specified vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="result">The symmetric matrix based on the specified vector</param>
+        /// <remarks>
+        /// The symmetric matrix is the equivalent to the cross product of the specified vector, such that a x b = A_s b, where a and b are vectors and A_s is the symmetric form of a
+        /// </remarks>
+        public static void SkewSymmetric(ref Vector3 vector, out Matrix3x3 result)
+        {
+            result.M11 = result.M22 = result.M33 = 0f;
+            result.M12 = -vector.Z;
+            result.M13 = vector.Y;
+            result.M21 = vector.Z;
+            result.M23 = -vector.X;
+            result.M31 = -vector.Y;
+            result.M32 = vector.X;
+        }
+        /// <summary>
+        /// Gets the symmetric matrix based on the specified vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns the symmetric matrix based on the specified vector</returns>
+        /// <remarks>
+        /// The symmetric matrix is the equivalent to the cross product of the specified vector, such that a x b = A_s b, where a and b are vectors and A_s is the symmetric form of a
+        /// </remarks>
+        public static Matrix3x3 SkewSymmetric(Vector3 vector)
+        {
+            SkewSymmetric(ref vector, out var result);
             return result;
         }
 
@@ -1901,32 +1928,21 @@ namespace Engine.Mathematics
             Divide(ref left, ref right, out var result);
             return result;
         }
-        /// <summary>
-        /// Tests for equality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // 
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Matrix3x3 left, Matrix3x3 right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Tests for inequality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Matrix3x3 left, Matrix3x3 right)
         {
             return !left.Equals(ref right);
         }
-        /// <summary>
-        /// Convert the Matrix3x3 to a Matrix4x4.
-        /// </summary>
-        /// <returns>A Matrix4x4 with zero translation and M44=1</returns>
+
+        /// <inheritdoc/>
         public static explicit operator Matrix4x4(Matrix3x3 Value)
         {
             return new Matrix4x4(
@@ -1935,10 +1951,7 @@ namespace Engine.Mathematics
                 Value.M31, Value.M32, Value.M33, 0,
                 0, 0, 0, 1);
         }
-        /// <summary>
-        /// Convert the Matrix4x4 to a Matrix3x3.
-        /// </summary>
-        /// <returns>A Matrix3x3</returns>
+        /// <inheritdoc/>
         public static explicit operator Matrix3x3(Matrix4x4 Value)
         {
             return new Matrix3x3(
@@ -1947,12 +1960,7 @@ namespace Engine.Mathematics
                 Value.M31, Value.M32, Value.M33);
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return string.Format(
@@ -1960,13 +1968,7 @@ namespace Engine.Mathematics
                 Matrix3x3Str,
                 M11, M12, M13, M21, M22, M23, M31, M32, M33);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format)
         {
             if (format == null) return ToString();
@@ -1979,13 +1981,7 @@ namespace Engine.Mathematics
                 M21.ToString(format, CultureInfo.CurrentCulture), M22.ToString(format, CultureInfo.CurrentCulture), M23.ToString(format, CultureInfo.CurrentCulture),
                 M31.ToString(format, CultureInfo.CurrentCulture), M32.ToString(format, CultureInfo.CurrentCulture), M33.ToString(format, CultureInfo.CurrentCulture));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
         {
             return string.Format(
@@ -1995,14 +1991,7 @@ namespace Engine.Mathematics
                 M21.ToString(formatProvider), M22.ToString(formatProvider), M23.ToString(formatProvider),
                 M31.ToString(formatProvider), M32.ToString(formatProvider), M33.ToString(formatProvider));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) return ToString(formatProvider);
@@ -2016,12 +2005,7 @@ namespace Engine.Mathematics
                 M31.ToString(format, formatProvider), M32.ToString(format, formatProvider), M33.ToString(format, formatProvider));
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             HashCode hash = new();
@@ -2037,67 +2021,65 @@ namespace Engine.Mathematics
             return hash.ToHashCode();
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Matrix3x3"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Matrix3x3"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Matrix3x3"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Matrix3x3 other)
         {
-            return
-                Helper.NearEqual(other.M11, M11) &&
-                Helper.NearEqual(other.M12, M12) &&
-                Helper.NearEqual(other.M13, M13) &&
-                Helper.NearEqual(other.M21, M21) &&
-                Helper.NearEqual(other.M22, M22) &&
-                Helper.NearEqual(other.M23, M23) &&
-                Helper.NearEqual(other.M31, M31) &&
-                Helper.NearEqual(other.M32, M32) &&
-                Helper.NearEqual(other.M33, M33);
+            return NearEqual(this, other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Matrix3x3"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Matrix3x3"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Matrix3x3"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Matrix3x3 other)
         {
             return Equals(ref other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Matrix3x3"/> are equal.
-        /// </summary>
-        public static bool Equals(ref Matrix3x3 a, ref Matrix3x3 b)
-        {
-            return
-                Helper.NearEqual(a.M11, b.M11) &&
-                Helper.NearEqual(a.M12, b.M12) &&
-                Helper.NearEqual(a.M13, b.M13) &&
-                Helper.NearEqual(a.M21, b.M21) &&
-                Helper.NearEqual(a.M22, b.M22) &&
-                Helper.NearEqual(a.M23, b.M23) &&
-                Helper.NearEqual(a.M31, b.M31) &&
-                Helper.NearEqual(a.M32, b.M32) &&
-                Helper.NearEqual(a.M33, b.M33);
-        }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object value)
         {
             if (value is not Matrix3x3) return false;
 
             var strongValue = (Matrix3x3)value;
             return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two Matrix3x3 structures are equal.
+        /// </summary>
+        /// <param name="a">The first Matrix3x3 structure to compare.</param>
+        /// <param name="b">The second Matrix3x3 structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(Matrix3x3 a, Matrix3x3 b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Helper.WithinEpsilon(a.M11, b.M11, epsilon) &&
+                Helper.WithinEpsilon(a.M12, b.M12, epsilon) &&
+                Helper.WithinEpsilon(a.M13, b.M13, epsilon) &&
+                Helper.WithinEpsilon(a.M21, b.M21, epsilon) &&
+                Helper.WithinEpsilon(a.M22, b.M22, epsilon) &&
+                Helper.WithinEpsilon(a.M23, b.M23, epsilon) &&
+                Helper.WithinEpsilon(a.M31, b.M31, epsilon) &&
+                Helper.WithinEpsilon(a.M32, b.M32, epsilon) &&
+                Helper.WithinEpsilon(a.M33, b.M33, epsilon);
+        }
+
+        /// <summary>
+        /// Gets matrix description
+        /// </summary>
+        /// <returns>Return matrix description</returns>
+        public readonly string GetDescription()
+        {
+            if (Decompose(out Vector3 scale, out Quaternion rotation))
+            {
+                return string.Format(
+                    Matrix3x3DescStr,
+                    scale.GetDescription(),
+                    rotation.GetDescription());
+            }
+            else
+            {
+                return "Bad matrix";
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Engine.Mathematics
     /// <param name="width">The width.</param>
     /// <param name="height">The height.</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rect(float x, float y, float width, float height) : IEquatable<Rect>
+    public struct Rect(float x, float y, float width, float height) : IEquatable<Rect>, IFormattable
     {
         const string RectStr = "X:{0} Y:{1} Width:{2} Height:{3}";
 
@@ -545,11 +545,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Rect other)
         {
-            return
-                Helper.NearEqual(other.Left, Left) &&
-                Helper.NearEqual(other.Right, Right) &&
-                Helper.NearEqual(other.Top, Top) &&
-                Helper.NearEqual(other.Bottom, Bottom);
+            return NearEqual(this, other);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -628,9 +624,61 @@ namespace Engine.Mathematics
         public override readonly string ToString()
         {
             return string.Format(
-                CultureInfo.InvariantCulture,
+                CultureInfo.CurrentCulture,
                 RectStr,
-                X, Y, Width, Height);
+                X.ToString(),
+                Y.ToString(),
+                Width.ToString(),
+                Height.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                RectStr,
+                X.ToString(format, CultureInfo.CurrentCulture),
+                Y.ToString(format, CultureInfo.CurrentCulture),
+                Width.ToString(format, CultureInfo.CurrentCulture),
+                Height.ToString(format, CultureInfo.CurrentCulture));
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                RectStr,
+                X.ToString(),
+                Y.ToString(),
+                Width.ToString(),
+                Height.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                RectStr,
+                X.ToString(format, formatProvider),
+                Y.ToString(format, formatProvider),
+                Width.ToString(format, formatProvider),
+                Height.ToString(format, formatProvider));
+        }
+
+        /// <summary>
+        /// Gets whether the two Rect structures are equal.
+        /// </summary>
+        /// <param name="a">The first Rect structure to compare.</param>
+        /// <param name="b">The second Rect structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(Rect a, Rect b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Helper.WithinEpsilon(a.Left, b.Left, epsilon) &&
+                Helper.WithinEpsilon(a.Right, b.Right, epsilon) &&
+                Helper.WithinEpsilon(a.Top, b.Top, epsilon) &&
+                Helper.WithinEpsilon(a.Bottom, b.Bottom, epsilon);
         }
     }
 }

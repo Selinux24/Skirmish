@@ -374,11 +374,4 @@ namespace Engine.Mathematics
             return $"{nameof(X)}: {X}, {nameof(Y)}: {Y}, {nameof(Width)}: {Width}, {nameof(Height)}: {Height}, {nameof(MinDepth)}: {MinDepth}, {nameof(MaxDepth)}: {MaxDepth}";
         }
     }
-
-    public enum ViewportScaling
-    {
-        Stretch,
-        None,
-        AspectRatioStretch
-    }
 }

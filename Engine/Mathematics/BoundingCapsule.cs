@@ -1,7 +1,10 @@
 ﻿using Engine.Common;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Engine.Mathematics
 {
@@ -14,8 +17,11 @@ namespace Engine.Mathematics
     /// <param name="center">Center position</param>
     /// <param name="radius">Radius</param>
     /// <param name="height">Height</param>
-    public struct BoundingCapsule(Vector3 center, float radius, float height) : IEquatable<BoundingCapsule>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct BoundingCapsule(Vector3 center, float radius, float height) : IEquatable<BoundingCapsule>, IFormattable
     {
+        const string BoundingCapsuleStr = "Base:{0} Cap:{1} Radius:{2}";
+
         /// <summary>
         /// Constructs a BoundingCapsule that fully contains the given points.
         /// </summary>
@@ -67,35 +73,23 @@ namespace Engine.Mathematics
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius { get; set; } = radius;
+        public float Radius = radius;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; } = height;
+        public float Height = height;
         /// <summary>
         /// Center
         /// </summary>
-        public Vector3 Center { get; set; } = center;
+        public Vector3 Center = center;
         /// <summary>
         /// Base position
         /// </summary>
-        public readonly Vector3 BasePosition
-        {
-            get
-            {
-                return new Vector3(Center.X, Center.Y - (Height * 0.5f), Center.Z);
-            }
-        }
+        public readonly Vector3 BasePosition => new(Center.X, Center.Y - (Height * 0.5f), Center.Z);
         /// <summary>
         /// Cap position
         /// </summary>
-        public readonly Vector3 CapPosition
-        {
-            get
-            {
-                return new Vector3(Center.X, Center.Y + (Height * 0.5f), Center.Z);
-            }
-        }
+        public readonly Vector3 CapPosition => new(Center.X, Center.Y + (Height * 0.5f), Center.Z);
 
         /// <summary>
         /// Determines whether the current objects contains a point.
@@ -104,25 +98,8 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public readonly ContainmentType Contains(ref Vector3 point)
         {
-            // Find capsule points
-            var p1 = BasePosition;
-            var p2 = CapPosition;
-
-            // Find closest point of point in axis
-            Collision.ClosestPointInSegment(ref p1, ref p2, ref point, out float distance, out _);
-            if (distance > Radius)
-            {
-                // Outside capsule radius
-                return ContainmentType.Disjoint;
-            }
-
-            if (Helper.NearEqual(distance, Radius))
-            {
-                // In the capsule
-                return ContainmentType.Intersects;
-            }
-
-            return ContainmentType.Contains;
+            var c = this;
+            return Collision.CapsuleContainsPoint(ref c, ref point);
         }
         /// <summary>
         /// Determines whether the current objects contains a point.
@@ -146,6 +123,7 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(BoundingCapsule left, BoundingCapsule right)
         {
             return
@@ -154,34 +132,97 @@ namespace Engine.Mathematics
                 Helper.NearEqual(left.Height, right.Height);
         }
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(BoundingCapsule left, BoundingCapsule right)
         {
             return !(left == right);
         }
-        /// <inheritdoc/>
-        public readonly bool Equals(BoundingCapsule other)
-        {
-            return this == other;
-        }
-        /// <inheritdoc/>
-        public override readonly bool Equals(object obj)
-        {
-            if (obj is BoundingCapsule capsule)
-            {
-                return this == capsule;
-            }
 
-            return false;
+        /// <inheritdoc/>
+        public override readonly string ToString()
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                BoundingCapsuleStr,
+                BasePosition.ToString(),
+                CapPosition.ToString(),
+                Radius.ToString());
         }
+        /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            if (format == null) return ToString();
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                BoundingCapsuleStr,
+                BasePosition.ToString(format, CultureInfo.CurrentCulture),
+                CapPosition.ToString(format, CultureInfo.CurrentCulture),
+                Radius.ToString(format, CultureInfo.CurrentCulture));
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                BoundingCapsuleStr,
+                BasePosition.ToString(),
+                CapPosition.ToString(),
+                Radius.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null) return ToString(formatProvider);
+
+            return string.Format(
+                formatProvider,
+                BoundingCapsuleStr,
+                BasePosition.ToString(format, formatProvider),
+                CapPosition.ToString(format, formatProvider),
+                Radius.ToString(format, formatProvider));
+        }
+
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(Center, Radius, Height);
         }
+
         /// <inheritdoc/>
-        public override readonly string ToString()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(ref BoundingCapsule value)
         {
-            return $"Base: {BasePosition}; Cap: {CapPosition}; Radius: {Radius};";
+            return NearEqual(this, value);
+        }
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(BoundingCapsule value)
+        {
+            return Equals(ref value);
+        }
+        /// <inheritdoc/>
+        public readonly override bool Equals(object value)
+        {
+            if (value is not BoundingCapsule) return false;
+
+            var strongValue = (BoundingCapsule)value;
+            return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two BoundingCapsule structures are equal.
+        /// </summary>
+        /// <param name="a">The first BoundingCapsule structure to compare.</param>
+        /// <param name="b">The second BoundingCapsule structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(BoundingCapsule a, BoundingCapsule b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Helper.WithinEpsilon(a.Radius, b.Radius, epsilon) &&
+                Helper.WithinEpsilon(a.Height, b.Height, epsilon) &&
+                Vector3.NearEqual(a.Center, b.Center, epsilon);
         }
     }
 }

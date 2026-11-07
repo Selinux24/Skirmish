@@ -37,7 +37,7 @@ namespace Engine.Mathematics
     /// <param name="width">The width.</param>
     /// <param name="height">The height.</param>
     [StructLayout(LayoutKind.Sequential)]
-    public struct RectI(int x, int y, int width, int height) : IEquatable<RectI>
+    public struct RectI(int x, int y, int width, int height) : IEquatable<RectI>, IFormattable
     {
         const string RectIStr = "X:{0} Y:{1} Width:{2} Height:{3}";
 
@@ -540,9 +540,45 @@ namespace Engine.Mathematics
         public override readonly string ToString()
         {
             return string.Format(
-                CultureInfo.InvariantCulture,
+                CultureInfo.CurrentCulture,
                 RectIStr,
-                X, Y, Width, Height);
+                X.ToString(),
+                Y.ToString(),
+                Width.ToString(),
+                Height.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                RectIStr,
+                X.ToString(format, CultureInfo.CurrentCulture),
+                Y.ToString(format, CultureInfo.CurrentCulture),
+                Width.ToString(format, CultureInfo.CurrentCulture),
+                Height.ToString(format, CultureInfo.CurrentCulture));
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                RectIStr,
+                X.ToString(),
+                Y.ToString(),
+                Width.ToString(),
+                Height.ToString());
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format, IFormatProvider formatProvider)
+        {
+            return string.Format(
+                formatProvider,
+                RectIStr,
+                X.ToString(format, formatProvider),
+                Y.ToString(format, formatProvider),
+                Width.ToString(format, formatProvider),
+                Height.ToString(format, formatProvider));
         }
     }
 }

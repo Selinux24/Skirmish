@@ -130,7 +130,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Plane plane, out Vector3 point)
         {
-            return Collision.RayIntersectsPlane(ref this, ref plane, out point);
+            return Collision.RayIntersectsPlane(ref this, ref plane, out _, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a triangle.
@@ -345,7 +345,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Ray value)
         {
-            return Position == value.Position && Direction == value.Direction;
+            return NearEqual(this, value);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -360,6 +360,20 @@ namespace Engine.Mathematics
 
             var strongValue = (Ray)value;
             return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two Ray structures are equal.
+        /// </summary>
+        /// <param name="a">The first Ray structure to compare.</param>
+        /// <param name="b">The second Ray structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(Ray a, Ray b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Vector3.NearEqual(a.Position, b.Position, epsilon) &&
+                Vector3.NearEqual(a.Direction, b.Direction, epsilon);
         }
     }
 }

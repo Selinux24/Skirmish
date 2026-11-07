@@ -510,24 +510,19 @@ namespace Engine.Mathematics
         /// <param name="vector">Vector</param>
         public readonly float ProjectToVector(Vector3 vector)
         {
-            return ProjectToVector(Extents, Matrix4x4.Identity, vector);
+            return ProjectToVector(Extents, vector);
         }
         /// <summary>
         /// Projects the specified box to the given vector
         /// </summary>
         /// <param name="extents">Box extents</param>
-        /// <param name="trn">Box transform</param>
         /// <param name="vector">Vector</param>
-        public static float ProjectToVector(Vector3 extents, Matrix4x4 trn, Vector3 vector)
+        public static float ProjectToVector(Vector3 extents, Vector3 vector)
         {
-            var xAxis = trn.Right;
-            var yAxis = trn.Up;
-            var zAxis = trn.Backward;
-
             return
-                extents.X * MathF.Abs(Vector3.Dot(vector, xAxis)) +
-                extents.Y * MathF.Abs(Vector3.Dot(vector, yAxis)) +
-                extents.Z * MathF.Abs(Vector3.Dot(vector, zAxis));
+                extents.X * MathF.Abs(Vector3.Dot(vector, Vector3.Right)) +
+                extents.Y * MathF.Abs(Vector3.Dot(vector, Vector3.Up)) +
+                extents.Z * MathF.Abs(Vector3.Dot(vector, Vector3.ForwardLH));
         }
 
         /// <summary>
@@ -732,9 +727,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref BoundingBox value)
         {
-            return
-                Minimum == value.Minimum &&
-                Maximum == value.Maximum;
+            return NearEqual(this, value);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -749,6 +742,20 @@ namespace Engine.Mathematics
 
             var strongValue = (BoundingBox)value;
             return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two BoundingBox structures are equal.
+        /// </summary>
+        /// <param name="a">The first BoundingBox structure to compare.</param>
+        /// <param name="b">The second BoundingBox structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(BoundingBox a, BoundingBox b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Vector3.NearEqual(a.Minimum, b.Minimum, epsilon) &&
+                Vector3.NearEqual(a.Maximum, b.Maximum, epsilon);
         }
     }
 }

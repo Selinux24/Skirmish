@@ -15,10 +15,22 @@ namespace Engine.Mathematics
     {
         const string OrientedBoundingBoxStr = "Extents:{0} Transformation:{1}";
 
+        /// <summary>
+        /// Extents
+        /// </summary>
         public Vector3 Extents;
+        /// <summary>
+        /// Transform matrix
+        /// </summary>
         public Matrix4x4 Transformation;
 
+        /// <summary>
+        /// Box size
+        /// </summary>
         public readonly Vector3 Size => Extents * 2;
+        /// <summary>
+        /// Box center
+        /// </summary>
         public readonly Vector3 Center => Transformation.TranslationVector;
 
         /// <summary>
@@ -97,19 +109,34 @@ namespace Engine.Mathematics
             Transformation = Matrix4x4.Translation(Center);
         }
 
+        /// <summary>
+        /// Gets the bounding box of the oriented bounding box after it is transformed
+        /// </summary>
         public readonly BoundingBox GetBoundingBox()
         {
             return BoundingBox.FromPoints(GetCorners());
         }
 
+        /// <summary>
+        /// Transforms the box
+        /// </summary>
+        /// <param name="mat">Transform matrix</param>
         public void Transform(Matrix4x4 mat)
         {
             Transformation *= mat;
         }
+        /// <summary>
+        /// Scales the box
+        /// </summary>
+        /// <param name="scaling">Scaling vector</param>
         public void Scale(Vector3 scaling)
         {
             Extents *= scaling;
         }
+        /// <summary>
+        /// Translates the box
+        /// </summary>
+        /// <param name="translation">Translation vector</param>
         public void Translate(Vector3 translation)
         {
             Transformation.TranslationVector += translation;
@@ -236,7 +263,9 @@ namespace Engine.Mathematics
             yield return translationVector - normal - normal2 - normal3;
             yield return translationVector - normal - normal2 + normal3;
         }
-
+        /// <summary>
+        /// Gets the oriented bounding box corner points
+        /// </summary>
         public readonly Vector3[] GetCorners()
         {
             var xv = new Vector3(Extents.X, 0, 0);
@@ -267,7 +296,24 @@ namespace Engine.Mathematics
         /// <param name="vector">Vector</param>
         public readonly float ProjectToVector(Vector3 vector)
         {
-            return BoundingBox.ProjectToVector(Extents, Transformation, vector);
+            return ProjectToVector(Extents, Transformation, vector);
+        }
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="extents">Box extents</param>
+        /// <param name="trn">Box transform</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(Vector3 extents, Matrix4x4 trn, Vector3 vector)
+        {
+            var xAxis = trn.Right;
+            var yAxis = trn.Up;
+            var zAxis = trn.Backward;
+
+            return
+                extents.X * MathF.Abs(Vector3.Dot(vector, xAxis)) +
+                extents.Y * MathF.Abs(Vector3.Dot(vector, yAxis)) +
+                extents.Z * MathF.Abs(Vector3.Dot(vector, zAxis));
         }
 
         /// <inheritdoc/>

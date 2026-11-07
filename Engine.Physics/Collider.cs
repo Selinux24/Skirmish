@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Collider
     /// </summary>

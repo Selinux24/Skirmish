@@ -237,6 +237,7 @@ namespace Engine
                 Formatting = Formatting.Indented,
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 TypeNameHandling = handleTypeNames ? TypeNameHandling.Auto : TypeNameHandling.None,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             };
         }
         /// <summary>

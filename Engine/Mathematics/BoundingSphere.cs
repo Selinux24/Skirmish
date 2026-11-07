@@ -450,7 +450,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref BoundingSphere value)
         {
-            return Center == value.Center && Radius == value.Radius;
+            return NearEqual(this, value);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -465,6 +465,20 @@ namespace Engine.Mathematics
 
             var strongValue = (BoundingSphere)value;
             return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two BoundingSphere structures are equal.
+        /// </summary>
+        /// <param name="a">The first BoundingSphere structure to compare.</param>
+        /// <param name="b">The second BoundingSphere structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(BoundingSphere a, BoundingSphere b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Vector3.NearEqual(a.Center, b.Center, epsilon) &&
+                Helper.WithinEpsilon(a.Radius, b.Radius, epsilon);
         }
     }
 }

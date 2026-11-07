@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -29,8 +30,10 @@ namespace Engine.Mathematics
     /// (matrix, frustum, camera) interchange, and many kind of intersection testing.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct BoundingFrustum : IEquatable<BoundingFrustum>
+    public struct BoundingFrustum : IEquatable<BoundingFrustum>, IFormattable
     {
+        const string BoundingFrustumStr = "Camera:{0}";
+
         private Matrix4x4 pMatrix;
         private Plane pNear;
         private Plane pFar;
@@ -115,6 +118,16 @@ namespace Engine.Mathematics
             };
         }
 
+        /// <summary>
+        /// Gets the frustum planes from the specified matrix
+        /// </summary>
+        /// <param name="matrix">Matrix</param>
+        /// <param name="near">Near plane</param>
+        /// <param name="far">Far plane</param>
+        /// <param name="left">Left plane</param>
+        /// <param name="right">Right plane</param>
+        /// <param name="top">Top plane</param>
+        /// <param name="bottom">Bottom plane</param>
         private static void GetPlanesFromMatrix(ref Matrix4x4 matrix, out Plane near, out Plane far, out Plane left, out Plane right, out Plane top, out Plane bottom)
         {
             //http://www.chadvernon.com/blog/resources/directx9/frustum-culling/
@@ -267,22 +280,14 @@ namespace Engine.Mathematics
         /// <returns>The 8 corners of the frustum</returns>
         public void GetCorners(Vector3[] corners)
         {
-            corners[0] = Get3PlanesInterPoint(ref pNear, ref pBottom, ref pRight);    //Near1
-            corners[1] = Get3PlanesInterPoint(ref pNear, ref pTop, ref pRight);       //Near2
-            corners[2] = Get3PlanesInterPoint(ref pNear, ref pTop, ref pLeft);        //Near3
-            corners[3] = Get3PlanesInterPoint(ref pNear, ref pBottom, ref pLeft);     //Near3
-            corners[4] = Get3PlanesInterPoint(ref pFar, ref pBottom, ref pRight);    //Far1
-            corners[5] = Get3PlanesInterPoint(ref pFar, ref pTop, ref pRight);       //Far2
-            corners[6] = Get3PlanesInterPoint(ref pFar, ref pTop, ref pLeft);        //Far3
-            corners[7] = Get3PlanesInterPoint(ref pFar, ref pBottom, ref pLeft);     //Far3
-        }
-        private static Vector3 Get3PlanesInterPoint(ref Plane p1, ref Plane p2, ref Plane p3)
-        {
-            //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
-            var p1p2 = Vector3.Cross(p1.Normal, p2.Normal);
-            var p2p3 = Vector3.Cross(p2.Normal, p3.Normal);
-            var p3p1 = Vector3.Cross(p3.Normal, p1.Normal);
-            return -p1.D * p2p3 / Vector3.Dot(p1.Normal, p2p3) - p2.D * p3p1 / Vector3.Dot(p2.Normal, p3p1) - p3.D * p1p2 / Vector3.Dot(p3.Normal, p1p2);
+            Collision.PlanesIntersectsPoint(ref pNear, ref pBottom, ref pRight, out corners[0]);   //Near1
+            Collision.PlanesIntersectsPoint(ref pNear, ref pTop, ref pRight, out corners[1]);      //Near2
+            Collision.PlanesIntersectsPoint(ref pNear, ref pTop, ref pLeft, out corners[2]);       //Near3
+            Collision.PlanesIntersectsPoint(ref pNear, ref pBottom, ref pLeft, out corners[3]);    //Near3
+            Collision.PlanesIntersectsPoint(ref pFar, ref pBottom, ref pRight, out corners[4]);    //Far1
+            Collision.PlanesIntersectsPoint(ref pFar, ref pTop, ref pRight, out corners[5]);       //Far2
+            Collision.PlanesIntersectsPoint(ref pFar, ref pTop, ref pLeft, out corners[6]);        //Far3
+            Collision.PlanesIntersectsPoint(ref pFar, ref pBottom, ref pLeft, out corners[7]);     //Far3
         }
 
         /// <summary>
@@ -291,7 +296,7 @@ namespace Engine.Mathematics
         /// <returns>Perspective camera parameters from the frustum</returns>
         public FrustumCameraParams GetCameraParams()
         {
-            var position = Get3PlanesInterPoint(ref pRight, ref pTop, ref pLeft);
+            Collision.PlanesIntersectsPoint(ref pRight, ref pTop, ref pLeft, out var position);
             var corners = GetCorners();
 
             return new()
@@ -371,6 +376,9 @@ namespace Engine.Mathematics
 
             return -maxPointDist / vSin;
         }
+        /// <summary>
+        /// Gets the inside-out cone
+        /// </summary>
         private readonly BoundingFrustum GetInsideOutClone()
         {
             var frustum = this;
@@ -557,6 +565,64 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(BoundingFrustum left, BoundingFrustum right)
+        {
+            return left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(BoundingFrustum left, BoundingFrustum right)
+        {
+            return !left.Equals(ref right);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var camParams = GetCameraParams();
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                BoundingFrustumStr,
+                camParams.ToString());
+        }
+        /// <inheritdoc/>
+        public string ToString(string format)
+        {
+            if (format == null) return ToString();
+
+            var camParams = GetCameraParams();
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                BoundingFrustumStr,
+                camParams.ToString(format, CultureInfo.CurrentCulture));
+        }
+        /// <inheritdoc/>
+        public string ToString(IFormatProvider formatProvider)
+        {
+            var camParams = GetCameraParams();
+
+            return string.Format(
+                formatProvider,
+                BoundingFrustumStr,
+                camParams.ToString());
+        }
+        /// <inheritdoc/>
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null) return ToString(formatProvider);
+
+            var camParams = GetCameraParams();
+
+            return string.Format(
+                formatProvider,
+                BoundingFrustumStr,
+                camParams.ToString(format, formatProvider));
+        }
+
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             return pMatrix.GetHashCode();
@@ -566,7 +632,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref BoundingFrustum other)
         {
-            return pMatrix == other.pMatrix;
+            return NearEqual(this, other);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -583,49 +649,16 @@ namespace Engine.Mathematics
             return Equals(ref strongValue);
         }
 
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(BoundingFrustum left, BoundingFrustum right)
+        /// <summary>
+        /// Gets whether the two BoundingFrustum structures are equal.
+        /// </summary>
+        /// <param name="a">The first BoundingFrustum structure to compare.</param>
+        /// <param name="b">The second BoundingFrustum structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(BoundingFrustum a, BoundingFrustum b, float epsilon = Helper.ZeroTolerance)
         {
-            return left.Equals(ref right);
+            return Matrix4x4.NearEqual(a.pMatrix, b.pMatrix, epsilon);
         }
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(BoundingFrustum left, BoundingFrustum right)
-        {
-            return !left.Equals(ref right);
-        }
-    }
-
-    public struct FrustumCameraParams
-    {
-        /// <summary>
-        /// Position of the camera.
-        /// </summary>
-        public Vector3 Position;
-        /// <summary>
-        /// Looking at direction of the camera.
-        /// </summary>
-        public Vector3 LookAtDir;
-        /// <summary>
-        /// Up direction.
-        /// </summary>
-        public Vector3 UpDir;
-        /// <summary>
-        /// Field of view.
-        /// </summary>
-        public float FOV;
-        /// <summary>
-        /// Z near distance.
-        /// </summary>
-        public float ZNear;
-        /// <summary>
-        /// Z far distance.
-        /// </summary>
-        public float ZFar;
-        /// <summary>
-        /// Aspect ratio.
-        /// </summary>
-        public float AspectRatio;
     }
 }

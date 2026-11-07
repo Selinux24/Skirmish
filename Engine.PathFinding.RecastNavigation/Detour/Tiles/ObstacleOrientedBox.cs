@@ -181,7 +181,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Computes the obstacle bounds
         /// </summary>
-        private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
+        private BoundingBoxI? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
         {
             float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
             int minx = (int)MathF.Floor(cx - maxr * ics);
@@ -201,7 +201,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (minz < 0) minz = 0;
             if (maxz >= h) maxz = h - 1;
 
-            return new BoundingBoxInt
+            return new BoundingBoxI
             {
                 Minimum = new Vector3I(minx, miny, minz),
                 Maximum = new Vector3I(maxx, maxy, maxz),

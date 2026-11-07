@@ -984,19 +984,19 @@ namespace Engine.Mathematics
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out Vector3 point)
+        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out float distance, out Vector3 point)
         {
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 175
 
-            if (!RayIntersectsPlane(ref ray, ref plane, out float distance))
+            if (RayIntersectsPlane(ref ray, ref plane, out distance))
             {
-                point = Vector3.Zero;
-                return false;
+                point = ray.Position + (ray.Direction * distance);
+                return true;
             }
 
-            point = ray.Position + (ray.Direction * distance);
-            return true;
+            point = Vector3.Zero;
+            return false;
         }
 
         /// <summary>
@@ -1547,12 +1547,11 @@ namespace Engine.Mathematics
             point = Vector3.Zero;
 
             var pFrom = new Plane(center, normal);
-            if (!pFrom.Intersects(ref ray, out Vector3 p))
+            if (!RayIntersectsPlane(ref ray, ref pFrom, out float dist, out Vector3 p))
             {
                 return false;
             }
 
-            float dist = Vector3.Distance(ray.Position, p);
             if (dist > radius)
             {
                 return false;
@@ -1622,7 +1621,7 @@ namespace Engine.Mathematics
         public static bool SegmentIntersectsTriangle(ref Segment segment, ref Triangle tri, out float distance)
         {
             var ray = new PickingRay(segment);
-            return Collision.RayIntersectsTriangle(ref ray, ref tri, out distance, out _);
+            return RayIntersectsTriangle(ref ray, ref tri, out distance, out _);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
@@ -1635,7 +1634,7 @@ namespace Engine.Mathematics
         public static bool SegmentIntersectsTriangle(ref Segment segment, ref Triangle tri, out float distance, out Vector3 point)
         {
             var ray = new PickingRay(segment);
-            return Collision.RayIntersectsTriangle(ref ray, ref tri, out distance, out point);
+            return RayIntersectsTriangle(ref ray, ref tri, out distance, out point);
         }
 
         /// <summary>
@@ -2041,6 +2040,25 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Gets the intersection point between three planes
+        /// </summary>
+        /// <param name="p1">Plane 1</param>
+        /// <param name="p2">Plane 2</param>
+        /// <param name="p3">Plane 3</param>
+        /// <param name="result">The intersection point.</param>
+        public static void PlanesIntersectsPoint(ref Plane p1, ref Plane p2, ref Plane p3, out Vector3 result)
+        {
+            //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
+            var p1p2 = Vector3.Cross(p1.Normal, p2.Normal);
+            var p2p3 = Vector3.Cross(p2.Normal, p3.Normal);
+            var p3p1 = Vector3.Cross(p3.Normal, p1.Normal);
+            result = -
+                p1.D * p2p3 / Vector3.Dot(p1.Normal, p2p3) -
+                p2.D * p3p1 / Vector3.Dot(p2.Normal, p3p1) -
+                p3.D * p1p2 / Vector3.Dot(p3.Normal, p1p2);
+        }
+
+        /// <summary>
         /// Determines whether there is an intersection between a <see cref="BoundingBox"/> and a <see cref="BoundingBox"/>.
         /// </summary>
         /// <param name="box1">The first box to test.</param>
@@ -2149,7 +2167,8 @@ namespace Engine.Mathematics
 
             // Test the box extents vs the triangle plane
             BoundingBox aabb = new(-boxExtents, boxExtents);
-            return triangle.GetPlane().Intersects(ref aabb) == PlaneIntersectionType.Intersecting;
+            Plane p = triangle.GetPlane();
+            return PlaneIntersectsBox(ref p, ref aabb) == PlaneIntersectionType.Intersecting;
         }
         /// <summary>
         /// Determines whether a box intersects with a mesh
@@ -2407,7 +2426,7 @@ namespace Engine.Mathematics
         {
             var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
-            if (!frustum.Intersects(ref ray, out var inDistance, out _))
+            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out _))
             {
                 return false;
             }
@@ -2441,7 +2460,7 @@ namespace Engine.Mathematics
 
             var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
-            if (!frustum.Intersects(ref ray, out var inDistance, out _))
+            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out _))
             {
                 return false;
             }
@@ -2478,7 +2497,7 @@ namespace Engine.Mathematics
 
             var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
-            if (!frustum.Intersects(ref ray, out var inDistance, out var outDistance))
+            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out var outDistance))
             {
                 return false;
             }
@@ -2711,9 +2730,12 @@ namespace Engine.Mathematics
         public static ContainmentType BoxContainsTriangle(ref BoundingBox box, ref Triangle triangle)
         {
             // Test containment
-            var test1 = box.Contains(triangle.Point1);
-            var test2 = box.Contains(triangle.Point2);
-            var test3 = box.Contains(triangle.Point3);
+            var p1 = triangle.Point1;
+            var p2 = triangle.Point2;
+            var p3 = triangle.Point3;
+            var test1 = BoxContainsPoint(ref box, ref p1);
+            var test2 = BoxContainsPoint(ref box, ref p2);
+            var test3 = BoxContainsPoint(ref box, ref p3);
 
             if (test1 == ContainmentType.Contains && test2 == ContainmentType.Contains && test3 == ContainmentType.Contains)
             {
@@ -2728,7 +2750,7 @@ namespace Engine.Mathematics
             }
 
             // Test intersection
-            if (Collision.BoxIntersectsTriangle(ref box, ref triangle))
+            if (BoxIntersectsTriangle(ref box, ref triangle))
             {
                 return ContainmentType.Intersects;
             }
@@ -3002,7 +3024,8 @@ namespace Engine.Mathematics
             var result = PlaneIntersectionType.Front;
             for (int i = 0; i < 6; i++)
             {
-                var planeResult = frustum.GetPlane(i).Intersects(ref point);
+                var p = frustum.GetPlane(i);
+                var planeResult = PlaneIntersectsPoint(ref p, ref point);
                 switch (planeResult)
                 {
                     case PlaneIntersectionType.Back:
@@ -3225,7 +3248,7 @@ namespace Engine.Mathematics
             foreach (var vertex in points)
             {
                 var v = vertex;
-                ContainmentType res = frustum.Contains(ref v);
+                var res = FrustumContainsPoint(ref frustum, ref v);
                 if (res != ContainmentType.Disjoint)
                 {
                     intersects = true;
@@ -3256,6 +3279,79 @@ namespace Engine.Mathematics
         public static ContainmentType FrustumContainsPoints(ref BoundingFrustum frustum, IEnumerable<Vector3> points)
         {
             return FrustumContainsPoints(ref frustum, [.. points]);
+        }
+
+        /// <summary>
+        /// Gets whether the capsule contains the point
+        /// </summary>
+        /// <param name="capsule">Capsule</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType CapsuleContainsPoint(ref BoundingCapsule capsule, ref Vector3 point)
+        {
+            // Find capsule points
+            var p1 = capsule.BasePosition;
+            var p2 = capsule.CapPosition;
+
+            // Find closest point of point in axis
+            ClosestPointInSegment(ref p1, ref p2, ref point, out float distance, out _);
+            if (distance > capsule.Radius)
+            {
+                // Outside capsule radius
+                return ContainmentType.Disjoint;
+            }
+
+            if (Helper.NearEqual(distance, capsule.Radius))
+            {
+                // In the capsule
+                return ContainmentType.Intersects;
+            }
+
+            return ContainmentType.Contains;
+        }
+        /// <summary>
+        /// Gets whether the cylinder contains the point
+        /// </summary>
+        /// <param name="cylinder">Cylinder</param>
+        /// <param name="point">Point</param>
+        /// <returns></returns>
+        public static ContainmentType CylinderContainsPoint(ref BoundingCylinder cylinder, ref Vector3 point)
+        {
+            // Find cylinder central axis
+            var p1 = cylinder.BasePosition;
+            var p2 = cylinder.CapPosition;
+
+            // Find closest point of point in axis
+            var ray = Ray.FromPoints(p1, p2);
+            ClosestPointInRay(ref ray, ref point, out float distance, out var closest);
+            if (distance > cylinder.Radius)
+            {
+                // Outside cylinder radius
+                return ContainmentType.Disjoint;
+            }
+
+            // Find distance from closest point in axis to the center
+            float hh = cylinder.Height * 0.5f;
+            float distOnAxis = Vector3.Distance(cylinder.Center, closest);
+            if (distOnAxis > hh)
+            {
+                // Outside cap and base distances
+                return ContainmentType.Disjoint;
+            }
+
+            if (Helper.NearEqual(distance, cylinder.Radius))
+            {
+                // The point is into the cylinder radius, and between cap and base distances.
+                return ContainmentType.Intersects;
+            }
+
+            if (Helper.NearEqual(distOnAxis, hh))
+            {
+                // The point is in the cap or base.
+                return ContainmentType.Intersects;
+            }
+
+            return ContainmentType.Contains;
         }
 
         /// <summary>
@@ -3336,13 +3432,13 @@ namespace Engine.Mathematics
             var bbox1 = BoundingBox.FromPoints([.. mesh1.SelectMany(t => t.GetVertices())]);
             var bbox2 = BoundingBox.FromPoints([.. mesh2.SelectMany(t => t.GetVertices())]);
 
-            if (bbox1.Contains(bbox2) == ContainmentType.Disjoint)
+            if (BoxContainsBox(ref bbox1, ref bbox2) == ContainmentType.Disjoint)
             {
                 // If volumes disjoint, no intersection is possible
                 return ContainmentType.Disjoint;
             }
 
-            if (bbox2.Contains(bbox1) == ContainmentType.Contains)
+            if (BoxContainsBox(ref bbox2, ref bbox1) == ContainmentType.Contains)
             {
                 // Box2 contains box1. Then box1 intersects box2
                 return ContainmentType.Intersects;
@@ -3483,7 +3579,8 @@ namespace Engine.Mathematics
 
             for (int i = 0; i < 6; i++)
             {
-                var planeResult = frustum.GetPlane(i).Intersects(ref sphere);
+                var p = frustum.GetPlane(i);
+                var planeResult = PlaneIntersectsSphere(ref p, ref sphere);
                 switch (planeResult)
                 {
                     case PlaneIntersectionType.Back:

@@ -245,7 +245,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Ray ray, out Vector3 point)
         {
-            return Collision.RayIntersectsPlane(ref ray, ref this, out point);
+            return Collision.RayIntersectsPlane(ref ray, ref this, out _, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="Plane"/>.
@@ -388,7 +388,7 @@ namespace Engine.Mathematics
         /// This plane is assumed to be normalized
         /// </summary>
         /// <param name="result">When the method completes, contains the reflection Matrix3x3.</param>
-        public readonly void Reflection(out Matrix3x3 result)
+        public readonly void Reflection3x3(out Matrix3x3 result)
         {
             float x = Normal.X;
             float y = Normal.Y;
@@ -415,7 +415,7 @@ namespace Engine.Mathematics
         /// <returns>The reflection Matrix3x3.</returns>
         public readonly Matrix3x3 Reflection3x3()
         {
-            Reflection(out Matrix3x3 result);
+            Reflection3x3(out Matrix3x3 result);
             return result;
         }
 
@@ -426,7 +426,7 @@ namespace Engine.Mathematics
         /// W component is 1, the light is a point light.</param>
         /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
         /// <param name="result">When the method completes, contains the shadow Matrix3x3.</param>
-        public static void Shadow(ref Vector4 light, ref Plane plane, out Matrix3x3 result)
+        public static void Shadow3x3(ref Vector4 light, ref Plane plane, out Matrix3x3 result)
         {
             float dot = (plane.Normal.X * light.X) + (plane.Normal.Y * light.Y) + (plane.Normal.Z * light.Z) + (plane.D * light.W);
             float x = -plane.Normal.X;
@@ -451,9 +451,9 @@ namespace Engine.Mathematics
         /// W component is 1, the light is a point light.</param>
         /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
         /// <returns>The shadow Matrix3x3.</returns>
-        public static Matrix3x3 Shadow(Vector4 light, Plane plane)
+        public static Matrix3x3 Shadow3x3(Vector4 light, Plane plane)
         {
-            Shadow(ref light, ref plane, out Matrix3x3 result);
+            Shadow3x3(ref light, ref plane, out Matrix3x3 result);
             return result;
         }
 
@@ -808,9 +808,7 @@ namespace Engine.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Plane value)
         {
-            return
-                Normal == value.Normal &&
-                D == value.D;
+            return NearEqual(this, value);
         }
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -825,6 +823,20 @@ namespace Engine.Mathematics
 
             var strongValue = (Plane)value;
             return Equals(ref strongValue);
+        }
+
+        /// <summary>
+        /// Gets whether the two Plane structures are equal.
+        /// </summary>
+        /// <param name="a">The first Plane structure to compare.</param>
+        /// <param name="b">The second Plane structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(Plane a, Plane b, float epsilon = Helper.ZeroTolerance)
+        {
+            return
+                Vector3.NearEqual(a.Normal, b.Normal, epsilon) &&
+                Helper.WithinEpsilon(a.D, b.D, epsilon);
         }
     }
 }

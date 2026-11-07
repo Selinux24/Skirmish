@@ -57,11 +57,13 @@ namespace Engine.Mathematics
     public struct Matrix4x4 : IEquatable<Matrix4x4>, IFormattable
     {
         const string Matrix4x4Str = "[M11:{0} M12:{1} M13:{2} M14:{3}] [M21:{4} M22:{5} M23:{6} M24:{7}] [M31:{8} M32:{9} M33:{10} M34:{11}] [M41:{12} M42:{13} M43:{14} M44:{15}]";
+        const string Matrix4x4DescStr = "S:{0,-30} T:{1,-30} R:{2,-30}";
 
         /// <summary>
         /// The size of the <see cref="Matrix4x4"/> type, in bytes.
         /// </summary>
         public static readonly int SizeInBytes = 4 * 4 * sizeof(float);
+
         /// <summary>
         /// A <see cref="Matrix4x4"/> with all of its components set to zero.
         /// </summary>
@@ -563,6 +565,15 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Creates an array containing the elements of the matrix.
+        /// </summary>
+        /// <returns>A sixteen-element array containing the components of the matrix.</returns>
+        public readonly float[] ToArray()
+        {
+            return [M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44];
+        }
+
+        /// <summary>
         /// Calculates the determinant of the matrix.
         /// </summary>
         /// <returns>The determinant of the matrix.</returns>
@@ -589,140 +600,12 @@ namespace Engine.Mathematics
             Invert(ref this, out this);
         }
         /// <summary>
-        /// Calculates the inverse of the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix whose inverse is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the inverse of the specified matrix.</param>
-        public static void Invert(ref Matrix4x4 value, out Matrix4x4 result)
-        {
-            float b0 = (value.M31 * value.M42) - (value.M32 * value.M41);
-            float b1 = (value.M31 * value.M43) - (value.M33 * value.M41);
-            float b2 = (value.M34 * value.M41) - (value.M31 * value.M44);
-            float b3 = (value.M32 * value.M43) - (value.M33 * value.M42);
-            float b4 = (value.M34 * value.M42) - (value.M32 * value.M44);
-            float b5 = (value.M33 * value.M44) - (value.M34 * value.M43);
-
-            float d11 = value.M22 * b5 + value.M23 * b4 + value.M24 * b3;
-            float d12 = value.M21 * b5 + value.M23 * b2 + value.M24 * b1;
-            float d13 = value.M21 * -b4 + value.M22 * b2 + value.M24 * b0;
-            float d14 = value.M21 * b3 + value.M22 * -b1 + value.M23 * b0;
-
-            float det = value.M11 * d11 - value.M12 * d12 + value.M13 * d13 - value.M14 * d14;
-            if (Math.Abs(det) == 0.0f)
-            {
-                result = Matrix4x4.Zero;
-                return;
-            }
-
-            det = 1f / det;
-
-            float a0 = (value.M11 * value.M22) - (value.M12 * value.M21);
-            float a1 = (value.M11 * value.M23) - (value.M13 * value.M21);
-            float a2 = (value.M14 * value.M21) - (value.M11 * value.M24);
-            float a3 = (value.M12 * value.M23) - (value.M13 * value.M22);
-            float a4 = (value.M14 * value.M22) - (value.M12 * value.M24);
-            float a5 = (value.M13 * value.M24) - (value.M14 * value.M23);
-
-            float d21 = value.M12 * b5 + value.M13 * b4 + value.M14 * b3;
-            float d22 = value.M11 * b5 + value.M13 * b2 + value.M14 * b1;
-            float d23 = value.M11 * -b4 + value.M12 * b2 + value.M14 * b0;
-            float d24 = value.M11 * b3 + value.M12 * -b1 + value.M13 * b0;
-
-            float d31 = value.M42 * a5 + value.M43 * a4 + value.M44 * a3;
-            float d32 = value.M41 * a5 + value.M43 * a2 + value.M44 * a1;
-            float d33 = value.M41 * -a4 + value.M42 * a2 + value.M44 * a0;
-            float d34 = value.M41 * a3 + value.M42 * -a1 + value.M43 * a0;
-
-            float d41 = value.M32 * a5 + value.M33 * a4 + value.M34 * a3;
-            float d42 = value.M31 * a5 + value.M33 * a2 + value.M34 * a1;
-            float d43 = value.M31 * -a4 + value.M32 * a2 + value.M34 * a0;
-            float d44 = value.M31 * a3 + value.M32 * -a1 + value.M33 * a0;
-
-            result.M11 = +d11 * det; result.M12 = -d21 * det; result.M13 = +d31 * det; result.M14 = -d41 * det;
-            result.M21 = -d12 * det; result.M22 = +d22 * det; result.M23 = -d32 * det; result.M24 = +d42 * det;
-            result.M31 = +d13 * det; result.M32 = -d23 * det; result.M33 = +d33 * det; result.M34 = -d43 * det;
-            result.M41 = -d14 * det; result.M42 = +d24 * det; result.M43 = -d34 * det; result.M44 = +d44 * det;
-        }
-        /// <summary>
-        /// Calculates the inverse of the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix whose inverse is to be calculated.</param>
-        /// <returns>The inverse of the specified matrix.</returns>
-        public static Matrix4x4 Invert(Matrix4x4 value)
-        {
-            value.Invert();
-            return value;
-        }
-
-        /// <summary>
         /// Transposes the matrix.
         /// </summary>
         public void Transpose()
         {
             Transpose(ref this, out this);
         }
-        /// <summary>
-        /// Calculates the transpose of the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix whose transpose is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the transpose of the specified matrix.</param>
-        public static void Transpose(ref Matrix4x4 value, out Matrix4x4 result)
-        {
-            result = new()
-            {
-                M11 = value.M11,
-                M12 = value.M21,
-                M13 = value.M31,
-                M14 = value.M41,
-                M21 = value.M12,
-                M22 = value.M22,
-                M23 = value.M32,
-                M24 = value.M42,
-                M31 = value.M13,
-                M32 = value.M23,
-                M33 = value.M33,
-                M34 = value.M43,
-                M41 = value.M14,
-                M42 = value.M24,
-                M43 = value.M34,
-                M44 = value.M44
-            };
-        }
-        /// <summary>
-        /// Calculates the transpose of the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix whose transpose is to be calculated.</param>
-        /// <param name="result">When the method completes, contains the transpose of the specified matrix.</param>
-        public static void TransposeByRef(ref Matrix4x4 value, ref Matrix4x4 result)
-        {
-            result.M11 = value.M11;
-            result.M12 = value.M21;
-            result.M13 = value.M31;
-            result.M14 = value.M41;
-            result.M21 = value.M12;
-            result.M22 = value.M22;
-            result.M23 = value.M32;
-            result.M24 = value.M42;
-            result.M31 = value.M13;
-            result.M32 = value.M23;
-            result.M33 = value.M33;
-            result.M34 = value.M43;
-            result.M41 = value.M14;
-            result.M42 = value.M24;
-            result.M43 = value.M34;
-            result.M44 = value.M44;
-        }
-        /// <summary>
-        /// Calculates the transpose of the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix whose transpose is to be calculated.</param>
-        /// <returns>The transpose of the specified matrix.</returns>
-        public static Matrix4x4 Transpose(Matrix4x4 value)
-        {
-            Transpose(ref value, out var result);
-            return result;
-        }
-
         /// <summary>
         /// Orthogonalizes the specified matrix.
         /// </summary>
@@ -742,64 +625,6 @@ namespace Engine.Mathematics
             Orthogonalize(ref this, out this);
         }
         /// <summary>
-        /// Orthogonalizes the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix to orthogonalize.</param>
-        /// <param name="result">When the method completes, contains the orthogonalized matrix.</param>
-        /// <remarks>
-        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
-        /// means that any given row in the matrix will be orthogonal to any other given row in the
-        /// matrix.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the matrix rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static void Orthogonalize(ref Matrix4x4 value, out Matrix4x4 result)
-        {
-            //Uses the modified Gram-Schmidt process.
-            //q1 = m1
-            //q2 = m2 - ((q1 ⋅ m2) / (q1 ⋅ q1)) * q1
-            //q3 = m3 - ((q1 ⋅ m3) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m3) / (q2 ⋅ q2)) * q2
-            //q4 = m4 - ((q1 ⋅ m4) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m4) / (q2 ⋅ q2)) * q2 - ((q3 ⋅ m4) / (q3 ⋅ q3)) * q3
-
-            //By separating the above algorithm into multiple lines, we actually increase accuracy.
-            result = value;
-
-            result.Row2 -= (Vector4.Dot(result.Row1, result.Row2) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
-
-            result.Row3 -= (Vector4.Dot(result.Row1, result.Row3) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
-            result.Row3 -= (Vector4.Dot(result.Row2, result.Row3) / Vector4.Dot(result.Row2, result.Row2)) * result.Row2;
-
-            result.Row4 -= (Vector4.Dot(result.Row1, result.Row4) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
-            result.Row4 -= (Vector4.Dot(result.Row2, result.Row4) / Vector4.Dot(result.Row2, result.Row2)) * result.Row2;
-            result.Row4 -= (Vector4.Dot(result.Row3, result.Row4) / Vector4.Dot(result.Row3, result.Row3)) * result.Row3;
-        }
-        /// <summary>
-        /// Orthogonalizes the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix to orthogonalize.</param>
-        /// <returns>The orthogonalized matrix.</returns>
-        /// <remarks>
-        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
-        /// means that any given row in the matrix will be orthogonal to any other given row in the
-        /// matrix.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the matrix rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static Matrix4x4 Orthogonalize(Matrix4x4 value)
-        {
-            Orthogonalize(ref value, out var result);
-            return result;
-        }
-
-        /// <summary>
         /// Orthonormalizes the specified matrix.
         /// </summary>
         /// <remarks>
@@ -818,74 +643,6 @@ namespace Engine.Mathematics
         public void Orthonormalize()
         {
             Orthonormalize(ref this, out this);
-        }
-        /// <summary>
-        /// Orthonormalizes the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix to orthonormalize.</param>
-        /// <param name="result">When the method completes, contains the orthonormalized matrix.</param>
-        /// <remarks>
-        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
-        /// other and making all rows and columns of unit length. This means that any given row will
-        /// be orthogonal to any other given row and any given column will be orthogonal to any other
-        /// given column. Any given row will not be orthogonal to any given column. Every row and every
-        /// column will be of unit length.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the matrix rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static void Orthonormalize(ref Matrix4x4 value, out Matrix4x4 result)
-        {
-            //Uses the modified Gram-Schmidt process.
-            //Because we are making unit vectors, we can optimize the math for orthonormalization
-            //and simplify the projection operation to remove the division.
-            //q1 = m1 / |m1|
-            //q2 = (m2 - (q1 ⋅ m2) * q1) / |m2 - (q1 ⋅ m2) * q1|
-            //q3 = (m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2) / |m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2|
-            //q4 = (m4 - (q1 ⋅ m4) * q1 - (q2 ⋅ m4) * q2 - (q3 ⋅ m4) * q3) / |m4 - (q1 ⋅ m4) * q1 - (q2 ⋅ m4) * q2 - (q3 ⋅ m4) * q3|
-
-            //By separating the above algorithm into multiple lines, we actually increase accuracy.
-            result = value;
-
-            result.Row1 = Vector4.Normalize(result.Row1);
-
-            result.Row2 -= Vector4.Dot(result.Row1, result.Row2) * result.Row1;
-            result.Row2 = Vector4.Normalize(result.Row2);
-
-            result.Row3 -= Vector4.Dot(result.Row1, result.Row3) * result.Row1;
-            result.Row3 -= Vector4.Dot(result.Row2, result.Row3) * result.Row2;
-            result.Row3 = Vector4.Normalize(result.Row3);
-
-            result.Row4 -= Vector4.Dot(result.Row1, result.Row4) * result.Row1;
-            result.Row4 -= Vector4.Dot(result.Row2, result.Row4) * result.Row2;
-            result.Row4 -= Vector4.Dot(result.Row3, result.Row4) * result.Row3;
-            result.Row4 = Vector4.Normalize(result.Row4);
-        }
-        /// <summary>
-        /// Orthonormalizes the specified matrix.
-        /// </summary>
-        /// <param name="value">The matrix to orthonormalize.</param>
-        /// <returns>The orthonormalized matrix.</returns>
-        /// <remarks>
-        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
-        /// other and making all rows and columns of unit length. This means that any given row will
-        /// be orthogonal to any other given row and any given column will be orthogonal to any other
-        /// given column. Any given row will not be orthogonal to any given column. Every row and every
-        /// column will be of unit length.</para>
-        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
-        /// tends to be numerically unstable. The numeric stability decreases according to the rows
-        /// so that the first row is the most stable and the last row is the least stable.</para>
-        /// <para>This operation is performed on the rows of the matrix rather than the columns.
-        /// If you wish for this operation to be performed on the columns, first transpose the
-        /// input and than transpose the output.</para>
-        /// </remarks>
-        public static Matrix4x4 Orthonormalize(Matrix4x4 value)
-        {
-            Orthonormalize(ref value, out var result);
-            return result;
         }
 
         /// <summary>
@@ -1106,12 +863,234 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Creates an array containing the elements of the matrix.
+        /// Calculates the inverse of the specified matrix.
         /// </summary>
-        /// <returns>A sixteen-element array containing the components of the matrix.</returns>
-        public readonly float[] ToArray()
+        /// <param name="value">The matrix whose inverse is to be calculated.</param>
+        /// <param name="result">When the method completes, contains the inverse of the specified matrix.</param>
+        public static void Invert(ref Matrix4x4 value, out Matrix4x4 result)
         {
-            return [M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44];
+            float b0 = (value.M31 * value.M42) - (value.M32 * value.M41);
+            float b1 = (value.M31 * value.M43) - (value.M33 * value.M41);
+            float b2 = (value.M34 * value.M41) - (value.M31 * value.M44);
+            float b3 = (value.M32 * value.M43) - (value.M33 * value.M42);
+            float b4 = (value.M34 * value.M42) - (value.M32 * value.M44);
+            float b5 = (value.M33 * value.M44) - (value.M34 * value.M43);
+
+            float d11 = value.M22 * b5 + value.M23 * b4 + value.M24 * b3;
+            float d12 = value.M21 * b5 + value.M23 * b2 + value.M24 * b1;
+            float d13 = value.M21 * -b4 + value.M22 * b2 + value.M24 * b0;
+            float d14 = value.M21 * b3 + value.M22 * -b1 + value.M23 * b0;
+
+            float det = value.M11 * d11 - value.M12 * d12 + value.M13 * d13 - value.M14 * d14;
+            if (Math.Abs(det) == 0.0f)
+            {
+                result = Matrix4x4.Zero;
+                return;
+            }
+
+            det = 1f / det;
+
+            float a0 = (value.M11 * value.M22) - (value.M12 * value.M21);
+            float a1 = (value.M11 * value.M23) - (value.M13 * value.M21);
+            float a2 = (value.M14 * value.M21) - (value.M11 * value.M24);
+            float a3 = (value.M12 * value.M23) - (value.M13 * value.M22);
+            float a4 = (value.M14 * value.M22) - (value.M12 * value.M24);
+            float a5 = (value.M13 * value.M24) - (value.M14 * value.M23);
+
+            float d21 = value.M12 * b5 + value.M13 * b4 + value.M14 * b3;
+            float d22 = value.M11 * b5 + value.M13 * b2 + value.M14 * b1;
+            float d23 = value.M11 * -b4 + value.M12 * b2 + value.M14 * b0;
+            float d24 = value.M11 * b3 + value.M12 * -b1 + value.M13 * b0;
+
+            float d31 = value.M42 * a5 + value.M43 * a4 + value.M44 * a3;
+            float d32 = value.M41 * a5 + value.M43 * a2 + value.M44 * a1;
+            float d33 = value.M41 * -a4 + value.M42 * a2 + value.M44 * a0;
+            float d34 = value.M41 * a3 + value.M42 * -a1 + value.M43 * a0;
+
+            float d41 = value.M32 * a5 + value.M33 * a4 + value.M34 * a3;
+            float d42 = value.M31 * a5 + value.M33 * a2 + value.M34 * a1;
+            float d43 = value.M31 * -a4 + value.M32 * a2 + value.M34 * a0;
+            float d44 = value.M31 * a3 + value.M32 * -a1 + value.M33 * a0;
+
+            result.M11 = +d11 * det; result.M12 = -d21 * det; result.M13 = +d31 * det; result.M14 = -d41 * det;
+            result.M21 = -d12 * det; result.M22 = +d22 * det; result.M23 = -d32 * det; result.M24 = +d42 * det;
+            result.M31 = +d13 * det; result.M32 = -d23 * det; result.M33 = +d33 * det; result.M34 = -d43 * det;
+            result.M41 = -d14 * det; result.M42 = +d24 * det; result.M43 = -d34 * det; result.M44 = +d44 * det;
+        }
+        /// <summary>
+        /// Calculates the inverse of the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix whose inverse is to be calculated.</param>
+        /// <returns>The inverse of the specified matrix.</returns>
+        public static Matrix4x4 Invert(Matrix4x4 value)
+        {
+            Invert(ref value, out Matrix4x4 result);
+            return result;
+        }
+
+        /// <summary>
+        /// Calculates the transpose of the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix whose transpose is to be calculated.</param>
+        /// <param name="result">When the method completes, contains the transpose of the specified matrix.</param>
+        public static void Transpose(ref Matrix4x4 value, out Matrix4x4 result)
+        {
+            result = new()
+            {
+                M11 = value.M11,
+                M12 = value.M21,
+                M13 = value.M31,
+                M14 = value.M41,
+                M21 = value.M12,
+                M22 = value.M22,
+                M23 = value.M32,
+                M24 = value.M42,
+                M31 = value.M13,
+                M32 = value.M23,
+                M33 = value.M33,
+                M34 = value.M43,
+                M41 = value.M14,
+                M42 = value.M24,
+                M43 = value.M34,
+                M44 = value.M44
+            };
+        }
+        /// <summary>
+        /// Calculates the transpose of the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix whose transpose is to be calculated.</param>
+        /// <returns>The transpose of the specified matrix.</returns>
+        public static Matrix4x4 Transpose(Matrix4x4 value)
+        {
+            Transpose(ref value, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Orthogonalizes the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix to orthogonalize.</param>
+        /// <param name="result">When the method completes, contains the orthogonalized matrix.</param>
+        /// <remarks>
+        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
+        /// means that any given row in the matrix will be orthogonal to any other given row in the
+        /// matrix.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the matrix rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static void Orthogonalize(ref Matrix4x4 value, out Matrix4x4 result)
+        {
+            //Uses the modified Gram-Schmidt process.
+            //q1 = m1
+            //q2 = m2 - ((q1 ⋅ m2) / (q1 ⋅ q1)) * q1
+            //q3 = m3 - ((q1 ⋅ m3) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m3) / (q2 ⋅ q2)) * q2
+            //q4 = m4 - ((q1 ⋅ m4) / (q1 ⋅ q1)) * q1 - ((q2 ⋅ m4) / (q2 ⋅ q2)) * q2 - ((q3 ⋅ m4) / (q3 ⋅ q3)) * q3
+
+            //By separating the above algorithm into multiple lines, we actually increase accuracy.
+            result = value;
+
+            result.Row2 -= (Vector4.Dot(result.Row1, result.Row2) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
+
+            result.Row3 -= (Vector4.Dot(result.Row1, result.Row3) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
+            result.Row3 -= (Vector4.Dot(result.Row2, result.Row3) / Vector4.Dot(result.Row2, result.Row2)) * result.Row2;
+
+            result.Row4 -= (Vector4.Dot(result.Row1, result.Row4) / Vector4.Dot(result.Row1, result.Row1)) * result.Row1;
+            result.Row4 -= (Vector4.Dot(result.Row2, result.Row4) / Vector4.Dot(result.Row2, result.Row2)) * result.Row2;
+            result.Row4 -= (Vector4.Dot(result.Row3, result.Row4) / Vector4.Dot(result.Row3, result.Row3)) * result.Row3;
+        }
+        /// <summary>
+        /// Orthogonalizes the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix to orthogonalize.</param>
+        /// <returns>The orthogonalized matrix.</returns>
+        /// <remarks>
+        /// <para>Orthogonalization is the process of making all rows orthogonal to each other. This
+        /// means that any given row in the matrix will be orthogonal to any other given row in the
+        /// matrix.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the matrix rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static Matrix4x4 Orthogonalize(Matrix4x4 value)
+        {
+            Orthogonalize(ref value, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Orthonormalizes the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix to orthonormalize.</param>
+        /// <param name="result">When the method completes, contains the orthonormalized matrix.</param>
+        /// <remarks>
+        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
+        /// other and making all rows and columns of unit length. This means that any given row will
+        /// be orthogonal to any other given row and any given column will be orthogonal to any other
+        /// given column. Any given row will not be orthogonal to any given column. Every row and every
+        /// column will be of unit length.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the matrix rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static void Orthonormalize(ref Matrix4x4 value, out Matrix4x4 result)
+        {
+            //Uses the modified Gram-Schmidt process.
+            //Because we are making unit vectors, we can optimize the math for orthonormalization
+            //and simplify the projection operation to remove the division.
+            //q1 = m1 / |m1|
+            //q2 = (m2 - (q1 ⋅ m2) * q1) / |m2 - (q1 ⋅ m2) * q1|
+            //q3 = (m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2) / |m3 - (q1 ⋅ m3) * q1 - (q2 ⋅ m3) * q2|
+            //q4 = (m4 - (q1 ⋅ m4) * q1 - (q2 ⋅ m4) * q2 - (q3 ⋅ m4) * q3) / |m4 - (q1 ⋅ m4) * q1 - (q2 ⋅ m4) * q2 - (q3 ⋅ m4) * q3|
+
+            //By separating the above algorithm into multiple lines, we actually increase accuracy.
+            result = value;
+
+            result.Row1 = Vector4.Normalize(result.Row1);
+
+            result.Row2 -= Vector4.Dot(result.Row1, result.Row2) * result.Row1;
+            result.Row2 = Vector4.Normalize(result.Row2);
+
+            result.Row3 -= Vector4.Dot(result.Row1, result.Row3) * result.Row1;
+            result.Row3 -= Vector4.Dot(result.Row2, result.Row3) * result.Row2;
+            result.Row3 = Vector4.Normalize(result.Row3);
+
+            result.Row4 -= Vector4.Dot(result.Row1, result.Row4) * result.Row1;
+            result.Row4 -= Vector4.Dot(result.Row2, result.Row4) * result.Row2;
+            result.Row4 -= Vector4.Dot(result.Row3, result.Row4) * result.Row3;
+            result.Row4 = Vector4.Normalize(result.Row4);
+        }
+        /// <summary>
+        /// Orthonormalizes the specified matrix.
+        /// </summary>
+        /// <param name="value">The matrix to orthonormalize.</param>
+        /// <returns>The orthonormalized matrix.</returns>
+        /// <remarks>
+        /// <para>Orthonormalization is the process of making all rows and columns orthogonal to each
+        /// other and making all rows and columns of unit length. This means that any given row will
+        /// be orthogonal to any other given row and any given column will be orthogonal to any other
+        /// given column. Any given row will not be orthogonal to any given column. Every row and every
+        /// column will be of unit length.</para>
+        /// <para>Because this method uses the modified Gram-Schmidt process, the resulting matrix
+        /// tends to be numerically unstable. The numeric stability decreases according to the rows
+        /// so that the first row is the most stable and the last row is the least stable.</para>
+        /// <para>This operation is performed on the rows of the matrix rather than the columns.
+        /// If you wish for this operation to be performed on the columns, first transpose the
+        /// input and than transpose the output.</para>
+        /// </remarks>
+        public static Matrix4x4 Orthonormalize(Matrix4x4 value)
+        {
+            Orthonormalize(ref value, out var result);
+            return result;
         }
 
         /// <summary>
@@ -3014,32 +2993,20 @@ namespace Engine.Mathematics
             return result;
         }
 
-        /// <summary>
-        /// Tests for equality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Matrix4x4 left, Matrix4x4 right)
         {
             return left.Equals(ref right);
         }
-        /// <summary>
-        /// Tests for inequality between two objects.
-        /// </summary>
-        /// <param name="left">The first value to compare.</param>
-        /// <param name="right">The second value to compare.</param>
-        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Matrix4x4 left, Matrix4x4 right)
         {
             return !left.Equals(ref right);
         }
-        /// <summary>
-        /// Convert the System.Numerics.Matrix4x4 to a Matrix4x4.
-        /// </summary>
-        /// <returns>A Matrix4x4</returns>
+
+        /// <inheritdoc/>
         public static implicit operator Matrix4x4(System.Numerics.Matrix4x4 Value)
         {
             return new Matrix4x4(
@@ -3048,10 +3015,7 @@ namespace Engine.Mathematics
                 Value.M31, Value.M32, Value.M33, Value.M34,
                 Value.M41, Value.M42, Value.M43, Value.M44);
         }
-        /// <summary>
-        /// Convert the Matrix4x4 to a System.Numerics.Matrix4x4.
-        /// </summary>
-        /// <returns>A System.Numerics.Matrix4x4</returns>
+        /// <inheritdoc/>
         public static implicit operator System.Numerics.Matrix4x4(Matrix4x4 Value)
         {
             return new System.Numerics.Matrix4x4(
@@ -3061,12 +3025,7 @@ namespace Engine.Mathematics
                 Value.M41, Value.M42, Value.M43, Value.M44);
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly string ToString()
         {
             return string.Format(
@@ -3074,13 +3033,7 @@ namespace Engine.Mathematics
                 Matrix4x4Str,
                 M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44);
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format)
         {
             if (format == null) return ToString();
@@ -3094,13 +3047,7 @@ namespace Engine.Mathematics
                 M31.ToString(format, CultureInfo.CurrentCulture), M32.ToString(format, CultureInfo.CurrentCulture), M33.ToString(format, CultureInfo.CurrentCulture), M34.ToString(format, CultureInfo.CurrentCulture),
                 M41.ToString(format, CultureInfo.CurrentCulture), M42.ToString(format, CultureInfo.CurrentCulture), M43.ToString(format, CultureInfo.CurrentCulture), M44.ToString(format, CultureInfo.CurrentCulture));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
         {
             return string.Format(
@@ -3111,14 +3058,7 @@ namespace Engine.Mathematics
                 M31.ToString(formatProvider), M32.ToString(formatProvider), M33.ToString(formatProvider), M34.ToString(formatProvider),
                 M41.ToString(formatProvider), M42.ToString(formatProvider), M43.ToString(formatProvider), M44.ToString(formatProvider));
         }
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="formatProvider">The format provider.</param>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) return ToString(formatProvider);
@@ -3132,12 +3072,7 @@ namespace Engine.Mathematics
                 M41.ToString(format, formatProvider), M42.ToString(format, formatProvider), M43.ToString(format, formatProvider), M44.ToString(format, formatProvider));
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
             HashCode hash = new();
@@ -3160,52 +3095,19 @@ namespace Engine.Mathematics
             return hash.ToHashCode();
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Matrix4x4"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Matrix4x4"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Matrix4x4"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(ref Matrix4x4 other)
         {
-            return (
-                Helper.NearEqual(other.M11, M11) &&
-                Helper.NearEqual(other.M12, M12) &&
-                Helper.NearEqual(other.M13, M13) &&
-                Helper.NearEqual(other.M14, M14) &&
-                Helper.NearEqual(other.M21, M21) &&
-                Helper.NearEqual(other.M22, M22) &&
-                Helper.NearEqual(other.M23, M23) &&
-                Helper.NearEqual(other.M24, M24) &&
-                Helper.NearEqual(other.M31, M31) &&
-                Helper.NearEqual(other.M32, M32) &&
-                Helper.NearEqual(other.M33, M33) &&
-                Helper.NearEqual(other.M34, M34) &&
-                Helper.NearEqual(other.M41, M41) &&
-                Helper.NearEqual(other.M42, M42) &&
-                Helper.NearEqual(other.M43, M43) &&
-                Helper.NearEqual(other.M44, M44));
+            return NearEqual(this, other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="Matrix4x4"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Matrix4x4"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Matrix4x4"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Matrix4x4 other)
         {
             return Equals(ref other);
         }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override readonly bool Equals(object value)
         {
             if (value is not Matrix4x4) return false;
@@ -3214,28 +3116,32 @@ namespace Engine.Mathematics
             return Equals(ref strongValue);
         }
 
-        public static bool NearEqual(Matrix4x4 a, Matrix4x4 b)
+        /// <summary>
+        /// Gets whether the two Matrix4x4 structures are equal.
+        /// </summary>
+        /// <param name="a">The first Matrix4x4 structure to compare.</param>
+        /// <param name="b">The second Matrix4x4 structure to compare.</param>
+        /// <param name="epsilon">The tolerance for equality.</param>
+        /// <returns>true if the two structures are equal; otherwise, false.</returns>
+        public static bool NearEqual(Matrix4x4 a, Matrix4x4 b, float epsilon = Helper.ZeroTolerance)
         {
             return
-                Helper.NearEqual(a.M11, b.M11) &&
-                Helper.NearEqual(a.M12, b.M12) &&
-                Helper.NearEqual(a.M13, b.M13) &&
-                Helper.NearEqual(a.M14, b.M14) &&
-
-                Helper.NearEqual(a.M21, b.M21) &&
-                Helper.NearEqual(a.M22, b.M22) &&
-                Helper.NearEqual(a.M23, b.M23) &&
-                Helper.NearEqual(a.M24, b.M24) &&
-
-                Helper.NearEqual(a.M31, b.M31) &&
-                Helper.NearEqual(a.M32, b.M32) &&
-                Helper.NearEqual(a.M33, b.M33) &&
-                Helper.NearEqual(a.M34, b.M34) &&
-
-                Helper.NearEqual(a.M41, b.M41) &&
-                Helper.NearEqual(a.M42, b.M42) &&
-                Helper.NearEqual(a.M43, b.M43) &&
-                Helper.NearEqual(a.M44, b.M44);
+                Helper.WithinEpsilon(a.M11, b.M11, epsilon) &&
+                Helper.WithinEpsilon(a.M12, b.M12, epsilon) &&
+                Helper.WithinEpsilon(a.M13, b.M13, epsilon) &&
+                Helper.WithinEpsilon(a.M14, b.M14, epsilon) &&
+                Helper.WithinEpsilon(a.M21, b.M21, epsilon) &&
+                Helper.WithinEpsilon(a.M22, b.M22, epsilon) &&
+                Helper.WithinEpsilon(a.M23, b.M23, epsilon) &&
+                Helper.WithinEpsilon(a.M24, b.M24, epsilon) &&
+                Helper.WithinEpsilon(a.M31, b.M31, epsilon) &&
+                Helper.WithinEpsilon(a.M32, b.M32, epsilon) &&
+                Helper.WithinEpsilon(a.M33, b.M33, epsilon) &&
+                Helper.WithinEpsilon(a.M34, b.M34, epsilon) &&
+                Helper.WithinEpsilon(a.M41, b.M41, epsilon) &&
+                Helper.WithinEpsilon(a.M42, b.M42, epsilon) &&
+                Helper.WithinEpsilon(a.M43, b.M43, epsilon) &&
+                Helper.WithinEpsilon(a.M44, b.M44, epsilon);
         }
 
         /// <summary>
@@ -3246,14 +3152,15 @@ namespace Engine.Mathematics
         {
             if (Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
             {
-                return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
+                return string.Format(
+                    Matrix4x4DescStr,
                     scale.GetDescription(),
                     translation.GetDescription(),
                     rotation.GetDescription());
             }
             else
             {
-                return "Bad transform matrix";
+                return "Bad matrix";
             }
         }
     }
