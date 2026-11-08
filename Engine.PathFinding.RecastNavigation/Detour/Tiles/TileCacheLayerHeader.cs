@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -117,7 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-     
+
         /// <inheritdoc/>
         public override readonly string ToString()
         {

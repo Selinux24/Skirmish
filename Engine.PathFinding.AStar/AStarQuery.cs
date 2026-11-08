@@ -1,10 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Path finder class
     /// </summary>

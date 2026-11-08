@@ -1,12 +1,14 @@
-using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests.UI
 {
+    using Engine.Mathematics;
+    using Engine.UI;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class PaddingTests
     {
         [TestMethod]
@@ -48,7 +50,7 @@ namespace EngineTests.UI
         {
             // Arrange
             var padding = new Padding(10, 20, 30, 40);
-            var rectangle = new RectangleF(0, 0, 100, 100);
+            var rectangle = new Rect(0, 0, 100, 100);
 
             // Act
             var result = padding.Apply(rectangle);

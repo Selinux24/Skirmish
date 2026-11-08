@@ -2,7 +2,7 @@
 using Engine.BuiltIn.Drawers.Forward;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Engine.BuiltIn.Components.Geometry
     /// <param name="name">Name</param>
     public sealed class GeometryColorDrawer<T>(Scene scene, string id, string name) : Drawable<GeometryColorDrawerDescription<T>>(scene, id, name), ITransformable3D where T : IVertexList
     {
-        const string className = nameof(GeometryColorDrawer<T>);
+        const string className = nameof(GeometryColorDrawer<>);
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -31,7 +31,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Primitives to draw
         /// </summary>
-        private int drawCount = 0;
+        private uint drawCount = 0;
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
@@ -43,7 +43,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// <summary>
         /// Item stride
         /// </summary>
-        private int stride = 0;
+        private uint stride = 0;
         /// <summary>
         /// Item topology
         /// </summary>
@@ -98,21 +98,21 @@ namespace Engine.BuiltIn.Components.Geometry
             stride = tmp.GetStride();
             topology = tmp.GetTopology();
 
-            int count;
+            uint count;
             if (Description.Primitives?.Length > 0)
             {
                 bufferData = new List<VertexPositionColor>(Description.Primitives.Length);
 
-                count = Description.Primitives.Length * stride;
+                count = (uint)Description.Primitives.Length * stride;
 
-                dictionary.TryAdd(Description.Color, new List<T>(Description.Primitives));
+                dictionary.TryAdd(Description.Color, [.. Description.Primitives]);
                 dictionaryChanged = true;
             }
             else
             {
                 bufferData = new List<VertexPositionColor>(Description.Count);
 
-                count = Description.Count * stride;
+                count = (uint)Description.Count * stride;
 
                 dictionaryChanged = false;
             }
@@ -125,7 +125,7 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="vertexCount">Vertex count</param>
-        private void InitializeBuffers(string name, int vertexCount)
+        private void InitializeBuffers(string name, uint vertexCount)
         {
             vertexBuffer = BufferManager.AddVertexData(name, true, new VertexPositionColor[vertexCount]);
         }
@@ -257,7 +257,7 @@ namespace Engine.BuiltIn.Components.Geometry
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"{className} Name: {Name} - Sets a null manipulator. Discarded.");
 
                 return;
             }
@@ -324,7 +324,7 @@ namespace Engine.BuiltIn.Components.Geometry
                 return;
             }
 
-            drawCount = bufferData.Count;
+            drawCount = (uint)bufferData.Count;
 
             dictionaryChanged = false;
         }

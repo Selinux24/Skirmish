@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -97,11 +97,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Minimum bounds of the item's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 BMin { get; set; }
+        public Vector3I BMin { get; set; }
         /// <summary>
         /// Maximum bounds of the item's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 BMax { get; set; }
+        public Vector3I BMax { get; set; }
         /// <summary>
         /// The item's index. (Negative for escape sequence.)
         /// </summary>
@@ -127,18 +127,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var bbox = Utils.GetMinMaxBounds(detailVerts, vb, ndv);
 
             // BV-tree uses cs for all dimensions
-            BMin = new Int3
+            BMin = new()
             {
-                X = MathUtil.Clamp((int)((bbox.Minimum.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bbox.Minimum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bbox.Minimum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = Math.Clamp((int)((bbox.Minimum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = Math.Clamp((int)((bbox.Minimum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = Math.Clamp((int)((bbox.Minimum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
 
-            BMax = new Int3
+            BMax = new()
             {
-                X = MathUtil.Clamp((int)((bbox.Maximum.X - bMin.X) * quantFactor), 0, int.MaxValue),
-                Y = MathUtil.Clamp((int)((bbox.Maximum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
-                Z = MathUtil.Clamp((int)((bbox.Maximum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+                X = Math.Clamp((int)((bbox.Maximum.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = Math.Clamp((int)((bbox.Maximum.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = Math.Clamp((int)((bbox.Maximum.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
             };
         }
         /// <summary>
@@ -149,7 +149,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="verts">Vertex list</param>
         /// <param name="ch">Cell height</param>
         /// <param name="cs">Cell size</param>
-        public void CalcPolygonBounds(IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
+        public void CalcPolygonBounds(IndexedPolygon p, int nvp, Vector3I[] verts, float ch, float cs)
         {
             int p0 = p.GetVertex(0);
             var v0 = verts[p0];

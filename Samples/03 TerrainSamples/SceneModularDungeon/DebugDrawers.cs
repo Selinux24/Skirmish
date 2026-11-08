@@ -2,10 +2,10 @@
 using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.Common;
+using Engine.Mathematics;
 using Engine.Modular;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,8 +20,8 @@ namespace TerrainSamples.SceneModularDungeon
         private GeometryColorDrawer<Triangle> obstacleDrawer = null;
         private GeometryColorDrawer<Line3D> connectionDrawer = null;
 
-        private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
-        private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
+        private readonly Color4 connectionColor = new(Color.LightBlue, 1f);
+        private readonly Color4 obstacleColor = new(Color.Pink, 0.5f);
 
         private Player[] agents;
         private int currentAgentIndex = 0;
@@ -39,7 +39,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var bboxesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
+                Color = new(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
             bboxesDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
@@ -47,7 +47,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var ratDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
+                Color = new(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
             modelDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneModularDungeon
             DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow);
             DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple);
         }
-        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color color)
+        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color4 color)
         {
             if (!boxes.Any())
             {
@@ -184,7 +184,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
                 if (!res.TryGetValue(color, out var value))

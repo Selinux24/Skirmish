@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Mathematics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Engine.Content.Persistence
@@ -55,7 +56,7 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Gravity
         /// </summary>
-        public Direction3 Gravity { get; set; } = Direction3.Down;
+        public Vector3 Gravity { get; set; } = Vector3.Down;
 
         /// <summary>
         /// Velocity at end
@@ -65,11 +66,11 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public ColorRgba MinColor { get; set; }
+        public Color MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public ColorRgba MaxColor { get; set; }
+        public Color MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed

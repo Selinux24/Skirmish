@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
@@ -55,29 +55,29 @@ namespace Engine
         /// <summary>
         /// Render width
         /// </summary>
-        int RenderWidth { get; }
+        uint RenderWidth { get; }
         /// <summary>
         /// Render height
         /// </summary>
-        int RenderHeight { get; }
+        uint RenderHeight { get; }
         /// <summary>
         /// Render rectangle
         /// </summary>
-        RectangleF RenderRectangle
+        Rect RenderRectangle
         {
             get
             {
-                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+                return new(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <summary>
         /// Render area center
         /// </summary>
-        Point RenderCenter { get; }
+        System.Drawing.Point RenderCenter { get; }
         /// <summary>
         /// Screen center
         /// </summary>
-        Point ScreenCenter { get; }
+        System.Drawing.Point ScreenCenter { get; }
         /// <summary>
         /// The form is manually resizing
         /// </summary>
@@ -124,7 +124,7 @@ namespace Engine
         /// Gets the current ortho-projection matrix
         /// </summary>
         /// <returns>Returns the current ortho-projection matrix</returns>
-        Matrix GetOrthoProjectionMatrix();
+        Matrix4x4 GetOrthoProjectionMatrix();
         /// <summary>
         /// Transform to screen space using the form view ortho projection matrix
         /// </summary>
@@ -144,10 +144,10 @@ namespace Engine
         /// <summary>
         ///  Computes the location of the screen point p in client coordinates.
         /// </summary>
-        Point PointToClient(Point p);
+        System.Drawing.Point PointToClient(System.Drawing.Point p);
         /// <summary>
         ///  Computes the location of the client point p in screen coordinates.
         /// </summary>
-        Point PointToScreen(Point p);
+        System.Drawing.Point PointToScreen(System.Drawing.Point p);
     }
 }

@@ -14,7 +14,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMapSpot(Scene scene, string name, int width, int height, int arraySize) : base(scene, name, width, height, arraySize)
+        public ShadowMapSpot(Scene scene, string name, uint width, uint height, uint arraySize) : base(scene, name, width, height, arraySize)
         {
             var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, width, height, 1, arraySize);
 

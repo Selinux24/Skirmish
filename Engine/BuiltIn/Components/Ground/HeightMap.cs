@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -433,7 +433,7 @@ namespace Engine.BuiltIn.Components.Ground
             float h = heightCurve.Evaluate(m_HeightData[depth, width]);
             if (m_FalloffData != null)
             {
-                h = MathUtil.Clamp(h - m_FalloffData[depth, width], 0, 1);
+                h = Math.Clamp(h - m_FalloffData[depth, width], 0, 1);
             }
 
             Color4 c = m_ColorData != null ? m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);

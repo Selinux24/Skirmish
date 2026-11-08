@@ -8,8 +8,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,9 +62,9 @@ namespace AISamples.SceneCWRVirtualWorld
         private const string editorFont = "Consolas";
         private const int editorButtonWidth = 100;
         private const int editorButtonHeight = 25;
-        private readonly Color editorBackgroundColor = Color.WhiteSmoke;
-        private readonly Color editorButtonColor = Color.LightGray;
-        private readonly Color editorButtonTextColor = Color.Black;
+        private readonly Color4 editorBackgroundColor = Color.WhiteSmoke;
+        private readonly Color4 editorButtonColor = Color.LightGray;
+        private readonly Color4 editorButtonTextColor = Color.Black;
 
         private const string titleText = "A VIRTUAL WORLD";
         private const string infoText = "PRESS F1 FOR HELP";
@@ -104,7 +104,7 @@ ESC - EXIT";
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color3.White, Color3.Black, true));
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color.White, Color.Black, true));
 
             world = new(graph, 0);
             world.Generate();
@@ -197,7 +197,7 @@ ESC - EXIT";
             editorButtonDesc.Width = editorButtonWidth;
             editorButtonDesc.Height = editorButtonHeight;
             editorButtonDesc.ColorReleased = editorButtonColor;
-            editorButtonDesc.ColorPressed = new Color4(editorButtonColor.RGB() * 1.2f, 1f);
+            editorButtonDesc.ColorPressed = new((Color3)editorButtonColor * 1.2f, 1f);
             editorButtonDesc.TextForeColor = editorButtonTextColor;
             editorButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             editorButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -308,7 +308,7 @@ ESC - EXIT";
                 var exList = res.GetExceptions();
                 foreach (var ex in exList)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 Game.Exit();

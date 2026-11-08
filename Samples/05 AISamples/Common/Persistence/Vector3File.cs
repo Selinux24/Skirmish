@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace AISamples.Common.Persistence
 {
+    using Engine.Mathematics;
+
     struct Vector3File
     {
         public float X { get; set; }

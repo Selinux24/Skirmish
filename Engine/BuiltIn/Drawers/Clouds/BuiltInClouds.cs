@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Clouds
@@ -76,9 +76,9 @@ namespace Engine.BuiltIn.Drawers.Clouds
             public float Brightness;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerCloud>();
+                return (uint)Marshal.SizeOf<PerCloud>();
             }
         }
 

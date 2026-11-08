@@ -1,6 +1,6 @@
+using Engine.Mathematics;
 using Engine.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -24,8 +24,8 @@ namespace EngineTests.UI
         {
             // Arrange
             string text = string.Empty;
-            Color4 defaultForeColor = new(1, 1, 1, 1); // Blanco
-            Color4 defaultShadowColor = new(0, 0, 0, 1); // Negro
+            Color4 defaultForeColor = Color.White; // Blanco
+            Color4 defaultShadowColor = Color.Black; // Negro
 
             // Act
             var result = FontMapParser.ParseSentence(text, defaultForeColor, defaultShadowColor);
@@ -41,8 +41,8 @@ namespace EngineTests.UI
         {
             // Arrange
             string text = "Hello I'm your father";
-            Color4 defaultForeColor = new(1, 1, 1, 1); // Blanco
-            Color4 defaultShadowColor = new(0, 0, 0, 1); // Negro
+            Color4 defaultForeColor = Color.White; // Blanco
+            Color4 defaultShadowColor = Color.Black; // Negro
 
             // Act
             var result = FontMapParser.ParseSentence(text, defaultForeColor, defaultShadowColor);

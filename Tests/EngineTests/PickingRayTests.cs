@@ -1,11 +1,12 @@
 ﻿using Engine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests
 {
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]

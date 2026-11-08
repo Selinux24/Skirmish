@@ -1,7 +1,7 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Collections.Generic;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -140,8 +140,8 @@ namespace Engine.BuiltIn.Components.Ground
                 }
             }
 
-            var bbox = SharpDXExtensions.BoundingBoxFromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
-            var items = vertices.Select(v => (SharpDXExtensions.BoundingBoxFromPoints(v.GetVertices().ToArray()), v));
+            var bbox = BoundingBox.FromPoints([.. vertices.SelectMany(v => v.GetVertices()).Distinct()]);
+            var items = vertices.Select(v => (BoundingBox.FromPoints([.. v.GetVertices()]), v));
             res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, new(LODLevels, false, 0));
 
             //Populate nodes dictionary
@@ -191,17 +191,11 @@ namespace Engine.BuiltIn.Components.Ground
                     }
                 }
 
-                if (dictVB != null)
-                {
-                    dictVB.Clear();
-                    dictVB = null;
-                }
+                dictVB?.Clear();
+                dictVB = null;
 
-                if (dictIB != null)
-                {
-                    dictIB.Clear();
-                    dictIB = null;
-                }
+                dictIB?.Clear();
+                dictIB = null;
 
                 drawingQuadTree = null;
 
@@ -397,8 +391,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="nodeList">Node list</param>
         private static bool DrawNodeList(IEngineDeviceContext dc, IDrawer drawer, TerrainGridNode[] nodeList)
         {
-            int instanceCount = 0;
-            int primitiveCount = 0;
+            uint primitiveCount = 0;
 
             for (int i = 0; i < nodeList.Length; i++)
             {
@@ -419,7 +412,6 @@ namespace Engine.BuiltIn.Components.Ground
                     continue;
                 }
 
-                instanceCount++;
                 primitiveCount += gNode.IBDesc.Count / 3;
             }
 

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -53,7 +53,7 @@ namespace Engine
         /// <inheritdoc/>
         public void Update(IGameTime gameTime)
         {
-            Matrix transform = manipulator.LocalTransform;
+            Matrix4x4 transform = manipulator.LocalTransform;
 
             Vector3 desiredPosition = Vector3.TransformCoordinate(positionOffset, transform);
             Vector3 position = Vector3.Lerp(Position, desiredPosition, Velocity * gameTime.ElapsedSeconds);

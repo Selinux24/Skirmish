@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Quad tree
     /// </summary>

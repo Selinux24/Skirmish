@@ -1,5 +1,5 @@
-﻿using Engine.PathFinding.RecastNavigation;
-using SharpDX;
+﻿using Engine;
+using Engine.PathFinding.RecastNavigation;
 using System;
 
 namespace TerrainSamples.SceneModularDungeon
@@ -40,8 +40,8 @@ namespace TerrainSamples.SceneModularDungeon
             if (obj is Player other)
             {
                 return
-                    MathUtil.NearEqual(other.Velocity, Velocity) &&
-                    MathUtil.NearEqual(other.VelocitySlow, VelocitySlow);
+                    Helper.NearEqual(other.Velocity, Velocity) &&
+                    Helper.NearEqual(other.VelocitySlow, VelocitySlow);
             }
 
             return false;

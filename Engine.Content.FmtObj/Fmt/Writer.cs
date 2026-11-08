@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,8 +16,8 @@ namespace Engine.Content.FmtObj.Fmt
             triangles.ToList().ForEach(t => normals.AddRange([t.Normal, t.Normal, t.Normal]));
 
             int index = 0;
-            var indices = new List<Int3>();
-            triangles.ToList().ForEach(t => indices.Add(new Int3(index++, index++, index++)));
+            var indices = new List<Vector3I>();
+            triangles.ToList().ForEach(t => indices.Add(new Vector3I(index++, index++, index++)));
 
             // Write the file
             WriteData(wr, "v", points.Cast<Vector3?>());

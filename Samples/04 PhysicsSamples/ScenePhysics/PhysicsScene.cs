@@ -5,9 +5,9 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Physics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -131,7 +131,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeJoint()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 8;
@@ -152,7 +152,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Matrix.Translation(new Vector3(-15, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(-15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -160,7 +160,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Matrix.Translation(new Vector3(-20, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(-20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -184,7 +184,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeRod()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 8;
@@ -205,7 +205,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Matrix.Translation(new Vector3(15, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -213,7 +213,7 @@ namespace PhysicsSamples.ScenePhysics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Matrix.Translation(new Vector3(20, 10, 0)),
+                InitialTransform = Matrix4x4.Translation(new Vector3(20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -238,7 +238,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task CreateCollider(string componentName, int index, ColliderTypes colliderType, GeometryDescriptor geo, IEnumerable<Line3D> wired)
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White;
 
             var desc = new ModelDescription()
             {
@@ -247,12 +247,12 @@ namespace PhysicsSamples.ScenePhysics
             };
 
             var model = await AddComponent<Model, ModelDescription>(componentName, componentName, desc);
-            model.TintColor = Helper.IntToCol(index * 10, 255);
+            model.TintColor = Color4.IntToCol(index * 10, 255);
 
             var rbState = new RigidBodyState
             {
                 Mass = 15,
-                InitialTransform = Matrix.Translation(Vector3.Up * (10f + (index * 2f))),
+                InitialTransform = Matrix4x4.Translation(Vector3.Up * (10f + (index * 2f))),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -267,7 +267,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeSpheres()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White;
 
             int slices = 16;
             int stacks = 16;
@@ -296,7 +296,9 @@ namespace PhysicsSamples.ScenePhysics
         }
         private async Task InitializeFrustums()
         {
-            var bFrustum = BoundingFrustum.FromCamera(Vector3.Zero, Vector3.Down, Vector3.ForwardLH, MathUtil.PiOverFour, 2, 4, 1);
+            var view = Matrix4x4.LookAtLH(Vector3.Zero, Vector3.Down, Vector3.ForwardLH);
+            var proj = Matrix4x4.PerspectiveFovLH(Helper.PiOver4, 1, 2, 4);
+            var bFrustum = new BoundingFrustum(view * proj);
             var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);
             var wired = Line3D.CreateFrustum(bFrustum);
 
@@ -376,7 +378,7 @@ namespace PhysicsSamples.ScenePhysics
                 var exList = res.GetExceptions();
                 foreach (var ex in exList)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 Game.Exit();
@@ -528,7 +530,7 @@ namespace PhysicsSamples.ScenePhysics
 
             var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
             var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
-            lineDrawer.AddPrimitives(Color4.White, [lJoint, rJoint]);
+            lineDrawer.AddPrimitives(Color.White, [lJoint, rJoint]);
         }
         private void UpdateText()
         {

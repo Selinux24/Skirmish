@@ -1,4 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Content.FmtCollada.FX;
+using Engine.Content.FmtCollada.Types;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,12 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Animation;
-    using Engine.Content.FmtCollada.FX;
-    using Engine.Content.FmtCollada.Types;
-    using Engine.Common;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Loader for collada
     /// </summary>
@@ -585,7 +584,7 @@ namespace Engine.Content.FmtCollada.Fmt
                     data[i + 2] = verts[i + 1];
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull, Matrix.Identity);
+                SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull, Matrix4x4.Identity);
 
                 meshInfo.SetVertices(data);
 
@@ -610,7 +609,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
 
             int inputCount = triangle.Inputs.Length;
 
@@ -682,7 +681,7 @@ namespace Engine.Content.FmtCollada.Fmt
                     continue;
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull, Matrix.Identity);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull, Matrix4x4.Identity);
 
                 meshInfo.SetVertices(verts);
                 meshInfo.SetIndices(indices);
@@ -710,7 +709,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
             var colors = colorsInput != null ? meshSources.ElementAt(colorsInput.Offset).ReadColor3() : null;
 
             int index = 0;
@@ -811,7 +810,7 @@ namespace Engine.Content.FmtCollada.Fmt
                     data[i + 2] = verts[i + 1];
                 }
 
-                SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull, Matrix.Identity);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull, Matrix4x4.Identity);
 
                 meshInfo.SetVertices(data);
 
@@ -836,7 +835,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
             var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
 
             int inputCount = polygon.Inputs.Length;
 
@@ -998,7 +997,7 @@ namespace Engine.Content.FmtCollada.Fmt
         {
             ControllerContent res = new()
             {
-                BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()),
+                BindShapeMatrix = Matrix4x4.Transpose(skin.BindShapeMatrix.ToMatrix4x4()),
                 Skin = skin.SourceUri.Replace("#", ""),
             };
 
@@ -1007,7 +1006,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 ProcessVertexWeights(skin, out var ibmList, out var wgList);
 
                 res.InverseBindMatrix = ibmList;
-                res.Weights = wgList.ToArray();
+                res.Weights = [.. wgList];
             }
 
             return res;
@@ -1023,7 +1022,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             ProcessVertexWeights(morph, out var wgList);
 
-            res.Weights = wgList.ToArray();
+            res.Weights = [.. wgList];
 
             return res;
         }
@@ -1033,12 +1032,12 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="skin">Skin information</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out IEnumerable<Weight> weightList)
+        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix4x4> inverseBindMatrixList, out IEnumerable<Weight> weightList)
         {
             //Joints & matrices
             int jointsOffset = -1;
             string[] joints = null;
-            Matrix[] mats = null;
+            Matrix4x4[] mats = null;
             var jointsInput = skin.VertexWeights[EnumSemantics.Joint];
             if (jointsInput != null)
             {
@@ -1120,7 +1119,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 for (int v = 0; v < n; v++)
                 {
                     float weightValue = weights.ElementAt(skin.VertexWeights.V[index + weightsOffset]);
-                    if (!MathUtil.IsZero(weightValue))
+                    if (!Helper.IsZero(weightValue))
                     {
                         string jointName = joints.ElementAt(skin.VertexWeights.V[index + jointsOffset]);
 
@@ -1147,7 +1146,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="joints">Joint names list</param>
         /// <param name="mats">Inverse bind matrix list</param>
         /// <returns>Returns the inverse bind matrix by joint name dictionary</returns>
-        private static Dictionary<string, Matrix> BuildInverseBindMatrixList(IEnumerable<string> joints, IEnumerable<Matrix> mats)
+        private static Dictionary<string, Matrix4x4> BuildInverseBindMatrixList(IEnumerable<string> joints, IEnumerable<Matrix4x4> mats)
         {
             if (mats?.Any() != true || joints?.Any() != true)
             {
@@ -1159,7 +1158,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 return [];
             }
 
-            var ibmList = new Dictionary<string, Matrix>();
+            var ibmList = new Dictionary<string, Matrix4x4>();
 
             for (int i = 0; i < joints.Count(); i++)
             {
@@ -1400,7 +1399,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
+        private static void ProcessVisualScene(Collada dae, Matrix4x4 transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
         {
             if (dae.Scene.InstanceVisualScene == null)
             {
@@ -1466,7 +1465,7 @@ namespace Engine.Content.FmtCollada.Fmt
                     new SkinningContent
                     {
                         Skeleton = skeleton,
-                        Controllers = controllerNames.ToArray(),
+                        Controllers = [.. controllerNames],
                     });
             }
         }
@@ -1478,7 +1477,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
+        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix4x4 transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
         {
             if (nodes?.Any() != true)
             {
@@ -1487,7 +1486,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             foreach (var node in nodes)
             {
-                Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
+                Matrix4x4 trn = useControllerTransform ? transform * node.ReadMatrix4x4() : transform;
 
                 bool procChilds = true;
 
@@ -1522,7 +1521,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="nodes">Node list</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ContentData modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesDefault(Matrix4x4 trn, IEnumerable<Node> nodes, ContentData modelContent, bool bakeTransforms)
         {
             if (nodes?.Any() != true)
             {
@@ -1531,7 +1530,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
             foreach (var child in nodes)
             {
-                ProcessSceneNodesGeometry(trn * child.ReadMatrix(), child.InstanceGeometry, modelContent, bakeTransforms);
+                ProcessSceneNodesGeometry(trn * child.ReadMatrix4x4(), child.InstanceGeometry, modelContent, bakeTransforms);
             }
         }
         /// <summary>
@@ -1540,7 +1539,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="trn">Transform</param>
         /// <param name="lights">Light nodes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodesLight(Matrix trn, IEnumerable<InstanceWithExtra> lights, ContentData modelContent)
+        private static void ProcessSceneNodesLight(Matrix4x4 trn, IEnumerable<InstanceWithExtra> lights, ContentData modelContent)
         {
             if (lights?.Any() != true)
             {
@@ -1567,7 +1566,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="geometry">Geometry nodes</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesGeometry(Matrix trn, IEnumerable<InstanceGeometry> geometry, ContentData modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesGeometry(Matrix4x4 trn, IEnumerable<InstanceGeometry> geometry, ContentData modelContent, bool bakeTransforms)
         {
             if (geometry?.Any() != true)
             {
@@ -1730,9 +1729,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Joint parent, Node node)
         {
-            Matrix localTransform = node.ReadMatrix();
+            Matrix4x4 localTransform = node.ReadMatrix4x4();
 
-            Joint jt = new(node.Id, node.SId, parent, localTransform, Matrix.Identity);
+            Joint jt = new(node.Id, node.SId, parent, localTransform, Matrix4x4.Identity);
 
             Skeleton.UpdateToWorldTransform(jt);
 

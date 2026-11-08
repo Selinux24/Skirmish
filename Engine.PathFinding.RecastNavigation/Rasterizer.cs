@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,8 +129,8 @@ namespace Engine.PathFinding.RecastNavigation
                 maxY = nmaxY;
 
                 // Snap the span to the heightfield height grid.
-                int ismin = MathUtil.Clamp((int)MathF.Floor(minY * ich), 0, maxHeight);
-                int ismax = MathUtil.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, maxHeight);
+                int ismin = Math.Clamp((int)MathF.Floor(minY * ich), 0, maxHeight);
+                int ismax = Math.Clamp((int)MathF.Ceiling(maxY * ich), ismin + 1, maxHeight);
 
                 yield return new(x, z, ismin, ismax, item.AreaType, flagMergeThr);
             }
@@ -276,8 +276,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return (false, s0, s1);
             }
-            s0 = MathUtil.Clamp(s0, -1, axisOffset - 1);
-            s1 = MathUtil.Clamp(s1, 0, axisOffset - 1);
+            s0 = Math.Clamp(s0, -1, axisOffset - 1);
+            s1 = Math.Clamp(s1, 0, axisOffset - 1);
 
             return (true, s0, s1);
         }

@@ -498,7 +498,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public void UseItem(Phase phase, Item item, int points)
         {
-            if(phase == Phase.Movement)
+            if (phase == Phase.Movement)
             {
                 item.Use();
 
@@ -589,7 +589,7 @@ namespace TerrainSamples.SceneGrid.Rules
         }
         private void AnimateLib(string animation)
         {
-            Logger.WriteDebug(this, animation);
+            Game.Logger.WriteDebug(this, animation);
         }
 
         public override string ToString()

@@ -1,5 +1,6 @@
 ﻿using Engine.Collections.Generic;
 using Engine.Common;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,7 +21,8 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns true if picked position found</returns>
         public static bool PickNearest(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
-            var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
+            var bbox = node.BoundingBox;
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -101,7 +103,8 @@ namespace Engine.Collections.Helpers
 
             foreach (var child in node.Children)
             {
-                if (Intersection.RayIntersectsBox(ray, child.BoundingBox, out float d))
+                var obb = child.BoundingBox;
+                if (Collision.RayIntersectsBox(ref ray, ref obb, out float d))
                 {
                     while (boxHitsByDistance.ContainsKey(d))
                     {
@@ -125,7 +128,8 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns true if picked position found</returns>
         public static bool PickFirst(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
-            var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
+            var bbox = node.BoundingBox;
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -156,7 +160,8 @@ namespace Engine.Collections.Helpers
         {
             foreach (var child in node.Children)
             {
-                var inBox = Intersection.RayIntersectsBox(ray, child.BoundingBox, out _);
+                var bbox = child.BoundingBox;
+                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;
@@ -190,7 +195,8 @@ namespace Engine.Collections.Helpers
         /// <returns>Returns true if picked position found</returns>
         public static bool PickAll(PickingQuadTreeNode<T> node, PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
+            var bbox = node.BoundingBox;
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 results = [];
@@ -222,7 +228,8 @@ namespace Engine.Collections.Helpers
 
             foreach (var child in node.Children)
             {
-                var inBox = Intersection.RayIntersectsBox(ray, child.BoundingBox, out _);
+                var bbox = child.BoundingBox;
+                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;

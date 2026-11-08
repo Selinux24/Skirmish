@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +64,8 @@ namespace Engine.PathFinding
                 {
                     tris = tris.Where(t =>
                     {
-                        return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                        var bb = bounds.Value;
+                        return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                     });
                 }
 
@@ -92,7 +93,8 @@ namespace Engine.PathFinding
             {
                 tris = tris.Where(t =>
                 {
-                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
+                    var bb = bounds.Value;
+                    return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                 });
             }
 

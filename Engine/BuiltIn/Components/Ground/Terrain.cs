@@ -4,7 +4,7 @@ using Engine.BuiltIn.Drawers.Deferred;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -204,7 +204,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var meshState = new BuiltInDrawerMeshState
             {
-                Local = Matrix.Identity,
+                Local = Matrix4x4.Identity,
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 

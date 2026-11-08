@@ -1,9 +1,10 @@
-﻿using Engine;
-using SharpDX;
-using System.Linq;
+﻿using System.Linq;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Patrolling behavior
     /// </summary>
@@ -114,7 +115,7 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                 {
                     LastCheckPointTime = 0;
 
-                    Logger.WriteDebug(this, $"Agent {Agent} going to next check-point.");
+                    Game.Logger.WriteDebug(this, $"Agent {Agent} going to next check-point.");
 
                     currentCheckPoint++;
                     if (currentCheckPoint > checkPoints.Length - 1)
@@ -128,7 +129,7 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
 
             if (navigate)
             {
-                Logger.WriteDebug(this, $"Agent {Agent} looking for path.");
+                Game.Logger.WriteDebug(this, $"Agent {Agent} looking for path.");
 
                 Agent.SetRouteToPoint(checkPoints[currentCheckPoint], PatrollVelocity, true);
             }

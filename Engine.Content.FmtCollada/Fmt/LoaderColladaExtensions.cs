@@ -1,13 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Content.FmtCollada.Types;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Content.FmtCollada.Types;
-    using Engine.Common;
-
     /// <summary>
     /// Extensions for collada to sharpDX data parse
     /// </summary>
@@ -22,7 +21,7 @@ namespace Engine.Content.FmtCollada.Fmt
         {
             if (vector.Values != null && vector.Values.Length == 2)
             {
-                return new Vector2(vector.Values[0], vector.Values[1]);
+                return new(vector.Values[0], vector.Values[1]);
             }
             else
             {
@@ -38,7 +37,7 @@ namespace Engine.Content.FmtCollada.Fmt
         {
             if (vector.Values != null && vector.Values.Length == 3)
             {
-                return new Vector3(vector.Values[0], vector.Values[2], vector.Values[1]);
+                return new(vector.Values[0], vector.Values[2], vector.Values[1]);
             }
             else
             {
@@ -54,7 +53,7 @@ namespace Engine.Content.FmtCollada.Fmt
         {
             if (vector.Values != null && vector.Values.Length == 4)
             {
-                return new Vector4(vector.Values[0], vector.Values[2], vector.Values[1], vector.Values[3]);
+                return new(vector.Values[0], vector.Values[2], vector.Values[1], vector.Values[3]);
             }
             else
             {
@@ -62,19 +61,19 @@ namespace Engine.Content.FmtCollada.Fmt
             }
         }
         /// <summary>
-        /// Reads a Color3 from BasicColor
+        /// Reads a Vector3 from BasicColor
         /// </summary>
         /// <param name="color">BasicColor color</param>
-        /// <returns>Returns the parsed Color3 from BasicColor</returns>
+        /// <returns>Returns the parsed Vector3 from BasicColor</returns>
         public static Color3 ToColor3(this BasicColor color)
         {
             if (color.Values != null && color.Values.Length == 3)
             {
-                return new Color3(color.Values[0], color.Values[1], color.Values[2]);
+                return new(color.Values[0], color.Values[1], color.Values[2]);
             }
             else if (color.Values != null && color.Values.Length == 4)
             {
-                return new Color3(color.Values[0], color.Values[1], color.Values[2]);
+                return new(color.Values[0], color.Values[1], color.Values[2]);
             }
             else
             {
@@ -82,30 +81,30 @@ namespace Engine.Content.FmtCollada.Fmt
             }
         }
         /// <summary>
-        /// Reads a Color4 from BasicColor
+        /// Reads a Vector4 from BasicColor
         /// </summary>
         /// <param name="color">BasicColor color</param>
-        /// <returns>Returns the parsed Color4 from BasicColor</returns>
+        /// <returns>Returns the parsed Vector4 from BasicColor</returns>
         public static Color4 ToColor4(this BasicColor color)
         {
             if (color.Values != null && color.Values.Length == 3)
             {
-                return new Color4(color.Values[0], color.Values[1], color.Values[2], 1f);
+                return new(color.Values[0], color.Values[1], color.Values[2], 1f);
             }
             else if (color.Values != null && color.Values.Length == 4)
             {
-                return new Color4(color.Values[0], color.Values[1], color.Values[2], color.Values[3]);
+                return new(color.Values[0], color.Values[1], color.Values[2], color.Values[3]);
             }
             else
             {
-                throw new EngineException("Value cannot be parsed to Color4.");
+                throw new EngineException("Value cannot be parsed to Vector4.");
             }
         }
         /// <summary>
-        /// Reads a Matrix from BasicFloat4x4
+        /// Reads a Matrix4x4 from BasicFloat4x4
         /// </summary>
         /// <param name="matrix">BasicFloat4x4 matrix</param>
-        /// <returns>Returns the parsed Matrix from BasicFloat4x4</returns>
+        /// <returns>Returns the parsed Matrix4x4 from BasicFloat4x4</returns>
         /// <remarks>
         /// From right handed
         /// { rx, ry, rz, 0 }
@@ -118,11 +117,11 @@ namespace Engine.Content.FmtCollada.Fmt
         /// { ux, uz, uy, 0 }
         /// { px, pz, py, 1 }
         /// </remarks>
-        public static Matrix ToMatrix(this BasicFloat4X4 matrix)
+        public static Matrix4x4 ToMatrix4x4(this BasicFloat4X4 matrix)
         {
             if (matrix.Values != null && matrix.Values.Length == 16)
             {
-                var m = new Matrix()
+                var m = new Matrix4x4()
                 {
                     M11 = matrix.Values[0],
                     M12 = matrix.Values[2],
@@ -149,7 +148,7 @@ namespace Engine.Content.FmtCollada.Fmt
             }
             else
             {
-                throw new EngineException("Value cannot be parsed to Matrix 4x4.");
+                throw new EngineException("Value cannot be parsed to Matrix4x4.");
             }
         }
 
@@ -217,33 +216,12 @@ namespace Engine.Content.FmtCollada.Fmt
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>Returns the Vector2 array</returns>
-        public static Vector2[] ReadVector2(this Source source)
+        public static Vector2[] ReadUV(this Source source)
         {
-            int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 2)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector2)}");
+            var floats = ReadFloatArray(source, ["S", "T"]);
 
-                return [];
-            }
-
-            int length = source.TechniqueCommon.Accessor.Count;
-
-            int s = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "S");
-            int t = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "T");
-
-            var verts = new List<Vector2>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                var v = new Vector2(
-                    source.FloatArray[i + s],
-                    source.FloatArray[i + t]);
-
-                verts.Add(v);
-            }
-
-            return [.. verts];
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector2(f))];
         }
         /// <summary>
         /// Reads a Vector3 array from a source
@@ -252,34 +230,10 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <returns>Returns the Vector3 array</returns>
         public static Vector3[] ReadVector3(this Source source)
         {
-            int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 3)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector3)}");
+            var floats = ReadFloatArray(source, ["X", "Y", "Z"]);
 
-                return [];
-            }
-
-            int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
-            int y = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Y");
-            int z = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Z");
-
-            int length = source.TechniqueCommon.Accessor.Count;
-
-            var verts = new List<Vector3>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                //To left handed -> Z flipped to Y
-                var v = new Vector3(
-                    source.FloatArray[i + x],
-                    source.FloatArray[i + z],
-                    source.FloatArray[i + y]);
-
-                verts.Add(v);
-            }
-
-            return [.. verts];
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector3(f[0], f[2], f[1]))];
         }
         /// <summary>
         /// Reads a Vector4 array from a source
@@ -288,36 +242,10 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <returns>Returns the Vector4 array</returns>
         public static Vector4[] ReadVector4(this Source source)
         {
-            int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 4)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector4)}");
+            var floats = ReadFloatArray(source, ["X", "Y", "Z", "W"]);
 
-                return [];
-            }
-
-            int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
-            int y = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Y");
-            int z = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Z");
-            int w = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "W");
-
-            int length = source.TechniqueCommon.Accessor.Count;
-
-            var verts = new List<Vector4>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                //To left handed -> Z flipped to Y
-                var v = new Vector4(
-                    source.FloatArray[i + x],
-                    source.FloatArray[i + z],
-                    source.FloatArray[i + y],
-                    source.FloatArray[i + w]);
-
-                verts.Add(v);
-            }
-
-            return [.. verts];
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector4(f[0], f[2], f[1], f[3]))];
         }
         /// <summary>
         /// Reads a Color3 array from a source
@@ -326,34 +254,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <returns>Returns the Color3 array</returns>
         public static Color3[] ReadColor3(this Source source)
         {
-            int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 3)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color3)}");
+            var floats = ReadFloatArray(source, ["R", "G", "B"]);
 
-                return [];
-            }
-
-            int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
-            int g = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "G");
-            int b = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "B");
-
-            int length = source.TechniqueCommon.Accessor.Count;
-
-            var colors = new List<Color3>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                //To left handed -> Z flipped to Y
-                var v = new Color3(
-                    source.FloatArray[i + r],
-                    source.FloatArray[i + g],
-                    source.FloatArray[i + b]);
-
-                colors.Add(v);
-            }
-
-            return [.. colors];
+            return [.. floats.Select(f => new Color3(f))];
         }
         /// <summary>
         /// Reads a Color4 array from a source
@@ -362,42 +265,15 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <returns>Returns the Color4 array</returns>
         public static Color4[] ReadColor4(this Source source)
         {
-            int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 4)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color4)}");
+            var floats = ReadFloatArray(source, ["R", "G", "B", "A"]);
 
-                return [];
-            }
-
-            int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
-            int g = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "G");
-            int b = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "B");
-            int a = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "A");
-
-            int length = source.TechniqueCommon.Accessor.Count;
-
-            var colors = new List<Color4>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                //To left handed -> Z flipped to Y
-                var v = new Color4(
-                    source.FloatArray[i + r],
-                    source.FloatArray[i + g],
-                    source.FloatArray[i + b],
-                    source.FloatArray[i + a]);
-
-                colors.Add(v);
-            }
-
-            return [.. colors];
+            return [.. floats.Select(f => new Color4(f))];
         }
         /// <summary>
-        /// Reads a Matrix array from a source
+        /// Reads a Matrix4x4 array from a source
         /// </summary>
         /// <param name="source">Source</param>
-        /// <returns>Returns the Matrix array</returns>
+        /// <returns>Returns the Matrix4x4 array</returns>
         /// <remarks>
         /// From right handed
         /// { rx, ry, rz, 0 }
@@ -410,23 +286,23 @@ namespace Engine.Content.FmtCollada.Fmt
         /// { ux, uz, uy, 0 }
         /// { px, pz, py, 1 }
         /// </remarks>
-        public static Matrix[] ReadMatrix(this Source source)
+        public static Matrix4x4[] ReadMatrix(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 16)
             {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix)}");
+                Game.Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix4x4)}");
 
                 return [];
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
 
-            var mats = new List<Matrix>();
+            var mats = new List<Matrix4x4>();
 
             for (int i = 0; i < length * stride; i += stride)
             {
-                var m = new Matrix()
+                var m = new Matrix4x4()
                 {
                     M11 = source.FloatArray[i + 0],
                     M12 = source.FloatArray[i + 8],
@@ -454,21 +330,62 @@ namespace Engine.Content.FmtCollada.Fmt
 
             return [.. mats];
         }
+        /// <summary>
+        /// Reads the accessor float array from source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <param name="accessorParams">Accessor parameters</param>
+        /// <returns>Returns an array of floats by accessors</returns>
+        private static float[][] ReadFloatArray(Source source, string[] accessorParams)
+        {
+            int length = accessorParams.Length;
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != length)
+            {
+                Game.Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {length}");
+
+                return [];
+            }
+
+            var accParams = source.TechniqueCommon.Accessor.Params;
+            int[] idx = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                idx[i] = Array.FindIndex(accParams, p => p.Name == accessorParams[i]);
+            }
+
+            List<float[]> result = [];
+            List<float> tmp = [];
+
+            int count = source.TechniqueCommon.Accessor.Count;
+            for (int i = 0; i < count * stride; i += stride)
+            {
+                for (int f = 0; f < length; f++)
+                {
+                    tmp.Add(source.FloatArray[i + idx[f]]);
+                }
+
+                result.Add([.. tmp]);
+                tmp.Clear();
+            }
+
+            return [.. result];
+        }
 
         /// <summary>
         /// Reads a transform matrix (SRT) from a Node
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrix(this Node node)
+        public static Matrix4x4 ReadMatrix4x4(this Node node)
         {
             if (node.Matrix != null)
             {
-                return ReadMatrixFromTransform(node.Matrix);
+                return ReadMatrix4x4FromTransform(node.Matrix);
             }
             else
             {
-                return ReadMatrixLocRotScale(node.Translate, node.Rotate, node.Scale);
+                return ReadMatrix4x4LocRotScale(node.Translate, node.Rotate, node.Scale);
             }
         }
         /// <summary>
@@ -476,20 +393,20 @@ namespace Engine.Content.FmtCollada.Fmt
         /// </summary>
         /// <param name="matrix">Node matrix</param>
         /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrixFromTransform(BasicFloat4X4[] matrix)
+        public static Matrix4x4 ReadMatrix4x4FromTransform(BasicFloat4X4[] matrix)
         {
             if (matrix != null)
             {
                 BasicFloat4X4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
                 if (trn != null)
                 {
-                    Matrix m = trn.ToMatrix();
+                    Matrix4x4 m = trn.ToMatrix4x4();
 
-                    return Matrix.Transpose(m);
+                    return Matrix4x4.Transpose(m);
                 }
             }
 
-            return Matrix.Identity;
+            return Matrix4x4.Identity;
         }
         /// <summary>
         /// Reads a transform matrix (SRT) from the specified transforms in the Node
@@ -498,16 +415,16 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="rotate">Rotate</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrixLocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
+        public static Matrix4x4 ReadMatrix4x4LocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
         {
-            Matrix finalTranslation = Matrix.Identity;
-            Matrix finalRotation = Matrix.Identity;
-            Matrix finalScale = Matrix.Identity;
+            Matrix4x4 finalTranslation = Matrix4x4.Identity;
+            Matrix4x4 finalRotation = Matrix4x4.Identity;
+            Matrix4x4 finalScale = Matrix4x4.Identity;
 
             if (translate != null)
             {
                 BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
-                if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
+                if (loc != null) finalTranslation *= Matrix4x4.Translation(loc.ToVector3());
             }
 
             if (rotate != null)
@@ -516,28 +433,28 @@ namespace Engine.Content.FmtCollada.Fmt
                 if (rotX != null)
                 {
                     Vector4 r = rotX.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
                 if (rotY != null)
                 {
                     Vector4 r = rotY.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
 
                 BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
                 if (rotZ != null)
                 {
                     Vector4 r = rotZ.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                 }
             }
 
             if (scale != null)
             {
                 BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
-                if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
+                if (sca != null) finalScale *= Matrix4x4.Scaling(sca.ToVector3());
             }
 
             return finalScale * finalRotation * finalTranslation;

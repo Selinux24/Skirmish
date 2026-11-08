@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Bounds
         /// </summary>
-        public RectangleF Bounds;
+        public Rect Bounds;
 
         /// <inheritdoc/>
         public override string ToString()

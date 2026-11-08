@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Content;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Content;
-
     /// <summary>
     /// Mesh data
     /// </summary>
@@ -220,10 +219,10 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
+            Game.Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {meshes.Keys.AsEnumerable().Join("|")}");
 
             var beforeCount = Game.BufferManager.PendingRequestCount;
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
+            Game.Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
 
             //Initilizes mesh textures
             var resourceManager = Game.ResourceManager;
@@ -250,13 +249,13 @@ namespace Engine.Common
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(DrawingData), $"{name} Error processing parallel tasks => {ex.Message}", ex);
+                Game.Logger.WriteError(nameof(DrawingData), $"{name} Error processing parallel tasks => {ex.Message}", ex);
 
                 throw;
             }
 
             var afterCount = Game.BufferManager.PendingRequestCount;
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
+            Game.Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace Engine.Common
                 {
                     if (!mesh.Ready)
                     {
-                        Logger.WriteTrace(this, $"{nameof(DrawingData)} - {nameof(IterateMaterials)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
+                        Game.Logger.WriteTrace(this, $"{nameof(DrawingData)} - {nameof(IterateMaterials)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                         continue;
                     }
 
@@ -311,7 +310,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            return GetPoints(Matrix.Identity, refresh);
+            return GetPoints(Matrix4x4.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -319,7 +318,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix transform, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(refresh))
@@ -339,9 +338,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
-            return GetPoints(Matrix.Identity, boneTransforms, refresh);
+            return GetPoints(Matrix4x4.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -350,7 +349,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(boneTransforms, refresh))
@@ -372,7 +371,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            return GetTriangles(Matrix.Identity, refresh);
+            return GetTriangles(Matrix4x4.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -380,7 +379,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix transform, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix4x4 transform, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(refresh))
@@ -391,7 +390,7 @@ namespace Engine.Common
                 triangles = Triangle.Transform(triangles, transform);
             }
 
-            return triangles.ToArray();
+            return [.. triangles];
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -399,9 +398,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
-            return GetTriangles(Matrix.Identity, boneTransforms, refresh);
+            return GetTriangles(Matrix4x4.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -410,7 +409,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(boneTransforms, refresh))
@@ -421,7 +420,7 @@ namespace Engine.Common
                 triangles = Triangle.Transform(triangles, transform);
             }
 
-            return triangles.ToArray();
+            return [.. triangles];
         }
 
         /// <summary>
@@ -509,7 +508,7 @@ namespace Engine.Common
         /// </summary>
         public IEnumerable<ISceneLight> GetLights()
         {
-            return lights.Select(l => l.Clone()).ToArray();
+            return [.. lights.Select(l => l.Clone())];
         }
     }
 }

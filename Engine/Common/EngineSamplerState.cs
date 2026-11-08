@@ -1,9 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.Common
 {
-    using SamplerState = SharpDX.Direct3D11.SamplerState;
+    using SamplerState = Vortice.Direct3D11.ID3D11SamplerState;
 
     /// <summary>
     /// Engine sampler state
@@ -59,7 +59,7 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="maxAnisotropic">Maximum anisotropic</param>
         /// <returns>Creates the anisotropic sampler state</returns>
-        public static EngineSamplerState Anisotropic(Graphics graphics, string name, int maxAnisotropic)
+        public static EngineSamplerState Anisotropic(Graphics graphics, string name, uint maxAnisotropic)
         {
             var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.Anisotropic;

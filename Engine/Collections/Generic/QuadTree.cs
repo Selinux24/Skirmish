@@ -1,16 +1,15 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Quad-tree
     /// </summary>
     public class QuadTree<T> : IQuadTree<QuadTreeNode<T>>
     {
-        const string cName = nameof(QuadTree<T>);
+        const string cName = nameof(QuadTree<>);
 
         /// <inheritdoc/>
         public QuadTreeNode<T> Root { get; private set; }

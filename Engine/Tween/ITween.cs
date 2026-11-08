@@ -35,7 +35,7 @@ namespace Engine.Tween
     /// Interface for a tween object that handles a specific type.
     /// </summary>
     /// <typeparam name="T">The type to tween.</typeparam>
-    public interface ITween<T> : ITween where T : struct
+    public interface ITween<T> : ITween where T : unmanaged
     {
         /// <summary>
         /// Gets the current value of the tween.

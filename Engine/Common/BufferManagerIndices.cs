@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Data stride
         /// </summary>
-        private readonly int stride = Marshal.SizeOf<uint>();
+        private readonly uint stride = (uint)Marshal.SizeOf<uint>();
         /// <summary>
         /// Descriptor list
         /// </summary>
@@ -30,13 +30,13 @@ namespace Engine.Common
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; private set; } = 0;
+        public uint AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
         public bool Allocated { get; private set; } = false;
         /// <inheritdoc/>
-        public int Allocations { get; private set; } = 0;
+        public uint Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -47,14 +47,14 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public int GetStride()
+        public uint GetStride()
         {
             return stride;
         }
         /// <inheritdoc/>
-        public int SizeInBytes()
+        public uint SizeInBytes()
         {
-            return data.Count * stride;
+            return (uint)data.Count * stride;
         }
 
         /// <summary>
@@ -67,10 +67,10 @@ namespace Engine.Common
         /// <returns>Returns the new registerd descriptor</returns>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
-            int offset;
+            uint offset;
 
             //Store current data index as descriptor offset
-            offset = data.Count;
+            offset = (uint)data.Count;
 
             //Add items to data list
             data.AddRange(indices);
@@ -79,7 +79,7 @@ namespace Engine.Common
             descriptor.Id = id;
             descriptor.BufferDescriptionIndex = bufferDescriptionIndex;
             descriptor.BufferOffset = offset;
-            descriptor.Count = indices.Count();
+            descriptor.Count = (uint)indices.Count();
 
             descriptors.Add(descriptor);
         }
@@ -99,7 +99,7 @@ namespace Engine.Common
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                data.RemoveRange((int)descriptor.BufferOffset, (int)descriptor.Count);
             }
 
             //Remove from descriptors list

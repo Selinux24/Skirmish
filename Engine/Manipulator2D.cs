@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// 2D manipulator
     /// </summary>
@@ -42,17 +41,17 @@ namespace Engine
         /// Gets the size transform
         /// </summary>
         /// <remarks>Scaling matrix based on the size</remarks>
-        public Matrix SizeTransform { get; private set; } = Matrix.Identity;
+        public Matrix4x4 SizeTransform { get; private set; } = Matrix4x4.Identity;
         /// <summary>
         /// Gets the sprite transform
         /// </summary>
         /// <remarks>Transform matrix without the size transform</remarks>
-        public Matrix SpriteTransform { get; private set; } = Matrix.Identity;
+        public Matrix4x4 SpriteTransform { get; private set; } = Matrix4x4.Identity;
         /// <summary>
         /// Gets final transform of controller
         /// </summary>
         /// <remarks>Size transforms * sprite transform</remarks>
-        public Matrix LocalTransform { get; private set; } = Matrix.Identity;
+        public Matrix4x4 LocalTransform { get; private set; } = Matrix4x4.Identity;
         /// <summary>
         /// Linear velocity modifier
         /// </summary>
@@ -79,8 +78,8 @@ namespace Engine
                 pivotPoint = parentScrPosition - localScrPosition;
             }
 
-            SizeTransform = Matrix.Scaling(new Vector3(Size, 0));
-            SpriteTransform = Matrix.Transformation2D(pivotPoint, 0, Scale, pivotPoint, Rotation, localScrPosition);
+            SizeTransform = Matrix4x4.Scaling(new Vector3(Size, 0));
+            SpriteTransform = Matrix4x4.Transformation2D(pivotPoint, 0, Scale, pivotPoint, Rotation, localScrPosition);
             LocalTransform = SizeTransform * SpriteTransform;
 
             updateInternals = false;

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -76,14 +76,14 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
 #if DEBUG
-            int size = Marshal.SizeOf<BufferMaterials>();
+            uint size = (uint)Marshal.SizeOf<BufferMaterials>();
             if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf<BufferMaterials>();
+            return (uint)Marshal.SizeOf<BufferMaterials>();
 #endif
         }
     };

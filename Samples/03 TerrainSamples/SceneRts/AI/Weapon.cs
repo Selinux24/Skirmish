@@ -1,8 +1,9 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace TerrainSamples.SceneRts.AI
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Agent weapon
     /// </summary>
@@ -81,8 +82,8 @@ namespace TerrainSamples.SceneRts.AI
                 if (distance <= Range)
                 {
                     lastAttackTime = 0;
-                    var dmg = Helper.RandomGenerator.NextFloat(0, Damage);
-                    if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { dmg *= 2f; } //Critic
+                    var dmg = Helper.RandomGenerator.NextSingle(0, Damage);
+                    if (Helper.RandomGenerator.NextSingle(0, 1) > 0.9f) { dmg *= 2f; } //Critic
 
                     return dmg;
                 }

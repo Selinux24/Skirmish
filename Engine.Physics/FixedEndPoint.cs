@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Fixed end-point
     /// </summary>

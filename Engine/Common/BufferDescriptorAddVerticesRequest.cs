@@ -7,7 +7,7 @@ namespace Engine.Common
     /// Add vertex buffer descriptor request
     /// </summary>
     class BufferDescriptorAddVerticesRequest<T>(string id, bool dynamic, IEnumerable<T> data, BufferDescriptor instancingBuffer = null) : IBufferDescriptorRequest
-        where T : struct, IVertexData
+        where T : unmanaged, IVertexData
     {
         /// <summary>
         /// New descriptor instance
@@ -46,7 +46,7 @@ namespace Engine.Common
 
             if (!data.Any())
             {
-                Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
+                Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} discarded no data [{Id}]");
 
                 Processed = ProcessedStages.Processed;
                 return;
@@ -56,7 +56,7 @@ namespace Engine.Common
 
             bool instanced = instancingDescriptor != null;
 
-            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(T)} Instanced {instanced} [{Id}]");
+            Game.Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(T)} Instanced {instanced} [{Id}]");
 
             int slot = bufferManager.FindVertexBufferDescription<T>(Dynamic);
             if (slot < 0)

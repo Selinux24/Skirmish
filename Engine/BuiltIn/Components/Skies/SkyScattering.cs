@@ -2,7 +2,7 @@
 using Engine.BuiltIn.Drawers.SkyScattering;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Threading.Tasks;
 
@@ -114,7 +114,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 rayleighScattering = value;
-                RayleighScattering4PI = value * 4.0f * MathUtil.Pi;
+                RayleighScattering4PI = value * 4.0f * Helper.Pi;
             }
         }
         /// <summary>
@@ -133,7 +133,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 mieScattering = value;
-                MieScattering4PI = value * 4.0f * MathUtil.Pi;
+                MieScattering4PI = value * 4.0f * Helper.Pi;
             }
         }
         /// <summary>
@@ -380,38 +380,38 @@ namespace Engine.BuiltIn.Components.Skies
         /// <returns>Returns the fog color</returns>
         public Color4 GetFogColor(Vector3 lightDirection)
         {
-            var outColor = new Color4(0f, 0f, 0f, 0f);
+            var outColor = Color4.Transparent;
 
-            Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
+            Vector3.AnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
 
-            float pitch = MathUtil.DegreesToRadians(10.0f);
+            float pitch = Helper.DegreesToRadians(10.0f);
 
             uint samples = 10;
 
             for (uint i = 0; i < samples; i++)
             {
-                Helper.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
+                Vector3.VectorFromAngles(yaw, pitch, out Vector3 scatterPos);
 
                 scatterPos *= PlanetRadius + PlanetAtmosphereRadius;
                 scatterPos.Y -= PlanetRadius;
 
-                GetColor(scatterPos, lightDirection, out Color4 tmpColor);
+                GetColor(scatterPos, lightDirection, out var tmpColor);
 
                 outColor += tmpColor;
 
                 if (i <= samples / 2)
                 {
-                    yaw += MathUtil.DegreesToRadians(5.0f);
+                    yaw += Helper.DegreesToRadians(5.0f);
                 }
                 else
                 {
-                    originalYaw += MathUtil.DegreesToRadians(-5.0f);
+                    originalYaw += Helper.DegreesToRadians(-5.0f);
 
                     yaw = originalYaw;
                 }
 
-                yaw = MathUtil.Mod(yaw, MathUtil.TwoPi);
+                yaw = Helper.Mod(yaw, Helper.TwoPi);
             }
 
             outColor *= 1f / samples;

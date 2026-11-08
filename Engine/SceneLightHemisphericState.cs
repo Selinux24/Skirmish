@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -10,10 +10,10 @@ namespace Engine
         /// <summary>
         /// Ambient down color
         /// </summary>
-        public ColorRgba AmbientDown { get; set; }
+        public Color3 AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        public ColorRgba AmbientUp { get; set; }
+        public Color3 AmbientUp { get; set; }
     }
 }

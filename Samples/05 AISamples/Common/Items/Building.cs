@@ -1,14 +1,15 @@
-﻿using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Format;
-using Engine.Common;
-using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace AISamples.Common.Items
 {
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Format;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     class Building(Polygon polygon, float height)
     {
         public Polygon Polygon { get; set; } = polygon;

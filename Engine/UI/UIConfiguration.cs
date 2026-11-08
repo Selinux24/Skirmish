@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.UI
 {
@@ -34,7 +34,7 @@ namespace Engine.UI
         /// <summary>
         /// Text background color
         /// </summary>
-        public static Color4 TextBackgroundColor { get; set; } = new Color4(0, 0, 0, 0.75f);
+        public static Color4 TextBackgroundColor { get; set; } = new(0, 0, 0, 0.75f);
         /// <summary>
         /// Default Font
         /// </summary>

@@ -1,10 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Pathfinding graph interface
     /// </summary>

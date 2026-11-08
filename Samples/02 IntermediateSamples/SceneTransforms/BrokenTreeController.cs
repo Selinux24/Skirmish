@@ -1,8 +1,9 @@
-﻿using Engine;
-using SharpDX;
-
+﻿
 namespace IntermediateSamples.SceneTransforms
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Broken tree controller
     /// </summary>

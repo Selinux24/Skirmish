@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph debug information helper
     /// </summary>

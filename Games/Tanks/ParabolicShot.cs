@@ -1,9 +1,10 @@
-﻿using Engine;
-using SharpDX;
-using System;
+﻿using System;
 
 namespace Tanks
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Paralbolic shot helper
     /// </summary>
@@ -36,7 +37,7 @@ namespace Tanks
         {
             initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
             var initialVelocity = shotDirection * shotForce;
-            horizontalVelocity = initialVelocity.XZ();
+            horizontalVelocity = initialVelocity.XZ;
             verticalVelocity = initialVelocity.Y;
             wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;
         }
@@ -80,7 +81,7 @@ namespace Tanks
         public float GetTimeOfFlight(Vector3 shooterPosition, Vector3 targetPosition)
         {
             float h = shooterPosition.Y - targetPosition.Y;
-            if (MathUtil.IsZero(h))
+            if (Helper.IsZero(h))
             {
                 return 2f * verticalVelocity / g;
             }

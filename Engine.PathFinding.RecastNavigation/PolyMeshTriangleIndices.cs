@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -50,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tris">Triangle indices</param>
         /// <param name="verts">Vertex list</param>
         /// <param name="poly">Polygon vertices</param>
-        public static PolyMeshTriangleIndices[] BuildTriangleList(Int3[] tris, Vector3[] verts, Vector3[] poly)
+        public static PolyMeshTriangleIndices[] BuildTriangleList(Vector3I[] tris, Vector3[] verts, Vector3[] poly)
         {
             PolyMeshTriangleIndices[] res = new PolyMeshTriangleIndices[tris.Length];
 

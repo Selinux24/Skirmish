@@ -14,7 +14,7 @@ namespace Engine.Tween
     /// interpolate between the start and end values for the given type.
     /// </remarks>
     /// <param name="lerpFunc">The interpolation function for the tween type.</param>
-    public class Tween<T>(LerpFunc<T> lerpFunc) : ITween<T> where T : struct
+    public class Tween<T>(LerpFunc<T> lerpFunc) : ITween<T> where T : unmanaged
     {
         private readonly LerpFunc<T> lerpFunc = lerpFunc;
         private ScaleFunc scaleFunc;

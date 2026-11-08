@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -24,13 +24,13 @@ namespace Engine
         /// <inheritdoc/>
         public uint ShadowMapCount { get; set; }
         /// <inheritdoc/>
-        public Matrix[] FromLightVP { get; set; }
+        public Matrix4x4[] FromLightVP { get; set; }
         /// <inheritdoc/>
         public Vector3 Position { get; set; }
         /// <inheritdoc/>
         public virtual object State { get; set; }
         /// <inheritdoc/>
-        public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
+        public virtual Matrix4x4 ParentTransform { get; set; } = Matrix4x4.Identity;
 
         /// <summary>
         /// Evaluates whether a light must be processed as a shadow casting light or not

@@ -1,6 +1,6 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 
@@ -1573,7 +1573,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="dir">Direction</param>
         /// <param name="neiarea">Neighbour area</param>
         /// <returns>Returns the limit bounds</returns>
-        private static Vector2Int? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
+        private static Vector2I? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
         {
             // Compress portal limits to an integer value.
             if (dir == 0 || dir == 4)
@@ -1585,10 +1585,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                var res = new Vector2Int
+                var res = new Vector2I
                 {
-                    X = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
-                    Y = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
+                    X = (int)(Math.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
+                    Y = (int)(Math.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
                 };
                 return res;
             }
@@ -1601,10 +1601,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                var res = new Vector2Int
+                var res = new Vector2I
                 {
-                    X = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
-                    Y = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
+                    X = (int)(Math.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
+                    Y = (int)(Math.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
                 };
                 return res;
             }
@@ -1787,15 +1787,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float qfac = tile.Header.BvQuantFactor;
 
             // Calculate quantized box
-            var bmin = new Int3();
-            var bmax = new Int3();
+            var bmin = new Vector3I();
+            var bmax = new Vector3I();
             // dtClamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float minx = Math.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = Math.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = Math.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = Math.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = Math.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = Math.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
             // Quantize
             bmin.X = (int)(qfac * minx) & 0xfffe;
             bmin.Y = (int)(qfac * miny) & 0xfffe;
@@ -1932,7 +1932,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             closest = pos;
             posOverPoly = false;
 
-            if (!IsValidPolyRef(r) || pos.IsInfinity())
+            if (!IsValidPolyRef(r) || pos.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1979,7 +1979,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
-            if (pos.IsInfinity())
+            if (pos.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2010,8 +2010,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             // Validate input
             if (request.Filter == null ||
-                request.StartPos.IsInfinity() ||
-                request.EndPos.IsInfinity() ||
+                request.StartPos.IsInfinity ||
+                request.EndPos.IsInfinity ||
                 !IsValidPolyRef(request.StartRef) ||
                 request.PrevReference.HasValue && !IsValidPolyRef(request.PrevReference.Value))
             {
@@ -2054,7 +2054,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
-            if (pos.XZ().IsInfinity())
+            if (pos.XZ.IsInfinity)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2096,7 +2096,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Choose random tile using reservoi sampling.
                 float area = 1.0f; // Could be tile area too.
                 areaSum += area;
-                float u = Helper.RandomGenerator.NextFloat(0, 1);
+                float u = Helper.RandomGenerator.NextSingle(0, 1);
                 if (u * areaSum <= area)
                 {
                     tile = tl;

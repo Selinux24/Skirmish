@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour

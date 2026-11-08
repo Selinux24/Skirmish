@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -62,8 +62,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
-            var min = bounds.Value.Min;
-            var max = bounds.Value.Max;
+            var min = bounds.Value.Minimum;
+            var max = bounds.Value.Maximum;
 
             for (int z = min.Z; z <= max.Z; ++z)
             {
@@ -99,7 +99,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="h">Height</param>
         /// <param name="ics">Cell size</param>
         /// <param name="ich">Cell height</param>
-        private static BoundingBoxInt? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
+        private static BoundingBoxI? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
         {
             int minx = (int)MathF.Floor((bbox.Minimum.X - orig.X) * ics);
             int miny = (int)MathF.Floor((bbox.Minimum.Y - orig.Y) * ich);
@@ -118,10 +118,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (minz < 0) minz = 0;
             if (maxz >= h) maxz = h - 1;
 
-            return new BoundingBoxInt
+            return new BoundingBoxI
             {
-                Min = new Vector3Int(minx, miny, minz),
-                Max = new Vector3Int(maxx, maxy, maxz),
+                Minimum = new Vector3I(minx, miny, minz),
+                Maximum = new Vector3I(maxx, maxy, maxz),
             };
         }
     }

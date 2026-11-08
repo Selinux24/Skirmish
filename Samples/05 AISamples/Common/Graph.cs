@@ -1,12 +1,13 @@
-﻿using AISamples.Common.Persistence;
-using AISamples.Common.Primitives;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AISamples.Common
 {
+    using AISamples.Common.Persistence;
+    using AISamples.Common.Primitives;
+    using Engine.Mathematics;
+
     class Graph
     {
         private readonly List<Vector2> points = [];

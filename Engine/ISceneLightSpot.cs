@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine
@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Local matrix
         /// </summary>
-        Matrix Local { get; }
+        Matrix4x4 Local { get; }
 
         /// <summary>
         /// Test the light shadow casting based on the viewer position

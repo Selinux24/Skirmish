@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Content.FmtCollada.Fmt;
 using Engine.Windows;
+using Logger;
 using System;
 
 namespace Tanks
@@ -14,10 +15,10 @@ namespace Tanks
             try
             {
 #if DEBUG
-                Logger.LogLevel = LogLevel.Debug;
-                Logger.EnableConsole = true;
+                Game.Logger.LogLevel = LogLevel.Debug;
+                Game.Logger.EnableConsole = true;
 #else
-                Logger.LogLevel = LogLevel.Error;
+                Game.Logger.LogLevel = LogLevel.Error;
 #endif
 
                 WindowsExtensions.Startup();
@@ -36,16 +37,16 @@ namespace Tanks
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(Program), ex);
+                Game.Logger.WriteError(nameof(Program), ex);
             }
             finally
             {
 #if DEBUG
-                Logger.Dump("dumpDEBUG.txt");
+                Game.Logger.Dump("dumpDEBUG.txt");
 #else
-                if (Logger.HasErrors())
+                if (Game.Logger.HasErrors())
                 {
-                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                    Game.Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
                 }
 #endif
             }

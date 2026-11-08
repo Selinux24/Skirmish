@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds

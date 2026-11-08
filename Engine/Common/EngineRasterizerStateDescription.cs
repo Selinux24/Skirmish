@@ -1,10 +1,10 @@
 ﻿
 namespace Engine.Common
 {
-    using DXConservativeRasterizationMode = SharpDX.Direct3D11.ConservativeRasterizationMode;
-    using DXCullMode = SharpDX.Direct3D11.CullMode;
-    using DXFillMode = SharpDX.Direct3D11.FillMode;
-    using DXRasterizerStateDescription2 = SharpDX.Direct3D11.RasterizerStateDescription2;
+    using DXConservativeRasterizationMode = Vortice.Direct3D11.ConservativeRasterizationMode;
+    using DXCullMode = Vortice.Direct3D11.CullMode;
+    using DXFillMode = Vortice.Direct3D11.FillMode;
+    using DXRasterizerStateDescription2 = Vortice.Direct3D11.RasterizerDescription2;
 
     /// <summary>
     /// Describes rasterizer state.
@@ -17,16 +17,16 @@ namespace Engine.Common
             {
                 FillMode = (DXFillMode)obj.FillMode,
                 CullMode = (DXCullMode)obj.CullMode,
-                IsFrontCounterClockwise = obj.IsFrontCounterClockwise,
+                FrontCounterClockwise = obj.IsFrontCounterClockwise,
                 DepthBias = obj.DepthBias,
                 DepthBiasClamp = obj.DepthBiasClamp,
                 SlopeScaledDepthBias = obj.SlopeScaledDepthBias,
-                IsDepthClipEnabled = obj.IsDepthClipEnabled,
-                IsScissorEnabled = obj.IsScissorEnabled,
-                IsMultisampleEnabled = obj.IsMultisampleEnabled,
-                IsAntialiasedLineEnabled = obj.IsAntialiasedLineEnabled,
+                DepthClipEnable = obj.IsDepthClipEnabled,
+                ScissorEnable = obj.IsScissorEnabled,
+                MultisampleEnable = obj.IsMultisampleEnabled,
+                AntialiasedLineEnable = obj.IsAntialiasedLineEnabled,
                 ForcedSampleCount = obj.ForcedSampleCount,
-                ConservativeRasterizationMode = (DXConservativeRasterizationMode)obj.ConservativeRasterizationMode,
+                ConservativeRaster = (DXConservativeRasterizationMode)obj.ConservativeRasterizationMode,
             };
         }
         public static explicit operator EngineRasterizerStateDescription(DXRasterizerStateDescription2 obj)
@@ -35,16 +35,16 @@ namespace Engine.Common
             {
                 FillMode = (FillMode)obj.FillMode,
                 CullMode = (CullMode)obj.CullMode,
-                IsFrontCounterClockwise = obj.IsFrontCounterClockwise,
+                IsFrontCounterClockwise = obj.FrontCounterClockwise,
                 DepthBias = obj.DepthBias,
                 DepthBiasClamp = obj.DepthBiasClamp,
                 SlopeScaledDepthBias = obj.SlopeScaledDepthBias,
-                IsDepthClipEnabled = obj.IsDepthClipEnabled,
-                IsScissorEnabled = obj.IsScissorEnabled,
-                IsMultisampleEnabled = obj.IsMultisampleEnabled,
-                IsAntialiasedLineEnabled = obj.IsAntialiasedLineEnabled,
+                IsDepthClipEnabled = obj.DepthClipEnable,
+                IsScissorEnabled = obj.ScissorEnable,
+                IsMultisampleEnabled = obj.MultisampleEnable,
+                IsAntialiasedLineEnabled = obj.AntialiasedLineEnable,
                 ForcedSampleCount = obj.ForcedSampleCount,
-                ConservativeRasterizationMode = (ConservativeRasterizationMode)obj.ConservativeRasterizationMode,
+                ConservativeRasterizationMode = (ConservativeRasterizationMode)obj.ConservativeRaster,
             };
         }
 
@@ -124,7 +124,7 @@ namespace Engine.Common
         /// returns SharpDX.Result.False. Otherwise, rendering behavior is undefined. For
         /// info about how to configure depth-stencil, see Configuring Depth-Stencil Functionality.
         /// </summary>
-        public int ForcedSampleCount { get; set; }
+        public uint ForcedSampleCount { get; set; }
         /// <summary>
         /// A ConservativeRasterizationMode-typed value that identifies whether conservative rasterization is on or off.
         /// </summary>

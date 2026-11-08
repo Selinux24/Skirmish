@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Component count
         /// </summary>
-        int InstanceCount { get; }
+        uint InstanceCount { get; }
         /// <summary>
         /// Gets components
         /// </summary>

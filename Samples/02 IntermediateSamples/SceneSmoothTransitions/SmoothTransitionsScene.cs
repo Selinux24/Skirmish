@@ -5,8 +5,9 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private readonly Vector3 soldierInitPosition = new(0, 0, 5);
 
         private GeometryColorDrawer<Triangle> itemTris = null;
-        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.25f);
+        private readonly Color4 itemTrisColor = new(Color.Yellow, 0.25f);
 
         private SegmentPath soldierPath;
         private readonly float soldierPathArrival = 5.333f;
@@ -215,7 +216,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;
@@ -458,7 +459,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         private static Color4 GetColor(float value)
         {
             var colorFrom = new Color4(0f, 1f, 0f, 0.25f);
-            var colorMiddle = new Color4(Color.Orange.ToColor3(), 0.25f);
+            var colorMiddle = new Color4(Color.Orange, 0.25f);
             var colorTo = new Color4(1f, 0f, 0f, 0.25f);
 
             if (value < 0.5f)
@@ -501,7 +502,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 animData.AppendLine($"PathUpdated  : {e.CurrentPath}");
 
                 var tris = soldier.GetGeometry();
-                itemTris.AddPrimitives(new Color(Color.MediumPurple.ToColor3(), 0.5f), tris);
+                itemTris.AddPrimitives(new Color4(Color.MediumPurple, 0.5f), tris);
             }
         }
         private void SoldierControllerPathChanged(object sender, AnimationControllerEventArgs e)

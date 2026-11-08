@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Format
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Skinned position normal texture and tangent vertex format
     /// </summary>
@@ -19,16 +21,16 @@ namespace Engine.BuiltIn.Format
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public static EngineInputElement[] Input(int slot)
+        public static EngineInputElement[] Input(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
-                new ("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
-                new ("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
-                new ("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
-                new ("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 44, slot, EngineInputClassification.PerVertexData, 0),
-                new ("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 56, slot, EngineInputClassification.PerVertexData, 0 ),
+                new ("POSITION", 0, Format.R32G32B32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("NORMAL", 0, Format.R32G32B32_Float, 12, slot, EngineInputClassification.PerVertexData, 0),
+                new ("TEXCOORD", 0, Format.R32G32_Float, 24, slot, EngineInputClassification.PerVertexData, 0),
+                new ("TANGENT", 0, Format.R32G32B32_Float, 32, slot, EngineInputClassification.PerVertexData, 0),
+                new ("WEIGHTS", 0, Format.R32G32B32_Float, 44, slot, EngineInputClassification.PerVertexData, 0),
+                new ("BONEINDICES", 0, Format.R8G8B8A8_UInt, 56, slot, EngineInputClassification.PerVertexData, 0 ),
             ];
         }
         /// <summary>
@@ -178,12 +180,12 @@ namespace Engine.BuiltIn.Format
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<VertexSkinnedPositionNormalTextureTangent>();
+            return (uint)Marshal.SizeOf<VertexSkinnedPositionNormalTextureTangent>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return Input(slot);
         }

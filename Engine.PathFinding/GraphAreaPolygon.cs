@@ -1,10 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph area
     /// </summary>
@@ -62,7 +63,7 @@ namespace Engine.PathFinding
                 throw new ArgumentException("A polygon area must have at least three vertices.", nameof(vertices));
             }
 
-            Vertices = vertices.ToArray();
+            Vertices = [.. vertices];
             MinHeight = minHeight;
             MaxHeight = maxHeight;
         }

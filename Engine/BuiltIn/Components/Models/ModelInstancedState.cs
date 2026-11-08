@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Maximum count
         /// </summary>
-        public int MaximumCount { get; set; }
+        public uint MaximumCount { get; set; }
         /// <summary>
         /// Instance list
         /// </summary>

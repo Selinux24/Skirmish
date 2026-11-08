@@ -1,9 +1,10 @@
 ﻿using AISamples.Common.Primitives;
-using SharpDX;
 using System;
 
 namespace AISamples.SceneCWRSelfDrivingCar
 {
+    using Engine.Mathematics;
+
     class Road
     {
         private readonly float laneWidth;
@@ -57,20 +58,20 @@ namespace AISamples.SceneCWRSelfDrivingCar
         {
             return [.. borders];
         }
-        public RectangleF[] GetLanes()
+        public Rect[] GetLanes()
         {
-            RectangleF[] lanes = new RectangleF[LaneCount];
+            Rect[] lanes = new Rect[LaneCount];
             for (int i = 0; i < LaneCount; i++)
             {
-                float x = MathUtil.Lerp(left, right, i / (float)LaneCount);
+                float x = float.Lerp(left, right, i / (float)LaneCount);
 
-                lanes[i] = new RectangleF(x, top, width / LaneCount, bottom - top);
+                lanes[i] = new(x, top, width / LaneCount, bottom - top);
             }
             return lanes;
         }
         public Vector2 GetLaneCenter(int laneIndex)
         {
-            laneIndex = MathUtil.Clamp(laneIndex, 0, LaneCount - 1);
+            laneIndex = Math.Clamp(laneIndex, 0, LaneCount - 1);
 
             return new Vector2(left + laneWidth * 0.5f + laneIndex * laneWidth, 0f);
         }

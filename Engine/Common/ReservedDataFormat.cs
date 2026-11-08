@@ -1,8 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Reserved format
     /// </summary>
@@ -31,16 +33,16 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf<ReservedDataFormat>();
+            return (uint)Marshal.SizeOf<ReservedDataFormat>();
         }
         /// <inheritdoc/>
-        public readonly EngineInputElement[] GetInput(int slot)
+        public readonly EngineInputElement[] GetInput(uint slot)
         {
             return
             [
-                new ("POSITION", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
+                new ("POSITION", 0, Format.R32G32B32A32_Float, 0, slot, EngineInputClassification.PerVertexData, 0),
             ];
         }
 

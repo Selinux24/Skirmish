@@ -1,11 +1,12 @@
-﻿using AISamples.Common.Primitives;
-using Engine;
-using SharpDX;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace AISamples.Common.Agents
 {
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.Mathematics;
+
     class Car
     {
         private float x;
@@ -55,17 +56,17 @@ namespace AISamples.Common.Agents
 
             if (controlType != AgentControlTypes.Dummy)
             {
-                Sensor = new(this, 5, 50, MathUtil.PiOverTwo);
+                Sensor = new(this, 5, 50, Helper.PiOver2);
                 Brain = new([Sensor.GetRayCount(), 6, AgentControls.InputCount]);
             }
         }
 
         private void CreatePoints()
         {
-            var trn = Matrix.RotationY(angle) * Matrix.Translation(x, 0, y);
+            var trn = Matrix4x4.RotationY(angle) * Matrix4x4.Translation(x, 0, y);
 
             trnBox = box;
-            trnBox.Transform(ref trn);
+            trnBox.Transform(trn);
             var corners = trnBox.GetCorners();
 
             points[0] = new(corners[4].X, 0f, corners[4].Z);
@@ -78,7 +79,7 @@ namespace AISamples.Common.Agents
             Segment2[] segments = new Segment2[points.Length];
             for (int i = 0; i < points.Length; i++)
             {
-                segments[i] = new Segment2(points[i].XZ(), points[(i + 1) % points.Length].XZ());
+                segments[i] = new Segment2(points[i].XZ, points[(i + 1) % points.Length].XZ);
             }
             return segments;
         }
@@ -173,7 +174,7 @@ namespace AISamples.Common.Agents
         }
         private bool AssessDamage(Segment2[] roadBorders, Car[] traffic, bool damageTraffic)
         {
-            var points2d = points.Select(p => p.XZ()).ToArray();
+            var points2d = points.Select(p => p.XZ).ToArray();
 
             for (int i = 0; i < roadBorders.Length; i++)
             {
@@ -225,7 +226,7 @@ namespace AISamples.Common.Agents
         }
         public void SetDirection(Vector2 direction)
         {
-            angle = -Utils.Angle(direction.Y, direction.X) + MathUtil.PiOverTwo;
+            angle = -Utils.Angle(direction.Y, direction.X) + Helper.PiOver2;
         }
         public void SetScale(float scale)
         {
@@ -243,11 +244,11 @@ namespace AISamples.Common.Agents
         {
             return trnBox;
         }
-        public Matrix GetTransform(float height = 0)
+        public Matrix4x4 GetTransform(float height = 0)
         {
-            var trn = Matrix.RotationY(angle) * Matrix.Translation(x, height, y);
+            var trn = Matrix4x4.RotationY(angle) * Matrix4x4.Translation(x, height, y);
 
-            return Matrix.Scaling(scale) * trn;
+            return Matrix4x4.Scaling(scale) * trn;
         }
     }
 }

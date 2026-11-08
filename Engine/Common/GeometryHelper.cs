@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
-
     /// <summary>
     /// Geometry helper
     /// </summary>

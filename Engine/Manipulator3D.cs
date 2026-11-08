@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// 3D manipulator
     /// </summary>
@@ -20,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Final transform for the controller
         /// </summary>
-        protected Matrix localTransform = Matrix.Identity;
+        protected Matrix4x4 localTransform = Matrix4x4.Identity;
         /// <summary>
         /// Rotation component
         /// </summary>
@@ -73,7 +72,7 @@ namespace Engine
         /// <inheritdoc/>
         public Vector3 Velocity { get; private set; }
         /// <inheritdoc/>
-        public Matrix LocalTransform
+        public Matrix4x4 LocalTransform
         {
             get
             {
@@ -86,7 +85,7 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public Matrix GlobalTransform
+        public Matrix4x4 GlobalTransform
         {
             get
             {
@@ -150,9 +149,9 @@ namespace Engine
                 return;
             }
 
-            var sca = Matrix.Scaling(scaling);
-            var rot = Matrix.RotationQuaternion(rotation);
-            var tra = Matrix.Translation(position);
+            var sca = Matrix4x4.Scaling(scaling);
+            var rot = Matrix4x4.RotationQuaternion(rotation);
+            var tra = Matrix4x4.Translation(position);
 
             localTransform = sca * rot * tra;
 
@@ -172,7 +171,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual void Reset()
         {
-            SetTransform(Matrix.Identity);
+            SetTransform(Matrix4x4.Identity);
         }
 
         /// <inheritdoc/>
@@ -180,17 +179,17 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return;
             }
 
-            if (MathUtil.IsZero(velocity))
+            if (Helper.IsZero(velocity))
             {
                 return;
             }
 
-            if (Vector3.NearEqual(direction, Vector3.Zero, Helper.ZeroToleranceVector))
+            if (Vector3.NearEqual(direction, Vector3.Zero))
             {
                 return;
             }
@@ -237,12 +236,12 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return;
             }
 
-            if (MathUtil.IsZero(yaw) && MathUtil.IsZero(pitch) && MathUtil.IsZero(roll))
+            if (Helper.IsZero(yaw) && Helper.IsZero(pitch) && Helper.IsZero(roll))
             {
                 return;
             }
@@ -301,12 +300,12 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return;
             }
 
-            if (MathUtil.IsZero(scaling.X) && MathUtil.IsZero(scaling.Y) && MathUtil.IsZero(scaling.Z))
+            if (Helper.IsZero(scaling.X) && Helper.IsZero(scaling.Y) && Helper.IsZero(scaling.Z))
             {
                 return;
             }
@@ -425,7 +424,7 @@ namespace Engine
             UpdateLocalTransform();
         }
         /// <inheritdoc/>
-        public void SetTransform(Matrix transform)
+        public void SetTransform(Matrix4x4 transform)
         {
             if (!transform.Decompose(out var newScaling, out var newRotation, out var newPosition))
             {
@@ -452,17 +451,17 @@ namespace Engine
             if (Parent != null)
             {
                 //Set parameters to local space
-                var parentTransform = Matrix.Invert(Parent.GlobalTransform);
+                var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
+            if (Vector3.NearEqual(position, target))
             {
                 return;
             }
 
-            var newRotation = Helper.LookAt(position, target, up, Axis.None);
+            var newRotation = Quaternion.LookAtLH(position, target, up, Axis.None);
 
             SetRotation(newRotation);
         }
@@ -478,21 +477,21 @@ namespace Engine
             if (Parent != null)
             {
                 //Set parameters to local space
-                var parentTransform = Matrix.Invert(Parent.GlobalTransform);
+                var parentTransform = Matrix4x4.Invert(Parent.GlobalTransform);
 
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (Vector3.NearEqual(position, target, Helper.ZeroToleranceVector))
+            if (Vector3.NearEqual(position, target))
             {
                 return;
             }
 
-            var newRotation = Helper.LookAt(position, target, up, axis);
+            var newRotation = Quaternion.LookAtLH(position, target, up, axis);
 
             if (interpolationAmount > 0)
             {
-                newRotation = Helper.RotateTowards(rotation, newRotation, interpolationAmount);
+                newRotation = Quaternion.RotateTowards(rotation, newRotation, interpolationAmount);
             }
 
             SetRotation(newRotation);
@@ -501,9 +500,9 @@ namespace Engine
         /// <inheritdoc/>
         public void SetNormal(Vector3 normal, float interpolationAmount = 0)
         {
-            float angle = Helper.AngleSigned(Up, normal);
+            float angle = Vector3.AngleSigned(Up, normal);
 
-            var axis = MathUtil.IsZero(angle % MathUtil.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
+            var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
 
             var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 

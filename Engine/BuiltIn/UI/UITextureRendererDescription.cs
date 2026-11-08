@@ -1,5 +1,5 @@
-﻿using Engine.UI;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.UI;
 
 namespace Engine.BuiltIn.UI
 {
@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.UI
         /// Gets a texture renderer description
         /// </summary>
         /// <param name="bounds">Control bounds</param>
-        public static UITextureRendererDescription Default(RectangleF bounds)
+        public static UITextureRendererDescription Default(Rect bounds)
         {
             return new()
             {
@@ -61,7 +61,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="fileName">Texture file name</param>
         /// <param name="bounds">Control bounds</param>
-        public static UITextureRendererDescription Default(string fileName, RectangleF bounds)
+        public static UITextureRendererDescription Default(string fileName, Rect bounds)
         {
             return new()
             {

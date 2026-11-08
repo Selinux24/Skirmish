@@ -1,8 +1,5 @@
-﻿using Engine.BuiltIn.Components.Models;
-using Engine.Content.FmtCollada.Fmt;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,13 +8,17 @@ using System.Threading.Tasks;
 
 namespace Engine.Content.FmtColladaTests
 {
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Content.FmtCollada.Fmt;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class LoaderTests
     {
         public TestContext TestContext { get; set; }
 
-        private const float tolerance = MathUtil.ZeroTolerance;
+        private const float tolerance = Helper.ZeroTolerance;
 
         private const string resourceTree = "Resources/Tree";
         private const string tree = "tree1.json";
@@ -120,7 +121,7 @@ namespace Engine.Content.FmtColladaTests
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = [.. points1, .. points2];
             var bounds = BoundingSphere.FromPoints([.. points.Distinct()]);
-            bounds = bounds.SetTransform(Matrix.Scaling(2) * Matrix.RotationYawPitchRoll(1, 0, 0) * Matrix.Translation(10, 10, 10));
+            bounds = BoundingSphere.Transform(bounds, Matrix4x4.Scaling(2) * Matrix4x4.RotationYawPitchRoll(1, 0, 0) * Matrix4x4.Translation(10, 10, 10));
             Assert.AreEqual(sph, bounds);
         }
 
@@ -151,10 +152,10 @@ namespace Engine.Content.FmtColladaTests
             await model.ReadAssets(tDesc);
 
             //Sets the transform of the current instance
-            Matrix instanceTrn = Matrix.Translation(Vector3.One);
-            Matrix hullTrn = Matrix.Identity;
-            Matrix turretTrn = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo));
-            Matrix barrelTrn = Matrix.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, MathUtil.PiOverFour));
+            Matrix4x4 instanceTrn = Matrix4x4.Translation(Vector3.One);
+            Matrix4x4 hullTrn = Matrix4x4.Identity;
+            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, Helper.PiOver2));
+            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, Helper.PiOver4));
 
             model[0].Manipulator.SetTransform(instanceTrn);
             model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);
@@ -179,12 +180,12 @@ namespace Engine.Content.FmtColladaTests
             expectedHull = hullTrn * instanceTrn;
             expectedTurret = turretTrn * expectedHull;
             expectedBarrel = barrelTrn * expectedTurret;
-            expectedHull *= Matrix.Translation(tankHullPos);
-            expectedTurret *= Matrix.Translation(tankTurretPos);
-            expectedBarrel *= Matrix.Translation(tankBarrelPos);
-            expectedHull = Matrix.Translation(Vector3.Zero) * expectedHull;
-            expectedTurret = Matrix.Translation(tankHullPos) * expectedTurret;
-            expectedBarrel = Matrix.Translation(tankTurretPos) * expectedBarrel;
+            expectedHull *= Matrix4x4.Translation(tankHullPos);
+            expectedTurret *= Matrix4x4.Translation(tankTurretPos);
+            expectedBarrel *= Matrix4x4.Translation(tankBarrelPos);
+            expectedHull = Matrix4x4.Translation(Vector3.Zero) * expectedHull;
+            expectedTurret = Matrix4x4.Translation(tankHullPos) * expectedTurret;
+            expectedBarrel = Matrix4x4.Translation(tankTurretPos) * expectedBarrel;
             AssertMatrix.AreEqual(expectedHull, trnWorldHull, tolerance, $"{param.TestCase} => World transform test hull failed");
             AssertMatrix.AreEqual(expectedTurret, trnWorldTurret, tolerance, $"{param.TestCase} => World transform test turret failed");
             AssertMatrix.AreEqual(expectedBarrel, trnWorldBarrel, tolerance, $"{param.TestCase} => World transform test barrel failed");
@@ -193,9 +194,9 @@ namespace Engine.Content.FmtColladaTests
             var trnPartHull = model[0].GetPartTransformByName(tankHullPart);
             var trnPartTurret = model[0].GetPartTransformByName(tankTurretPart);
             var trnPartBarrel = model[0].GetPartTransformByName(tankBarrelPart);
-            expectedHull = Matrix.Translation(-tankHullPos) * hullTrn * Matrix.Translation(tankHullPos);
-            expectedTurret = Matrix.Translation(-tankTurretPos - tankHullPos) * turretTrn * Matrix.Translation(tankTurretPos + tankHullPos);
-            expectedBarrel = Matrix.Translation(-tankBarrelPos - tankTurretPos - tankHullPos) * barrelTrn * Matrix.Translation(tankBarrelPos + tankTurretPos + tankHullPos);
+            expectedHull = Matrix4x4.Translation(-tankHullPos) * hullTrn * Matrix4x4.Translation(tankHullPos);
+            expectedTurret = Matrix4x4.Translation(-tankTurretPos - tankHullPos) * turretTrn * Matrix4x4.Translation(tankTurretPos + tankHullPos);
+            expectedBarrel = Matrix4x4.Translation(-tankBarrelPos - tankTurretPos - tankHullPos) * barrelTrn * Matrix4x4.Translation(tankBarrelPos + tankTurretPos + tankHullPos);
             expectedHull *= instanceTrn;
             expectedTurret *= expectedHull;
             expectedBarrel *= expectedTurret;
@@ -207,9 +208,9 @@ namespace Engine.Content.FmtColladaTests
             var trnPoseHull = model[0].GetPoseTransformByName(tankHullPart);
             var trnPoseTurret = model[0].GetPoseTransformByName(tankTurretPart);
             var trnPoseBarrel = model[0].GetPoseTransformByName(tankBarrelPart);
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos), trnPoseHull, tolerance, $"{param.TestCase} => Pose transform test hull failed");
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos), trnPoseTurret, tolerance, $"{param.TestCase} => Pose transform test turret failed");
-            AssertMatrix.AreEqual(Matrix.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel, tolerance, $"{param.TestCase} => Pose transform test barrel failed");
+            AssertMatrix.AreEqual(Matrix4x4.Translation(tankHullPos), trnPoseHull, tolerance, $"{param.TestCase} => Pose transform test hull failed");
+            AssertMatrix.AreEqual(Matrix4x4.Translation(tankHullPos + tankTurretPos), trnPoseTurret, tolerance, $"{param.TestCase} => Pose transform test turret failed");
+            AssertMatrix.AreEqual(Matrix4x4.Translation(tankHullPos + tankTurretPos + tankBarrelPos), trnPoseBarrel, tolerance, $"{param.TestCase} => Pose transform test barrel failed");
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Engine.Common
     /// Engine vertex buffer
     /// </summary>
     /// <typeparam name="T">Type of data</typeparam>
-    public class EngineVertexBuffer<T> : IEngineVertexBuffer where T : struct, IVertexData
+    public class EngineVertexBuffer<T> : IEngineVertexBuffer where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Graphics
@@ -32,7 +32,7 @@ namespace Engine.Common
         /// <summary>
         /// Buffer slot
         /// </summary>
-        protected int BufferSlot { get; set; }
+        protected uint BufferSlot { get; set; }
         /// <summary>
         /// Parameters
         /// </summary>
@@ -87,14 +87,14 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="length">Data length</param>
         /// <param name="parameters">Vertex buffer parameters</param>
-        public EngineVertexBuffer(Graphics graphics, string name, int length, VertexBufferParams parameters)
+        public EngineVertexBuffer(Graphics graphics, string name, uint length, VertexBufferParams parameters)
         {
             Graphics = graphics;
             Parameters = parameters;
 
             Name = name;
 
-            int sizeInBytes = default(T).GetStride() * length;
+            uint sizeInBytes = default(T).GetStride() * length;
 
             if (parameters == VertexBufferParams.Dynamic)
             {
@@ -160,7 +160,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void CreateInputLayout(string name, byte[] signature, int bufferSlot)
+        public void CreateInputLayout(string name, byte[] signature, uint bufferSlot)
         {
             var layout = Graphics.CreateInputLayout<T>(name, signature, bufferSlot);
             BufferSlot = bufferSlot;
@@ -184,7 +184,7 @@ namespace Engine.Common
             dc.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
-        public void Draw(IEngineDeviceContext dc, int drawCount)
+        public void Draw(IEngineDeviceContext dc, uint drawCount)
         {
             dc.Draw(drawCount, 0);
         }

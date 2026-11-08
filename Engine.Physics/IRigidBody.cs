@@ -1,7 +1,7 @@
-﻿using SharpDX;
-
-namespace Engine.Physics
+﻿namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Rigid body interface
     /// </summary>
@@ -69,7 +69,7 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the rigid body transform matrix
         /// </summary>
-        Matrix Transform { get; }
+        Matrix4x4 Transform { get; }
 
         /// <summary>
         /// Gets whether the body is awake or not
@@ -88,7 +88,7 @@ namespace Engine.Physics
         /// Sets the initial state of the body
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        void SetInitialState(Matrix transform);
+        void SetInitialState(Matrix4x4 transform);
         /// <summary>
         /// Sets the initial state of the body to the indicated position, scale and rotation
         /// </summary>
@@ -106,7 +106,7 @@ namespace Engine.Physics
         /// Sets the state of the body
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        void SetState(Matrix transform);
+        void SetState(Matrix4x4 transform);
         /// <summary>
         /// Sets the state of the body
         /// </summary>

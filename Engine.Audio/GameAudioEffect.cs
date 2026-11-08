@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Vortice.XAudio2;
 
 namespace Engine.Audio
 {
-    using SharpDX;
-    using SharpDX.X3DAudio;
-    using SharpDX.XAudio2;
-
     /// <summary>
     /// Game audio effect
     /// </summary>
@@ -20,14 +18,14 @@ namespace Engine.Audio
         private readonly GameAudio gameAudio;
         private readonly GameAudioFile audioFile;
 
-        private readonly SourceVoice sourceVoice;
-        private readonly int voiceInputChannels;
+        private readonly IXAudio2SourceVoice sourceVoice;
+        private readonly uint voiceInputChannels;
 
         private float pan;
         private float[] panOutputMatrix;
         private float pitch;
 
-        private SubmixVoice submixVoice;
+        private IXAudio2SubmixVoice submixVoice;
         private GameAudioReverbPresets? reverbPreset;
         private DspSettings dspSettings;
 
@@ -43,113 +41,71 @@ namespace Engine.Audio
         private int playCounter;
         private bool disposed = false;
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is looped.
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsLooped { get; set; }
-        /// <summary>
-        /// Gets or sets the pan value of the sound effect.
-        /// </summary>
-        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Pan
+        /// <inheritdoc/>
+        public float Pan => pan;
+        /// <inheritdoc/>
+        public float Pitch => pitch;
+        /// <inheritdoc/>
+        public float Volume => sourceVoice.Volume;
+
+        /// <inheritdoc/>
+        public void SetPan(float value)
         {
-            get
+            value = Math.Clamp(value, -1.0f, 1.0f);
+
+            if (Helper.NearEqual(pan, value))
             {
-                return pan;
+                return;
             }
-            set
-            {
-                value = MathUtil.Clamp(value, -1.0f, 1.0f);
 
-                if (MathUtil.NearEqual(pan, value))
-                {
-                    return;
-                }
+            pan = value;
 
-                pan = value;
-
-                UpdateOutputMatrix();
-            }
+            UpdateOutputMatrix();
         }
-        /// <summary>
-        /// Gets or sets the pitch value of the sound effect.
-        /// </summary>
-        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Pitch
+        /// <inheritdoc/>
+        public void SetPitch(float value)
         {
-            get
+            value = Math.Clamp(value, -1.0f, 1.0f);
+
+            if (Helper.NearEqual(pitch, value))
             {
-                return pitch;
+                return;
             }
-            set
-            {
-                value = MathUtil.Clamp(value, -1.0f, 1.0f);
 
-                if (MathUtil.NearEqual(pitch, value))
-                {
-                    return;
-                }
+            pitch = value;
 
-                pitch = value;
+            float targetRatio = Math.Clamp(
+                MathF.Pow(2.0f, value / 12.0f),
+                XAudio2.MinimumFrequencyRatio,
+                XAudio2.MaximumFilterFrequency);
 
-                sourceVoice.SetFrequencyRatio(XAudio2.SemitonesToFrequencyRatio(pitch));
-            }
+            sourceVoice.SetFrequencyRatio(targetRatio, gameAudio.OperationSet).CheckError();
         }
-        /// <summary>
-        /// Gets or sets the volume of the current sound effect instance.
-        /// </summary>
-        /// <remarks>The value is clamped to (0f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Volume
+        /// <inheritdoc/>
+        public void SetVolume(float value)
         {
-            get
-            {
-                sourceVoice.GetVolume(out float volume);
-                return volume;
-            }
-            set
-            {
-                float volume = MathUtil.Clamp(value, 0.0f, 1.0f);
-                sourceVoice.SetVolume(volume);
-            }
+            sourceVoice.SetVolume(Math.Clamp(value, 0.0f, 1.0f), gameAudio.OperationSet).CheckError();
         }
 
-        /// <summary>
-        /// Gets or sets whether the master voice uses 3D audio or not
-        /// </summary>
+        /// <inheritdoc/>
         public bool UseAudio3D { get; set; }
-        /// <summary>
-        /// Emitter
-        /// </summary>
+        /// <inheritdoc/>
         public IGameAudioEmitter Emitter { get; set; }
-        /// <summary>
-        /// Listener
-        /// </summary>
+        /// <inheritdoc/>
         public IGameAudioListener Listener { get; set; }
 
-        /// <summary>
-        /// Gets the duration in seconds of the current sound.
-        /// </summary>
-        /// <value>The duration.</value>
+        /// <inheritdoc/>
         public TimeSpan Duration
         {
             get { return audioFile.Duration; }
         }
-        /// <summary>
-        /// Gets the state of this instance.
-        /// </summary>
-        /// <value>The state.</value>
+        /// <inheritdoc/>
         public GameAudioState State { get; private set; } = GameAudioState.Stopped;
-        /// <summary>
-        /// The instance is due to dispose
-        /// </summary>
+        /// <inheritdoc/>
         public bool DueToDispose { get; private set; }
-        /// <summary>
-        /// Gets or sets the position in seconds.
-        /// </summary>
-        /// <value>The position.</value>
+        /// <inheritdoc/>
         public TimeSpan Position
         {
             get { return playPosition; }
@@ -162,21 +118,13 @@ namespace Engine.Audio
             }
         }
 
-        /// <summary>
-        /// Event fired when the audio starts
-        /// </summary>
+        /// <inheritdoc/>
         public event GameAudioHandler AudioStart;
-        /// <summary>
-        /// Event fired when the audio ends
-        /// </summary>
+        /// <inheritdoc/>
         public event GameAudioHandler AudioEnd;
-        /// <summary>
-        /// Event fired when a loop ends
-        /// </summary>
+        /// <inheritdoc/>
         public event GameAudioHandler LoopEnd;
-        /// <summary>
-        /// Event fired when the play progressed
-        /// </summary>
+        /// <inheritdoc/>
         public event GameAudioProgressHandler PlayProgress;
 
         /// <summary>
@@ -191,7 +139,7 @@ namespace Engine.Audio
 
             // Read in the file
             audioFile = new GameAudioFile(fileName);
-            voiceInputChannels = audioFile.WaveFormat.Channels;
+            voiceInputChannels = (uint)audioFile.WaveFormat.Channels;
 
             // Create the source voice
             sourceVoice = audioState.CreateSourceVoice(audioFile.WaveFormat, true);
@@ -199,7 +147,7 @@ namespace Engine.Audio
 
             // LPF direct-path
             var sendDescriptor = new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = audioState.MasteringVoice };
-            sourceVoice.SetOutputVoices(sendDescriptor);
+            sourceVoice.SetOutputVoices(new Span<VoiceSendDescriptor>(ref sendDescriptor)).CheckError();
 
             UseAudio3D = effectParameters.UseAudio3D;
             if (UseAudio3D)
@@ -221,9 +169,9 @@ namespace Engine.Audio
             }
 
             IsLooped = effectParameters.IsLooped;
-            Pan = effectParameters.Pan;
-            Pitch = effectParameters.Pitch;
-            Volume = effectParameters.Volume;
+            SetPan(effectParameters.Pan);
+            SetPitch(effectParameters.Pitch);
+            SetVolume(effectParameters.Volume);
 
             if (effectParameters.ReverbPreset.HasValue)
             {
@@ -263,38 +211,27 @@ namespace Engine.Audio
 
                 string fileName = audioFile?.FileName ?? "AlreadyDisposed.file";
 
-                Logger.WriteTrace(this, $"{fileName} Dispose Begin");
+                Game.Logger.WriteTrace(this, $"{fileName} Dispose Begin");
 
-                if (sourceVoice?.IsDisposed != true)
-                {
-                    sourceVoice?.Stop(0);
-                    sourceVoice?.DestroyVoice();
-                    sourceVoice?.Dispose();
-                }
+                sourceVoice?.Stop(0);
+                sourceVoice?.DestroyVoice();
+                sourceVoice?.Dispose();
 
-                if (submixVoice?.IsDisposed != true)
-                {
-                    submixVoice?.DestroyVoice();
-                    submixVoice?.Dispose();
-                }
+                submixVoice?.DestroyVoice();
+                submixVoice?.Dispose();
 
                 audioFile?.Dispose();
 
-                Logger.WriteTrace(this, $"{fileName} Dispose End");
+                Game.Logger.WriteTrace(this, $"{fileName} Dispose End");
             }
         }
 
-        /// <summary>
-        /// Plays the current instance. If it is already playing - the call is ignored.
-        /// </summary>
+        /// <inheritdoc/>
         public void Play()
         {
             Play(TimeSpan.Zero);
         }
-        /// <summary>
-        /// Plays the current instance. If it is already playing - the call is ignored.
-        /// </summary>
-        /// <param name="start">Start position</param>
+        /// <inheritdoc/>
         public void Play(TimeSpan start)
         {
             if (disposed)
@@ -306,7 +243,7 @@ namespace Engine.Audio
             {
                 nextPlayPosition = start;
 
-                sourceVoice.Start(0);
+                sourceVoice.Start(0).CheckError();
 
                 playCounter++;
                 waitForPlayToOutput.Reset();
@@ -319,10 +256,7 @@ namespace Engine.Audio
                 Resume();
             }
         }
-        /// <summary>
-        /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
-        /// </summary>
-        /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
+        /// <inheritdoc/>
         public void Stop(bool immediate = true)
         {
             if (disposed)
@@ -332,7 +266,7 @@ namespace Engine.Audio
 
             if (State != GameAudioState.Stopped)
             {
-                sourceVoice.Stop(0);
+                sourceVoice.Stop(0).CheckError();
 
                 playPosition = TimeSpan.Zero;
                 nextPlayPosition = TimeSpan.Zero;
@@ -343,9 +277,7 @@ namespace Engine.Audio
                 playEvent.Reset();
             }
         }
-        /// <summary>
-        /// Pauses the playback of the current instance.
-        /// </summary>
+        /// <inheritdoc/>
         public void Pause()
         {
             if (disposed)
@@ -355,16 +287,14 @@ namespace Engine.Audio
 
             if (State == GameAudioState.Playing)
             {
-                sourceVoice.Stop();
+                sourceVoice.Stop().CheckError();
 
                 clock.Stop();
                 State = GameAudioState.Paused;
                 playEvent.Reset();
             }
         }
-        /// <summary>
-        /// Resumes playback of the current instance.
-        /// </summary>
+        /// <inheritdoc/>
         public void Resume()
         {
             if (disposed)
@@ -374,16 +304,14 @@ namespace Engine.Audio
 
             if (State == GameAudioState.Paused)
             {
-                sourceVoice.Start();
+                sourceVoice.Start().CheckError();
 
                 clock.Start();
                 State = GameAudioState.Playing;
                 playEvent.Set();
             }
         }
-        /// <summary>
-        /// Resets the current instance.
-        /// </summary>
+        /// <inheritdoc/>
         public void Reset()
         {
             Stop();
@@ -395,7 +323,7 @@ namespace Engine.Audio
         /// </summary>
         private void PlayAsync()
         {
-            AudioStart?.Invoke(this, new GameAudioEventArgs(this));
+            AudioStart?.Invoke(this, new(this));
 
             DueToDispose = false;
 
@@ -418,7 +346,7 @@ namespace Engine.Audio
                 {
                     if (playEvent.WaitOne(WaitPrecision))
                     {
-                        Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
+                        Game.Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
                         break;
                     }
                 }
@@ -431,13 +359,13 @@ namespace Engine.Audio
                 {
                     if (!IsLooped)
                     {
-                        AudioEnd?.Invoke(this, new GameAudioEventArgs(this));
+                        AudioEnd?.Invoke(this, new(this));
                         Stop();
                         DueToDispose = true;
                     }
                     else
                     {
-                        LoopEnd?.Invoke(this, new GameAudioEventArgs(this));
+                        LoopEnd?.Invoke(this, new(this));
                     }
                 }
             }
@@ -468,7 +396,7 @@ namespace Engine.Audio
                 isFirstTime = false;
 
                 // Fires the progress event
-                PlayProgress?.Invoke(this, new GameAudioProgressEventArgs(this, Duration, playPosition));
+                PlayProgress?.Invoke(this, new(this, Duration, playPosition));
             }
         }
         /// <summary>
@@ -530,7 +458,7 @@ namespace Engine.Audio
             {
                 clock.Restart();
 
-                Logger.WriteTrace(this, "waitForPlayToOutput.Set (First time)");
+                Game.Logger.WriteTrace(this, "waitForPlayToOutput.Set (First time)");
                 waitForPlayToOutput.Set();
             }
 
@@ -557,7 +485,7 @@ namespace Engine.Audio
                 // While the player is not stopped, wait for the play event
                 if (playEvent.WaitOne(WaitPrecision))
                 {
-                    Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
+                    Game.Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
                     break;
                 }
             }
@@ -571,13 +499,10 @@ namespace Engine.Audio
             {
                 bufferEndEvent.WaitOne(WaitPrecision);
             }
-            Logger.WriteTrace(this, "bufferEndEvent.WaitOne - Load new buffer");
+            Game.Logger.WriteTrace(this, "bufferEndEvent.WaitOne - Load new buffer");
         }
 
-        /// <summary>
-        /// Applies the 3D effect to the current sound effect instance.
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
         public void Update(IGameTime gameTime)
         {
             if (!UseAudio3D)
@@ -590,7 +515,7 @@ namespace Engine.Audio
 
             Calculate3D();
 
-            UpdateVoices();
+            UpdateVoices(gameAudio.OperationSet);
         }
         /// <summary>
         /// Updates listener state
@@ -600,34 +525,35 @@ namespace Engine.Audio
         {
             listener ??= new Listener()
             {
-                OrientFront = Listener.Forward,
-                OrientTop = Listener.Up,
-                Position = Listener.Position,
-                Velocity = Vector3.Zero,
+                OrientFront = (System.Numerics.Vector3)Listener.Forward,
+                OrientTop = (System.Numerics.Vector3)Listener.Up,
+                Position = (System.Numerics.Vector3)Listener.Position,
+                Velocity = (System.Numerics.Vector3)Vector3.Zero,
             };
 
             if (elapsedSeconds > 0)
             {
-                listener.Velocity = (Listener.Position - listener.Position) / elapsedSeconds;
+                listener.Velocity = (System.Numerics.Vector3)(Listener.Position - (Vector3)listener.Position) / elapsedSeconds;
             }
 
-            listener.OrientFront = Listener.Forward;
-            listener.OrientTop = Listener.Up;
-            listener.Position = Listener.Position;
+            listener.OrientFront = (System.Numerics.Vector3)Listener.Forward;
+            listener.OrientTop = (System.Numerics.Vector3)Listener.Up;
+            listener.Position = (System.Numerics.Vector3)Listener.Position;
 
             if (Listener.Cone.HasValue)
             {
-                listener.Cone ??= new Cone();
+                listener.Cone = new Cone
+                {
+                    InnerAngle = Listener.Cone.Value.InnerAngle,
+                    InnerVolume = Listener.Cone.Value.InnerVolume,
+                    InnerLpf = Listener.Cone.Value.InnerLpf,
+                    InnerReverb = Listener.Cone.Value.InnerReverb,
 
-                listener.Cone.InnerAngle = Listener.Cone.Value.InnerAngle;
-                listener.Cone.InnerVolume = Listener.Cone.Value.InnerVolume;
-                listener.Cone.InnerLpf = Listener.Cone.Value.InnerLpf;
-                listener.Cone.InnerReverb = Listener.Cone.Value.InnerReverb;
-
-                listener.Cone.OuterAngle = Listener.Cone.Value.OuterAngle;
-                listener.Cone.OuterVolume = Listener.Cone.Value.OuterVolume;
-                listener.Cone.OuterLpf = Listener.Cone.Value.OuterLpf;
-                listener.Cone.OuterReverb = Listener.Cone.Value.OuterReverb;
+                    OuterAngle = Listener.Cone.Value.OuterAngle,
+                    OuterVolume = Listener.Cone.Value.OuterVolume,
+                    OuterLpf = Listener.Cone.Value.OuterLpf,
+                    OuterReverb = Listener.Cone.Value.OuterReverb
+                };
             }
             else
             {
@@ -642,22 +568,22 @@ namespace Engine.Audio
         {
             emitter ??= new Emitter()
             {
-                OrientFront = Emitter.Forward,
-                OrientTop = Emitter.Up,
-                Position = Emitter.Position,
-                Velocity = Vector3.Zero
+                OrientFront = (System.Numerics.Vector3)Emitter.Forward,
+                OrientTop = (System.Numerics.Vector3)Emitter.Up,
+                Position = (System.Numerics.Vector3)Emitter.Position,
+                Velocity = (System.Numerics.Vector3)Vector3.Zero
             };
 
             if (elapsedSeconds > 0)
             {
-                emitter.Velocity = (Emitter.Position - emitter.Position) / elapsedSeconds;
+                emitter.Velocity = (System.Numerics.Vector3)(Emitter.Position - (Vector3)emitter.Position) / elapsedSeconds;
             }
 
-            emitter.Position = Emitter.Position;
-            emitter.OrientFront = Emitter.Forward;
-            emitter.OrientTop = Emitter.Up;
+            emitter.Position = (System.Numerics.Vector3)Emitter.Position;
+            emitter.OrientFront = (System.Numerics.Vector3)Emitter.Forward;
+            emitter.OrientTop = (System.Numerics.Vector3)Emitter.Up;
 
-            emitter.ChannelCount = audioFile.WaveFormat.Channels;
+            emitter.ChannelCount = (uint)audioFile.WaveFormat.Channels;
             emitter.ChannelRadius = 1;
             if (emitter.ChannelCount > 1)
             {
@@ -667,26 +593,27 @@ namespace Engine.Audio
             emitter.InnerRadius = Emitter.InnerRadius;
             emitter.InnerRadiusAngle = Emitter.InnerRadiusAngle;
 
-            emitter.VolumeCurve = SharpDXExtensions.ConvertCurve(Emitter.VolumeCurve);
-            emitter.LfeCurve = SharpDXExtensions.ConvertCurve(Emitter.LfeCurve);
-            emitter.ReverbCurve = SharpDXExtensions.ConvertCurve(Emitter.ReverbCurve);
+            emitter.VolumeCurve = XAudio2Extensions.ConvertCurve(Emitter.VolumeCurve);
+            emitter.LfeCurve = XAudio2Extensions.ConvertCurve(Emitter.LfeCurve);
+            emitter.ReverbCurve = XAudio2Extensions.ConvertCurve(Emitter.ReverbCurve);
 
             emitter.CurveDistanceScaler = GameAudio.DistanceScale * Emitter.Radius;
             emitter.DopplerScaler = GameAudio.DopplerScale;
 
             if (Emitter.Cone.HasValue)
             {
-                emitter.Cone ??= new Cone();
+                emitter.Cone = new Cone
+                {
+                    InnerAngle = Emitter.Cone.Value.InnerAngle,
+                    InnerVolume = Emitter.Cone.Value.InnerVolume,
+                    InnerLpf = Emitter.Cone.Value.InnerLpf,
+                    InnerReverb = Emitter.Cone.Value.InnerReverb,
 
-                emitter.Cone.InnerAngle = Emitter.Cone.Value.InnerAngle;
-                emitter.Cone.InnerVolume = Emitter.Cone.Value.InnerVolume;
-                emitter.Cone.InnerLpf = Emitter.Cone.Value.InnerLpf;
-                emitter.Cone.InnerReverb = Emitter.Cone.Value.InnerReverb;
-
-                emitter.Cone.OuterAngle = Emitter.Cone.Value.OuterAngle;
-                emitter.Cone.OuterVolume = Emitter.Cone.Value.OuterVolume;
-                emitter.Cone.OuterLpf = Emitter.Cone.Value.OuterLpf;
-                emitter.Cone.OuterReverb = Emitter.Cone.Value.OuterReverb;
+                    OuterAngle = Emitter.Cone.Value.OuterAngle,
+                    OuterVolume = Emitter.Cone.Value.OuterVolume,
+                    OuterLpf = Emitter.Cone.Value.OuterLpf,
+                    OuterReverb = Emitter.Cone.Value.OuterReverb
+                };
             }
             else
             {
@@ -725,14 +652,14 @@ namespace Engine.Audio
         {
             var flags = Calculate3DFlags();
 
-            dspSettings ??= new DspSettings(audioFile.WaveFormat.Channels, gameAudio.InputChannelCount);
+            dspSettings ??= new DspSettings((uint)audioFile.WaveFormat.Channels, gameAudio.InputChannelCount);
 
             gameAudio.Calculate3D(listener, emitter, flags, dspSettings);
         }
         /// <summary>
         /// Updates the instance voices
         /// </summary>
-        private void UpdateVoices()
+        private void UpdateVoices(uint operationSet)
         {
             if (sourceVoice == null)
             {
@@ -744,7 +671,7 @@ namespace Engine.Audio
             var outputMatrix = GetOutputMatrix();
 
             // Apply X3DAudio generated DSP settings to XAudio2
-            sourceVoice.SetFrequencyRatio(dspSettings.DopplerFactor);
+            sourceVoice.SetFrequencyRatio(dspSettings.DopplerFactor, operationSet);
 
             sourceVoice.SetOutputMatrix(
                 gameAudio.MasteringVoice,
@@ -757,9 +684,10 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * MathF.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(Helper.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
-                });
+                },
+                operationSet);
 
             if (!reverbPreset.HasValue)
             {
@@ -782,22 +710,18 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * MathF.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(Helper.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
-                });
+                },
+                operationSet);
         }
 
-        /// <summary>
-        /// Gets the reverb effect
-        /// </summary>
+        /// <inheritdoc/>
         public GameAudioReverbPresets? GetReverb()
         {
             return reverbPreset;
         }
-        /// <summary>
-        /// Set reverb to voice
-        /// </summary>
-        /// <param name="reverb">Reverb index</param>
+        /// <inheritdoc/>
         public bool SetReverb(GameAudioReverbPresets? reverb)
         {
             submixVoice ??= gameAudio.CreateReverbVoice();
@@ -822,16 +746,16 @@ namespace Engine.Audio
                     // LPF direct-path
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
                 ];
-                sourceVoice.SetOutputVoices(sendDescriptors);
+                sourceVoice.SetOutputVoices(sendDescriptors).CheckError();
 
-                submixVoice.DisableEffect(0);
+                submixVoice.DisableEffect(0, gameAudio.OperationSet).CheckError();
             }
 
             if (reverb.HasValue)
             {
-                var native = GameAudioPresets.Convert(reverb.Value, submixVoice.VoiceDetails.InputSampleRate);
-                submixVoice.SetEffectParameters(0, native);
-                submixVoice.EnableEffect(0);
+                var effect = GameAudioPresets.Convert(reverb.Value);
+                submixVoice.SetEffectParameters(0, effect, gameAudio.OperationSet).CheckError();
+                submixVoice.EnableEffect(0, gameAudio.OperationSet).CheckError();
             }
 
             reverbPreset = reverb;
@@ -852,15 +776,12 @@ namespace Engine.Audio
         /// </summary>
         private void InitializeOutputMatrix()
         {
-            if (panOutputMatrix?.Length > 0)
-            {
-                return;
-            }
+            if (panOutputMatrix?.Length > 0) return;
 
-            var activeVoice = reverbPreset.HasValue ? submixVoice : (Voice)gameAudio.MasteringVoice;
+            IXAudio2Voice activeVoice = reverbPreset.HasValue ? submixVoice : gameAudio.MasteringVoice;
 
-            int destinationChannels = activeVoice.VoiceDetails.InputChannelCount;
-            int sourceChannels = sourceVoice.VoiceDetails.InputChannelCount;
+            uint destinationChannels = activeVoice.VoiceDetails.InputChannels;
+            uint sourceChannels = sourceVoice.VoiceDetails.InputChannels;
 
             panOutputMatrix = new float[destinationChannels * sourceChannels];
 
@@ -879,13 +800,13 @@ namespace Engine.Audio
 
             var outputMatrix = dspSettings.MatrixCoefficients.ToArray();
 
-            int sourceChannels = sourceVoice.VoiceDetails.InputChannelCount;
+            uint sourceChannels = sourceVoice.VoiceDetails.InputChannels;
 
             float panLeft = 0.5f - (pan * 0.5f);
             float panRight = 0.5f + (pan * 0.5f);
 
             //The level sent from source channel S to destination channel D is specified in the form outputMatrix[SourceChannels × D + S]
-            for (int s = 0; s < sourceChannels; s++)
+            for (uint s = 0; s < sourceChannels; s++)
             {
                 switch (gameAudio.GetAudioSpeakers())
                 {

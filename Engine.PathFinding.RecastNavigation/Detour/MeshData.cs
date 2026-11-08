@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -216,7 +216,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="imax">Maximum index</param>
         /// <param name="bmin">Resulting minimum bounds point</param>
         /// <param name="bmax">Resulting maximum bounds point</param>
-        private static void CalcExtends(BVItem[] items, int imin, int imax, out Int3 bmin, out Int3 bmax)
+        private static void CalcExtends(BVItem[] items, int imin, int imax, out Vector3I bmin, out Vector3I bmax)
         {
             bmin.X = items[imin].BMin.X;
             bmin.Y = items[imin].BMin.Y;
@@ -283,7 +283,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
         /// <param name="storedOffMeshConCount">Resulting stored connection count</param>
         /// <param name="offMeshConLinkCount">Resulting stored link count</param>
-        private static void ClassifyOffMeshConnections(NavMeshCreateParams param, out Vector2Int[] offMeshConClass, out int storedOffMeshConCount, out int offMeshConLinkCount)
+        private static void ClassifyOffMeshConnections(NavMeshCreateParams param, out Vector2I[] offMeshConClass, out int storedOffMeshConCount, out int offMeshConLinkCount)
         {
             // Classify off-mesh connection points. We store only the connections
             // whose start point is inside the tile.
@@ -296,7 +296,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            offMeshConClass = new Vector2Int[param.OffMeshConCount];
+            offMeshConClass = new Vector2I[param.OffMeshConCount];
 
             // Find tight heigh bounds, used for culling out off-mesh start locations.
             var bbox = param.FindBounds();
@@ -458,7 +458,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
-        private void StoreOffMeshLinksVertices(NavMeshCreateParams param, Vector2Int[] offMeshConClass)
+        private void StoreOffMeshLinksVertices(NavMeshCreateParams param, Vector2I[] offMeshConClass)
         {
             int n = 0;
             for (int i = 0; i < param.OffMeshConCount; ++i)
@@ -492,7 +492,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
         /// <param name="offMeshVertsBase">Off-mesh vertices base index</param>
-        private void StoreOffMeshConnectionVertices(NavMeshCreateParams param, Vector2Int[] offMeshConClass, int offMeshVertsBase)
+        private void StoreOffMeshConnectionVertices(NavMeshCreateParams param, Vector2I[] offMeshConClass, int offMeshVertsBase)
         {
             int n = 0;
             for (int i = 0; i < param.OffMeshConCount; i++)
@@ -605,7 +605,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
         /// <param name="offMeshPolyBase">Off-mesh polygon base index</param>
-        private void StoreOffMeshConnections(NavMeshCreateParams param, Vector2Int[] offMeshConClass, int offMeshPolyBase)
+        private void StoreOffMeshConnections(NavMeshCreateParams param, Vector2I[] offMeshConClass, int offMeshPolyBase)
         {
             int n = 0;
 

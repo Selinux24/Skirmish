@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Geometry;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 
 namespace AISamples.Common
@@ -40,7 +40,7 @@ namespace AISamples.Common
             int levelHeight = height / levels;
             for (int i = levels - 1; i >= 0; i--)
             {
-                float levelTop = top + MathUtil.Lerp(height - levelHeight, 0, GetX(i, levels));
+                float levelTop = top + float.Lerp(height - levelHeight, 0, GetX(i, levels));
 
                 DrawLevel(network.GetLevel(i), nodeRadius, -left, (int)-levelTop, -width, -levelHeight, position.Z);
             }
@@ -73,8 +73,8 @@ namespace AISamples.Common
                 for (int o = 0; o < outputCount; o++)
                 {
                     var l = new Line3D(
-                        new(MathUtil.Lerp(left, right, GetX(i, inputCount)), bottom, 1 + depth),
-                        new(MathUtil.Lerp(left, right, GetX(o, outputCount)), top, 1 + depth));
+                        new(float.Lerp(left, right, GetX(i, inputCount)), bottom, 1 + depth),
+                        new(float.Lerp(left, right, GetX(o, outputCount)), top, 1 + depth));
 
                     float w = level.GetWeight(i, o);
                     lineDrawer.AddPrimitives(ColorFromValue(w), l);
@@ -83,7 +83,7 @@ namespace AISamples.Common
 
             for (int i = 0; i < inputCount; i++)
             {
-                float x = MathUtil.Lerp(left, right, GetX(i, inputCount));
+                float x = float.Lerp(left, right, GetX(i, inputCount));
 
                 float iv = level.GetInput(i);
                 var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
@@ -92,7 +92,7 @@ namespace AISamples.Common
 
             for (int o = 0; o < outputCount; o++)
             {
-                float x = MathUtil.Lerp(left, right, GetX(o, outputCount));
+                float x = float.Lerp(left, right, GetX(o, outputCount));
 
                 float ov = level.GetOutput(o);
                 var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
@@ -110,10 +110,10 @@ namespace AISamples.Common
         }
         private static Color4 ColorFromValue(float v)
         {
-            float alpha = MathUtil.Clamp(MathF.Abs(v), 0f, 1f);
-            Color3 color = v > 0 ? wPositiveColor.ToVector3() : wNegativeColor.ToVector3();
+            float alpha = Math.Clamp(MathF.Abs(v), 0f, 1f);
+            var color = v > 0 ? wPositiveColor : wNegativeColor;
 
-            return new Color4(color, alpha);
+            return new((Color3)color, alpha);
         }
     }
 }

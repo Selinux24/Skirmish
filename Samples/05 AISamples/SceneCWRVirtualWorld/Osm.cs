@@ -1,7 +1,6 @@
 ﻿using AISamples.Common;
 using AISamples.Common.Primitives;
 using Engine;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +9,8 @@ using System.Text;
 
 namespace AISamples.SceneCWRVirtualWorld
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Open street map data struct
     /// </summary>
@@ -87,7 +88,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             var deltaLon = maxLon - minLon;
             var deltaLat = maxLat - minLat;
-            var ar = deltaLon / deltaLat * MathF.Cos(MathUtil.DegreesToRadians(maxLat));
+            var ar = deltaLon / deltaLat * MathF.Cos(Helper.DegreesToRadians(maxLat));
             float height = deltaLat * 111000;
             float width = height * ar;
             height *= scale;

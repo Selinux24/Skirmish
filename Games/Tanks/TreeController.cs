@@ -1,11 +1,12 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Tanks
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tree controller
     /// </summary>
@@ -122,7 +123,7 @@ namespace Tanks
 
                 Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-                if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
+                if (Helper.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
                 {
                     Active = false;
 

@@ -1,9 +1,10 @@
-﻿using Engine;
-using SharpDX;
-using System;
+﻿using System;
 
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Attack behavior
     /// </summary>
@@ -67,20 +68,20 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                     var onSight = Agent.EnemyOnSight(attackTarget);
                     if (onSight)
                     {
-                        Logger.WriteDebug(this, $"Agent {Agent} target on sight.");
+                        Game.Logger.WriteDebug(this, $"Agent {Agent} target on sight.");
 
                         var inRange = Agent.EnemyOnAttackRange(attackTarget);
                         if (inRange)
                         {
                             bool hardEnemy = Agent.IsHardEnemy(attackTarget);
 
-                            Logger.WriteDebug(this, $"Agent {Agent} target in range. Hard enemy {hardEnemy}");
+                            Game.Logger.WriteDebug(this, $"Agent {Agent} target in range. Hard enemy {hardEnemy}");
 
                             return !hardEnemy;
                         }
                         else
                         {
-                            Logger.WriteDebug(this, $"Agent {Agent} target not in range.");
+                            Game.Logger.WriteDebug(this, $"Agent {Agent} target not in range.");
 
                             return false;
                         }
@@ -88,12 +89,12 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                 }
             }
 
-            Logger.WriteDebug(this, $"Agent {Agent} looking for valid targets.");
+            Game.Logger.WriteDebug(this, $"Agent {Agent} looking for valid targets.");
 
             var target = Array.Find(Agent.GetEnemiesOnSight(), e => e != attackTarget);
             if (target != null)
             {
-                Logger.WriteDebug(this, $"Agent {Agent} selected target {target}.");
+                Game.Logger.WriteDebug(this, $"Agent {Agent} selected target {target}.");
 
                 attackTarget = target;
                 attackPosition = null;
@@ -137,12 +138,12 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                         v = attackTarget.Controller.Speed;
                     }
 
-                    Logger.WriteDebug(this, $"Agent {Agent} not on range. Going to target position.");
+                    Game.Logger.WriteDebug(this, $"Agent {Agent} not on range. Going to target position.");
                     Agent.SetRouteToPoint(attackPosition.Value, v, false);
                 }
                 else
                 {
-                    Logger.WriteDebug(this, $"Agent {Agent} attacking target {attackTarget}.");
+                    Game.Logger.WriteDebug(this, $"Agent {Agent} attacking target {attackTarget}.");
                     Agent.Attack(attackTarget);
 
                     Agent.Stop();

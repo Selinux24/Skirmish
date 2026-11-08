@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Capsule collider
     /// </summary>

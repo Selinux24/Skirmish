@@ -8,8 +8,8 @@ using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.BuiltIn.UI;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -173,8 +173,6 @@ F7 to F10: Toggle object visibility.";
                     InitializeSkydom,
                     InitializeHelicopters,
                     InitializeTerrain,
-                    InitializeGardener,
-                    InitializeTrees,
                     InitializeDebug,
                 ],
                 LoadingTaskObjectsCompleted);
@@ -218,6 +216,57 @@ F7 to F10: Toggle object visibility.";
 
             terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", desc);
         }
+        private async Task InitializeDebug()
+        {
+            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
+            {
+                Count = 1000,
+                StartsVisible = false,
+            };
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
+        }
+        private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
+        {
+            res.ThrowExceptions();
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
+
+            Lights.KeyLight.Enabled = false;
+            Lights.KeyLight.CastShadow = false;
+
+            Lights.BackLight.Enabled = false;
+            Lights.BackLight.CastShadow = false;
+
+            Lights.FillLight.Enabled = true;
+            Lights.FillLight.CastShadow = true;
+            Lights.FillLight.DiffuseColor = new(0.8f, 0.9f, 1);
+            Lights.FillLight.SpecularColor = new(0.4f, 0.5f, 1);
+            Lights.FillLight.Brightness = 0.2f;
+
+            StartAnimations();
+
+            LoadingTaskTerrain();
+        }
+        private void StartAnimations()
+        {
+            var ap = new AnimationPath();
+            ap.AddLoop("roll");
+            animations.Add("default", new AnimationPlan(ap));
+        }
+
+        private void LoadingTaskTerrain()
+        {
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeGardener,
+                    InitializeTrees,
+                ],
+                LoadingTaskTerrainCompleted);
+
+            LoadResources(group);
+        }
         private async Task InitializeTrees()
         {
             var desc1 = new ModelDescription()
@@ -257,36 +306,9 @@ F7 to F10: Toggle object visibility.";
             };
             await AddComponentEffect<Foliage, FoliageDescription>("Vegetation", "Vegetation", desc);
         }
-        private async Task InitializeDebug()
-        {
-            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
-            {
-                Count = 1000,
-                StartsVisible = false,
-            };
-            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
-        }
-        private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
+        private void LoadingTaskTerrainCompleted(LoadResourcesResult res)
         {
             res.ThrowExceptions();
-
-            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
-            Renderer.ClearPostProcessingEffects();
-            Renderer.PostProcessingObjectsEffects = postProcessingState;
-
-            Lights.KeyLight.Enabled = false;
-            Lights.KeyLight.CastShadow = false;
-
-            Lights.BackLight.Enabled = false;
-            Lights.BackLight.CastShadow = false;
-
-            Lights.FillLight.Enabled = true;
-            Lights.FillLight.CastShadow = true;
-            Lights.FillLight.DiffuseColor = new Color3(0.8f, 0.9f, 1);
-            Lights.FillLight.SpecularColor = new Color3(0.4f, 0.5f, 1);
-            Lights.FillLight.Brightness = 0.2f;
-
-            StartAnimations();
 
             StartTerrain();
 
@@ -299,12 +321,6 @@ F7 to F10: Toggle object visibility.";
             Camera.FarPlaneDistance = far;
 
             gameReady = true;
-        }
-        private void StartAnimations()
-        {
-            var ap = new AnimationPath();
-            ap.AddLoop("roll");
-            animations.Add("default", new AnimationPlan(ap));
         }
         private void StartTerrain()
         {
@@ -462,9 +478,9 @@ F7 to F10: Toggle object visibility.";
         {
             if (Game.Input.KeyJustReleased(Keys.F))
             {
-                Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
-                Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? far * fogStart : 0f;
-                Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? far * fogRange : 0f;
+                Lights.BaseFogColor = new Color(54, 56, 68);
+                Lights.FogStart = Helper.IsZero(Lights.FogStart) ? far * fogStart : 0f;
+                Lights.FogRange = Helper.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
 
             if (Game.Input.KeyJustReleased(Keys.G))
@@ -872,7 +888,7 @@ F7 to F10: Toggle object visibility.";
                         lightPosition.Y += 1f;
                     }
 
-                    var color = new Color3(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1));
+                    var color = new Vector3(Helper.RandomGenerator.NextSingle(0, 1), Helper.RandomGenerator.NextSingle(0, 1), Helper.RandomGenerator.NextSingle(0, 1));
 
                     var pointLight = new SceneLightPoint(
                         $"Point {Lights.PointLights.Length}",
@@ -882,7 +898,7 @@ F7 to F10: Toggle object visibility.";
                         true,
                         SceneLightPointDescription.Create(lightPosition, 5f, 10f))
                     {
-                        State = Helper.RandomGenerator.NextFloat(0, 1) >= 0.5f ? 1 : -1
+                        State = Helper.RandomGenerator.NextSingle(0, 1) >= 0.5f ? 1 : -1
                     };
 
                     Lights.Add(pointLight);
@@ -902,8 +918,8 @@ F7 to F10: Toggle object visibility.";
             spotLight = new SceneLightSpot(
                 "Spot the dog",
                 castShadows,
-                Color.Yellow.RGB(),
-                Color.Yellow.RGB(),
+                Color.Yellow,
+                Color.Yellow,
                 true,
                 SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 

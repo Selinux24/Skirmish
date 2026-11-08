@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Content;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Audio
 {
-    using Engine.Content;
-
     /// <summary>
     /// Audio manager
     /// </summary>
@@ -57,28 +56,16 @@ namespace Engine.Audio
         /// <remarks>From 0 to 1</remarks>
         public float MasterVolume
         {
-            get
-            {
-                return gameAudio.MasterVolume;
-            }
-            set
-            {
-                gameAudio.MasterVolume = value;
-            }
+            get => gameAudio.MasterVolume;
+            set => gameAudio.MasterVolume = value;
         }
         /// <summary>
         /// Gets or sets whether the master voice uses a limiter or not
         /// </summary>
         public bool UseMasteringLimiter
         {
-            get
-            {
-                return gameAudio.UseMasteringLimiter;
-            }
-            set
-            {
-                gameAudio.UseMasteringLimiter = value;
-            }
+            get => gameAudio.UseMasteringLimiter;
+            set => gameAudio.UseMasteringLimiter = value;
         }
 
         /// <summary>
@@ -86,7 +73,7 @@ namespace Engine.Audio
         /// </summary>
         /// <typeparam name="T">Type of audio loader</typeparam>
         /// <param name="sampleRate">Sample rate</param>
-        public static void RegisterAudio<T>(int sampleRate) where T : class, IGameAudioLoader
+        public static void RegisterAudio<T>(uint sampleRate) where T : class, IGameAudioLoader
         {
             T audio = Activator.CreateInstance<T>();
 
@@ -149,16 +136,14 @@ namespace Engine.Audio
         public void Update(IGameTime gameTime)
         {
             //Extract a remove the effects due to dispose
-            var toDispose = effectInstances
-                .FindAll(i => i.Effect.DueToDispose)
-                .ToArray();
+            var toDispose = effectInstances.FindAll(i => i.Effect.DueToDispose);
 
-            if (toDispose.Length != 0)
+            if (toDispose.Count != 0)
             {
                 effectInstances.RemoveAll(i => i.Effect.DueToDispose);
                 Task.Run(() =>
                 {
-                    toDispose.ToList().ForEach(i =>
+                    toDispose.ForEach(i =>
                     {
                         i.Effect.Stop(true);
                         i.Effect.Dispose();
@@ -166,11 +151,9 @@ namespace Engine.Audio
                 });
             }
 
-            var toUpdate = effectInstances
-                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == GameAudioState.Playing && i.Effect.UseAudio3D)
-                .ToArray();
+            var toUpdate = effectInstances.FindAll(i => !i.Effect.DueToDispose && i.Effect.State == GameAudioState.Playing && i.Effect.UseAudio3D);
 
-            int effectCount = toUpdate.Length;
+            int effectCount = toUpdate.Count;
             if (effectCount == 0)
             {
                 return;
@@ -336,7 +319,7 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
         /// <param name="loudness">Threshold of the limiter</param>
-        public void SetMasteringLimit(int release, int loudness)
+        public void SetMasteringLimit(uint release, uint loudness)
         {
             gameAudio.SetMasteringLimit(release, loudness);
         }

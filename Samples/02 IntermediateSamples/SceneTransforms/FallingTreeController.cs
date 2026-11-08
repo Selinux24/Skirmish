@@ -1,8 +1,9 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace IntermediateSamples.SceneTransforms
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Falling tree controller
     /// </summary>
@@ -29,7 +30,7 @@ namespace IntermediateSamples.SceneTransforms
 
             Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-            if (MathUtil.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
+            if (Helper.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
             {
                 Active = false;
 

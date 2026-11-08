@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Billboard
@@ -66,9 +66,9 @@ namespace Engine.BuiltIn.Drawers.Billboard
             public float EndRadius;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerBillboard>();
+                return (uint)Marshal.SizeOf<PerBillboard>();
             }
         }
 

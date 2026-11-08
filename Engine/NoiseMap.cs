@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
@@ -16,8 +16,8 @@ namespace Engine
         {
             descriptor.Validate();
 
-            int mapWidth = descriptor.MapWidth;
-            int mapHeight = descriptor.MapHeight;
+            uint mapWidth = descriptor.MapWidth;
+            uint mapHeight = descriptor.MapHeight;
             float scale = descriptor.Scale;
             int octaves = descriptor.Octaves;
             float persistance = descriptor.Persistance;
@@ -31,8 +31,8 @@ namespace Engine
             Vector2[] octaveOffsets = new Vector2[octaves];
             for (int i = 0; i < octaves; i++)
             {
-                float sampleX = rnd.NextFloat(-1f, 1f) + offset.X;
-                float sampleY = rnd.NextFloat(-1f, 1f) + offset.Y;
+                float sampleX = rnd.NextSingle(-1f, 1f) + offset.X;
+                float sampleY = rnd.NextSingle(-1f, 1f) + offset.Y;
                 octaveOffsets[i] = new Vector2(sampleX, sampleY);
             }
 
@@ -88,12 +88,12 @@ namespace Engine
         /// <returns>Returns the clamped value</returns>
         private static float InverseLerp(float a, float b, float value)
         {
-            if (MathUtil.NearEqual(a, b))
+            if (Helper.NearEqual(a, b))
             {
                 return 0.0f;
             }
 
-            return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
+            return Math.Clamp((value - a) / (b - a), 0f, 1f);
         }
 
         /// <summary>

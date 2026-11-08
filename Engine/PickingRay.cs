@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
@@ -165,7 +165,7 @@ namespace Engine
             return
                 Start == other.Start &&
                 Direction == other.Direction &&
-                MathUtil.NearEqual(RayLength, other.RayLength) &&
+                Helper.NearEqual(RayLength, other.RayLength) &&
                 RayPickingParams == other.RayPickingParams;
         }
         /// <inheritdoc/>

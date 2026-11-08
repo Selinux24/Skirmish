@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Engine.Content
     /// <param name="isTextured">Is textured mesh</param>
     /// <param name="isHull">Is hull mesh</param>
     /// <param name="transform">Transform</param>
-    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
+    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix4x4 transform)
     {
         /// <summary>
         /// Vertex Topology
@@ -47,7 +47,7 @@ namespace Engine.Content
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; private set; } = transform;
+        public Matrix4x4 Transform { get; private set; } = transform;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -109,7 +109,7 @@ namespace Engine.Content
                 indexOffset = (uint)verts.Count;
             }
 
-            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix.Identity);
+            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix4x4.Identity);
 
             optimizedMesh.SetVertices(verts);
             optimizedMesh.SetIndices(idx);
@@ -284,21 +284,21 @@ namespace Engine.Content
         /// Transforms the vertex data and resets de internal transform to identity
         /// </summary>
         /// <param name="transform">Transform to apply</param>
-        public void BakeTransform(Matrix transform)
+        public void BakeTransform(Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
                 return;
             }
 
-            Transform = Matrix.Identity;
-            Vertices = Vertices.Select(v => v.Transform(transform)).ToArray();
+            Transform = Matrix4x4.Identity;
+            Vertices = [.. Vertices.Select(v => v.Transform(transform))];
         }
         /// <summary>
         /// Sets the specified transform matrix
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        public void SetTransform(Matrix transform)
+        public void SetTransform(Matrix4x4 transform)
         {
             Transform = transform;
         }

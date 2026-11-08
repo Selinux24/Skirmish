@@ -1,12 +1,11 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.IO;
 using System.Linq;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Image content from file
     /// </summary>
@@ -19,7 +18,7 @@ namespace Engine.Content
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle;
+        private readonly RectI cropRectangle;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -36,7 +35,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="path">Path to image</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileImageContent(string path, Rectangle? cropRectangle = null)
+        public FileImageContent(string path, RectI? cropRectangle = null)
         {
             if (path == null)
             {
@@ -53,7 +52,7 @@ namespace Engine.Content
             }
 
             this.path = p.First();
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
         /// <summary>
         /// Constructor
@@ -61,7 +60,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentFileName">Path to image</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileImageContent(string contentFolder, string contentFileName, Rectangle? cropRectangle = null)
+        public FileImageContent(string contentFolder, string contentFileName, RectI? cropRectangle = null)
         {
             if (contentFileName == null)
             {
@@ -75,7 +74,7 @@ namespace Engine.Content
             }
 
             path = p.First();
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
+            this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
 
         /// <inheritdoc/>
@@ -83,7 +82,7 @@ namespace Engine.Content
         {
             Name = name;
 
-            if (cropRectangle == Rectangle.Empty)
+            if (cropRectangle == RectI.Empty)
             {
                 return game.Graphics.LoadTexture($"{name}_{GetResourceKey()}", path, mipAutogen, dynamic);
             }

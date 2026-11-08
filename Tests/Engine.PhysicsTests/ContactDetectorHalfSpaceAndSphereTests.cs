@@ -1,22 +1,23 @@
-﻿using Engine.Physics;
-using Engine.Physics.Colliders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ContactDetectorHalfSpaceAndSphereTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
+        static readonly float Epsilon = Helper.ZeroTolerance;
 
-        static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix transform)
+        static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix4x4 transform)
         {
             var p = new Plane(normal, d);
             var plane = new HalfSpaceCollider(p);
@@ -26,7 +27,7 @@ namespace Engine.PhysicsTests
             return plane;
         }
 
-        static SphereCollider FromRadius(float radius, Matrix transform)
+        static SphereCollider FromRadius(float radius, Matrix4x4 transform)
         {
             var sphere = new SphereCollider(radius);
             var boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
@@ -43,7 +44,7 @@ namespace Engine.PhysicsTests
 
         public struct HalfSpaceAndSphereData
         {
-            public Matrix Transform { get; set; }
+            public Matrix4x4 Transform { get; set; }
             public bool IntersectionExpected { get; set; }
             public HalfSpaceAndSphereContactData Contact { get; set; }
         }
@@ -63,14 +64,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Translation(Vector3.Up * 5f),
+                            Transform = Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Translation(Vector3.Up),
+                            Transform = Matrix4x4.Translation(Vector3.Up),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 0 },
                         }
@@ -78,7 +79,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Identity,
+                            Transform = Matrix4x4.Identity,
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 1 },
                         }
@@ -86,7 +87,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Translation(Vector3.Down),
+                            Transform = Matrix4x4.Translation(Vector3.Down),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 2 },
                         }
@@ -94,7 +95,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Translation(Vector3.Down * 2f),
+                            Transform = Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 3 },
                         }
@@ -102,7 +103,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndSphereData
                         {
-                            Transform = Matrix.Translation(Vector3.Down * 5f),
+                            Transform = Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 6 },
                         }
@@ -117,7 +118,7 @@ namespace Engine.PhysicsTests
         {
             var data = new ContactResolver();
 
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
+            var plane = FromPlane(Vector3.Up, 0, Matrix4x4.Identity);
 
             var sphere = FromRadius(1f, testData.Transform);
             bool intersection = ContactDetector.BetweenObjects(sphere, plane, data);
@@ -140,7 +141,7 @@ namespace Engine.PhysicsTests
             var expectedPosition = expectedContact.Point;
             var expectedNormal = plane.Normal;
 
-            Assert.IsTrue(MathUtil.NearEqual(expectedPenetration, contact.Penetration), $"Expected penetration {expectedPenetration} != {contact.Penetration}");
+            Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Expected penetration {expectedPenetration} != {contact.Penetration}");
             Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Expected position {expectedPosition} != {contact.Position}");
             Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Expected normal {expectedNormal} != {contact.Normal}");
         }

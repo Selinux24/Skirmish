@@ -1,5 +1,5 @@
 ﻿using Engine.BuiltIn.Components.ShadowMapping;
-using SharpDX;
+using Engine.Mathematics;
 
 namespace Engine
 {
@@ -84,7 +84,7 @@ namespace Engine
         private ICullingVolume lightVolume;
 
         /// <inheritdoc/>
-        public override Matrix ParentTransform
+        public override Matrix4x4 ParentTransform
         {
             get
             {
@@ -104,7 +104,7 @@ namespace Engine
         /// <inheritdoc/>
         public float Brightness { get; set; } = 1f;
         /// <inheritdoc/>
-        public Matrix ToShadowSpace { get; set; }
+        public Matrix4x4 ToShadowSpace { get; set; }
         /// <inheritdoc/>
         public Vector4 ToCascadeOffsetX { get; set; }
         /// <inheritdoc/>
@@ -160,7 +160,7 @@ namespace Engine
             ShadowMapIndex = -1;
             ShadowMapCount = 0;
             FromLightVP = [];
-            ToShadowSpace = Matrix.Identity;
+            ToShadowSpace = Matrix4x4.Identity;
             ToCascadeOffsetX = Vector4.Zero;
             ToCascadeOffsetY = Vector4.Zero;
             ToCascadeScale = Vector4.Zero;

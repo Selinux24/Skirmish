@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using VertexShader = Vortice.Direct3D11.ID3D11VertexShader;
 
     /// <summary>
     /// Vertex shader description

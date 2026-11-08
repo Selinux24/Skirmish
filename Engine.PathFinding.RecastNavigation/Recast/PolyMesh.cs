@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The mesh vertices. [Form: (x, y, z) * #<see cref="vertCount"/>]
         /// </summary>
-        private Int3[] vertList;
+        private Vector3I[] vertList;
         /// <summary>
         /// The number of polygons.
         /// </summary>
@@ -190,7 +190,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var mesh = new PolyMesh
             {
                 vertCount = 0,
-                vertList = new Int3[maxVertices],
+                vertList = new Vector3I[maxVertices],
 
                 polyCount = 0,
                 polyList = new IndexedPolygon[maxPolys],
@@ -289,7 +289,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var (maxVerts, maxPolys, maxVertsPerMesh) = UpdateBounds(meshes);
 
             mesh.vertCount = 0;
-            mesh.vertList = new Int3[maxVerts];
+            mesh.vertList = new Vector3I[maxVerts];
             mesh.polyCount = 0;
             mesh.polyList = new IndexedPolygon[maxPolys];
             mesh.regionList = new int[maxPolys];
@@ -618,7 +618,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var (triRes, tris) = TriangulationHelper.Triangulate(tverts, thole);
             if (!triRes)
             {
-                Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
+                Game.Logger.WriteWarning(this, "removeVertex: Hole triangulation error");
             }
 
             // Merge the hole triangles back to polygons.
@@ -640,7 +640,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Store polygons.
             if (!StorePolygons(polys, polys.Length, pareas, pregs, maxPolys))
             {
-                Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
+                Game.Logger.WriteWarning(this, $"removeVertex: Too many polygons {polyCount} (max:{maxPolys}).");
 
                 return false;
             }
@@ -745,7 +745,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hreg">Hole regions</param>
         /// <param name="harea">Hole areas</param>
         /// <returns>Retusn the triangulated vertices and the triangulated hole</returns>
-        private (Int3[] TriVerts, int[] TriHole, int[] hole, int[] harea, int[] hreg) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
+        private (Vector3I[] TriVerts, int[] TriHole, int[] hole, int[] harea, int[] hreg) GetTriangulateHole(IndexedRegionEdge[] edges, ref int nedges, int numRemovedVerts)
         {
             var hole = new int[numRemovedVerts * NVP];
             var harea = new int[numRemovedVerts * NVP];
@@ -807,7 +807,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            var tverts = new Int3[nhole];
+            var tverts = new Vector3I[nhole];
             var thole = new int[nhole];
 
             // Generate temp vertex array for triangulation.
@@ -987,7 +987,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Iterates over the mesh triangles
         /// </summary>
         /// <returns>Returns the polygon index, the polygon, and the three vertices of each triangle</returns>
-        public IEnumerable<(int i, Int3[] tri, IndexedPolygon p, int r, int a)> IteratePolyTriangles()
+        public IEnumerable<(int i, Vector3I[] tri, IndexedPolygon p, int r, int a)> IteratePolyTriangles()
         {
             for (int i = 0; i < polyCount; i++)
             {
@@ -1021,7 +1021,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Return vertices
         /// </summary>
-        public Int3[] GetVertices()
+        public Vector3I[] GetVertices()
         {
             return [.. vertList];
         }
@@ -1029,7 +1029,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the vertex at index
         /// </summary>
         /// <param name="index">Index</param>
-        public Int3 GetVertex(int index)
+        public Vector3I GetVertex(int index)
         {
             return vertList[index];
         }

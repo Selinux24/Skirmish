@@ -1,8 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Physics.EPA
 {
+    using Engine.Mathematics;
     using GJKSupportPoint = GJK.SupportPoint;
 
     /// <summary>

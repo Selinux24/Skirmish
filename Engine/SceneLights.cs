@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -193,12 +193,12 @@ namespace Engine
             [
                 .. new[]
                 {
-                    new Tuple<float, Color3>(MathUtil.Pi * -1.00f, Color.Black.RGB()),
-                    new Tuple<float, Color3>(MathUtil.Pi * 0.02f, Color.Orange.RGB()),
-                    new Tuple<float, Color3>(MathUtil.Pi * 0.20f, Color.White.RGB()),
-                    new Tuple<float, Color3>(MathUtil.Pi * 0.70f, Color.White.RGB()),
-                    new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
-                    new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
+                    new Tuple<float, Color3>(Helper.Pi * -1.00f, Color.Black),
+                    new Tuple<float, Color3>(Helper.Pi * 0.02f, Color.Orange),
+                    new Tuple<float, Color3>(Helper.Pi * 0.20f, Color.White),
+                    new Tuple<float, Color3>(Helper.Pi * 0.70f, Color.White),
+                    new Tuple<float, Color3>(Helper.Pi * 0.98f, Color.Orange),
+                    new Tuple<float, Color3>(Helper.Pi * 2.00f, Color.Black),
                 },
             ];
         /// <summary>
@@ -364,7 +364,7 @@ namespace Engine
         /// <param name="viewerPosition">Viewer position</param>
         private ISceneLight[] CullDirectionalLights()
         {
-            return directionalLights.Where(l => l.Enabled).ToArray();
+            return [.. directionalLights.Where(l => l.Enabled)];
         }
         /// <summary>
         /// Cull test for point lights
@@ -395,8 +395,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (MathUtil.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (MathUtil.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -433,8 +433,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (MathUtil.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (MathUtil.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -456,9 +456,7 @@ namespace Engine
         /// <returns>Returns the visible directional lights array</returns>
         public IEnumerable<ISceneLightDirectional> GetVisibleDirectionalLights()
         {
-            return visibleLights
-                .OfType<ISceneLightDirectional>()
-                .ToArray();
+            return [.. visibleLights.OfType<ISceneLightDirectional>()];
         }
         /// <summary>
         /// Gets the visible point lights
@@ -466,9 +464,7 @@ namespace Engine
         /// <returns>Returns the visible point lights array</returns>
         public IEnumerable<ISceneLightPoint> GetVisiblePointLights()
         {
-            return visibleLights
-                .OfType<ISceneLightPoint>()
-                .ToArray();
+            return [.. visibleLights.OfType<ISceneLightPoint>()];
         }
         /// <summary>
         /// Gets the visible spot lights
@@ -476,9 +472,7 @@ namespace Engine
         /// <returns>Returns the visible spot lights array</returns>
         public IEnumerable<ISceneLightSpot> GetVisibleSpotLights()
         {
-            return visibleLights
-                .OfType<ISceneLightSpot>()
-                .ToArray();
+            return [.. visibleLights.OfType<ISceneLightSpot>()];
         }
 
         /// <summary>
@@ -488,10 +482,9 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment)
         {
-            return visibleLights
+            return [.. visibleLights
                 .OfType<ISceneLightDirectional>()
-                .Where(l => l.MarkForShadowCasting(environment))
-                .ToArray();
+                .Where(l => l.MarkForShadowCasting(environment))];
         }
         /// <summary>
         /// Gets a collection of point lights that cast shadow
@@ -587,7 +580,7 @@ namespace Engine
         /// <returns>Returns the color base on time of day meridian angle</returns>
         private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
-            float angle = MathUtil.Clamp(timeOfDay.MeridianAngle - MathUtil.PiOverTwo, 0, MathUtil.Pi);
+            float angle = Math.Clamp(timeOfDay.MeridianAngle - Helper.PiOver2, 0, Helper.Pi);
 
             for (int i = 0; i < SunColorPalette.Count; i++)
             {
@@ -637,9 +630,9 @@ namespace Engine
         {
             return new SceneLightsState
             {
-                DirectionalLights = directionalLights.Select(l => l.GetState()).ToArray(),
-                PointLights = pointLights.Select(l => l.GetState()).ToArray(),
-                SpotLights = spotLights.Select(l => l.GetState()).ToArray(),
+                DirectionalLights = [.. directionalLights.Select(l => l.GetState())],
+                PointLights = [.. pointLights.Select(l => l.GetState())],
+                SpotLights = [.. spotLights.Select(l => l.GetState())],
                 HemisphericLigth = HemisphericLigth.GetState(),
             };
         }

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <summary>
         /// Transform
         /// </summary>
-        Matrix Transform { get; }
+        Matrix4x4 Transform { get; }
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -45,7 +45,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the primitive count of the mesh
         /// </summary>
-        int Count { get; }
+        uint Count { get; }
 
         /// <summary>
         /// Initializes a mesh
@@ -67,7 +67,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="instanceCount">Instance count</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        void Draw(IEngineDeviceContext dc, int instanceCount, int startInstanceLocation);
+        void Draw(IEngineDeviceContext dc, uint instanceCount, uint startInstanceLocation);
 
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -81,7 +81,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false);
+        IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false);
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
@@ -94,7 +94,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false);
+        IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false);
 
         /// <summary>
         /// Vertex type

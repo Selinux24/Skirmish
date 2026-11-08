@@ -1,13 +1,14 @@
-﻿using Engine.Physics;
-using Engine.Physics.Colliders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class CollisionPrimitiveTests
@@ -43,7 +44,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
-            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             plane.Attach(rbody);
             Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
@@ -52,7 +53,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
-            var trn = Matrix.Translation(Vector3.One);
+            var trn = Matrix4x4.Translation(Vector3.One);
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
 
             plane.Attach(rbody);
@@ -69,7 +70,7 @@ namespace Engine.PhysicsTests
         {
             var extents = Vector3.Up;
             var sourceBox = new BoundingBox(-extents, extents);
-            var sphere = SharpDXExtensions.BoundingSphereFromPoints([.. sourceBox.GetVertices()]);
+            var sphere = BoundingSphere.FromPoints([.. sourceBox.GetVertices()]);
             var obb = new OrientedBoundingBox([.. sourceBox.GetVertices()]);
 
             var box = new BoxCollider(extents);
@@ -78,18 +79,18 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
-            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             box.Attach(rbody);
             Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
-            var trn = Matrix.Translation(Vector3.One);
+            var trn = Matrix4x4.Translation(Vector3.One);
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
-            sourceBox = sourceBox.SetTransform(trn);
-            sphere = sphere.SetTransform(trn);
-            obb = obb.SetTransform(trn);
+            sourceBox = BoundingBox.Transform(sourceBox, trn);
+            sphere = BoundingSphere.Transform(sphere, trn);
+            obb = OrientedBoundingBox.Transform(obb, trn);
             box.Attach(rbody);
             Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
@@ -111,18 +112,18 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(sphere.BoundingBox, box);
             Assert.AreEqual(sphere.OrientedBoundingBox, obb);
 
-            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             sphere.Attach(rbody);
             Assert.AreEqual(sphere.Radius, radius);
             Assert.AreEqual(sphere.BoundingSphere, sourceSphere);
             Assert.AreEqual(sphere.BoundingBox, box);
             Assert.AreEqual(sphere.OrientedBoundingBox, obb);
 
-            var trn = Matrix.Translation(Vector3.One);
+            var trn = Matrix4x4.Translation(Vector3.One);
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
-            sourceSphere = sourceSphere.SetTransform(trn);
-            box = box.SetTransform(trn);
-            obb = obb.SetTransform(trn);
+            sourceSphere = BoundingSphere.Transform(sourceSphere, trn);
+            box = BoundingBox.Transform(box, trn);
+            obb = OrientedBoundingBox.Transform(obb, trn);
             sphere.Attach(rbody);
             Assert.AreEqual(sphere.Radius, radius);
             Assert.AreEqual(sphere.BoundingSphere, sourceSphere);
@@ -141,8 +142,8 @@ namespace Engine.PhysicsTests
             Triangle[] distinctTris = [.. allTris.Distinct()];
             Vector3[] allPoints = [.. allTris.SelectMany(t => t.GetVertices())];
             Vector3[] distinctPoints = [.. allPoints.Distinct()];
-            var sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
-            var box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
+            var sphere = BoundingSphere.FromPoints(distinctPoints);
+            var box = BoundingBox.FromPoints(distinctPoints);
             var obb = new OrientedBoundingBox(distinctPoints);
 
             var soup = new ConvexMeshCollider(allTris);
@@ -152,7 +153,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             soup.Attach(rbody);
             Assert.AreSequenceEqual([.. soup.GetTriangles(true)], distinctTris, SequenceOrder.InAnyOrder);
             Assert.AreSequenceEqual([.. soup.GetVertices(true)], distinctPoints, SequenceOrder.InAnyOrder);
@@ -160,15 +161,15 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            var trn = Matrix.Translation(Vector3.One);
+            var trn = Matrix4x4.Translation(Vector3.One);
             rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
             allTris = [.. allTris.Select(t => Triangle.Transform(t, trn))];
             distinctTris = [.. allTris.Distinct()];
             allPoints = [.. allTris.SelectMany(t => t.GetVertices())];
             distinctPoints = [.. allPoints.Distinct()];
-            sphere = sphere.SetTransform(trn);
-            box = box.SetTransform(trn);
-            obb = obb.SetTransform(trn);
+            sphere = BoundingSphere.Transform(sphere, trn);
+            box = BoundingBox.Transform(box, trn);
+            obb = OrientedBoundingBox.Transform(obb, trn);
             soup.Attach(rbody);
             Assert.AreSequenceEqual([.. soup.GetTriangles(true)], distinctTris, SequenceOrder.InAnyOrder);
             Assert.AreSequenceEqual([.. soup.GetVertices(true)], distinctPoints, SequenceOrder.InAnyOrder);
@@ -185,7 +186,7 @@ namespace Engine.PhysicsTests
         {
             var box = new BoxCollider(Vector3.One);
 
-            var body = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
+            var body = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             box.Attach(body);
             Assert.AreEqual(box.RigidBody, body);
 

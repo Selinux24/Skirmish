@@ -3,7 +3,7 @@ using Engine.BuiltIn.Drawers.Foliage;
 using Engine.Collections;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -387,7 +387,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var volume = (IntersectionVolumeFrustum)frustum;
 
-            return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint).ToArray();
+            return [.. nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint)];
         }
 
         /// <summary>
@@ -605,7 +605,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 var state = new BuiltInFoliageState
                 {
-                    TintColor = Color4.White,
+                    TintColor = new(1f, 1f, 1f, 1f),
 
                     StartRadius = channelData.StartRadius,
                     EndRadius = channelData.EndRadius,
@@ -716,9 +716,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// </summary>
         public (QuadTreeNode Node, bool WithData, bool Ready)[] GetPatches()
         {
-            return foliagePatches
-                .Select(patch => (patch.Node, patch.Planted && patch.HasData, patch.ReadyForDrawing))
-                .ToArray();
+            return [.. foliagePatches.Select(patch => (patch.Node, patch.Planted && patch.HasData, patch.ReadyForDrawing))];
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace TerrainSamples.SceneRts.Controllers
 {
@@ -54,7 +53,7 @@ namespace TerrainSamples.SceneRts.Controllers
             float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
 
             var lookPos = pos - dir;
-            lookPos.Y = pos.Y - (curSpeed / (MathUtil.IsZero(maxSpeed) ? 1f : maxSpeed));
+            lookPos.Y = pos.Y - (curSpeed / (Helper.IsZero(maxSpeed) ? 1f : maxSpeed));
 
             if (lookPos != pos)
             {

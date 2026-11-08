@@ -4,8 +4,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneAnimationParts
@@ -26,12 +26,12 @@ namespace IntermediateSamples.SceneAnimationParts
 
         private GeometryColorDrawer<Triangle> itemTris = null;
         private GeometryColorDrawer<Line3D> itemLines = null;
-        private readonly Color sphTrisColor = new(Color.Red.ToColor3(), 0.25f);
-        private readonly Color sphLinesColor = new(Color.Red.ToColor3(), 1f);
-        private readonly Color boxTrisColor = new(Color.Green.ToColor3(), 0.25f);
-        private readonly Color boxLinesColor = new(Color.Green.ToColor3(), 1f);
-        private readonly Color obbTrisColor = new(Color.Blue.ToColor3(), 0.25f);
-        private readonly Color obbLinesColor = new(Color.Blue.ToColor3(), 1f);
+        private readonly Color4 sphTrisColor = new(Color.Red, 0.25f);
+        private readonly Color4 sphLinesColor = new(Color.Red, 1f);
+        private readonly Color4 boxTrisColor = new(Color.Green, 0.25f);
+        private readonly Color4 boxLinesColor = new(Color.Green, 1f);
+        private readonly Color4 obbTrisColor = new(Color.Blue, 0.25f);
+        private readonly Color4 obbLinesColor = new(Color.Blue, 1f);
 
         private Model tank;
 
@@ -76,7 +76,7 @@ namespace IntermediateSamples.SceneAnimationParts
 
             backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new(0.35f, 0.35f, 0.35f, 1f));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
@@ -182,7 +182,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             BoundingBox bbox = tank.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

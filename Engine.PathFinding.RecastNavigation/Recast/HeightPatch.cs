@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -22,12 +22,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Rectangle
         /// </summary>
-        public Rectangle Bounds { get; private set; }
+        public RectI Bounds { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public HeightPatch(Rectangle bounds)
+        public HeightPatch(RectI bounds)
         {
             int size = bounds.Width * bounds.Height;
             data = Helper.CreateArray(size, RC_UNSET_HEIGHT);
@@ -105,8 +105,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the patch height value</returns>
         public int CalculateHeight(int hx, int hy, float ph, float ch, int radius)
         {
-            hx = MathUtil.Clamp(hx - Bounds.X, 0, Bounds.Width - 1);
-            hy = MathUtil.Clamp(hy - Bounds.Y, 0, Bounds.Height - 1);
+            hx = Math.Clamp(hx - Bounds.X, 0, Bounds.Width - 1);
+            hy = Math.Clamp(hy - Bounds.Y, 0, Bounds.Height - 1);
             int hmin = data[hx + hy * Bounds.Width];
             if (hmin != RC_UNSET_HEIGHT)
             {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -57,18 +58,18 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        public Quaternion Rotation { get; set; } = Quaternion.Identity;
         /// <summary>
         /// Rotation quaternion
         /// </summary>
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = Scale3.One;
+        public Vector3 Scale { get; set; } = Vector3.One;
 
         /// <summary>
         /// Meshes by level of detail in the file
@@ -104,12 +105,12 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Gets the initial transform matrix
         /// </summary>
-        public Matrix4X4 GetTransform()
+        public Matrix4x4 GetTransform()
         {
             return
-                Matrix4X4.Scaling(Scale) *
-                Matrix4X4.Rotation(Rotation) *
-                Matrix4X4.Translation(Position);
+                Matrix4x4.Scaling(Scale) *
+                Matrix4x4.RotationQuaternion(Rotation) *
+                Matrix4x4.Translation(Position);
         }
     }
 }

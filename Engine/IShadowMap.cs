@@ -50,6 +50,6 @@ namespace Engine
         /// <param name="instanced">Use instancing data</param>
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
-        IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : struct, IVertexData;
+        IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : unmanaged, IVertexData;
     }
 }

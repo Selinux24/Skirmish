@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Contact end-point interface
     /// </summary>

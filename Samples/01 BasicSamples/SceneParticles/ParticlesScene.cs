@@ -6,7 +6,8 @@ using Engine.BuiltIn.Components.Particles;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
+using Engine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -79,8 +80,8 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeUI()
         {
-            var defaultFont20 = Engine.UI.FontDescription.FromFamily("Arial", 20);
-            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
+            var defaultFont20 = FontDescription.FromFamily("Arial", 20);
+            var defaultFont10 = FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -124,7 +125,7 @@ namespace BasicSamples.SceneParticles
                 res.ThrowExceptions();
             }
 
-            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color3.White, Color3.White, true));
+            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color.White, Color.White, true));
 
             UpdateLayout();
 
@@ -152,7 +153,7 @@ namespace BasicSamples.SceneParticles
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
-            geo.Transform(Matrix.RotationY(MathUtil.PiOverTwo));
+            geo.Transform(Matrix4x4.RotationY(Helper.PiOver2));
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFloor;
@@ -325,7 +326,7 @@ namespace BasicSamples.SceneParticles
 
         private void AddSystem()
         {
-            float percent = Helper.RandomGenerator.NextFloat(0, 1);
+            float percent = Helper.RandomGenerator.NextSingle(0, 1);
             if (percent <= 0.25f)
             {
                 AddExplosionSystem();
@@ -347,7 +348,7 @@ namespace BasicSamples.SceneParticles
         }
         private void AddExplosionSystem()
         {
-            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
+            var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
             var velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.01f;
@@ -379,8 +380,8 @@ namespace BasicSamples.SceneParticles
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.005f,
-                AngularVelocity = Helper.RandomGenerator.NextFloat(3, 10),
-                Radius = Helper.RandomGenerator.NextFloat(5, 10),
+                AngularVelocity = Helper.RandomGenerator.NextSingle(3, 10),
+                Radius = Helper.RandomGenerator.NextSingle(5, 10),
                 Duration = 3,
                 MaximumDistance = 100f,
             };
@@ -392,8 +393,8 @@ namespace BasicSamples.SceneParticles
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.1f,
-                AngularVelocity = Helper.RandomGenerator.NextFloat(0, 1),
-                Radius = Helper.RandomGenerator.NextFloat(1, 10),
+                AngularVelocity = Helper.RandomGenerator.NextSingle(0, 1),
+                Radius = Helper.RandomGenerator.NextSingle(1, 10),
                 Duration = 5,
                 MaximumDistance = 250f,
             };
@@ -402,10 +403,10 @@ namespace BasicSamples.SceneParticles
         }
         private void AddSmokePlumeSystem()
         {
-            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
+            var position = new Vector3(Helper.RandomGenerator.NextSingle(-10, 10), 0, Helper.RandomGenerator.NextSingle(-10, 10));
             var velocity = Vector3.Up;
-            float duration = Helper.RandomGenerator.NextFloat(10, 60);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextSingle(10, 60);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             var emitter1 = new ParticleEmitter()
             {

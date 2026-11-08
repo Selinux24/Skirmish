@@ -4,8 +4,9 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -97,9 +98,9 @@ namespace BasicSamples.SceneCascadedShadows
         }
         private async Task InitializeUIText()
         {
-            var defaultFont20 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 20);
-            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
-            var defaultFont12 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 12);
+            var defaultFont20 = FontDescription.FromFamily(fontFamilyName, 20);
+            var defaultFont14 = FontDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont12 = FontDescription.FromFamily(fontFamilyName, 12);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -169,7 +170,7 @@ namespace BasicSamples.SceneCascadedShadows
             bufferDrawer2.TextureIndex = 1;
             bufferDrawer3.TextureIndex = 2;
 
-            var defaultFont14 = Engine.UI.FontDescription.FromFamily(fontFamilyName, 14);
+            var defaultFont14 = FontDescription.FromFamily(fontFamilyName, 14);
 
             var captionDesc = new UITextAreaDescription
             {
@@ -267,16 +268,16 @@ namespace BasicSamples.SceneCascadedShadows
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
-                    new ( 0.0f, 5.6f, new Color( 25,  25,  25), resourceFlare4String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.0f, 5.6f, new( 25,  25,  25), resourceFlare4String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -420,10 +421,7 @@ namespace BasicSamples.SceneCascadedShadows
         {
             selector.Text = $"High: {GameEnvironment.ShadowDistanceHigh:0.00} - Medium: {GameEnvironment.ShadowDistanceMedium:0.00} - Low: {GameEnvironment.ShadowDistanceLow:0.00}";
 
-            if (currentSelector != null)
-            {
-                currentSelector.Left = MathUtil.Clamp(Game.Input.MouseX, min, max) - 5f;
-            }
+            currentSelector?.Left = Math.Clamp(Game.Input.MouseX, min, max) - 5f;
 
             float select1Pos = spSelect1.Left + 5;
             float select2Pos = spSelect2.Left + 5;
@@ -520,7 +518,7 @@ namespace BasicSamples.SceneCascadedShadows
         private void UpdateLayoutUIDrawers()
         {
             int height = (int)(Game.Form.RenderHeight * 0.33f);
-            int top = Game.Form.RenderHeight - height;
+            int top = (int)Game.Form.RenderHeight - height;
             int width = (int)(Game.Form.RenderWidth / 3f);
 
             bufferDrawer1.Height = height;

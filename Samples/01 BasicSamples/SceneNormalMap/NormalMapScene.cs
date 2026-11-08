@@ -4,8 +4,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneNormalMap
@@ -59,8 +59,8 @@ namespace BasicSamples.SceneNormalMap
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = Engine.UI.FontDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -113,7 +113,7 @@ namespace BasicSamples.SceneNormalMap
         private async Task InitializeEmitter()
         {
             var mat = MaterialPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 15);
 
@@ -152,7 +152,7 @@ namespace BasicSamples.SceneNormalMap
 
             var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
 
-            pointLight = new SceneLightPoint("light", false, Color3.White, Color3.White, true, desc);
+            pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
 
             Lights.Add(pointLight);
         }

@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Rod between two bodies
     /// </summary>
@@ -58,7 +59,7 @@ namespace Engine.Physics
             var positionTwoWorld = Two.PositionWorld;
 
             float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (MathUtil.NearEqual(Length - distance, Tolerance))
+            if (Helper.NearEqual(Length - distance, Tolerance))
             {
                 // Valid rod
                 return false;

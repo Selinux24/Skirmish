@@ -1,7 +1,7 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -68,7 +68,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Gets or sets the maximum number of instances to draw
         /// </summary>
-        public int MaximumCount { get; set; }
+        public uint MaximumCount { get; set; }
         /// <inheritdoc/>
         /// <remarks>Always uses the highest level of detail drawing data.</remarks>
         public override ISkinningData SkinningData
@@ -97,7 +97,7 @@ namespace Engine.BuiltIn.Components.Models
                 SortInstances(instances, pointOfView);
             }
 
-            return instances
+            return [.. instances
                 .Where(i => i != null)
                 .Select(i => new VertexInstancingData
                 {
@@ -108,8 +108,7 @@ namespace Engine.BuiltIn.Components.Models
                     AnimationOffset = i.AnimationController.AnimationOffset,
                     AnimationOffsetB = i.AnimationController.TransitionOffset,
                     AnimationInterpolation = i.AnimationController.TransitionInterpolationAmount,
-                })
-                .ToArray();
+                })];
         }
         /// <summary>
         /// Updates the instances order
@@ -175,7 +174,7 @@ namespace Engine.BuiltIn.Components.Models
 
             instancesAll = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, Description));
 
-            MaximumCount = -1;
+            MaximumCount = 0;
 
             hasIndependentTransforms = Description.TransformDependences.Length != 0;
         }
@@ -199,9 +198,7 @@ namespace Engine.BuiltIn.Components.Models
             }
 
             // Store visible instances
-            instancesVisible = instancesAll
-                .Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)
-                .ToArray();
+            instancesVisible = [.. instancesAll.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)];
 
             // Update each active instance
             instancesAll
@@ -250,9 +247,9 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the limit of instances to draw
         /// </summary>
         /// <returns>Returns the number of maximum instances to draw</returns>
-        private int GetMaxCount()
+        private uint GetMaxCount()
         {
-            return MaximumCount >= 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
+            return MaximumCount > 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
         }
 
         /// <inheritdoc/>
@@ -273,7 +270,7 @@ namespace Engine.BuiltIn.Components.Models
                 return false;
             }
             var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.ShadowMap.LightSource.Position);
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+            Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
             Game.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
             return DrawShadowsInstances(context, cullInstanceList, cullInstanceData);
         }
@@ -285,13 +282,13 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="cullInstancingData">Cull instances data</param>
         private bool DrawShadowsInstances(DrawContextShadows context, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData)
         {
-            int count = 0;
-            int instanceCount = 0;
+            uint count = 0;
+            uint instanceCount = 0;
 
-            int maxCount = GetMaxCount();
+            uint maxCount = GetMaxCount();
 
             //Render by level of detail
-            for (int l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
+            for (uint l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
             {
                 if (maxCount <= 0)
                 {
@@ -302,28 +299,22 @@ namespace Engine.BuiltIn.Components.Models
 
                 //Get instances in this LOD
                 var lodInstances = Array.FindAll(cullInstanceList, i => i != null && i.LevelOfDetail == lod);
-                if (lodInstances.Length <= 0)
-                {
-                    continue;
-                }
+                if (lodInstances.Length <= 0) continue;
 
                 var drawingData = GetDrawingData(lod);
-                if (drawingData == null)
-                {
-                    continue;
-                }
+                if (drawingData == null) continue;
 
-                var startInstanceLocation = Array.IndexOf(cullInstanceList, lodInstances[0]) + InstancingBuffer.BufferOffset;
-                var instancesToDraw = Math.Min(maxCount, lodInstances.Length);
-                if (instancesToDraw <= 0)
-                {
-                    continue;
-                }
+                int idx = Array.IndexOf(cullInstanceList, lodInstances[0]);
+                if (idx < 0) continue;
+
+                uint startInstanceLocation = (uint)idx + InstancingBuffer.BufferOffset;
+                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Length);
+                if (instancesToDraw <= 0) continue;
 
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                int dCount = DrawShadowMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
+                uint dCount = DrawShadowMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
                 dCount *= instancesToDraw;
 
                 count += dCount;
@@ -341,9 +332,9 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, int instancesToDraw, int startInstanceLocation)
+        private uint DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, uint instancesToDraw, uint startInstanceLocation)
         {
-            int count = 0;
+            uint count = 0;
 
             var dc = context.DeviceContext;
 
@@ -354,7 +345,7 @@ namespace Engine.BuiltIn.Components.Models
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
+                Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
                 var drawer = context.ShadowMap?.GetDrawer(mesh, true, meshMaterial.Material.IsTransparent);
                 if (drawer == null)
@@ -375,10 +366,10 @@ namespace Engine.BuiltIn.Components.Models
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
+                Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
                 if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
-                    count += mesh.Count;
+                    count += (uint)mesh.Count;
                 }
             }
 
@@ -403,7 +394,7 @@ namespace Engine.BuiltIn.Components.Models
                 return false;
             }
             var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.Camera.Position);
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+            Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
             Game.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
             return DrawInstances(context, cullInstanceList, cullInstanceData);
         }
@@ -415,36 +406,30 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="cullInstancingData">Cull instances data</param>
         private bool DrawInstances(DrawContext context, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData)
         {
-            int count = 0;
-            int instanceCount = 0;
+            uint count = 0;
+            uint instanceCount = 0;
 
-            int maxCount = GetMaxCount();
+            uint maxCount = GetMaxCount();
 
             //Render by level of detail
             for (int l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
             {
-                if (maxCount <= 0)
-                {
-                    break;
-                }
+                if (maxCount <= 0) break;
 
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
                 var lodInstances = cullInstanceList.Where(i => i?.LevelOfDetail == lod);
-                if (!lodInstances.Any())
-                {
-                    continue;
-                }
+                if (!lodInstances.Any()) continue;
 
                 var drawingData = GetDrawingData(lod);
-                if (drawingData == null)
-                {
-                    continue;
-                }
+                if (drawingData == null) continue;
 
-                var startInstanceLocation = Array.IndexOf(cullInstanceList, lodInstances.First()) + InstancingBuffer.BufferOffset;
-                var instancesToDraw = Math.Min(maxCount, lodInstances.Count());
+                int idx = Array.IndexOf(cullInstanceList, lodInstances.First());
+                if (idx < 0) continue;
+
+                uint startInstanceLocation = (uint)idx + InstancingBuffer.BufferOffset;
+                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Count());
                 if (instancesToDraw <= 0)
                 {
                     continue;
@@ -453,7 +438,7 @@ namespace Engine.BuiltIn.Components.Models
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                int dCount = DrawMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
+                uint dCount = DrawMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
                 dCount *= instancesToDraw;
 
                 count += dCount;
@@ -471,9 +456,9 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, int instancesToDraw, int startInstanceLocation)
+        private uint DrawMesh(DrawContext context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, uint instancesToDraw, uint startInstanceLocation)
         {
-            int count = 0;
+            uint count = 0;
 
             var dc = context.DeviceContext;
 
@@ -484,12 +469,12 @@ namespace Engine.BuiltIn.Components.Models
                 string meshName = matData.MeshName;
                 var mesh = matData.Mesh;
 
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
+                Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
                 bool draw = context.ValidateDraw(BlendMode, meshMaterial.Material.IsTransparent);
                 if (!draw)
                 {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
+                    Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
                     continue;
                 }
 
@@ -510,10 +495,10 @@ namespace Engine.BuiltIn.Components.Models
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
+                Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
                 if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
-                    count += mesh.Count;
+                    count += (uint)mesh.Count;
                 }
             }
 
@@ -552,7 +537,7 @@ namespace Engine.BuiltIn.Components.Models
         /// Sets instance transforms
         /// </summary>
         /// <param name="transforms">Transform matrix list</param>
-        public void SetTransforms(IEnumerable<Matrix> transforms)
+        public void SetTransforms(IEnumerable<Matrix4x4> transforms)
         {
             if ((transforms?.Any()) != true || !(instancesAll?.Length > 0))
             {
@@ -587,7 +572,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public IEnumerable<T> GetComponents<T>()
         {
-            return new ReadOnlyCollection<T>(instancesAll.Where(i => i.Visible).OfType<T>().ToArray());
+            return new ReadOnlyCollection<T>([.. instancesAll.Where(i => i.Visible).OfType<T>()]);
         }
 
         /// <summary>
@@ -678,7 +663,7 @@ namespace Engine.BuiltIn.Components.Models
                 OwnerId = Owner?.Name,
 
                 MaximumCount = MaximumCount,
-                Instances = instancesAll.Select(i => i.GetState()).ToArray(),
+                Instances = [.. instancesAll.Select(i => i.GetState())],
             };
         }
         /// <inheritdoc/>

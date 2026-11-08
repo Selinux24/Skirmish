@@ -14,7 +14,7 @@ namespace Engine.Helpers
         /// <summary>
         /// Total resources elements
         /// </summary>
-        public int Elements { get; private set; }
+        public uint Elements { get; private set; }
 
         /// <summary>
         /// Adds a new resource status item
@@ -24,7 +24,7 @@ namespace Engine.Helpers
         /// <param name="binding">Resource binding</param>
         /// <param name="size">Size in bytes</param>
         /// <param name="elements">Number of elements</param>
-        public void Add(string name, int usage, int binding, long size, int elements)
+        public void Add(string name, int usage, int binding, long size, uint elements)
         {
             Add(new ResourceStatusItem()
             {

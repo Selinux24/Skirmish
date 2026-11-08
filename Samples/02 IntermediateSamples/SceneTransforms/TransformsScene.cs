@@ -4,8 +4,9 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -211,7 +212,7 @@ namespace IntermediateSamples.SceneTransforms
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 1000;

@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.IO;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Image content from memory
     /// </summary>
@@ -14,7 +13,7 @@ namespace Engine.Content
     /// </remarks>
     /// <param name="stream">Memory stream</param>
     /// <param name="cropRectangle">Crop rectangle</param>
-    public sealed class MemoryImageContent(MemoryStream stream, Rectangle? cropRectangle = null) : IImageContent, IEquatable<MemoryImageContent>
+    public sealed class MemoryImageContent(MemoryStream stream, RectI? cropRectangle = null) : IImageContent, IEquatable<MemoryImageContent>
     {
         /// <summary>
         /// Image data in stream
@@ -23,7 +22,7 @@ namespace Engine.Content
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle = cropRectangle ?? Rectangle.Empty;
+        private readonly RectI cropRectangle = cropRectangle ?? RectI.Empty;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -40,7 +39,7 @@ namespace Engine.Content
         {
             Name = name;
 
-            if (cropRectangle == Rectangle.Empty)
+            if (cropRectangle == RectI.Empty)
             {
                 return game.Graphics.LoadTexture($"{name}_{GetResourceKey()}", stream, mipAutogen, dynamic);
             }

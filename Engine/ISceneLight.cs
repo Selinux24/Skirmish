@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -42,7 +42,7 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        Matrix[] FromLightVP { get; set; }
+        Matrix4x4[] FromLightVP { get; set; }
         /// <summary>
         /// Free use variable
         /// </summary>
@@ -53,7 +53,7 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        Matrix ParentTransform { get; set; }
+        Matrix4x4 ParentTransform { get; set; }
         /// <summary>
         /// Light position
         /// </summary>

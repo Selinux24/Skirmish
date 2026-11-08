@@ -246,7 +246,7 @@ namespace TerrainSamples.SceneModularDungeon
             var effect = audioManager.CreateEffectInstance(soundDoor, emitter, Scene.Camera);
             if (effect == null) return TimeSpan.Zero;
 
-            effect.Volume = volume;
+            effect.SetVolume(volume);
             effect.Play();
             return effect.Duration;
         }
@@ -255,7 +255,7 @@ namespace TerrainSamples.SceneModularDungeon
             var effect = audioManager.CreateEffectInstance(soundLadder, emitter, Scene.Camera);
             if (effect == null) return;
 
-            effect.Volume = volume;
+            effect.SetVolume(volume);
             effect.Play();
         }
 

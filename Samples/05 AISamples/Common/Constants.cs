@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace AISamples.Common
 {
+    using Engine.Mathematics;
+
     static class Constants
     {
         public const string CommonResourcesFolder = "Common/Resources/";

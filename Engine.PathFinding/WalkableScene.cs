@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -165,7 +165,7 @@ namespace Engine.PathFinding
         /// <param name="fileName">File name</param>
         public void SaveNavigationGraphToFile(string fileName)
         {
-            Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+            Game.Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
             PathFinderDescription.Save(fileName, NavigationGraph);
         }
@@ -175,7 +175,7 @@ namespace Engine.PathFinding
         /// <param name="fileName">File name</param>
         public async Task SaveNavigationGraphToFileAsync(string fileName)
         {
-            Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+            Game.Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
             await PathFinderDescription.SaveAsync(fileName, NavigationGraph);
         }
@@ -276,7 +276,7 @@ namespace Engine.PathFinding
 
             var navTris = allTris.Distinct();
 
-            return navTris.ToArray();
+            return [.. navTris];
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace Engine.PathFinding
 
             var path = await NavigationGraph.FindPathAsync(agent, From, To);
 
-            Logger.WriteTrace(this, $"FindPathAsync path result: {path.Count()} nodes.");
+            Game.Logger.WriteTrace(this, $"FindPathAsync path result: {path.Count()} nodes.");
 
             if (path.Count() <= 1)
             {
@@ -326,7 +326,7 @@ namespace Engine.PathFinding
 
             var path = NavigationGraph.FindPath(agent, From, To);
 
-            Logger.WriteTrace(this, $"FindPath path result: {path.Count()} nodes.");
+            Game.Logger.WriteTrace(this, $"FindPath path result: {path.Count()} nodes.");
 
             if (path.Count() <= 1)
             {
@@ -352,7 +352,7 @@ namespace Engine.PathFinding
                 return (groundFrom, groundTo);
             }
 
-            Logger.WriteTrace(this, $"FindPathAsync looking for nearest ground end-point positions {from} -> {to}.");
+            Game.Logger.WriteTrace(this, $"FindPathAsync looking for nearest ground end-point positions {from} -> {to}.");
 
             if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
             {
@@ -363,7 +363,7 @@ namespace Engine.PathFinding
                 groundTo = rTo.Position;
             }
 
-            Logger.WriteTrace(this, $"FindPathAsync Found nearest ground end-point positions {groundFrom} -> {groundTo}.");
+            Game.Logger.WriteTrace(this, $"FindPathAsync Found nearest ground end-point positions {groundFrom} -> {groundTo}.");
 
             return (groundFrom, groundTo);
         }
@@ -375,12 +375,12 @@ namespace Engine.PathFinding
         /// <returns>Returns the path-finding path</returns>
         private PathFindingPath ComputeGroundPositions(IEnumerable<Vector3> path, bool useGround)
         {
-            List<Vector3> positions = new(path);
-            List<Vector3> normals = new(Helper.CreateArray(path.Count(), Vector3.Up));
+            List<Vector3> positions = [.. path];
+            List<Vector3> normals = [.. Helper.CreateArray(path.Count(), Vector3.Up)];
 
             if (useGround)
             {
-                Logger.WriteTrace(this, "FindPath compute ground positions.");
+                Game.Logger.WriteTrace(this, "FindPath compute ground positions.");
 
                 for (int i = 0; i < positions.Count; i++)
                 {
@@ -391,7 +391,7 @@ namespace Engine.PathFinding
                     }
                 }
 
-                Logger.WriteTrace(this, "FindPath ground positions computed.");
+                Game.Logger.WriteTrace(this, "FindPath ground positions computed.");
             }
 
             return new PathFindingPath(positions, normals);
@@ -689,7 +689,7 @@ namespace Engine.PathFinding
         /// <returns>Returns true if a position were found</returns>
         public bool GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph, out Vector3 point)
         {
-            if (MathUtil.IsZero(bsph.Radius))
+            if (Helper.IsZero(bsph.Radius))
             {
                 point = Vector3.Zero;
 
@@ -698,9 +698,9 @@ namespace Engine.PathFinding
 
             for (int i = 0; i < 50; i++)
             {
-                float dist = rnd.NextFloat(0, bsph.Radius);
+                float dist = rnd.NextSingle(0, bsph.Radius);
 
-                var dir = new Vector3(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
+                var dir = new Vector3(rnd.NextSingle(-1, 1), rnd.NextSingle(-1, 1), rnd.NextSingle(-1, 1));
 
                 var v = bsph.Center + (dist * Vector3.Normalize(dir));
 

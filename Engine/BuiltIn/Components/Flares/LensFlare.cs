@@ -1,6 +1,6 @@
 ﻿using Engine.BuiltIn.UI;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Threading.Tasks;
 
@@ -156,7 +156,7 @@ namespace Engine.BuiltIn.Components.Flares
                 -keyLight.Direction * (1f + camera.NearPlaneDistance), //Move position into near and far plane projection bounds
                 camera.Projection,
                 infiniteView,
-                Matrix.Identity);
+                Matrix4x4.Identity);
 
             if (projectedPosition.Z < 0 || projectedPosition.Z > 1)
             {
@@ -166,14 +166,15 @@ namespace Engine.BuiltIn.Components.Flares
             //The light is in front of the camera.
             drawFlares = true;
 
+            var rc = Game.Form.RenderCenter;
             var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-            var lightProjectedDirection = lightProjectedPosition - Game.Form.RenderCenter;
+            var lightProjectedDirection = lightProjectedPosition - new Vector2(rc.X, rc.Y);
 
             //Update glow sprite
             float glowScale = scale;
             var glowSpritePos = lightProjectedPosition;
 
-            glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
+            glowSprite.BaseColor = new(keyLight.DiffuseColor, 0.25f);
             glowSprite.Scale = glowScale;
             glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
             glowSprite.Update(context);
@@ -193,7 +194,7 @@ namespace Engine.BuiltIn.Components.Flares
                 var flareSpritePos = lightProjectedPosition + lightProjectedDirection * flare.Distance;
 
                 // Set the flare alpha based on the angle with view and light directions.
-                flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                flare.FlareSprite.BaseColor = new(flare.Color, 0.5f * transparency);
                 flare.FlareSprite.Scale = flareScale;
                 flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                 flare.FlareSprite.Update(context);
@@ -218,7 +219,7 @@ namespace Engine.BuiltIn.Components.Flares
             Vector3 lPositionUnit = eyePosition - light.Direction;
 
             //Is the light into the vision cone?
-            if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
+            if (frustum.Contains(ref lPositionUnit) != ContainmentType.Disjoint)
             {
                 //Calculate the ray from light to position
                 Vector3 lightPosition = GetPosition(maxZ, light.Direction);

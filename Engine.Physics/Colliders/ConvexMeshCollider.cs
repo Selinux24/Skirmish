@@ -1,10 +1,11 @@
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Convex mesh collider
     /// </summary>
@@ -30,12 +31,12 @@ namespace Engine.Physics.Colliders
                 throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(ConvexMeshCollider)} must have one triangle at least.");
             }
 
-            this.triangles = triangles.Distinct().ToArray();
+            this.triangles = [.. triangles.Distinct()];
 
-            vertices = triangles.SelectMany(t => t.GetVertices()).Distinct().ToArray();
+            vertices = [.. triangles.SelectMany(t => t.GetVertices()).Distinct()];
 
-            boundingBox = SharpDXExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = SharpDXExtensions.BoundingSphereFromPoints(vertices);
+            boundingBox = BoundingBox.FromPoints(vertices);
+            boundingSphere = BoundingSphere.FromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

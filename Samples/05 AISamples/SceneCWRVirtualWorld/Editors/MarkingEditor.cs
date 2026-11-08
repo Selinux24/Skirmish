@@ -1,15 +1,16 @@
-﻿using AISamples.Common;
-using AISamples.Common.Markings;
-using AISamples.Common.Primitives;
-using Engine;
-using Engine.BuiltIn.Components.Geometry;
-using Engine.BuiltIn.Format;
-using Engine.Content;
-using SharpDX;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
+    using AISamples.Common;
+    using AISamples.Common.Markings;
+    using AISamples.Common.Primitives;
+    using Engine;
+    using Engine.BuiltIn.Components.Geometry;
+    using Engine.BuiltIn.Format;
+    using Engine.Content;
+    using Engine.Mathematics;
+
     abstract class MarkingEditor(string name, World world, float height, bool is3d = false) : IEditor
     {
         private const float editorPointRadius = 10f;
@@ -90,7 +91,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
 
             bool leftClicked = scene.Game.Input.MouseButtonJustPressed(MouseButtons.Left);
             bool rightClicked = scene.Game.Input.MouseButtonJustPressed(MouseButtons.Right);
-            var p = hit.PickingResult.Position.XZ();
+            var p = hit.PickingResult.Position.XZ;
 
             if (leftClicked)
             {

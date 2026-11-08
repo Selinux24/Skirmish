@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -18,7 +18,7 @@ namespace Engine
         {
             return new SceneLightPointDescription
             {
-                Transform = Matrix.Translation(position),
+                Transform = Matrix4x4.Translation(position),
                 Radius = radius,
                 Intensity = intensity,
             };
@@ -27,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Light transform
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Matrix4x4 Transform { get; set; }
         /// <summary>
         /// Light radius
         /// </summary>

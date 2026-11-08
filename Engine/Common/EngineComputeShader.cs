@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using ComputeShader = Vortice.Direct3D11.ID3D11ComputeShader;
 
     /// <summary>
     /// Compute shader description

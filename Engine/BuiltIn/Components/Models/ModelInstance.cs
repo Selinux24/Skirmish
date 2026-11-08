@@ -1,6 +1,6 @@
 ﻿using Engine.Animation;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -238,15 +238,12 @@ namespace Engine.BuiltIn.Components.Models
         {
             if (manipulator == null)
             {
-                Logger.WriteWarning(this, $"ModelInstance Id: {Id} - Sets a null manipulator. Discarded.");
+                Game.Logger.WriteWarning(this, $"ModelInstance Id: {Id} - Sets a null manipulator. Discarded.");
 
                 return;
             }
 
-            if (Manipulator != null)
-            {
-                Manipulator.Updated -= ManipulatorUpdated;
-            }
+            Manipulator?.Updated -= ManipulatorUpdated;
 
             Manipulator = manipulator;
             Manipulator.Updated += ManipulatorUpdated;
@@ -269,28 +266,28 @@ namespace Engine.BuiltIn.Components.Models
             return partHelper.GetModelPartByName(name);
         }
         /// <inheritdoc/>
-        public Matrix GetLocalTransformByName(string name)
+        public Matrix4x4 GetLocalTransformByName(string name)
         {
-            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix.Identity;
+            var localTransform = partHelper.GetLocalTransformByName(name) ?? Matrix4x4.Identity;
 
             return localTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetWorldTransformByName(string name)
+        public Matrix4x4 GetWorldTransformByName(string name)
         {
-            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix.Identity;
+            var worldTransform = partHelper.GetWorldTransformByName(name) ?? Matrix4x4.Identity;
 
             return worldTransform * Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
-        public Matrix GetPoseTransformByName(string name)
+        public Matrix4x4 GetPoseTransformByName(string name)
         {
-            return partHelper.GetPoseTransformByName(name) ?? Matrix.Identity;
+            return partHelper.GetPoseTransformByName(name) ?? Matrix4x4.Identity;
         }
         /// <inheritdoc/>
-        public Matrix GetPartTransformByName(string name)
+        public Matrix4x4 GetPartTransformByName(string name)
         {
-            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix.Identity;
+            var partTransform = partHelper.GetPartTransformByName(name) ?? Matrix4x4.Identity;
 
             return partTransform * Manipulator.GlobalTransform;
         }
@@ -300,7 +297,7 @@ namespace Engine.BuiltIn.Components.Models
         /// </summary>
         public void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
+            Game.Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
 
             geometryHelper.Invalidate();
             boundsHelper.Invalidate(Manipulator);
@@ -397,7 +394,9 @@ namespace Engine.BuiltIn.Components.Models
             if (bsph.Intersects(sphere))
             {
                 var mesh = GetGeometry(GeometryTypes.Picking);
-                if (Intersection.SphereIntersectsMesh(sphere, mesh, out var res))
+
+                BoundingSphere sph = sphere;
+                if (Collision.SphereIntersectsMesh(ref sph, mesh, out var res))
                 {
                     result = res;
 
@@ -415,12 +414,12 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

@@ -1,7 +1,7 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Collections;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -118,8 +118,8 @@ namespace Engine.BuiltIn.Components.Foliage
                 foreach (var (found, r) in res)
                 {
                     Vector2 size = new(
-                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
+                        rnd.NextSingle(description.MinSize.X, description.MaxSize.X),
+                        rnd.NextSingle(description.MinSize.Y, description.MaxSize.Y));
 
                     if (found)
                     {
@@ -181,9 +181,9 @@ namespace Engine.BuiltIn.Components.Foliage
             Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
 
             pos = new(
-                rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
+                rnd.NextSingle(nbbox.Minimum.X, nbbox.Maximum.X),
                 nbbox.Maximum.Y + 1f,
-                rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
+                rnd.NextSingle(nbbox.Minimum.Z, nbbox.Maximum.Z));
 
             bool plant = false;
             if (map != null)
@@ -192,7 +192,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 if (c[description.Index] > 0)
                 {
-                    plant = rnd.NextFloat(0, 1) < c[description.Index];
+                    plant = rnd.NextSingle(0, 1) < c[description.Index];
                 }
             }
             else

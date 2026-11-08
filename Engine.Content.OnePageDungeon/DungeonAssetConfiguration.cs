@@ -1,8 +1,8 @@
 ﻿using Engine.Content.Persistence;
+using Engine.Mathematics;
 using Engine.Modular.Persistence;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -143,7 +143,7 @@ namespace Engine.Content.OnePageDungeon
                 return list.First();
             }
 
-            float weight = GetGenerator().NextFloat(0, 1);
+            float weight = GetGenerator().NextSingle(0, 1);
 
             var sortedList = list.OrderBy(i => i.Weight);
 
@@ -204,15 +204,15 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = Scale3.One;
+        public Vector3 Scale { get; set; } = Vector3.One;
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        public Quaternion Rotation { get; set; } = Quaternion.Identity;
         /// <summary>
         /// Path finding
         /// </summary>
@@ -222,12 +222,12 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Gets the initial transform matrix
         /// </summary>
-        public Matrix4X4 GetTransform()
+        public Matrix4x4 GetTransform()
         {
             return
-                Matrix4X4.Scaling(Scale) *
-                Matrix4X4.Rotation(Rotation) *
-                Matrix4X4.Translation(Position);
+                Matrix4x4.Scaling(Scale) *
+                Matrix4x4.RotationQuaternion(Rotation) *
+                Matrix4x4.Translation(Position);
         }
     }
 

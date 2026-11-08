@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {

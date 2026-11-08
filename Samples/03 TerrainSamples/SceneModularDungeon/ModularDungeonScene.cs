@@ -4,18 +4,18 @@ using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.BuiltIn.UI;
-using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj.Fmt;
 using Engine.Content.OnePageDungeon;
 using Engine.Content.Persistence;
+using Engine.Mathematics;
 using Engine.Modular;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,11 +49,11 @@ namespace TerrainSamples.SceneModularDungeon
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Color ambientUp = new(255, 224, 255, 255);
-        private readonly Color ambientDown = new(72, 72, 255, 255);
+        private readonly Color3 ambientUp = new(255, 224, 255);
+        private readonly Color3 ambientDown = new(72, 72, 255);
 
         private Player playerAgentType = null;
-        private readonly Color3 agentTorchLight = new Color(255, 201, 14).RGB();
+        private readonly Color3 agentTorchLight = new(255, 201, 14);
         private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new(-1001, 1000, 1000);
 
@@ -103,7 +103,7 @@ namespace TerrainSamples.SceneModularDungeon
             this.dungeonMapFile = dungeonMapFile;
             this.dungeonCnfFile = dungeonCnfFile;
 
-            Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(ModularDungeonScene); });
+            Game.Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(ModularDungeonScene); });
 
 
 #if DEBUG
@@ -134,7 +134,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             if (value.Id == "LoadAssets")
             {
-                Logger.WriteDebug(this, $"Level progress {value.Progress * 100f:0}%");
+                Game.Logger.WriteDebug(this, $"Level progress {value.Progress * 100f:0}%");
 
                 pbLevels.Caption.Text = $"{value.Progress * 100f:0}%";
                 pbLevels.ProgressValue = value.Progress;
@@ -142,7 +142,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return;
             }
 
-            Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
+            Game.Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
         public void NavigationGraphLoading()
         {
@@ -385,7 +385,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -579,7 +579,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (AggregateException ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 var exceptions = ex.Flatten().InnerExceptions
                     .Select(e => e.Message)
@@ -615,7 +615,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB(), ambientUp.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
@@ -718,12 +718,12 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Game.Input.KeyPressed(Keys.Left))
             {
-                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = Math.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
             {
-                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = Math.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
             }
         }
         private void UpdateGraphInput()
@@ -737,7 +737,7 @@ namespace TerrainSamples.SceneModularDungeon
             if (Game.Input.KeyJustReleased(Keys.F6))
             {
                 //Save the navigation triangles to a file
-                SaveGraphToFile();
+                SaveSceneryToFile();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F9))
@@ -806,7 +806,7 @@ namespace TerrainSamples.SceneModularDungeon
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
 
-                Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
+                Game.Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
 
                 selectedItemDrawer.SetPrimitives(sItemColor, tris);
                 selectedItemDrawer.Visible = true;
@@ -901,7 +901,11 @@ namespace TerrainSamples.SceneModularDungeon
             //Test items into the camera frustum and nearest to the player
             var items =
                 scenery.GetObjectsInVolume(sphere, objTypes, false, true)
-                .Where(i => Camera.Frustum.Contains(i.Instance.GetBoundingBox()) != ContainmentType.Disjoint)
+                .Where(i =>
+                {
+                    var bbox = i.Instance.GetBoundingBox();
+                    return Camera.Frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+                })
                 .Where(i =>
                 {
                     if (i.Instance.PickNearest(ray, out _))
@@ -911,13 +915,13 @@ namespace TerrainSamples.SceneModularDungeon
                     else
                     {
                         var bbox = i.Instance.GetBoundingBox();
-                        var center = bbox.GetCenter();
-                        var extents = bbox.GetExtents();
+                        var center = bbox.Center;
+                        var extents = bbox.Extents;
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
-                        Ray rRay = ray;
-                        return sBbox.Intersects(ref rRay);
+                        Ray pRay = ray;
+                        return sBbox.Intersects(ref pRay, out float _);
                     }
                 })
                 .ToList();
@@ -949,7 +953,8 @@ namespace TerrainSamples.SceneModularDungeon
             else
             {
                 var sph = item.Instance.GetBoundingSphere();
-                Intersection.ClosestPointInRay(ray, sph.Center, out float distance);
+                Ray r = ray;
+                Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
                 return distance;
             }
         }
@@ -1162,7 +1167,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
-        private void SaveGraphToFile()
+        private void SaveSceneryToFile()
         {
             Task.Run(() =>
             {
@@ -1187,7 +1192,7 @@ namespace TerrainSamples.SceneModularDungeon
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
+                    Game.Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
                 }
                 finally
                 {
@@ -1243,7 +1248,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var ex = res.Flatten();
 
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -1275,7 +1280,7 @@ namespace TerrainSamples.SceneModularDungeon
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, ex);
+                Game.Logger.WriteError(this, ex);
 
                 PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
             }
@@ -1310,10 +1315,9 @@ namespace TerrainSamples.SceneModularDungeon
         private void StartEntities()
         {
             //Rat holes
-            ratHoles = scenery
+            ratHoles = [.. scenery
                 .GetObjectsByName("Dn_Rat_Hole_1")
-                .Select(o => o.Instance.Manipulator.Position)
-                .ToArray();
+                .Select(o => o.Instance.Manipulator.Position)];
 
             //NPCs
             StartNPCs();
@@ -1344,7 +1348,7 @@ namespace TerrainSamples.SceneModularDungeon
             for (int i = 0; i < human.InstanceCount; i++)
             {
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29);
-                human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0);
+                human[i].Manipulator.SetRotation(-Helper.PiOver2, 0, 0);
 
                 human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
@@ -1474,7 +1478,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             var windEffectDuration = soundEffectsManager.PlayWind(man);
 
-            float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
+            float durationVariation = Helper.RandomGenerator.NextSingle(0.5f, 1.0f);
             int duration = (int)(windEffectDuration.TotalMilliseconds * durationVariation);
 
             Task.Run(async () =>

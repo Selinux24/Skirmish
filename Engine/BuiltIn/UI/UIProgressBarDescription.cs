@@ -1,5 +1,5 @@
-﻿using Engine.UI;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.UI;
 
 namespace Engine.BuiltIn.UI
 {
@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default progress bar description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIProgressBarDescription Default(Engine.UI.FontDescription font)
+        public static UIProgressBarDescription Default(FontDescription font)
         {
             return new()
             {
@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="baseColor">Base color</param>
         /// <param name="progressColor">Progress color</param>
-        public static UIProgressBarDescription Default(Engine.UI.FontDescription font, Color4 baseColor, Color4 progressColor)
+        public static UIProgressBarDescription Default(FontDescription font, Color4 baseColor, Color4 progressColor)
         {
             return new()
             {
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = Engine.UI.FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+                Font = FontDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
 
@@ -106,7 +106,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
@@ -123,7 +123,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Shadow position delta
         /// </summary>
-        public Vector2 TextShadowDelta { get; set; } = new Vector2(1, 1);
+        public Vector2 TextShadowDelta { get; set; } = Vector2.One;
         /// <summary>
         /// Text horizontal alignement
         /// </summary>

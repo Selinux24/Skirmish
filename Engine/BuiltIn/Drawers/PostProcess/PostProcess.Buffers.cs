@@ -20,9 +20,9 @@ namespace Engine.BuiltIn.Drawers.PostProcess
         public uint Effect;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerEffect));
+            return (uint)Marshal.SizeOf<PerEffect>();
         }
     }
 
@@ -122,9 +122,9 @@ namespace Engine.BuiltIn.Drawers.PostProcess
         public uint ToneMappingTone;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerPass));
+            return (uint)Marshal.SizeOf<PerPass>();
         }
     }
 }

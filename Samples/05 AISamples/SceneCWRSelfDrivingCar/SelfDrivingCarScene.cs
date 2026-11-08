@@ -7,8 +7,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,7 +99,7 @@ ESC - EXIT";
 
             GameEnvironment.Background = Color.Black;
 
-            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color3.White, Color3.Black, true));
+            Lights.SetAmbient(new SceneLightHemispheric("Ambient", Color.White, Color.Black, true));
         }
 
         public override void Initialize()
@@ -287,7 +287,7 @@ ESC - EXIT";
                 var exList = res.GetExceptions();
                 foreach (var ex in exList)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 Game.Exit();
@@ -491,7 +491,7 @@ ESC - EXIT";
             carModel.Manipulator.SetTransform(car.GetTransform());
 
             bool isBestCar = car == bestCar;
-            var betColor = isBestCar ? new Color4(color.ToVector3(), 1f) : color;
+            var betColor = isBestCar ? new((Color3)color, 1f) : color;
             carModel.TintColor = car.Damaged ? carDamagedColor : betColor;
 
             if (!isBestCar)

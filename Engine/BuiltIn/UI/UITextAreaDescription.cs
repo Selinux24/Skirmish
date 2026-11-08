@@ -1,5 +1,5 @@
-﻿using Engine.UI;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.UI;
 
 namespace Engine.BuiltIn.UI
 {
@@ -28,7 +28,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="text">Text</param>
-        public static UITextAreaDescription Default(Engine.UI.FontDescription font, string text = null)
+        public static UITextAreaDescription Default(FontDescription font, string text = null)
         {
             return new()
             {
@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public Engine.UI.FontDescription Font { get; set; } = UIConfiguration.Font;
+        public FontDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text

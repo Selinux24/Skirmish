@@ -1,7 +1,7 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
 using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 using Engine.PathFinding.RecastNavigation.Recast;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,9 @@ namespace Engine.PathFinding.RecastNavigation
     /// <param name="agent">Agent</param>
     public struct GraphDebug(Graph graph, AgentType agent) : IGraphDebug
     {
+        private static readonly Color4 DefaultNodeColor = new Color(255, 255, 255, 32);
+        private static readonly Color4 DefaultPrimitiveColor = new Color(0, 192, 255, 128);
+
         /// <summary>
         /// Internal graph
         /// </summary>
@@ -95,7 +98,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             if (showTriangles)
             {
@@ -127,7 +130,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (separateNodes)
             {
                 var tris = nodes
-                    .GroupBy(n => Helper.IntToCol(n.Id, 128))
+                    .GroupBy(n => Color4.IntToCol(n.Id, 128))
                     .ToDictionary(
                         keySelector => keySelector.Key,
                         elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY));
@@ -136,7 +139,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Color4 colorTris = new Color(0, 192, 255, 128);
+                Color4 colorTris = DefaultPrimitiveColor;
                 Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY))]);
 
                 yield return new(nameTris, Topology.TriangleList, tris);
@@ -154,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (separateNodes)
             {
                 var lines = nodes
-                    .GroupBy(n => Helper.IntToCol(n.Id, 128))
+                    .GroupBy(n => Color4.IntToCol(n.Id, 128))
                     .ToDictionary(
                         keySelector => keySelector.Key,
                         elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable());
@@ -163,7 +166,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Color4 colorLines = new Color(0, 192, 255, 128);
+                Color4 colorLines = DefaultPrimitiveColor;
                 Dictionary<Color4, IEnumerable<Vector3>> lines = new([new(colorLines, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable())]);
 
                 yield return new(nameLines, Topology.LineList, lines);
@@ -232,7 +235,7 @@ namespace Engine.PathFinding.RecastNavigation
                     { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
                     { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
                     { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
-                    { Color.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())] },
+                    { Color4.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())] },
                 };
                 return [new(name, Topology.TriangleList, data)];
             }
@@ -244,7 +247,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 Dictionary<Color4, IEnumerable<Vector3>> data = new()
                 {
-                    { Color.White, [.. walkableVerts, .. nullVerts, .. multiVerts] },
+                    { Color4.White, [.. walkableVerts, .. nullVerts, .. multiVerts] },
                 };
                 return [new(name, Topology.TriangleList, data)];
             }
@@ -266,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation
             float cs = cset.CellSize;
             float ch = cset.CellHeight;
 
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             List<GraphDebugDataCollection> res =
             [
@@ -303,7 +306,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                Color4 regColor = Helper.IntToCol(c.RegionId, a);
+                Color4 regColor = Color4.IntToCol(c.RegionId, a);
                 lines.TryAdd(regColor, []);
 
                 foreach (var (j, v) in c.IterateRawVertices())
@@ -355,7 +358,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                var regColor = Helper.IntToCol(c.RegionId, a);
+                var regColor = Color4.IntToCol(c.RegionId, a);
                 var bColor = Color4.Lerp(regColor, bseColor, 0.5f);
 
                 foreach (var (va, vb) in c.IterateSegments())
@@ -438,7 +441,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
             float cs = pm.CellSize;
             float ch = pm.CellHeight;
             var orig = pm.Bounds.Minimum;
@@ -536,7 +539,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 col = new Color(0, 48, 64, 255);
                 if (p.IsExternalLink(i0))
                 {
-                    col = new Color(255, 255, 255, 255);
+                    col = Color4.White;
                 }
 
                 edges.TryAdd(col, []);
@@ -569,7 +572,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             return
             [
@@ -588,7 +591,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var (meshIndex, p0, p1, p2) in dm.IterateMeshTriangles())
             {
-                Color4 color = Helper.IntToCol(meshIndex, 192);
+                Color4 color = Color4.IntToCol(meshIndex, 192);
 
                 res.TryAdd(color, []);
                 res[color].AddRange([p0, p1, p2]);
@@ -655,7 +658,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="dRegions">Draw regions</param>
         private readonly List<GraphDebugDataCollection> GetTileCacheLayer(TileCacheLayer layer, float cs, float ch, bool dAreas, bool dRegions)
         {
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             List<GraphDebugDataCollection> res =
             [
@@ -685,7 +688,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             int idx = layer.Header.TLayer;
 
-            Color color = (Color)Helper.IntToCol(idx + 1, 128);
+            Color4 color = Color4.IntToCol(idx + 1, 128);
 
             var bmin = layer.Header.Bounds.Minimum;
             var bmax = layer.Header.Bounds.Maximum;
@@ -715,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation
             var bmin = layer.Header.Bounds.Minimum;
 
             int idx = layer.Header.TLayer;
-            Color color = (Color)Helper.IntToCol(idx + 1, 255);
+            Color4 color = Color4.IntToCol(idx + 1, 255);
 
             foreach (var (lidx, x, y) in layer.IterateLayer())
             {
@@ -723,18 +726,18 @@ namespace Engine.PathFinding.RecastNavigation
                 if (lh == 0xff) continue;
 
                 var area = layer.GetArea(lidx);
-                Color col;
+                Color4 col;
                 if (area == AreaTypes.RC_WALKABLE_AREA)
                 {
-                    col = Color.Lerp(color, new Color(0, 192, 255, 64), 32);
+                    col = Color4.Lerp(color, new Color(0, 192, 255, 64), 32 / 255f);
                 }
                 else if (area == AreaTypes.RC_NULL_AREA)
                 {
-                    col = Color.Lerp(color, new Color(0, 0, 0, 64), 32);
+                    col = Color4.Lerp(color, new Color(0, 0, 0, 64), 32 / 255f);
                 }
                 else
                 {
-                    col = Color.Lerp(color, (Color)AreaToCol((int)area), 32);
+                    col = Color4.Lerp(color, AreaToCol((int)area), 32 / 255f);
                 }
 
                 float fx = bmin.X + x * cs;
@@ -772,7 +775,7 @@ namespace Engine.PathFinding.RecastNavigation
             var bmin = layer.Header.Bounds.Minimum;
 
             int idx = layer.Header.TLayer;
-            Color color = (Color)Helper.IntToCol(idx + 1, 255);
+            Color4 color = Color4.IntToCol(idx + 1, 255);
 
             foreach (var (lidx, x, y) in layer.IterateLayer())
             {
@@ -781,7 +784,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int reg = layer.GetRegion(lidx);
 
-                Color col = Color.Lerp(color, (Color)Helper.IntToCol(reg, 255), 192);
+                Color4 col = Color4.Lerp(color, Color4.IntToCol(reg, 255), 192 / 255f);
 
                 float fx = bmin.X + x * cs;
                 float fy = bmin.Y + (lh + 1) * ch;
@@ -818,7 +821,7 @@ namespace Engine.PathFinding.RecastNavigation
             var bmin = layer.Header.Bounds.Minimum;
 
             // Portals
-            Color pcol = new(255, 255, 255, 255);
+            Color4 pcol = new(255, 255, 255, 255);
 
             int[][] segs = [[0, 0, 0, 1], [0, 1, 1, 1], [1, 1, 1, 0], [1, 0, 0, 0]];
 
@@ -868,7 +871,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="drawRaw">Draw raw contour set</param>
         private readonly List<GraphDebugDataCollection> GetTileCacheContours(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
         {
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             return
             [
@@ -896,7 +899,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                var regColor = Helper.IntToCol(c.RegionId, a);
+                var regColor = Color4.IntToCol(c.RegionId, a);
                 var bColor = Color4.Lerp(regColor, bseColor, 0.5f);
 
                 foreach (var (va, vb) in c.IterateSegments())
@@ -974,7 +977,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pm">Polygon mesh</param>
         private readonly IEnumerable<GraphDebugDataCollection> GetTileCachePolyMesh(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
         {
-            Color4 color = new Color(255, 255, 255, 32);
+            Color4 color = DefaultNodeColor;
 
             return
             [
@@ -1069,7 +1072,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 col = new Color(0, 48, 64, 255);
                 if (p.IsExternalLink(i0))
                 {
-                    col = new Color(255, 255, 255, 255);
+                    col = Color4.White;
                 }
 
                 edges.TryAdd(col, []);
@@ -1176,7 +1179,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<(Color4, Vector3)> ReadTris(Int3[] t, int area, Vector3 orig, float cs, float ch)
+        private static IEnumerable<(Color4, Vector3)> ReadTris(Vector3I[] t, int area, Vector3 orig, float cs, float ch)
         {
             Color4 col;
             if (area == 0)
@@ -1206,7 +1209,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Int3[] verts, Vector3 orig, float cs, float ch)
+        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Vector3I[] verts, Vector3 orig, float cs, float ch)
         {
             int[] vi = [p0, p1];
 
@@ -1235,7 +1238,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                return Helper.IntToCol(area, alpha);
+                return Color4.IntToCol(area, alpha);
             }
         }
     }

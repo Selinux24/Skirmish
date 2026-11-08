@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.PathFinding
 {
@@ -47,7 +46,7 @@ namespace Engine.PathFinding
             {
                 return
                     other.Name == Name &&
-                    MathUtil.NearEqual(other.Height, Height);
+                    Helper.NearEqual(other.Height, Height);
             }
 
             return false;

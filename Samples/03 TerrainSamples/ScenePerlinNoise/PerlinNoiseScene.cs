@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.BuiltIn.UI;
 using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -53,7 +53,7 @@ namespace TerrainSamples.ScenePerlinNoise
         bool noiseMapDirty = true;
         bool generatingMap = false;
 
-        readonly int mapSize = 128;
+        readonly uint mapSize = 128;
         readonly float maxScale = 100;
         readonly float maxLacunarity = 20;
         readonly float maxPersistance = 1;
@@ -252,7 +252,7 @@ namespace TerrainSamples.ScenePerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
+            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Vector4>(), mapSize, true);
 
             perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
@@ -350,25 +350,25 @@ namespace TerrainSamples.ScenePerlinNoise
 
             bool updateMap = false;
 
-            if (!MathUtil.NearEqual(Scale, pbScale.ProgressValue))
+            if (!Helper.NearEqual(Scale, pbScale.ProgressValue))
             {
                 Scale = pbScale.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
+            if (!Helper.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
             {
                 Lacunarity = pbLacunarity.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Persistance, pbPersistance.ProgressValue))
+            if (!Helper.NearEqual(Persistance, pbPersistance.ProgressValue))
             {
                 Persistance = pbPersistance.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Octaves, pbOctaves.ProgressValue))
+            if (!Helper.NearEqual(Octaves, pbOctaves.ProgressValue))
             {
                 Octaves = pbOctaves.ProgressValue;
                 updateMap = true;
@@ -560,7 +560,7 @@ namespace TerrainSamples.ScenePerlinNoise
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 generatingMap = false;

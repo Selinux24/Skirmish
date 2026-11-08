@@ -1,6 +1,6 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
 using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -342,7 +342,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = nPoint;
 
             return
-                nPoint.XZ() == position.XZ() &&
+                nPoint.XZ == position.XZ &&
                 Vector3.Distance(nPoint, position) <= distanceThreshold;
         }
 

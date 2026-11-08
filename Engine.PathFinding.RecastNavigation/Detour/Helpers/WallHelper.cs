@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                centerPos.IsInfinity() ||
+                centerPos.IsInfinity ||
                 maxRadius < 0 || float.IsInfinity(maxRadius) ||
                 filter == null)
             {
@@ -309,7 +309,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
                 var midPointRes = TileRef.GetEdgeMidPoint(best, neighbour, out var pos);
                 if (midPointRes != Status.DT_SUCCESS)
                 {
-                    Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
+                    Game.Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
                     status = midPointRes;
                     return status;
                 }

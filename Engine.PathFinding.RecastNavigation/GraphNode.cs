@@ -1,13 +1,11 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Graph node
     /// </summary>
@@ -154,7 +152,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var dtris = tile.GetDetailTris(p);
 
-                if (!Intersection.PointInMesh(point, dtris))
+                if (!Collision.MeshIntersectsPoint(dtris, ref point))
                 {
                     continue;
                 }
@@ -197,7 +195,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
-            return Intersection.PointInMesh(point, Triangles);
+            return Collision.MeshIntersectsPoint(Triangles, ref point);
         }
         /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()

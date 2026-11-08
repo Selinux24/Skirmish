@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +16,8 @@ namespace Engine.Common
     /// <param name="transform">World transform</param>
     /// <param name="vertices">Vertices</param>
     /// <param name="indices">Indices</param>
-    public class Mesh<T>(string name, Topology topology, Matrix transform, IEnumerable<T> vertices, IEnumerable<uint> indices) : IMesh
-        where T : struct, IVertexData
+    public class Mesh<T>(string name, Topology topology, Matrix4x4 transform, IEnumerable<T> vertices, IEnumerable<uint> indices) : IMesh
+        where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Vertices cache
@@ -51,7 +51,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public Topology Topology { get; } = topology;
         /// <inheritdoc/>
-        public Matrix Transform { get; } = transform;
+        public Matrix4x4 Transform { get; } = transform;
         /// <inheritdoc/>
         public BufferDescriptor VertexBuffer { get; private set; } = null;
         /// <inheritdoc/>
@@ -65,11 +65,11 @@ namespace Engine.Common
             }
         }
         /// <inheritdoc/>
-        public int Count
+        public uint Count
         {
             get
             {
-                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
+                uint count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
                 return Topology switch
                 {
                     Topology.LineList => count / 2,
@@ -107,7 +107,7 @@ namespace Engine.Common
         {
             try
             {
-                Logger.WriteTrace(this, $"{name}.{Name} Processing Mesh => {this}");
+                Game.Logger.WriteTrace(this, $"{name}.{Name} Processing Mesh => {this}");
 
                 //Vertices
                 var trnVertices = VertexData.Transform(vertices, Transform);
@@ -119,11 +119,11 @@ namespace Engine.Common
                     IndexBuffer = bufferManager.AddIndexData($"{name}.{Name}", dynamicBuffers, indices);
                 }
 
-                Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
+                Game.Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{name}.{Name} Error Processing Mesh => {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"{name}.{Name} Error Processing Mesh => {ex.Message}", ex);
 
                 throw;
             }
@@ -142,7 +142,7 @@ namespace Engine.Common
             dc.Draw(VertexBuffer);
         }
         /// <inheritdoc/>
-        public virtual void Draw(IEngineDeviceContext dc, int instanceCount, int startInstanceLocation)
+        public virtual void Draw(IEngineDeviceContext dc, uint instanceCount, uint startInstanceLocation)
         {
             if (Indexed)
             {
@@ -159,7 +159,7 @@ namespace Engine.Common
         {
             if (!refresh && positionCache != null)
             {
-                return positionCache.ToArray();
+                return [.. positionCache];
             }
 
             if (!vertices.Any())
@@ -185,14 +185,14 @@ namespace Engine.Common
                 return p;
             });
 
-            return positionCache.ToArray();
+            return [.. positionCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             if (!refresh && positionCache != null)
             {
-                return positionCache.ToArray();
+                return [.. positionCache];
             }
 
             if (!vertices.Any())
@@ -217,14 +217,14 @@ namespace Engine.Common
                 return p;
             });
 
-            return positionCache.ToArray();
+            return [.. positionCache];
         }
         /// <inheritdoc/>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
-                return triangleCache.ToArray();
+                return [.. triangleCache];
             }
 
             var positions = GetPoints(refresh);
@@ -242,14 +242,14 @@ namespace Engine.Common
                 triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
-            return triangleCache.ToArray();
+            return [.. triangleCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
-                return triangleCache.ToArray();
+                return [.. triangleCache];
             }
 
             var positions = GetPoints(boneTransforms, refresh);
@@ -267,7 +267,7 @@ namespace Engine.Common
                 triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
-            return triangleCache.ToArray();
+            return [.. triangleCache];
         }
 
         /// <inheritdoc/>

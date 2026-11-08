@@ -1,5 +1,5 @@
-﻿using Engine.UI;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.UI;
 
 namespace Engine.BuiltIn.UI
 {
@@ -58,7 +58,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default button description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIButtonDescription Default(Engine.UI.FontDescription font)
+        public static UIButtonDescription Default(FontDescription font)
         {
             return new()
             {
@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="color">Button color</param>
-        public static UIButtonDescription Default(Engine.UI.FontDescription font, Color4 color)
+        public static UIButtonDescription Default(FontDescription font, Color4 color)
         {
             return new()
             {
@@ -83,7 +83,7 @@ namespace Engine.BuiltIn.UI
         /// </summary>
         /// <param name="font">Font description</param>
         /// <param name="textureFileName">Texture file name</param>
-        public static UIButtonDescription Default(Engine.UI.FontDescription font, string textureFileName)
+        public static UIButtonDescription Default(FontDescription font, string textureFileName)
         {
             return new()
             {
@@ -99,7 +99,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="textureRect">Texture rectangle</param>
-        public static UIButtonDescription Default(Engine.UI.FontDescription font, string textureFileName, Vector4 textureRect)
+        public static UIButtonDescription Default(FontDescription font, string textureFileName, Color4 textureRect)
         {
             return new()
             {
@@ -174,7 +174,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the default two state button description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIButtonDescription DefaultTwoStateButton(Engine.UI.FontDescription font)
+        public static UIButtonDescription DefaultTwoStateButton(FontDescription font)
         {
             return new()
             {
@@ -188,7 +188,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="releasedColor">Released button color</param>
         /// <param name="pressedColor">Pressed button color</param>
-        public static UIButtonDescription DefaultTwoStateButton(Engine.UI.FontDescription font, Color4 releasedColor, Color4 pressedColor)
+        public static UIButtonDescription DefaultTwoStateButton(FontDescription font, Color4 releasedColor, Color4 pressedColor)
         {
             return new()
             {
@@ -204,7 +204,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="font">Font description</param>
         /// <param name="releasedTextureFileName">Released texture file name</param>
         /// <param name="pressedTextureFileName">Pressed texture file name</param>
-        public static UIButtonDescription DefaultTwoStateButton(Engine.UI.FontDescription font, string releasedTextureFileName, string pressedTextureFileName)
+        public static UIButtonDescription DefaultTwoStateButton(FontDescription font, string releasedTextureFileName, string pressedTextureFileName)
         {
             return new()
             {
@@ -223,7 +223,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="releasedTextureRect">Released texture rectangle</param>
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
-        public static UIButtonDescription DefaultTwoStateButton(Engine.UI.FontDescription font, string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect)
+        public static UIButtonDescription DefaultTwoStateButton(FontDescription font, string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect)
         {
             return new()
             {
@@ -248,7 +248,7 @@ namespace Engine.BuiltIn.UI
         {
             return new()
             {
-                Font = Engine.UI.FontDescription.FromFamily(fontFamilyName, size, fineSampling),
+                Font = FontDescription.FromFamily(fontFamilyName, size, fineSampling),
             };
         }
         /// <summary>
@@ -432,7 +432,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Shadow position delta
         /// </summary>
-        public Vector2 TextShadowDelta { get; set; } = new Vector2(1, 1);
+        public Vector2 TextShadowDelta { get; set; } = Vector2.One;
         /// <summary>
         /// Text horizontal alignement
         /// </summary>

@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     public struct SteerTarget
     {
         public Vector3 Position { get; set; }

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
@@ -15,7 +15,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
-        private static float GetYRotation(Matrix transform)
+        private static float GetYRotation(Matrix4x4 transform)
         {
             if (transform.Decompose(out _, out var rotation, out _))
             {
@@ -33,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            if (MathUtil.IsZero(rotation.Angle))
+            if (Helper.IsZero(rotation.Angle))
             {
                 return 0f;
             }
@@ -114,8 +114,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return true;
             }
 
-            var min = bounds.Value.Min;
-            var max = bounds.Value.Max;
+            var min = bounds.Value.Minimum;
+            var max = bounds.Value.Maximum;
 
             float xhalf = halfExtents.X * ics + 0.5f;
             float zhalf = halfExtents.Z * ics + 0.5f;
@@ -180,7 +180,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Computes the obstacle bounds
         /// </summary>
-        private BoundingBoxInt? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
+        private BoundingBoxI? ComputeBounds(Vector3 orig, int w, int h, float cx, float cz, float ics, float ich)
         {
             float maxr = 1.41f * MathF.Max(halfExtents.X, halfExtents.Z);
             int minx = (int)MathF.Floor(cx - maxr * ics);
@@ -200,10 +200,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (minz < 0) minz = 0;
             if (maxz >= h) maxz = h - 1;
 
-            return new BoundingBoxInt
+            return new BoundingBoxI
             {
-                Min = new Vector3Int(minx, miny, minz),
-                Max = new Vector3Int(maxx, maxy, maxz),
+                Minimum = new Vector3I(minx, miny, minz),
+                Maximum = new Vector3I(maxx, maxy, maxz),
             };
         }
     }

@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// A rigid body is the basic simulation object in the physics core.
     ///
@@ -65,7 +66,7 @@ namespace Engine.Physics
         public Matrix3x3 InverseInertiaTensorWorld { get; private set; } = Matrix3x3.Identity;
 
         /// <inheritdoc/>
-        public Matrix Transform { get; private set; } = Matrix.Identity;
+        public Matrix4x4 Transform { get; private set; } = Matrix4x4.Identity;
 
         /// <inheritdoc/>
         public bool IsAwake { get; private set; } = false;
@@ -90,9 +91,9 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
-        public void SetInitialState(Matrix transform)
+        public void SetInitialState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroTolerance))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -123,9 +124,9 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
-        public void SetState(Matrix transform)
+        public void SetState(Matrix4x4 transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroTolerance))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -145,7 +146,7 @@ namespace Engine.Physics
         public void SetMass(float mass)
         {
             Mass = mass;
-            InverseMass = MathUtil.IsZero(mass) ? float.PositiveInfinity : 1f / mass;
+            InverseMass = Helper.IsZero(mass) ? float.PositiveInfinity : 1f / mass;
         }
         /// <inheritdoc/>
         public bool HasFiniteMass()
@@ -236,7 +237,7 @@ namespace Engine.Physics
         {
             // Calculate transformation matrix with orientation and position
             Rotation = Quaternion.Normalize(Rotation);
-            Transform = Matrix.RotationQuaternion(Rotation) * Matrix.Translation(Position);
+            Transform = Matrix4x4.RotationQuaternion(Rotation) * Matrix4x4.Translation(Position);
 
             if (!HasFiniteMass())
             {
@@ -244,7 +245,8 @@ namespace Engine.Physics
             }
 
             // Calculate the inertia tensor in world coordinates
-            InverseInertiaTensorWorld = InverseInertiaTensor.Transform(Transform);
+            InverseInertiaTensorWorld = Matrix3x3.Transform(InverseInertiaTensor, Transform);
+
             InertiaTensorWorld = Matrix3x3.Invert(InverseInertiaTensorWorld);
         }
         /// <inheritdoc/>
@@ -266,7 +268,7 @@ namespace Engine.Physics
 
             // Calculate the linear acceleration from the forces
             LastFrameAcceleration = Acceleration;
-            if (forceAccum != Vector3.Zero && !MathUtil.IsZero(InverseMass))
+            if (forceAccum != Vector3.Zero && !Helper.IsZero(InverseMass))
             {
                 LastFrameAcceleration += Vector3.Multiply(forceAccum, InverseMass);
             }
@@ -491,7 +493,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public Vector3 GetPointInLocalSpace(Vector3 point)
         {
-            return Vector3.TransformCoordinate(point, Matrix.Invert(Transform));
+            return Vector3.TransformCoordinate(point, Matrix4x4.Invert(Transform));
         }
         /// <inheritdoc/>
         public Vector3 GetPointInWorldSpace(Vector3 point)
@@ -501,7 +503,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public Vector3 GetDirectionInLocalSpace(Vector3 direction)
         {
-            return Vector3.TransformNormal(direction, Matrix.Invert(Transform));
+            return Vector3.TransformNormal(direction, Matrix4x4.Invert(Transform));
         }
         /// <inheritdoc/>
         public Vector3 GetDirectionInWorldSpace(Vector3 direction)
@@ -539,7 +541,7 @@ namespace Engine.Physics
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix InitialTransform { get; set; } = Matrix.Identity;
+        public Matrix4x4 InitialTransform { get; set; } = Matrix4x4.Identity;
         /// <summary>
         /// Static body
         /// </summary>

@@ -1,18 +1,17 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Common;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Picking quad tree
     /// </summary>
     public class PickingQuadTree<T> : IQuadTree<PickingQuadTreeNode<T>> where T : IVertexList, IRayIntersectable
     {
-        const string cName = nameof(PickingQuadTree<T>);
+        const string cName = nameof(PickingQuadTree<>);
 
         /// <inheritdoc/>
         public PickingQuadTreeNode<T> Root { get; private set; }

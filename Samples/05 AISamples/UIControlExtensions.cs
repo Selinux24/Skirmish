@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.BuiltIn.UI;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 
 namespace AISamples
@@ -28,8 +28,8 @@ namespace AISamples
             int h = 8;
             int hv = h - 1;
 
-            int formWidth = form.RenderWidth;
-            int formHeight = form.RenderHeight;
+            int formWidth = (int)form.RenderWidth;
+            int formHeight = (int)form.RenderHeight;
 
             int i = 0;
             for (int row = 0; row < rowCount; row++)

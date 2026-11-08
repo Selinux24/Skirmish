@@ -1,10 +1,11 @@
 ﻿using Engine;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace IntermediateSamples.SceneTransforms
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Tree controller
     /// </summary>

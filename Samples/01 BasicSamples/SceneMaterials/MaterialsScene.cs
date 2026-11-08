@@ -4,7 +4,8 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
+using Engine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,12 +96,12 @@ namespace BasicSamples.SceneMaterials
         {
             var spDesc = new SpriteDescription()
             {
-                BaseColor = new Color4(0, 0, 0, 0.75f),
+                BaseColor = new(0, 0, 0, 0.75f),
             };
             backpanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
-            var defaultFont18 = Engine.UI.FontDescription.FromFamily("Arial", 18);
-            var defaultFont10 = Engine.UI.FontDescription.FromFamily("Arial", 10);
+            var defaultFont18 = FontDescription.FromFamily("Arial", 18);
+            var defaultFont10 = FontDescription.FromFamily("Arial", 10);
 
             var titleDesc = new UITextAreaDescription
             {
@@ -131,18 +132,16 @@ namespace BasicSamples.SceneMaterials
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
-
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
-
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
         }
@@ -173,7 +172,7 @@ namespace BasicSamples.SceneMaterials
         private async Task InitializeEmitters()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color3.White;
+            mat.EmissiveColor = Color.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.25f, 32, 32);
 
@@ -190,7 +189,7 @@ namespace BasicSamples.SceneMaterials
             int n = 32;
             int colorCount = 256;
             int e = colorCount / n;
-            int totalSpheres = (int)MathF.Pow(e, 3);
+            uint totalSpheres = (uint)MathF.Pow(e, 3);
             float distance = 3f;
 
             var mapParams = new MaterialParams
@@ -245,7 +244,7 @@ namespace BasicSamples.SceneMaterials
             //Cook-torrance
             var ctMaterials = materials.Select(m => (MaterialCookTorranceContent)m).OfType<IMaterialContent>();
 
-            var spheres = await InitializeSphereInstanced("Built-in materials test", materials.Count, ctMaterials);
+            var spheres = await InitializeSphereInstanced("Built-in materials test", (uint)materials.Count, ctMaterials);
 
             float sep = 2f;
             float x = sep * spheres.InstanceCount * 0.5f;
@@ -266,7 +265,7 @@ namespace BasicSamples.SceneMaterials
             {
                 var mat = MaterialCookTorranceContent.Default;
                 mat.DiffuseColor = Color.Gold;
-                mat.SpecularColor = (Color.Gold * 1.25f).RGB();
+                mat.SpecularColor = Color.Gold * 1.25f;
                 mat.Metallic = 0.9f;
                 mat.Roughness = roughness * (i + 1);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
@@ -280,7 +279,7 @@ namespace BasicSamples.SceneMaterials
             {
                 var mat = MaterialCookTorranceContent.Default;
                 mat.DiffuseColor = Color.Gold;
-                mat.SpecularColor = (Color.Gold * 1.25f).RGB();
+                mat.SpecularColor = Color.Gold * 1.25f;
                 mat.Metallic = metalness * (i + 1);
                 mat.Roughness = 0.1f;
                 mat.DiffuseTexture = resourceDefaultDiffuse;
@@ -289,7 +288,7 @@ namespace BasicSamples.SceneMaterials
                 materials.Add(mat);
             }
 
-            var spheres = await InitializeSphereInstanced("Cook-Torrance Metallics", materials.Count, materials);
+            var spheres = await InitializeSphereInstanced("Cook-Torrance Metallics", (uint)materials.Count, materials);
 
             float sep = 2f;
             float x = sep * itemsPerRow * 0.5f;
@@ -322,12 +321,12 @@ namespace BasicSamples.SceneMaterials
                 }
             }
         }
-        private static IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, MaterialParams matParams, bool nmap)
+        private static IMaterialContent GenerateMaterial(Vector3 diffuse, Vector3 specular, MaterialParams matParams, bool nmap)
         {
             if (matParams.Algorithm == SpecularAlgorithms.Phong)
             {
                 MaterialPhongContent mat = MaterialPhongContent.Default;
-                mat.DiffuseColor = new Color4(diffuse, 1f);
+                mat.DiffuseColor = new(diffuse, 1f);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
                 mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
@@ -337,7 +336,7 @@ namespace BasicSamples.SceneMaterials
             else if (matParams.Algorithm == SpecularAlgorithms.BlinnPhong)
             {
                 MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-                mat.DiffuseColor = new Color4(diffuse, 1f);
+                mat.DiffuseColor = new(diffuse, 1f);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
                 mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
@@ -347,7 +346,7 @@ namespace BasicSamples.SceneMaterials
             else if (matParams.Algorithm == SpecularAlgorithms.CookTorrance)
             {
                 MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
-                mat.DiffuseColor = new Color4(diffuse, 1f);
+                mat.DiffuseColor = new(diffuse, 1f);
                 mat.DiffuseTexture = resourceDefaultDiffuse;
                 mat.NormalMapTexture = nmap ? resourceDefaultNormal1 : resourceDefaultNormal2;
                 mat.SpecularColor = specular;
@@ -358,7 +357,7 @@ namespace BasicSamples.SceneMaterials
 
             return MaterialBlinnPhongContent.Default;
         }
-        private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<IMaterialContent> materials)
+        private async Task<ModelInstanced> InitializeSphereInstanced(string name, uint count, IEnumerable<IMaterialContent> materials)
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -416,8 +415,8 @@ namespace BasicSamples.SceneMaterials
             movingLight1 = new SceneLightPoint(
                 "Emitter 1 light",
                 false,
-                Color.Yellow.RGB() * 1.25f,
-                Color3.White,
+                Color.Yellow * 1.25f,
+                Color.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
@@ -426,8 +425,8 @@ namespace BasicSamples.SceneMaterials
             movingLight2 = new SceneLightPoint(
                 "Emitter 2 light",
                 false,
-                Color3.White,
-                Color3.White,
+                Color.White,
+                Color.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 10f, 5f));
 

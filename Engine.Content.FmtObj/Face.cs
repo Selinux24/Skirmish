@@ -1,10 +1,11 @@
 ﻿using Engine.Common;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.FmtObj
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Face
     /// </summary>

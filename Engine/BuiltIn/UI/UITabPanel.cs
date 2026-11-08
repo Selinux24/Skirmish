@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,7 +93,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                if (MathUtil.NearEqual(tabButtonsAreaSize, value))
+                if (Helper.NearEqual(tabButtonsAreaSize, value))
                 {
                     return;
                 }

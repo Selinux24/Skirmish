@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +51,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex data</param>
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the weighted position</returns>
-        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix> boneTransforms)
+        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix4x4> boneTransforms)
         {
             if (!vertex.HasChannel(VertexDataChannels.Position))
             {
@@ -84,7 +84,7 @@ namespace Engine.Common
                 var boneTransform = transforms[index];
                 if (!boneTransform.IsIdentity)
                 {
-                    Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
+                    p = Vector3.TransformCoordinate(position, boneTransform);
                 }
 
                 t += p * weight;
@@ -99,7 +99,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix transform)
+        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix4x4 transform)
         {
             if (vertices?.Any() != true)
             {
@@ -108,7 +108,7 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
@@ -123,7 +123,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static VertexData Transform(VertexData vertex, Matrix transform)
+        public static VertexData Transform(VertexData vertex, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
@@ -160,8 +160,8 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix transform)
-            where T : struct, IVertexData
+        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix4x4 transform)
+            where T : unmanaged, IVertexData
         {
             if (vertices?.Any() != true)
             {
@@ -170,7 +170,7 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
@@ -185,8 +185,8 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static T Transform<T>(T vertex, Matrix transform)
-            where T : struct, IVertexData
+        public static T Transform<T>(T vertex, Matrix4x4 transform)
+            where T : unmanaged, IVertexData
         {
             if (transform.IsIdentity)
             {
@@ -257,7 +257,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public readonly VertexData Transform(Matrix transform)
+        public readonly VertexData Transform(Matrix4x4 transform)
         {
             return Transform(this, transform);
         }
@@ -265,10 +265,10 @@ namespace Engine.Common
         /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return [Position.Value];
+            yield return Position.Value;
         }
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
             return 1;
         }

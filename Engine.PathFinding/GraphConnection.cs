@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.PathFinding
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Graph connection
     /// </summary>

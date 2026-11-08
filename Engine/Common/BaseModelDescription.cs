@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Instances
         /// </summary>
-        public int Instances { get; set; } = 1;
+        public uint Instances { get; set; } = 1;
         /// <summary>
         /// Load animation
         /// </summary>

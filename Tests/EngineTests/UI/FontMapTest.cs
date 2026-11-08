@@ -1,9 +1,9 @@
 ﻿using Engine;
 using Engine.BuiltIn.Format;
+using Engine.Mathematics;
 using Engine.UI;
 using Engine.Windows;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -62,7 +62,7 @@ namespace EngineTests.UI
 
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
 
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(100);
 
@@ -80,7 +80,7 @@ I'm the next line";
 
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
 
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(100);
 
@@ -107,7 +107,7 @@ I'm the next line";
 
             int height = (int)font.GetSpaceSize().Y;
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(5000);
             font.MapSentence(sentence, false, float.MaxValue, ref desc);
 
@@ -142,7 +142,7 @@ I'm the next line";
 
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(5000);
             font.MapSentence(sentence, false, 500, ref desc);
 
@@ -173,7 +173,7 @@ I'm the next line";
 
             int sampleSize = sample.Replace(Environment.NewLine, "").Replace(" ", "").Length;
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(15);
             fontMapped.MapSentence(sentence, false, width, ref desc);
 
@@ -185,7 +185,7 @@ I'm the next line";
         {
             const string sample = "Hello world!";
 
-            var sentence = FontMapParser.ParseSentence(sample, Color4.White, Color4.White);
+            var sentence = FontMapParser.ParseSentence(sample, Color.White, Color.White);
 
             var desc = FontMapSentenceDescriptor<VertexFont>.Create(5);
 

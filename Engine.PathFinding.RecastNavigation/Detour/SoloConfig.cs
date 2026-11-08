@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -51,7 +51,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BorderSize = borderSize,
                 Width = width,
                 Height = height,
-                
+
                 FilterLedgeSpans = settings.FilterLedgeSpans,
                 FilterLowHangingObstacles = settings.FilterLowHangingObstacles,
                 FilterWalkableLowHeightSpans = settings.FilterWalkableLowHeightSpans,

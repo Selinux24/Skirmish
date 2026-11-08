@@ -6,10 +6,10 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.AStar;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,11 +37,11 @@ namespace TerrainSamples.SceneGrid
         private UITextArea txtAction = null;
         private UIMinimap minimap = null;
 
-        private RectangleF hudTextureSize;
-        private RectangleF initialGameArea;
-        private RectangleF gameArea;
-        private RectangleF initialMinimapArea;
-        private RectangleF minimapArea;
+        private Rect hudTextureSize;
+        private Rect initialGameArea;
+        private Rect gameArea;
+        private Rect initialMinimapArea;
+        private Rect minimapArea;
 
         private readonly string titleFontFileName = "ARMY RUST.TTF";
         private readonly string fontFileName = "JOYSTIX.TTF";
@@ -77,8 +77,8 @@ namespace TerrainSamples.SceneGrid
         private readonly float soldierAssaultSpeed = 6f;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
-        private readonly Color4 bsphColor = new(Color.LightYellow.ToColor3(), 0.25f);
-        private readonly Color4 frstColor = new(Color.Yellow.ToColor3(), 1f);
+        private readonly Color4 bsphColor = new(Color.LightYellow, 0.25f);
+        private readonly Color4 frstColor = new(Color.Yellow, 1f);
         private readonly int bsphSlices = 50;
         private readonly int bsphStacks = 25;
 
@@ -147,8 +147,8 @@ namespace TerrainSamples.SceneGrid
             spotLight = new SceneLightSpot(
                 "Current soldier",
                 false,
-                Color3.White,
-                Color3.White,
+                Color.White,
+                Color.White,
                 true,
                 SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 
@@ -177,8 +177,8 @@ namespace TerrainSamples.SceneGrid
             await AddComponentUI<Sprite, SpriteDescription>("HUD", "HUD", bgDesc, LayerUI - 1);
 
             hudTextureSize = new(0, 0, 800, 600);
-            initialGameArea = new RectangleF(8, 71, 780, 426);
-            initialMinimapArea = new RectangleF(593, 443, 196, 147);
+            initialGameArea = new(8, 71, 780, 426);
+            initialMinimapArea = new(593, 443, 196, 147);
         }
         private async Task InitializeText()
         {
@@ -303,8 +303,8 @@ namespace TerrainSamples.SceneGrid
         }
         private async Task InitializeMinimap()
         {
-            int minimapHeight = (Game.Form.RenderHeight / 4) - 8;
-            int minimapWidth = minimapHeight;
+            uint minimapHeight = (Game.Form.RenderHeight / 4) - 8;
+            uint minimapWidth = minimapHeight;
             var topLeft = new Vector2(593, 443);
             var bottomRight = new Vector2(789, 590);
             var tRes = new Vector2(800, 600);
@@ -359,7 +359,7 @@ namespace TerrainSamples.SceneGrid
 
             var troopsDesc = new ModelInstancedDescription()
             {
-                Instances = skirmishGame.AllSoldiers.Length,
+                Instances = (uint)skirmishGame.AllSoldiers.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(resourcesSoldier, "soldier_anim2.json"),
                 StartsVisible = false,
@@ -509,7 +509,7 @@ namespace TerrainSamples.SceneGrid
         }
         private PointerStates PointerOverHUD()
         {
-            var mouse = Game.Input.MousePosition;
+            Vector2 mouse = new(Game.Input.MousePosition.X, Game.Input.MousePosition.Y);
 
             bool overMinimap = minimapArea.Contains(mouse);
             if (overMinimap)
@@ -793,7 +793,7 @@ namespace TerrainSamples.SceneGrid
 
                     if (teamIndex == 0)
                     {
-                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0);
+                        soldier.Manipulator.SetRotation(Helper.DegreesToRadians(180), 0, 0);
                     }
 
                     soldierModels.Add(soldierC, soldier);

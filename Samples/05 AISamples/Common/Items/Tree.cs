@@ -1,9 +1,9 @@
-﻿using AISamples.Common.Persistence;
-using Engine;
-using SharpDX;
-
+﻿
 namespace AISamples.Common.Items
 {
+    using AISamples.Common.Persistence;
+    using Engine.Mathematics;
+
     class Tree(Vector3 position, float radius, float height)
     {
         public Vector3 Position { get; set; } = position;
@@ -30,7 +30,7 @@ namespace AISamples.Common.Items
 
         public float DistanceToPoint(Vector2 point)
         {
-            return Vector2.Distance(Position.XZ(), point);
+            return Vector2.Distance(Position.XZ, point);
         }
     }
 }

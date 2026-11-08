@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Joint between two bodies
     /// </summary>

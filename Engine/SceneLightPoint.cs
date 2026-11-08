@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine
@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix initialTransform = Matrix.Identity;
+        private Matrix4x4 initialTransform = Matrix4x4.Identity;
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -34,7 +34,7 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public override Matrix ParentTransform
+        public override Matrix4x4 ParentTransform
         {
             get
             {
@@ -48,11 +48,11 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public Matrix Local
+        public Matrix4x4 Local
         {
             get
             {
-                return Matrix.Scaling(Radius) * Matrix.Translation(Position);
+                return Matrix4x4.Scaling(Radius) * Matrix4x4.Translation(Position);
             }
         }
 
@@ -63,10 +63,10 @@ namespace Engine
         /// <param name="direction">Direction</param>
         /// <param name="up">Up vector</param>
         /// <returns>Returns the point light from light view matrix</returns>
-        private static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        private static Matrix4x4 GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
         {
             // View from light to scene center position
-            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
+            return Matrix4x4.LookAtLH(lightPosition, lightPosition + direction, up);
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace Engine
         /// Gets from light view * projection matrix cube
         /// </summary>
         /// <returns>Returns the from light view * projection matrix cube</returns>
-        private Matrix[] UpdateFromLightViewProjection()
+        private Matrix4x4[] UpdateFromLightViewProjection()
         {
             // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, Radius);
+            var projection = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1f, 0.1f, Radius);
 
             return
             [

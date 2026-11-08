@@ -1,6 +1,6 @@
 ﻿using Engine.BuiltIn.Drawers.Foliage;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 
 namespace Engine.BuiltIn.Components.Foliage
@@ -53,7 +53,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor;
+        public Vector4 TintColor;
         /// <summary>
         /// Foliage start radius
         /// </summary>

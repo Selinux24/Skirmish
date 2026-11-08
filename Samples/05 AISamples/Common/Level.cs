@@ -1,6 +1,5 @@
 ﻿using AISamples.Common.Persistence;
 using Engine;
-using SharpDX;
 
 namespace AISamples.Common
 {
@@ -39,13 +38,13 @@ namespace AISamples.Common
             {
                 for (int o = 0; o < level.outputs.Length; o++)
                 {
-                    level.weights[i][o] = Helper.RandomGenerator.NextFloat(-1, 1);
+                    level.weights[i][o] = Helper.RandomGenerator.NextSingle(-1, 1);
                 }
             }
 
             for (int b = 0; b < level.biases.Length; b++)
             {
-                level.biases[b] = Helper.RandomGenerator.NextFloat(-1, 1);
+                level.biases[b] = Helper.RandomGenerator.NextSingle(-1, 1);
             }
         }
 
@@ -143,14 +142,14 @@ namespace AISamples.Common
 
             for (int i = 0; i < biases.Length; i++)
             {
-                biases[i] = MathUtil.Lerp(biases[i], rnd.NextFloat(-1, 1), amount);
+                biases[i] = float.Lerp(biases[i], rnd.NextSingle(-1, 1), amount);
             }
 
             for (int i = 0; i < weights.Length; i++)
             {
                 for (int o = 0; o < weights[i].Length; o++)
                 {
-                    weights[i][o] = MathUtil.Lerp(weights[i][o], rnd.NextFloat(-1, 1), amount);
+                    weights[i][o] = float.Lerp(weights[i][o], rnd.NextSingle(-1, 1), amount);
                 }
             }
         }

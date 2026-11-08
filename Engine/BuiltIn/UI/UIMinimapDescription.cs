@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.BuiltIn.UI
 {
@@ -18,11 +18,11 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Width
         /// </summary>
-        public int Width { get; set; }
+        public uint Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height { get; set; }
+        public uint Height { get; set; }
         /// <summary>
         /// Terrain to draw
         /// </summary>
@@ -30,7 +30,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Color BackColor { get; set; } = Color.Black;
+        public Color4 BackColor { get; set; } = Color.Black;
         /// <summary>
         /// Minimap render area
         /// </summary>

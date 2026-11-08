@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -17,10 +16,6 @@ namespace Engine.Common
         /// Gets the internal buffer
         /// </summary>
         public EngineBuffer Buffer { get; private set; }
-        /// <summary>
-        /// Gets the internal data stream
-        /// </summary>
-        public EngineDataStream DataStream { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -32,7 +27,6 @@ namespace Engine.Common
             if (graphics == null) throw new ArgumentNullException(nameof(graphics), "Must specify the graphics instance to create the constant buffer in the graphics device.");
 
             Name = name;
-            DataStream = new EngineDataStream(Marshal.SizeOf(typeof(T)), true, true);
             Buffer = graphics.CreateConstantBuffer<T>(name);
         }
         /// <summary>
@@ -57,7 +51,6 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                DataStream?.Dispose();
                 Buffer?.Dispose();
             }
         }
@@ -65,7 +58,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{nameof(EngineConstantBuffer<T>)} {Name}";
+            return $"{nameof(EngineConstantBuffer<>)} {Name}";
         }
     }
 }

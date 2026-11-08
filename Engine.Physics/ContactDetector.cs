@@ -1,9 +1,9 @@
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
     using Engine.Physics.Colliders;
     using EPAFace = EPA.Face;
     using EPASolver = EPA.Solver;
@@ -150,7 +150,7 @@ namespace Engine.Physics
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;
-            if (penetration > 0f && !MathUtil.IsZero(penetration))
+            if (penetration > 0f && !Helper.IsZero(penetration))
             {
                 return false;
             }
@@ -181,7 +181,7 @@ namespace Engine.Physics
             foreach (var point in points)
             {
                 float penetration = d + Vector3.Dot(point, normal);
-                if (penetration > 0f && !MathUtil.IsZero(penetration))
+                if (penetration > 0f && !Helper.IsZero(penetration))
                 {
                     continue;
                 }
@@ -259,7 +259,7 @@ namespace Engine.Physics
             {
                 // Distance to plane
                 float penetration = d + Vector3.Dot(point, normal);
-                if (penetration > 0f && !MathUtil.IsZero(penetration))
+                if (penetration > 0f && !Helper.IsZero(penetration))
                 {
                     continue;
                 }

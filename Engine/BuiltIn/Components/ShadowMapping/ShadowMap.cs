@@ -1,7 +1,7 @@
 ﻿using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Shadows;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
     /// <param name="width">Width</param>
     /// <param name="height">Height</param>
     /// <param name="arraySize">Array size</param>
-    public abstract class ShadowMap(Scene scene, string name, int width, int height, int arraySize) : IShadowMap
+    public abstract class ShadowMap(Scene scene, string name, uint width, uint height, uint arraySize) : IShadowMap
     {
         /// <summary>
         /// Scene
@@ -99,7 +99,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             return GetDrawer(mesh.GetVertexType(), instanced, useTextureAlpha);
         }
         /// <inheritdoc/>
-        public IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : struct, IVertexData
+        public IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : unmanaged, IVertexData
         {
             return GetDrawer(default(T), instanced, useTextureAlpha);
         }

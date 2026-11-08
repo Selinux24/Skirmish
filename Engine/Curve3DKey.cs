@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
@@ -79,7 +79,7 @@ namespace Engine
             }
 
             return
-                MathUtil.NearEqual(value1.Position, value2.Position) &&
+                Helper.NearEqual(value1.Position, value2.Position) &&
                 (value1.Value == value2.Value) &&
                 (value1.TangentIn == value2.TangentIn) &&
                 (value1.TangentOut == value2.TangentOut) &&

@@ -62,13 +62,13 @@ namespace Engine
         {
             if (contentLoaders.ContainsKey(extension))
             {
-                Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is currently registered.");
+                Game.Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is currently registered.");
                 return false;
             }
 
             if (!contentLoaders.TryAdd(extension, loaderDelegate))
             {
-                Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
+                Game.Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
                 return false;
             }
 
@@ -85,7 +85,7 @@ namespace Engine
 
             if (!contentLoaders.ContainsKey(extension))
             {
-                Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is not registered. A valid content loader must be added first.");
+                Game.Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is not registered. A valid content loader must be added first.");
                 return null;
             }
 
@@ -95,7 +95,7 @@ namespace Engine
             }
             else
             {
-                Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
+                Game.Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
 
                 return null;
             }
@@ -191,15 +191,15 @@ namespace Engine
                     return;
                 }
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Length}");
+                Game.Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Length}");
 
                 ProcessPendingRequests(id, pendingRequests, progress);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Length}");
+                Game.Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Length}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating resources: {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating resources: {ex.Message}", ex);
 
                 throw;
             }
@@ -334,7 +334,7 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
+        public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
         {
             var resource = new GameResourceValueArray<T>(name)
             {
@@ -357,7 +357,7 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
+        public EngineShaderResourceView CreateGlobalResource(string name, uint size, float min, float max, int seed = 0, bool dynamic = false)
         {
             var resource = new GameResourceRandomTexture(name)
             {
@@ -452,7 +452,7 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
         {
             var (key, resource) = TryGetResource(identifier);
             if (resource != null)
@@ -489,7 +489,7 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(Guid identifier, uint size, float min, float max, int seed = 0, bool dynamic = false)
         {
             var (key, resource) = TryGetResource(identifier);
             if (resource != null)

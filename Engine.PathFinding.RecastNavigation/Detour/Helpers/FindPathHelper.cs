@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -183,7 +183,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
                     var midPointRes = TileRef.GetEdgeMidPoint(best, neighbour, out var pos);
                     if (midPointRes != Status.DT_SUCCESS)
                     {
-                        Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
+                        Game.Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
                         return midPointRes;
                     }
 

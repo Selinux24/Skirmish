@@ -2,8 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D;
-    using SharpDX.Direct3D11;
+    using ShaderResourceView1 = Vortice.Direct3D11.ID3D11ShaderResourceView1;
 
     /// <summary>
     /// Texture view
@@ -94,18 +93,18 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="dc">Device context</param>
         /// <param name="data">New data</param>
-        public void Update<T>(IEngineDeviceContext dc, T[] data) where T : struct
+        public void Update<T>(IEngineDeviceContext dc, T[] data) where T : unmanaged
         {
             if (srv == null)
             {
                 return;
             }
 
-            if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture1D)
+            if (srv.Description1.ViewDimension == Vortice.Direct3D.ShaderResourceViewDimension.Texture1D)
             {
                 dc.UpdateTexture1D(this, data);
             }
-            else if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture2D)
+            else if (srv.Description1.ViewDimension == Vortice.Direct3D.ShaderResourceViewDimension.Texture2D)
             {
                 dc.UpdateTexture2D(this, data);
             }

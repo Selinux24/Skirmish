@@ -1,6 +1,6 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -88,7 +88,7 @@ namespace Engine.Content
         /// <param name="Weights">Weight data</param>
         /// <param name="BoneNames">Bone names</param>
         /// <param name="Indices">Indices</param>
-        record MeshCreateParams(string Name, Topology Topology, Matrix Transform, IEnumerable<VertexData> Vertices, IEnumerable<Weight> Weights, IEnumerable<string> BoneNames, IEnumerable<uint> Indices);
+        record MeshCreateParams(string Name, Topology Topology, Matrix4x4 Transform, IEnumerable<VertexData> Vertices, IEnumerable<Weight> Weights, IEnumerable<string> BoneNames, IEnumerable<uint> Indices);
 
         /// <summary>
         /// Try to create a new mesh
@@ -237,7 +237,7 @@ namespace Engine.Content
         /// <param name="createParams">Creation parameters</param>
         /// <param name="vertices">Formatted vertices</param>
         private static Mesh<T> CreateMesh<T>(MeshCreateParams createParams, IEnumerable<T> vertices)
-            where T : struct, IVertexData
+            where T : unmanaged, IVertexData
         {
             return new Mesh<T>(
                 createParams.Name,

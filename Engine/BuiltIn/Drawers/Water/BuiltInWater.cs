@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Water
@@ -86,9 +86,9 @@ namespace Engine.BuiltIn.Drawers.Water
             public uint ColorIterations;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf<PerWater>();
+                return (uint)Marshal.SizeOf<PerWater>();
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using DepthStencilState = SharpDX.Direct3D11.DepthStencilState;
+    using DepthStencilState = Vortice.Direct3D11.ID3D11DepthStencilState;
 
     /// <summary>
     /// Engine depth stencil state

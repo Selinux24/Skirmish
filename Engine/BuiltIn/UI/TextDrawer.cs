@@ -2,8 +2,8 @@
 using Engine.BuiltIn.Drawers.Fonts;
 using Engine.BuiltIn.Format;
 using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,7 +37,7 @@ namespace Engine.BuiltIn.UI
         /// <summary>
         /// Index count
         /// </summary>
-        private int indexDrawCount = 0;
+        private uint indexDrawCount = 0;
         /// <summary>
         /// Sentence descriptor
         /// </summary>
@@ -233,7 +233,7 @@ namespace Engine.BuiltIn.UI
         /// Clipping rectangle
         /// </summary>
         /// <remarks>Defines an area outside which all text is clipped</remarks>
-        public Rectangle? ClippingRectangle { get; set; } = null;
+        public RectI? ClippingRectangle { get; set; } = null;
         /// <summary>
         /// Parent control
         /// </summary>
@@ -330,7 +330,7 @@ namespace Engine.BuiltIn.UI
             Manipulator.SetPosition(pos);
             Manipulator.Update2D(parentPos);
 
-            if (ShadowColor != Color.Transparent)
+            if (ShadowColor != Color4.Transparent)
             {
                 ShadowManipulator.SetScale(sca);
                 ShadowManipulator.SetRotation(rot);
@@ -344,7 +344,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="pos">Text position</param>
         /// <param name="renderArea">Text render area</param>
         /// <returns>Returns the transformed position</returns>
-        private Vector2 ApplyScroll(Vector2 pos, RectangleF renderArea)
+        private Vector2 ApplyScroll(Vector2 pos, Rect renderArea)
         {
             if (Parent is not IScrollable ta)
             {
@@ -356,7 +356,7 @@ namespace Engine.BuiltIn.UI
                 return pos;
             }
 
-            ClippingRectangle = (Rectangle)renderArea;
+            ClippingRectangle = renderArea;
 
             pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.ScrollHorizontalOffset : 0f;
             pos.X = (int)pos.X;
@@ -414,18 +414,18 @@ namespace Engine.BuiltIn.UI
                 UseRectangle = ClippingRectangle.HasValue,
                 FineSampling = FineSampling,
                 FontTexture = fontMap.Texture,
-                ClippingRectangle = ClippingRectangle ?? Rectangle.Empty,
+                ClippingRectangle = ClippingRectangle ?? RectI.Empty,
             };
             fontDrawer.UpdateFont(dc, state);
 
-            int count = indexDrawCount;
+            uint count = indexDrawCount;
 
             bool drawn = false;
 
-            if (ShadowColor != Color.Transparent)
+            if (ShadowColor != Color4.Transparent)
             {
                 //Draw with shadows
-                int offset = indexDrawCount / 2;
+                uint offset = indexDrawCount / 2;
                 count = indexDrawCount / 2;
 
                 fontDrawer.UpdateText(dc, ShadowManipulator.LocalTransform);
@@ -466,7 +466,7 @@ namespace Engine.BuiltIn.UI
                 return;
             }
 
-            indexDrawCount = (int)sentenceDescriptor.IndexCount;
+            indexDrawCount = sentenceDescriptor.IndexCount;
         }
 
         /// <summary>
@@ -494,7 +494,7 @@ namespace Engine.BuiltIn.UI
 
             TextSize = sentenceDescriptor.GetSize();
 
-            if (ShadowColor != Color.Transparent)
+            if (ShadowColor != Color4.Transparent)
             {
                 fontMap.MapSentence(
                     parsed,
@@ -509,7 +509,7 @@ namespace Engine.BuiltIn.UI
         /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
         /// <returns>Returns the render area</returns>
-        private RectangleF GetRenderArea()
+        private Rect GetRenderArea()
         {
             return Parent?.GetRenderArea(true) ?? Game.Form.RenderRectangle;
         }

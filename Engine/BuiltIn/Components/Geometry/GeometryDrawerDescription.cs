@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Components.Geometry
 {

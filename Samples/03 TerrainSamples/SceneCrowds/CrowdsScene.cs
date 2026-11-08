@@ -9,11 +9,11 @@ using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtCollada;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -299,15 +299,15 @@ namespace TerrainSamples.SceneCrowds
             }
 
             var clrRnd = Helper.NewGenerator(1);
-            Color[] regions = new Color[nodes.Count()];
+            Vector4[] regions = new Vector4[nodes.Count()];
             for (int i = 0; i < nodes.Count(); i++)
             {
-                regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                regions[i] = new(clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), 0.55f);
             }
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -483,7 +483,7 @@ namespace TerrainSamples.SceneCrowds
                 var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
+                if (Vector3.NearEqual(aPos, pPos, 0.001f))
                 {
                     continue;
                 }
@@ -581,7 +581,7 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }

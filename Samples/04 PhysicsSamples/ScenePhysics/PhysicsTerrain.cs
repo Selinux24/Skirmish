@@ -1,15 +1,16 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Ground;
-using Engine.Collections.Generic;
-using Engine.Physics;
-using Engine.Physics.Colliders;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Ground;
+    using Engine.Collections.Generic;
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     /// <summary>
     /// Terrain
     /// </summary>
@@ -89,7 +90,7 @@ namespace PhysicsSamples.ScenePhysics
             return Terrain.GetIntersectionVolume(IntersectDetectionMode.Box);
         }
         /// <inheritdoc/>
-        public void Reset(Matrix transform)
+        public void Reset(Matrix4x4 transform)
         {
             RigidBody?.SetInitialState(transform);
         }

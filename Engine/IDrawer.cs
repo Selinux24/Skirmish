@@ -32,7 +32,7 @@ namespace Engine
         /// <param name="meshes">Mesh list</param>
         /// <param name="instances">Number of instances</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        bool Draw(IEngineDeviceContext dc, IMesh[] meshes, int instances = 0, int startInstanceLocation = 0);
+        bool Draw(IEngineDeviceContext dc, IMesh[] meshes, uint instances = 0, uint startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="buffer">Vertex buffer</param>
         /// <param name="topology">Primitive topology</param>
         /// <param name="drawCount">Draw count</param>
-        bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount);
+        bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, uint drawCount);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
@@ -57,7 +57,7 @@ namespace Engine
         /// <param name="topology">Primitive topology</param>
         /// <param name="count">Draw count</param>
         /// <param name="startLocation">Start location</param>
-        bool Draw(IEngineDeviceContext dc, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, int count, int startLocation);
+        bool Draw(IEngineDeviceContext dc, uint bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, uint count, uint startLocation);
 
         /// <summary>
         /// Draws the specified vertex buffer

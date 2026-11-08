@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using HullShader = Vortice.Direct3D11.ID3D11HullShader;
 
     /// <summary>
     /// Hull shader description

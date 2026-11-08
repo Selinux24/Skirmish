@@ -1,12 +1,13 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Common;
-using SharpDX;
 using System;
 using System.Threading.Tasks;
 
 namespace Tanks
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Sound effects manager
     /// </summary>
@@ -236,7 +237,7 @@ namespace Tanks
             if (musicEffectInstance == null)
             {
                 musicEffectInstance = audioManager.CreateEffectInstance(music);
-                musicEffectInstance.Volume = 0.5f;
+                musicEffectInstance.SetVolume(0.5f);
                 musicEffectInstance.Play();
             }
         }
@@ -245,7 +246,7 @@ namespace Tanks
             if (tankMoveEffectInstance == null)
             {
                 tankMoveEffectInstance = audioManager.CreateEffectInstance(tankMoveEffect, emitter, Scene.Camera);
-                tankMoveEffectInstance.Volume = 0.5f;
+                tankMoveEffectInstance.SetVolume(0.5f);
                 tankMoveEffectInstance.Play();
 
                 Task.Run(async () =>

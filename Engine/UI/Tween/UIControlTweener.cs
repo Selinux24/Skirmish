@@ -1,5 +1,6 @@
-﻿using Engine.Tween;
-using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.Tween;
+using System;
 
 namespace Engine.UI.Tween
 {
@@ -305,9 +306,9 @@ namespace Engine.UI.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
-                control.Visible = !MathUtil.IsZero(control.Scale);
+                control.Visible = !Helper.IsZero(control.Scale);
 
-                if (MathUtil.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
+                if (Helper.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
                 {
                     return true;
                 }
@@ -329,9 +330,9 @@ namespace Engine.UI.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
-                control.Visible = !MathUtil.IsZero(control.Scale);
+                control.Visible = !Helper.IsZero(control.Scale);
 
-                if (MathUtil.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
+                if (Helper.NearEqual(ftScale.CurrentValue, ftScale.EndValue))
                 {
                     var newStart = ftScale.EndValue;
                     var newEnd = ftScale.StartValue;
@@ -357,7 +358,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
+                if (Helper.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     return true;
                 }
@@ -380,7 +381,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
+                if (Helper.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     var newStart = ftRotate.StartValue;
                     var newEnd = ftRotate.EndValue;
@@ -406,7 +407,7 @@ namespace Engine.UI.Tween
 
                 control.Rotation = ftRotate.CurrentValue;
 
-                if (MathUtil.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
+                if (Helper.NearEqual(ftRotate.CurrentValue, ftRotate.EndValue))
                 {
                     var newStart = ftRotate.EndValue;
                     var newEnd = ftRotate.StartValue;
@@ -426,7 +427,7 @@ namespace Engine.UI.Tween
         /// <param name="ftColorB">Blue tween</param>
         public void AddBaseColorTween(IUIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.BaseColor = new(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue, 1);
 
             collection.AddTween(control, (d) =>
             {
@@ -434,11 +435,11 @@ namespace Engine.UI.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.BaseColor = new(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue, 1);
 
-                if (MathUtil.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
-                    MathUtil.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
-                    MathUtil.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
+                if (Helper.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
+                    Helper.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
+                    Helper.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
                 {
                     return true;
                 }
@@ -455,7 +456,7 @@ namespace Engine.UI.Tween
         /// <param name="ftColorB">Blue tween</param>
         public void AddBaseColorBounce(IUIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.BaseColor = new(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue, 1);
 
             collection.AddTween(control, (d) =>
             {
@@ -463,11 +464,11 @@ namespace Engine.UI.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.BaseColor = new(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue, 1);
 
-                if (MathUtil.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
-                    MathUtil.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
-                    MathUtil.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
+                if (Helper.NearEqual(ftColorR.CurrentValue, ftColorR.EndValue) &&
+                    Helper.NearEqual(ftColorG.CurrentValue, ftColorG.EndValue) &&
+                    Helper.NearEqual(ftColorB.CurrentValue, ftColorB.EndValue))
                 {
                     var newStartR = ftColorR.EndValue;
                     var newStartG = ftColorG.EndValue;
@@ -498,10 +499,10 @@ namespace Engine.UI.Tween
             {
                 ftAlpha.Update(d);
 
-                control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
-                control.Visible = !MathUtil.IsZero(control.Alpha);
+                control.Alpha = Math.Clamp(ftAlpha.CurrentValue, 0f, 1f);
+                control.Visible = !Helper.IsZero(control.Alpha);
 
-                if (MathUtil.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
+                if (Helper.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
                 {
                     return true;
                 }
@@ -522,10 +523,10 @@ namespace Engine.UI.Tween
             {
                 ftAlpha.Update(d);
 
-                control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
-                control.Visible = !MathUtil.IsZero(control.Alpha);
+                control.Alpha = Math.Clamp(ftAlpha.CurrentValue, 0f, 1f);
+                control.Visible = !Helper.IsZero(control.Alpha);
 
-                if (MathUtil.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
+                if (Helper.NearEqual(ftAlpha.CurrentValue, ftAlpha.EndValue))
                 {
                     var newStart = ftAlpha.EndValue;
                     var newEnd = ftAlpha.StartValue;

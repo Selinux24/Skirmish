@@ -1,6 +1,6 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Threading.Tasks;
 
@@ -231,10 +231,7 @@ namespace Engine.BuiltIn.UI
 
                 base.Alpha = alpha;
 
-                if (textDrawer != null)
-                {
-                    textDrawer.Alpha = alpha;
-                }
+                textDrawer?.Alpha = alpha;
             }
         }
         /// <inheritdoc/>
@@ -252,7 +249,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                verticalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumVerticalOffset());
+                verticalScrollOffset = Math.Clamp(value, 0f, this.GetMaximumVerticalOffset());
                 verticalScrollPosition = this.ConvertVerticalOffsetToPosition(verticalScrollOffset);
             }
         }
@@ -265,7 +262,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                verticalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                verticalScrollPosition = Math.Clamp(value, 0f, 1f);
                 verticalScrollOffset = this.ConvertVerticalPositionToOffset(verticalScrollPosition);
             }
         }
@@ -280,7 +277,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
+                horizontalScrollOffset = Math.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
                 horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
             }
         }
@@ -293,7 +290,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                horizontalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                horizontalScrollPosition = Math.Clamp(value, 0f, 1f);
                 horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
             }
         }
@@ -340,7 +337,7 @@ namespace Engine.BuiltIn.UI
         }
         private async Task<TextDrawer> CreateTextDrawer()
         {
-            var td = await Scene.CreateComponent<TextDrawer, Engine.UI.FontDescription>(
+            var td = await Scene.CreateComponent<TextDrawer, FontDescription>(
                 $"{Id}.TextDrawer",
                 $"{Name}.TextDrawer",
                 Description.Font,
@@ -481,22 +478,22 @@ namespace Engine.BuiltIn.UI
         }
 
         /// <inheritdoc/>
-        public override RectangleF GetRenderArea(bool applyPadding)
+        public override Rect GetRenderArea(bool applyPadding)
         {
             var absRect = base.GetRenderArea(false);
 
             //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
-            if (GrowControlWithText && !HasParent || MathUtil.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
-            if (GrowControlWithText && !HasParent || MathUtil.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
+            if (GrowControlWithText && !HasParent || Helper.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
+            if (GrowControlWithText && !HasParent || Helper.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
             return applyPadding ? Padding.Apply(absRect) : absRect;
         }
         /// <inheritdoc/>
-        public override RectangleF GetControlArea()
+        public override Rect GetControlArea()
         {
             var size = textDrawer?.TextSize ?? Vector2.Zero;
 
-            return new RectangleF
+            return new()
             {
                 X = Left,
                 Y = Top,
@@ -512,7 +509,7 @@ namespace Engine.BuiltIn.UI
         /// <param name="keyChar">Key character</param>
         /// <param name="textColor">Text color</param>
         /// <param name="keyColor">Key color</param>
-        public void SetTextWithKeyChar(string text, char keyChar, Color textColor, Color keyColor)
+        public void SetTextWithKeyChar(string text, char keyChar, Color4 textColor, Color4 keyColor)
         {
             string res;
             int keyIndex = text.IndexOf(keyChar);
@@ -609,8 +606,8 @@ namespace Engine.BuiltIn.UI
             var minHeight = textDrawer?.GetLineHeight() ?? 0;
 
             //Set sizes if grow control with text or sizes not setted
-            if (GrowControlWithText || MathUtil.IsZero(Width)) Width = size.X;
-            if (GrowControlWithText || MathUtil.IsZero(Height)) Height = MathUtil.IsZero(size.Y) ? minHeight : size.Y;
+            if (GrowControlWithText || Helper.IsZero(Width)) Width = size.X;
+            if (GrowControlWithText || Helper.IsZero(Height)) Height = Helper.IsZero(size.Y) ? minHeight : size.Y;
         }
     }
 }
