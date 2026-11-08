@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Build tiles configuration
     /// </summary>

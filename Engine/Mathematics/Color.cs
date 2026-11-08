@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -29,6 +30,7 @@ namespace Engine.Mathematics
     /// Represents a 32-bit color (4 bytes) in the form of RGBA (in byte order: R, G, B, A).
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Size = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public partial struct Color : IEquatable<Color>, IFormattable
     {
         private const string ColorStr = "A:{0} R:{1} G:{2} B:{3}";
@@ -45,18 +47,22 @@ namespace Engine.Mathematics
         /// <summary>
         /// The red component of the color.
         /// </summary>
+        [JsonProperty]
         public byte R;
         /// <summary>
         /// The green component of the color.
         /// </summary>
+        [JsonProperty]
         public byte G;
         /// <summary>
         /// The blue component of the color.
         /// </summary>
+        [JsonProperty]
         public byte B;
         /// <summary>
         /// The alpha component of the color.
         /// </summary>
+        [JsonProperty]
         public byte A;
 
         /// <summary>

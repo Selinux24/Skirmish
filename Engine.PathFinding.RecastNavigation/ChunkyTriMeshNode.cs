@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Chunky TriMesh Node
     /// </summary>

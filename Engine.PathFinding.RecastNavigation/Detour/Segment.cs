@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     public class Segment
     {
         public int R { get; set; }

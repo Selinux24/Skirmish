@@ -1,7 +1,7 @@
-﻿namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
-{
-    using Engine.Mathematics;
+﻿using Engine.Mathematics;
 
+namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
+{
     /// <summary>
     /// Onstacle interface
     /// </summary>

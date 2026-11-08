@@ -576,9 +576,11 @@ namespace TerrainSamples.SceneHeightmap
                     new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlareFlare1File),
                     new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlareFlare1File),
                     new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlareFlare1File),
+
                     new (-0.3f, 0.7f, new(200,  50,  50), resourceFlareFlare2File),
                     new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlareFlare2File),
                     new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlareFlare2File),
+
                     new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlareFlare3File),
                     new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlareFlare3File),
                     new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlareFlare3File),
@@ -996,7 +998,7 @@ namespace TerrainSamples.SceneHeightmap
             SceneLightPoint[] torchLights = new SceneLightPoint[torchs.InstanceCount - 1];
             for (int i = 1; i < torchs.InstanceCount; i++)
             {
-                var color = new Vector3(
+                var color = new Color3(
                     posRnd.NextSingle(0, 1),
                     posRnd.NextSingle(0, 1),
                     posRnd.NextSingle(0, 1));

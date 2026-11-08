@@ -173,8 +173,6 @@ F7 to F10: Toggle object visibility.";
                     InitializeSkydom,
                     InitializeHelicopters,
                     InitializeTerrain,
-                    InitializeGardener,
-                    InitializeTrees,
                     InitializeDebug,
                 ],
                 LoadingTaskObjectsCompleted);
@@ -218,6 +216,57 @@ F7 to F10: Toggle object visibility.";
 
             terrain = await AddComponentGround<Scenery, SceneryDescription>("Terrain", "Terrain", desc);
         }
+        private async Task InitializeDebug()
+        {
+            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
+            {
+                Count = 1000,
+                StartsVisible = false,
+            };
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
+        }
+        private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
+        {
+            res.ThrowExceptions();
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
+
+            Lights.KeyLight.Enabled = false;
+            Lights.KeyLight.CastShadow = false;
+
+            Lights.BackLight.Enabled = false;
+            Lights.BackLight.CastShadow = false;
+
+            Lights.FillLight.Enabled = true;
+            Lights.FillLight.CastShadow = true;
+            Lights.FillLight.DiffuseColor = new(0.8f, 0.9f, 1);
+            Lights.FillLight.SpecularColor = new(0.4f, 0.5f, 1);
+            Lights.FillLight.Brightness = 0.2f;
+
+            StartAnimations();
+
+            LoadingTaskTerrain();
+        }
+        private void StartAnimations()
+        {
+            var ap = new AnimationPath();
+            ap.AddLoop("roll");
+            animations.Add("default", new AnimationPlan(ap));
+        }
+
+        private void LoadingTaskTerrain()
+        {
+            var group = LoadResourceGroup.FromTasks(
+                [
+                    InitializeGardener,
+                    InitializeTrees,
+                ],
+                LoadingTaskTerrainCompleted);
+
+            LoadResources(group);
+        }
         private async Task InitializeTrees()
         {
             var desc1 = new ModelDescription()
@@ -257,36 +306,9 @@ F7 to F10: Toggle object visibility.";
             };
             await AddComponentEffect<Foliage, FoliageDescription>("Vegetation", "Vegetation", desc);
         }
-        private async Task InitializeDebug()
-        {
-            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
-            {
-                Count = 1000,
-                StartsVisible = false,
-            };
-            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
-        }
-        private void LoadingTaskObjectsCompleted(LoadResourcesResult res)
+        private void LoadingTaskTerrainCompleted(LoadResourcesResult res)
         {
             res.ThrowExceptions();
-
-            postProcessingState.AddToneMapping(BuiltInToneMappingTones.Uncharted2);
-            Renderer.ClearPostProcessingEffects();
-            Renderer.PostProcessingObjectsEffects = postProcessingState;
-
-            Lights.KeyLight.Enabled = false;
-            Lights.KeyLight.CastShadow = false;
-
-            Lights.BackLight.Enabled = false;
-            Lights.BackLight.CastShadow = false;
-
-            Lights.FillLight.Enabled = true;
-            Lights.FillLight.CastShadow = true;
-            Lights.FillLight.DiffuseColor = new(0.8f, 0.9f, 1);
-            Lights.FillLight.SpecularColor = new(0.4f, 0.5f, 1);
-            Lights.FillLight.Brightness = 0.2f;
-
-            StartAnimations();
 
             StartTerrain();
 
@@ -299,12 +321,6 @@ F7 to F10: Toggle object visibility.";
             Camera.FarPlaneDistance = far;
 
             gameReady = true;
-        }
-        private void StartAnimations()
-        {
-            var ap = new AnimationPath();
-            ap.AddLoop("roll");
-            animations.Add("default", new AnimationPlan(ap));
         }
         private void StartTerrain()
         {

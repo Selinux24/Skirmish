@@ -109,8 +109,8 @@ namespace Engine.Animation
                 return;
             }
 
-            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out var rot1, out Vector3 sca1);
-            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out var rot2, out Vector3 sca2);
+            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
+            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
             Vector3 translation = Vector3.Lerp(pos1, pos2, factor);
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);

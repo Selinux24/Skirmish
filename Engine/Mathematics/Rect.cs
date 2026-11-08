@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -37,6 +38,7 @@ namespace Engine.Mathematics
     /// <param name="width">The width.</param>
     /// <param name="height">The height.</param>
     [StructLayout(LayoutKind.Sequential)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Rect(float x, float y, float width, float height) : IEquatable<Rect>, IFormattable
     {
         const string RectStr = "X:{0} Y:{1} Width:{2} Height:{3}";
@@ -70,36 +72,40 @@ namespace Engine.Mathematics
         /// <summary>
         /// The left.
         /// </summary>
+        [JsonProperty]
         public float Left = x;
         /// <summary>
         /// The top.
         /// </summary>
+        [JsonProperty]
         public float Top = y;
         /// <summary>
         /// The right.
         /// </summary>
+        [JsonProperty]
         public float Right = x + width;
         /// <summary>
         /// The bottom.
         /// </summary>
+        [JsonProperty]
         public float Bottom = y + height;
 
         /// <summary>
         /// Gets the top left corner of the rectangle.
         /// </summary>
-        public readonly Vector2 TopLeft => new(Top, Left);
+        public readonly Vector2 TopLeft => new(Left, Top);
         /// <summary>
         /// Gets the top right corner of the rectangle.
         /// </summary>
-        public readonly Vector2 TopRight => new(Top, Right);
+        public readonly Vector2 TopRight => new(Right, Top);
         /// <summary>
         /// Gets the bottom left corner of the rectangle.
         /// </summary>
-        public readonly Vector2 BottomLeft => new(Bottom, Left);
+        public readonly Vector2 BottomLeft => new(Left, Bottom);
         /// <summary>
         /// Gets the bottom right corner of the rectangle.
         /// </summary>
-        public readonly Vector2 BottomRight => new(Bottom, Right);
+        public readonly Vector2 BottomRight => new(Right, Bottom);
         /// <summary>
         /// Gets the center of the rectangle.
         /// </summary>

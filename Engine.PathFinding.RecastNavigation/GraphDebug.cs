@@ -729,15 +729,15 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 col;
                 if (area == AreaTypes.RC_WALKABLE_AREA)
                 {
-                    col = Color4.Lerp(color, new Color(0, 192, 255, 64), 32);
+                    col = Color4.Lerp(color, new Color(0, 192, 255, 64), 32 / 255f);
                 }
                 else if (area == AreaTypes.RC_NULL_AREA)
                 {
-                    col = Color4.Lerp(color, new Color(0, 0, 0, 64), 32);
+                    col = Color4.Lerp(color, new Color(0, 0, 0, 64), 32 / 255f);
                 }
                 else
                 {
-                    col = Color4.Lerp(color, AreaToCol((int)area), 32);
+                    col = Color4.Lerp(color, AreaToCol((int)area), 32 / 255f);
                 }
 
                 float fx = bmin.X + x * cs;
@@ -784,7 +784,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int reg = layer.GetRegion(lidx);
 
-                Color4 col = Color4.Lerp(color, Color4.IntToCol(reg, 255), 192);
+                Color4 col = Color4.Lerp(color, Color4.IntToCol(reg, 255), 192 / 255f);
 
                 float fx = bmin.X + x * cs;
                 float fy = bmin.Y + (lh + 1) * ch;
@@ -821,7 +821,7 @@ namespace Engine.PathFinding.RecastNavigation
             var bmin = layer.Header.Bounds.Minimum;
 
             // Portals
-            Color4 pcol = new Color(255, 255, 255, 255);
+            Color4 pcol = new(255, 255, 255, 255);
 
             int[][] segs = [[0, 0, 0, 1], [0, 1, 1, 1], [1, 1, 1, 0], [1, 0, 0, 0]];
 

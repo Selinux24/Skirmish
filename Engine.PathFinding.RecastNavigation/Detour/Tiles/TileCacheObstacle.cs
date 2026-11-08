@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Tile-cache obstacle processor
     /// </summary>

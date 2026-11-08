@@ -577,10 +577,10 @@ namespace Engine
             var boxes = GetBoundingBoxes(usage);
             if (!boxes.Any())
             {
-                return new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
+                return new BoundingBox(Vector3.One * -100f, Vector3.One * 100f);
             }
 
-            Bounds = Mathematics.BoundingBox.Merge(boxes);
+            Bounds = BoundingBox.Merge(boxes);
 
             return Bounds.Value;
         }

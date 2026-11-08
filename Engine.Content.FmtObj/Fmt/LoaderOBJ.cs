@@ -1,4 +1,5 @@
 ﻿using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -27,7 +28,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="transform">Transform</param>
         /// <param name="materials">Resulting material list</param>
         /// <returns>Returns a list of model contents</returns>
-        private static List<SubMeshContent> Load(string contentFolder, string fileName, Mathematics.Matrix4x4 transform, out List<Material> materials)
+        private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix4x4 transform, out List<Material> materials)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (!modelList.Any())

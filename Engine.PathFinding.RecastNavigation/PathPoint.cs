@@ -1,9 +1,8 @@
-﻿
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
+
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Mathematics;
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Path point
     /// </summary>

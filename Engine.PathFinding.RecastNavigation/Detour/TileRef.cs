@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Tile reference
     /// </summary>

@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a Matrix3x3 ( contains only Scale and Rotation ).
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Matrix3x3 : IEquatable<Matrix3x3>, IFormattable
     {
         const string Matrix3x3Str = "[M11:{0} M12:{1} M13:{2}] [M21:{3} M22:{4} M23:{5}] [M31:{6} M32:{7} M33:{8}]";
@@ -76,38 +78,47 @@ namespace Engine.Mathematics
         /// <summary>
         /// Value at row 1 column 1 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M11;
         /// <summary>
         /// Value at row 1 column 2 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M12;
         /// <summary>
         /// Value at row 1 column 3 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M13;
         /// <summary>
         /// Value at row 2 column 1 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M21;
         /// <summary>
         /// Value at row 2 column 2 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M22;
         /// <summary>
         /// Value at row 2 column 3 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M23;
         /// <summary>
         /// Value at row 3 column 1 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M31;
         /// <summary>
         /// Value at row 3 column 2 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M32;
         /// <summary>
         /// Value at row 3 column 3 of the Matrix3x3.
         /// </summary>
+        [JsonProperty]
         public float M33;
 
         /// <summary>

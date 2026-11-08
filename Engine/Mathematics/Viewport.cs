@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Amer Koleci and contributors.
 // Licensed under the MIT License (MIT). See LICENSE in the repository root for more information.
 
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -12,32 +13,39 @@ namespace Engine.Mathematics
     /// Represents a floating-point viewport struct.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Viewport : IEquatable<Viewport>
     {
         /// <summary>
         /// Position of the pixel coordinate of the upper-left corner of the viewport.
         /// </summary>
+        [JsonProperty]
         public float X;
         /// <summary>
         /// Position of the pixel coordinate of the upper-left corner of the viewport.
         /// </summary>
+        [JsonProperty]
         public float Y;
         /// <summary>
         /// Width dimension of the viewport.
         /// </summary>
+        [JsonProperty]
         public float Width;
         /// <summary>
         /// Height dimension of the viewport.
         /// </summary>
+        [JsonProperty]
         public float Height;
 
         /// <summary>
         /// Gets or sets the minimum depth of the clip volume.
         /// </summary>
+        [JsonProperty]
         public float MinDepth;
         /// <summary>
         /// Gets or sets the maximum depth of the clip volume.
         /// </summary>
+        [JsonProperty]
         public float MaxDepth;
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Walkable scene
     /// </summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,6 +11,7 @@ namespace Engine.Mathematics
     /// </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector2I : IEquatable<Vector2I>, IFormattable
     {
         const string Vector2IStr = "X:{0} Y:{1}";
@@ -41,10 +43,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X coordinate.
         /// </summary>
+        [JsonProperty]
         public int X;
         /// <summary>
         /// The Y coordinate.
         /// </summary>
+        [JsonProperty]
         public int Y;
 
         /// <summary>

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Straight path
     /// </summary>

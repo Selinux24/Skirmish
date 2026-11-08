@@ -245,7 +245,7 @@ namespace Engine.Animation
                     {
                         values.Add(new Vector4(mat.Row1.XYZ, mat.Row4.X));
                         values.Add(new Vector4(mat.Row2.XYZ, mat.Row4.Y));
-                        values.Add(new Vector4(mat.Row2.XYZ, mat.Row4.Z));
+                        values.Add(new Vector4(mat.Row3.XYZ, mat.Row4.Z));
                         values.Add(Vector4.Zero);
                     }
                 }

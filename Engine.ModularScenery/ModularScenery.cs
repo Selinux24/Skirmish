@@ -1,18 +1,17 @@
-﻿using System;
+﻿using Engine.Animation;
+using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.Components.Particles;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
+using Engine.Modular.Persistence;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Modular
 {
-    using Engine.Animation;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.BuiltIn.Components.Particles;
-    using Engine.Common;
-    using Engine.Content;
-    using Engine.Mathematics;
-    using Engine.Modular.Persistence;
-
     /// <summary>
     /// Terrain model
     /// </summary>
@@ -472,7 +471,7 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void ParseAssetsMap(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            var transforms = new Dictionary<string, List<Mathematics.Matrix4x4>>();
+            var transforms = new Dictionary<string, List<Matrix4x4>>();
 
             float total = level.Map.Count() + transforms.Keys.Count;
             int current = 0;
@@ -506,7 +505,7 @@ namespace Engine.Modular
         /// <param name="item">Reference</param>
         /// <param name="assetIndex">Asset index</param>
         /// <param name="transforms">Transforms dictionary</param>
-        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Mathematics.Matrix4x4>> transforms)
+        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix4x4>> transforms)
         {
             var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
@@ -551,7 +550,7 @@ namespace Engine.Modular
                         if (maintain)
                         {
                             //Invert complex asset rotation
-                            basicTrn = Mathematics.Matrix4x4.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                            basicTrn = Matrix4x4.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
                         }
                     }
 
@@ -1078,7 +1077,7 @@ namespace Engine.Modular
             /// <summary>
             /// Complex asset transform
             /// </summary>
-            public Mathematics.Matrix4x4 Transform;
+            public Matrix4x4 Transform;
             /// <summary>
             /// Individual asset indices
             /// </summary>

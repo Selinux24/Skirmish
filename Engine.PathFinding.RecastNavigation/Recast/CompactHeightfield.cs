@@ -1764,7 +1764,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int k = 0; k < cellOffsets.Length && dmin > 0; ++k)
                 {
                     var offset = cellOffsets[k];
-                    var a = Vector3I.Add(vert, offset);
+                    var a = vert + offset;
                     if (!hp.Contains(a.X, a.Z))
                     {
                         continue;

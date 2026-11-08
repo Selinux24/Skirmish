@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ namespace Engine.Mathematics
     /// Represents a four dimensional mathematical vector.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector4I : IEquatable<Vector4I>, IFormattable
     {
         const string Vector4IStr = "X:{0} Y:{1} Z:{2} W:{3}";
@@ -48,18 +50,22 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X component of the vector.
         /// </summary>
+        [JsonProperty]
         public int X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
+        [JsonProperty]
         public int Y;
         /// <summary>
         /// The Z component of the vector.
         /// </summary>
+        [JsonProperty]
         public int Z;
         /// <summary>
         /// The W component of the vector.
         /// </summary>
+        [JsonProperty]
         public int W;
 
         /// <summary>

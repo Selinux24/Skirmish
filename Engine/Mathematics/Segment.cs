@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ namespace Engine.Mathematics
     /// Segment
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Segment : IEquatable<Segment>, IFormattable
     {
         const string SegmentStr = "Point1:{0} Point2:{1}";
@@ -16,10 +18,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// First point
         /// </summary>
+        [JsonProperty]
         public Vector3 Point1;
         /// <summary>
         /// Second point
         /// </summary>
+        [JsonProperty]
         public Vector3 Point2;
 
         /// <summary>

@@ -53,7 +53,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly Color3 ambientDown = new(72, 72, 255);
 
         private Player playerAgentType = null;
-        private readonly Vector3 agentTorchLight = new(255, 201, 14);
+        private readonly Color3 agentTorchLight = new(255, 201, 14);
         private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new(-1001, 1000, 1000);
 
@@ -737,7 +737,7 @@ namespace TerrainSamples.SceneModularDungeon
             if (Game.Input.KeyJustReleased(Keys.F6))
             {
                 //Save the navigation triangles to a file
-                SaveGraphToFile();
+                SaveSceneryToFile();
             }
 
             if (Game.Input.KeyJustReleased(Keys.F9))
@@ -1167,7 +1167,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             EnqueueNavigationGraphUpdate(NavigationGraphLoaded);
         }
-        private void SaveGraphToFile()
+        private void SaveSceneryToFile()
         {
             Task.Run(() =>
             {

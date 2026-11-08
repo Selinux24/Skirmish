@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Find polygons around a circle
     /// </summary>

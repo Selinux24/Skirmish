@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Height patch
     /// </summary>

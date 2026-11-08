@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Oriented box obstacle
     /// </summary>
     public readonly struct ObstacleOrientedBox : IObstacle
     {
-        static readonly float epsilon = 0.0001f;
+        static readonly Vector3 epsilon = Vector3.Up * 0.0001f;
 
         /// <summary>
         /// Gets the Y axis rotation from a transform matrix

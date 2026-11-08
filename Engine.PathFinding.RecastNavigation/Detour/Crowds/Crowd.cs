@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Provides local steering behaviors for a group of agents. 
     /// </summary>

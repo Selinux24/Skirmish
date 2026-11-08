@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Mathematics;
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Graph node
     /// </summary>

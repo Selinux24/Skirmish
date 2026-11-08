@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
-    using Engine.Mathematics;
-
     public class ObstacleSegment
     {
         /// <summary>

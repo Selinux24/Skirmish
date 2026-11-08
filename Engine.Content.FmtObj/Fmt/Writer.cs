@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Engine.Content.FmtObj.Fmt
 {
-    using Engine.Mathematics;
-
     static class Writer
     {
         public static void WriteObj(StreamWriter wr, IEnumerable<Triangle> triangles)

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
+using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -6,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Mathematics;
-    using Engine.PathFinding.RecastNavigation.Detour;
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-
     /// <summary>
     /// Navigation graph
     /// </summary>

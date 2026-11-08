@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.PathFinding.RecastNavigation.Recast;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Tile cache data
     /// </summary>

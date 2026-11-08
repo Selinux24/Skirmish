@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Sliced path query data
     /// </summary>

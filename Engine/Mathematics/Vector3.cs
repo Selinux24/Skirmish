@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a three dimensional mathematical vector.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector3 : IEquatable<Vector3>, IFormattable
     {
         const string Vector3Str = "X:{0} Y:{1} Z:{2}";
@@ -121,14 +123,17 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X component of the vector.
         /// </summary>
+        [JsonProperty]
         public float X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
+        [JsonProperty]
         public float Y;
         /// <summary>
         /// The Z component of the vector.
         /// </summary>
+        [JsonProperty]
         public float Z;
 
         /// <summary>
@@ -1951,6 +1956,20 @@ namespace Engine.Mathematics
                 Helper.WithinEpsilon(left.X, right.X, epsilon) &&
                 Helper.WithinEpsilon(left.Y, right.Y, epsilon) &&
                 Helper.WithinEpsilon(left.Z, right.Z, epsilon);
+        }
+        /// <summary>
+        /// Tests whether one 3D vector is near another 3D vector.
+        /// </summary>
+        /// <param name="left">The left vector.</param>
+        /// <param name="right">The right vector.</param>
+        /// <param name="epsilon">The epsilon.</param>
+        /// <returns><c>true</c> if left and right are near another 3D, <c>false</c> otherwise</returns>
+        public static bool NearEqual(Vector3 left, Vector3 right, Vector3 epsilon)
+        {
+            return
+                Helper.WithinEpsilon(left.X, right.X, epsilon.X) &&
+                Helper.WithinEpsilon(left.Y, right.Y, epsilon.Y) &&
+                Helper.WithinEpsilon(left.Z, right.Z, epsilon.Z);
         }
 
         /// <summary>

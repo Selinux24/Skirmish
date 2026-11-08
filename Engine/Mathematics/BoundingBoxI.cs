@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace Engine.Mathematics
     /// <param name="minimum">The lower bound of the bounding box.</param>
     /// <param name="maximum">The upper bound of the bounding box.</param>
     [StructLayout(LayoutKind.Sequential)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingBoxI(Vector3I minimum, Vector3I maximum) : IEquatable<BoundingBoxI>, IFormattable
     {
         const string BoundingBoxIStr = "Minimum:{0} Maximum:{1}";
@@ -23,10 +25,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The lower bound of the bounding box.
         /// </summary>
+        [JsonProperty]
         public Vector3I Minimum = minimum;
         /// <summary>
         /// The upper bound of the bounding box.
         /// </summary>
+        [JsonProperty]
         public Vector3I Maximum = maximum;
         /// <summary>
         /// Returns the width of the bounding box

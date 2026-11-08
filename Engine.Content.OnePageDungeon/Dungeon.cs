@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System.Collections.Generic;
 
 namespace Engine.Content.OnePageDungeon
 {
@@ -40,7 +41,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// List of chambers
         /// </summary>
-        public IEnumerable<Rect> Rects { get; set; }
+        public IEnumerable<Chamber> Rects { get; set; }
         /// <summary>
         /// List of doors
         /// </summary>
@@ -77,7 +78,7 @@ namespace Engine.Content.OnePageDungeon
     /// <summary>
     /// Chamber
     /// </summary>
-    public class Rect
+    public class Chamber
     {
         /// <summary>
         /// X position
@@ -103,7 +104,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Gets the rectangle
         /// </summary>
-        public Mathematics.Rect GetRectangle()
+        public Rect GetRectangle()
         {
             return new(X, Y, W, H);
         }

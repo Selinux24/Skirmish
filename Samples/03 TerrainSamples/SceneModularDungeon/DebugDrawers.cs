@@ -189,7 +189,7 @@ namespace TerrainSamples.SceneModularDungeon
 
                 if (!res.TryGetValue(color, out var value))
                 {
-                    value = [.. tris];
+                    value = new List<Triangle>(tris);
                     res.Add(color, value);
                 }
                 else

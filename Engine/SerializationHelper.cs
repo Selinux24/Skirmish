@@ -59,7 +59,7 @@ namespace Engine
         {
             using var tmp = obj.SerializeJsonToStream(handleTypeNames);
             using var cmp = CompressStream(tmp);
-
+            
             return cmp.ToArray();
         }
         /// <summary>

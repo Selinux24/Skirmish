@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a two dimensional mathematical vector.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector2 : IEquatable<Vector2>, IFormattable
     {
         const string Vector2Str = "X:{0} Y:{1}";
@@ -85,10 +87,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X component of the vector.
         /// </summary>
+        [JsonProperty]
         public float X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
+        [JsonProperty]
         public float Y;
 
         /// <summary>

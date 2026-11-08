@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Find path helper
     /// </summary>

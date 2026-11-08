@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ namespace Engine.Mathematics
     /// A bounding rectangle represeted by integers.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingRectangleI : IEquatable<BoundingRectangleI>, IFormattable
     {
         const string RectIStr = "Min:{0} Max:{1}";
@@ -16,10 +18,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The minimum of the bounding box.
         /// </summary>
+        [JsonProperty]
         public Vector2I Minimum;
         /// <summary>
         /// The maximum of the bounding box.
         /// </summary>
+        [JsonProperty]
         public Vector2I Maximum;
 
         /// <summary>

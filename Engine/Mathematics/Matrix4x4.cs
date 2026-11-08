@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a 4x4 mathematical matrix.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Matrix4x4 : IEquatable<Matrix4x4>, IFormattable
     {
         const string Matrix4x4Str = "[M11:{0} M12:{1} M13:{2} M14:{3}] [M21:{4} M22:{5} M23:{6} M24:{7}] [M31:{8} M32:{9} M33:{10} M34:{11}] [M41:{12} M42:{13} M43:{14} M44:{15}]";
@@ -76,66 +78,82 @@ namespace Engine.Mathematics
         /// <summary>
         /// Value at row 1 column 1 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M11;
         /// <summary>
         /// Value at row 1 column 2 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M12;
         /// <summary>
         /// Value at row 1 column 3 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M13;
         /// <summary>
         /// Value at row 1 column 4 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M14;
         /// <summary>
         /// Value at row 2 column 1 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M21;
         /// <summary>
         /// Value at row 2 column 2 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M22;
         /// <summary>
         /// Value at row 2 column 3 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M23;
         /// <summary>
         /// Value at row 2 column 4 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M24;
         /// <summary>
         /// Value at row 3 column 1 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M31;
         /// <summary>
         /// Value at row 3 column 2 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M32;
         /// <summary>
         /// Value at row 3 column 3 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M33;
         /// <summary>
         /// Value at row 3 column 4 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M34;
         /// <summary>
         /// Value at row 4 column 1 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M41;
         /// <summary>
         /// Value at row 4 column 2 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M42;
         /// <summary>
         /// Value at row 4 column 3 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M43;
         /// <summary>
         /// Value at row 4 column 4 of the matrix.
         /// </summary>
+        [JsonProperty]
         public float M44;
 
         /// <summary>
@@ -544,21 +562,10 @@ namespace Engine.Mathematics
             x = Vector3.Normalize(x);
             y = Vector3.Normalize(y);
 
-            result.M11 = x.X;
-            result.M12 = x.Y;
-            result.M13 = x.Z;
-
-            result.M21 = y.X;
-            result.M22 = y.Y;
-            result.M23 = y.Z;
-
-            result.M31 = z.X;
-            result.M32 = z.Y;
-            result.M33 = z.Z;
-
-            result.M41 = position.X;
-            result.M42 = position.Y;
-            result.M43 = position.Z;
+            result.Right = x;
+            result.Up = y;
+            result.Forward = z;
+            result.TranslationVector = position;
             result.M44 = 1f;
 
             return result;

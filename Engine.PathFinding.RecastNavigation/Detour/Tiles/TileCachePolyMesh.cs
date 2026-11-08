@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Represents a polygon mesh suitable for use in building a tile cache navigation mesh.
     /// </summary>

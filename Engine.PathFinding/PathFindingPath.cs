@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// PathFinder path
     /// </summary>

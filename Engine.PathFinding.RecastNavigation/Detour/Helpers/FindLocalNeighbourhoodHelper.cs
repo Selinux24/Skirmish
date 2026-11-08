@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Find local neighbourhood helper
     /// </summary>

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Axis aligned box obstacle
     /// </summary>

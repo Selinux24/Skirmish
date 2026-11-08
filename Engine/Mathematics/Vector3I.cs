@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ namespace Engine.Mathematics
     /// A 3d vector represented by integers.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector3I : IEquatable<Vector3I>, IFormattable
     {
         const string Vector3IStr = "X:{0} Y:{1} Z:{2}";
@@ -76,14 +78,17 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X coordinate.
         /// </summary>
+        [JsonProperty]
         public int X;
         /// <summary>
         /// The Y coordinate.
         /// </summary>
+        [JsonProperty]
         public int Y;
         /// <summary>
         /// The Z coordinate.
         /// </summary>
+        [JsonProperty]
         public int Z;
 
         /// <summary>

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Polygon mesh triangle indexes
     /// </summary>

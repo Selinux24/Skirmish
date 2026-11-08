@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Engine.Mathematics
     /// Oriented bounding box
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct OrientedBoundingBox : IEquatable<OrientedBoundingBox>, IFormattable
     {
         const string OrientedBoundingBoxStr = "Extents:{0} Transformation:{1}";
@@ -18,10 +20,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// Extents
         /// </summary>
+        [JsonProperty]
         public Vector3 Extents;
         /// <summary>
         /// Transform matrix
         /// </summary>
+        [JsonProperty]
         public Matrix4x4 Transformation;
 
         /// <summary>

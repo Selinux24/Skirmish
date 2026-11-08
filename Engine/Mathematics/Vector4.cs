@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a four dimensional mathematical vector.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vector4 : IEquatable<Vector4>, IFormattable
     {
         const string Vector4Str = "X:{0} Y:{1} Z:{2} W:{3}";
@@ -93,18 +95,22 @@ namespace Engine.Mathematics
         /// <summary>
         /// The X component of the vector.
         /// </summary>
+        [JsonProperty]
         public float X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
+        [JsonProperty]
         public float Y;
         /// <summary>
         /// The Z component of the vector.
         /// </summary>
+        [JsonProperty]
         public float Z;
         /// <summary>
         /// The W component of the vector.
         /// </summary>
+        [JsonProperty]
         public float W;
 
         /// <summary>

@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -61,6 +62,7 @@ namespace Engine.Mathematics
     /// <param name="center">The center of the sphere in three dimensional space.</param>
     /// <param name="radius">The radius of the sphere.</param>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingSphere(Vector3 center, float radius) : IEquatable<BoundingSphere>, IFormattable
     {
         const string BoundingSphereStr = "Center:{0} Radius:{1}";
@@ -68,10 +70,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The center of the sphere in three dimensional space.
         /// </summary>
+        [JsonProperty]
         public Vector3 Center = center;
         /// <summary>
         /// The radius of the sphere.
         /// </summary>
+        [JsonProperty]
         public float Radius = radius;
 
         /// <summary>

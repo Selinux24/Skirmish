@@ -42,6 +42,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -60,6 +61,7 @@ namespace Engine.Mathematics
     /// <param name="minimum">The minimum vertex of the bounding box.</param>
     /// <param name="maximum">The maximum vertex of the bounding box.</param>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingBox(Vector3 minimum, Vector3 maximum) : IEquatable<BoundingBox>, IFormattable
     {
         const string BoundingBoxStr = "Minimum:{0} Maximum:{1}";
@@ -67,10 +69,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The minimum point of the box.
         /// </summary>
+        [JsonProperty]
         public Vector3 Minimum = minimum;
         /// <summary>
         /// The maximum point of the box.
         /// </summary>
+        [JsonProperty]
         public Vector3 Maximum = maximum;
         /// <summary>
         /// Returns the width of the bounding box

@@ -54,7 +54,7 @@ namespace Engine.Content.OnePageDungeon
         /// Gets the chamber tile list
         /// </summary>
         /// <param name="rect">Chamber rectangle</param>
-        private static IEnumerable<RectI> GetRects(Rect rect)
+        private static IEnumerable<RectI> GetRects(Chamber rect)
         {
             for (int x = 0; x < rect.W; x++)
             {
@@ -171,7 +171,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="walls">Wall list</param>
         /// <param name="configuration">Asset configuration</param>
-        private static List<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
+        private static List<AssetReference> CreateRoom(Chamber rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
         {
             List<AssetReference> references = [];
 
@@ -282,7 +282,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="dungeon">Dungeon</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnections(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetConnection> CreateConnections(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var roomRect = rect.GetRectangle();
             roomRect.Inflate(1, 1);
@@ -313,7 +313,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="one">Room rectangle one</param>
         /// <param name="two">Room rectangle two</param>
         /// <param name="configuration">Asset configuration</param>
-        private static List<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
+        private static List<AssetConnection> CreateConnection(Chamber one, Chamber two, DungeonAssetConfiguration configuration)
         {
             List<AssetConnection> connections = [];
 
@@ -336,7 +336,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="two">Area</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnection(Rect rect, RectI two, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetConnection> CreateConnection(Chamber rect, RectI two, DungeonAssetConfiguration configuration)
         {
             float tvx = two.X * configuration.BlockSize;
             float tvz = two.Y * configuration.BlockSize;
@@ -387,7 +387,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="dungeon">Dungeon</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetReference> CreateColumns(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetReference> CreateColumns(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var roomRect = rect.GetRectangle();
             float half = configuration.BlockSize * 0.5f;

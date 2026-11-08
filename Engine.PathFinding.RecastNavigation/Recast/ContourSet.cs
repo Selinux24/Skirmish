@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Represents a group of related contours.
     /// </summary>

@@ -81,7 +81,7 @@ namespace Engine
         /// <param name="diffuse">Diffuse color contribution</param>
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        protected SceneLight(string name, bool castShadow, Vector3 diffuse, Vector3 specular, bool enabled)
+        protected SceneLight(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled)
         {
             Name = name;
             Enabled = enabled;

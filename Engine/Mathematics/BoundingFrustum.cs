@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -30,6 +31,7 @@ namespace Engine.Mathematics
     /// (matrix, frustum, camera) interchange, and many kind of intersection testing.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingFrustum : IEquatable<BoundingFrustum>, IFormattable
     {
         const string BoundingFrustumStr = "Camera:{0}";
@@ -45,6 +47,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Gets or sets the Matrix4x4 that describes this bounding frustum.
         /// </summary>
+        [JsonProperty]
         public Matrix4x4 Matrix
         {
             readonly get

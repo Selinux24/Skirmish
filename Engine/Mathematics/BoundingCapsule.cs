@@ -1,4 +1,5 @@
 ﻿using Engine.Common;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,6 +19,7 @@ namespace Engine.Mathematics
     /// <param name="radius">Radius</param>
     /// <param name="height">Height</param>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct BoundingCapsule(Vector3 center, float radius, float height) : IEquatable<BoundingCapsule>, IFormattable
     {
         const string BoundingCapsuleStr = "Base:{0} Cap:{1} Radius:{2}";
@@ -73,14 +75,17 @@ namespace Engine.Mathematics
         /// <summary>
         /// Radius
         /// </summary>
+        [JsonProperty]
         public float Radius = radius;
         /// <summary>
         /// Height
         /// </summary>
+        [JsonProperty]
         public float Height = height;
         /// <summary>
         /// Center
         /// </summary>
+        [JsonProperty]
         public Vector3 Center = center;
         /// <summary>
         /// Base position

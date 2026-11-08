@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -59,6 +60,7 @@ namespace Engine.Mathematics
     /// <param name="position">The position in three dimensional space of the origin of the ray.</param>
     /// <param name="direction">The normalized direction of the ray.</param>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Ray(Vector3 position, Vector3 direction) : IEquatable<Ray>, IFormattable
     {
         const string RayStr = "Position:{0} Direction:{1}";
@@ -66,10 +68,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The position in three dimensional space where the ray starts.
         /// </summary>
+        [JsonProperty]
         public Vector3 Position = position;
         /// <summary>
         /// The normalized direction in which the ray points.
         /// </summary>
+        [JsonProperty]
         public Vector3 Direction = direction;
 
         /// <summary>

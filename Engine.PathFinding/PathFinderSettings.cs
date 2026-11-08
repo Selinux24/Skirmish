@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Path finder settings
     /// </summary>

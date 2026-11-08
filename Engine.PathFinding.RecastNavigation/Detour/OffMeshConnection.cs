@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Defines an navigation mesh off-mesh connection within a dtMeshTile object.
     /// An off-mesh connection is a user defined traversable connection made up to two vertices.

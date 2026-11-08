@@ -51,7 +51,7 @@ namespace Engine.Collections.Generic
             var nodeItems = items
                 .Where(t =>
                 {
-                    var tbox = Mathematics.BoundingBox.FromPoints(t.GetVertices());
+                    var tbox = BoundingBox.FromPoints(t.GetVertices());
 
                     return bbox.Contains(tbox) != ContainmentType.Disjoint;
                 })

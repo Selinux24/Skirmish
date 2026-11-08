@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Mesh data
     /// </summary>
@@ -219,12 +218,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="bmax">Resulting maximum bounds point</param>
         private static void CalcExtends(BVItem[] items, int imin, int imax, out Vector3I bmin, out Vector3I bmax)
         {
-            bmin = Vector3I.Zero;
             bmin.X = items[imin].BMin.X;
             bmin.Y = items[imin].BMin.Y;
             bmin.Z = items[imin].BMin.Z;
 
-            bmax = Vector3I.Zero;
             bmax.X = items[imin].BMax.X;
             bmax.Y = items[imin].BMax.Y;
             bmax.Z = items[imin].BMax.Z;

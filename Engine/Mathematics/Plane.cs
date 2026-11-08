@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a plane in three dimensional space.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Plane : IEquatable<Plane>, IFormattable
     {
         const string PlaneStr = "A:{0} B:{1} C:{2} D:{3}";
@@ -61,10 +63,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// The normal vector of the plane.
         /// </summary>
+        [JsonProperty]
         public Vector3 Normal;
         /// <summary>
         /// The distance of the plane along its normal from the origin.
         /// </summary>
+        [JsonProperty]
         public float D;
 
         /// <summary>

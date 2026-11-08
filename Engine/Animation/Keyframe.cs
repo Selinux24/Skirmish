@@ -65,7 +65,7 @@ namespace Engine.Animation
         /// <summary>
         /// Rotation
         /// </summary>
-        public Quaternion Rotation { get; set; }
+        public Quaternion Rotation { get; private set; }
         /// <summary>
         /// Scale
         /// </summary>

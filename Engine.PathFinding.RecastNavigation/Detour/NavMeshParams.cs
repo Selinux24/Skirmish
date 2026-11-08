@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.Mathematics;
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-
     /// <summary>
     /// Navigation mesh parameters
     /// </summary>

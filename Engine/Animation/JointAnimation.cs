@@ -68,7 +68,7 @@ namespace Engine.Animation
             Keyframe[] tmp = [.. keyframes];
             for (int i = 0; i < tmp.Length; i++)
             {
-                tmp[i].Rotation = Quaternion.Normalize(tmp[i].Rotation);
+                tmp[i].Rotation.Normalize();
             }
 
             Keyframes = tmp;

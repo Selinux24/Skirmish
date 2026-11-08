@@ -43,6 +43,7 @@
 * THE SOFTWARE.
 */
 
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,7 @@ namespace Engine.Mathematics
     /// Represents a color in the form of rgba.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Color4 : IEquatable<Color4>, IFormattable
     {
         private const string Color4Str = "Alpha:{0} Red:{1} Green:{2} Blue:{3}";
@@ -74,18 +76,22 @@ namespace Engine.Mathematics
         /// <summary>
         /// The red component of the color.
         /// </summary>
+        [JsonProperty]
         public float Red;
         /// <summary>
         /// The green component of the color.
         /// </summary>
+        [JsonProperty]
         public float Green;
         /// <summary>
         /// The blue component of the color.
         /// </summary>
+        [JsonProperty]
         public float Blue;
         /// <summary>
         /// The alpha component of the color.
         /// </summary>
+        [JsonProperty]
         public float Alpha;
 
         /// <summary>
