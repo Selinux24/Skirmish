@@ -15,9 +15,5 @@ namespace Engine.Common
         /// Gets the internal buffer
         /// </summary>
         EngineBuffer Buffer { get; }
-        /// <summary>
-        /// Gets the internal data stream
-        /// </summary>
-        EngineDataStream DataStream { get; }
     }
 }

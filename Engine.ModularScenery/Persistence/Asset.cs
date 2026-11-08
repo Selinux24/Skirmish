@@ -1,11 +1,12 @@
-﻿using Engine.Common;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Asset map class
     /// </summary>
@@ -21,19 +22,19 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Assets list
         /// </summary>
-        public IEnumerable<AssetReference> References { get; set; } = Enumerable.Empty<AssetReference>();
+        public IEnumerable<AssetReference> References { get; set; } = [];
         /// <summary>
         /// Connections list
         /// </summary>
-        public IEnumerable<AssetConnection> Connections { get; set; } = Enumerable.Empty<AssetConnection>();
+        public IEnumerable<AssetConnection> Connections { get; set; } = [];
 
         /// <summary>
         /// Gets the instance transforms dictionary
         /// </summary>
         /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
-        public Dictionary<string, Matrix[]> GetInstanceTransforms()
+        public Dictionary<string, Matrix4x4[]> GetInstanceTransforms()
         {
-            Dictionary<string, Matrix[]> res = new();
+            Dictionary<string, Matrix4x4[]> res = [];
 
             var assetNames = References.Select(a => a.AssetName).Distinct();
 

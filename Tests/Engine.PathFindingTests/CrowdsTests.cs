@@ -1,21 +1,22 @@
-﻿using Engine.Common;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.PathFinding.RecastNavigation.Detour.Crowds;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Engine.PathFindingTests
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class CrowdsTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         const float frame = 1f / 60f;
 
@@ -33,16 +34,10 @@ namespace Engine.PathFindingTests
         static readonly Vector3 p3Start = new(-8, 0, -6);
         static readonly Vector3 target = new(8, 0, 8);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var pZero = GeometryUtil.CreateXZPlane(20, 20, hZero);
             zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
@@ -90,19 +85,19 @@ namespace Engine.PathFindingTests
 
             crowd.RemoveAgent(1);
             Assert.AreEqual(2, crowd.Count());
-            Assert.AreEqual(2, crowd.GetPositions().Length);
+            Assert.HasCount(2, crowd.GetPositions());
 
             crowd.RemoveAgent(1);
             Assert.AreEqual(2, crowd.Count());
-            Assert.AreEqual(2, crowd.GetPositions().Length);
+            Assert.HasCount(2, crowd.GetPositions());
 
             crowd.RemoveAgent(2);
             Assert.AreEqual(1, crowd.Count());
-            Assert.AreEqual(1, crowd.GetPositions().Length);
+            Assert.HasCount(1, crowd.GetPositions());
 
             crowd.RemoveAgent(3);
             Assert.AreEqual(0, crowd.Count());
-            Assert.AreEqual(0, crowd.GetPositions().Length);
+            Assert.IsEmpty(crowd.GetPositions());
         }
 
         [TestMethod()]
@@ -114,20 +109,20 @@ namespace Engine.PathFindingTests
             crowdManager.Add(crowd);
 
             Assert.AreEqual(1, crowd.AddAgent(p1Start));
-            Assert.AreEqual(1, crowd.GetPositions().Length);
+            Assert.HasCount(1, crowd.GetPositions());
 
             Assert.AreEqual(2, crowd.AddAgent(p2Start));
-            Assert.AreEqual(2, crowd.GetPositions().Length);
+            Assert.HasCount(2, crowd.GetPositions());
 
             Assert.AreEqual(3, crowd.AddAgent(p3Start));
-            Assert.AreEqual(3, crowd.GetPositions().Length);
+            Assert.HasCount(3, crowd.GetPositions());
 
             Assert.AreEqual(-1, crowd.AddAgent(p1Start));
-            Assert.AreEqual(3, crowd.GetPositions().Length);
+            Assert.HasCount(3, crowd.GetPositions());
 
-            Assert.AreEqual(p1Start.XZ(), crowd.GetPosition(1).XZ());
-            Assert.AreEqual(p2Start.XZ(), crowd.GetPosition(2).XZ());
-            Assert.AreEqual(p3Start.XZ(), crowd.GetPosition(3).XZ());
+            Assert.AreEqual(p1Start.XZ, crowd.GetPosition(1).XZ);
+            Assert.AreEqual(p2Start.XZ, crowd.GetPosition(2).XZ);
+            Assert.AreEqual(p3Start.XZ, crowd.GetPosition(3).XZ);
         }
 
         [TestMethod()]
@@ -143,25 +138,25 @@ namespace Engine.PathFindingTests
             Assert.AreEqual(3, crowd.AddAgent(p3Start));
 
             var positions = crowd.GetPositions();
-            Assert.AreEqual(3, positions.Length);
-            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.HasCount(3, positions);
+            Assert.AreEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreEqual(p3Start.XZ, positions[2].Position.XZ);
 
             crowd.RequestMove(target);
             positions = crowd.GetPositions();
-            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.AreEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreEqual(p3Start.XZ, positions[2].Position.XZ);
 
             var mockGameTime = new Mock<IGameTime>();
             mockGameTime.SetupGet(m => m.ElapsedSeconds).Returns(frame);
 
             crowd.Update(mockGameTime.Object);
             positions = crowd.GetPositions();
-            Assert.AreNotEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreNotEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreNotEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.AreNotEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreNotEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreNotEqual(p3Start.XZ, positions[2].Position.XZ);
         }
         [TestMethod()]
         public void CrowdRequestMoveAgent()
@@ -176,25 +171,25 @@ namespace Engine.PathFindingTests
             Assert.AreEqual(3, crowd.AddAgent(p3Start));
 
             var positions = crowd.GetPositions();
-            Assert.AreEqual(3, positions.Length);
-            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.HasCount(3, positions);
+            Assert.AreEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreEqual(p3Start.XZ, positions[2].Position.XZ);
 
             crowd.RequestMove(1, target);
             positions = crowd.GetPositions();
-            Assert.AreEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.AreEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreEqual(p3Start.XZ, positions[2].Position.XZ);
 
             var mockGameTime = new Mock<IGameTime>();
             mockGameTime.SetupGet(m => m.ElapsedSeconds).Returns(frame);
 
             crowd.Update(mockGameTime.Object);
             positions = crowd.GetPositions();
-            Assert.AreNotEqual(p1Start.XZ(), positions[0].Position.XZ());
-            Assert.AreEqual(p2Start.XZ(), positions[1].Position.XZ());
-            Assert.AreEqual(p3Start.XZ(), positions[2].Position.XZ());
+            Assert.AreNotEqual(p1Start.XZ, positions[0].Position.XZ);
+            Assert.AreEqual(p2Start.XZ, positions[1].Position.XZ);
+            Assert.AreEqual(p3Start.XZ, positions[2].Position.XZ);
         }
     }
 }

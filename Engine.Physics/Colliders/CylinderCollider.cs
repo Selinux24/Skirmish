@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Cylinder collider
     /// </summary>
@@ -55,7 +56,7 @@ namespace Engine.Physics.Colliders
 
             if (!transform || !HasTransform)
             {
-                return new[] { bse, cap };
+                return [bse, cap];
             }
 
             var trn = RigidBody.Transform;
@@ -64,9 +65,9 @@ namespace Engine.Physics.Colliders
             var cNorm = Vector3.Normalize(cap - bse);
             var dir = Vector3.Cross(normal, cNorm);
 
-            if (MathUtil.IsZero(dir.Length()))
+            if (Helper.IsZero(dir.Length()))
             {
-                return new[] { bse, cap };
+                return [bse, cap];
             }
 
             dir = Vector3.Normalize(Vector3.Cross(dir, cNorm)) * Radius;
@@ -75,7 +76,7 @@ namespace Engine.Physics.Colliders
             var cap1 = cap + dir;
             var cap2 = cap - dir;
 
-            return new[] { bse1, bse2, cap1, cap2 };
+            return [bse1, bse2, cap1, cap2];
         }
 
         /// <inheritdoc/>

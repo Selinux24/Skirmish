@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Forward
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position normal color pixel shader
     /// </summary>
-    public class PositionNormalColorPs : IBuiltInShader<EnginePixelShader>
+    public class PositionNormalColorPs : IShader<EnginePixelShader>
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }

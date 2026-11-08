@@ -4,25 +4,19 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Indexed edge of PolyMesh
     /// </summary>
-    struct IndexedEdge
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    struct IndexedEdge(int edgeIndex, int shareCount)
     {
         /// <summary>
         /// Edge index
         /// </summary>
-        public int EdgeIndex;
+        public int EdgeIndex = edgeIndex;
         /// <summary>
         /// Shared edge count
         /// </summary>
-        public int ShareCount;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public IndexedEdge(int edgeIndex, int shareCount)
-        {
-            EdgeIndex = edgeIndex;
-            ShareCount = shareCount;
-        }
+        public int ShareCount = shareCount;
 
         /// <summary>
         /// Gets whether the specified edge index, exist in the edge definition

@@ -4,11 +4,12 @@ using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
 using Engine.BuiltIn.Drawers.PostProcess.Tween;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -63,7 +64,7 @@ namespace IntermediateSamples.SceneInstancing
 
         private ModelInstanced troops = null;
 
-        private readonly int instanceBlock = 10;
+        private readonly uint instanceBlock = 10;
         private readonly BuiltInPostProcessState postProcessState = BuiltInPostProcessState.Empty;
 
         private bool gameReady = false;
@@ -112,8 +113,8 @@ namespace IntermediateSamples.SceneInstancing
         }
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11);
+            var defaultFont18 = FontDescription.FromFamily("Arial", 18);
+            var defaultFont11 = FontDescription.FromFamily("Arial", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -150,7 +151,7 @@ namespace IntermediateSamples.SceneInstancing
         {
             float l = 12f;
             float h = 0f;
-            int side = 5;
+            uint side = 5;
 
             var geo = GeometryUtil.CreatePlane(l * 2, h, Vector3.Up);
 
@@ -188,7 +189,7 @@ namespace IntermediateSamples.SceneInstancing
         }
         private async Task InitializeTrees()
         {
-            int instances = 40;
+            uint instances = 40;
 
             var treeDesc = new ModelInstancedDescription()
             {
@@ -200,7 +201,7 @@ namespace IntermediateSamples.SceneInstancing
             };
             var trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
 
-            int side = instances / 4;
+            uint side = instances / 4;
             float groundSide = 55f;
 
             for (int i = 0; i < trees.InstanceCount; i++)
@@ -243,7 +244,7 @@ namespace IntermediateSamples.SceneInstancing
                 Content = ContentDescription.FromFile(resourceSoldierFolder, resourceSoldierFile),
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
-            troops.MaximumCount = -1;
+            troops.MaximumCount = 0;
 
             Dictionary<string, AnimationPlan> animations = [];
 
@@ -276,7 +277,7 @@ namespace IntermediateSamples.SceneInstancing
 
                 troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
                 troops[i].AnimationController.AppendPlan(animations[anim[i % anim.Length]]);
-                troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                troops[i].AnimationController.Start(rnd.NextSingle(0f, 8f));
 
                 if (++x < side)
                 {
@@ -312,19 +313,19 @@ namespace IntermediateSamples.SceneInstancing
             for (int i = 10; i < 20; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
-                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+                wall[i].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             }
 
             for (int i = 20; i < 30; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
-                wall[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+                wall[i].Manipulator.SetRotation(Helper.Pi, 0, 0);
             }
 
             for (int i = 30; i < 40; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
-                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+                wall[i].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
             }
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
@@ -432,11 +433,11 @@ namespace IntermediateSamples.SceneInstancing
         }
         private void UpdateInstances()
         {
-            int increment = Game.Input.ShiftPressed ? instanceBlock : 1;
+            uint increment = Game.Input.ShiftPressed ? instanceBlock : 1u;
 
             if (Game.Input.KeyJustReleased(Keys.Left))
             {
-                troops.MaximumCount = Math.Max(-1, troops.MaximumCount - increment);
+                troops.MaximumCount = Math.Max(0, troops.MaximumCount - increment);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Right))

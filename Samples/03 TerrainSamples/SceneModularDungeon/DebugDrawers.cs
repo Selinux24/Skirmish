@@ -1,11 +1,11 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
+using Engine.Mathematics;
 using Engine.Modular;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,14 +14,14 @@ namespace TerrainSamples.SceneModularDungeon
 {
     internal class DebugDrawers(Scene scene, string id, string name) : BaseSceneObject<SceneObjectDescription>(scene, id, name)
     {
-        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private PrimitiveListDrawer<Line3D> modelDrawer = null;
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
-        private PrimitiveListDrawer<Triangle> obstacleDrawer = null;
-        private PrimitiveListDrawer<Line3D> connectionDrawer = null;
+        private GeometryColorDrawer<Line3D> bboxesDrawer = null;
+        private GeometryColorDrawer<Line3D> modelDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> obstacleDrawer = null;
+        private GeometryColorDrawer<Line3D> connectionDrawer = null;
 
-        private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
-        private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
+        private readonly Color4 connectionColor = new(Color.LightBlue, 1f);
+        private readonly Color4 obstacleColor = new(Color.Pink, 0.5f);
 
         private Player[] agents;
         private int currentAgentIndex = 0;
@@ -30,43 +30,43 @@ namespace TerrainSamples.SceneModularDungeon
         {
             this.agents = agents;
 
-            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var graphDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 50000,
             };
-            graphDrawer = await Scene.AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
-            var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var bboxesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
+                Color = new(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            bboxesDrawer = await Scene.AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
+            bboxesDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
             bboxesDrawer.Visible = false;
 
-            var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var ratDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
+                Color = new(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            modelDrawer = await Scene.AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
+            modelDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
             modelDrawer.Visible = false;
 
-            var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var obstacleDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 DepthEnabled = false,
                 Count = 10000,
             };
-            obstacleDrawer = await Scene.AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
+            obstacleDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
             obstacleDrawer.Visible = false;
 
-            var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var connectionDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Color = connectionColor,
                 Count = 10000,
             };
-            connectionDrawer = await Scene.AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db5", "DEBUG++ Connections", connectionDrawerDesc);
+            connectionDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db5", "DEBUG++ Connections", connectionDrawerDesc);
             connectionDrawer.Visible = false;
         }
 
@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneModularDungeon
             DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance.GetBoundingBox()), Color.LightYellow);
             DrawBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance.GetBoundingBox()), Color.MediumPurple);
         }
-        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color color)
+        private void DrawBoundingBoxes(IEnumerable<BoundingBox> boxes, Color4 color)
         {
             if (!boxes.Any())
             {
@@ -184,7 +184,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
                 if (!res.TryGetValue(color, out var value))

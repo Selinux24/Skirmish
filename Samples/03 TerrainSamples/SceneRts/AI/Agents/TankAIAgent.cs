@@ -1,5 +1,4 @@
-﻿using Engine;
-using Engine.PathFinding;
+﻿using Engine.PathFinding;
 
 namespace TerrainSamples.SceneRts.AI.Agents
 {
@@ -68,11 +67,7 @@ namespace TerrainSamples.SceneRts.AI.Agents
         {
             base.FireDestroyed(active, passive);
 
-            var model = SceneObject;
-            if (model != null)
-            {
-                model.TextureIndex = 2;
-            }
+            SceneObject?.TextureIndex = 2;
         }
     }
 }

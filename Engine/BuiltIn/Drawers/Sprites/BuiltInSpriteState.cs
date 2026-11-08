@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Local transform
         /// </summary>
-        public Matrix Local { get; set; }
+        public Matrix4x4 Local { get; set; }
         /// <summary>
         /// First color
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Render area in pixels
         /// </summary>
-        public RectangleF RenderArea { get; set; }
+        public Rect RenderArea { get; set; }
         /// <summary>
         /// Draw direction
         /// </summary>
@@ -72,6 +72,6 @@ namespace Engine.BuiltIn.Drawers.Sprites
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        public RectangleF ClippingRecangle { get; set; }
+        public Rect ClippingRecangle { get; set; }
     }
 }

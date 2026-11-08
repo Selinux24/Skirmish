@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.Physics
@@ -39,29 +39,29 @@ namespace Engine.Physics
             }
         }
         /// <inheritdoc/>
-        public Matrix RotationScale
+        public Matrix4x4 RotationScale
         {
             get
             {
                 if (!HasTransform)
                 {
-                    return Matrix.Identity;
+                    return Matrix4x4.Identity;
                 }
 
-                return Matrix.RotationQuaternion(RigidBody.Rotation);
+                return Matrix4x4.RotationQuaternion(RigidBody.Rotation);
             }
         }
         /// <inheritdoc/>
-        public Matrix RotationScaleInverse
+        public Matrix4x4 RotationScaleInverse
         {
             get
             {
                 if (!HasTransform)
                 {
-                    return Matrix.Identity;
+                    return Matrix4x4.Identity;
                 }
 
-                return Matrix.Invert(RotationScale);
+                return Matrix4x4.Invert(RotationScale);
             }
         }
         /// <inheritdoc/>
@@ -69,7 +69,7 @@ namespace Engine.Physics
         {
             get
             {
-                return !(RigidBody?.Transform ?? Matrix.Identity).IsIdentity;
+                return !(RigidBody?.Transform ?? Matrix4x4.Identity).IsIdentity;
             }
         }
 
@@ -90,7 +90,7 @@ namespace Engine.Physics
                     return boundingBox;
                 }
 
-                return boundingBox.SetTransform(RigidBody.Transform);
+                return BoundingBox.Transform(boundingBox, RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -108,7 +108,7 @@ namespace Engine.Physics
                     return boundingSphere;
                 }
 
-                return boundingSphere.SetTransform(RigidBody.Transform);
+                return BoundingSphere.Transform(boundingSphere, RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -126,7 +126,7 @@ namespace Engine.Physics
                     return orientedBoundingBox;
                 }
 
-                return orientedBoundingBox.SetTransform(RigidBody.Transform);
+                return OrientedBoundingBox.Transform(orientedBoundingBox, RigidBody.Transform);
             }
         }
 
@@ -148,7 +148,7 @@ namespace Engine.Physics
                 return;
             }
 
-            Vector3 halfSize = boundingBox.GetExtents();
+            Vector3 halfSize = boundingBox.Extents;
             Vector3 squares = halfSize * halfSize;
 
             RigidBody.SetIntertiaCoefficients(

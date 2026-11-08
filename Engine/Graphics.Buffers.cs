@@ -1,12 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine
 {
-    using Engine.Common;
-    using SharpDX.Direct3D11;
+    using Vortice.Direct3D11;
 
     /// <summary>
     /// Graphic buffers management
@@ -17,44 +17,10 @@ namespace Engine
         /// Creates a vertex buffer
         /// </summary>
         /// <param name="name">Buffer name</param>
-        /// <param name="data">Vertex data collection</param>
-        /// <param name="dynamic">Dynamic or Inmutable</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateVertexBuffer(string name, IEnumerable<IVertexData> data, bool dynamic)
-        {
-            var vertexType = data.First().VertexType;
-
-            return vertexType switch
-            {
-                VertexTypes.Billboard => CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic),
-                VertexTypes.Decal => CreateVertexBuffer(name, data.OfType<VertexDecal>(), dynamic),
-                VertexTypes.CPUParticle => CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic),
-                VertexTypes.GPUParticle => CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic),
-                VertexTypes.Font => CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic),
-                VertexTypes.Terrain => CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic),
-                VertexTypes.Position => CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic),
-                VertexTypes.PositionColor => CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic),
-                VertexTypes.PositionTexture => CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic),
-                VertexTypes.PositionNormalColor => CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic),
-                VertexTypes.PositionNormalTexture => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic),
-                VertexTypes.PositionNormalTextureTangent => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic),
-                VertexTypes.PositionSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic),
-                VertexTypes.PositionColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic),
-                VertexTypes.PositionTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic),
-                VertexTypes.PositionNormalColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic),
-                VertexTypes.PositionNormalTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic),
-                VertexTypes.PositionNormalTextureTangentSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic),
-                _ => throw new EngineException($"Unknown vertex type: {vertexType}"),
-            };
-        }
-        /// <summary>
-        /// Creates a vertex buffer
-        /// </summary>
-        /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateVertexBuffer(string name, int sizeInBytes, bool dynamic)
+        public EngineBuffer CreateVertexBuffer(string name, uint sizeInBytes, bool dynamic)
         {
             return CreateBuffer(
                 name,
@@ -72,7 +38,7 @@ namespace Engine
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -91,7 +57,7 @@ namespace Engine
         /// <returns>Returns created buffer initialized with the specified data</returns>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         public EngineBuffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -109,7 +75,7 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         public EngineBuffer CreateStreamOutBuffer<T>(string name, IEnumerable<T> data)
-            where T : struct
+            where T : unmanaged
         {
             return CreateBuffer(
                 name,
@@ -124,7 +90,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateStreamOutBuffer(string name, int sizeInBytes)
+        public EngineBuffer CreateStreamOutBuffer(string name, uint sizeInBytes)
         {
             return CreateBuffer(
                 name,
@@ -140,8 +106,8 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="length">Buffer length</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateStreamOutBuffer<T>(string name, int length)
-            where T : struct
+        public EngineBuffer CreateStreamOutBuffer<T>(string name, uint length)
+            where T : unmanaged
         {
             return CreateBuffer<T>(
                 name,
@@ -160,7 +126,7 @@ namespace Engine
         public EngineBuffer CreateConstantBuffer<T>(string name)
             where T : struct, IBufferData
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T));
+            uint sizeInBytes = (uint)Marshal.SizeOf<T>();
             sizeInBytes = sizeInBytes / 16 * 16;
 
             ResourceUsage usage = ResourceUsage.Default;
@@ -171,14 +137,20 @@ namespace Engine
             var description = new BufferDescription()
             {
                 Usage = usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = binding,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
 
         /// <summary>
@@ -190,21 +162,32 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+        public EngineBuffer CreateBuffer(string name, uint sizeInBytes, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
         {
+            if (sizeInBytes == 0)
+            {
+                return null;
+            }
+
             FrameCounters.RegBuffer(name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
             var description = new BufferDescription()
             {
                 Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = (CpuAccessFlags)access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -216,24 +199,34 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
-            where T : struct
+        public EngineBuffer CreateBuffer<T>(string name, uint length, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+            where T : unmanaged
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+            uint sizeInBytes = (uint)Marshal.SizeOf<T>() * length;
+            if (sizeInBytes == 0)
+            {
+                return null;
+            }
 
             FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 
             var description = new BufferDescription()
             {
                 Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
+                ByteWidth = sizeInBytes,
                 BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = (CpuAccessFlags)access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, description));
+            var res = device.CreateBuffer(description, null, out var buffer);
+            if (res.Failure)
+            {
+                throw new EngineException(res.ToString());
+            }
+
+            return new EngineBuffer(name, buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -245,28 +238,80 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
-            where T : struct
+        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> values, EngineResourceUsage usage, EngineBinds binding, EngineCpuAccess access)
+            where T : unmanaged
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
-
-            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, data.Count());
-
-            using var dstr = new DataStream(sizeInBytes, true, true);
-            dstr.WriteRange(data.ToArray());
-            dstr.Position = 0;
-
-            var description = new BufferDescription()
+            if (!values.Any())
             {
-                Usage = (ResourceUsage)usage,
-                SizeInBytes = sizeInBytes,
-                BindFlags = (BindFlags)binding,
-                CpuAccessFlags = (CpuAccessFlags)access,
-                OptionFlags = ResourceOptionFlags.None,
+                return null;
+            }
+
+            var buffer = CreateWithSubresource(
+                name, values,
+                (ResourceUsage)usage, (BindFlags)binding, (CpuAccessFlags)access,
+                (desc, data) =>
+                {
+                    var res = device.CreateBuffer(desc, data, out var b);
+                    if (res.Failure)
+                    {
+                        throw new EngineException(res.ToString());
+                    }
+                    return b;
+                });
+
+            buffer.DebugName = name;
+
+            return new EngineBuffer(name, buffer);
+        }
+        /// <summary>
+        /// Creates a populated resource using a callback function
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <typeparam name="TResource">Resource type</typeparam>
+        /// <param name="name">Resource name</param>
+        /// <param name="values">Data values</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Data binding</param>
+        /// <param name="access">CPU access flags</param>
+        /// <param name="createResourceFunc">Callback</param>
+        /// <returns>Returns the created resource</returns>
+        private static unsafe TResource CreateWithSubresource<T, TResource>(
+            string name, IEnumerable<T> values, ResourceUsage usage, BindFlags binding, CpuAccessFlags access,
+            Func<BufferDescription, SubresourceData, TResource> createResourceFunc)
+            where T : unmanaged
+        {
+            uint length = (uint)values.Count();
+
+            T[] array = new T[length];
+            Array.Copy(values.ToArray(), array, length);
+
+            uint bytesPerPixel = (uint)Marshal.SizeOf<T>() * length;
+            uint rowPitch = length * bytesPerPixel;
+            uint slicePitch = rowPitch;
+
+            var desc = new BufferDescription()
+            {
+                Usage = usage,
+                ByteWidth = bytesPerPixel,
+                BindFlags = binding,
+                CPUAccessFlags = access,
+                MiscFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
-            return new EngineBuffer(name, new Buffer(device, dstr, description));
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, bytesPerPixel, length);
+
+            fixed (T* ptr = array)
+            {
+                var srData = new SubresourceData()
+                {
+                    DataPointer = (IntPtr)ptr,
+                    RowPitch = rowPitch,
+                    SlicePitch = slicePitch
+                };
+
+                return createResourceFunc(desc, srData);
+            }
         }
     }
 }

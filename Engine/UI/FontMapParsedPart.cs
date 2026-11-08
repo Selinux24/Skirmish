@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.UI
 {
@@ -80,7 +80,7 @@ namespace Engine.UI
                 return Colors[index];
             }
 
-            return Color.Transparent;
+            return Color4.Transparent;
         }
         /// <summary>
         /// Gets the shadow color of the character at index
@@ -93,7 +93,7 @@ namespace Engine.UI
                 return ShadowColors[index];
             }
 
-            return Color.Transparent;
+            return Color4.Transparent;
         }
 
         /// <inheritdoc/>

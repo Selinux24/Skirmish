@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Material content interface
     /// </summary>

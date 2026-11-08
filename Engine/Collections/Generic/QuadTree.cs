@@ -1,16 +1,15 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Quad-tree
     /// </summary>
     public class QuadTree<T> : IQuadTree<QuadTreeNode<T>>
     {
-        const string cName = nameof(QuadTree<T>);
+        const string cName = nameof(QuadTree<>);
 
         /// <inheritdoc/>
         public QuadTreeNode<T> Root { get; private set; }
@@ -20,9 +19,10 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="items">Partitioning items</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, int maxDepth)
+        /// <param name="options">Options</param>
+        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, QuadTreeOptions options)
         {
             BoundingBox = bbox;
 
@@ -30,7 +30,7 @@ namespace Engine.Collections.Generic
             Root = QuadTreeNode<T>.CreatePartitions(
                 null,
                 bbox, items,
-                maxDepth,
+                options,
                 0,
                 ref nodeCount);
         }

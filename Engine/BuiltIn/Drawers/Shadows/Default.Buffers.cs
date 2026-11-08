@@ -1,13 +1,11 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Per-shadow casting light data structure
     /// </summary>
@@ -33,10 +31,10 @@ namespace Engine.BuiltIn.Drawers.Shadows
                 throw new EngineException($"The matrix array must have a maximum length of {MaxCount}");
             }
 
-            var m = new Matrix[MaxCount];
+            var m = new Matrix4x4[MaxCount];
             for (int i = 0; i < MaxCount; i++)
             {
-                m[i] = Matrix.Transpose(viewProjection.ElementAtOrDefault(i));
+                m[i] = Matrix4x4.Transpose(viewProjection.ElementAtOrDefault(i));
             }
 
             return new PerCastingLight
@@ -50,7 +48,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// View projection matrix
         /// </summary>
         [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxCount)]
-        public Matrix[] FromLightViewProjection;
+        public Matrix4x4[] FromLightViewProjection;
 
         /// <summary>
         /// Face count
@@ -59,9 +57,9 @@ namespace Engine.BuiltIn.Drawers.Shadows
         public uint FaceCount;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerCastingLight));
+            return (uint)Marshal.SizeOf<PerCastingLight>();
         }
     }
 
@@ -75,7 +73,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         {
             return new PerMeshSingle
             {
-                Local = Matrix.Transpose(state.Local),
+                Local = Matrix4x4.Transpose(state.Local),
             };
         }
 
@@ -83,12 +81,12 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// Local transform
         /// </summary>
         [FieldOffset(0)]
-        public Matrix Local;
+        public Matrix4x4 Local;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSingle));
+            return (uint)Marshal.SizeOf<PerMeshSingle>();
         }
     }
 
@@ -102,7 +100,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         {
             return new PerMeshSkinned
             {
-                Local = Matrix.Transpose(state.Local),
+                Local = Matrix4x4.Transpose(state.Local),
                 AnimationOffset = state.AnimationOffset1,
                 AnimationOffset2 = state.AnimationOffset2,
                 AnimationInterpolation = state.AnimationInterpolationAmount,
@@ -113,7 +111,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
         /// Local transform
         /// </summary>
         [FieldOffset(0)]
-        public Matrix Local;
+        public Matrix4x4 Local;
 
         /// <summary>
         /// Animation offset 1
@@ -132,9 +130,9 @@ namespace Engine.BuiltIn.Drawers.Shadows
         public float AnimationInterpolation;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMeshSkinned));
+            return (uint)Marshal.SizeOf<PerMeshSkinned>();
         }
     }
 
@@ -159,9 +157,9 @@ namespace Engine.BuiltIn.Drawers.Shadows
         public uint TextureIndex;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMaterialTexture));
+            return (uint)Marshal.SizeOf<PerMaterialTexture>();
         }
     }
 }

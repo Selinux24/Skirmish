@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Sprites
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Color sprite pixel shader
     /// </summary>
-    public class SpriteColorPs : IBuiltInShader<EnginePixelShader>
+    public class SpriteColorPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per sprite constant buffer

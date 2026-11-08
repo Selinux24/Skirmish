@@ -1,12 +1,11 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.IO;
 using System.Linq;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Cubic image content from file
     /// </summary>
@@ -19,7 +18,7 @@ namespace Engine.Content
         /// <summary>
         /// Texture faces
         /// </summary>
-        private readonly Rectangle[] faces;
+        private readonly RectI[] faces;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -36,7 +35,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="path">Path to image</param>
         /// <param name="faces">Cube faces</param>
-        public FileCubicImageContent(string path, Rectangle[] faces = null)
+        public FileCubicImageContent(string path, RectI[] faces = null)
         {
             if (path == null)
             {
@@ -66,7 +65,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentFileName">Path to image</param>
         /// <param name="faces">Cube faces</param>
-        public FileCubicImageContent(string contentFolder, string contentFileName, Rectangle[] faces = null)
+        public FileCubicImageContent(string contentFolder, string contentFileName, RectI[] faces = null)
         {
             if (contentFileName == null)
             {

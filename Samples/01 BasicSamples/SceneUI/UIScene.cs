@@ -1,8 +1,9 @@
 ﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -97,10 +98,10 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeProgressbar()
         {
-            var defaultFont = TextDrawerDescription.FromFile(fontFamilyString, 10, true);
+            var defaultFont = FontDescription.FromFile(fontFamilyString, 10, true);
             defaultFont.ContentPath = resourcesFolder;
 
-            var desc = UIProgressBarDescription.Default(defaultFont, new Color(0, 0, 0, 0.5f), Color.Green);
+            var desc = UIProgressBarDescription.Default(defaultFont, new(0, 0, 0, 0.5f), Color.Green);
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
@@ -173,7 +174,7 @@ namespace BasicSamples.SceneUI
             };
             staticPan = await AddComponentUI<UIPanel, UIPanelDescription>("StaticPanel", "StaticPanel", desc);
 
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 18, true);
+            var font = FontDescription.FromFile(fontFamilyString, 18, true);
             font.ContentPath = resourcesFolder;
 
             var descText = new UITextAreaDescription()
@@ -189,8 +190,8 @@ namespace BasicSamples.SceneUI
                     Bottom = height * 0.1f,
                 },
                 TextForeColor = Color.LightGoldenrodYellow,
-                TextShadowColor = new Color4(0, 0, 0, 0.2f),
-                TextShadowDelta = new Vector2(8, 5),
+                TextShadowColor = new(0, 0, 0, 0.2f),
+                TextShadowDelta = new(8, 5),
             };
             textArea = await CreateComponent<UITextArea, UITextAreaDescription>("StaticPanel.Text", "StaticPanel.Text", descText);
 
@@ -228,7 +229,7 @@ namespace BasicSamples.SceneUI
             var releasedRect = new Vector4(w0, 0, w1, 1f);
             var pressedRect = new Vector4(w2, 0, w3, 1f);
 
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
+            var font = FontDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, "buttons.png", releasedRect, pressedRect);
@@ -244,7 +245,7 @@ namespace BasicSamples.SceneUI
             var butClose = await CreateComponent<UIButton, UIButtonDescription>("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", descButClose);
             butClose.MouseDoubleClick += ButDoubleClose_Click;
 
-            var maraFont = TextDrawerDescription.FromMap("MaraFont.png", "MaraFont.txt");
+            var maraFont = FontDescription.FromMap("MaraFont.png", "MaraFont.txt");
             maraFont.ContentPath = resourcesFolder;
 
             var descText = UITextAreaDescription.Default();
@@ -268,7 +269,7 @@ namespace BasicSamples.SceneUI
         }
         private async Task InitializeButtonTest()
         {
-            var font = TextDrawerDescription.FromFile(fontFamilyString, 16, true);
+            var font = FontDescription.FromFile(fontFamilyString, 16, true);
             font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);
@@ -300,13 +301,13 @@ namespace BasicSamples.SceneUI
 
             var panel = await AddComponentUI<UIPanel, UIPanelDescription>("scrollPanel", "Panel", panelDesc, LayerUI + 1);
 
-            var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
+            var areaFont = FontDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
             areaDesc.MaxTextLength = 1024;
             areaDesc.Scroll = ScrollModes.Vertical;
             areaDesc.ScrollbarSize = 20;
             areaDesc.ScrollbarMarkerSize = 100;
-            areaDesc.ScrollbarBaseColor = new Color4(0, 0, 0, 0.7f);
+            areaDesc.ScrollbarBaseColor = new(0, 0, 0, 0.7f);
             areaDesc.ScrollbarMarkerColor = Color.LightGray;
             areaDesc.Padding = new Padding(5, 1, 1, 25);
 
@@ -434,7 +435,7 @@ Progress: {(int)(progressValue * 100f)}%";
         }
         private void UpdateLorem(IGameTime gameTime)
         {
-            if (MathUtil.IsZero(textInterval))
+            if (Helper.IsZero(textInterval))
             {
                 return;
             }
@@ -444,7 +445,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 textTime = 0;
 
-                textInterval = Helper.RandomGenerator.NextFloat(50, 200);
+                textInterval = Helper.RandomGenerator.NextSingle(50, 200);
                 int chars = Helper.RandomGenerator.Next(1, 5);
 
                 //Add text

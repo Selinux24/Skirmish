@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Size
         /// </summary>
-        public int Size { get; set; }
+        public uint Size { get; set; }
         /// <summary>
         /// Minimum value
         /// </summary>

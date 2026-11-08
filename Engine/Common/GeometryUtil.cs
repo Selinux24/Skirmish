@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,16 +25,6 @@ namespace Engine.Common
         /// </summary>
         public const float QuadInverseGoldenRatio = InverseGoldenRatio * InverseGoldenRatio;
 
-        /// <summary>
-        /// Generates a index for a triangle soup quad with the specified shape
-        /// </summary>
-        /// <param name="bufferShape">Buffer shape</param>
-        /// <param name="triangles">Triangle count</param>
-        /// <returns>Returns the generated index list</returns>
-        public static IEnumerable<uint> GenerateIndices(IndexBufferShapes bufferShape, int triangles)
-        {
-            return GenerateIndices(LevelOfDetail.High, bufferShape, triangles);
-        }
         /// <summary>
         /// Generates a index for a triangle soup quad with the specified shape
         /// </summary>
@@ -289,14 +279,43 @@ namespace Engine.Common
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns a matrix with the reference transform</returns>
-        public static Matrix Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
+        public static Matrix4x4 Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            return Matrix.Transformation(
+            return Matrix4x4.Transformation(
                 Vector3.Zero, Quaternion.Identity, scale,
                 Vector3.Zero, rotation,
                 position);
         }
+        /// <summary>
+        /// Generate normals for a triangle list topology geometry
+        /// </summary>
+        /// <param name="positions">Positions</param>
+        /// <param name="indices">Triangle list indices</param>
+        public static Vector3[] GenerateNormals(Vector3[] positions, uint[] indices)
+        {
+            Vector3[] normals = new Vector3[positions.Length];
 
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                uint i0 = indices[i + 0];
+                uint i1 = indices[i + 1];
+                uint i2 = indices[i + 2];
+                var v0 = positions[i0];
+                var v1 = positions[i1];
+                var v2 = positions[i2];
+                var normal = Vector3.Normalize(Vector3.Cross(v1 - v0, v2 - v0));
+                normals[i0] += normal;
+                normals[i1] += normal;
+                normals[i2] += normal;
+            }
+
+            for (int i = 0; i < normals.Length; i++)
+            {
+                normals[i] = Vector3.Normalize(normals[i]);
+            }
+
+            return normals;
+        }
         /// <summary>
         /// Creates a new UV map from parameters
         /// </summary>
@@ -319,21 +338,39 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Creates a screen
+        /// Creates a line in the XZ-plane
         /// </summary>
-        /// <param name="form">Form</param>
+        /// <param name="topology">Topology</param>
+        /// <param name="p1XZ">Point 1 in the XZ-plane</param>
+        /// <param name="p2XZ">Point 2 in the XZ-plane</param>
+        /// <param name="stroke">Stroke size</param>
+        /// <param name="height">Height</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(IEngineForm form)
+        public static GeometryDescriptor CreateLine2D(Topology topology, Vector2 p1XZ, Vector2 p2XZ, float stroke, float height = 0f)
         {
-            return CreateScreen(form.RenderWidth, form.RenderHeight);
+            var p1 = new Vector3(p1XZ.X, height, p1XZ.Y);
+            var p2 = new Vector3(p2XZ.X, height, p2XZ.Y);
+            var line = p1 - p2;
+
+            //As line is the rectangle bisector, get rectangle corners
+            var ext1 = Vector3.Normalize(new Vector3(-line.Z, 0, line.X)) * stroke;
+            var ext2 = Vector3.Normalize(new Vector3(line.Z, 0, -line.X)) * stroke;
+            var topLeft = p1 + ext1;
+            var topRight = p1 + ext2;
+            var bottomLeft = p2 + ext1;
+            var bottomRight = p2 + ext2;
+            Vector3[] corners = [topLeft, topRight, bottomRight, bottomLeft];
+
+            return CreatePolygon(topology, corners, false);
         }
+
         /// <summary>
         /// Creates a screen
         /// </summary>
         /// <param name="renderWidth">Render area width</param>
         /// <param name="renderHeight">Render area height</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(int renderWidth, int renderHeight)
+        public static GeometryDescriptor CreateScreen(uint renderWidth, uint renderHeight)
         {
             Vector3[] vertices = new Vector3[4];
             Vector2[] uvs = new Vector2[4];
@@ -342,9 +379,9 @@ namespace Engine.Common
             float width = renderWidth;
             float height = renderHeight;
 
-            float left = ((width / 2) * -1);
+            float left = -width * 0.5f;
             float right = left + width;
-            float top = (height / 2);
+            float top = height * 0.5f;
             float bottom = top - height;
 
             vertices[0] = new Vector3(left, top, 0.0f);
@@ -367,7 +404,7 @@ namespace Engine.Common
             indices[4] = 3;
             indices[5] = 1;
 
-            return new GeometryDescriptor()
+            return new()
             {
                 Vertices = vertices,
                 Indices = indices,
@@ -472,10 +509,11 @@ namespace Engine.Common
         /// <param name="sphereList">Sphere list</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSpheres(Topology topology, IEnumerable<BoundingSphere> sphereList, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSpheres(Topology topology, IEnumerable<BoundingSphere> sphereList, int sliceCount, int stackCount, bool ccw = true)
         {
-            var gList = sphereList.Select(s => CreateSphere(topology, s, sliceCount, stackCount));
+            var gList = sphereList.Select(s => CreateSphere(topology, s, sliceCount, stackCount, ccw));
 
             return new GeometryDescriptor(gList);
         }
@@ -486,10 +524,11 @@ namespace Engine.Common
         /// <param name="sphere">Sphere</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, BoundingSphere sphere, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, BoundingSphere sphere, int sliceCount, int stackCount, bool ccw = true)
         {
-            return CreateSphere(topology, sphere.Center, sphere.Radius, sliceCount, stackCount);
+            return CreateSphere(topology, sphere.Center, sphere.Radius, sliceCount, stackCount, ccw);
         }
         /// <summary>
         /// Creates a sphere
@@ -498,10 +537,11 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, float radius, int sliceCount, int stackCount, bool ccw = true)
         {
-            return CreateSphere(topology, Vector3.Zero, radius, sliceCount, stackCount);
+            return CreateSphere(topology, Vector3.Zero, radius, sliceCount, stackCount, ccw);
         }
         /// <summary>
         /// Creates a sphere
@@ -511,12 +551,13 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateSphere(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount, bool ccw = true)
         {
             return topology switch
             {
-                Topology.TriangleList => CreateSphereTriangleList(center, radius, sliceCount, stackCount),
+                Topology.TriangleList => CreateSphereTriangleList(center, radius, sliceCount, stackCount, ccw),
                 Topology.LineList => CreateSphereLineList(center, radius, sliceCount, stackCount),
                 _ => throw new NotImplementedException()
             };
@@ -528,6 +569,7 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         private static Vector3[] CreateSphereVertices(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = [];
@@ -535,8 +577,8 @@ namespace Engine.Common
             //North pole
             vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
 
-            float phiStep = MathUtil.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+            float phiStep = Helper.Pi / (stackCount + 1);
+            float thetaStep = 2.0f * Helper.Pi / sliceCount;
 
             //Compute vertices for each stack ring (do not count the poles as rings).
             for (int st = 1; st < (stackCount + 1); ++st)
@@ -570,6 +612,7 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         private static (Vector3[] Vertices, Vector3[] Normals, Vector3[] Tangents, Vector3[] Binormals, Vector2[] Uvs) CreateSphereVerticesExt(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = [];
@@ -588,8 +631,8 @@ namespace Engine.Common
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 0.0f));
 
-            float phiStep = MathUtil.Pi / stackCount;
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+            float phiStep = Helper.Pi / stackCount;
+            float thetaStep = 2.0f * Helper.Pi / sliceCount;
 
             for (int st = 1; st <= stackCount - 1; ++st)
             {
@@ -612,8 +655,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / MathUtil.Pi * 2f;
-                    float v = phi / MathUtil.Pi;
+                    float u = theta / Helper.Pi * 2f;
+                    float v = phi / Helper.Pi;
 
                     var texture = new Vector2(u, v);
 
@@ -641,8 +684,9 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="ccw">Use counter-clock wise winding</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateSphereTriangleList(Vector3 center, float radius, int sliceCount, int stackCount)
+        private static GeometryDescriptor CreateSphereTriangleList(Vector3 center, float radius, int sliceCount, int stackCount, bool ccw)
         {
             var (vertices, normals, tangents, binormals, uvs) = CreateSphereVerticesExt(center, radius, sliceCount, stackCount);
 
@@ -653,9 +697,13 @@ namespace Engine.Common
 
             for (int index = 1; index <= sliceCount; ++index)
             {
-                indexList.Add(0);
-                indexList.Add(index + 1);
-                indexList.Add(index);
+                int i0 = 0;
+                int i1 = index;
+                int i2 = index + 1;
+
+                int[] ids = ccw ? [i0, i2, i1] : [i0, i1, i2];
+
+                indexList.AddRange(ids);
             }
 
             int baseIndex = 1;
@@ -664,13 +712,16 @@ namespace Engine.Common
             {
                 for (int sl = 0; sl < sliceCount; ++sl)
                 {
-                    indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                    int i0 = baseIndex + st * ringVertexCount + sl;
+                    int i1 = baseIndex + (st + 1) * ringVertexCount + sl;
+                    int i2 = baseIndex + st * ringVertexCount + sl + 1;
+                    int i3 = i1;
+                    int i4 = baseIndex + (st + 1) * ringVertexCount + sl + 1;
+                    int i5 = i2;
 
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                    int[] ids = ccw ? [i0, i2, i1, i3, i5, i4] : [i0, i1, i2, i3, i4, i5];
+
+                    indexList.AddRange(ids);
                 }
             }
 
@@ -680,9 +731,13 @@ namespace Engine.Common
 
             for (int index = 0; index < sliceCount; ++index)
             {
-                indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index);
-                indexList.Add(baseIndex + index + 1);
+                int i0 = southPoleIndex;
+                int i1 = baseIndex + index + 1;
+                int i2 = baseIndex + index;
+
+                int[] ids = ccw ? [i0, i2, i1] : [i0, i1, i2];
+
+                indexList.AddRange(ids);
             }
 
             return new GeometryDescriptor()
@@ -692,7 +747,7 @@ namespace Engine.Common
                 Tangents = tangents,
                 Binormals = binormals,
                 Uvs = uvs,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
+                Indices = [.. indexList.Select(i => (uint)i)],
             };
         }
         /// <summary>
@@ -724,7 +779,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
+                Indices = [.. indexList.Select(i => (uint)i)],
             };
         }
 
@@ -772,8 +827,8 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = MathUtil.PiOverTwo / stackCount;
-            float thetaStep = MathUtil.TwoPi / sliceCount;
+            float phiStep = Helper.PiOver2 / stackCount;
+            float thetaStep = Helper.TwoPi / sliceCount;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -818,9 +873,9 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = MathUtil.PiOverTwo / stackCount;
-            float thetaStep = MathUtil.TwoPi / sliceCount;
-            float halfStep = thetaStep / MathUtil.TwoPi / 2f;
+            float phiStep = Helper.PiOver2 / stackCount;
+            float thetaStep = Helper.TwoPi / sliceCount;
+            float halfStep = thetaStep / Helper.TwoPi / 2f;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -848,8 +903,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / MathUtil.TwoPi;
-                    float v = phi / MathUtil.PiOverTwo;
+                    float u = theta / Helper.TwoPi;
+                    float v = phi / Helper.PiOver2;
 
                     if (st == 0)
                     {
@@ -911,7 +966,7 @@ namespace Engine.Common
                 Tangents = tangents,
                 Binormals = binormals,
                 Uvs = uvs,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
+                Indices = [.. indexList.Select(i => (uint)i)],
             };
         }
         /// <summary>
@@ -1152,9 +1207,12 @@ namespace Engine.Common
                 23,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1238,16 +1296,16 @@ namespace Engine.Common
             vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
             vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
-            float thetaStep = MathUtil.TwoPi / sliceCount;
+            float thetaStep = Helper.TwoPi / sliceCount;
 
             for (int sl = 0; sl < sliceCount; sl++)
             {
                 float theta = sl * thetaStep;
 
                 var position = new Vector3(
-                    baseRadius * MathF.Sin(MathUtil.PiOverTwo) * MathF.Cos(theta),
+                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Cos(theta),
                     -height,
-                    baseRadius * MathF.Sin(MathUtil.PiOverTwo) * MathF.Sin(theta));
+                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Sin(theta));
 
                 vertList.Add(position);
             }
@@ -1277,9 +1335,12 @@ namespace Engine.Common
                 indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
             }
 
+            var normals = GenerateNormals(vertices, [.. indexList]);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indexList,
             };
         }
@@ -1349,11 +1410,11 @@ namespace Engine.Common
 
             uint[] indices =
             [
-                0,1,2,
-                0,2,3,
+                0,2,1,
+                0,3,2,
 
-                4,6,5,
-                4,7,6,
+                4,5,6,
+                4,6,7,
 
                 3,6,2,
                 3,7,6,
@@ -1361,16 +1422,19 @@ namespace Engine.Common
                 0,1,5,
                 0,5,4,
 
-                2,1,5,
-                2,5,6,
+                2,5,1,
+                2,6,5,
 
-                0,3,7,
-                0,7,4,
+                0,7,3,
+                0,4,7,
             ];
+
+            var normals = GenerateNormals(vertices, indices);
 
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1443,7 +1507,7 @@ namespace Engine.Common
                 new(-1f, -1f, 1),
             ];
 
-            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1468,9 +1532,12 @@ namespace Engine.Common
                 0, 3, 1,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1540,7 +1607,7 @@ namespace Engine.Common
                 new (0f, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1570,9 +1637,12 @@ namespace Engine.Common
                 5, 1, 4,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1660,7 +1730,7 @@ namespace Engine.Common
                 new (+InverseGoldenRatio, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1706,9 +1776,12 @@ namespace Engine.Common
                 10,8,11,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -1830,7 +1903,7 @@ namespace Engine.Common
                 new (+QuadInverseGoldenRatio, -1f, 0f),
             ];
 
-            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -1910,9 +1983,12 @@ namespace Engine.Common
                 19,11,17,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -2024,7 +2100,7 @@ namespace Engine.Common
                 new (-1f, -1f, -1f),
             ];
 
-            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Matrix4x4 trn = Matrix4x4.Scaling(width, height, depth) * Matrix4x4.Translation(center);
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return vertices;
@@ -2051,9 +2127,12 @@ namespace Engine.Common
                 3, 1, 4,
             ];
 
+            var normals = GenerateNormals(vertices, indices);
+
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
+                Normals = normals,
                 Indices = indices,
             };
         }
@@ -2105,17 +2184,20 @@ namespace Engine.Common
         /// Creates a cylinder
         /// </summary>
         /// <param name="topology">Topology</param>
-        /// <param name="center">Center position</param>
+        /// <param name="center">Geometric center position</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 center, float radius, float height, int sliceCount)
         {
+            var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
+            var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
+
             return topology switch
             {
-                Topology.TriangleList => CreateCylinderTriangleList(center, radius, height, sliceCount),
-                Topology.LineList => CreateCylinderLineList(center, radius, height, sliceCount),
+                Topology.TriangleList => CreateCylinderTriangleList(bsePosition, capPosition, radius, sliceCount),
+                Topology.LineList => CreateCylinderLineList(bsePosition, capPosition, radius, sliceCount),
                 _ => throw new NotImplementedException()
             };
         }
@@ -2131,45 +2213,60 @@ namespace Engine.Common
             return CreateCylinder(topology, cylinder.Center, cylinder.Radius, cylinder.Height, sliceCount);
         }
         /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
+        {
+            return topology switch
+            {
+                Topology.TriangleList => CreateCylinderTriangleList(baseCenter, topCenter, radius, sliceCount),
+                Topology.LineList => CreateCylinderLineList(baseCenter, topCenter, radius, sliceCount),
+                _ => throw new NotImplementedException()
+            };
+        }
+        /// <summary>
         /// Creates the cylinder vertices
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top center</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
-        /// <returns></returns>
-        private static Vector3[] CreateCylinderVertices(Vector3 center, float radius, float height, int sliceCount)
+        private static Vector3[] CreateCylinderVertices(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
+            float height = Vector3.Distance(baseCenter, topCenter);
+            var trn = GetInversetAxisTransform(baseCenter, topCenter);
+
             List<Vector3> verts = [];
-
-            var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
-            var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
-
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = j / (float)sliceCount * 2 * MathUtil.Pi;
+                    float theta = j / (float)sliceCount * 2 * Helper.Pi;
                     float st = MathF.Sin(theta), ct = MathF.Cos(theta);
-
-                    verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
+                    var v = new Vector3(radius * st, height * i, radius * ct);
+                    verts.Add(Vector3.TransformCoordinate(v, trn));
                 }
             }
-            verts.AddRange([bsePosition, capPosition]);
+            verts.AddRange([baseCenter, topCenter]);
 
             return [.. verts];
         }
         /// <summary>
         /// Creates the cylinder vertices with lighting
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
-        /// <returns></returns>
-        private static (Vector3[] Vertices, Vector3[] Normals) CreateCylinderVerticesExt(Vector3 center, float radius, float height, int sliceCount)
+        private static (Vector3[] Vertices, Vector3[] Normals) CreateCylinderVerticesExt(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var verts = CreateCylinderVertices(center, radius, height, sliceCount);
+            var verts = CreateCylinderVertices(baseCenter, topCenter, radius, sliceCount);
 
             List<Vector3> norms = [];
 
@@ -2185,14 +2282,14 @@ namespace Engine.Common
         /// <summary>
         /// Creates a triangle list cylinder
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCylinderTriangleList(Vector3 center, float radius, float height, int sliceCount)
+        private static GeometryDescriptor CreateCylinderTriangleList(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var (vertices, normals) = CreateCylinderVerticesExt(center, radius, height, sliceCount);
+            var (vertices, normals) = CreateCylinderVerticesExt(baseCenter, topCenter, radius, sliceCount);
 
             int cBase = vertices.Length - 2;
             int cCap = vertices.Length - 1;
@@ -2229,20 +2326,20 @@ namespace Engine.Common
             {
                 Vertices = vertices,
                 Normals = normals,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
+                Indices = [.. indexList.Select(i => (uint)i)],
             };
         }
         /// <summary>
         /// Creates a line list cylinder
         /// </summary>
-        /// <param name="center">Center position</param>
+        /// <param name="baseCenter">Base center</param>
+        /// <param name="topCenter">Top cencer</param>
         /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCylinderLineList(Vector3 center, float radius, float height, int sliceCount)
+        private static GeometryDescriptor CreateCylinderLineList(Vector3 baseCenter, Vector3 topCenter, float radius, int sliceCount)
         {
-            var vertices = CreateCylinderVertices(center, radius, height, sliceCount);
+            var vertices = CreateCylinderVertices(baseCenter, topCenter, radius, sliceCount);
 
             List<int> indexList = [];
 
@@ -2260,7 +2357,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
+                Indices = [.. indexList.Select(i => (uint)i)],
             };
         }
 
@@ -2335,7 +2432,7 @@ namespace Engine.Common
             if (center != Vector3.Zero)
             {
                 // Translate to center
-                verts = verts.Select(v => v + center).ToList();
+                verts = [.. verts.Select(v => v + center)];
             }
 
             return [.. verts];
@@ -2369,7 +2466,7 @@ namespace Engine.Common
             if (center != Vector3.Zero)
             {
                 // Translate to center
-                verts = verts.Select(v => v + center).ToList();
+                verts = [.. verts.Select(v => v + center)];
             }
 
             Vector3[] norms =
@@ -2460,7 +2557,19 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount)
         {
-            return CreateCircle(topology, Vector3.Zero, radius, stackCount);
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount, Vector3.Up);
+        }
+        /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, float radius, int stackCount, Vector3 up)
+        {
+            return CreateCircle(topology, Vector3.Zero, radius, stackCount, up);
         }
         /// <summary>
         /// Creates a circle
@@ -2472,12 +2581,25 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount)
         {
+            return CreateCircle(topology, center, radius, stackCount, Vector3.Up);
+        }
+        /// <summary>
+        /// Creates a circle
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCircle(Topology topology, Vector3 center, float radius, int stackCount, Vector3 up)
+        {
             ArgumentOutOfRangeException.ThrowIfLessThan(stackCount, 3);
 
             return topology switch
             {
-                Topology.TriangleList => CreateCircleTriangleList(center, radius, stackCount),
-                Topology.LineList => CreateCircleLineList(center, radius, stackCount),
+                Topology.TriangleList => CreateCircleTriangleList(center, radius, stackCount, up),
+                Topology.LineList => CreateCircleLineList(center, radius, stackCount, up),
                 _ => throw new NotImplementedException()
             };
         }
@@ -2487,16 +2609,24 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
-        private static Vector3[] CreateCircleVertices(Vector3 center, float radius, int stackCount)
+        /// <param name="up">Up vector</param>
+        private static Vector3[] CreateCircleVertices(Vector3 center, float radius, int stackCount, Vector3 up)
         {
             List<Vector3> verts = [];
 
             for (int i = 0; i < stackCount; i++)
             {
-                float a = i / (float)stackCount * MathUtil.TwoPi;
+                float a = i / (float)stackCount * Helper.TwoPi;
                 float x = MathF.Cos(a) * radius;
                 float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
+
+                if (up != Vector3.Up)
+                {
+                    var axis = Vector3.Cross(up, Vector3.Up);
+
+                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, Helper.PiOver2));
+                }
 
                 verts.Add(v + center);
             }
@@ -2509,10 +2639,11 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCircleTriangleList(Vector3 center, float radius, int stackCount)
+        private static GeometryDescriptor CreateCircleTriangleList(Vector3 center, float radius, int stackCount, Vector3 up)
         {
-            var verts = CreateCircleVertices(center, radius, stackCount);
+            var verts = CreateCircleVertices(center, radius, stackCount, up);
 
             List<uint> indexList = [];
 
@@ -2523,9 +2654,12 @@ namespace Engine.Common
                 indexList.Add((uint)i - 1);
             }
 
+            var normals = GenerateNormals(verts, [.. indexList]);
+
             return new GeometryDescriptor()
             {
                 Vertices = verts,
+                Normals = normals,
                 Indices = indexList,
             };
         }
@@ -2535,10 +2669,11 @@ namespace Engine.Common
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="stackCount">Stack count</param>
+        /// <param name="up">Up vector</param>
         /// <returns>Returns a geometry descriptor</returns>
-        private static GeometryDescriptor CreateCircleLineList(Vector3 center, float radius, int stackCount)
+        private static GeometryDescriptor CreateCircleLineList(Vector3 center, float radius, int stackCount, Vector3 up)
         {
-            var verts = CreateCircleVertices(center, radius, stackCount);
+            var verts = CreateCircleVertices(center, radius, stackCount, up);
 
             List<uint> indexList = [];
 
@@ -2593,23 +2728,16 @@ namespace Engine.Common
         /// <param name="vertices">Polygon vertices</param>
         /// <param name="ccw">Assume CCW triangle sort for normals</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw)
+        public static GeometryDescriptor CreatePolygonTriangleList(IEnumerable<Vector3> vertices, bool ccw = true)
         {
-            int count = vertices.Count();
-
-            List<uint> indexList = [];
-
-            for (int i = 2; i < count; i++)
-            {
-                indexList.Add(0);
-                indexList.Add(ccw ? (uint)i : (uint)i - 1);
-                indexList.Add(ccw ? (uint)i - 1 : (uint)i);
-            }
+            var indices = CreateIndexesForTriangleList(vertices.Count(), ccw);
+            var normals = GenerateNormals([.. vertices], indices);
 
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Normals = normals,
+                Indices = indices,
             };
         }
         /// <summary>
@@ -2619,21 +2747,45 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreatePolygonLineList(IEnumerable<Vector3> vertices)
         {
-            int count = vertices.Count();
-
-            List<uint> indexList = [];
-
-            for (int i = 0; i < count; i++)
-            {
-                indexList.Add((uint)i);
-                indexList.Add((uint)((i + 1) % count));
-            }
-
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = CreateIndexesForLineList(vertices.Count()),
             };
+        }
+        /// <summary>
+        /// Creates the index array for triangle list
+        /// </summary>
+        /// <param name="vertexCount">Vertex count</param>
+        /// <param name="ccw">Assume CCW triangle sort for normals</param>
+        public static uint[] CreateIndexesForTriangleList(int vertexCount, bool ccw = true)
+        {
+            List<uint> indexList = [];
+
+            for (int i = 2; i < vertexCount; i++)
+            {
+                indexList.Add(0);
+                indexList.Add(ccw ? (uint)i : (uint)i - 1);
+                indexList.Add(ccw ? (uint)i - 1 : (uint)i);
+            }
+
+            return [.. indexList];
+        }
+        /// <summary>
+        /// Creates the index array for line list
+        /// </summary>
+        /// <param name="vertexCount">Vertex count</param>
+        public static uint[] CreateIndexesForLineList(int vertexCount)
+        {
+            List<uint> indexList = [];
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                indexList.Add((uint)i);
+                indexList.Add((uint)((i + 1) % vertexCount));
+            }
+
+            return [.. indexList];
         }
 
         /// <summary>
@@ -2645,13 +2797,29 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateXZPlane(float sizeX, float sizeZ, float height)
         {
+            return CreateXZPlane(new Vector3(0, height, 0), sizeX, sizeZ);
+        }
+        /// <summary>
+        /// Creates a XZ plane
+        /// </summary>
+        /// <param name="center">Plane center</param>
+        /// <param name="sizeX">Plane X size</param>
+        /// <param name="sizeZ">Plane Z size</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZPlane(Vector3 center, float sizeX, float sizeZ)
+        {
             Vector3[] vertices =
             [
-                new (-sizeX*0.5f, +height, -sizeZ*0.5f),
-                new (-sizeX*0.5f, +height, +sizeZ*0.5f),
-                new (+sizeX*0.5f, +height, -sizeZ*0.5f),
-                new (+sizeX*0.5f, +height, +sizeZ*0.5f),
+                new (-sizeX*0.5f, 0f, -sizeZ*0.5f),
+                new (-sizeX*0.5f, 0f, +sizeZ*0.5f),
+                new (+sizeX*0.5f, 0f, -sizeZ*0.5f),
+                new (+sizeX*0.5f, 0f, +sizeZ*0.5f),
             ];
+
+            if (center != Vector3.Zero)
+            {
+                vertices = [.. vertices.Select(v => v + center)];
+            }
 
             Vector3[] normals =
             [
@@ -2713,10 +2881,10 @@ namespace Engine.Common
                 return geometry;
             }
 
-            float angle = Helper.AngleSigned(Vector3.Up, rotNormal);
+            float angle = Vector3.AngleSigned(Vector3.Up, rotNormal);
 
             Vector3 axis;
-            if (MathUtil.NearEqual(angle, MathUtil.Pi))
+            if (Helper.NearEqual(angle, Helper.Pi))
             {
                 //Parallel negative axis: Vector3.Down
                 axis = Vector3.Left;
@@ -2726,7 +2894,7 @@ namespace Engine.Common
                 axis = Vector3.Normalize(Vector3.Cross(Vector3.Up, rotNormal));
             }
 
-            geometry.Transform(Matrix.RotationAxis(axis, angle));
+            geometry.Transform(Matrix4x4.RotationAxis(axis, angle));
 
             return geometry;
         }
@@ -2819,6 +2987,109 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Creates a XZ grid
+        /// </summary>
+        /// <param name="sizeX">Grid X size</param>
+        /// <param name="sizeZ">Grid Z size</param>
+        /// <param name="partitionsX">Number of partitions in X</param>
+        /// <param name="partitionsZ">Number of partitions in Z</param>
+        /// <param name="height">Grid height</param>
+        /// <param name="uvScale">Uv scale</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZGrid(float sizeX, float sizeZ, int partitionsX, int partitionsZ, float height = 0, float uvScale = 1f)
+        {
+            return CreateXZGrid(new(0, height, 0), sizeX, sizeZ, partitionsX, partitionsZ, uvScale);
+        }
+        /// <summary>
+        /// Creates a XZ grid
+        /// </summary>
+        /// <param name="center">Grid center</param>
+        /// <param name="sizeX">Grid X size</param>
+        /// <param name="sizeZ">Grid Z size</param>
+        /// <param name="partitionsX">Number of partitions in X</param>
+        /// <param name="partitionsZ">Number of partitions in Z</param>
+        /// <param name="uvScale">Uv scale</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZGrid(Vector3 center, float sizeX, float sizeZ, int partitionsX, int partitionsZ, float uvScale = 1f)
+        {
+            List<Vector3> vertices = [];
+            List<Vector3> normals = [];
+            List<Vector2> uvs = [];
+            List<uint> indices = [];
+
+            uint index = 0;
+
+            for (int z = 0; z < partitionsZ; z++)
+            {
+                float sz = z / (float)partitionsZ;
+                float z0 = -sizeZ * 0.5f + (sizeZ * sz) + center.Z;
+                float z1 = -sizeZ * 0.5f + (sizeZ * (sz + 1.0f / partitionsZ)) + center.Z;
+
+                for (int x = 0; x < partitionsX; x++)
+                {
+                    float sx = x / (float)partitionsX;
+                    float x0 = -sizeX * 0.5f + (sizeX * sx) + center.X;
+                    float x1 = -sizeX * 0.5f + (sizeX * (sx + 1.0f / partitionsX)) + center.X;
+
+                    //Calculate points of the current grid
+                    Vector3 v0 = new(x0, center.Y, z0);
+                    Vector3 v1 = new(x1, center.Y, z0);
+                    Vector3 v2 = new(x0, center.Y, z1);
+                    Vector3 v3 = new(x1, center.Y, z1);
+
+                    vertices.AddRange(
+                    [
+                        v0,
+                        v1,
+                        v2,
+                        v3,
+                    ]);
+
+                    normals.AddRange(
+                    [
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                        Vector3.Up,
+                    ]);
+
+                    //Interpolate uv values of the node
+                    Vector2 uv0 = new(sx, sz);
+                    Vector2 uv1 = new(sx + 1.0f / partitionsX, sz);
+                    Vector2 uv2 = new(sx, sz + 1.0f / partitionsZ);
+                    Vector2 uv3 = new(sx + 1.0f / partitionsX, sz + 1.0f / partitionsZ);
+
+                    uvs.AddRange(
+                    [
+                        uv0 * uvScale,
+                        uv1 * uvScale,
+                        uv2 * uvScale,
+                        uv3 * uvScale,
+                    ]);
+
+                    uint i0 = index++;
+                    uint i1 = index++;
+                    uint i2 = index++;
+                    uint i3 = index++;
+
+                    indices.AddRange(
+                    [
+                        i0, i2, i1,
+                        i3, i1, i2,
+                    ]);
+                }
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Normals = normals,
+                Uvs = uvs,
+                Indices = indices,
+            };
+        }
+
+        /// <summary>
         /// Compute normal of three points in the same plane
         /// </summary>
         /// <param name="p1">Point 1</param>
@@ -2827,11 +3098,13 @@ namespace Engine.Common
         /// <returns>Returns a normal descriptor</returns>
         public static NormalDescriptor ComputeNormal(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            var p = new Plane(p1, p2, p3);
+            var edge1 = p2 - p1;
+            var edge2 = p3 - p1;
+            var normal = Vector3.Normalize(Vector3.Cross(edge1, edge2));
 
             return new NormalDescriptor()
             {
-                Normal = p.Normal,
+                Normal = normal,
             };
         }
         /// <summary>
@@ -2900,7 +3173,7 @@ namespace Engine.Common
 
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return SharpDXExtensions.BoundingBoxFromPoints(points);
+            return BoundingBox.FromPoints(points);
         }
         /// <summary>
         /// Generates a bounding sphere from a vertex item list
@@ -2916,7 +3189,7 @@ namespace Engine.Common
 
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return SharpDXExtensions.BoundingSphereFromPoints(points);
+            return BoundingSphere.FromPoints(points);
         }
         /// <summary>
         /// Generates a bounding cylinder from a vertex item list
@@ -3061,6 +3334,35 @@ namespace Engine.Common
                 return (tvertices, tindices);
             },
             TaskCreationOptions.LongRunning);
+        }
+
+        /// <summary>
+        /// Gets the inverse axis transform of the specified base and top points, to put the base at the origin and the top on the Y axis
+        /// </summary>
+        /// <param name="vBase">Axis base</param>
+        /// <param name="vTop">Axis top</param>
+        private static Matrix4x4 GetInversetAxisTransform(Vector3 vBase, Vector3 vTop)
+        {
+            //Rotate vTop from vBase, to put vTop on vBase's Y axis
+
+            //Find direction vector between vBase and vTop
+            var dir = Vector3.Normalize(vTop - vBase);
+
+            //Find angle between dir and up vector
+            float angle = MathF.Acos(Vector3.Dot(dir, Vector3.Up));
+
+            Matrix4x4 matrix = Matrix4x4.Translation(-vBase);
+            if (!Helper.IsZero(angle))
+            {
+                //Find rotation axis
+                var axis = Vector3.Cross(dir, Vector3.Up);
+                axis = Vector3.Normalize(axis);
+
+                //Create rotation matrix
+                matrix *= Matrix4x4.RotationAxis(axis, angle);
+            }
+
+            return Matrix4x4.Invert(matrix);
         }
     }
 }

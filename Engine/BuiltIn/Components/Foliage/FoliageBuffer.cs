@@ -1,4 +1,5 @@
 ﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Format;
 using Engine.Common;
 using System;
 
@@ -37,7 +38,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <summary>
         /// Vertex count
         /// </summary>
-        private int vertexDrawCount = 0;
+        private uint vertexDrawCount = 0;
 
         /// <summary>
         /// Buffer ready
@@ -110,7 +111,7 @@ namespace Engine.BuiltIn.Components.Foliage
                 return;
             }
 
-            vertexDrawCount = data.Length;
+            vertexDrawCount = (uint)data.Length;
         }
         /// <summary>
         /// Clears the buffer

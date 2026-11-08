@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using Vortice.D3DCompiler;
+using Vortice.Direct3D;
+using Vortice.Direct3D11;
 
 namespace Engine
 {
-    using Engine.Common;
-    using SharpDX.D3DCompiler;
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Graphics shaders management
     /// </summary>
@@ -20,9 +21,11 @@ namespace Engine
         /// <param name="bytes">Code bytes</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        private EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
+        public EngineInputLayout CreateInputLayout(string name, byte[] bytes, EngineInputElement[] elements)
         {
-            return new(name, new(device, bytes, elements));
+            var inputElements = elements.Select(e => new InputElementDescription(e.SemanticName, e.SemanticIndex, e.Format, e.AlignedByteOffset, e.Slot, (InputClassification)e.Classification, e.InstanceDataStepRate)).ToArray();
+
+            return new(name, device.CreateInputLayout(inputElements, bytes));
         }
         /// <summary>
         /// Creates a new Input Layout for a vertext data type
@@ -32,25 +35,9 @@ namespace Engine
         /// <param name="bytes">Code bytes</param>
         /// <param name="bufferSlot">Buffer slot</param>
         /// <returns>Returns a new Input Layout</returns>
-        public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, int bufferSlot) where T : struct, IVertexData
+        public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, uint bufferSlot) where T : unmanaged, IVertexData
         {
             var inputElements = default(T).GetInput(bufferSlot);
-
-            return CreateInputLayout(name, bytes, inputElements);
-        }
-        /// <summary>
-        /// Creates a new Input Layout for a <see cref="BufferManagerVertices"/> instance
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Code bytes</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="instanced">Create a instanced layout</param>
-        /// <returns>Returns a new Input Layout</returns>
-        public EngineInputLayout CreateInputLayout(string name, byte[] bytes, BufferManagerVertices vertices, bool instanced)
-        {
-            var inputElements = instanced ?
-                vertices.Input.ToArray() :
-                vertices.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
 
             return CreateInputLayout(name, bytes, inputElements);
         }
@@ -120,7 +107,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineVertexShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineVertexShader: {compilationErrors}");
             }
 
             return res;
@@ -140,34 +127,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = errorBlob.ToString();
+
+                return null;
             }
 
-            return new EngineVertexShader(name, new VertexShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a vertex shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineVertexShader LoadVertexShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EngineVertexShader(name, new VertexShader(device, code.Data), code);
+            return new EngineVertexShader(name, device.CreateVertexShader(blob), blob.AsBytes());
         }
 
         /// <summary>
@@ -189,7 +167,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
             }
 
             return res;
@@ -231,7 +209,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
             }
 
             return res;
@@ -251,34 +229,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            return new EngineHullShader(name, new HullShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a hull shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineHullShader LoadHullShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EngineHullShader(name, new HullShader(device, code.Data), code);
+            return new EngineHullShader(name, device.CreateHullShader(blob), blob.AsBytes());
         }
 
         /// <summary>
@@ -300,7 +269,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
             }
 
             return res;
@@ -342,7 +311,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
             }
 
             return res;
@@ -362,34 +331,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            return new EngineDomainShader(name, new DomainShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a domain shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineDomainShader LoadDomainShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EngineDomainShader(name, new DomainShader(device, code.Data), code);
+            return new EngineDomainShader(name, device.CreateDomainShader(blob), blob.AsBytes());
         }
 
         /// <summary>
@@ -411,7 +371,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
             }
 
             return res;
@@ -453,7 +413,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
             }
 
             return res;
@@ -473,34 +433,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a geometry shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineGeometryShader LoadGeometryShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EngineGeometryShader(name, new GeometryShader(device, code.Data), code);
+            return new EngineGeometryShader(name, device.CreateGeometryShader(blob), blob.AsBytes());
         }
 
         /// <summary>
@@ -524,7 +475,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
             }
 
             return res;
@@ -570,7 +521,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
             }
 
             return res;
@@ -591,39 +542,33 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
+            var so = soElements.Select(s => (SODeclarationEntry)s).ToArray();
 
-            return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode, so, [], 0), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a geometry shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <param name="soElements">Stream-out elements</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineGeometryShader LoadGeometryShaderWithStreamOut(string name, byte[] bytes, IEnumerable<EngineStreamOutputElement> soElements)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
+            var s = device.CreateGeometryShaderWithStreamOutput(
+                blob.BufferPointer, blob.BufferSize,
+                so, (uint)so.Length,
+                null, 0,
+                0);
 
-            using var code = ShaderBytecode.FromStream(ms);
-            var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
-
-            return new EngineGeometryShader(name, new GeometryShader(device, code.Data, so, [], 0), code);
+            return new EngineGeometryShader(name, s, blob.AsBytes());
         }
 
         /// <summary>
@@ -645,7 +590,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
             }
 
             return res;
@@ -687,7 +632,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
             }
 
             return res;
@@ -707,34 +652,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            return new EnginePixelShader(name, new PixelShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a pixel shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EnginePixelShader LoadPixelShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EnginePixelShader(name, new PixelShader(device, code.Data), code);
+            return new EnginePixelShader(name, device.CreatePixelShader(blob), blob.AsBytes());
         }
 
         /// <summary>
@@ -756,7 +692,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
             }
 
             return res;
@@ -798,7 +734,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
+                Game.Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
             }
 
             return res;
@@ -818,34 +754,25 @@ namespace Engine
 
             var shaderFlags = GetShaderCompilationFlags();
             using var includeManager = new ShaderIncludeManager();
-            using var cmpResult = ShaderBytecode.Compile(
+            var cmpResult = Compiler.Compile(
                 byteCode,
+                [],
+                includeManager,
                 entryPoint,
+                null,
                 profile,
                 shaderFlags,
                 EffectFlags.None,
-                null,
-                includeManager);
-            if (cmpResult.HasErrors)
+                out Blob blob, out Blob errorBlob);
+
+            if (cmpResult.Failure)
             {
-                compilationErrors = cmpResult.Message;
+                compilationErrors = Encoding.UTF8.GetString(errorBlob.AsBytes());
+
+                return null;
             }
 
-            return new EngineComputeShader(name, new ComputeShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
-        }
-        /// <summary>
-        /// Loads a compute shader from pre-compiled file
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="bytes">Pre-compiled byte code</param>
-        /// <returns>Returns loaded shader</returns>
-        public EngineComputeShader LoadComputeShader(string name, byte[] bytes)
-        {
-            using var ms = new MemoryStream(bytes);
-            ms.Position = 0;
-
-            using var code = ShaderBytecode.FromStream(ms);
-            return new EngineComputeShader(name, new ComputeShader(device, code.Data), code);
+            return new EngineComputeShader(name, device.CreateComputeShader(blob), blob.AsBytes());
         }
     }
 }

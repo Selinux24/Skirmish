@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.Content
 {
@@ -10,19 +10,19 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public static Color3 AmbientColor { get; } = new Color3(0.2f, 0.2f, 0.2f);
+        public static Color3 AmbientColor { get; } = new(0.5f, 0.5f, 0.5f);
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public static Color4 DiffuseColor { get; } = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
+        public static Color4 DiffuseColor { get; } = new(0.8f, 0.8f, 0.8f, 1.0f);
         /// <summary>
         /// Specular color
         /// </summary>
-        public static Color3 SpecularColor { get; } = new Color3(0.25f, 0.25f, 0.25f);
+        public static Color3 SpecularColor { get; } = new(0.25f, 0.25f, 0.25f);
         /// <summary>
         /// Emissive color
         /// </summary>
-        public static Color3 EmissiveColor { get; } = new Color3(0.0f, 0.0f, 0.0f);
+        public static Color3 EmissiveColor { get; } = new(0.0f, 0.0f, 0.0f);
 
         #region Phong / Blinn-Phong specs
 

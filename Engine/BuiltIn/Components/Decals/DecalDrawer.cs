@@ -1,14 +1,14 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Decals;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Decals;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Decal drawer class
     /// </summary>
@@ -23,7 +23,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <summary>
         /// Assigned buffer slot
         /// </summary>
-        public static int BufferSlot { get; set; } = 0;
+        public static uint BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Decal list
@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <summary>
         /// Current decal index to update data
         /// </summary>
-        private int currentDecalIndex = 0;
+        private uint currentDecalIndex = 0;
         /// <summary>
         /// Decal volume
         /// </summary>
@@ -48,7 +48,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <summary>
         /// Current decal count
         /// </summary>
-        private int currentDecals;
+        private uint currentDecals;
         /// <summary>
         /// Decals drawer
         /// </summary>
@@ -73,7 +73,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color4 TintColor { get; set; } = Color4.White;
+        public Color4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         /// <summary>
         /// Gets the active decal count
         /// </summary>
@@ -133,7 +133,7 @@ namespace Engine.BuiltIn.Components.Decals
                 return;
             }
 
-            boundingVolume = SharpDXExtensions.BoundingSphereFromPoints(activeDecals);
+            boundingVolume = BoundingSphere.FromPoints(activeDecals);
         }
 
         /// <inheritdoc/>
@@ -161,7 +161,7 @@ namespace Engine.BuiltIn.Components.Decals
 
             if (updateBuffer)
             {
-                Logger.WriteTrace(this, $"{Name} - {nameof(Draw)} Update decals buffer");
+                Game.Logger.WriteTrace(this, $"{Name} - {nameof(Draw)} Update decals buffer");
                 buffer.Write(dc, decals);
                 updateBuffer = false;
             }
@@ -207,7 +207,7 @@ namespace Engine.BuiltIn.Components.Decals
         /// <param name="maxAge">Max age in seconds</param>
         public void AddDecal(Vector3 position, Vector3 normal, Vector2 size, float maxAge)
         {
-            int nextFreeDecal = currentDecalIndex + 1;
+            uint nextFreeDecal = currentDecalIndex + 1;
 
             if (currentDecals < nextFreeDecal)
             {
@@ -240,10 +240,9 @@ namespace Engine.BuiltIn.Components.Decals
                 return [];
             }
 
-            return decals
+            return [.. decals
                 .Where(d => d.StartTime + d.MaxAge > Game.GameTime.TotalSeconds)
-                .Select(d => d.Position)
-                .ToArray();
+                .Select(d => d.Position)];
         }
         /// <summary>
         /// Clears all decals

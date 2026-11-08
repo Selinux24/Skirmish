@@ -1,18 +1,19 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.BuiltIn.Components.Flares;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Components.Water;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,7 +57,7 @@ namespace BasicSamples.SceneTest
         private readonly float spaceSize = 40;
         private readonly Vector3 baseDelta = new(500, 7, 0);
 
-        private readonly Color3 ambientUp = Color3.Black;
+        private readonly Color3 ambientUp = Color.Black;
         private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f) * 0.2f;
 
         private readonly Color3 waterBaseColor = new(0.067f, 0.065f, 0.003f);
@@ -93,7 +94,7 @@ namespace BasicSamples.SceneTest
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
-        private PrimitiveListDrawer<Line3D> volumeDrawer = null;
+        private GeometryColorDrawer<Line3D> volumeDrawer = null;
         private bool drawLightDrawVolumes = false;
         private bool drawLightCullVolumes = false;
         private bool drawModelCullVolumes = false;
@@ -145,8 +146,8 @@ namespace BasicSamples.SceneTest
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont10 = FontDescription.FromFamily("Tahoma", 10);
             defaultFont18.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
@@ -171,10 +172,10 @@ namespace BasicSamples.SceneTest
             {
                 Width = Game.Form.RenderWidth,
                 Height = runtime.Top + runtime.Height + 10,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
+                BaseColor = new(0, 0, 0, 0.75f),
             }, LayerUI - 1);
 
-            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
+            var buttonFont = FontDescription.FromFamily("Lucida Console", 12);
 
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, "SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
             buttonDesc.Width = 100;
@@ -207,9 +208,9 @@ namespace BasicSamples.SceneTest
                 Height = Game.Form.RenderHeight,
             }, LayerUI + 1);
 
-            var pbFont = TextDrawerDescription.FromFamily("Consolas", 18);
+            var pbFont = FontDescription.FromFamily("Consolas", 18);
 
-            var pbDesc = UIProgressBarDescription.Default(pbFont, new Color(0, 0, 0, 0.5f), Color.Green);
+            var pbDesc = UIProgressBarDescription.Default(pbFont, new(0, 0, 0, 0.5f), Color.Green);
             pbDesc.Top = Game.Form.RenderHeight - 60;
             pbDesc.Left = 100;
             pbDesc.Width = Game.Form.RenderWidth - 200;
@@ -300,18 +301,16 @@ namespace BasicSamples.SceneTest
                 GlowTexture = resourceGlowString,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlare1String),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlare1String),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlare1String),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlare1String),
-
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlare2String),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlare2String),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlare2String),
-
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlare3String),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlare3String),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlare3String),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlare1String),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlare1String),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlare1String),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlare1String),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlare2String),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlare2String),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlare2String),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlare3String),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlare3String),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlare3String),
                 ]
             });
 
@@ -436,7 +435,7 @@ namespace BasicSamples.SceneTest
                 });
 
             buildingObelisk.Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
-            buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            buildingObelisk.Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
             buildingObelisk.Manipulator.SetScaling(10);
 
             buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
@@ -444,10 +443,10 @@ namespace BasicSamples.SceneTest
             buildingObeliskI[2].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2) + baseDelta.Z);
             buildingObeliskI[3].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2) + baseDelta.Z);
 
-            buildingObeliskI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            buildingObeliskI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            buildingObeliskI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            buildingObeliskI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            buildingObeliskI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
+            buildingObeliskI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
+            buildingObeliskI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
+            buildingObeliskI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
 
             buildingObeliskI[0].Manipulator.SetScaling(10);
             buildingObeliskI[1].Manipulator.SetScaling(10);
@@ -483,7 +482,7 @@ namespace BasicSamples.SceneTest
             animations.Add(DefaultString, new AnimationPlan(p1));
 
             characterSoldier.Manipulator.SetPosition((+s - 10) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
-            characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            characterSoldier.Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
             characterSoldier.AnimationController.Start(animations[DefaultString]);
 
             characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
@@ -491,10 +490,10 @@ namespace BasicSamples.SceneTest
             characterSoldierI[2].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2 - s) + baseDelta.Z);
             characterSoldierI[3].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2 - s) + baseDelta.Z);
 
-            characterSoldierI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            characterSoldierI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            characterSoldierI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            characterSoldierI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            characterSoldierI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
+            characterSoldierI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
+            characterSoldierI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
+            characterSoldierI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
 
             characterSoldierI[0].AnimationController.Start(animations[DefaultString], 1);
             characterSoldierI[1].AnimationController.Start(animations[DefaultString], 2);
@@ -527,17 +526,17 @@ namespace BasicSamples.SceneTest
             float s = -spaceSize / 2f;
 
             vehicle.Manipulator.SetPosition(s + baseDelta.X, baseHeight + baseDelta.Y, -10 + baseDelta.Z);
-            vehicle.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            vehicle.Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
 
             vehicleI[0].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
             vehicleI[1].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
             vehicleI[2].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
             vehicleI[3].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
 
-            vehicleI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            vehicleI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            vehicleI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            vehicleI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            vehicleI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
+            vehicleI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
+            vehicleI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
+            vehicleI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
 
             List<ISceneLight> lights = [.. vehicle.Lights];
 
@@ -572,7 +571,7 @@ namespace BasicSamples.SceneTest
                 });
 
             float dist = 0.23f;
-            float pitch = MathUtil.DegreesToRadians(165) * -1;
+            float pitch = Helper.DegreesToRadians(165) * -1;
 
             lamp.Manipulator.SetPosition(0 + baseDelta.X, spaceSize + baseDelta.Y, (-spaceSize * dist) + baseDelta.Z);
             lamp.Manipulator.SetRotation(0, pitch, 0);
@@ -584,8 +583,8 @@ namespace BasicSamples.SceneTest
 
             lampI[0].Manipulator.SetRotation(0, pitch, 0);
             lampI[1].Manipulator.SetRotation(0, pitch, 0);
-            lampI[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
-            lampI[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
+            lampI[2].Manipulator.SetRotation(Helper.PiOver2, pitch, 0);
+            lampI[3].Manipulator.SetRotation(Helper.PiOver2, pitch, 0);
 
             List<ISceneLight> lights = [.. lamp.Lights];
 
@@ -632,11 +631,11 @@ namespace BasicSamples.SceneTest
             streetlampI[7].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 1f + baseDelta.Z);
             streetlampI[8].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2f + baseDelta.Z);
 
-            streetlampI[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            streetlampI[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            streetlampI[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            streetlampI[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            streetlampI[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            streetlampI[4].Manipulator.SetRotation(Helper.Pi, 0, 0);
+            streetlampI[5].Manipulator.SetRotation(Helper.Pi, 0, 0);
+            streetlampI[6].Manipulator.SetRotation(Helper.Pi, 0, 0);
+            streetlampI[7].Manipulator.SetRotation(Helper.Pi, 0, 0);
+            streetlampI[8].Manipulator.SetRotation(Helper.Pi, 0, 0);
 
             List<ISceneLight> lights = [.. streetlamp.Lights];
 
@@ -659,7 +658,7 @@ namespace BasicSamples.SceneTest
             int xRowCount = xCount * 2;
             int zRowCount = zCount * 2;
             int rowSize = xRowCount + zRowCount;
-            int instances = rowSize * rows;
+            uint instances = (uint)(rowSize * rows);
 
             var container = await AddComponentGround<Model, ModelDescription>(
                 "Container",
@@ -682,7 +681,7 @@ namespace BasicSamples.SceneTest
             container.Manipulator.SetScaling(scale);
             var scaledOnlyBbox = container.GetBoundingBox(true);
             container.Manipulator.SetPosition(s + 12 + baseDelta.X, baseHeight + baseDelta.Y, 30 + baseDelta.Z);
-            container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
+            container.Manipulator.SetRotation(Helper.PiOver2 * 2.1f, 0, 0);
 
             var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
                 "ContainerI",
@@ -727,16 +726,16 @@ namespace BasicSamples.SceneTest
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
             var cubeTris = Triangle.ComputeTriangleList(bbox);
-            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
+            cubeTris = Triangle.Transform(cubeTris, Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
-            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
-                Primitives = cubeTris.ToArray(),
+                Primitives = [.. cubeTris],
                 Color = Color.Red,
                 BlendMode = BlendModes.Alpha,
             };
 
-            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "TestCube",
                 "Test Cube",
                 desc);
@@ -789,24 +788,24 @@ namespace BasicSamples.SceneTest
                         MaximumDistance = 1000f,
                     });
 
-                markers.AddRange(Triangle.Transform(cubeTris, Matrix.Translation(positions[i])));
+                markers.AddRange(Triangle.Transform(cubeTris, Matrix4x4.Translation(positions[i])));
             }
 
-            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. markers],
-                Color = new(Color.Yellow.ToColor3(), 0.3333f),
+                Color = new(Color.Yellow, 0.3333f),
                 BlendMode = BlendModes.Alpha,
             };
-            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugPM",
                 "Marker Cubes",
                 desc);
         }
         private async Task InitializeDebug()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>() { Count = 20000 };
-            volumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            var desc = new GeometryColorDrawerDescription<Line3D>() { Count = 20000 };
+            volumeDrawer = await AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DebugVolumes",
                 "DebugLightsVolumeDrawer",
                 desc);
@@ -825,13 +824,13 @@ namespace BasicSamples.SceneTest
 
             foreach (var t in treesI.GetInstances().Select(t => t.Manipulator))
             {
-                float px = Helper.RandomGenerator.NextFloat(400, 600);
-                float pz = Helper.RandomGenerator.NextFloat(400, 600);
-                float r = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                float y = Helper.RandomGenerator.NextFloat(0, MathUtil.Pi / 16f);
-                float s = Helper.RandomGenerator.NextFloat(1.8f, 3.5f);
+                float px = Helper.RandomGenerator.NextSingle(400, 600);
+                float pz = Helper.RandomGenerator.NextSingle(400, 600);
+                float r = Helper.RandomGenerator.NextSingle(0, Helper.TwoPi);
+                float y = Helper.RandomGenerator.NextSingle(0, Helper.Pi / 16f);
+                float s = Helper.RandomGenerator.NextSingle(1.8f, 3.5f);
 
-                topDownRay.Position = new Vector3(px, 1000, pz);
+                topDownRay.Start = new Vector3(px, 1000, pz);
                 topDownRay.Direction = Vector3.Down;
                 scenery.PickFirst(topDownRay, out var treeIPos);
 
@@ -874,8 +873,8 @@ namespace BasicSamples.SceneTest
 
             if (Camera.Position.Y < waterHeight)
             {
-                Lights.HemisphericLigth.AmbientUp = Color3.Black;
-                Lights.HemisphericLigth.AmbientDown = waterColor.RGB() * 1.5f;
+                Lights.HemisphericLigth.AmbientUp = Color.Black;
+                Lights.HemisphericLigth.AmbientDown = waterColor.ToVector3() * 1.5f;
 
                 float depth = waterHeight - Camera.Position.Y;
                 Lights.EnableFog(1, MathF.Max((1f - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);
@@ -976,7 +975,7 @@ namespace BasicSamples.SceneTest
         {
             if (nextWindChange <= 0)
             {
-                nextWindChange = Helper.RandomGenerator.NextFloat(0, 120);
+                nextWindChange = Helper.RandomGenerator.NextSingle(0, 120);
 
                 var limits = Vector2.One * 100f;
                 nextWind = Helper.RandomGenerator.NextVector2(-limits, limits);
@@ -990,7 +989,7 @@ namespace BasicSamples.SceneTest
         }
         private void UpdateSkyEffects()
         {
-            skyPlane.Velocity = MathF.Min(1f, MathUtil.Lerp(skyPlane.Velocity, wind.Length() / 100f, 0.001f));
+            skyPlane.Velocity = MathF.Min(1f, float.Lerp(skyPlane.Velocity, wind.Length() / 100f, 0.001f));
         }
         private void UpdateParticles()
         {
@@ -1035,14 +1034,14 @@ namespace BasicSamples.SceneTest
             {
                 var lines = Line3D.CreateSphere(spot.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red, 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = Line3D.CreateSphere(point.BoundingSphere, 12, 5);
 
-                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red, 0.55f), lines);
             }
 
             volumeDrawer.Active = volumeDrawer.Visible = true;
@@ -1076,7 +1075,7 @@ namespace BasicSamples.SceneTest
 
                     var lines = Line3D.CreateBox(box);
 
-                    var contains = cameraFrustum.Contains(box);
+                    var contains = cameraFrustum.Contains(ref box);
 
                     volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
@@ -1086,7 +1085,7 @@ namespace BasicSamples.SceneTest
 
                     var lines = Line3D.CreateSphere(sph, 16, 3);
 
-                    var contains = cameraFrustum.Contains(sph);
+                    var contains = cameraFrustum.Contains(ref sph);
 
                     volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
@@ -1104,7 +1103,7 @@ namespace BasicSamples.SceneTest
 
                     var lines = Line3D.CreateBox(box);
 
-                    var contains = cameraFrustum.Contains(box);
+                    var contains = cameraFrustum.Contains(ref box);
 
                     volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }
@@ -1114,7 +1113,7 @@ namespace BasicSamples.SceneTest
 
                     var lines = Line3D.CreateSphere(sph, 16, 3);
 
-                    var contains = cameraFrustum.Contains(sph);
+                    var contains = cameraFrustum.Contains(ref sph);
 
                     volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
                 }

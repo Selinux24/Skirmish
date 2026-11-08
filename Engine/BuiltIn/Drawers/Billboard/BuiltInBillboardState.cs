@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Billboard
 {
-    using Engine.Common;
-
     /// <summary>
     /// Built-in billboard state
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,25 +16,13 @@ namespace Engine.Common
     /// <param name="transform">World transform</param>
     /// <param name="vertices">Vertices</param>
     /// <param name="indices">Indices</param>
-    public class Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices) : IDisposable
+    public class Mesh<T>(string name, Topology topology, Matrix4x4 transform, IEnumerable<T> vertices, IEnumerable<uint> indices) : IMesh
+        where T : unmanaged, IVertexData
     {
-        /// <summary>
-        /// Static id counter
-        /// </summary>
-        private static int ID = 0;
-        /// <summary>
-        /// Gets the next Id
-        /// </summary>
-        /// <returns>Returns the next Id</returns>
-        private static int GetNextId()
-        {
-            return ++ID;
-        }
-
         /// <summary>
         /// Vertices cache
         /// </summary>
-        private readonly IEnumerable<IVertexData> vertices = vertices ?? [];
+        private readonly IEnumerable<T> vertices = vertices ?? [];
         /// <summary>
         /// Indices cache
         /// </summary>
@@ -51,40 +39,24 @@ namespace Engine.Common
         /// <summary>
         /// Mesh id
         /// </summary>
-        public int Id { get; set; } = GetNextId();
+        public int Id { get; } = IMesh.GetNextId();
         /// <summary>
         /// Indexed model
         /// </summary>
-        public bool Indexed { get; set; } = indices?.Any() == true;
-
+        public bool Indexed { get; } = indices?.Any() == true;
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; private set; } = name;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public VertexTypes VertextType { get; private set; } = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-        /// <summary>
-        /// Topology
-        /// </summary>
-        public Topology Topology { get; private set; } = topology;
-        /// <summary>
-        /// Transform
-        /// </summary>
-        public Matrix Transform { get; set; } = transform;
-
-        /// <summary>
-        /// Vertex buffer descriptor
-        /// </summary>
-        public BufferDescriptor VertexBuffer { get; set; } = null;
-        /// <summary>
-        /// Index buffer descriptor
-        /// </summary>
-        public BufferDescriptor IndexBuffer { get; set; } = null;
-        /// <summary>
-        /// Gets whether the internal state of the mesh is ready from drawing
-        /// </summary>
+        public string Name { get; } = name;
+        /// <inheritdoc/>
+        public Topology Topology { get; } = topology;
+        /// <inheritdoc/>
+        public Matrix4x4 Transform { get; } = transform;
+        /// <inheritdoc/>
+        public BufferDescriptor VertexBuffer { get; private set; } = null;
+        /// <inheritdoc/>
+        public BufferDescriptor IndexBuffer { get; private set; } = null;
+        /// <inheritdoc/>
         public bool Ready
         {
             get
@@ -92,14 +64,12 @@ namespace Engine.Common
                 return (VertexBuffer?.Ready ?? false) && (IndexBuffer?.Ready ?? true);
             }
         }
-        /// <summary>
-        /// Gets the primitive count of the mesh
-        /// </summary>
-        public int Count
+        /// <inheritdoc/>
+        public uint Count
         {
             get
             {
-                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
+                uint count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
                 return Topology switch
                 {
                     Topology.LineList => count / 2,
@@ -117,9 +87,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -134,18 +102,12 @@ namespace Engine.Common
 
         }
 
-        /// <summary>
-        /// Initializes a mesh
-        /// </summary>
-        /// <param name="name">Owner name</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="dynamicBuffers">Create dynamic buffers</param>
-        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <inheritdoc/>
         public void Initialize(string name, BufferManager bufferManager, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             try
             {
-                Logger.WriteTrace(this, $"{name}.{Name} Processing Mesh => {this}");
+                Game.Logger.WriteTrace(this, $"{name}.{Name} Processing Mesh => {this}");
 
                 //Vertices
                 var trnVertices = VertexData.Transform(vertices, Transform);
@@ -157,20 +119,17 @@ namespace Engine.Common
                     IndexBuffer = bufferManager.AddIndexData($"{name}.{Name}", dynamicBuffers, indices);
                 }
 
-                Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
+                Game.Logger.WriteTrace(this, $"{name}.{Name} Processed Mesh => {this}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"{name}.{Name} Error Processing Mesh => {ex.Message}", ex);
+                Game.Logger.WriteError(this, $"{name}.{Name} Error Processing Mesh => {ex.Message}", ex);
 
                 throw;
             }
         }
 
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="dc">Device context</param>
+        /// <inheritdoc/>
         public virtual void Draw(IEngineDeviceContext dc)
         {
             if (Indexed)
@@ -182,13 +141,8 @@ namespace Engine.Common
 
             dc.Draw(VertexBuffer);
         }
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
-        public virtual void Draw(IEngineDeviceContext dc, int instanceCount, int startInstanceLocation)
+        /// <inheritdoc/>
+        public virtual void Draw(IEngineDeviceContext dc, uint instanceCount, uint startInstanceLocation)
         {
             if (Indexed)
             {
@@ -200,16 +154,12 @@ namespace Engine.Common
             dc.DrawInstanced(instanceCount, startInstanceLocation, VertexBuffer);
         }
 
-        /// <summary>
-        /// Gets point list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or position list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
             if (!refresh && positionCache != null)
             {
-                return positionCache.ToArray();
+                return [.. positionCache];
             }
 
             if (!vertices.Any())
@@ -235,19 +185,14 @@ namespace Engine.Common
                 return p;
             });
 
-            return positionCache.ToArray();
+            return [.. positionCache];
         }
-        /// <summary>
-        /// Gets point list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="boneTransforms">Bone transforms</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or position list</returns>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        /// <inheritdoc/>
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             if (!refresh && positionCache != null)
             {
-                return positionCache.ToArray();
+                return [.. positionCache];
             }
 
             if (!vertices.Any())
@@ -272,18 +217,14 @@ namespace Engine.Common
                 return p;
             });
 
-            return positionCache.ToArray();
+            return [.. positionCache];
         }
-        /// <summary>
-        /// Gets triangle list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or triangle list</returns>
+        /// <inheritdoc/>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
-                return triangleCache.ToArray();
+                return [.. triangleCache];
             }
 
             var positions = GetPoints(refresh);
@@ -301,19 +242,14 @@ namespace Engine.Common
                 triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
-            return triangleCache.ToArray();
+            return [.. triangleCache];
         }
-        /// <summary>
-        /// Gets triangle list of mesh if the vertex type has position channel
-        /// </summary>
-        /// <param name="boneTransforms">Bone transforms</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
-                return triangleCache.ToArray();
+                return [.. triangleCache];
             }
 
             var positions = GetPoints(boneTransforms, refresh);
@@ -331,15 +267,21 @@ namespace Engine.Common
                 triangleCache = Triangle.ComputeTriangleList(positions, indices);
             }
 
-            return triangleCache.ToArray();
+            return [.. triangleCache];
+        }
+
+        /// <inheritdoc/>
+        public IVertexData GetVertexType()
+        {
+            return default(T);
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
             return Indexed ?
-                $"Id: {Id}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
-                $"Id: {Id}; Vertices: {vertices.Count()}";
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}";
         }
     }
 }

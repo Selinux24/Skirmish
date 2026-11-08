@@ -13,11 +13,11 @@ namespace Engine.Common
         /// <summary>
         /// Vertex draw count
         /// </summary>
-        public int VertexDrawCount { get; set; }
+        public uint VertexDrawCount { get; set; }
         /// <summary>
         /// Vertex buffer additional offset
         /// </summary>
-        public int VertexBufferOffset { get; set; }
+        public uint VertexBufferOffset { get; set; }
         /// <summary>
         /// Topology
         /// </summary>
@@ -40,11 +40,11 @@ namespace Engine.Common
         /// <summary>
         /// Index draw count
         /// </summary>
-        public int IndexDrawCount { get; set; }
+        public uint IndexDrawCount { get; set; }
         /// <summary>
         /// Index buffer additional offset
         /// </summary>
-        public int IndexBufferOffset { get; set; }
+        public uint IndexBufferOffset { get; set; }
 
         /// <summary>
         /// Use instanced drawing
@@ -53,11 +53,11 @@ namespace Engine.Common
         /// <summary>
         /// Instance count
         /// </summary>
-        public int InstanceCount { get; set; }
+        public uint InstanceCount { get; set; }
         /// <summary>
         /// Start instance location in instanced buffer
         /// </summary>
-        public int StartInstanceLocation { get; set; }
+        public uint StartInstanceLocation { get; set; }
 
         /// <summary>
         /// Draw
@@ -82,7 +82,7 @@ namespace Engine.Common
         {
             if (Indexed)
             {
-                int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
+                uint drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
                 dc.DrawIndexed(
                     drawCount,
@@ -91,7 +91,7 @@ namespace Engine.Common
             }
             else
             {
-                int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
+                uint drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
                 dc.Draw(
                     drawCount,
@@ -106,7 +106,7 @@ namespace Engine.Common
         {
             if (Indexed)
             {
-                int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
+                uint drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
                 dc.DrawIndexedInstanced(
                     drawCount,
@@ -116,7 +116,7 @@ namespace Engine.Common
             }
             else
             {
-                int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
+                uint drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
                 dc.DrawInstanced(
                     drawCount,

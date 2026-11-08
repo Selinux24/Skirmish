@@ -1,10 +1,12 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
-using Engine.Collada;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtCollada;
 using Engine.InputMapping;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour;
@@ -12,13 +14,13 @@ using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneNavMeshTest
@@ -35,6 +37,9 @@ namespace TerrainSamples.SceneNavMeshTest
         private const string agentFileName = "agentState.json";
         private const string buildSettingsFileName = "buildSettingsState.json";
         private const string groupSettingsFileName = "groupSettingsState.json";
+        private const int dialogWidth = 600;
+        private const int dialogHeight = 350;
+        private const int dialogItemsPerPage = 10;
 
         private readonly InputMapper inputMapper;
 
@@ -64,10 +69,12 @@ namespace TerrainSamples.SceneNavMeshTest
         private UIPanel groupPanel = null;
         private UIPanel debugPanel = null;
 
-        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color4 sceneButtonColor = Color4.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color4 sceneButtonTextColor = Color.WhiteSmoke;
+        private readonly Color4 sceneBackgroundColor = Color.CornflowerBlue;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private PrimitiveListDrawer<Triangle> triangleDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Triangle> triangleDrawer = null;
 
         private Model inputGeometry = null;
         private Model debugGeometry = null;
@@ -78,8 +85,8 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly GroupManager<CrowdAgentSettings> crowdManager = new();
         private Crowd crowd;
         private CrowdAgentSettings crowdAgentSettings;
-        private readonly Color groupColor = new(125, 97, 255, 255);
-        private readonly Color groupTargetColor = new(125, 197, 255, 255);
+        private readonly Color4 groupColor = new Color(125, 97, 255, 255);
+        private readonly Color4 groupTargetColor = new Color(125, 197, 255, 255);
 
         private float? lastElapsedSeconds = null;
         private TimeSpan enqueueTime = TimeSpan.Zero;
@@ -89,18 +96,18 @@ namespace TerrainSamples.SceneNavMeshTest
         private bool gameReady = false;
         private readonly StateManager stateManager = new();
 
-        private readonly Color4 pointColor = new(Color.White.ToVector3(), 1f);
-        private readonly Color4 walkableColor = new(Color.Green.RGB(), 0.75f);
-        private readonly Color4 unwalkableColor = new(Color.Red.RGB(), 0.75f);
+        private readonly Color4 pointColor = new(Color.White, 1f);
+        private readonly Color4 walkableColor = new(Color.Green, 0.75f);
+        private readonly Color4 unwalkableColor = new(Color.Red, 0.75f);
 
-        private readonly Color4 rndColor = new(Color.White.ToVector3(), 0.5f);
-        private readonly Color4 circleColor = new(Color.Orange.ToVector3(), 0.5f);
-        private readonly Color4 pickInColor = new(Color.LightGreen.ToVector3(), 0.5f);
-        private readonly Color4 pickOutColor = new(Color.Pink.ToVector3(), 0.5f);
-        private readonly Color4 obsColor = new(Color.Yellow.RGB(), 0.15f);
-        private readonly Color4 obsStrongColor = new(Color.Yellow.RGB(), 0.35f);
-        private readonly Color4 areaColor = new(Color.GreenYellow.RGB(), 0.1f);
-        private readonly Color4 areaStrongColor = new(Color.GreenYellow.RGB(), 0.15f);
+        private readonly Color4 rndColor = new(Color.White, 0.5f);
+        private readonly Color4 circleColor = new(Color.Orange, 0.5f);
+        private readonly Color4 pickInColor = new(Color.LightGreen, 0.5f);
+        private readonly Color4 pickOutColor = new(Color.Pink, 0.5f);
+        private readonly Color4 obsColor = new(Color.Yellow, 0.15f);
+        private readonly Color4 obsStrongColor = new(Color.Yellow, 0.35f);
+        private readonly Color4 areaColor = new(Color.GreenYellow, 0.1f);
+        private readonly Color4 areaStrongColor = new(Color.GreenYellow, 0.15f);
 
         private readonly List<ObstacleMarker> obstacles = [];
         private readonly List<IAreaMarker> areas = [];
@@ -112,19 +119,28 @@ namespace TerrainSamples.SceneNavMeshTest
         private Vector3 lastPosition = Vector3.Zero;
         private Vector3? pathFindingStart = null;
         private Vector3? pathFindingEnd = null;
-        private readonly Color pathFindingColorPath = new(128, 0, 255, 255);
-        private readonly Color pathFindingColorStart = new(97, 0, 255, 255);
-        private readonly Color pathFindingColorEnd = new(0, 97, 255, 255);
+        private readonly Color4 pathFindingColorPath = new Color(128, 0, 255, 255);
+        private readonly Color4 pathFindingColorStart = new Color(97, 0, 255, 255);
+        private readonly Color4 pathFindingColorEnd = new Color(0, 97, 255, 255);
         private string addConnectionStartMessage = null;
         private Vector3? addConnectionStart = null;
-        private readonly Color connectionColor = Color.LightPink;
-        private readonly Color connectionColorStart = Color.Pink;
-        private readonly Color connectionColorEnd = Color.DeepPink;
+        private readonly Color4 connectionColor = Color.LightPink;
+        private readonly Color4 connectionColorStart = Color.Pink;
+        private readonly Color4 connectionColorEnd = Color.DeepPink;
 
         private bool mapSelected = false;
         private string mapResourcesFolder;
         private string mapFileName;
         private Stopwatch swUpdateGraph = Stopwatch.StartNew();
+
+        private bool dialogVisible = false;
+        private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private UIOpenFileDialog loadMapDialog = null;
+        private UIOpenFileDialog loadGraphDialog = null;
+        private UISaveFileDialog saveGraphDialog = null;
+        private const string mapFilesSearchPattern = "*.obj";
+        private const string graphFilesSearchPattern = "*.grf";
+        private const string graphDefaultFile = "test.grf";
 
         private readonly AgentEditor agentEditor;
         private readonly BuildSettingsEditor navMeshEditor;
@@ -138,7 +154,7 @@ namespace TerrainSamples.SceneNavMeshTest
             navMeshEditor = new(this);
             groupEditor = new(this);
 
-            GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
+            GameEnvironment.Background = new(0.09f, 0.09f, 0.09f, 1f);
 
             Game.VisibleMouse = true;
             Game.LockMouse = false;
@@ -161,6 +177,9 @@ namespace TerrainSamples.SceneNavMeshTest
                     InitializeAgentEditor,
                     InitializeNavMeshEditor,
                     InitializeGroupEditor,
+                    InitializeLoadMapDialog,
+                    InitializeLoadGraphDialog,
+                    InitializeSaveGraphDialog,
                     InitializeDebugDrawers,
                 ],
                 InitializeComponentsCompleted);
@@ -175,8 +194,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -220,13 +239,13 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeDebugButtons()
         {
-            var btnFont = TextDrawerDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Regular);
+            var btnFont = FontDescription.FromFamily(resourcesButtonFonts, 10, FontMapStyles.Regular);
             btnFont.ContentPath = resourcesUIFolder;
 
             var btnDesc = UIButtonDescription.DefaultTwoStateButton(btnFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             btnDesc.ContentPath = resourcesUIControls;
-            btnDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            btnDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            btnDesc.ColorReleased = new((Color3)sceneButtonColor, 0.8f);
+            btnDesc.ColorPressed = new((Color3)sceneButtonColor * 1.2f, 0.9f);
             btnDesc.TextForeColor = Color.Gold;
             btnDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             btnDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -403,8 +422,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeAgentEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -426,8 +445,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeNavMeshEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -449,8 +468,8 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeGroupEditor()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily(resourcesFont, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(resourcesFont, 12);
+            var defaultFont18 = FontDescription.FromFamily(resourcesFont, 18);
+            var defaultFont12 = FontDescription.FromFamily(resourcesFont, 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -472,23 +491,121 @@ namespace TerrainSamples.SceneNavMeshTest
 
             await groupEditor.Initialize(defaultFont18, defaultFont12);
         }
+        private async Task InitializeLoadMapDialog()
+        {
+            loadMapDialog = new(this, nameof(loadMapDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            loadMapDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = loadMapDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                if (debugGeometry != null)
+                {
+                    debugGeometry.Active = false;
+                    debugGeometry.Visible = false;
+                }
+
+                mapSelected = false;
+                mapResourcesFolder = dialogFolder;
+                mapFileName = Path.GetFileName(fileName);
+                mapSelected = true;
+
+                InitializeMapData();
+            };
+            loadMapDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await loadMapDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
+        private async Task InitializeLoadGraphDialog()
+        {
+            loadGraphDialog = new(this, nameof(loadGraphDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            loadGraphDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = loadMapDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                LoadNavigationGraphFromFile(fileName);
+            };
+            loadGraphDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await loadGraphDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
+        private async Task InitializeSaveGraphDialog()
+        {
+            saveGraphDialog = new(this, nameof(saveGraphDialog), dialogWidth, dialogHeight, dialogItemsPerPage)
+            {
+                ButtonColor = sceneButtonColor,
+                ButtonTextColor = sceneButtonTextColor,
+                BackgroundColor = sceneBackgroundColor,
+            };
+
+            saveGraphDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = saveGraphDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                PathFinderDescription.Save(fileName, NavigationGraph);
+            };
+            saveGraphDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await saveGraphDialog.Initialize(dialogFolder, resourcesButtonFonts);
+        }
         private async Task InitializeDebugDrawers()
         {
-            var markDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var markDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 100000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            triangleDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
+            triangleDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
 
-            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var volumesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 100000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc, LayerEffects + 1);
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc, LayerEffects + 1);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult resUi)
         {
@@ -595,30 +712,13 @@ namespace TerrainSamples.SceneNavMeshTest
 
         private void SelectMap()
         {
-            System.Windows.Forms.OpenFileDialog dlg = new()
-            {
-                Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
-                FilterIndex = 1,
-                RestoreDirectory = true
-            };
-
-            if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            if (dialogVisible)
             {
                 return;
             }
 
-            if (debugGeometry != null)
-            {
-                debugGeometry.Active = false;
-                debugGeometry.Visible = false;
-            }
-
-            mapSelected = false;
-            mapResourcesFolder = Path.GetDirectoryName(dlg.FileName);
-            mapFileName = Path.GetFileName(dlg.FileName);
-            mapSelected = true;
-
-            InitializeMapData();
+            loadMapDialog.ShowDialog("Please select a model to continue", dialogFolder, mapFilesSearchPattern);
+            dialogVisible = true;
         }
         private void InitializeMapData()
         {
@@ -804,7 +904,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             var bbox = inputGeometry.GetBoundingBox();
-            var center = bbox.GetCenter();
+            var center = bbox.Center;
             float maxD = MathF.Max(MathF.Max(bbox.Width, bbox.Height), bbox.Depth);
 
             Camera.SetInterest(center);
@@ -1643,7 +1743,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var group = LoadResourceGroup.FromTasks(
                 () => LoadDebugModel(agent, debugType),
-                (LoadResourcesResult res) =>
+                res =>
                 {
                     if (!res.Completed)
                     {
@@ -1724,9 +1824,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var material = new MaterialPhongContent()
             {
-                DiffuseColor = Color4.White,
+                DiffuseColor = Color.White,
                 EmissiveColor = MaterialConstants.EmissiveColor,
-                AmbientColor = Color3.White,
+                AmbientColor = Color.White,
                 SpecularColor = MaterialConstants.SpecularColor,
                 Shininess = MaterialConstants.Shininess,
                 IsTransparent = true,
@@ -1785,11 +1885,11 @@ namespace TerrainSamples.SceneNavMeshTest
                         var norm = new Plane(dverts[i], dverts[i + 1], dverts[i + 2]).Normal;
 
                         var vData = verts.Select(v => new VertexData() { Color = color, Position = v, Normal = norm });
-                        vertices.AddRange(vData.ToArray());
+                        vertices.AddRange([.. vData]);
                     }
                 }
 
-                SubMeshContent geo = new(topology, materialName, false, false, Matrix.Identity);
+                SubMeshContent geo = new(topology, materialName, false, false, Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 return geo;
             }
@@ -1806,11 +1906,11 @@ namespace TerrainSamples.SceneNavMeshTest
                         Vector3[] verts = [dverts[i], dverts[i + 1]];
 
                         var vData = verts.Select(v => new VertexData() { Color = color, Position = v });
-                        vertices.AddRange(vData.ToArray());
+                        vertices.AddRange([.. vData]);
                     }
                 }
 
-                SubMeshContent geo = new(topology, materialName, false, false, Matrix.Identity);
+                SubMeshContent geo = new(topology, materialName, false, false, Matrix4x4.Identity);
                 geo.SetVertices(vertices);
                 return geo;
             }
@@ -1873,13 +1973,10 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            using var dlg = new System.Windows.Forms.SaveFileDialog();
-            dlg.FileName = @"test.grf";
+            string fileName = Path.Combine(dialogFolder, graphDefaultFile);
 
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                PathFinderDescription.Save(dlg.FileName, NavigationGraph);
-            }
+            saveGraphDialog.ShowDialog("Save Graph to file", fileName, graphFilesSearchPattern);
+            dialogVisible = true;
         }
         private void LoadNavmeshFromFile()
         {
@@ -1890,13 +1987,13 @@ namespace TerrainSamples.SceneNavMeshTest
                 return;
             }
 
-            using var dlg = new System.Windows.Forms.OpenFileDialog();
-            dlg.FileName = @"test.grf";
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (dialogVisible)
             {
-                LoadNavigationGraphFromFile(dlg.FileName);
+                return;
             }
+
+            loadGraphDialog.ShowDialog("Please select a graph to continue", dialogFolder, graphFilesSearchPattern);
+            dialogVisible = true;
         }
 
         private void ShowMessage(string text, long duration = 5000)

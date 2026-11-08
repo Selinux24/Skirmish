@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix4X4 InitialTransform { get; set; }
+        public Matrix4x4 InitialTransform { get; set; }
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Ligth position
         /// </summary>
-        public Position3 Position { get; set; }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Light radius
         /// </summary>

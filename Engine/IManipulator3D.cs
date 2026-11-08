@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
@@ -238,7 +238,7 @@ namespace Engine
         /// </summary>
         /// <param name="transform">Transform matrix</param>
         /// <remarks>The specified transform matrix must be a SRT matrix</remarks>
-        void SetTransform(Matrix transform);
+        void SetTransform(Matrix4x4 transform);
 
         /// <summary>
         /// Looks at target

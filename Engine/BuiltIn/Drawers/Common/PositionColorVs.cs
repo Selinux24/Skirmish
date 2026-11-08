@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position color vertex shader
     /// </summary>
-    public class PositionColorVs : IBuiltInShader<EngineVertexShader>
+    public class PositionColorVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

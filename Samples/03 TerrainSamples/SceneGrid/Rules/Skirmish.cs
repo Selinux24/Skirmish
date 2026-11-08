@@ -8,9 +8,9 @@ namespace TerrainSamples.SceneGrid.Rules
 
     public class Skirmish
     {
-        private readonly List<Team> teams = new();
-        private readonly Dictionary<Team, bool> turnInfo = new();
-        private readonly List<Melee> melees = new();
+        private readonly List<Team> teams = [];
+        private readonly Dictionary<Team, bool> turnInfo = [];
+        private readonly List<Melee> melees = [];
 
         private int currentTurn = 0;
         private int currentSoldier = 0;
@@ -29,7 +29,7 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return teams.ToArray();
+                return [.. teams];
             }
         }
         public Team[] IdleTeams
@@ -46,7 +46,7 @@ namespace TerrainSamples.SceneGrid.Rules
                     }
                 }
 
-                return idleTeams.ToArray();
+                return [.. idleTeams];
             }
         }
         public Soldier CurrentSoldier
@@ -88,7 +88,7 @@ namespace TerrainSamples.SceneGrid.Rules
                     soldiers.AddRange(team.Soldiers);
                 }
 
-                return soldiers.ToArray();
+                return [.. soldiers];
             }
         }
 
@@ -143,9 +143,9 @@ namespace TerrainSamples.SceneGrid.Rules
         public Victory IsFinished()
         {
             //Victory conditions...
-            Team[] activeTeams = teams.FindAll(t =>
+            var activeTeams = teams.FindAll(t =>
                 t.Role != TeamRoles.Neutral &&
-                Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStates.Disabled)).ToArray();
+                Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStates.Disabled));
 
             string[] factions = activeTeams.Select((a) => { return a.Faction; }).Distinct().ToArray();
             if (factions.Length == 1)
@@ -344,11 +344,11 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public Team[] EnemyOf(Team team)
         {
-            return teams.FindAll(t => t.Faction != team.Faction && t.Role != TeamRoles.Neutral).ToArray();
+            return [.. teams.FindAll(t => t.Faction != team.Faction && t.Role != TeamRoles.Neutral)];
         }
         public Team[] FriendOf(Team team)
         {
-            return teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRoles.Neutral).ToArray();
+            return [.. teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRoles.Neutral)];
         }
 
         /// <inheritdoc/>

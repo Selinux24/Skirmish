@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -124,7 +124,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileWidth = tileWidth,
                 TileHeight = tileHeight,
                 MaxObstacles = 128,
-                
+
                 EnableDebugInfo = settings.EnableDebugInfo,
             };
         }

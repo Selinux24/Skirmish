@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,7 +69,7 @@ namespace Engine
             }
 
             this.checkPoints = points;
-            this.normals = normals.ToArray();
+            this.normals = [.. normals];
             Length = length;
         }
 
@@ -81,7 +81,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return checkPoints[0];
             }
@@ -118,7 +118,7 @@ namespace Engine
                 return Vector3.Up;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return normals[0];
             }
@@ -155,7 +155,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return checkPoints[0];
             }

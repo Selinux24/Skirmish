@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var t in triangles)
             {
-                var bbox = SharpDXExtensions.BoundingBoxFromPoints(t.GetVertices().ToArray());
+                var bbox = BoundingBox.FromPoints([.. t.GetVertices()]);
 
                 items.Add(new BoundsItem
                 {
@@ -144,7 +144,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return new ChunkyTriMesh
             {
-                triangles = triangles.ToArray(),
+                triangles = [.. triangles],
                 nodes = [.. data.Nodes],
                 triangleIndices = [.. data.OutTris]
             };
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="bounds">Bounds</param>
         /// <returns>Returns the longest axis</returns>
-        private static Axis LongestAxis(RectangleF bounds)
+        private static Axis LongestAxis(Rect bounds)
         {
             Vector2 bmin = bounds.TopLeft;
             Vector2 bmax = bounds.BottomRight;
@@ -238,13 +238,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="imin">Minimum index</param>
         /// <param name="imax">Maximum index</param>
         /// <returns>Returns the items bounds</returns>
-        private static RectangleF CalcExtends(BoundsItem[] items, int imin, int imax)
+        private static Rect CalcExtends(BoundsItem[] items, int imin, int imax)
         {
             var bounds = items[imin].Bounds;
 
             for (int i = imin + 1; i < imax; ++i)
             {
-                bounds = RectangleF.Union(bounds, items[i].Bounds);
+                bounds = Rect.Union(bounds, items[i].Bounds);
             }
 
             return bounds;

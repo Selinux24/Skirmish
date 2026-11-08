@@ -1,9 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Foliage drawer
     /// </summary>

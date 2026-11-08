@@ -129,8 +129,8 @@ namespace Engine.Modular
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
             {
-                int count = instances[assetName].Count;
-                if (count <= 0)
+                uint count = (uint)instances[assetName].Count;
+                if (count == 0)
                 {
                     continue;
                 }
@@ -152,7 +152,7 @@ namespace Engine.Modular
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding</param>
-        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeAsset(string assetName, uint count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
             var assetId = $"Asset.{assetName}.{level.Name}";
 
@@ -195,8 +195,8 @@ namespace Engine.Modular
             // Load all single geometries into single instanced model components
             foreach (var objectName in instances.Keys)
             {
-                var count = instances[objectName].Count;
-                if (count <= 0)
+                uint count = (uint)instances[objectName].Count;
+                if (count == 0)
                 {
                     continue;
                 }
@@ -218,7 +218,7 @@ namespace Engine.Modular
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding enabled flag</param>
-        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeObject(string objectName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
+        private (string Id, string Name, ModelInstancedDescription ModelDescription) InitializeObject(string objectName, uint count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
             var objectId = $"{objectName}.{level.Name}";
 

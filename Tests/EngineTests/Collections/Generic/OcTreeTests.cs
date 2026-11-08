@@ -1,29 +1,25 @@
-using Engine;
-using Engine.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EngineTests.Collections.Generic
 {
+    using Engine;
+    using Engine.Collections.Generic;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class OcTreeTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         private static (ICullingVolume Box, Vector3 Obj) GenerateItem(Vector3 position, float size)
@@ -90,34 +86,34 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(3, count);
 
             var res = q.Query((IntersectionVolumeAxisAlignedBox)bbox);
-            Assert.AreEqual(3, res.Count());
+            Assert.HasCount(3, res);
 
             res = q.Query(b1);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p1, res.ElementAt(0));
 
             res = q.Query(b2);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p2, res.ElementAt(0));
 
             res = q.Query(b3);
-            Assert.AreEqual(1, res.Count());
+            Assert.HasCount(1, res);
             Assert.AreEqual(p3, res.ElementAt(0));
 
             var d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p2]);
             res = q.Query(d);
-            Assert.AreEqual(2, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p2 }, res.ToArray());
+            Assert.HasCount(2, res);
+            Assert.AreSequenceEqual([p1, p2], res, SequenceOrder.InAnyOrder);
 
             d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p3]);
             res = q.Query(d);
-            Assert.AreEqual(2, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p3 }, res.ToArray());
+            Assert.HasCount(2, res);
+            Assert.AreSequenceEqual([p1, p3], res, SequenceOrder.InAnyOrder);
 
             d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p2, p3]);
             res = q.Query(d);
-            Assert.AreEqual(3, res.Count());
-            CollectionAssert.AreEquivalent(new[] { p1, p2, p3 }, res.ToArray());
+            Assert.HasCount(3, res);
+            Assert.AreSequenceEqual([p1, p2, p3], res, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]

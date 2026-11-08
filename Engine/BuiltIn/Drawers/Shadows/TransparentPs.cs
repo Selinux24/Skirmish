@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Shadow transparent texture pixel shader
     /// </summary>
-    public class TransparentPs : IBuiltInShader<EnginePixelShader>
+    public class TransparentPs : IShader<EnginePixelShader>
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }

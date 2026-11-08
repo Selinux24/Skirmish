@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,199 +44,14 @@ namespace Engine.Common
         /// Color
         /// </summary>
         public Color4? Color { get; set; }
-        /// <summary>
-        /// Sprite size
-        /// </summary>
-        public Vector2? Size { get; set; }
-        /// <summary>
-        /// Vertex weights
-        /// </summary>
-        public float[] Weights { get; set; }
-        /// <summary>
-        /// Bone weights
-        /// </summary>
-        public byte[] BoneIndices { get; set; }
 
-        /// <summary>
-        /// Gets whether specified vertex type is skinned or not
-        /// </summary>
-        /// <param name="vertexTypes">Vertex type</param>
-        /// <returns>Returns true if the vertex type contains skinning info</returns>
-        public static bool IsSkinned(VertexTypes vertexTypes)
-        {
-            return
-                vertexTypes == VertexTypes.PositionSkinned ||
-                vertexTypes == VertexTypes.PositionColorSkinned ||
-                vertexTypes == VertexTypes.PositionNormalColorSkinned ||
-                vertexTypes == VertexTypes.PositionTextureSkinned ||
-                vertexTypes == VertexTypes.PositionNormalTextureSkinned ||
-                vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
-        }
-        /// <summary>
-        /// Gets whether specified vertex type has tangent channel or not
-        /// </summary>
-        /// <param name="vertexTypes">Vertex type</param>
-        /// <returns>Returns true if the vertex type has tangent channel info</returns>
-        public static bool IsTangent(VertexTypes vertexTypes)
-        {
-            return
-                vertexTypes == VertexTypes.PositionNormalTextureTangent ||
-                vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
-        }
-        /// <summary>
-        /// Gets whether specified vertex type is textured or not
-        /// </summary>
-        /// <param name="vertexTypes">Vertex type</param>
-        /// <returns>Returns true if the vertex type contains texture map info</returns>
-        public static bool IsTextured(VertexTypes vertexTypes)
-        {
-            return
-                vertexTypes == VertexTypes.Billboard ||
-
-                vertexTypes == VertexTypes.PositionTexture ||
-                vertexTypes == VertexTypes.PositionNormalTexture ||
-                vertexTypes == VertexTypes.PositionNormalTextureTangent ||
-
-                vertexTypes == VertexTypes.PositionTextureSkinned ||
-                vertexTypes == VertexTypes.PositionNormalTextureSkinned ||
-                vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
-        }
-        /// <summary>
-        /// Gets the vertex type based on vertex data
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
-        /// <returns>Returns the vertex type</returns>
-        public static VertexTypes GetVertexType(VertexData v, bool preferTextured = true)
-        {
-            if (v.Position.HasValue)
-            {
-                if (v.Normal.HasValue)
-                {
-                    return GetPositionNormalVariant(v, preferTextured);
-                }
-                else
-                {
-                    return GetPositionOnlyVariant(v, preferTextured);
-                }
-            }
-            else
-            {
-                return VertexTypes.Unknown;
-            }
-        }
-        /// <summary>
-        /// Gets the vertex type based on vertex data (Position with Normal)
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
-        /// <returns>Returns the vertex type</returns>
-        public static VertexTypes GetPositionOnlyVariant(VertexData v, bool preferTextured)
-        {
-            if (!preferTextured && v.Color.HasValue)
-            {
-                return VertexTypes.PositionColor;
-            }
-            else if (preferTextured && v.Texture.HasValue)
-            {
-                return VertexTypes.PositionTexture;
-            }
-            else
-            {
-                return VertexTypes.PositionColor;
-            }
-        }
-        /// <summary>
-        /// Gets the vertex type based on vertex data (Position without Normal)
-        /// </summary>
-        /// <param name="v">Vertex</param>
-        /// <param name="preferTextured">Sets whether textured formats were prefered over vertex colored formats</param>
-        /// <returns>Returns the vertex type</returns>
-        public static VertexTypes GetPositionNormalVariant(VertexData v, bool preferTextured)
-        {
-            if (!preferTextured && v.Color.HasValue)
-            {
-                return VertexTypes.PositionNormalColor;
-            }
-            else if (preferTextured && v.Texture.HasValue)
-            {
-                if (v.Tangent.HasValue)
-                {
-                    return VertexTypes.PositionNormalTextureTangent;
-                }
-                else
-                {
-                    return VertexTypes.PositionNormalTexture;
-                }
-            }
-            else
-            {
-                return VertexTypes.PositionNormalColor;
-            }
-        }
-        /// <summary>
-        /// Gets skinned equivalent for specified non skinning type
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns skinned equivalent for specified non skinning type</returns>
-        public static VertexTypes GetSkinnedEquivalent(VertexTypes vertexType)
-        {
-            if (vertexType == VertexTypes.Position) return VertexTypes.PositionSkinned;
-            if (vertexType == VertexTypes.PositionColor) return VertexTypes.PositionColorSkinned;
-            if (vertexType == VertexTypes.PositionNormalColor) return VertexTypes.PositionNormalColorSkinned;
-            if (vertexType == VertexTypes.PositionTexture) return VertexTypes.PositionTextureSkinned;
-            if (vertexType == VertexTypes.PositionNormalTexture) return VertexTypes.PositionNormalTextureSkinned;
-            if (vertexType == VertexTypes.PositionNormalTextureTangent) return VertexTypes.PositionNormalTextureTangentSkinned;
-
-            return VertexTypes.Unknown;
-        }
-        /// <summary>
-        /// Gets tangent equivalent for specified non tangent type
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns tangent equivalent for specified non tangent type</returns>
-        public static VertexTypes GetTangentEquivalent(VertexTypes vertexType)
-        {
-            if (vertexType == VertexTypes.PositionNormalTexture) return VertexTypes.PositionNormalTextureTangent;
-            if (vertexType == VertexTypes.PositionNormalTextureSkinned) return VertexTypes.PositionNormalTextureTangentSkinned;
-
-            return VertexTypes.Unknown;
-        }
-
-        /// <summary>
-        /// Converts helpers to vertices
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="vertices">Helpers</param>
-        /// <param name="weights">Weight information</param>
-        /// <returns>Returns generated vertices</returns>
-        public static async Task<IEnumerable<IVertexData>> Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
-        {
-            return vertexType switch
-            {
-                VertexTypes.Position => await VertexPosition.Convert(vertices),
-                VertexTypes.PositionColor => await VertexPositionColor.Convert(vertices),
-                VertexTypes.PositionNormalColor => await VertexPositionNormalColor.Convert(vertices),
-                VertexTypes.PositionTexture => await VertexPositionTexture.Convert(vertices),
-                VertexTypes.PositionNormalTexture => await VertexPositionNormalTexture.Convert(vertices),
-                VertexTypes.PositionNormalTextureTangent => await VertexPositionNormalTextureTangent.Convert(vertices),
-                VertexTypes.PositionSkinned => await VertexSkinnedPosition.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionColorSkinned => await VertexSkinnedPositionColor.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalColorSkinned => await VertexSkinnedPositionNormalColor.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionTextureSkinned => await VertexSkinnedPositionTexture.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalTextureSkinned => await VertexSkinnedPositionNormalTexture.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.PositionNormalTextureTangentSkinned => await VertexSkinnedPositionNormalTextureTangent.Convert(vertices, weights, skinBoneNames),
-                VertexTypes.Terrain => await VertexTerrain.Convert(vertices),
-                _ => throw new EngineException($"Unknown vertex type: {vertexType}")
-            };
-        }
         /// <summary>
         /// Apply weighted transforms to the vertext data
         /// </summary>
         /// <param name="vertex">Vertex data</param>
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the weighted position</returns>
-        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix> boneTransforms)
+        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix4x4> boneTransforms)
         {
             if (!vertex.HasChannel(VertexDataChannels.Position))
             {
@@ -269,7 +84,7 @@ namespace Engine.Common
                 var boneTransform = transforms[index];
                 if (!boneTransform.IsIdentity)
                 {
-                    Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
+                    p = Vector3.TransformCoordinate(position, boneTransform);
                 }
 
                 t += p * weight;
@@ -284,7 +99,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix transform)
+        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix4x4 transform)
         {
             if (vertices?.Any() != true)
             {
@@ -293,11 +108,12 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
                 .AsParallel()
+                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                 .Select(r => Transform(r, transform))
                 .ToArray();
         }
@@ -307,7 +123,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static VertexData Transform(VertexData vertex, Matrix transform)
+        public static VertexData Transform(VertexData vertex, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
@@ -344,7 +160,8 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<IVertexData> Transform(IEnumerable<IVertexData> vertices, Matrix transform)
+        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix4x4 transform)
+            where T : unmanaged, IVertexData
         {
             if (vertices?.Any() != true)
             {
@@ -353,11 +170,12 @@ namespace Engine.Common
 
             if (transform.IsIdentity)
             {
-                return vertices.ToArray();
+                return [.. vertices];
             }
 
             return vertices
                 .AsParallel()
+                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                 .Select(r => Transform(r, transform))
                 .ToArray();
         }
@@ -367,14 +185,15 @@ namespace Engine.Common
         /// <param name="vertex">Vertex</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public static IVertexData Transform(IVertexData vertex, Matrix transform)
+        public static T Transform<T>(T vertex, Matrix4x4 transform)
+            where T : unmanaged, IVertexData
         {
             if (transform.IsIdentity)
             {
                 return vertex;
             }
 
-            IVertexData result = vertex;
+            T result = vertex;
 
             if (result.HasChannel(VertexDataChannels.Position))
             {
@@ -438,41 +257,48 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public readonly VertexData Transform(Matrix transform)
+        public readonly VertexData Transform(Matrix4x4 transform)
         {
             return Transform(this, transform);
         }
-        /// <summary>
-        /// Gets the vertex list stride
-        /// </summary>
-        /// <returns>Returns the list stride</returns>
-        public readonly int GetStride()
+
+        /// <inheritdoc/>
+        public readonly IEnumerable<Vector3> GetVertices()
+        {
+            yield return Position.Value;
+        }
+        /// <inheritdoc/>
+        public readonly uint GetStride()
         {
             return 1;
         }
-        /// <summary>
-        /// Gets the vertex list
-        /// </summary>
-        /// <returns>Returns a vertex list</returns>
-        public readonly IEnumerable<Vector3> GetVertices()
-        {
-            return [Position.Value];
-        }
-        /// <summary>
-        /// Gets the vertex list topology
-        /// </summary>
-        /// <returns>Returns the list topology</returns>
+        /// <inheritdoc/>
         public readonly Topology GetTopology()
         {
             return Topology.PointList;
+        }
+
+        /// <summary>
+        /// Evaluates the vertex data content
+        /// </summary>
+        public readonly int Evaluate()
+        {
+            int index = 0;
+
+            if (Position.HasValue) index |= 1 << 0;
+            if (Normal.HasValue) index |= 1 << 1;
+            if (Tangent.HasValue) index |= 1 << 2;
+            if (BiNormal.HasValue) index |= 1 << 3;
+            if (Texture.HasValue) index |= 1 << 4;
+            if (Color.HasValue) index |= 1 << 5;
+
+            return index;
         }
 
         /// <inheritdoc/>
         public override readonly string ToString()
         {
             string text = null;
-
-            if (Weights != null && Weights.Length > 0) text += "Skinned; ";
 
             text += string.Format("FaceIndex: {0}; ", FaceIndex);
             text += string.Format("VertexIndex: {0}; ", VertexIndex);
@@ -483,9 +309,6 @@ namespace Engine.Common
             if (BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", BiNormal);
             if (Texture.HasValue) text += string.Format("Texture: {0}; ", Texture);
             if (Color.HasValue) text += string.Format("Color: {0}; ", Color);
-            if (Size.HasValue) text += string.Format("Size: {0}; ", Size);
-            if (Weights != null && Weights.Length > 0) text += string.Format("Weights: {0}; ", Weights.Length);
-            if (BoneIndices != null && BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", BoneIndices.Length);
 
             return text;
         }

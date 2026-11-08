@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,7 +154,7 @@ namespace Engine.UI
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
         /// <returns>Returns the layout updated state</returns>
-        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
+        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Vector2 bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {
@@ -191,8 +191,8 @@ namespace Engine.UI
                 cols = (int)MathF.Ceiling(controls.Count() / (float)rows);
             }
 
-            float cellWidth = (bounds.Width / cols) - (spacing.Horizontal / cols * (cols - 1)) - (padding.Left / cols) - (padding.Right / cols);
-            float cellHeight = (bounds.Height / rows) - (spacing.Vertical / rows * (rows - 1)) - (padding.Top / rows) - (padding.Bottom / rows);
+            float cellWidth = bounds.X / cols - spacing.Horizontal / cols * (cols - 1) - padding.Left / cols - padding.Right / cols;
+            float cellHeight = bounds.Y / rows - spacing.Vertical / rows * (rows - 1) - padding.Top / rows - padding.Bottom / rows;
 
             cellSize.X = fitX ? cellWidth : cellSize.X;
             cellSize.Y = fitY ? cellHeight : cellSize.Y;
@@ -202,8 +202,8 @@ namespace Engine.UI
                 int rowCount = i / cols;
                 int columnCount = i % cols;
 
-                var xPos = (cellSize.X * columnCount) + (spacing.Horizontal * columnCount) + padding.Left;
-                var yPos = cellSize.Y * rowCount + (spacing.Vertical * rowCount) + padding.Top;
+                var xPos = cellSize.X * columnCount + spacing.Horizontal * columnCount + padding.Left;
+                var yPos = cellSize.Y * rowCount + spacing.Vertical * rowCount + padding.Top;
 
                 var item = controls.ElementAt(i);
                 item.SetPosition(xPos, yPos);

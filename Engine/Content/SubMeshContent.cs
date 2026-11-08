@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sub mesh content
     /// </summary>
@@ -19,33 +18,12 @@ namespace Engine.Content
     /// <param name="isTextured">Is textured mesh</param>
     /// <param name="isHull">Is hull mesh</param>
     /// <param name="transform">Transform</param>
-    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix transform)
+    public class SubMeshContent(Topology topology, string material, bool isTextured, bool isHull, Matrix4x4 transform)
     {
-        /// <summary>
-        /// Global id counter
-        /// </summary>
-        private static int ID = 0;
-        /// <summary>
-        /// Gets the next instance Id
-        /// </summary>
-        /// <returns>Returns the next instance Id</returns>
-        private static int GetNextId()
-        {
-            return ++ID;
-        }
-
-        /// <summary>
-        /// Submesh id
-        /// </summary>
-        public int Id { get; private set; } = GetNextId();
         /// <summary>
         /// Vertex Topology
         /// </summary>
         public Topology Topology { get; set; } = topology;
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public VertexTypes VertexType { get; private set; } = VertexTypes.Unknown;
         /// <summary>
         /// Gets or sets whether the submesh has attached a textured material
         /// </summary>
@@ -69,7 +47,7 @@ namespace Engine.Content
         /// <summary>
         /// Transform
         /// </summary>
-        public Matrix Transform { get; private set; } = transform;
+        public Matrix4x4 Transform { get; private set; } = transform;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -93,7 +71,7 @@ namespace Engine.Content
                 return true;
             }
 
-            if (meshArray.Select(m => (m.VertexType, m.Topology)).Distinct().Count() > 1)
+            if (meshArray.Select(m => (m.Vertices[0].Evaluate(), m.Topology)).Distinct().Count() > 1)
             {
                 optimizedMesh = null;
 
@@ -131,7 +109,7 @@ namespace Engine.Content
                 indexOffset = (uint)verts.Count;
             }
 
-            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix.Identity);
+            optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix4x4.Identity);
 
             optimizedMesh.SetVertices(verts);
             optimizedMesh.SetIndices(idx);
@@ -146,7 +124,6 @@ namespace Engine.Content
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
             Vertices = vertices?.ToArray() ?? [];
-            VertexType = vertices?.Any() != true ? VertexTypes.Unknown : VertexData.GetVertexType(Vertices[0], Textured);
         }
         /// <summary>
         /// Sets the submesh index list
@@ -163,15 +140,10 @@ namespace Engine.Content
         public void SetTextured(bool isTextured)
         {
             Textured = isTextured;
-
-            if (Vertices.Length > 0)
-            {
-                VertexType = VertexData.GetVertexType(Vertices[0], Textured);
-            }
         }
 
         /// <summary>
-        /// Compute UV tangen space
+        /// Computes UV tangent space
         /// </summary>
         public void ComputeTangents()
         {
@@ -180,58 +152,81 @@ namespace Engine.Content
                 return;
             }
 
+            var v = Vertices[0];
+            bool updateNormals = !v.Normal.HasValue;
+            bool updateTangents = !v.Tangent.HasValue;
+            bool updateBiNormals = !v.BiNormal.HasValue;
+            if (!updateNormals && !updateTangents && !updateBiNormals)
+            {
+                return;
+            }
+
             if (Indices.Length > 0)
             {
                 for (int i = 0; i < Indices.Length; i += 3)
                 {
-                    var v0 = Vertices[(int)Indices[i + 0]];
-                    var v1 = Vertices[(int)Indices[i + 1]];
-                    var v2 = Vertices[(int)Indices[i + 2]];
+                    int i0 = (int)Indices[i + 0];
+                    int i1 = (int)Indices[i + 1];
+                    int i2 = (int)Indices[i + 2];
 
-                    var n = GeometryUtil.ComputeNormals(
-                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                    v0.Tangent = n.Tangent;
-                    v1.Tangent = n.Tangent;
-                    v2.Tangent = n.Tangent;
-
-                    v0.BiNormal = n.Binormal;
-                    v1.BiNormal = n.Binormal;
-                    v2.BiNormal = n.Binormal;
-
-                    Vertices[(int)Indices[i + 0]] = v0;
-                    Vertices[(int)Indices[i + 1]] = v1;
-                    Vertices[(int)Indices[i + 2]] = v2;
+                    ComputeTriangleTangents(i0, i1, i2, updateNormals, updateTangents, updateBiNormals);
                 }
             }
             else
             {
                 for (int i = 0; i < Vertices.Length; i += 3)
                 {
-                    var v0 = Vertices[i + 0];
-                    var v1 = Vertices[i + 1];
-                    var v2 = Vertices[i + 2];
+                    int i0 = i + 0;
+                    int i1 = i + 1;
+                    int i2 = i + 2;
 
-                    var n = GeometryUtil.ComputeNormals(
-                        v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                        v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
-
-                    v0.Tangent = n.Tangent;
-                    v1.Tangent = n.Tangent;
-                    v2.Tangent = n.Tangent;
-
-                    v0.BiNormal = n.Binormal;
-                    v1.BiNormal = n.Binormal;
-                    v2.BiNormal = n.Binormal;
-
-                    Vertices[i + 0] = v0;
-                    Vertices[i + 1] = v1;
-                    Vertices[i + 2] = v2;
+                    ComputeTriangleTangents(i0, i1, i2, updateNormals, updateTangents, updateBiNormals);
                 }
             }
+        }
+        /// <summary>
+        /// Computes the triangle UV tangent space
+        /// </summary>
+        /// <param name="i0">Index 0</param>
+        /// <param name="i1">Index 1</param>
+        /// <param name="i2">Index 2</param>
+        /// <param name="updateNormals">Updates normal data</param>
+        /// <param name="updateTangents">Updates tangent data</param>
+        /// <param name="updateBiNormals">Updates binormal data</param>
+        private void ComputeTriangleTangents(int i0, int i1, int i2, bool updateNormals, bool updateTangents, bool updateBiNormals)
+        {
+            var v0 = Vertices[i0];
+            var v1 = Vertices[i1];
+            var v2 = Vertices[i2];
 
-            VertexType = VertexData.GetVertexType(Vertices[0], Textured);
+            var n = GeometryUtil.ComputeNormals(
+                v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
+
+            if (updateNormals)
+            {
+                v0.Normal = n.Normal;
+                v1.Normal = n.Normal;
+                v2.Normal = n.Normal;
+            }
+
+            if (updateTangents)
+            {
+                v0.Tangent = n.Tangent;
+                v1.Tangent = n.Tangent;
+                v2.Tangent = n.Tangent;
+            }
+
+            if (updateBiNormals)
+            {
+                v0.BiNormal = n.Binormal;
+                v1.BiNormal = n.Binormal;
+                v2.BiNormal = n.Binormal;
+            }
+
+            Vertices[i0] = v0;
+            Vertices[i1] = v1;
+            Vertices[i2] = v2;
         }
 
         /// <summary>
@@ -289,21 +284,21 @@ namespace Engine.Content
         /// Transforms the vertex data and resets de internal transform to identity
         /// </summary>
         /// <param name="transform">Transform to apply</param>
-        public void BakeTransform(Matrix transform)
+        public void BakeTransform(Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
                 return;
             }
 
-            Transform = Matrix.Identity;
-            Vertices = Vertices.Select(v => v.Transform(transform)).ToArray();
+            Transform = Matrix4x4.Identity;
+            Vertices = [.. Vertices.Select(v => v.Transform(transform))];
         }
         /// <summary>
         /// Sets the specified transform matrix
         /// </summary>
         /// <param name="transform">Transform matrix</param>
-        public void SetTransform(Matrix transform)
+        public void SetTransform(Matrix4x4 transform)
         {
             Transform = transform;
         }
@@ -311,11 +306,11 @@ namespace Engine.Content
         /// <summary>
         /// Process the vertex data
         /// </summary>
-        /// <param name="vertexType">Vertext type</param>
+        /// <param name="computeTangents">Compute tangent space</param>
         /// <param name="constraint">Constraint</param>
-        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint)
+        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(bool computeTangents, BoundingBox? constraint)
         {
-            if (VertexData.IsTangent(vertexType))
+            if (computeTangents)
             {
                 ComputeTangents();
             }
@@ -341,7 +336,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"VertexType: {VertexType}; Vertices: {Vertices?.Length ?? 0}; Indices: {Indices?.Length ?? 0}; Material: {Material}";
+            return $"Vertices: {Vertices?.Length ?? 0}; Indices: {Indices?.Length ?? 0}; Material: {Material}";
         }
     }
 }

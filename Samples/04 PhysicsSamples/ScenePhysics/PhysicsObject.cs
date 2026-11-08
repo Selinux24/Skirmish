@@ -1,15 +1,15 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
-using Engine.Common;
-using Engine.Physics;
-using Engine.Physics.Colliders;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PhysicsSamples.ScenePhysics
 {
+    using Engine;
+    using Engine.BuiltIn.Components.Models;
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+
     /// <summary>
     /// Physics object
     /// </summary>
@@ -27,7 +27,8 @@ namespace PhysicsSamples.ScenePhysics
         private static ConvexMeshCollider CollisionTriangleSoupFromModel(Model model)
         {
             var tris = model.GetGeometry(true);
-            tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.GlobalTransform));
+            var inv = Matrix4x4.Invert(model.Manipulator.GlobalTransform);
+            tris = Triangle.Transform(tris, inv);
 
             return new ConvexMeshCollider(tris);
         }
@@ -41,13 +42,13 @@ namespace PhysicsSamples.ScenePhysics
         }
         private static CylinderCollider CollisionCylinderFromModel(Model model)
         {
-            var extents = model.GetBoundingBox(true).GetExtents();
+            var extents = model.GetBoundingBox(true).Extents;
 
             return new CylinderCollider(extents.X, extents.Y * 2);
         }
         private static CapsuleCollider CollisionCapsuleFromModel(Model model)
         {
-            var extents = model.GetBoundingBox(true).GetExtents();
+            var extents = model.GetBoundingBox(true).Extents;
 
             return new CapsuleCollider(extents.X, extents.Y * 2);
         }
@@ -105,7 +106,7 @@ namespace PhysicsSamples.ScenePhysics
         {
             var cullingVolume = obj.GetBroadPhaseBounds();
 
-            return Colliders.Where(c => IntersectionHelper.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
+            return Colliders.Where(c => Collision.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
         }
         /// <inheritdoc/>
         public ICullingVolume GetBroadPhaseBounds()
@@ -113,7 +114,7 @@ namespace PhysicsSamples.ScenePhysics
             return Model.GetIntersectionVolume(IntersectDetectionMode.Sphere);
         }
         /// <inheritdoc/>
-        public void Reset(Matrix transform)
+        public void Reset(Matrix4x4 transform)
         {
             RigidBody?.SetInitialState(transform);
         }

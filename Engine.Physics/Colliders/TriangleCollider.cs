@@ -1,9 +1,10 @@
-using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Triangle collider
     /// </summary>
@@ -26,10 +27,10 @@ namespace Engine.Physics.Colliders
         {
             this.triangle = triangle;
 
-            vertices = triangle.GetVertices().ToArray();
+            vertices = [.. triangle.GetVertices()];
 
-            boundingBox = SharpDXExtensions.BoundingBoxFromPoints(vertices);
-            boundingSphere = SharpDXExtensions.BoundingSphereFromPoints(vertices);
+            boundingBox = BoundingBox.FromPoints(vertices);
+            boundingSphere = BoundingSphere.FromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

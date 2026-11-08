@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// CPU particles pixel shader
     /// </summary>
-    public class ParticlesPs : IBuiltInShader<EnginePixelShader>
+    public class ParticlesPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per frame constant buffer

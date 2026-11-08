@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using RenderTargetView1 = Vortice.Direct3D11.ID3D11RenderTargetView1;
 
     /// <summary>
     /// Render target
@@ -96,7 +96,7 @@ namespace Engine.Common
                 throw new ArgumentNullException(nameof(renderTarget), "A render target must be specified.");
             }
 
-            renderTarget.DebugName = Name;
+            renderTarget.DebugName = $"{Name}[{rtvList.Count}]";
             rtvList.Add(renderTarget);
         }
 
@@ -112,7 +112,7 @@ namespace Engine.Common
         /// Gets the render targets
         /// </summary>
         /// <returns>Returns the internal render target list</returns>
-        internal IEnumerable<RenderTargetView1> GetRenderTargets()
+        internal RenderTargetView1[] GetRenderTargets()
         {
             return [.. rtvList];
         }

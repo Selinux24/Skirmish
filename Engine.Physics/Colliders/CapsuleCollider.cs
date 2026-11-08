@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Capsule collider
     /// </summary>
@@ -54,14 +55,14 @@ namespace Engine.Physics.Colliders
 
             if (!transform || !HasTransform)
             {
-                return new[] { bse, cap };
+                return [bse, cap];
             }
 
             var trn = RigidBody.Transform;
             bse = Vector3.TransformCoordinate(bse, trn);
             cap = Vector3.TransformCoordinate(cap, trn);
 
-            return new[] { bse, cap };
+            return [bse, cap];
         }
 
         /// <inheritdoc/>

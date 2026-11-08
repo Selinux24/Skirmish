@@ -1,10 +1,11 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneAnimationParts
@@ -23,14 +24,14 @@ namespace IntermediateSamples.SceneAnimationParts
         private UIPanel backPanel = null;
         private UIConsole console = null;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color sphTrisColor = new(Color.Red.ToColor3(), 0.25f);
-        private readonly Color sphLinesColor = new(Color.Red.ToColor3(), 1f);
-        private readonly Color boxTrisColor = new(Color.Green.ToColor3(), 0.25f);
-        private readonly Color boxLinesColor = new(Color.Green.ToColor3(), 1f);
-        private readonly Color obbTrisColor = new(Color.Blue.ToColor3(), 0.25f);
-        private readonly Color obbLinesColor = new(Color.Blue.ToColor3(), 1f);
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
+        private readonly Color4 sphTrisColor = new(Color.Red, 0.25f);
+        private readonly Color4 sphLinesColor = new(Color.Red, 1f);
+        private readonly Color4 boxTrisColor = new(Color.Green, 0.25f);
+        private readonly Color4 boxLinesColor = new(Color.Green, 1f);
+        private readonly Color4 obbTrisColor = new(Color.Blue, 0.25f);
+        private readonly Color4 obbLinesColor = new(Color.Blue, 1f);
 
         private Model tank;
 
@@ -67,7 +68,7 @@ namespace IntermediateSamples.SceneAnimationParts
         }
         private async Task InitializeUITitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
+            var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 
@@ -75,7 +76,7 @@ namespace IntermediateSamples.SceneAnimationParts
 
             backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            var consoleDesc = UIConsoleDescription.Default(new(0.35f, 0.35f, 0.35f, 1f));
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
@@ -162,16 +163,16 @@ namespace IntermediateSamples.SceneAnimationParts
         }
         private async Task InitializeDebug()
         {
-            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugItemTris",
                 "DebugItemTris",
-                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, BlendMode = BlendModes.Alpha });
+                new GeometryColorDrawerDescription<Triangle>() { Count = 5000, BlendMode = BlendModes.Alpha });
             itemTris.Visible = false;
 
-            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DebugItemLines",
                 "DebugItemLines",
-                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
+                new GeometryColorDrawerDescription<Line3D>() { Count = 1000, BlendMode = BlendModes.Alpha });
             itemLines.Visible = false;
         }
         private void StartEnvironment()
@@ -181,7 +182,7 @@ namespace IntermediateSamples.SceneAnimationParts
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             BoundingBox bbox = tank.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

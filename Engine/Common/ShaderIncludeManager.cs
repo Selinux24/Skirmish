@@ -1,22 +1,25 @@
 ﻿using Engine.Shaders.Properties;
-using SharpDX;
-using SharpDX.D3DCompiler;
+using SharpGen.Runtime;
 using System.IO;
 
 namespace Engine.Common
 {
-    class ShaderIncludeManager : CallbackBase, Include
+    class ShaderIncludeManager : CallbackBase, Vortice.Direct3D.Include
     {
-        public void Close(Stream stream)
+        public Stream Open(Vortice.Direct3D.IncludeType type, string fileName, Stream parentStream)
         {
-            stream.Dispose();
+            string resourceName = Path.GetFileNameWithoutExtension(fileName);
+
+            byte[] bytes =
+                (byte[])LibResources.ResourceManager.GetObject(resourceName) ??
+                throw new FileNotFoundException($"No se encontró el shader include: {fileName}");
+
+            return new MemoryStream(bytes);
         }
 
-        public Stream Open(IncludeType type, string fileName, Stream parentStream)
+        public void Close(Stream stream)
         {
-            byte[] o = (byte[])LibResources.ResourceManager.GetObject(Path.GetFileNameWithoutExtension(fileName));
-
-            return new MemoryStream(o);
+            stream?.Dispose();
         }
     }
 }

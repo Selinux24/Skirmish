@@ -1,31 +1,30 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Engine.UI
 {
-    using Engine.Common;
+    using Engine.Mathematics;
 
     /// <summary>
     /// Sentence descriptor
     /// </summary>
-    public struct FontMapSentenceDescriptor
+    public struct FontMapSentenceDescriptor<T> where T : unmanaged, IVertexData
     {
         /// <summary>
         /// One character sentence descriptor
         /// </summary>
-        public static readonly FontMapSentenceDescriptor OneCharDescriptor = Create(1);
+        public static readonly FontMapSentenceDescriptor<T> OneCharDescriptor = Create(1);
         /// <summary>
         /// Creates a new sentence descriptor
         /// </summary>
         /// <param name="size">Number of characters</param>
-        public static FontMapSentenceDescriptor Create(int size)
+        public static FontMapSentenceDescriptor<T> Create(int size)
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(size, 0);
 
             return new()
             {
-                Vertices = new VertexFont[size * 4],
+                Vertices = new T[size * 4],
                 VertexCount = 0,
                 Indices = new uint[size * 6],
                 IndexCount = 0,
@@ -47,7 +46,7 @@ namespace Engine.UI
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexFont[] Vertices { get; set; }
+        public T[] Vertices { get; set; }
         /// <summary>
         /// Vertex count
         /// </summary>
@@ -106,9 +105,9 @@ namespace Engine.UI
                     continue;
                 }
 
-                Vertices[VertexCount].Position = vArray[i];
-                Vertices[VertexCount].Texture = uvArray[i];
-                Vertices[VertexCount].Color = color;
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Position, vArray[i]);
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Texture, uvArray[i]);
+                Vertices[VertexCount].SetChannelValue(Common.VertexDataChannels.Color, color);
 
                 VertexCount++;
             }
@@ -123,7 +122,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a new vertex list</returns>
-        public void Adjust(RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
+        public void Adjust(Rect rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             //Find total height (the column height)
             var textSize = GetSize(0, (int)VertexCount);
@@ -132,7 +131,7 @@ namespace Engine.UI
 
             for (int i = 0; i < VertexCount; i += 4)
             {
-                if (i == 0 || !MathUtil.IsZero(Vertices[i].Position.X))
+                if (i == 0 || !Helper.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
                 {
                     //Skip until the first character
                     continue;
@@ -157,7 +156,7 @@ namespace Engine.UI
         /// <param name="rect">Rectangle</param>
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
-        private readonly void AdjustLine(int from, int to, Vector2 textSize, RectangleF rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
+        private readonly void AdjustLine(int from, int to, Vector2 textSize, Rect rect, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             //Find this line width
             var lineSize = GetSize(from, to);
@@ -166,7 +165,7 @@ namespace Engine.UI
             float diffX = GetDeltaX(horizontalAlign, rect.Width, lineSize.X);
             float diffY = GetDeltaY(verticalAlign, rect.Height, textSize.Y);
 
-            if (MathUtil.IsZero(diffX) && MathUtil.IsZero(diffY))
+            if (Helper.IsZero(diffX) && Helper.IsZero(diffY))
             {
                 //No changes, add the line and skip the update
                 return;
@@ -175,8 +174,10 @@ namespace Engine.UI
             //Update all the coordinates
             for (int x = from; x < to; x++)
             {
-                Vertices[x].Position.X += diffX;
-                Vertices[x].Position.Y -= diffY;
+                var position = Vertices[x].GetChannelValue<Vector3>(Common.VertexDataChannels.Position);
+                position.X += diffX;
+                position.Y -= diffY;
+                Vertices[x].SetChannelValue(Common.VertexDataChannels.Position, position);
             }
         }
         /// <summary>
@@ -194,7 +195,7 @@ namespace Engine.UI
             }
             else if (horizontalAlign == TextHorizontalAlign.Right)
             {
-                diffX = (maxWidth * 0.5f) - lineWidth;
+                diffX = maxWidth * 0.5f - lineWidth;
             }
             else
             {
@@ -218,7 +219,7 @@ namespace Engine.UI
             }
             else if (verticalAlign == TextVerticalAlign.Bottom)
             {
-                diffY = (maxHeight * 0.5f) - columnHeight;
+                diffY = maxHeight * 0.5f - columnHeight;
             }
             else
             {
@@ -258,7 +259,7 @@ namespace Engine.UI
 
             for (int i = from; i < to; i++)
             {
-                var p = Vertices[i].Position;
+                var p = Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position);
 
                 maxX = MathF.Max(maxX, p.X);
                 maxY = MathF.Max(maxY, -p.Y);

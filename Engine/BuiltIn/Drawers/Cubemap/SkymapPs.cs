@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skymap pixel shader
     /// </summary>
-    public class SkymapPs : IBuiltInShader<EnginePixelShader>
+    public class SkymapPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per sky constant buffer

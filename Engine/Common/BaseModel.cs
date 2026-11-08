@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.BuiltIn.Drawers.Forward;
     using Engine.Content;
 
     /// <summary>
@@ -276,27 +273,6 @@ namespace Engine.Common
         public IEnumerable<DrawingData> GetDrawingDataCollection()
         {
             return meshesByLOD.Values.AsEnumerable();
-        }
-
-        /// <summary>
-        /// Gets the drawing effect for the current instance
-        /// </summary>
-        /// <param name="mode">Drawing mode</param>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns the drawing effect</returns>
-        protected IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType, bool instanced)
-        {
-            if (mode.HasFlag(DrawerModes.Forward))
-            {
-                return ForwardDrawerManager.GetDrawer(vertexType, instanced);
-            }
-
-            if (mode.HasFlag(DrawerModes.Deferred))
-            {
-                return DeferredDrawerManager.GetDrawer(vertexType, instanced);
-            }
-
-            return null;
         }
 
         /// <inheritdoc/>

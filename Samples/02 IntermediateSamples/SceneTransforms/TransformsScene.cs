@@ -1,10 +1,12 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -65,9 +67,9 @@ namespace IntermediateSamples.SceneTransforms
         }
         private async Task InitializeUITitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
-            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
+            var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -210,7 +212,7 @@ namespace IntermediateSamples.SceneTransforms
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 1000;

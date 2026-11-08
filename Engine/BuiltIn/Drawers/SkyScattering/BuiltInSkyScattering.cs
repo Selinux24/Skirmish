@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Sky scattering drawer
     /// </summary>
@@ -92,9 +90,9 @@ namespace Engine.BuiltIn.Drawers.SkyScattering
             public uint Samples;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerObject));
+                return (uint)Marshal.SizeOf<PerObject>();
             }
         }
 

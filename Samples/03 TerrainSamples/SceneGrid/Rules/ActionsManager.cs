@@ -72,11 +72,11 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             if (phase != Phase.End && actionType.HasFlag(ActionTypes.Automatic))
             {
-                return actions.Where(a => a.Automatic).ToArray();
+                return [.. actions.Where(a => a.Automatic)];
             }
             else if (phase != Phase.End && actionType.HasFlag(ActionTypes.Manual))
             {
-                return actions.Where(a => !a.Automatic).ToArray();
+                return [.. actions.Where(a => !a.Automatic)];
             }
 
             return [.. actions];
@@ -105,7 +105,7 @@ namespace TerrainSamples.SceneGrid.Rules
                 filteredActions = filteredActions.Where(a => a.Automatic == (actionType == ActionTypes.Automatic));
             }
 
-            return filteredActions.ToArray();
+            return [.. filteredActions];
         }
 
         private static IEnumerable<ActionSpecification> FilterByPhase(IEnumerable<ActionSpecification> actions, Phase phase, Soldier soldier)
@@ -134,7 +134,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         private static ActionSpecification[] GetListForTeam(Team team)
         {
-            Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
+            Game.Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
 
             return [];
         }
@@ -255,7 +255,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public static bool UseMovementItem(Soldier active, Item item, int wastedPoints)
         {
-            active.UseItemForMovementPhase(item, wastedPoints);
+            active.UseItem(Phase.Movement, item, wastedPoints);
 
             return true;
         }
@@ -328,7 +328,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public static bool UseShootingItem(Soldier active, Item item, int wastedPoints)
         {
-            active.UseItemForShootingPhase(item, wastedPoints);
+            active.UseItem(Phase.Shooting, item, wastedPoints);
 
             return true;
         }
@@ -363,7 +363,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public static bool UseMeleeItem(Soldier active, Item item)
         {
-            active.UseItemForMeleePhase(item);
+            active.UseItem(Phase.Melee, item, 0);
 
             return true;
         }
@@ -390,7 +390,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public static bool UseMoraleItem(Soldier active, Item item)
         {
-            active.UseItemForMoralePhase(item);
+            active.UseItem(Phase.Morale, item, 0);
 
             return true;
         }

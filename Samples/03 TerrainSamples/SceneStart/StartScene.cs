@@ -1,11 +1,12 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,10 +49,10 @@ namespace TerrainSamples.SceneStart
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
         private readonly string largeControlsFont = "HelveticaNeue Medium.ttf";
-        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.DarkSeaGreen, 1.5f);
-        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
-        private Color4 SceneButtonColorBase { get { return new Color4(sceneButtonColor.RGB(), 0.8f); } }
-        private Color4 SceneButtonColorHighlight { get { return new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f); } }
+        private readonly Color4 sceneButtonColor = Color4.AdjustSaturation(Color.DarkSeaGreen, 1.5f);
+        private readonly Color4 exitButtonColor = Color4.AdjustSaturation(Color.OrangeRed, 1.5f);
+        private Color4 SceneButtonColorBase { get { return new((Color3)sceneButtonColor, 0.8f); } }
+        private Color4 SceneButtonColorHighlight { get { return new((Color3)sceneButtonColor * 1.2f, 0.9f); } }
 
         private bool sceneReady = false;
 
@@ -108,14 +109,14 @@ namespace TerrainSamples.SceneStart
         {
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
             titleFont.ContentPath = resourceFontsFolder;
             titleFont.CustomKeycodes = ['✌'];
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.ContentPath = resourceFontsFolder;
             titleDesc.TextForeColor = Color.Gold;
-            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextShadowColor = new(Color.LightYellow, 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -129,15 +130,15 @@ namespace TerrainSamples.SceneStart
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
             buttonsFont.ContentPath = resourceFontsFolder;
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, resourceControlsFile, new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.ContentPath = resourceControlsFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
-            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new((Color3)sceneButtonColor, 0.8f);
+            startButtonDesc.ColorPressed = new((Color3)sceneButtonColor * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -160,8 +161,8 @@ namespace TerrainSamples.SceneStart
             exitButtonDesc.ContentPath = resourceControlsFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
-            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new((Color3)exitButtonColor, 0.8f);
+            exitButtonDesc.ColorPressed = new((Color3)exitButtonColor * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             exitButtonDesc.StartsVisible = false;
@@ -217,11 +218,11 @@ namespace TerrainSamples.SceneStart
             backIndex = tabButtons.Count;
             tabButtons.Add("Back");
 
-            var largeFont = TextDrawerDescription.FromFile(largeControlsFont, 72);
+            var largeFont = FontDescription.FromFile(largeControlsFont, 72);
             largeFont.ContentPath = resourceFontsFolder;
-            var mediumFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            var mediumFont = FontDescription.FromFile(mediumControlsFont, 12);
             mediumFont.ContentPath = resourceFontsFolder;
-            var mediumClickFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            var mediumClickFont = FontDescription.FromFile(mediumControlsFont, 12);
             mediumClickFont.ContentPath = resourceFontsFolder;
 
             var desc = UITabPanelDescription.Default([.. tabButtons], Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
@@ -328,8 +329,8 @@ namespace TerrainSamples.SceneStart
             float butWidth = exitButton.Width;
             float butHeight = exitButton.Height;
 
-            int formWidth = Game.Form.RenderWidth;
-            int formHeight = Game.Form.RenderHeight;
+            int formWidth = (int)Game.Form.RenderWidth;
+            int formHeight = (int)Game.Form.RenderHeight;
 
             int i = 0;
             for (int row = 0; row < rowCount; row++)

@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+using Engine.PathFinding.RecastNavigation.Recast;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Navigation mesh build data
     /// </summary>

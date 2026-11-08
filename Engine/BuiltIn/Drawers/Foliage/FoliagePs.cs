@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Foliage pixel shader
     /// </summary>
-    public class FoliagePs : IBuiltInShader<EnginePixelShader>
+    public class FoliagePs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per material constant buffer

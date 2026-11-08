@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
@@ -19,6 +18,6 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Plan's animation paths
         /// </summary>
-        public IEnumerable<ObjectAnimationPath> Paths { get; set; } = Enumerable.Empty<ObjectAnimationPath>();
+        public IEnumerable<ObjectAnimationPath> Paths { get; set; } = [];
     }
 }

@@ -1,7 +1,7 @@
-using SharpDX;
-
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Box collider
     /// </summary>

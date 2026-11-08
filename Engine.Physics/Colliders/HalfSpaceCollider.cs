@@ -1,19 +1,23 @@
-using SharpDX;
-
 namespace Engine.Physics.Colliders
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Half-space collider
     /// </summary>
     /// <remarks>
     /// A plane dividing two spaces
     /// </remarks>
-    public class HalfSpaceCollider : Collider
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="plane">Plane</param>
+    public class HalfSpaceCollider(Plane plane) : Collider()
     {
         /// <summary>
         /// Gets the plane
         /// </summary>
-        public Plane Plane { get; private set; }
+        public Plane Plane { get; private set; } = plane;
         /// <summary>
         /// Gets the plane normal
         /// </summary>
@@ -31,14 +35,6 @@ namespace Engine.Physics.Colliders
         public HalfSpaceCollider(Vector3 normal, float d) : this(new Plane(normal, d))
         {
 
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="plane">Plane</param>
-        public HalfSpaceCollider(Plane plane) : base()
-        {
-            Plane = plane;
         }
 
         /// <summary>

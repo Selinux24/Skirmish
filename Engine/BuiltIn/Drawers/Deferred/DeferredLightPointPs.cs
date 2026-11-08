@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred point light pixel shader
     /// </summary>
-    public class DeferredLightPointPs : IBuiltInShader<EnginePixelShader>
+    public class DeferredLightPointPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Light constant buffer
@@ -76,7 +74,7 @@ namespace Engine.BuiltIn.Drawers.Deferred
             dc.SetPixelShaderConstantBuffers(0, cb);
 
             dc.SetPixelShaderResourceViews(0, deferredBuffer);
-            dc.SetPixelShaderResourceView(deferredBuffer.Length, BuiltInShaders.GetShadowMapPointResourceView());
+            dc.SetPixelShaderResourceView((uint)deferredBuffer.Length, BuiltInShaders.GetShadowMapPointResourceView());
 
             dc.SetPixelShaderSampler(0, samplerPoint);
 

@@ -1,17 +1,19 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using SharpDX;
+using Engine.BuiltIn.Components.ShadowMapping;
+using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.Mathematics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.PostProcess;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Base scene renderer
@@ -88,7 +90,7 @@ namespace Engine.Common
             /// <summary>
             /// Effect list
             /// </summary>
-            public IEnumerable<(BuiltInPostProcessEffects Effect, int TargetIndex)> Effects;
+            public IEnumerable<(int Effect, int TargetIndex)> Effects;
         }
 
         /// <summary>
@@ -145,15 +147,15 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing objects drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerObjects = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerObjects = null;
         /// <summary>
         /// Post-processing UI drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerUI = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerUI = null;
         /// <summary>
         /// Post-processing results drawer
         /// </summary>
-        private readonly PostProcessingDrawer processingDrawerFinal = null;
+        private readonly BuiltInPostProcessingDrawer processingDrawerFinal = null;
         /// <summary>
         /// Scene objects target
         /// </summary>
@@ -281,11 +283,11 @@ namespace Engine.Common
         /// <summary>
         /// Renderer width
         /// </summary>
-        protected int Width;
+        protected uint Width;
         /// <summary>
         /// Renderer height
         /// </summary>
-        protected int Height;
+        protected uint Height;
         /// <summary>
         /// Cull manager
         /// </summary>
@@ -360,10 +362,10 @@ namespace Engine.Common
         /// </summary>
         /// <param name="pixelCount">Pixel count</param>
         /// <returns>Returns the texture size</returns>
-        protected static int GetTextureSize(int pixelCount)
+        protected static uint GetTextureSize(int pixelCount)
         {
-            int texWidth = (int)MathF.Sqrt(pixelCount) + 1;
-            int texHeight = 1;
+            uint texWidth = (uint)MathF.Sqrt(pixelCount) + 1;
+            uint texHeight = 1;
             while (texHeight < texWidth)
             {
                 texHeight <<= 1;
@@ -439,7 +441,7 @@ namespace Engine.Common
 
             cullManager = new SceneCullManager();
 
-            var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
+            var targetFormat = Format.R32G32B32A32_Float;
 
             sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
             sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
@@ -447,9 +449,9 @@ namespace Engine.Common
 
             postProcessingTarget0 = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
             postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
-            processingDrawerObjects = new PostProcessingDrawer(scene.Game);
-            processingDrawerUI = new PostProcessingDrawer(scene.Game);
-            processingDrawerFinal = new PostProcessingDrawer(scene.Game);
+            processingDrawerObjects = new BuiltInPostProcessingDrawer(scene.Game);
+            processingDrawerUI = new BuiltInPostProcessingDrawer(scene.Game);
+            processingDrawerFinal = new BuiltInPostProcessingDrawer(scene.Game);
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
@@ -673,7 +675,7 @@ namespace Engine.Common
                 return true;
             });
 
-            return opaques.ToList();
+            return [.. opaques];
         }
         /// <summary>
         /// Sorting opaque list comparer
@@ -741,7 +743,7 @@ namespace Engine.Common
                 return true;
             });
 
-            return transparents.ToList();
+            return [.. transparents];
         }
         /// <summary>
         /// Sorting transparent list comparer
@@ -1383,7 +1385,7 @@ namespace Engine.Common
                 var target = GetPostProcessingTargets(targetIndex);
 
                 //Bind the buffer as render target
-                BindPostProcessingTarget(dc, target, false, Color.Transparent);
+                BindPostProcessingTarget(dc, target, false, Color4.Transparent);
 
                 //Draw effect into target, using the source texture
                 processingDrawer.Draw(dc, source, effect, state.State);
@@ -1396,7 +1398,7 @@ namespace Engine.Common
             SetTarget(dc, renderTarget);
 
             //Draw the result
-            processingDrawer.Draw(dc, source, BuiltInPostProcessEffects.None, state.State);
+            processingDrawer.Draw(dc, source, 0, state.State);
         }
         /// <summary>
         /// Toggles post-processing render targets
@@ -1469,7 +1471,7 @@ namespace Engine.Common
         /// <param name="materialPaletteWidth">Material palette width</param>
         private void BuildMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
         {
-            Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
+            Game.Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
 
             List<IMeshMaterial> mats =
             [
@@ -1494,10 +1496,10 @@ namespace Engine.Common
                 values.AddRange(matV);
             }
 
-            int texWidth = GetTextureSize(values.Count);
+            uint texWidth = GetTextureSize(values.Count);
 
             materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
-            materialPaletteWidth = (uint)texWidth;
+            materialPaletteWidth = texWidth;
         }
         /// <summary>
         /// Builds the global animation palette
@@ -1506,7 +1508,7 @@ namespace Engine.Common
         /// <param name="animationPaletteWidth">Animation palette width</param>
         private void BuildAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
         {
-            Logger.WriteInformation(this, $"{nameof(BuildAnimationPalette)} =>Building Animation palette.");
+            Game.Logger.WriteInformation(this, $"{nameof(BuildAnimationPalette)} =>Building Animation palette.");
 
             var skData = Scene.Components.Get<IUseSkinningData>(c => c.SkinningData != null)
                 .Select(c => c.SkinningData)
@@ -1538,10 +1540,10 @@ namespace Engine.Common
                 }
             }
 
-            int texWidth = GetTextureSize(values.Count);
+            uint texWidth = GetTextureSize(values.Count);
 
             animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
-            animationPaletteWidth = (uint)texWidth;
+            animationPaletteWidth = texWidth;
         }
         /// <summary>
         /// Assign light information for shadow mapping
@@ -1642,37 +1644,37 @@ namespace Engine.Common
 
             if (PostProcessingObjectsEffects.Ready)
             {
-                var effects = PostProcessingObjectsEffects.GetEffects();
+                var effects = PostProcessingObjectsEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingObjectsEffects,
                     RenderPass = RenderPass.Objects,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
 
             if (PostProcessingUIEffects.Ready)
             {
-                var effects = PostProcessingUIEffects.GetEffects();
+                var effects = PostProcessingUIEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingUIEffects,
                     RenderPass = RenderPass.UI,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
 
             if (PostProcessingFinalEffects.Ready)
             {
-                var effects = PostProcessingFinalEffects.GetEffects();
+                var effects = PostProcessingFinalEffects.GetEffects().Select(e => ((int)e, targetIndex++ % 2)).ToArray();
 
                 postProcessingEffects.Add(new PostProcessingStateData
                 {
                     State = PostProcessingFinalEffects,
                     RenderPass = RenderPass.Final,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                    Effects = effects,
                 });
             }
         }
@@ -1774,7 +1776,7 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
-            processingDrawerFinal.Draw(dc, texture, BuiltInPostProcessEffects.None, null);
+            processingDrawerFinal.Draw(dc, texture, 0, null);
         }
 
         /// <summary>

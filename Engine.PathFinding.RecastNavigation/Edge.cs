@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -35,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="h">Height</param>
         /// <param name="portalValue">Returns the portal value</param>
         /// <returns>Returns true if found</returns>
-        public static bool IsPortal(Int3 va, Int3 vb, int w, int h, out int portalValue)
+        public static bool IsPortal(Vector3I va, Vector3I vb, int w, int h, out int portalValue)
         {
             if (va.X == 0 && vb.X == 0)
             {

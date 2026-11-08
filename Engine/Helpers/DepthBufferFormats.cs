@@ -1,7 +1,8 @@
-﻿using SharpDX.DXGI;
-
+﻿
 namespace Engine.Helpers
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Depth buffer available formats
     /// </summary>

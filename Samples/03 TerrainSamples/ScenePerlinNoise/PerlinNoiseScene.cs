@@ -1,19 +1,27 @@
 ﻿using Engine;
+using Engine.BuiltIn.UI;
 using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
+using System.IO;
 using System.Threading.Tasks;
-using DialogResult = System.Windows.Forms.DialogResult;
-using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
+using TerrainSamples.Common.Dialogs;
+using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.ScenePerlinNoise
 {
-    using TerrainSamples.SceneStart;
-
     class PerlinNoiseScene : Scene
     {
-        readonly string fontFamily = "Microsoft Sans Serif";
+        const string fontFamily = "Microsoft Sans Serif";
+        static readonly Color4 pBackground = Color.RosyBrown;
+        static readonly Color4 bColor1 = Color.Brown;
+        static readonly Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
+        static readonly Color4 pColor = Color.DeepSkyBlue;
+
+        const int dialogWidth = 600;
+        const int dialogHeight = 350;
+        const int dialogItemsPerPage = 10;
 
         UIPanel backGround;
         UIButton btnExit;
@@ -32,6 +40,12 @@ namespace TerrainSamples.ScenePerlinNoise
         UITextArea txtSeed;
 
         UIButton btnSave;
+        bool dialogVisible = false;
+        string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        readonly Color4 dialogButtonColor = Color4.AdjustSaturation(bColor1, 1.5f);
+        readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
+        readonly Color4 dialogBackgroundColor = bColor1;
+        UISaveFileDialog saveFileDialog = null;
 
         UITextureRenderer perlinRenderer;
         EngineShaderResourceView texture;
@@ -39,7 +53,7 @@ namespace TerrainSamples.ScenePerlinNoise
         bool noiseMapDirty = true;
         bool generatingMap = false;
 
-        readonly int mapSize = 128;
+        readonly uint mapSize = 128;
         readonly float maxScale = 100;
         readonly float maxLacunarity = 20;
         readonly float maxPersistance = 1;
@@ -111,7 +125,7 @@ namespace TerrainSamples.ScenePerlinNoise
             base.Initialize();
 
             var group = LoadResourceGroup.FromTasks(
-                InitializeUI,
+                [InitializeUI, InitializeUIDialogs],
                 (res) =>
                 {
                     res.ThrowExceptions();
@@ -131,16 +145,11 @@ namespace TerrainSamples.ScenePerlinNoise
 
             LoadResources(textureGroup);
         }
-        public async Task InitializeUI()
+        private async Task InitializeUI()
         {
-            Color4 pBackground = Color.RosyBrown;
-            Color4 bColor1 = Color.Brown;
-            Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
-            Color4 pColor = Color.DeepSkyBlue;
-
-            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16);
-            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
+            var defaultFont16 = FontDescription.FromFamily(fontFamily, 16);
+            var defaultFont14 = FontDescription.FromFamily(fontFamily, 14);
+            var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
 
             var defaultText16 = UITextAreaDescription.Default(defaultFont16);
             var defaultText14 = UITextAreaDescription.Default(defaultFont14);
@@ -161,7 +170,7 @@ namespace TerrainSamples.ScenePerlinNoise
             txtHelpSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpSeed", "HelpSeed", defaultText12);
             txtSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtSeed", "Seed", defaultText14);
 
-            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12);
+            var pbFont = FontDescription.FromFamily(fontFamily, 12);
 
             var pbDescription = UIProgressBarDescription.Default(pbFont);
 
@@ -212,9 +221,38 @@ namespace TerrainSamples.ScenePerlinNoise
 
             btnSave.MouseClick += BtnSaveClick;
         }
+        private async Task InitializeUIDialogs()
+        {
+            saveFileDialog = new(this, nameof(saveFileDialog), dialogWidth, dialogHeight, dialogItemsPerPage, LayerUI + 1)
+            {
+                ButtonColor = dialogButtonColor,
+                ButtonTextColor = dialogButtonTextColor,
+                BackgroundColor = dialogBackgroundColor,
+            };
+
+            saveFileDialog.OnAcceptHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+
+                string fileName = saveFileDialog.SelectedFileName;
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return;
+                }
+                dialogFolder = Path.GetDirectoryName(fileName);
+
+                noiseMap.SaveMapToFile(fileName);
+            };
+            saveFileDialog.OnCancelHandler += (sender, args) =>
+            {
+                dialogVisible = false;
+            };
+
+            await saveFileDialog.Initialize(dialogFolder, fontFamily);
+        }
         public async Task InitializeTextureRenderer()
         {
-            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Color4>(), mapSize, true);
+            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), Array.Empty<Vector4>(), mapSize, true);
 
             perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
@@ -255,6 +293,11 @@ namespace TerrainSamples.ScenePerlinNoise
         }
         private bool UpdateInput(IGameTime gameTime)
         {
+            if (dialogVisible)
+            {
+                return false;
+            }
+
             bool updateMap = false;
 
             float delta = gameTime.ElapsedSeconds;
@@ -307,25 +350,25 @@ namespace TerrainSamples.ScenePerlinNoise
 
             bool updateMap = false;
 
-            if (!MathUtil.NearEqual(Scale, pbScale.ProgressValue))
+            if (!Helper.NearEqual(Scale, pbScale.ProgressValue))
             {
                 Scale = pbScale.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
+            if (!Helper.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
             {
                 Lacunarity = pbLacunarity.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Persistance, pbPersistance.ProgressValue))
+            if (!Helper.NearEqual(Persistance, pbPersistance.ProgressValue))
             {
                 Persistance = pbPersistance.ProgressValue;
                 updateMap = true;
             }
 
-            if (!MathUtil.NearEqual(Octaves, pbOctaves.ProgressValue))
+            if (!Helper.NearEqual(Octaves, pbOctaves.ProgressValue))
             {
                 Octaves = pbOctaves.ProgressValue;
                 updateMap = true;
@@ -472,14 +515,10 @@ namespace TerrainSamples.ScenePerlinNoise
 
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                using var dlg = new SaveFileDialog();
-                dlg.DefaultExt = ".png";
-                dlg.FileName = "Noisemap.png";
+                string fileName = Path.Combine(dialogFolder, "Noisemap.png");
 
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    noiseMap.SaveMapToFile(dlg.FileName);
-                }
+                saveFileDialog.ShowDialog("Save Graph to file", fileName, "*.png");
+                dialogVisible = true;
             }
         }
         private void BtnExitClick(IUIControl sender, MouseEventArgs e)
@@ -521,7 +560,7 @@ namespace TerrainSamples.ScenePerlinNoise
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(this, ex);
+                    Game.Logger.WriteError(this, ex);
                 }
 
                 generatingMap = false;

@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.Common;
-
     /// <summary>
     /// Effect sky scatter state
     /// </summary>
@@ -12,7 +11,7 @@ namespace Engine.BuiltIn.Drawers.Common
         /// <summary>
         /// Tint color
         /// </summary>
-        public Color TintColor { get; set; }
+        public Color4 TintColor { get; set; }
         /// <summary>
         /// Scattering coefficients
         /// </summary>

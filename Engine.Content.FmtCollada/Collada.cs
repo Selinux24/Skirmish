@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Engine.Collada
+namespace Engine.Content.FmtCollada
 {
-    using Engine.Collada.Types;
+    using Engine.Content.FmtCollada.Types;
 
     [Serializable]
     [XmlRoot("COLLADA")]
@@ -105,11 +105,11 @@ namespace Engine.Collada
                     res.Add(cnv);
                 }
 
-                return res.ToArray();
+                return [.. res];
             }
             else
             {
-                return Array.Empty<T>();
+                return [];
             }
         }
         internal static string ConvertToString<T>(T value)

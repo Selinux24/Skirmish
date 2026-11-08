@@ -1,7 +1,7 @@
-﻿using SharpDX;
-
-namespace TerrainSamples.SceneGrid.Rules
+﻿namespace TerrainSamples.SceneGrid.Rules
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Area
     /// </summary>
@@ -23,21 +23,5 @@ namespace TerrainSamples.SceneGrid.Rules
         /// Distance
         /// </summary>
         public float Distance { get; set; }
-
-        /// <summary>
-        /// Gets bounding frustum
-        /// </summary>
-        /// <returns>Returns bounding frustum</returns>
-        public BoundingFrustum GetFrustum()
-        {
-            return BoundingFrustum.FromCamera(
-                Position,
-                Direction,
-                Vector3.Up,
-                Angle,
-                1,
-                Distance,
-                1);
-        }
     }
 }

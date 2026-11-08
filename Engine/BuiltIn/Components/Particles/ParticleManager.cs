@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Common;
-
     /// <summary>
     /// CPU particle manager
     /// </summary>
@@ -44,15 +43,15 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Current particle count
         /// </summary>
-        public int AllocatedParticleCount { get; private set; }
+        public uint AllocatedParticleCount { get; private set; }
         /// <summary>
         /// Number of active particle systems
         /// </summary>
-        public int Count
+        public uint Count
         {
             get
             {
-                return particleSystems.Count;
+                return (uint)particleSystems.Count;
             }
         }
 

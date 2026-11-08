@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -20,11 +20,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Direction
         /// </summary>
-        public Direction3 Direction { get; set; } = Direction3.ForwardLH;
+        public Vector3 Direction { get; set; } = Vector3.ForwardLH;
 
         /// <inheritdoc/>
         public override string ToString()

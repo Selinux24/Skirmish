@@ -1,10 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using Engine.Common;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skymap drawer
     /// </summary>
@@ -33,9 +31,9 @@ namespace Engine.BuiltIn.Drawers.Cubemap
             public float TextureIndex;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerCube));
+                return (uint)Marshal.SizeOf<PerCube>();
             }
         }
 

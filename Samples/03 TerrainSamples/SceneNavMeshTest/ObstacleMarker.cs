@@ -1,8 +1,7 @@
-﻿using Engine;
-using SharpDX;
-
-namespace TerrainSamples.SceneNavMeshTest
+﻿namespace TerrainSamples.SceneNavMeshTest
 {
+    using Engine.Mathematics;
+
     struct ObstacleMarker
     {
         public int Id { get; set; }

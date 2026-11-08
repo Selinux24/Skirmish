@@ -1,7 +1,6 @@
 ﻿using Engine;
-using SharpDX;
+using Engine.Mathematics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Tanks
 {
@@ -58,10 +57,10 @@ namespace Tanks
                 {
                     //Low light
                     float newRadius = Description.Radius * invD * 0.1f;
-                    Light.Radius = MathUtil.Lerp(Light.Radius, newRadius, 0.3f);
+                    Light.Radius = float.Lerp(Light.Radius, newRadius, 0.3f);
                     Light.Intensity = Light.Radius * Description.IntensityCurve.Evaluate(d);
 
-                    var col = Color3.Lerp(Description.StartColor, Description.EndColor, Description.ColorCurve.Evaluate(d));
+                    var col = Vector3.Lerp(Description.StartColor, Description.EndColor, Description.ColorCurve.Evaluate(d));
                     Light.DiffuseColor = col;
                     Light.SpecularColor = col;
                 }

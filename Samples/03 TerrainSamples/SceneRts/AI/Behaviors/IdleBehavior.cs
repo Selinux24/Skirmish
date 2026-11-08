@@ -1,8 +1,9 @@
-﻿using Engine;
-using SharpDX;
-
+﻿
 namespace TerrainSamples.SceneRts.AI.Behaviors
 {
+    using Engine;
+    using Engine.Mathematics;
+
     /// <summary>
     /// Idle behavior
     /// </summary>

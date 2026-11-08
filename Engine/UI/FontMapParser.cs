@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +43,7 @@ namespace Engine.UI
             var shadowColorParts = new List<Color4[]>();
 
             //Find lines
-            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = text.Split([Environment.NewLine], StringSplitOptions.None);
 
             for (int l = 0; l < lines.Length; l++)
             {
@@ -71,8 +71,8 @@ namespace Engine.UI
                     charShadowColors = charShadowColors.Skip(part.Length + 1);
 
                     sentenceParts.Add(part);
-                    colorParts.Add(partColors.ToArray());
-                    shadowColorParts.Add(partShadowColors.ToArray());
+                    colorParts.Add([.. partColors]);
+                    shadowColorParts.Add([.. partShadowColors]);
 
                     if (lastPart)
                     {
@@ -80,8 +80,8 @@ namespace Engine.UI
                     }
 
                     sentenceParts.Add(" ");
-                    colorParts.Add([Color.Transparent]);
-                    shadowColorParts.Add([Color.Transparent]);
+                    colorParts.Add([Color4.Transparent]);
+                    shadowColorParts.Add([Color4.Transparent]);
                 }
 
                 if (lastLine)
@@ -90,8 +90,8 @@ namespace Engine.UI
                 }
 
                 sentenceParts.Add(Environment.NewLine);
-                colorParts.Add([Color.Transparent]);
-                shadowColorParts.Add([Color.Transparent]);
+                colorParts.Add([Color4.Transparent]);
+                shadowColorParts.Add([Color4.Transparent]);
             }
 
             return new()
@@ -193,7 +193,7 @@ namespace Engine.UI
                         float r = float.Parse(vR);
                         float g = float.Parse(vG);
                         float b = float.Parse(vB);
-                        foreColor = new Color4(r, g, b, a);
+                        foreColor = new(r, g, b, a);
                     }
                     else if (gr.Value == "A")
                     {
@@ -201,7 +201,7 @@ namespace Engine.UI
                         int r = int.Parse(vR);
                         int g = int.Parse(vG);
                         int b = int.Parse(vB);
-                        foreColor = new Color(r, g, b, a);
+                        foreColor = new(r, g, b, a);
                     }
                 }
 
@@ -218,7 +218,7 @@ namespace Engine.UI
                         float r = float.Parse(vR);
                         float g = float.Parse(vG);
                         float b = float.Parse(vB);
-                        shadowColor = new Color4(r, g, b, a);
+                        shadowColor = new(r, g, b, a);
                     }
                     else if (gr.Value == "A")
                     {
@@ -226,7 +226,7 @@ namespace Engine.UI
                         int r = int.Parse(vR);
                         int g = int.Parse(vG);
                         int b = int.Parse(vB);
-                        shadowColor = new Color(r, g, b, a);
+                        shadowColor = new(r, g, b, a);
                     }
                 }
             }

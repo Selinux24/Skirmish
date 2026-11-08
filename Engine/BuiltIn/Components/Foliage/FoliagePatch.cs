@@ -1,9 +1,11 @@
-﻿using Engine.Collections;
+﻿using Engine.BuiltIn.Format;
+using Engine.Collections;
 using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
@@ -101,7 +103,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="nbbox">Node bounding box</param>
         /// <param name="callback">Planted callback</param>
         /// <returns>Returns generated vertex data</returns>
-        private void CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
+        private Task CalculatePoints(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
             Planting = true;
 
@@ -111,13 +113,13 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var rayList = CalculatePickingRays(scene, map, description, gbbox, nbbox, rnd);
 
-            scene.PickFirstAsync<Triangle>(rayList, SceneObjectUsages.Ground, (res) =>
+            return scene.PickFirstAsync<Triangle>(rayList, SceneObjectUsages.Ground, (res) =>
             {
                 foreach (var (found, r) in res)
                 {
                     Vector2 size = new(
-                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
+                        rnd.NextSingle(description.MinSize.X, description.MaxSize.X),
+                        rnd.NextSingle(description.MinSize.Y, description.MaxSize.Y));
 
                     if (found)
                     {
@@ -179,9 +181,9 @@ namespace Engine.BuiltIn.Components.Foliage
             Vector2 max = new(gbbox.Maximum.X, gbbox.Maximum.Z);
 
             pos = new(
-                rnd.NextFloat(nbbox.Minimum.X, nbbox.Maximum.X),
+                rnd.NextSingle(nbbox.Minimum.X, nbbox.Maximum.X),
                 nbbox.Maximum.Y + 1f,
-                rnd.NextFloat(nbbox.Minimum.Z, nbbox.Maximum.Z));
+                rnd.NextSingle(nbbox.Minimum.Z, nbbox.Maximum.Z));
 
             bool plant = false;
             if (map != null)
@@ -190,7 +192,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 if (c[description.Index] > 0)
                 {
-                    plant = rnd.NextFloat(0, 1) < c[description.Index];
+                    plant = rnd.NextSingle(0, 1) < c[description.Index];
                 }
             }
             else
@@ -210,11 +212,11 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
         /// <param name="callback">Planted callback</param>
-        public void Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
+        public Task Plant(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Action callback)
         {
             Channel = description.Index;
 
-            CalculatePoints(scene, map, description, gbbox, nbbox, callback);
+            return CalculatePoints(scene, map, description, gbbox, nbbox, callback);
         }
         /// <summary>
         /// Sorts the internal data by distance to eye position. Far first if transparency specified, near first otherwise

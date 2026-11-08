@@ -1,17 +1,19 @@
-﻿using Engine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EngineTests
 {
+    using Engine;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class TriangleTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static readonly float third = 1f / 3f;
         static readonly float delta = 0.0001f;
@@ -29,12 +31,12 @@ namespace EngineTests
         static Vector3 p1i45 = new(1, 1, 1);
         static Vector3 p2i45 = new(-1, -1, -1);
         static Vector3 p3i45 = new(-1, -1, 1);
-        static readonly float inc45 = MathUtil.PiOverFour;
+        static readonly float inc45 = Helper.PiOver4;
 
         static Vector3 p1i90 = new(0, 1, 1);
         static Vector3 p2i90 = new(0, -1, -1);
         static Vector3 p3i90 = new(0, -1, 1);
-        static readonly float inc90 = MathUtil.PiOverTwo;
+        static readonly float inc90 = Helper.PiOver2;
 
         static Vector3 p1r2 = new(2, 0, 1);
         static Vector3 p2r2 = new(-1, 0, -1);
@@ -42,16 +44,10 @@ namespace EngineTests
         static Vector3 c2 = Vector3.Multiply(p1r2 + p2r2 + p3r2, third);
         static readonly float r2 = Vector3.Distance(c2, p1r2);
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -60,12 +56,12 @@ namespace EngineTests
             Triangle t1 = new();
             Triangle t2 = new(p1, p2, p3);
             Triangle t3 = new(p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, p3.X, p3.Y, p3.Z);
-            Triangle t4 = new(new[] { p1, p2, p3 });
+            Triangle t4 = new([p1, p2, p3]);
 
             Assert.AreEqual(Vector3.Zero, t1.Point1);
             Assert.AreEqual(Vector3.Zero, t1.Point2);
             Assert.AreEqual(Vector3.Zero, t1.Point3);
-            Assert.AreEqual(3, t1.GetStride());
+            Assert.AreEqual(3u, t1.GetStride());
             Assert.AreEqual(Topology.TriangleList, t1.GetTopology());
 
             Assert.AreEqual(p1, t2.Point1);
@@ -228,13 +224,13 @@ namespace EngineTests
 
             Assert.AreEqual(new Vector3(2, 0, 0), dx);
             Assert.AreEqual(2, dx.Length());
-          
+
             Assert.AreEqual(new Vector3(0, 0, 0), dy);
             Assert.AreEqual(0, dy.Length());
-         
+
             Assert.AreEqual(new Vector3(0, 0, 2), dz);
             Assert.AreEqual(2, dz.Length());
-         
+
             Assert.AreEqual(1.3333f, dOne.X, delta);
             Assert.AreEqual(1.3333f, dOne.Y, delta);
             Assert.AreEqual(1.3333f, dOne.Z, delta);

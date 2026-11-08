@@ -425,8 +425,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Merges the specified reference list
         /// </summary>
         /// <param name="rlist">Reference list</param>
-        /// <param name="count">Number of elements of the reference list</param>
-        public void Merge(IEnumerable<int> rlist, int count)
+        public void Merge(IEnumerable<int> rlist)
         {
             var l = rlist.ToList();
             l.AddRange(referenceList.Take(Count));

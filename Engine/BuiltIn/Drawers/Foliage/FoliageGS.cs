@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Foliage geometry shader
     /// </summary>
-    public class FoliageGS : IBuiltInShader<EngineGeometryShader>
+    public class FoliageGS : IShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per patch constant buffer

@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Quad tree
     /// </summary>
@@ -20,9 +19,10 @@ namespace Engine.Collections
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="items">Partitioning items</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(BoundingBox bbox, int maxDepth)
+        /// <param name="options">Options</param>
+        public QuadTree(BoundingBox bbox, QuadTreeOptions options)
         {
             BoundingBox = bbox;
 
@@ -30,7 +30,7 @@ namespace Engine.Collections
             Root = QuadTreeNode.CreatePartitions(
                 null,
                 bbox,
-                maxDepth,
+                options,
                 0,
                 ref nodeCount);
         }

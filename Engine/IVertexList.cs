@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine
@@ -17,7 +17,7 @@ namespace Engine
         /// Gets the vertex list stride
         /// </summary>
         /// <returns>Returns the list stride</returns>
-        int GetStride();
+        uint GetStride();
         /// <summary>
         /// Gets the vertex list topology
         /// </summary>

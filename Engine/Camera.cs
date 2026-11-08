@@ -1,10 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// 3D Camera
     /// </summary>
@@ -18,7 +16,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public static Camera CreateFree(Vector3 position, Vector3 interest, int width, int height)
+        public static Camera CreateFree(Vector3 position, Vector3 interest, uint width, uint height)
         {
             var cam = new Camera();
 
@@ -35,7 +33,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public static Camera CreateIsometric(IsometricAxis axis, Vector3 interest, float distance, int width, int height)
+        public static Camera CreateIsometric(IsometricAxis axis, Vector3 interest, float distance, uint width, uint height)
         {
             var cam = new Camera();
 
@@ -51,7 +49,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns new 2D camera</returns>
-        public static Camera CreateOrtho(Vector3 position, Vector3 interest, int width, int height)
+        public static Camera CreateOrtho(Vector3 position, Vector3 interest, uint width, uint height)
         {
             var cam = new Camera();
 
@@ -79,7 +77,7 @@ namespace Engine
         /// <summary>
         /// Field of view angle
         /// </summary>
-        private float fieldOfView = MathUtil.PiOverFour;
+        private float fieldOfView = Helper.PiOver4;
         /// <summary>
         /// Near plane distance
         /// </summary>
@@ -208,7 +206,7 @@ namespace Engine
         {
             get
             {
-                return Helper.RotateFromDirection(Direction, Up);
+                return Quaternion.RotateFromDirection(Direction, Up);
             }
         }
         /// <inheritdoc/>
@@ -382,7 +380,7 @@ namespace Engine
         }
         /// <inheritdoc/>
         /// <remarks>The view * projection transform</remarks>
-        public Matrix LocalTransform
+        public Matrix4x4 LocalTransform
         {
             get
             {
@@ -391,7 +389,7 @@ namespace Engine
         }
         /// <inheritdoc/>
         /// <remarks>The view * projection transform</remarks>
-        public Matrix GlobalTransform
+        public Matrix4x4 GlobalTransform
         {
             get
             {
@@ -529,15 +527,15 @@ namespace Engine
         /// <summary>
         /// Perspective view matrix
         /// </summary>
-        public Matrix View { get; private set; }
+        public Matrix4x4 View { get; private set; }
         /// <summary>
         /// Perspective projection matrix
         /// </summary>
-        public Matrix Projection { get; private set; }
+        public Matrix4x4 Projection { get; private set; }
         /// <summary>
         /// View * projection matrix
         /// </summary>
-        public Matrix ViewProjection { get; private set; }
+        public Matrix4x4 ViewProjection { get; private set; }
         /// <summary>
         /// Camera frustum
         /// </summary>
@@ -563,8 +561,8 @@ namespace Engine
             position = Vector3.One;
             interest = Vector3.Zero;
 
-            View = Matrix.LookAtLH(position, interest, Vector3.UnitY);
-            Projection = Matrix.Identity;
+            View = Matrix4x4.LookAtLH(position, interest, Vector3.UnitY);
+            Projection = Matrix4x4.Identity;
             ViewProjection = View * Projection;
 
             InvertY = false;
@@ -597,7 +595,7 @@ namespace Engine
         /// </summary>
         /// <param name="width">Viewport width</param>
         /// <param name="height">Viewport height</param>
-        public void SetLens(int width, int height)
+        public void SetLens(uint width, uint height)
         {
             viewportWidth = width;
             viewportHeight = height;
@@ -632,7 +630,7 @@ namespace Engine
         {
             if (mode == CameraModes.Ortho)
             {
-                Projection = Matrix.OrthoLH(
+                Projection = Matrix4x4.OrthoLH(
                     viewportWidth,
                     viewportHeight,
                     nearPlaneDistance,
@@ -640,7 +638,7 @@ namespace Engine
             }
             else
             {
-                Projection = Matrix.PerspectiveFovLH(
+                Projection = Matrix4x4.PerspectiveFovLH(
                     fieldOfView,
                     aspectRelation,
                     nearPlaneDistance,
@@ -658,6 +656,7 @@ namespace Engine
                 Following.Update(gameTime);
                 nextPosition = Following.Position;
                 nextInterest = Following.Interest;
+                updateNeeded = true;
             }
 
             UpdateTranslations(gameTime);
@@ -671,7 +670,7 @@ namespace Engine
             }
 
             var upVector = mode == CameraModes.Ortho ? Vector3.UnitZ : Vector3.UnitY;
-            View = Matrix.LookAtLH(position, interest, upVector);
+            View = Matrix4x4.LookAtLH(position, interest, upVector);
 
             ViewProjection = View * Projection;
 
@@ -733,7 +732,7 @@ namespace Engine
                 updateNeeded = true;
             }
 
-            if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
+            if (Vector3.NearEqual(nextInterest, translationInterest, 0.1f))
             {
                 StopTranslations();
             }
@@ -998,7 +997,7 @@ namespace Engine
 
             //Smooth rotation
             Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
-            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, Helper.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
             Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
@@ -1006,8 +1005,8 @@ namespace Engine
 
             if (clampY)
             {
-                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
-                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
+                float newAngle = Vector3.Angle(Vector3.Up, newDir) - Helper.PiOver2;
+                if (newAngle >= Helper.DegreesToRadians(clampFrom) && newAngle <= Helper.DegreesToRadians(clampTo))
                 {
                     nextInterest = nextPosition + newDir;
                     updateNeeded = true;
@@ -1053,7 +1052,7 @@ namespace Engine
             float delta = slow ? SlowZoomDelta : ZoomDelta;
             float zooming = zoomIn ? +delta : -delta;
 
-            if (MathUtil.IsZero(zooming))
+            if (Helper.IsZero(zooming))
             {
                 return 0;
             }
@@ -1083,7 +1082,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public void SetFree(Vector3 position, Vector3 interest, int width, int height)
+        public void SetFree(Vector3 position, Vector3 interest, uint width, uint height)
         {
             SetFree(position, interest);
             SetLens(width, height);
@@ -1112,7 +1111,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public void SetIsometric(IsometricAxis axis, Vector3 interest, float distance, int width, int height)
+        public void SetIsometric(IsometricAxis axis, Vector3 interest, float distance, uint width, uint height)
         {
             SetIsometric(axis, interest, distance);
             SetLens(width, height);
@@ -1179,7 +1178,7 @@ namespace Engine
         /// <param name="width">Viewport Width</param>
         /// <param name="height">Viewport Height</param>
         /// <returns>Returns new 2D camera</returns>
-        public void SetOrtho(Vector3 position, Vector3 interest, int width, int height)
+        public void SetOrtho(Vector3 position, Vector3 interest, uint width, uint height)
         {
             SetOrtho(position, interest);
             SetLens(width, height);
@@ -1350,12 +1349,12 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+            return Collision.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
-            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+            return Collision.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
         public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)

@@ -4,16 +4,21 @@ namespace Engine.Common
     /// <summary>
     /// Pass counters
     /// </summary>
-    public class PassCounters
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="name">Pass name</param>
+    /// <param name="passIndex">Pass index</param>
+    public class PassCounters(string name, int passIndex)
     {
         /// <summary>
         /// Pass name
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = name;
         /// <summary>
         /// Pass index
         /// </summary>
-        public int PassIndex { get; private set; }
+        public int PassIndex { get; private set; } = passIndex;
 
         /// <summary>
         /// Context state clear calls per frame (ClearState)
@@ -170,11 +175,11 @@ namespace Engine.Common
         /// <summary>
         /// Sum of single draw calls and instance draw calls * instance count of this call
         /// </summary>
-        public int InstancesPerFrame { get; set; }
+        public uint InstancesPerFrame { get; set; }
         /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
-        public int PrimitivesPerFrame { get; set; }
+        public uint PrimitivesPerFrame { get; set; }
 
         /// <summary>
         /// State changes count per frame (rasterizer, blend and depth-stencil states)
@@ -185,17 +190,6 @@ namespace Engine.Common
             {
                 return RasterizerStateChanges + OMBlendStateChanges + DepthStencilStateChanges;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Pass name</param>
-        /// <param name="passIndex">Pass index</param>
-        public PassCounters(string name, int passIndex)
-        {
-            Name = name;
-            PassIndex = passIndex;
         }
 
         /// <summary>

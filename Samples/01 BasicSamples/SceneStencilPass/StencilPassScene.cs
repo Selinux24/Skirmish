@@ -1,9 +1,9 @@
 ﻿using Engine;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.Common;
 using Engine.Content;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace BasicSamples.SceneStencilPass
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
 
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -111,7 +111,7 @@ namespace BasicSamples.SceneStencilPass
         private async Task InitializeEmitter()
         {
             var mat = MaterialBlinnPhongContent.Default;
-            mat.EmissiveColor = Color.White.RGB();
+            mat.EmissiveColor = Color.White;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 32, 15);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -127,13 +127,13 @@ namespace BasicSamples.SceneStencilPass
         }
         private async Task InitializeLightsDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 5000,
                 BlendMode = BlendModes.Alpha
             };
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
         private void StartLights()
         {
@@ -141,9 +141,9 @@ namespace BasicSamples.SceneStencilPass
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = true;
 
-            Lights.Add(new SceneLightPoint("Point1", false, Color3.White, Color3.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
+            Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            Lights.Add(new SceneLightSpot("Spot1", false, Color3.White, Color3.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
         }
 
         public override void Update(IGameTime gameTime)
@@ -289,7 +289,7 @@ namespace BasicSamples.SceneStencilPass
 
             if (drawCullVolumes)
             {
-                var color = new Color4(Color.Red.RGB(), 0.50f);
+                var color = new Color4(Color.Red, 0.5f);
 
                 foreach (var spot in Lights.SpotLights)
                 {

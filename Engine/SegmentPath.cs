@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine
@@ -125,7 +125,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return path[0];
             }
@@ -167,7 +167,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (MathUtil.IsZero(time))
+            if (Helper.IsZero(time))
             {
                 return path[0];
             }

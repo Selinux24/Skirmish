@@ -1,24 +1,28 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.IO;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-
     /// <summary>
     /// Image content from memory
     /// </summary>
-    public sealed class MemoryImageContent : IImageContent, IEquatable<MemoryImageContent>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="stream">Memory stream</param>
+    /// <param name="cropRectangle">Crop rectangle</param>
+    public sealed class MemoryImageContent(MemoryStream stream, RectI? cropRectangle = null) : IImageContent, IEquatable<MemoryImageContent>
     {
         /// <summary>
         /// Image data in stream
         /// </summary>
-        private readonly MemoryStream stream;
+        private readonly MemoryStream stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
         /// <summary>
         /// Crop rectangle
         /// </summary>
-        private readonly Rectangle cropRectangle;
+        private readonly RectI cropRectangle = cropRectangle ?? RectI.Empty;
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -30,23 +34,12 @@ namespace Engine.Content
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <param name="cropRectangle">Crop rectangle</param>
-        public MemoryImageContent(MemoryStream stream, Rectangle? cropRectangle = null)
-        {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
-            this.cropRectangle = cropRectangle ?? Rectangle.Empty;
-        }
-
         /// <inheritdoc/>
         public EngineShaderResourceView CreateResource(Game game, string name, bool mipAutogen = true, bool dynamic = false)
         {
             Name = name;
 
-            if (cropRectangle == Rectangle.Empty)
+            if (cropRectangle == RectI.Empty)
             {
                 return game.Graphics.LoadTexture($"{name}_{GetResourceKey()}", stream, mipAutogen, dynamic);
             }

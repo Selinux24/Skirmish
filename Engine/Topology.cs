@@ -1,4 +1,4 @@
-﻿using SharpDX.Direct3D;
+﻿using Vortice.Direct3D;
 
 namespace Engine
 {
@@ -13,10 +13,10 @@ namespace Engine
         LineStrip = PrimitiveTopology.LineStrip,
         TriangleList = PrimitiveTopology.TriangleList,
         TriangleStrip = PrimitiveTopology.TriangleStrip,
-        LineListWithAdjacency = PrimitiveTopology.LineListWithAdjacency,
-        LineStripWithAdjacency = PrimitiveTopology.LineStripWithAdjacency,
-        TriangleListWithAdjacency = PrimitiveTopology.TriangleListWithAdjacency,
-        TriangleStripWithAdjacency = PrimitiveTopology.TriangleStripWithAdjacency,
+        LineListWithAdjacency = PrimitiveTopology.LineListAdjacency,
+        LineStripWithAdjacency = PrimitiveTopology.LineStripAdjacency,
+        TriangleListWithAdjacency = PrimitiveTopology.TriangleListAdjacency,
+        TriangleStripWithAdjacency = PrimitiveTopology.TriangleStripAdjacency,
         PatchListWith1ControlPoints = PrimitiveTopology.PatchListWith1ControlPoints,
         PatchListWith2ControlPoints = PrimitiveTopology.PatchListWith2ControlPoints,
         PatchListWith3ControlPoints = PrimitiveTopology.PatchListWith3ControlPoints,

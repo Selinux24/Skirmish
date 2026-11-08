@@ -10,7 +10,7 @@ namespace Engine
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public class GameResourceValueArray<T>(string name) : IGameResourceRequest where T : struct
+    public class GameResourceValueArray<T>(string name) : IGameResourceRequest where T : unmanaged
     {
         /// <inheritdoc/>
         public string Name { get; private set; } = name;
@@ -19,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Size
         /// </summary>
-        public int Size { get; set; }
+        public uint Size { get; set; }
         /// <summary>
         /// Values
         /// </summary>

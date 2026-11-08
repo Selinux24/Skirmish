@@ -9,34 +9,30 @@ namespace Engine.Common
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public class BufferManagerInstances<T>(bool dynamic) : IEngineBufferDescriptor
-        where T : struct, IInstacingData
+    public class BufferManagerInstances<T>(bool dynamic) : IEngineInstancingBufferDescriptor
+        where T : unmanaged, IInstacingData
     {
         /// <summary>
         /// Instancing descriptor list
         /// </summary>
         private readonly List<BufferDescriptor> instancingDescriptors = [];
+        /// <summary>
+        /// Stride
+        /// </summary>
+        private readonly uint stride = default(T).GetStride();
 
         /// <inheritdoc/>
         public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; private set; } = 0;
-        /// <inheritdoc/>
-        public int ToAllocateSize
-        {
-            get
-            {
-                return Instances;
-            }
-        }
+        public uint AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
         public bool Allocated { get; private set; } = false;
         /// <inheritdoc/>
-        public int Allocations { get; private set; } = 0;
+        public uint Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -45,22 +41,25 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-        /// <summary>
-        /// Instances
-        /// </summary>
-        public int Instances { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
+        /// <inheritdoc/>
+        public uint Instances { get; set; } = 0;
+        /// <inheritdoc/>
         public int BufferBindingIndex { get; set; } = -1;
 
-        /// <summary>
-        /// Gets the buffer format stride
-        /// </summary>
-        /// <returns>Returns the buffer format stride in bytes</returns>
-        public int GetStride()
+        /// <inheritdoc/>
+        public uint GetStride()
         {
-            return default(T).GetStride();
+            return stride;
+        }
+        /// <inheritdoc/>
+        public uint SizeInBytes()
+        {
+            return Instances * stride;
+        }
+        /// <inheritdoc/>
+        public EngineInputElement[] GetInput()
+        {
+            return default(T).GetInput((uint)BufferIndex);
         }
 
         /// <summary>
@@ -70,10 +69,10 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description</param>
         /// <param name="instances">Number of instances</param>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, uint instances)
         {
             //Store current data index as descriptor offset
-            int offset = Instances;
+            uint offset = Instances;
 
             //Increment the instance count
             Instances += instances;
@@ -90,8 +89,7 @@ namespace Engine.Common
         /// Removes a buffer descriptor from the internal list
         /// </summary>
         /// <param name="descriptor">Buffer descriptor to remove</param>
-        /// <param name="instances">Number of instances</param>
-        public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
+        public void RemoveDescriptor(BufferDescriptor descriptor)
         {
             //Remove descriptor
             instancingDescriptors.Remove(descriptor);
@@ -108,19 +106,29 @@ namespace Engine.Common
                 }
             }
 
+            uint instances = descriptor.Count;
             Instances -= instances;
+
+            ReallocationNeeded = true;
         }
 
         /// <inheritdoc/>
         public void Allocate()
         {
-            AllocatedSize = Instances;
+            AllocatedSize = SizeInBytes();
             Allocated = true;
             Allocations++;
             ReallocationNeeded = false;
         }
         /// <inheritdoc/>
-        public IEngineBufferDescriptor Copy()
+        public EngineBuffer CreateBuffer(Graphics graphics, string name)
+        {
+            uint sizeInBytes = SizeInBytes();
+
+            return graphics.CreateVertexBuffer(name, sizeInBytes, Dynamic);
+        }
+        /// <inheritdoc/>
+        public IEngineInstancingBufferDescriptor Copy()
         {
             var d = new BufferManagerInstances<T>(Dynamic)
             {
@@ -144,7 +152,7 @@ namespace Engine.Common
             string strDynamic = Dynamic ? "[Dynamic]" : "";
             string strInstances = Instances > 0 ? $" Instances: {Instances}" : "";
 
-            return $"[{typeof(T)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}{strInstances}";
+            return $"[{typeof(T)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {SizeInBytes()} Dirty: {Dirty}{strInstances}";
         }
     }
 }

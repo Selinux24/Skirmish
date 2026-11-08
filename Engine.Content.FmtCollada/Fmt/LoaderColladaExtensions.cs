@@ -1,0 +1,546 @@
+﻿using Engine.Common;
+using Engine.Content.FmtCollada.Types;
+using Engine.Mathematics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Engine.Content.FmtCollada.Fmt
+{
+    /// <summary>
+    /// Extensions for collada to sharpDX data parse
+    /// </summary>
+    static class LoaderColladaExtensions
+    {
+        /// <summary>
+        /// Reads a Vector2 from BasicFloat2
+        /// </summary>
+        /// <param name="vector">BasicFloat2 vector</param>
+        /// <returns>Returns the parsed Vector2 from BasicFloat2</returns>
+        public static Vector2 ToVector2(this BasicFloat2 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 2)
+            {
+                return new(vector.Values[0], vector.Values[1]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Vector2.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector3 from BasicFloat3
+        /// </summary>
+        /// <param name="vector">BasicFloat3 vector</param>
+        /// <returns>Returns the parsed Vector3 from BasicFloat3</returns>
+        public static Vector3 ToVector3(this BasicFloat3 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 3)
+            {
+                return new(vector.Values[0], vector.Values[2], vector.Values[1]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Vector3.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector4 from BasicFloat4
+        /// </summary>
+        /// <param name="vector">BasicFloat4 vector</param>
+        /// <returns>Returns the parsed Vector4 from BasicFloat4</returns>
+        public static Vector4 ToVector4(this BasicFloat4 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 4)
+            {
+                return new(vector.Values[0], vector.Values[2], vector.Values[1], vector.Values[3]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Vector4.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector3 from BasicColor
+        /// </summary>
+        /// <param name="color">BasicColor color</param>
+        /// <returns>Returns the parsed Vector3 from BasicColor</returns>
+        public static Color3 ToColor3(this BasicColor color)
+        {
+            if (color.Values != null && color.Values.Length == 3)
+            {
+                return new(color.Values[0], color.Values[1], color.Values[2]);
+            }
+            else if (color.Values != null && color.Values.Length == 4)
+            {
+                return new(color.Values[0], color.Values[1], color.Values[2]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Color2.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector4 from BasicColor
+        /// </summary>
+        /// <param name="color">BasicColor color</param>
+        /// <returns>Returns the parsed Vector4 from BasicColor</returns>
+        public static Color4 ToColor4(this BasicColor color)
+        {
+            if (color.Values != null && color.Values.Length == 3)
+            {
+                return new(color.Values[0], color.Values[1], color.Values[2], 1f);
+            }
+            else if (color.Values != null && color.Values.Length == 4)
+            {
+                return new(color.Values[0], color.Values[1], color.Values[2], color.Values[3]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Vector4.");
+            }
+        }
+        /// <summary>
+        /// Reads a Matrix4x4 from BasicFloat4x4
+        /// </summary>
+        /// <param name="matrix">BasicFloat4x4 matrix</param>
+        /// <returns>Returns the parsed Matrix4x4 from BasicFloat4x4</returns>
+        /// <remarks>
+        /// From right handed
+        /// { rx, ry, rz, 0 }
+        /// { ux, uy, uz, 0 }
+        /// { lx, ly, lz, 0 }
+        /// { px, py, pz, 1 }
+        /// To left handed
+        /// { rx, rz, ry, 0 }
+        /// { lx, lz, ly, 0 }
+        /// { ux, uz, uy, 0 }
+        /// { px, pz, py, 1 }
+        /// </remarks>
+        public static Matrix4x4 ToMatrix4x4(this BasicFloat4X4 matrix)
+        {
+            if (matrix.Values != null && matrix.Values.Length == 16)
+            {
+                var m = new Matrix4x4()
+                {
+                    M11 = matrix.Values[0],
+                    M12 = matrix.Values[2],
+                    M13 = matrix.Values[1],
+                    M14 = matrix.Values[3],
+
+                    M31 = matrix.Values[4],
+                    M32 = matrix.Values[6],
+                    M33 = matrix.Values[5],
+                    M34 = matrix.Values[7],
+
+                    M21 = matrix.Values[8],
+                    M22 = matrix.Values[10],
+                    M23 = matrix.Values[9],
+                    M24 = matrix.Values[11],
+
+                    M41 = matrix.Values[12],
+                    M42 = matrix.Values[14],
+                    M43 = matrix.Values[13],
+                    M44 = matrix.Values[15],
+                };
+
+                return m;
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Matrix4x4.");
+            }
+        }
+
+        /// <summary>
+        /// Reads an array
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Value array</param>
+        /// <param name="length">Length</param>
+        /// <param name="stride">Stride</param>
+        public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
+        {
+            var n = new List<T>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    T v = array.ElementAt(i + x);
+
+                    n.Add(v);
+                }
+            }
+
+            return [.. n];
+        }
+        /// <summary>
+        /// Reads a float array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the float array</returns>
+        public static float[] ReadFloat(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            return ReadArray(source.FloatArray.Values, length, stride);
+        }
+        /// <summary>
+        /// Reads a string array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the string array</returns>
+        public static string[] ReadNames(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            return ReadArray(source.NameArray.Values, length, stride);
+        }
+        /// <summary>
+        /// Reads a string array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the string array</returns>
+        public static string[] ReadIDRefs(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            return ReadArray(source.IdRefArray.Values, length, stride);
+        }
+        /// <summary>
+        /// Reads a Vector2 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector2 array</returns>
+        public static Vector2[] ReadUV(this Source source)
+        {
+            var floats = ReadFloatArray(source, ["S", "T"]);
+
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector2(f))];
+        }
+        /// <summary>
+        /// Reads a Vector3 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector3 array</returns>
+        public static Vector3[] ReadVector3(this Source source)
+        {
+            var floats = ReadFloatArray(source, ["X", "Y", "Z"]);
+
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector3(f[0], f[2], f[1]))];
+        }
+        /// <summary>
+        /// Reads a Vector4 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector4 array</returns>
+        public static Vector4[] ReadVector4(this Source source)
+        {
+            var floats = ReadFloatArray(source, ["X", "Y", "Z", "W"]);
+
+            //To left handed -> Z flipped to Y
+            return [.. floats.Select(f => new Vector4(f[0], f[2], f[1], f[3]))];
+        }
+        /// <summary>
+        /// Reads a Color3 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Color3 array</returns>
+        public static Color3[] ReadColor3(this Source source)
+        {
+            var floats = ReadFloatArray(source, ["R", "G", "B"]);
+
+            return [.. floats.Select(f => new Color3(f))];
+        }
+        /// <summary>
+        /// Reads a Color4 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Color4 array</returns>
+        public static Color4[] ReadColor4(this Source source)
+        {
+            var floats = ReadFloatArray(source, ["R", "G", "B", "A"]);
+
+            return [.. floats.Select(f => new Color4(f))];
+        }
+        /// <summary>
+        /// Reads a Matrix4x4 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Matrix4x4 array</returns>
+        /// <remarks>
+        /// From right handed
+        /// { rx, ry, rz, 0 }
+        /// { ux, uy, uz, 0 }
+        /// { lx, ly, lz, 0 }
+        /// { px, py, pz, 1 }
+        /// To left handed
+        /// { rx, rz, ry, 0 }
+        /// { lx, lz, ly, 0 }
+        /// { ux, uz, uy, 0 }
+        /// { px, pz, py, 1 }
+        /// </remarks>
+        public static Matrix4x4[] ReadMatrix(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 16)
+            {
+                Game.Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix4x4)}");
+
+                return [];
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            var mats = new List<Matrix4x4>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                var m = new Matrix4x4()
+                {
+                    M11 = source.FloatArray[i + 0],
+                    M12 = source.FloatArray[i + 8],
+                    M13 = source.FloatArray[i + 4],
+                    M14 = source.FloatArray[i + 12],
+
+                    M21 = source.FloatArray[i + 2],
+                    M22 = source.FloatArray[i + 10],
+                    M23 = source.FloatArray[i + 6],
+                    M24 = source.FloatArray[i + 14],
+
+                    M31 = source.FloatArray[i + 1],
+                    M32 = source.FloatArray[i + 9],
+                    M33 = source.FloatArray[i + 5],
+                    M34 = source.FloatArray[i + 13],
+
+                    M41 = source.FloatArray[i + 3],
+                    M43 = source.FloatArray[i + 7],
+                    M42 = source.FloatArray[i + 11],
+                    M44 = source.FloatArray[i + 15],
+                };
+
+                mats.Add(m);
+            }
+
+            return [.. mats];
+        }
+        /// <summary>
+        /// Reads the accessor float array from source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <param name="accessorParams">Accessor parameters</param>
+        /// <returns>Returns an array of floats by accessors</returns>
+        private static float[][] ReadFloatArray(Source source, string[] accessorParams)
+        {
+            int length = accessorParams.Length;
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != length)
+            {
+                Game.Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {length}");
+
+                return [];
+            }
+
+            var accParams = source.TechniqueCommon.Accessor.Params;
+            int[] idx = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                idx[i] = Array.FindIndex(accParams, p => p.Name == accessorParams[i]);
+            }
+
+            List<float[]> result = [];
+            List<float> tmp = [];
+
+            int count = source.TechniqueCommon.Accessor.Count;
+            for (int i = 0; i < count * stride; i += stride)
+            {
+                for (int f = 0; f < length; f++)
+                {
+                    tmp.Add(source.FloatArray[i + idx[f]]);
+                }
+
+                result.Add([.. tmp]);
+                tmp.Clear();
+            }
+
+            return [.. result];
+        }
+
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a Node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix4x4 ReadMatrix4x4(this Node node)
+        {
+            if (node.Matrix != null)
+            {
+                return ReadMatrix4x4FromTransform(node.Matrix);
+            }
+            else
+            {
+                return ReadMatrix4x4LocRotScale(node.Translate, node.Rotate, node.Scale);
+            }
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a matrix in the Node
+        /// </summary>
+        /// <param name="matrix">Node matrix</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix4x4 ReadMatrix4x4FromTransform(BasicFloat4X4[] matrix)
+        {
+            if (matrix != null)
+            {
+                BasicFloat4X4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
+                if (trn != null)
+                {
+                    Matrix4x4 m = trn.ToMatrix4x4();
+
+                    return Matrix4x4.Transpose(m);
+                }
+            }
+
+            return Matrix4x4.Identity;
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from the specified transforms in the Node
+        /// </summary>
+        /// <param name="translate">Translate</param>
+        /// <param name="rotate">Rotate</param>
+        /// <param name="scale">Scale</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix4x4 ReadMatrix4x4LocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
+        {
+            Matrix4x4 finalTranslation = Matrix4x4.Identity;
+            Matrix4x4 finalRotation = Matrix4x4.Identity;
+            Matrix4x4 finalScale = Matrix4x4.Identity;
+
+            if (translate != null)
+            {
+                BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
+                if (loc != null) finalTranslation *= Matrix4x4.Translation(loc.ToVector3());
+            }
+
+            if (rotate != null)
+            {
+                BasicFloat4 rotX = Array.Find(rotate, t => string.Equals(t.SId, "rotationX"));
+                if (rotX != null)
+                {
+                    Vector4 r = rotX.ToVector4();
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
+                if (rotY != null)
+                {
+                    Vector4 r = rotY.ToVector4();
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
+                if (rotZ != null)
+                {
+                    Vector4 r = rotZ.ToVector4();
+                    finalRotation *= Matrix4x4.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+            }
+
+            if (scale != null)
+            {
+                BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
+                if (sca != null) finalScale *= Matrix4x4.Scaling(sca.ToVector3());
+            }
+
+            return finalScale * finalRotation * finalTranslation;
+        }
+
+        /// <summary>
+        /// Adds vertex input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="vertexInput">Input</param>
+        /// <param name="positions">Positions list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateVertexInput(this VertexData vert, Input vertexInput, Vector3[] positions, BasicIntArray indices, int index)
+        {
+            if (vertexInput != null)
+            {
+                var vIndex = indices[index + vertexInput.Offset];
+                vert.VertexIndex = vIndex;
+                vert.Position = positions[vIndex];
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds normal input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="normalInput">Input</param>
+        /// <param name="normals">Normals list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateNormalInput(this VertexData vert, Input normalInput, Vector3[] normals, BasicIntArray indices, int index)
+        {
+            if (normalInput != null)
+            {
+                var nIndex = indices[index + normalInput.Offset];
+                vert.Normal = normals[nIndex];
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds texture coordinates input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="texCoordInput">Input</param>
+        /// <param name="texCoords">Coordinates list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateTexCoordInput(this VertexData vert, Input texCoordInput, Vector2[] texCoords, BasicIntArray indices, int index)
+        {
+            if (texCoordInput != null)
+            {
+                var tIndex = indices[index + texCoordInput.Offset];
+                Vector2 tex = texCoords[tIndex];
+
+                //Invert Vertical coordinate
+                tex.Y = -tex.Y;
+
+                vert.Texture = tex;
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds color input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="colorsInput">Input</param>
+        /// <param name="colors">Colors list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateColorsInput(this VertexData vert, Input colorsInput, Color3[] colors, BasicIntArray indices, int index)
+        {
+            if (colorsInput != null)
+            {
+                int cIndex = indices[index + colorsInput.Offset];
+                vert.Color = new Color4(colors[cIndex], 1);
+            }
+
+            return vert;
+        }
+    }
+}

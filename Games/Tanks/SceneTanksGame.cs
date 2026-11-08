@@ -1,16 +1,17 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,8 +44,8 @@ namespace Tanks
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
-        private readonly Color gameMessageForeColor = Color.Yellow;
-        private readonly Color gameMessageShadowColor = Color.Yellow * 0.5f;
+        private readonly Color4 gameMessageForeColor = Color.Yellow;
+        private readonly Color4 gameMessageShadowColor = Color.Yellow * 0.5f;
         private UITextArea gameKeyHelp;
 
         private UIPanel dialog;
@@ -85,7 +86,7 @@ namespace Tanks
         private UIProgressBar pbFire;
         private readonly Color4 pbFireBaseColor = Color.Yellow;
         private readonly Color4 pbFireHBaseColor = Color.Red;
-        private readonly Color4 pbFireProgressColor = new(Color.Yellow.ToColor3(), 0.9f);
+        private readonly Color4 pbFireProgressColor = new(Color.Yellow, 0.9f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -101,13 +102,13 @@ namespace Tanks
         private float terrainTop;
         private readonly float terrainHeight = 100;
         private readonly float terrainSize = 1024;
-        private readonly int mapSize = 256;
+        private readonly uint mapSize = 256;
         private ModelInstanced tanks;
         private readonly string tankBarrelPart = "Barrel-mesh";
         private readonly string tankTurretPart = "Turret-mesh";
         private readonly string tankHullPart = "Hull-mesh";
-        private readonly float maxBarrelPitch = MathUtil.DegreesToRadians(85);
-        private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
+        private readonly float maxBarrelPitch = Helper.DegreesToRadians(85);
+        private readonly float minBarrelPitch = Helper.DegreesToRadians(-5);
         private Model projectile;
 
         private readonly List<ModelInstanced> treeModels = [];
@@ -118,8 +119,8 @@ namespace Tanks
         private ParticleManager particleManager = null;
         private readonly float explosionDurationSeconds = 0.5f;
         private readonly float shotDurationSeconds = 0.2f;
-        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
-        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
+        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow, Color.Yellow);
+        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow, Color.Yellow);
 
         private bool shooting = false;
         private bool gameEnding = false;
@@ -133,7 +134,7 @@ namespace Tanks
 
         private DecalDrawer decalDrawer;
 
-        private PrimitiveListDrawer<Line3D> boundsDrawer;
+        private GeometryColorDrawer<Line3D> boundsDrawer;
 
         private readonly string loadGroupSceneObjects = "Asset initializing";
 
@@ -199,7 +200,7 @@ namespace Tanks
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
             loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
@@ -308,10 +309,10 @@ namespace Tanks
             descPan.BlendMode = BlendModes.OpaqueTransparent;
             dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
-            var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
+            var font = FontDescription.FromFile(fontFilename, 20, true);
 
-            Color4 releasedColor = new((Color.DarkGray * 0.6666f).ToColor3(), 1f);
-            Color4 pressedColor = new((Color.DarkGray * 0.7777f).ToColor3(), 1f);
+            Color4 releasedColor = new(Color.DarkGray * 0.6666f, 1f);
+            Color4 pressedColor = new(Color.DarkGray * 0.7777f, 1f);
             var descButton = UIButtonDescription.DefaultTwoStateButton(font, releasedColor, pressedColor);
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -403,7 +404,7 @@ namespace Tanks
             int layerSprites = layerPanel + 1;
             int layerKeys = layerSprites + 1;
 
-            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
+            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color.Black * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
             keyRotate = await AddComponentUI<Sprite, SpriteDescription>("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), layerSprites);
@@ -486,7 +487,7 @@ namespace Tanks
             windVelocity.Caption.Text = "Wind velocity";
             windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
             windVelocity.BaseColor = Color.DeepSkyBlue;
-            windVelocity.ProgressColor = new Color4(Color.DarkBlue.ToColor3(), 0.5f);
+            windVelocity.ProgressColor = new(Color.DarkBlue, 0.5f);
             windVelocity.Visible = false;
 
             windDirectionArrow = await AddComponentUI<Sprite, SpriteDescription>("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), layerMarkers);
@@ -504,7 +505,7 @@ namespace Tanks
                 trajectoryMarker.BaseColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
-                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
+                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, Helper.TwoPi, 1000, ScaleFuncs.Linear);
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
@@ -566,7 +567,7 @@ namespace Tanks
         }
         private async Task InitializeModelsTrees()
         {
-            int instances = Helper.RandomGenerator.Next(200, 5000) / 3;
+            uint instances = (uint)Helper.RandomGenerator.Next(200, 5000) / 3;
 
             for (int i = 0; i < 3; i++)
             {
@@ -622,7 +623,7 @@ namespace Tanks
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
             var pShotExplosion = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleFireFileName, 5);
-            pShotExplosion.Gravity = Direction3.Zero;
+            pShotExplosion.Gravity = Vector3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             pShotExplosion.MinVerticalVelocity = 0f;
             pShotExplosion.MaxVerticalVelocity = 0f;
@@ -631,7 +632,7 @@ namespace Tanks
             particleDescriptions.Add("ShotExplosion", pShotExplosion);
 
             var pShotSmoke = ParticleSystemDescription.InitializeExplosion(resourceParticlesFolder, particleSmokeFileName, 5);
-            pShotSmoke.Gravity = Direction3.Zero;
+            pShotSmoke.Gravity = Vector3.Zero;
             pShotExplosion.EmitterVelocitySensitivity = 1f;
             particleDescriptions.Add("ShotSmoke", pShotSmoke);
         }
@@ -641,7 +642,7 @@ namespace Tanks
             desc.BlendMode = BlendModes.OpaqueAlpha;
 
             decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
-            decalDrawer.TintColor = new Color(90, 77, 72, 170);
+            decalDrawer.TintColor = new Color(170, 90, 77, 72);
         }
         private async Task InitializeAudio()
         {
@@ -656,7 +657,7 @@ namespace Tanks
 
             for (int i = 0; i < 8; i++)
             {
-                var light = new SceneLightPoint($"Explosion_{i}", true, Color3.Black, Color3.Black, false, lightDesc);
+                var light = new SceneLightPoint($"Explosion_{i}", true, Color.Black, Color.Black, false, lightDesc);
 
                 pointLights.Add(light);
             }
@@ -669,14 +670,14 @@ namespace Tanks
         }
         private async Task InitializeDebugDrawer()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            var desc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 100000,
                 CastShadow = ShadowCastingAlgorihtms.None,
                 StartsVisible = false,
             };
 
-            boundsDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
+            boundsDrawer = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("Bounds", "Bounds", desc);
         }
 
         private async Task LoadAssetsCompleted(LoadResourcesResult res)
@@ -854,18 +855,18 @@ namespace Tanks
             uiTweener.Show(loadingBar, 500);
 
             var bbox = terrain.GetBoundingBox();
-            var min = bbox.Minimum.XZ();
-            var max = bbox.Maximum.XZ();
-            var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
+            var min = bbox.Minimum.XZ;
+            var max = bbox.Maximum.XZ;
+            var sph = new BoundingSphere(bbox.Center, bbox.Extents.X * 0.66f);
 
-            int totalTrees = treeModels.Sum(t => t.InstanceCount);
+            uint totalTrees = (uint)treeModels.Sum(t => t.InstanceCount);
 
             Task.Run(() =>
             {
-                int progressCount = 0;
+                uint progressCount = 0;
                 foreach (var treeModel in treeModels)
                 {
-                    progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees, (float progress) =>
+                    progressCount = PlantTree(treeModel, min, max, sph, progressCount, totalTrees, progress =>
                     {
                         loadingBar.ProgressValue = MathF.Max(loadingBar.ProgressValue, progress);
                         loadingBar.Caption.Text = $"Planting trees... {(int)(progress * 100f)}%";
@@ -876,16 +877,16 @@ namespace Tanks
                 return startGame();
             }).ConfigureAwait(false);
         }
-        private int PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, int trees, int total, Action<float> callback)
+        private uint PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph, uint trees, uint total, Action<float> callback)
         {
-            int count = trees;
+            uint count = trees;
 
-            int treeCount = tree.InstanceCount;
+            uint treeCount = tree.InstanceCount;
             while (treeCount > 0)
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
-                var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = Helper.RandomGenerator.NextFloat(2.5f, 5f);
+                var rot = Helper.RandomGenerator.NextSingle(0, Helper.TwoPi);
+                var scale = Helper.RandomGenerator.NextSingle(2.5f, 5f);
 
                 if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
@@ -893,7 +894,7 @@ namespace Tanks
                 }
 
                 var pos = result.Position;
-                if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextFloat(0, 1) < 0.95f)
+                if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextSingle(0, 1) < 0.95f)
                 {
                     continue;
                 }
@@ -902,7 +903,7 @@ namespace Tanks
 
                 callback.Invoke(count++ / (float)total);
 
-                tree[treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
+                tree[(int)treeCount].Manipulator.SetTransform(pos, rot, 0, 0, scale);
             }
 
             return count;
@@ -1020,7 +1021,7 @@ namespace Tanks
                 MaxMove = 25,
                 CurrentMove = 25,
                 Color = Color.Blue,
-                TintColor = new Color(0.5f, 0.5f, 1f, 1f),
+                TintColor = new(0.5f, 0.5f, 1f, 1f),
             };
 
             player2Status = new PlayerStatus
@@ -1032,7 +1033,7 @@ namespace Tanks
                 MaxMove = 25,
                 CurrentMove = 25,
                 Color = Color.Red,
-                TintColor = new Color(1f, 0.5f, 0.5f, 1f),
+                TintColor = new(1f, 0.5f, 0.5f, 1f),
             };
         }
         private void UpdateGameControls(bool visible)
@@ -1312,7 +1313,7 @@ You will lost all the game progress.",
                 var pos = nextPosition;
                 var vw = nextInterest;
 
-                float y = MathUtil.Lerp(pos.Y, cRes.Position.Y + radius, 0.5f);
+                float y = float.Lerp(pos.Y, cRes.Position.Y + radius, 0.5f);
                 vw.Y -= pos.Y - y;
                 pos.Y = y;
 
@@ -1359,7 +1360,7 @@ You will lost all the game progress.",
             else
             {
                 playerTurnMarker.Left = Game.Form.RenderCenter.X + 120;
-                playerTurnMarker.Rotation = MathUtil.Pi;
+                playerTurnMarker.Rotation = Helper.Pi;
             }
         }
         private void UpdatePlayersStatus()
@@ -1452,12 +1453,13 @@ You will lost all the game progress.",
                 dist += sampleDist;
 
                 // Test the individual marker visibility against camera
-                if (Camera.Frustum.Contains(markerPos) == ContainmentType.Disjoint)
+                if (Camera.Frustum.Contains(ref markerPos) == ContainmentType.Disjoint)
                 {
                     continue;
                 }
 
-                var screenPos = Vector3.Project(markerPos,
+                var screenPos = Vector3.Project(
+                    markerPos,
                     Game.Graphics.Viewport.X,
                     Game.Graphics.Viewport.Y,
                     Game.Graphics.Viewport.Width,
@@ -1529,8 +1531,8 @@ You will lost all the game progress.",
             //Calculates the angle between the barrel direction, and the new direction (barrel position to designated position)
             var newDir = Vector3.Normalize(barrelPos - position);
 
-            var angle = Helper.AngleSigned(barrelDir, newDir);
-            if (MathUtil.IsZero(angle))
+            var angle = Vector3.AngleSigned(barrelDir, newDir);
+            if (Helper.IsZero(angle))
             {
                 return;
             }
@@ -1539,7 +1541,7 @@ You will lost all the game progress.",
             var barrelManipulator = model.GetModelPartByName(tankTurretPart).Manipulator;
             var localPos = barrelManipulator.Position;
             var c = Vector3.Cross(barrelDir, newDir);
-            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix.RotationAxis(c, angle));
+            var localDir = Vector3.TransformNormal(barrelManipulator.Forward, Matrix4x4.RotationAxis(c, angle));
 
             //Apply de local delta
             barrelManipulator.RotateTo(localPos + localDir, Vector3.Up, Axis.Y, 0.01f);
@@ -1548,18 +1550,18 @@ You will lost all the game progress.",
         {
             // Set wind velocity and direction
             windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
-            windDirectionArrow.Rotation = Helper.AngleSigned(Vector2.UnitY, windDirection);
+            windDirectionArrow.Rotation = Vector2.AngleSigned(Vector2.UnitY, windDirection);
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            RectangleF terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
+            Rect terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
-            Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
-            Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
+            Vector2 tank1 = tanks[0].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
+            Vector2 tank2 = tanks[1].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
 
             // Get the mini map rectangle
-            RectangleF miniMapRect = miniMapBackground.GetRenderArea(false);
+            Rect miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
             Vector2 markerBounds1 = new(miniMapTank1.Width, miniMapTank1.Height);
@@ -1576,16 +1578,16 @@ You will lost all the game progress.",
             Vector2 markerToMinimap2 = new(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
 
             // Translate and center into the minimap
-            Vector2 mt1Position = markerToMinimap1 + miniMapRect.TopLeft - (markerBounds1 * 0.5f);
-            Vector2 mt2Position = markerToMinimap2 + miniMapRect.TopLeft - (markerBounds2 * 0.5f);
+            Vector2 mt1Position = markerToMinimap1 + (Vector2)miniMapRect.TopLeft - (markerBounds1 * 0.5f);
+            Vector2 mt2Position = markerToMinimap2 + (Vector2)miniMapRect.TopLeft - (markerBounds2 * 0.5f);
 
             // Set marker position
             miniMapTank1.SetPosition(mt1Position);
             miniMapTank2.SetPosition(mt2Position);
 
             // Set marker rotation
-            miniMapTank1.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ()));
-            miniMapTank2.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
+            miniMapTank1.Rotation = Vector2.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ));
+            miniMapTank2.Rotation = Vector2.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ));
         }
 
         private void Shoot(float shotForce)
@@ -1653,7 +1655,7 @@ You will lost all the game progress.",
             if (impact)
             {
                 ShooterStatus.Points += impactDamage * 100;
-                TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - impactDamage, 0, TargetStatus.MaxLife);
+                TargetStatus.CurrentLife = Math.Clamp(TargetStatus.CurrentLife - impactDamage, 0, TargetStatus.MaxLife);
 
                 if (impactPosition.HasValue)
                 {
@@ -1852,7 +1854,7 @@ You will lost all the game progress.",
                 ShooterStatus.NewTurn();
                 TargetStatus.NewTurn();
 
-                currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
+                currentWindVelocity = Helper.RandomGenerator.NextSingle(0f, maxWindVelocity);
                 windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
 
                 Parallel.ForEach(particleManager.ParticleSystems, p =>
@@ -1926,8 +1928,8 @@ You will lost all the game progress.",
         private void AddSmokePlumeSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
-            float duration = Helper.RandomGenerator.NextFloat(10, 30);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextSingle(10, 30);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             LightQueue.QueueLight(Game.GameTime, position, lightExplosion, duration);
 
@@ -1956,7 +1958,7 @@ You will lost all the game progress.",
         }
         private void AddCrater(Vector3 position, Vector3 normal)
         {
-            var rnd = Helper.RandomGenerator.NextFloat(10f, 30f);
+            var rnd = Helper.RandomGenerator.NextSingle(10f, 30f);
 
             decalDrawer.AddDecal(position + (normal * 0.2f), normal, Vector2.One * rnd, float.PositiveInfinity);
         }

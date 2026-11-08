@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.SkyScattering
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Sky scatering vertex shader
     /// </summary>
-    public class SkyScatteringVs : IBuiltInShader<EngineVertexShader>
+    public class SkyScatteringVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per object constant buffer

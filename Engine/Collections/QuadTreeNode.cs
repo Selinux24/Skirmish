@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Quad-tree node
     /// </summary>
@@ -22,18 +21,18 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
-        /// <param name="maxDepth">Maximum depth</param>
+        /// <param name="options">Quadtree options</param>
         /// <param name="treeDepth">Current depth</param>
         /// <param name="nodeCount">Node count</param>
         /// <returns>Returns new node</returns>
         public static QuadTreeNode CreatePartitions(
             QuadTreeNode parent,
             BoundingBox bbox,
-            int maxDepth,
+            QuadTreeOptions options,
             int treeDepth,
             ref int nodeCount)
         {
-            if (treeDepth > maxDepth)
+            if (treeDepth > options.MaxDepth)
             {
                 return null;
             }
@@ -45,7 +44,7 @@ namespace Engine.Collections
                 BoundingBox = bbox,
             };
 
-            bool haltByDepth = treeDepth == maxDepth;
+            bool haltByDepth = treeDepth == options.MaxDepth;
             if (haltByDepth)
             {
                 node.Id = nodeCount++;
@@ -53,7 +52,7 @@ namespace Engine.Collections
             else
             {
                 // Initialize node partitions
-                IntializeNode(node, bbox, maxDepth, treeDepth + 1, ref nodeCount);
+                IntializeNode(node, bbox, options, treeDepth + 1, ref nodeCount);
             }
 
             if (parent == null)
@@ -69,22 +68,22 @@ namespace Engine.Collections
         /// <param name="node">Current node</param>
         /// <param name="bbox">Bounding box</param>
         /// <param name="items">Items into the node</param>
-        /// <param name="maxDepth">Maximum depth</param>
+        /// <param name="options">Quadtree options</param>
         /// <param name="nextTreeDepth">Next depth</param>
         /// <param name="nodeCount">Node count</param>
         private static void IntializeNode(
             QuadTreeNode node,
             BoundingBox bbox,
-            int maxDepth,
+            QuadTreeOptions options,
             int nextTreeDepth,
             ref int nodeCount)
         {
-            BoundingBox[] boxes = [.. bbox.SubdivideQuadtree()];
+            BoundingBox[] boxes = [.. bbox.SubdivideQuadtree(options.SeparateSubdivisions, options.Separation)];
 
-            var topLeftChild = CreatePartitions(node, boxes[0], maxDepth, nextTreeDepth, ref nodeCount);
-            var topRightChild = CreatePartitions(node, boxes[1], maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomLeftChild = CreatePartitions(node, boxes[2], maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomRightChild = CreatePartitions(node, boxes[3], maxDepth, nextTreeDepth, ref nodeCount);
+            var topLeftChild = CreatePartitions(node, boxes[0], options, nextTreeDepth, ref nodeCount);
+            var topRightChild = CreatePartitions(node, boxes[1], options, nextTreeDepth, ref nodeCount);
+            var bottomLeftChild = CreatePartitions(node, boxes[2], options, nextTreeDepth, ref nodeCount);
+            var bottomRightChild = CreatePartitions(node, boxes[3], options, nextTreeDepth, ref nodeCount);
 
             List<QuadTreeNode> childList = [];
 

@@ -4,7 +4,7 @@ namespace Engine.Common
     /// <summary>
     /// Mesh by material collection
     /// </summary>
-    public class MeshByMaterialCollection : DrawingDataCollection<Mesh>
+    public class MeshByMaterialCollection : DrawingDataCollection<IMesh>
     {
         /// <summary>
         /// Initializes the mesh list
@@ -20,7 +20,7 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
+            Game.Logger.WriteTrace(nameof(MeshByMaterialCollection), $"{name} Processing Mesh Collection => {this}");
 
             foreach (var mesh in GetValues())
             {

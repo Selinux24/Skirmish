@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -164,7 +164,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Vertex C. [(x, y, z)]</param>
         /// <returns>The signed xz-plane area of the triangle</returns>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static int TriArea2D(Int3 a, Int3 b, Int3 c)
+        public static int TriArea2D(Vector3I a, Vector3I b, Vector3I c)
         {
             return (c.X - a.X) * (b.Z - a.Z) - (b.X - a.X) * (c.Z - a.Z);
         }
@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point A</param>
         /// <param name="b">Point B</param>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static bool VEqual2D(Int3 a, Int3 b)
+        public static bool VEqual2D(Vector3I a, Vector3I b)
         {
             return a.X == b.X && a.Z == b.Z;
         }
@@ -184,7 +184,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point A</param>
         /// <param name="b">Point B</param>
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
-        public static int DistanceSqr2D(Int3 a, Int3 b)
+        public static int DistanceSqr2D(Vector3I a, Vector3I b)
         {
             int dx = b.X - a.X;
             int dz = b.Z - a.Z;
@@ -291,11 +291,11 @@ namespace Engine.PathFinding.RecastNavigation
             Vector3 v1 = Vector3.Subtract(b, a);
             Vector3 v2 = Vector3.Subtract(pt, a);
 
-            float dot00 = Vector2.Dot(v0.XZ(), v0.XZ());
-            float dot01 = Vector2.Dot(v0.XZ(), v1.XZ());
-            float dot02 = Vector2.Dot(v0.XZ(), v2.XZ());
-            float dot11 = Vector2.Dot(v1.XZ(), v1.XZ());
-            float dot12 = Vector2.Dot(v1.XZ(), v2.XZ());
+            float dot00 = Vector2.Dot(v0.XZ, v0.XZ);
+            float dot01 = Vector2.Dot(v0.XZ, v1.XZ);
+            float dot02 = Vector2.Dot(v0.XZ, v2.XZ);
+            float dot11 = Vector2.Dot(v1.XZ, v1.XZ);
+            float dot12 = Vector2.Dot(v1.XZ, v2.XZ);
 
             // Compute barycentric coordinates
             float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
@@ -525,10 +525,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
         public static void ProjectPoly2D(Vector3 axis, Vector3[] polygon, int npoly, out float rmin, out float rmax)
         {
-            rmin = rmax = Vector2.Dot(axis.XZ(), polygon[0].XZ());
+            rmin = rmax = Vector2.Dot(axis.XZ, polygon[0].XZ);
             for (int i = 1; i < npoly; ++i)
             {
-                float d = Vector2.Dot(axis.XZ(), polygon[i].XZ());
+                float d = Vector2.Dot(axis.XZ, polygon[i].XZ);
                 rmin = MathF.Min(rmin, d);
                 rmax = MathF.Max(rmax, d);
             }
@@ -671,8 +671,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a a random point</returns>
         public static Vector3 RandomPointInConvexPoly(Vector3[] polygon)
         {
-            float s = Helper.RandomGenerator.NextFloat(0, 1);
-            float t = Helper.RandomGenerator.NextFloat(0, 1);
+            float s = Helper.RandomGenerator.NextSingle(0, 1);
+            float t = Helper.RandomGenerator.NextSingle(0, 1);
 
             List<float> areas = [];
 
@@ -752,7 +752,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a value between 0 and 1</returns>
         public static float Tween(float t, float t0, float t1)
         {
-            return MathUtil.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
+            return Math.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
         }
         /// <summary>
         /// Gets whether the point b is into the cylinder defined by the a vector, and the specified radius and height
@@ -816,7 +816,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="verts">Vertices array</param>
         /// <param name="triPoints">Triangle indices array</param>
         /// <returns>Returns the distance from pt to closest point</returns>
-        public static float DistanceTriMesh(Vector3 pt, Vector3[] verts, Int3[] triPoints)
+        public static float DistanceTriMesh(Vector3 pt, Vector3[] verts, Vector3I[] triPoints)
         {
             float dmin = float.MaxValue;
 
@@ -884,7 +884,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="bmin">Minimum bounds of box B</param>
         /// <param name="bmax">Maximum bounds of box B</param>
         /// <returns>True if the two AABB's overlap</returns>
-        public static bool OverlapBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
+        public static bool OverlapBounds(Vector3I amin, Vector3I amax, Vector3I bmin, Vector3I bmax)
         {
             return
                 !(amin.X > bmax.X || amax.X < bmin.X) &&
@@ -913,7 +913,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="amax">A maximum rectangle point</param>
         /// <param name="bounds">Bounds</param>
         /// <returns>Returns true if rectangles overlap</returns>
-        public static bool OverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
+        public static bool OverlapRect(Vector2 amin, Vector2 amax, Rect bounds)
         {
             return
                 !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
@@ -965,7 +965,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = verts[j] + orig;
 
-                if (!MathUtil.IsZero(cellHeight))
+                if (!Helper.IsZero(cellHeight))
                 {
                     p.Y += cellHeight;// Is this offset necessary?
                 }
@@ -992,7 +992,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="v">Vector to normalize</param>
         public static Vector3 Normalize2D(Vector3 v)
         {
-            Vector2 n = Vector2.Normalize(v.XZ());
+            Vector2 n = Vector2.Normalize(v.XZ);
 
             return new Vector3(n.X, v.Y, n.Y);
         }

@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine
 {
@@ -79,10 +78,10 @@ namespace Engine
             }
 
             return
-                MathUtil.NearEqual(value1.Position, value2.Position) &&
-                MathUtil.NearEqual(value1.Value, value2.Value) &&
-                MathUtil.NearEqual(value1.TangentIn, value2.TangentIn) &&
-                MathUtil.NearEqual(value1.TangentOut, value2.TangentOut) &&
+                Helper.NearEqual(value1.Position, value2.Position) &&
+                Helper.NearEqual(value1.Value, value2.Value) &&
+                Helper.NearEqual(value1.TangentIn, value2.TangentIn) &&
+                Helper.NearEqual(value1.TangentOut, value2.TangentOut) &&
                 (value1.Continuity == value2.Continuity);
         }
         /// <inheritdoc/>

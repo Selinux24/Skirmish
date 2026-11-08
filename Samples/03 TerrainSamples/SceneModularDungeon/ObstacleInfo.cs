@@ -1,5 +1,4 @@
-﻿using Engine;
-using Engine.BuiltIn.Components.Models;
+﻿using Engine.BuiltIn.Components.Models;
 
 namespace TerrainSamples.SceneModularDungeon
 {

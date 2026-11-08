@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Helicopter controller
     /// </summary>
@@ -59,7 +58,7 @@ namespace Engine
             // A vector pointing from the location to the target
             var desired = next - position;
             float dToNext = desired.Length();
-            if (MathUtil.IsZero(dToNext))
+            if (Helper.IsZero(dToNext))
             {
                 return;
             }

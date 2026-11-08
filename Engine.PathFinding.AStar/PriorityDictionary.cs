@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
@@ -251,13 +250,6 @@ namespace Engine.PathFinding.AStar
             return newItems;
         }
         /// <summary>
-        /// Gets whether access to the ICollection is safe for multithreaded (Thread Safe)
-        /// </summary>
-        protected bool IsSynchronized
-        {
-            get { return false; }
-        }
-        /// <summary>
         /// Gets a value that can be used to synchronize access to the ICollection
         /// </summary>
         protected object SyncRoot
@@ -313,7 +305,7 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         bool ICollection.IsSynchronized
         {
-            get { return IsSynchronized; }
+            get { return false; }
         }
         /// <summary>
         /// Gets a value that can be used to synchronize access to the ICollection

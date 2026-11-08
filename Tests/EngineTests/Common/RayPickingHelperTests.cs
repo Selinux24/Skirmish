@@ -1,8 +1,5 @@
-﻿using Engine;
-using Engine.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,11 +7,16 @@ using System.Linq;
 
 namespace EngineTests.Common
 {
+    using Engine;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class RayPickingHelperTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Mock<IRayPickable<Triangle>> mockQuad1;
         static Mock<IRayPickable<Triangle>> mockQuad2;
@@ -52,8 +54,6 @@ namespace EngineTests.Common
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             var ray = new Ray(Vector3.Zero, Vector3.ForwardLH);
             var rayReverse = new Ray(Vector3.ForwardLH * 4, Vector3.BackwardLH);
             var rayNoContact = new Ray(Vector3.Zero, Vector3.BackwardLH);
@@ -87,13 +87,13 @@ namespace EngineTests.Common
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
             var p3 = t3.SelectMany(t => t.GetVertices()).ToArray();
 
-            bsph1 = SharpDXExtensions.BoundingSphereFromPoints(p1);
-            bsph2 = SharpDXExtensions.BoundingSphereFromPoints(p2);
-            bsph3 = SharpDXExtensions.BoundingSphereFromPoints(p3);
+            bsph1 = BoundingSphere.FromPoints(p1);
+            bsph2 = BoundingSphere.FromPoints(p2);
+            bsph3 = BoundingSphere.FromPoints(p3);
 
-            bbox1 = SharpDXExtensions.BoundingBoxFromPoints(p1);
-            bbox2 = SharpDXExtensions.BoundingBoxFromPoints(p2);
-            bbox3 = SharpDXExtensions.BoundingBoxFromPoints(p3);
+            bbox1 = BoundingBox.FromPoints(p1);
+            bbox2 = BoundingBox.FromPoints(p2);
+            bbox3 = BoundingBox.FromPoints(p3);
 
             var bbox1Tris = Triangle.ComputeTriangleList(bbox1);
             var bbox2Tris = Triangle.ComputeTriangleList(bbox2);
@@ -122,7 +122,7 @@ namespace EngineTests.Common
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -705,7 +705,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -735,7 +735,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -765,7 +765,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -795,7 +795,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse2()
@@ -804,7 +804,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse3()
@@ -813,7 +813,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestDefaultNoContact1()
@@ -822,7 +822,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestDefaultNoContact2()
@@ -831,7 +831,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestDefaultNoContact3()
@@ -840,7 +840,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
 
         [TestMethod()]
@@ -850,7 +850,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -880,7 +880,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -910,7 +910,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
@@ -940,7 +940,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
@@ -970,7 +970,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
@@ -1000,7 +1000,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(6, res.Count());
+            Assert.HasCount(6, res);
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
@@ -1030,7 +1030,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestReverseNoContact2()
@@ -1039,7 +1039,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestReverseNoContact3()
@@ -1048,7 +1048,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
 
         [TestMethod()]
@@ -1058,7 +1058,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarse2()
@@ -1067,7 +1067,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarse3()
@@ -1076,7 +1076,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseReverse1()
@@ -1085,7 +1085,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseReverse2()
@@ -1094,7 +1094,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseReverse3()
@@ -1103,7 +1103,7 @@ namespace EngineTests.Common
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseNoContact1()
@@ -1112,7 +1112,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseNoContact2()
@@ -1121,7 +1121,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
         [TestMethod()]
         public void PickAllTestCoarseNoContact3()
@@ -1130,7 +1130,7 @@ namespace EngineTests.Common
 
             Assert.IsFalse(picked);
 
-            Assert.AreEqual(0, res.Count());
+            Assert.IsEmpty(res);
         }
     }
 }

@@ -1,11 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
 using System;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Material description
     /// </summary>
@@ -102,9 +101,9 @@ namespace Engine
                 Block3 = Vector4.Zero,
                 Block4 = Vector4.Zero,
                 Diffuse = DiffuseColor,
-                Emissive = new Color4(EmissiveColor, 0),
-                Ambient = new Color4(AmbientColor, 0),
-                Specular = new Color4(SpecularColor, 0),
+                Emissive = new(EmissiveColor, 0),
+                Ambient = new(AmbientColor, 0),
+                Specular = new(SpecularColor, 0),
             };
         }
         /// <inheritdoc/>
@@ -116,8 +115,8 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                MathUtil.NearEqual(Metallic, other.Metallic) &&
-                MathUtil.NearEqual(Roughness, other.Roughness);
+                Helper.NearEqual(Metallic, other.Metallic) &&
+                Helper.NearEqual(Roughness, other.Roughness);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

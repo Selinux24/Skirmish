@@ -1,28 +1,23 @@
-﻿using Engine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EngineTests.Common
 {
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class SharpDXExtensionsTests
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -34,12 +29,12 @@ namespace EngineTests.Common
             var aabbCorners = aabb.GetVertices().ToArray();
             var obbCorners = obb.GetVertices().ToArray();
 
-            CollectionAssert.AreEqual(aabbCorners, obbCorners);
+            Assert.AreSequenceEqual(aabbCorners, obbCorners);
 
             var aabbFaces = aabb.GetFaces().ToArray();
             var obbFaces = obb.GetFaces().ToArray();
 
-            CollectionAssert.AreEqual(aabbFaces, obbFaces);
+            Assert.AreSequenceEqual(aabbFaces, obbFaces);
         }
     }
 }

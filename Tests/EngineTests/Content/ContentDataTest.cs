@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,9 +12,10 @@ namespace EngineTests.Content
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class ContentDataTest
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static BoundingBox cubeBig;
         static BoundingBox cubeMedium;
@@ -23,8 +24,6 @@ namespace EngineTests.Content
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             Vector3 vBig = Vector3.One * 2f;
             Vector3 vMedium = Vector3.One;
             Vector3 vSmall = Vector3.One * 0.5f;
@@ -36,7 +35,7 @@ namespace EngineTests.Content
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -44,7 +43,7 @@ namespace EngineTests.Content
         {
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Matrix.Identity);
+            SubMeshContent subMeshcontent = new(Topology.TriangleList, null, false, false, Matrix4x4.Identity);
             subMeshcontent.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {
@@ -56,7 +55,7 @@ namespace EngineTests.Content
 
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points = res["default"].First().Value.GetPoints();
-            var bounds = BoundingBox.FromPoints(points.ToArray());
+            var bounds = BoundingBox.FromPoints([.. points]);
 
             Assert.AreEqual(cubeMedium, bounds);
         }
@@ -72,9 +71,9 @@ namespace EngineTests.Content
 
             var desc = GeometryUtil.CreateBox(Topology.TriangleList, cubeMedium);
             var data = VertexData.FromDescriptor(desc);
-            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Matrix.Scaling(2));
+            SubMeshContent subMeshcontent1 = new(Topology.TriangleList, "defaultMat1", false, false, Matrix4x4.Scaling(2));
             subMeshcontent1.SetVertices(data);
-            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Matrix.Scaling(0.5f));
+            SubMeshContent subMeshcontent2 = new(Topology.TriangleList, "defaultMat2", false, false, Matrix4x4.Scaling(0.5f));
             subMeshcontent2.SetVertices(data);
             Dictionary<string, SubMeshContent> geometryContent = new()
             {
@@ -89,8 +88,8 @@ namespace EngineTests.Content
             var res = content.CreateGeometry(true, true, null).GetAwaiter().GetResult();
             var points1 = res["default"]["defaultMat1"].GetPoints();
             var points2 = res["default"]["defaultMat2"].GetPoints();
-            var bounds1 = BoundingBox.FromPoints(points1.ToArray());
-            var bounds2 = BoundingBox.FromPoints(points2.ToArray());
+            var bounds1 = BoundingBox.FromPoints([.. points1]);
+            var bounds2 = BoundingBox.FromPoints([.. points2]);
 
             Assert.AreEqual(cubeBig, bounds1);
             Assert.AreEqual(cubeSmall, bounds2);
@@ -99,7 +98,7 @@ namespace EngineTests.Content
             Assert.IsNotNull(dd);
 
             var points = dd.GetPoints();
-            var bounds = BoundingBox.FromPoints(points.ToArray());
+            var bounds = BoundingBox.FromPoints([.. points]);
             Assert.AreEqual(cubeBig, bounds);
         }
     }

@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
@@ -43,19 +43,19 @@ namespace Engine
         /// <summary>
         /// Grounding box minimum point
         /// </summary>
-        public Position3? GroundBoundingBoxMin { get; set; }
+        public Vector3? GroundBoundingBoxMin { get; set; }
         /// <summary>
         /// Grounding box maximum point
         /// </summary>
-        public Position3? GroundBoundingBoxMax { get; set; }
+        public Vector3? GroundBoundingBoxMax { get; set; }
         /// <summary>
         /// Navigation box minimum point
         /// </summary>
-        public Position3? NavigationBoundingBoxMin { get; set; }
+        public Vector3? NavigationBoundingBoxMin { get; set; }
         /// <summary>
         /// Navigation box maximum point
         /// </summary>
-        public Position3? NavigationBoundingBoxMax { get; set; }
+        public Vector3? NavigationBoundingBoxMax { get; set; }
         /// <summary>
         /// Game environment state
         /// </summary>

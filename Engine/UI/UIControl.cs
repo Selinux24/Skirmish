@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
-    using Engine.Common;
-
     /// <summary>
     /// User interface control
     /// </summary>
@@ -202,7 +201,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(width, value))
+                if (!Helper.NearEqual(width, value))
                 {
                     width = value;
 
@@ -219,7 +218,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(height, value))
+                if (!Helper.NearEqual(height, value))
                 {
                     height = value;
 
@@ -237,7 +236,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(scale, value))
+                if (!Helper.NearEqual(scale, value))
                 {
                     scale = value;
 
@@ -262,8 +261,8 @@ namespace Engine.UI
             }
             set
             {
-                float v = value % MathUtil.TwoPi;
-                if (!MathUtil.NearEqual(rotation, v))
+                float v = value % Helper.TwoPi;
+                if (!Helper.NearEqual(rotation, v))
                 {
                     rotation = v;
 
@@ -306,7 +305,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(left, value))
+                if (!Helper.NearEqual(left, value))
                 {
                     left = value;
 
@@ -331,7 +330,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(top, value))
+                if (!Helper.NearEqual(top, value))
                 {
                     top = value;
 
@@ -349,31 +348,31 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual RectangleF LocalRectangle
+        public virtual Rect LocalRectangle
         {
             get
             {
-                return new RectangleF(0, 0, Width, Height);
+                return new(0, 0, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF AbsoluteRectangle
+        public virtual Rect AbsoluteRectangle
         {
             get
             {
-                return new RectangleF(AbsoluteLeft, AbsoluteTop, Width, Height);
+                return new(AbsoluteLeft, AbsoluteTop, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF RelativeToParentRectangle
+        public virtual Rect RelativeToParentRectangle
         {
             get
             {
-                return new RectangleF(Left, Top, Width, Height);
+                return new(Left, Top, Width, Height);
             }
         }
         /// <inheritdoc/>
-        public virtual RectangleF RelativeToRootRectangle
+        public virtual Rect RelativeToRootRectangle
         {
             get
             {
@@ -381,7 +380,7 @@ namespace Engine.UI
 
                 if (Root != null)
                 {
-                    return new RectangleF
+                    return new()
                     {
                         Left = rect.Left - Root.Left,
                         Top = rect.Top - Root.Top,
@@ -531,7 +530,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!MathUtil.NearEqual(alpha, value))
+                if (!Helper.NearEqual(alpha, value))
                 {
                     alpha = value;
                 }
@@ -667,7 +666,7 @@ namespace Engine.UI
 
             if (anchor.HasFlag(Anchors.VerticalCenter))
             {
-                top = areaRect.Center.Y - (Height * 0.5f);
+                top = areaRect.Center.Y - Height * 0.5f;
             }
 
             if (anchor.HasFlag(Anchors.Top))
@@ -682,7 +681,7 @@ namespace Engine.UI
 
             if (anchor.HasFlag(Anchors.HorizontalCenter))
             {
-                left = areaRect.Center.X - (Width * 0.5f);
+                left = areaRect.Center.X - Width * 0.5f;
             }
 
             if (anchor.HasFlag(Anchors.Left))
@@ -748,7 +747,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual Matrix GetTransform()
+        public virtual Matrix4x4 GetTransform()
         {
             return fitWithParent && HasParent ? Parent.GetTransform() : Manipulator.LocalTransform;
         }
@@ -758,7 +757,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseOverEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseOverEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseOver?.Invoke(this, new MouseEventArgs
             {
@@ -771,7 +770,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseEnterEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseEnterEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseEnter?.Invoke(this, new MouseEventArgs
             {
@@ -784,7 +783,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FireMouseLeaveEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FireMouseLeaveEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MouseLeave?.Invoke(this, new MouseEventArgs
             {
@@ -797,7 +796,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="buttons">Pressed buttons</param>
-        protected virtual void FirePressedEvent(Point pointerPosition, MouseButtons buttons)
+        protected virtual void FirePressedEvent(System.Drawing.Point pointerPosition, MouseButtons buttons)
         {
             MousePressed?.Invoke(this, new MouseEventArgs
             {
@@ -810,7 +809,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="justPressedButtons">Just pressed buttons</param>
-        protected virtual void FireJustPressedEvent(Point pointerPosition, MouseButtons justPressedButtons)
+        protected virtual void FireJustPressedEvent(System.Drawing.Point pointerPosition, MouseButtons justPressedButtons)
         {
             MouseJustPressed?.Invoke(this, new MouseEventArgs
             {
@@ -823,7 +822,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="justReleasedButtons">Just released buttons</param>
-        protected virtual void FireJustReleasedEvent(Point pointerPosition, MouseButtons justReleasedButtons)
+        protected virtual void FireJustReleasedEvent(System.Drawing.Point pointerPosition, MouseButtons justReleasedButtons)
         {
             MouseJustReleased?.Invoke(this, new MouseEventArgs
             {
@@ -836,7 +835,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="clickedButtons">Clicked buttons</param>
-        protected virtual void FireMouseClickEvent(Point pointerPosition, MouseButtons clickedButtons)
+        protected virtual void FireMouseClickEvent(System.Drawing.Point pointerPosition, MouseButtons clickedButtons)
         {
             MouseClick?.Invoke(this, new MouseEventArgs
             {
@@ -866,7 +865,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="doubleClickedButtons">Double clicked buttons</param>
-        protected virtual void FireMouseDoubleClickEvent(Point pointerPosition, MouseButtons doubleClickedButtons)
+        protected virtual void FireMouseDoubleClickEvent(System.Drawing.Point pointerPosition, MouseButtons doubleClickedButtons)
         {
             MouseDoubleClick?.Invoke(this, new MouseEventArgs
             {
@@ -1130,11 +1129,11 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual bool Contains(Point point)
+        public virtual bool Contains(System.Drawing.Point point)
         {
             var rect = GetRenderArea(false);
 
-            var contains = rect.Scale(AbsoluteScale).Contains(point.X, point.Y);
+            var contains = Rect.Scale(rect, AbsoluteScale).Contains(point.X, point.Y);
 
             return contains;
         }
@@ -1175,7 +1174,7 @@ namespace Engine.UI
             SetPosition(position.X, position.Y);
         }
         /// <inheritdoc/>
-        public virtual void SetRectangle(RectangleF rectangle)
+        public virtual void SetRectangle(Rect rectangle)
         {
             left = rectangle.Left;
             top = rectangle.Top;
@@ -1187,9 +1186,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public virtual RectangleF GetRenderArea(bool applyPadding)
+        public virtual Rect GetRenderArea(bool applyPadding)
         {
-            RectangleF renderArea;
+            Rect renderArea;
 
             if (fitWithParent && Parent != null)
             {
@@ -1203,7 +1202,7 @@ namespace Engine.UI
             return applyPadding ? Padding.Apply(renderArea) : renderArea;
         }
         /// <inheritdoc/>
-        public virtual RectangleF GetControlArea()
+        public virtual Rect GetControlArea()
         {
             return GetRenderArea(false);
         }

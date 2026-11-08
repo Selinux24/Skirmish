@@ -1,18 +1,19 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.Collada;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtCollada;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,8 +51,8 @@ namespace TerrainSamples.SceneCrowds
         private Model tree = null;
         private ModelInstanced trees = null;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Line3D> lineDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
@@ -93,9 +94,9 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
+            var defaultFont10 = FontDescription.FromFamily("Tahoma", 10);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
             defaultFont10.LineAdjust = true;
@@ -221,21 +222,21 @@ namespace TerrainSamples.SceneCrowds
         }
         private async Task InitializeDebug()
         {
-            var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            var lineDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
                 Count = 1000,
                 BlendMode = BlendModes.Alpha,
                 StartsVisible = true,
             };
-            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
+            lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
 
-            var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            var terrainGraphDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
                 BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
-            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
         }
         private void InitializeSceneComponentsCompleted(LoadResourcesResult res)
         {
@@ -298,15 +299,15 @@ namespace TerrainSamples.SceneCrowds
             }
 
             var clrRnd = Helper.NewGenerator(1);
-            Color[] regions = new Color[nodes.Count()];
+            Vector4[] regions = new Vector4[nodes.Count()];
             for (int i = 0; i < nodes.Count(); i++)
             {
-                regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                regions[i] = new(clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), clrRnd.NextSingle(0, 1), 0.55f);
             }
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -482,7 +483,7 @@ namespace TerrainSamples.SceneCrowds
                 var aPos = crowd.GetPosition(tankAgents[i].CrowdAgentId);
                 var pPos = tankAgents[i].Manipulator.Position;
 
-                if (Vector3.NearEqual(aPos, pPos, new Vector3(0.001f)))
+                if (Vector3.NearEqual(aPos, pPos, 0.001f))
                 {
                     continue;
                 }
@@ -580,7 +581,7 @@ namespace TerrainSamples.SceneCrowds
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 terrainGraphDrawer.AddPrimitives(color, node.Triangles);
             }
         }

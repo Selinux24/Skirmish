@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using DepthStencilView = Vortice.Direct3D11.ID3D11DepthStencilView;
 
     /// <summary>
     /// Depth stencil view

@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Engine.PathFinding.RecastNavigation
+﻿namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Array utils

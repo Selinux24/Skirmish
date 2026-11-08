@@ -1,9 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Cubemap drawer
     /// </summary>

@@ -5,20 +5,15 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio event arguments class
     /// </summary>
-    public class GameAudioEventArgs : EventArgs
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="effect">Effect</param>
+    public class GameAudioEventArgs(IGameAudioEffect effect) : EventArgs
     {
         /// <summary>
         /// Effect
         /// </summary>
-        public IGameAudioEffect Effect { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        public GameAudioEventArgs(IGameAudioEffect effect)
-        {
-            Effect = effect;
-        }
+        public IGameAudioEffect Effect { get; private set; } = effect;
     }
 }

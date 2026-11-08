@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -54,10 +54,10 @@ namespace Engine.Common
                 var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
-                sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
+                sphere = BoundingSphere.FromPoints(distinctPoints);
 
                 //Initialize the identity box
-                box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
+                box = BoundingBox.FromPoints(distinctPoints);
             }
 
             if (sphere != BoundingSphere || box != BoundingBox)

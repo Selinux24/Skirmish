@@ -1,21 +1,23 @@
-﻿using Engine.Common;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.PathFindingTests
 {
+    using Engine.Common;
+    using Engine.Mathematics;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class PathFinderDescriptionTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static GraphAgentType agentDefault;
         static GraphAgentType agentInclined;
@@ -33,8 +35,6 @@ namespace Engine.PathFindingTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _testContext = context;
-
             float hZero = 0;
             float hOne = 5;
             float hTwo = 10;
@@ -65,7 +65,7 @@ namespace Engine.PathFindingTests
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -81,17 +81,15 @@ namespace Engine.PathFindingTests
         }
 
         [TestMethod()]
-        public void BuildAsyncTest()
+        public async Task BuildAsyncTest()
         {
             var mockSettings = new Mock<PathFinderSettings>();
-
             var mockInput = new Mock<PathFinderInput>([() => { return zeroPlaneTris; }]);
-
             var mockGraph = new Mock<IGraph>();
             mockInput.Setup(i => i.CreateGraphAsync(It.IsAny<PathFinderSettings>(), It.IsAny<AgentType[]>(), null)).ReturnsAsync(mockGraph.Object);
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object, [agentDefault]);
-            var res = pfDesc.BuildAsync().GetAwaiter().GetResult();
+            var res = await pfDesc.BuildAsync();
 
             Assert.IsNotNull(res);
         }
@@ -126,7 +124,7 @@ namespace Engine.PathFindingTests
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
-            Assert.AreEqual(pointZero.XZ(), n1.Value.XZ());
+            Assert.AreEqual(pointZero.XZ, n1.Value.XZ);
             Assert.IsFalse(walkable2);
             Assert.IsNull(n2);
             Assert.IsFalse(walkable3);
@@ -148,9 +146,9 @@ namespace Engine.PathFindingTests
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
-            Assert.AreEqual(pointOne.XZ(), n1.Value.XZ());
+            Assert.AreEqual(pointOne.XZ, n1.Value.XZ);
             Assert.IsTrue(walkable2);
-            Assert.AreEqual(pointOne.XZ(), n2.Value.XZ());
+            Assert.AreEqual(pointOne.XZ, n2.Value.XZ);
             Assert.IsFalse(walkable3);
             Assert.IsNull(n3);
         }
@@ -170,11 +168,11 @@ namespace Engine.PathFindingTests
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
-            Assert.AreEqual(pointTwo.XZ(), n1.Value.XZ());
+            Assert.AreEqual(pointTwo.XZ, n1.Value.XZ);
             Assert.IsFalse(walkable2);
-            Assert.AreEqual(pointTwo.XZ(), n2.Value.XZ());
+            Assert.AreEqual(pointTwo.XZ, n2.Value.XZ);
             Assert.IsTrue(walkable3);
-            Assert.AreEqual(pointTwo.XZ(), n3.Value.XZ());
+            Assert.AreEqual(pointTwo.XZ, n3.Value.XZ);
         }
 
         [TestMethod()]
@@ -192,11 +190,11 @@ namespace Engine.PathFindingTests
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
-            Assert.AreEqual(pointZero.XZ(), n1.Value.XZ());
+            Assert.AreEqual(pointZero.XZ, n1.Value.XZ);
             Assert.IsTrue(walkable2);
-            Assert.AreEqual(pointOne.XZ(), n2.Value.XZ());
+            Assert.AreEqual(pointOne.XZ, n2.Value.XZ);
             Assert.IsTrue(walkable3);
-            Assert.AreEqual(pointTwo.XZ(), n3.Value.XZ());
+            Assert.AreEqual(pointTwo.XZ, n3.Value.XZ);
         }
 
         [TestMethod()]
@@ -214,9 +212,9 @@ namespace Engine.PathFindingTests
 
             Assert.IsNotNull(graph, "Graph is null");
             Assert.IsTrue(walkable1, "Point zero spected to be walkable.");
-            Assert.AreEqual(pointZero.XZ(), n1.Value.XZ(), "Point zero spected to be the nearest point.");
+            Assert.AreEqual(pointZero.XZ, n1.Value.XZ, "Point zero spected to be the nearest point.");
             Assert.IsFalse(walkable2, "Point one spected to be not walkable.");
-            Assert.AreEqual(pointZero.XZ(), n2.Value.XZ(), "Point zero spected to be the nearest point.");
+            Assert.AreEqual(pointZero.XZ, n2.Value.XZ, "Point zero spected to be the nearest point.");
             Assert.IsFalse(walkable3, "Point two spected to be not walkable.");
             Assert.IsNull(n3, "No nearest point spected for point two");
         }

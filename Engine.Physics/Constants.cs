@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Physics constants
     /// </summary>
@@ -50,10 +51,10 @@ namespace Engine.Physics
         /// <summary>
         /// Zero tolerance value
         /// </summary>
-        public static float ZeroTolerance { get; set; } = MathUtil.ZeroTolerance;
+        public static float ZeroTolerance { get; set; } = Helper.ZeroTolerance;
         /// <summary>
         /// Zero tolerance vector
         /// </summary>
-        public static Vector3 ZeroToleranceVector { get; set; } = new Vector3(MathUtil.ZeroTolerance);
+        public static Vector3 ZeroToleranceVector { get; set; } = Helper.ZeroToleranceVector3;
     }
 }

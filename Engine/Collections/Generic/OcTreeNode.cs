@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -278,7 +277,7 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                if (IntersectionHelper.Intersects(queryBoundary, node.items[i].volume))
+                if (Collision.Intersects(queryBoundary, node.items[i].volume))
                 {
                     results.Add(node.items[i].item);
                 }

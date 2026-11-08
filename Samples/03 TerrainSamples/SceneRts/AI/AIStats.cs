@@ -1,5 +1,4 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace TerrainSamples.SceneRts.AI
 {
@@ -59,7 +58,7 @@ namespace TerrainSamples.SceneRts.AI
             initialLife = description.Life;
             Life = description.Life;
             SightDistance = description.SightDistance;
-            SightAngle = MathUtil.DegreesToRadians(description.SightAngle);
+            SightAngle = Helper.DegreesToRadians(description.SightAngle);
 
             CurrentWeapon = PrimaryWeapon;
         }

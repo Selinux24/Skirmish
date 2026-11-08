@@ -30,7 +30,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual BlendModes BlendMode { get; protected set; }
         /// <inheritdoc/>
-        public virtual int InstanceCount { get; protected set; }
+        public virtual uint InstanceCount { get; protected set; }
 
         /// <summary>
         /// Destructor

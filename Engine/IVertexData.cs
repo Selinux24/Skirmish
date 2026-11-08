@@ -1,18 +1,12 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine
 {
-    using Engine.Common;
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Vertex data
     /// </summary>
     public interface IVertexData : IBufferData
     {
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        VertexTypes VertexType { get; }
         /// <summary>
         /// Gets if structure contains data for the specified channel
         /// </summary>
@@ -38,6 +32,6 @@ namespace Engine
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        InputElement[] GetInput(int slot);
+        EngineInputElement[] GetInput(uint slot);
     }
 }

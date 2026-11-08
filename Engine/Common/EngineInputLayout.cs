@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using InputLayout = Vortice.Direct3D11.ID3D11InputLayout;
 
     /// <summary>
     /// Input layout

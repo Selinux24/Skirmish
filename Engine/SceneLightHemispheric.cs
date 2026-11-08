@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -71,7 +71,7 @@ namespace Engine
         {
             ShadowMapIndex = assignedShadowMap;
             ShadowMapCount = 1;
-            FromLightVP = [Matrix.Identity];
+            FromLightVP = [Matrix4x4.Identity];
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()

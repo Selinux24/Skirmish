@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Particle system
     /// </summary>
@@ -20,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Gets the maximum number of concurrent particles at the same time
         /// </summary>
-        int MaxConcurrentParticles { get; }
+        uint MaxConcurrentParticles { get; }
         /// <summary>
         /// Gets the particle emitter reference
         /// </summary>

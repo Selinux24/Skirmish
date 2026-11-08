@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.PathFinding.AStar
@@ -49,22 +49,22 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Center position
         /// </summary>
-        public Position3 Center { get; set; }
+        public Vector3 Center { get; set; }
         /// <summary>
         /// North West point
         /// </summary>
-        public Position3 NorthWest { get; set; }
+        public Vector3 NorthWest { get; set; }
         /// <summary>
         /// North East point
         /// </summary>
-        public Position3 NorthEast { get; set; }
+        public Vector3 NorthEast { get; set; }
         /// <summary>
         /// South West point
         /// </summary>
-        public Position3 SouthWest { get; set; }
+        public Vector3 SouthWest { get; set; }
         /// <summary>
         /// South East point
         /// </summary>
-        public Position3 SouthEast { get; set; }
+        public Vector3 SouthEast { get; set; }
     }
 }

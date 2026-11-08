@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position normal texture tangent instanced vertex shader
     /// </summary>
-    public class PositionNormalTextureTangentSkinnedVsI : IBuiltInShader<EngineVertexShader>
+    public class PositionNormalTextureTangentSkinnedVsI : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

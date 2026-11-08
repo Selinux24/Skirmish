@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Physics.GJK
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// GJK simplex support point
     /// </summary>

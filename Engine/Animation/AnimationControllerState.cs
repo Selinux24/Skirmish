@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Animation
 {
@@ -19,6 +18,6 @@ namespace Engine.Animation
         /// <summary>
         /// Animation plan
         /// </summary>
-        public IEnumerable<IGameState> AnimationPlan { get; set; } = Enumerable.Empty<IGameState>();
+        public IEnumerable<IGameState> AnimationPlan { get; set; } = [];
     }
 }

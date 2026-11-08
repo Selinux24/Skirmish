@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Stream-out drawer
     /// </summary>
@@ -72,9 +70,9 @@ namespace Engine.BuiltIn.Drawers.Particles
             public Vector4 RandomValues;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerStreamOut));
+                return (uint)Marshal.SizeOf<PerStreamOut>();
             }
         }
 

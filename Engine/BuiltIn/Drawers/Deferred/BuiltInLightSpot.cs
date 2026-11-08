@@ -1,15 +1,13 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Spot light drawer
     /// </summary>
-    public class BuiltInLightSpot : BuiltInDrawer
+    public class BuiltInLightSpot : BuiltInDrawer, ILightSpotDrawer
     {
         /// <summary>
         /// Per light data structure
@@ -17,11 +15,11 @@ namespace Engine.BuiltIn.Drawers.Deferred
         [StructLayout(LayoutKind.Explicit, Size = 64)]
         struct PerLight : IBufferData
         {
-            public static PerLight Build(Matrix local)
+            public static PerLight Build(Matrix4x4 local)
             {
                 return new PerLight
                 {
-                    Local = Matrix.Transpose(local),
+                    Local = Matrix4x4.Transpose(local),
                 };
             }
 
@@ -29,12 +27,12 @@ namespace Engine.BuiltIn.Drawers.Deferred
             /// Local transform
             /// </summary>
             [FieldOffset(0)]
-            public Matrix Local;
+            public Matrix4x4 Local;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerLight));
+                return (uint)Marshal.SizeOf<PerLight>();
             }
         }
 

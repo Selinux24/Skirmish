@@ -1,10 +1,11 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,8 +26,8 @@ namespace BasicSamples.SceneStart
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
-        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
-        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
+        private readonly Color3 sceneButtonColor = Color3.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color3 exitButtonColor = Color3.AdjustSaturation(Color.Orange, 1.5f);
 
         private bool sceneReady = false;
 
@@ -83,11 +84,11 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
-            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextShadowColor = new(Color.LightYellow, 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -104,17 +105,17 @@ namespace BasicSamples.SceneStart
             buttonPanel.Spacing = 40;
             buttonPanel.EventsEnabled = true;
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            var buttonsFont = FontDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
-            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.ColorReleased = new(sceneButtonColor, 0.8f);
+            startButtonDesc.ColorPressed = new(sceneButtonColor * 1.2f, 0.9f);
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             startButtonDesc.StartsVisible = false;
 
             await CreateButton("ButtonCascadedShadows", startButtonDesc, "Cascaded", 'C', SceneButtonClick<SceneCascadedShadows.CascadedShadowsScene>);
-            await CreateButton("ButtonLights", startButtonDesc, "Lights", 'L', SceneButtonClick<SceneLights.LightsScene>);
+            await CreateButton("ButtonLights", startButtonDesc, "Lights", 'L', SceneButtonClick<SceneLighting.LightingScene>);
             await CreateButton("ButtonMaterials", startButtonDesc, "Materials", 'M', SceneButtonClick<SceneMaterials.MaterialsScene>);
             await CreateButton("ButtonNormalMap", startButtonDesc, "Normal Maps", 'N', SceneButtonClick<SceneNormalMap.NormalMapScene>);
             await CreateButton("ButtonParticles", startButtonDesc, "Particles", 'P', SceneButtonClick<SceneParticles.ParticlesScene>);
@@ -124,8 +125,8 @@ namespace BasicSamples.SceneStart
             await CreateButton("ButtonWater", startButtonDesc, "Water", 'W', SceneButtonClick<SceneWater.WaterScene>);
 
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
-            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.ColorReleased = new(exitButtonColor, 0.8f);
+            exitButtonDesc.ColorPressed = new(exitButtonColor * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             exitButtonDesc.StartsVisible = false;
@@ -165,7 +166,7 @@ namespace BasicSamples.SceneStart
 
             backGround.Manipulator.SetScaling(1.5f, 1.25f, 1.5f);
 
-            var shadow = new Color4(0, 0, 0, 0.5f);
+            Color shadow = new(0f, 0f, 0f, 0.5f);
             title.Text = $"{Color.Red}|{shadow}B{Color.Cyan}a{Color.Red}s{Color.Cyan}i{Color.Red}c {Color.Green}S{Color.Orange}a{Color.Green}m{Color.Orange}p{Color.Green}l{Color.Orange}e{Color.Green}s";
 
             UpdateLayout();

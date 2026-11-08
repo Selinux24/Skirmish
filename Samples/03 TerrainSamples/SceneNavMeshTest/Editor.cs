@@ -1,6 +1,7 @@
 ﻿using Engine;
+using Engine.BuiltIn.UI;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Threading.Tasks;
 
@@ -75,7 +76,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// </summary>
         /// <param name="font">Font</param>
         /// <param name="title">Title</param>
-        public virtual async Task Initialize(TextDrawerDescription font, string titleText)
+        public virtual async Task Initialize(FontDescription font, string titleText)
         {
             string id = GetType().Name;
 
@@ -96,7 +97,8 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="name">Name</param>
         protected async Task<UIPanel> InitializePanel(string id, string name)
         {
-            var panelColor = new Color4(UIConfiguration.BaseColor.ToVector3(), 0.85f);
+            var panelColor = UIConfiguration.BaseColor;
+            panelColor.Alpha = 0.85f;
             var desc = UIPanelDescription.Default(panelColor);
             desc.StartsVisible = false;
 
@@ -109,7 +111,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="name">Name</param>
         /// <param name="font">Font</param>
         /// <param name="text">Text</param>
-        protected async Task<UITextArea> InitializeText(string id, string name, TextDrawerDescription font, string text = null)
+        protected async Task<UITextArea> InitializeText(string id, string name, FontDescription font, string text = null)
         {
             var desc = UITextAreaDescription.Default(font, text);
             desc.StartsVisible = false;
@@ -122,7 +124,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="id">Id</param>
         protected async Task InitializeButtons(string id)
         {
-            var font = TextDrawerDescription.FromFamily("Wingdings 2", 20, FontMapStyles.Bold, true);
+            var font = FontDescription.FromFamily("Wingdings 2", 20, FontMapStyles.Bold, true);
 
             var desc = UIButtonDescription.DefaultTwoStateButton(font);
             desc.Width = 24;
@@ -179,7 +181,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="name">Name</param>
         /// <param name="font">Font</param>
         /// <param name="text">Caption text</param>
-        protected async Task<UICheckbox> InitializeCheckbox(string id, string name, TextDrawerDescription font, string text)
+        protected async Task<UICheckbox> InitializeCheckbox(string id, string name, FontDescription font, string text)
         {
             var desc = UICheckboxDescription.Default(font);
             desc.Text = text;
@@ -199,7 +201,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="max">Maximum value</param>
         /// <param name="step">Step value</param>
         /// <param name="format">Format</param>
-        protected async Task<EditorSlider> InitializePropertySlider(string objId, string id, TextDrawerDescription font, float min, float max, float step, string format)
+        protected async Task<EditorSlider> InitializePropertySlider(string objId, string id, FontDescription font, float min, float max, float step, string format)
         {
             var caption = await InitializeText($"{objId}_Caption.{id}", $"Caption.{id}", font, id);
             var value = await InitializeText($"{objId}_Value.{id}", $"Value.{id}", font);
@@ -213,7 +215,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="objId">Object id</param>
         /// <param name="id">Id</param>
         /// <param name="font">Font</param>
-        protected async Task<EditorCheckbox> InitializePropertyCheckbox(string objId, string id, TextDrawerDescription font)
+        protected async Task<EditorCheckbox> InitializePropertyCheckbox(string objId, string id, FontDescription font)
         {
             var checkbox = await InitializeCheckbox($"{objId}.{id}", id, font, id);
 
@@ -227,7 +229,7 @@ namespace TerrainSamples.SceneNavMeshTest
         /// <param name="id">Id</param>
         /// <param name="font">Font</param>
         /// <param name="values">Value list</param>
-        protected async Task<EditorCheckboxGroup<T>> InitializePropertyCheckboxGroup<T>(string objId, string id, TextDrawerDescription font, T[] values)
+        protected async Task<EditorCheckboxGroup<T>> InitializePropertyCheckboxGroup<T>(string objId, string id, FontDescription font, T[] values)
         {
             var caption = await InitializeText($"{objId}_Caption.{id}", $"Caption.{id}", font, id);
 

@@ -1,55 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Vertex buffer description
     /// </summary>
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public class BufferManagerVertices(VertexTypes type, bool dynamic) : IEngineBufferDescriptor
+    public class BufferManagerVertices<T>(bool dynamic) : IEngineVertexBufferDescriptor
+        where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Data list
         /// </summary>
-        private readonly List<IVertexData> data = [];
+        private readonly List<T> data = [];
+        /// <summary>
+        /// Data stride
+        /// </summary>
+        private readonly uint stride = default(T).GetStride();
         /// <summary>
         /// Input element list
         /// </summary>
-        private readonly List<InputElement> input = [];
+        private readonly List<EngineInputElement> input = [];
         /// <summary>
         /// Vertex descriptor list
         /// </summary>
         private readonly List<BufferDescriptor> vertexDescriptors = [];
 
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public VertexTypes Type { get; private set; } = type;
         /// <inheritdoc/>
         public bool Dynamic { get; private set; } = dynamic;
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; private set; } = 0;
-        /// <inheritdoc/>
-        public int ToAllocateSize
-        {
-            get
-            {
-                return data?.Count ?? 0;
-            }
-        }
+        public uint AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
         public bool Allocated { get; private set; } = false;
         /// <inheritdoc/>
-        public int Allocations { get; private set; } = 0;
+        public uint Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -58,37 +50,44 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-        /// <summary>
-        /// Vertex data
-        /// </summary>
-        public IEnumerable<IVertexData> Data { get { return [.. data]; } }
-        /// <summary>
-        /// Instancing buffer descriptor
-        /// </summary>
-        public BufferDescriptor InstancingDescriptor { get; set; } = null;
-        /// <summary>
-        /// Input elements
-        /// </summary>
-        public IEnumerable<InputElement> Input { get { return [.. input]; } }
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
+        /// <inheritdoc/>
         public int BufferBindingIndex { get; set; } = -1;
+        /// <inheritdoc/>
+        public BufferDescriptor InstancingDescriptor { get; set; } = null;
 
-        /// <summary>
-        /// Gets the buffer format stride
-        /// </summary>
-        /// <returns>Returns the buffer format stride in bytes</returns>
-        public int GetStride()
+        /// <inheritdoc/>
+        public uint GetStride()
         {
-            return data.FirstOrDefault()?.GetStride() ?? 0;
+            return stride;
+        }
+        /// <inheritdoc/>
+        public uint SizeInBytes()
+        {
+            return (uint)data.Count * stride;
+        }
+        /// <inheritdoc/>
+        public EngineInputElement[] GetInput(bool instanced)
+        {
+            AddInputs();
+
+            var inputElements = instanced ?
+                input :
+                input.FindAll(i => i.Classification != EngineInputClassification.PerInstanceData);
+
+            return [.. inputElements];
         }
 
-        /// <summary>
-        /// Adds the input element to the internal input list, of the specified slot
-        /// </summary>
-        /// <param name="slot">Buffer descriptor slot</param>
-        public void AddInputs(int slot)
+        /// <inheritdoc/>
+        public bool OfType<TData>() where TData : struct, IVertexData
+        {
+            var thisType = typeof(T);
+            var otherType = typeof(TData);
+
+            return otherType == thisType;
+        }
+
+        /// <inheritdoc/>
+        public void AddInputs()
         {
             if (data.Count == 0)
             {
@@ -101,28 +100,21 @@ namespace Engine.Common
             }
 
             //Get the input element list from the vertex data
-            var inputs = data[0].GetInput(slot);
+            var inputs = default(T).GetInput((uint)BufferIndex);
 
             //Adds the input list
             input.AddRange(inputs);
         }
-        /// <summary>
-        /// Clears the internal input list
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearInputs()
         {
             input.Clear();
             AllocatedSize = 0;
         }
-        /// <summary>
-        /// Sets the specified instancing input elements to the internal list
-        /// </summary>
-        /// <param name="instancingSlot">Instancing buffer slot</param>
-        public void SetInstancingInputs(int instancingSlot)
+        /// <inheritdoc/>
+        public void SetInstancingInputs(EngineInputElement[] instancingInputs)
         {
-            input.RemoveAll(i => i.Classification == InputClassification.PerInstanceData);
-
-            var instancingInputs = VertexInstancingData.Input(instancingSlot);
+            input.RemoveAll(i => i.Classification == EngineInputClassification.PerInstanceData);
 
             input.AddRange(instancingInputs);
         }
@@ -134,12 +126,12 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="vertices">Vertex list</param>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<T> vertices)
         {
-            int offset;
+            uint offset;
 
             //Store current data index as descriptor offset
-            offset = data.Count;
+            offset = (uint)data.Count;
             //Add items to data list
             data.AddRange(vertices);
 
@@ -147,52 +139,54 @@ namespace Engine.Common
             descriptor.Id = id;
             descriptor.BufferDescriptionIndex = bufferDescriptionIndex;
             descriptor.BufferOffset = offset;
-            descriptor.Count = vertices.Count();
+            descriptor.Count = (uint)vertices.Count();
 
             vertexDescriptors.Add(descriptor);
         }
-        /// <summary>
-        /// Removes a buffer descriptor from the internal list
-        /// </summary>
-        /// <param name="descriptor">Buffer descriptor to remove</param>
+        /// <inheritdoc/>
         public void RemoveDescriptor(BufferDescriptor descriptor)
         {
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                data.RemoveRange((int)descriptor.BufferOffset, (int)descriptor.Count);
             }
 
             //Remove descriptor
             vertexDescriptors.Remove(descriptor);
 
-            if (vertexDescriptors.Count == 0)
+            if (vertexDescriptors.Count != 0)
             {
-                return;
+                //Reallocate descriptor offsets
+                vertexDescriptors[0].BufferOffset = 0;
+                for (int i = 1; i < vertexDescriptors.Count; i++)
+                {
+                    var prev = vertexDescriptors[i - 1];
+
+                    vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                }
             }
 
-            //Reallocate descriptor offsets
-            vertexDescriptors[0].BufferOffset = 0;
-            for (int i = 1; i < vertexDescriptors.Count; i++)
-            {
-                var prev = vertexDescriptors[i - 1];
-
-                vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-            }
+            ReallocationNeeded = true;
         }
 
         /// <inheritdoc/>
         public void Allocate()
         {
-            AllocatedSize = Data.Count();
+            AllocatedSize = SizeInBytes();
             Allocated = true;
             Allocations++;
             ReallocationNeeded = false;
         }
         /// <inheritdoc/>
-        public IEngineBufferDescriptor Copy()
+        public EngineBuffer CreateBuffer(Graphics graphics, string name)
         {
-            var d = new BufferManagerVertices(Type, Dynamic)
+            return graphics.CreateVertexBuffer(name, data, Dynamic);
+        }
+        /// <inheritdoc/>
+        public IEngineVertexBufferDescriptor Copy()
+        {
+            var d = new BufferManagerVertices<T>(Dynamic)
             {
                 BufferIndex = BufferIndex,
                 AllocatedSize = 0,
@@ -216,7 +210,7 @@ namespace Engine.Common
             string strDynamic = Dynamic ? "[Dynamic]" : "";
             string strInstancesDesc = (InstancingDescriptor?.Count ?? 0) > 0 ? $" Instances: {InstancingDescriptor.Id}|{InstancingDescriptor.Count}" : "";
 
-            return $"[{Type}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}{strInstancesDesc}";
+            return $"[{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {SizeInBytes()} Dirty: {Dirty}{strInstancesDesc}";
         }
     }
 }

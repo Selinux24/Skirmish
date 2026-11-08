@@ -1,12 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Content.Persistence;
+using Engine.Mathematics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using SharpDX;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Content;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Particle system description
     /// </summary>
@@ -129,8 +127,8 @@ namespace Engine.BuiltIn.Components.Particles
 
                 Gravity = new Vector3(0, 0, 0),
 
-                MinColor = new Color(1f, 1f, 1f, 0.85f),
-                MaxColor = new Color(1f, 1f, 1f, 1f),
+                MinColor = new(1f, 1f, 1f, 0.85f),
+                MaxColor = new(1f, 1f, 1f, 1f),
 
                 MinStartSize = 0.1f,
                 MaxStartSize = 0.5f,
@@ -383,7 +381,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Gravity
         /// </summary>
-        public Direction3 Gravity { get; set; }
+        public Vector3 Gravity { get; set; }
 
         /// <summary>
         /// Velocity at end
@@ -393,11 +391,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        public ColorRgba MinColor { get; set; }
+        public Color4 MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        public ColorRgba MaxColor { get; set; }
+        public Color4 MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed
@@ -473,7 +471,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <param name="scale">Scale to apply</param>
         public void Scale(float scale)
         {
-            if (MathUtil.IsOne(scale))
+            if (Helper.IsOne(scale))
             {
                 return;
             }

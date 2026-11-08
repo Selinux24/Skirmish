@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Format;
+using Engine.Collections.Generic;
+using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-
     /// <summary>
     /// Map grid
     /// </summary>
@@ -141,15 +140,15 @@ namespace Engine.BuiltIn.Components.Ground
                 }
             }
 
-            var bbox = SharpDXExtensions.BoundingBoxFromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
-            var items = vertices.Select(v => (SharpDXExtensions.BoundingBoxFromPoints(v.GetVertices().ToArray()), v));
-            res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, LODLevels);
+            var bbox = BoundingBox.FromPoints([.. vertices.SelectMany(v => v.GetVertices()).Distinct()]);
+            var items = vertices.Select(v => (BoundingBox.FromPoints([.. v.GetVertices()]), v));
+            res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, new(LODLevels, false, 0));
 
             //Populate nodes dictionary
             var nodes = res.drawingQuadTree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var data = await VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
+                var data = await VertexTerrain.Convert(node.Items);
 
                 res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
             }
@@ -192,17 +191,11 @@ namespace Engine.BuiltIn.Components.Ground
                     }
                 }
 
-                if (dictVB != null)
-                {
-                    dictVB.Clear();
-                    dictVB = null;
-                }
+                dictVB?.Clear();
+                dictVB = null;
 
-                if (dictIB != null)
-                {
-                    dictIB.Clear();
-                    dictIB = null;
-                }
+                dictIB?.Clear();
+                dictIB = null;
 
                 drawingQuadTree = null;
 
@@ -361,7 +354,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// </summary>
         /// <param name="context">Draw context</param>
         /// <param name="drawer">Drawer</param>
-        public bool DrawShadows(DrawContextShadows context, IBuiltInDrawer drawer)
+        public bool DrawShadows(DrawContextShadows context, IDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
@@ -378,7 +371,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// </summary>
         /// <param name="context">Draw context</param>
         /// <param name="drawer">Drawer</param>
-        public bool Draw(DrawContext context, IBuiltInDrawer drawer)
+        public bool Draw(DrawContext context, IDrawer drawer)
         {
             var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
@@ -396,10 +389,9 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Drawer</param>
         /// <param name="nodeList">Node list</param>
-        private static bool DrawNodeList(IEngineDeviceContext dc, IBuiltInDrawer drawer, TerrainGridNode[] nodeList)
+        private static bool DrawNodeList(IEngineDeviceContext dc, IDrawer drawer, TerrainGridNode[] nodeList)
         {
-            int instanceCount = 0;
-            int primitiveCount = 0;
+            uint primitiveCount = 0;
 
             for (int i = 0; i < nodeList.Length; i++)
             {
@@ -420,7 +412,6 @@ namespace Engine.BuiltIn.Components.Ground
                     continue;
                 }
 
-                instanceCount++;
                 primitiveCount += gNode.IBDesc.Count / 3;
             }
 

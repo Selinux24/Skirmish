@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position instanced vertex shader
     /// </summary>
-    public class PositionSkinnedVsI : IBuiltInShader<EngineVertexShader>
+    public class PositionSkinnedVsI : IShader<EngineVertexShader>
     {
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }

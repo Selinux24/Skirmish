@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.PathFinding.AStar
 {
@@ -13,6 +12,6 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Path node maximum inclination
         /// </summary>
-        public float NodeInclination { get; set; } = MathUtil.PiOverFour;
+        public float NodeInclination { get; set; } = Helper.PiOver4;
     }
 }

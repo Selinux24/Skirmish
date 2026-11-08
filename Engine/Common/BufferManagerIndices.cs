@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -9,12 +10,16 @@ namespace Engine.Common
     /// <remarks>
     /// Constructor
     /// </remarks>
-    public class BufferManagerIndices(bool dynamic) : IEngineBufferDescriptor
+    public class BufferManagerIndices(bool dynamic) : IEngineIndexBufferDescriptor
     {
         /// <summary>
         /// Data list
         /// </summary>
         private readonly List<uint> data = [];
+        /// <summary>
+        /// Data stride
+        /// </summary>
+        private readonly uint stride = (uint)Marshal.SizeOf<uint>();
         /// <summary>
         /// Descriptor list
         /// </summary>
@@ -25,21 +30,13 @@ namespace Engine.Common
         /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
         /// <inheritdoc/>
-        public int AllocatedSize { get; private set; } = 0;
-        /// <inheritdoc/>
-        public int ToAllocateSize
-        {
-            get
-            {
-                return data?.Count ?? 0;
-            }
-        }
+        public uint AllocatedSize { get; private set; } = 0;
         /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
         /// <inheritdoc/>
         public bool Allocated { get; private set; } = false;
         /// <inheritdoc/>
-        public int Allocations { get; private set; } = 0;
+        public uint Allocations { get; private set; } = 0;
         /// <inheritdoc/>
         public bool Dirty
         {
@@ -48,10 +45,17 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
-        /// <summary>
-        /// Index data
-        /// </summary>
-        public IEnumerable<uint> Data { get { return [.. data]; } }
+
+        /// <inheritdoc/>
+        public uint GetStride()
+        {
+            return stride;
+        }
+        /// <inheritdoc/>
+        public uint SizeInBytes()
+        {
+            return (uint)data.Count * stride;
+        }
 
         /// <summary>
         /// Adds a buffer descritor to the internal descriptors list
@@ -63,10 +67,10 @@ namespace Engine.Common
         /// <returns>Returns the new registerd descriptor</returns>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
-            int offset;
+            uint offset;
 
             //Store current data index as descriptor offset
-            offset = data.Count;
+            offset = (uint)data.Count;
 
             //Add items to data list
             data.AddRange(indices);
@@ -75,7 +79,7 @@ namespace Engine.Common
             descriptor.Id = id;
             descriptor.BufferDescriptionIndex = bufferDescriptionIndex;
             descriptor.BufferOffset = offset;
-            descriptor.Count = indices.Count();
+            descriptor.Count = (uint)indices.Count();
 
             descriptors.Add(descriptor);
         }
@@ -95,37 +99,42 @@ namespace Engine.Common
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                data.RemoveRange((int)descriptor.BufferOffset, (int)descriptor.Count);
             }
 
             //Remove from descriptors list
             descriptors.RemoveAt(index);
 
-            if (descriptors.Count == 0)
+            if (descriptors.Count != 0)
             {
-                return;
+                //Reallocate descriptor offsets
+                descriptors[0].BufferOffset = 0;
+                for (int i = 1; i < descriptors.Count; i++)
+                {
+                    var prev = descriptors[i - 1];
+
+                    descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                }
             }
 
-            //Reallocate descriptor offsets
-            descriptors[0].BufferOffset = 0;
-            for (int i = 1; i < descriptors.Count; i++)
-            {
-                var prev = descriptors[i - 1];
-
-                descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
-            }
+            ReallocationNeeded = true;
         }
 
         /// <inheritdoc/>
         public void Allocate()
         {
-            AllocatedSize = Data.Count();
+            AllocatedSize = SizeInBytes();
             Allocated = true;
             Allocations++;
             ReallocationNeeded = false;
         }
         /// <inheritdoc/>
-        public IEngineBufferDescriptor Copy()
+        public EngineBuffer CreateBuffer(Graphics graphics, string name)
+        {
+            return graphics.CreateIndexBuffer(name, data, Dynamic);
+        }
+        /// <inheritdoc/>
+        public IEngineIndexBufferDescriptor Copy()
         {
             var d = new BufferManagerIndices(Dynamic)
             {
@@ -147,7 +156,7 @@ namespace Engine.Common
         {
             string strDynamic = Dynamic ? "[Dynamic]" : "";
 
-            return $"[{typeof(uint)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            return $"[{typeof(uint)}]{strDynamic} AllocatedSize: {AllocatedSize} ToAllocateSize: {SizeInBytes()} Dirty: {Dirty}";
         }
     }
 }

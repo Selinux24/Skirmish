@@ -18,7 +18,7 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="signature">Shader signature</param>
         /// <param name="bufferSlot">Buffer slot</param>
-        void CreateInputLayout(string name, byte[] signature, int bufferSlot);
+        void CreateInputLayout(string name, byte[] signature, uint bufferSlot);
         /// <summary>
         /// Sets the vertex buffer in the input assembler
         /// </summary>
@@ -39,7 +39,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="">Draw count</param>
-        void Draw(IEngineDeviceContext dc, int drawCount);
+        void Draw(IEngineDeviceContext dc, uint drawCount);
         /// <summary>
         /// Draws auto
         /// </summary>

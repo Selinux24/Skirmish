@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 
 namespace Engine.BuiltIn.Components.Particles
 {
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Particle emitter
     /// </summary>
@@ -286,17 +285,17 @@ namespace Engine.BuiltIn.Components.Particles
         {
             Vector3 velocity = Velocity * parameters.EmitterVelocitySensitivity;
 
-            float horizontalVelocity = MathUtil.Lerp(
+            float horizontalVelocity = float.Lerp(
                 parameters.HorizontalVelocity.X,
                 parameters.HorizontalVelocity.Y,
                 hVelVariance);
 
-            float horizontalAngle = hAngleVariance * MathUtil.TwoPi;
+            float horizontalAngle = hAngleVariance * Helper.TwoPi;
 
             velocity.X += horizontalVelocity * MathF.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * MathF.Sin(horizontalAngle);
 
-            velocity.Y += MathUtil.Lerp(
+            velocity.Y += float.Lerp(
                 parameters.VerticalVelocity.X,
                 parameters.VerticalVelocity.Y,
                 vVelVariance);
@@ -309,11 +308,11 @@ namespace Engine.BuiltIn.Components.Particles
         /// </summary>
         /// <param name="maxParticleDuration">Maximum particle duration</param>
         /// <returns>Returns the maximum number of particles running at the same time</returns>
-        public int GetMaximumConcurrentParticles(float maxParticleDuration)
+        public uint GetMaximumConcurrentParticles(float maxParticleDuration)
         {
             float maxActiveParticles = maxParticleDuration * (1f / EmissionRate);
 
-            return (int)(maxActiveParticles > (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
+            return (uint)(maxActiveParticles > (uint)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
 
         /// <inheritdoc/>

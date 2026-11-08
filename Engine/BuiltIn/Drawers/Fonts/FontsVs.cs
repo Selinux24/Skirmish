@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Fonts vertex shader
     /// </summary>
-    public class FontsVs : IBuiltInShader<EngineVertexShader>
+    public class FontsVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per text constant buffer

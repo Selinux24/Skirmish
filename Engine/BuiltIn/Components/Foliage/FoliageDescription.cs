@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers.Foliage;
+using Engine.Mathematics;
 using System;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Drawers.Foliage;
-
     /// <summary>
     /// Foliage description
     /// </summary>
@@ -66,11 +65,11 @@ namespace Engine.BuiltIn.Components.Foliage
             /// Y value applies to all of the instances
             /// X and Z values only applies to additional instances
             /// </remarks>
-            public Vector3 Delta { get; set; } = new Vector3(0.5f, 0.0f, 0.5f);
+            public Vector3 Delta { get; set; } = new(0.5f, 0.0f, 0.5f);
             /// <summary>
             /// Tint color
             /// </summary>
-            public Color4 TintColor { get; set; } = Color4.White;
+            public Vector4 TintColor { get; set; } = new(1f, 1f, 1f, 1f);
         }
 
         /// <summary>

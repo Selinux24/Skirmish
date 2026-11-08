@@ -5,6 +5,7 @@ using System.Windows.Forms;
 namespace Engine.Windows
 {
     using Engine.Windows.Helpers;
+    using System.Threading;
 
     /// <summary>
     /// RenderLoop provides a rendering loop infrastructure. See remarks for usage. 
@@ -46,6 +47,7 @@ namespace Engine.Windows
         private Control control;
         private bool isControlAlive;
         private bool switchControl;
+        private readonly Lock lockObject = new();
 
         /// <summary>
         /// Gets or sets the control to associate with the current render loop.
@@ -162,13 +164,15 @@ namespace Engine.Windows
         public bool NextFrame()
         {
             // Setup new control
-            // TODO this is not completely thread-safe. We should use a lock to handle this correctly
-            if (switchControl && control != null)
+            lock (lockObject)
             {
-                controlHandle = control.Handle;
-                control.Disposed += ControlDisposed;
-                isControlAlive = true;
-                switchControl = false;
+                if (switchControl && control != null)
+                {
+                    controlHandle = control.Handle;
+                    control.Disposed += ControlDisposed;
+                    isControlAlive = true;
+                    switchControl = false;
+                }
             }
 
             if (!isControlAlive)
@@ -206,7 +210,7 @@ namespace Engine.Windows
                     isControlAlive = false;
                 }
 
-                var message = new Message() { HWnd = msg.handle, LParam = msg.lParam, Msg = (int)msg.msg, WParam = msg.wParam };
+                var message = new Message() { HWnd = msg.hwnd, LParam = msg.lParam, Msg = (int)msg.msg, WParam = (nint)msg.wParam };
                 if (!Application.FilterMessage(ref message))
                 {
                     _ = NativeMethods.TranslateMessage(ref msg);

@@ -22,7 +22,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             return new()
             {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Quadtree = new(quadtreeDepth),
                 Heightmap = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve, textures),
             };
         }
@@ -35,7 +35,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             return new()
             {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Quadtree = new(quadtreeDepth),
                 Heightmap = description,
             };
         }
@@ -49,7 +49,7 @@ namespace Engine.BuiltIn.Components.Ground
         {
             return new()
             {
-                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Quadtree = new(quadtreeDepth),
                 Content = ContentDescription.FromFile(contentFolder, fileName),
             };
         }

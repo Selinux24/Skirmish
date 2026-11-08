@@ -1,12 +1,14 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -56,20 +58,20 @@ TAB - Change control between Camera and Agent
 
         private Model map = null;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color gbLinesColor = new(Color.Cyan.ToColor3(), 0.5f);
-        private readonly Color grTrisColor = new(Color.Blue.ToColor3(), 0.15f);
-        private readonly Color grLinesColor = new(Color.Blue.ToColor3(), 0.5f);
-        private readonly Color fTrisColor = new(Color.Green.ToColor3(), 0.15f);
-        private readonly Color empTrisColor = new(Color.Orange.ToColor3(), 0.15f);
-        private readonly Color errTrisColor = new(Color.Red.ToColor3(), 0.15f);
-        private readonly Color frTrisColor = new(Color.White.ToColor3(), 0.15f);
-        private readonly Color frLinesColor = new(Color.White.ToColor3(), 0.5f);
-        private readonly Color crStartTrisColor = new(Color.IndianRed.ToColor3(), 0.15f);
-        private readonly Color crStartLinesColor = new(Color.IndianRed.ToColor3(), 1f);
-        private readonly Color crEndTrisColor = new(Color.WhiteSmoke.ToColor3(), 0.15f);
-        private readonly Color crEndLinesColor = new(Color.WhiteSmoke.ToColor3(), 1f);
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
+        private readonly Color4 gbLinesColor = new(Color.Cyan, 0.5f);
+        private readonly Color4 grTrisColor = new(Color.Blue, 0.15f);
+        private readonly Color4 grLinesColor = new(Color.Blue, 0.5f);
+        private readonly Color4 fTrisColor = new(Color.Green, 0.15f);
+        private readonly Color4 empTrisColor = new(Color.Orange, 0.15f);
+        private readonly Color4 errTrisColor = new(Color.Red, 0.15f);
+        private readonly Color4 frTrisColor = new(Color.White, 0.15f);
+        private readonly Color4 frLinesColor = new(Color.White, 0.5f);
+        private readonly Color4 crStartTrisColor = new(Color.IndianRed, 0.15f);
+        private readonly Color4 crStartLinesColor = new(Color.IndianRed, 1f);
+        private readonly Color4 crEndTrisColor = new(Color.WhiteSmoke, 0.15f);
+        private readonly Color4 crEndLinesColor = new(Color.WhiteSmoke, 1f);
 
         private bool showHelp = false;
         private bool freeCamera = true;
@@ -102,9 +104,9 @@ TAB - Change control between Camera and Agent
         }
         private async Task InitializeUITitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
-            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
+            var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -214,7 +216,7 @@ TAB - Change control between Camera and Agent
             };
 
             map = await AddComponentEffect<Model, ModelDescription>("Map", "Map", desc);
-            map.TintColor = new Color4(1f, 1f, 1f, 0.1f);
+            map.TintColor = new(1f, 1f, 1f, 0.1f);
         }
         private async Task InitializeGrass()
         {
@@ -287,12 +289,12 @@ TAB - Change control between Camera and Agent
             const string itemTrisName = nameof(itemTris);
             const string itemLinesName = nameof(itemLines);
 
-            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 itemTrisName,
                 itemTrisName,
                 new() { Count = 5000, BlendMode = BlendModes.Alpha, StartsVisible = false });
 
-            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 itemLinesName,
                 itemLinesName,
                 new() { Count = 1000, BlendMode = BlendModes.Alpha, StartsVisible = false });
@@ -319,7 +321,7 @@ TAB - Change control between Camera and Agent
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 1000;
@@ -517,8 +519,8 @@ TAB - Change control between Camera and Agent
             var position = pov.Manipulator.Position;
             var interest = position - pov.Manipulator.Forward;
 
-            var proj = Matrix.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
-            var view = Matrix.LookAtLH(position, interest, Vector3.Up);
+            var proj = Matrix4x4.PerspectiveFovLH(Camera.FieldOfView, Camera.AspectRelation, 0.1f, l);
+            var view = Matrix4x4.LookAtLH(position, interest, Vector3.Up);
             var frustum = new BoundingFrustum(view * proj);
 
             grass.PointOfView = position;

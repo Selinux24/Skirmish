@@ -1,4 +1,5 @@
-﻿
+﻿using Engine.BuiltIn.Components.Cubemap;
+
 namespace Engine.BuiltIn.Components.Skies
 {
     /// <summary>
@@ -78,7 +79,7 @@ namespace Engine.BuiltIn.Components.Skies
         /// <returns></returns>
         public static new SkydomDescription Hemispheric(string texture, float radius)
         {
-            return Hemispheric(new[] { texture }, radius);
+            return Hemispheric([texture], radius);
         }
         /// <summary>
         /// Gets the default skydom description

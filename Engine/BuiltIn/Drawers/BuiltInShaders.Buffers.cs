@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,9 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers
 {
-    using Engine.Common;
-
+    /// <summary>
+    /// Built-in shaders
+    /// </summary>
     internal static partial class BuiltInShaders
     {
         /// <summary>
@@ -42,9 +44,9 @@ namespace Engine.BuiltIn.Drawers
             public uint AnimationPaletteWidth;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(Global));
+                return (uint)Marshal.SizeOf<Global>();
             }
         }
 
@@ -64,8 +66,8 @@ namespace Engine.BuiltIn.Drawers
             {
                 return new PerFrame
                 {
-                    ViewProjection = Matrix.Transpose(context.Camera.ViewProjection),
-                    OrthoViewProjection = Matrix.Transpose(context.Form.GetOrthoProjectionMatrix()),
+                    ViewProjection = Matrix4x4.Transpose(context.Camera.ViewProjection),
+                    OrthoViewProjection = Matrix4x4.Transpose(context.Form.GetOrthoProjectionMatrix()),
                     EyePosition = context.Camera.Position,
                     ScreenResolution = context.Form.RenderRectangle.BottomRight,
                     TotalTime = context.GameTime.TotalSeconds,
@@ -82,13 +84,13 @@ namespace Engine.BuiltIn.Drawers
             /// View projection matrix
             /// </summary>
             [FieldOffset(0)]
-            public Matrix ViewProjection;
+            public Matrix4x4 ViewProjection;
 
             /// <summary>
             /// Ortho view projection matrix
             /// </summary>
             [FieldOffset(64)]
-            public Matrix OrthoViewProjection;
+            public Matrix4x4 OrthoViewProjection;
 
             /// <summary>
             /// Eye position
@@ -141,9 +143,9 @@ namespace Engine.BuiltIn.Drawers
             public float FogRange;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerFrame));
+                return (uint)Marshal.SizeOf<PerFrame>();
             }
         }
 
@@ -181,9 +183,9 @@ namespace Engine.BuiltIn.Drawers
             public Color3 AmbientUp;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightHemispheric));
+                return (uint)Marshal.SizeOf<BufferLightHemispheric>();
             }
         }
         /// <summary>
@@ -213,9 +215,9 @@ namespace Engine.BuiltIn.Drawers
             public BufferLightHemispheric HemiLight;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PSHemispheric));
+                return (uint)Marshal.SizeOf<PSHemispheric>();
             }
         }
 
@@ -275,7 +277,7 @@ namespace Engine.BuiltIn.Drawers
                     ToCascadeOffsetX = light.ToCascadeOffsetX,
                     ToCascadeOffsetY = light.ToCascadeOffsetY,
                     ToCascadeScale = light.ToCascadeScale,
-                    ToShadowSpace = Matrix.Transpose(light.ToShadowSpace),
+                    ToShadowSpace = Matrix4x4.Transpose(light.ToShadowSpace),
                 };
             }
 
@@ -324,12 +326,12 @@ namespace Engine.BuiltIn.Drawers
             /// From light view * projection matrix array
             /// </summary>
             [FieldOffset(96)]
-            public Matrix ToShadowSpace;
+            public Matrix4x4 ToShadowSpace;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightDirectional));
+                return (uint)Marshal.SizeOf<BufferLightDirectional>();
             }
         }
         /// <summary>
@@ -370,9 +372,9 @@ namespace Engine.BuiltIn.Drawers
             public BufferLightDirectional[] DirLights;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PSDirectional));
+                return (uint)Marshal.SizeOf<PSDirectional>();
             }
         }
 
@@ -436,7 +438,7 @@ namespace Engine.BuiltIn.Drawers
                     CastShadow = light.CastShadowsMarked ? 1 : 0,
                     MapIndex = light.ShadowMapIndex,
                     MapCount = light.ShadowMapCount,
-                    FromLightVP = (light.FromLightVP?.Length ?? 0) != 0 ? Matrix.Transpose(light.FromLightVP[0]) : Matrix.Zero,
+                    FromLightVP = (light.FromLightVP?.Length ?? 0) != 0 ? Matrix4x4.Transpose(light.FromLightVP[0]) : Matrix4x4.Zero,
                 };
             }
 
@@ -499,12 +501,12 @@ namespace Engine.BuiltIn.Drawers
             /// From light view * projection matrix array
             /// </summary>
             [FieldOffset(80)]
-            public Matrix FromLightVP;
+            public Matrix4x4 FromLightVP;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightSpot));
+                return (uint)Marshal.SizeOf<BufferLightSpot>();
             }
         }
         /// <summary>
@@ -545,9 +547,9 @@ namespace Engine.BuiltIn.Drawers
             public BufferLightSpot[] SpotLights;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PSSpots));
+                return (uint)Marshal.SizeOf<PSSpots>();
             }
         }
 
@@ -600,7 +602,7 @@ namespace Engine.BuiltIn.Drawers
                 }
 
                 float radius = light.Radius;
-                var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius + 0.1f);
+                var perspectiveMatrix = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, radius + 0.1f);
 
                 return new BufferLightPoint
                 {
@@ -661,9 +663,9 @@ namespace Engine.BuiltIn.Drawers
             public int MapIndex;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(BufferLightPoint));
+                return (uint)Marshal.SizeOf<BufferLightPoint>();
             }
         }
         /// <summary>
@@ -704,9 +706,9 @@ namespace Engine.BuiltIn.Drawers
             public BufferLightPoint[] PointLights;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PSPoints));
+                return (uint)Marshal.SizeOf<PSPoints>();
             }
         }
     }

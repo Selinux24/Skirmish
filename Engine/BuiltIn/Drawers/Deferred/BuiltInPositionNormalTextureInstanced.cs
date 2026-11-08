@@ -1,10 +1,8 @@
-﻿
+﻿using Engine.BuiltIn.Drawers.Common;
+using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Common;
-    using Engine.Common;
-
     /// <summary>
     /// Basic position-normal-texture instanced drawer
     /// </summary>

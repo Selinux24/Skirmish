@@ -21,11 +21,11 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using SharpDX;
 using System;
 
 namespace Engine.Physics.EPA
 {
+    using Engine.Mathematics;
     using GJKSimplex = GJK.Simplex;
     using GJKSupportPoint = GJK.SupportPoint;
 

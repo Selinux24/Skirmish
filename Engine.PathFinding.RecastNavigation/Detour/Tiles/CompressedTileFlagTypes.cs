@@ -13,6 +13,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// DT_COMPRESSEDTILE_FREE_DATA. Navmesh owns the tile memory and should free it.
         /// </summary>
-        Free = 0x01,					
+        Free = 0x01,
     }
 }

@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Foliage vertex shader
     /// </summary>
-    public class FoliageVs : IBuiltInShader<EngineVertexShader>
+    public class FoliageVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

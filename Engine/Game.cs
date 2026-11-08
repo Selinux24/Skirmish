@@ -1,7 +1,7 @@
 ﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
-using SharpDX.DXGI;
+using Logger;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -58,6 +58,39 @@ namespace Engine
         }
 
         /// <summary>
+        /// Frame performance stopwatch
+        /// </summary>
+        private readonly Stopwatch frameSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to input operations.
+        /// </summary>
+        private readonly Stopwatch inputSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to update operations.
+        /// </summary>
+        private readonly Stopwatch updateSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to draw operations.
+        /// </summary>
+        private readonly Stopwatch drawSW = new();
+        /// <summary>
+        /// Provides a stopwatch instance for measuring elapsed time related to present operations.
+        /// </summary>
+        private readonly Stopwatch presentSW = new();
+        /// <summary>
+        /// Integrates the resource groups in the resource queue
+        /// </summary>
+        /// <returns>Returns the integrated resource groups</returns>
+        private readonly List<ILoadResourceGroup> integratedGroups = [];
+        /// <summary>
+        /// Resource request queue
+        /// </summary>
+        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
+        /// <summary>
+        /// Status collected event arguments
+        /// </summary>
+        private readonly GameStatusCollectedEventArgs statusArgs = new();
+        /// <summary>
         /// Scene list
         /// </summary>
         private readonly List<Scene> scenes = [];
@@ -73,10 +106,6 @@ namespace Engine
         /// Game paused
         /// </summary>
         private bool paused = false;
-        /// <summary>
-        /// Resource request queue
-        /// </summary>
-        private readonly ConcurrentQueue<ILoadResourceGroup> resourceRequests = [];
         /// <summary>
         /// Resource integration running flag
         /// </summary>
@@ -131,7 +160,12 @@ namespace Engine
         {
             get
             {
-                return scenes.FindAll(s => s.Active).Count;
+                int count = 0;
+                for (int i = 0; i < scenes.Count; i++)
+                {
+                    if (scenes[i].Active) count++;
+                }
+                return count;
             }
         }
         /// <summary>
@@ -152,10 +186,7 @@ namespace Engine
             }
             set
             {
-                if (Input != null)
-                {
-                    Input.VisibleMouse = value;
-                }
+                Input?.VisibleMouse = value;
             }
         }
         /// <summary>
@@ -176,10 +207,7 @@ namespace Engine
             }
             set
             {
-                if (Input != null)
-                {
-                    Input.LockMouse = value;
-                }
+                Input?.LockMouse = value;
             }
         }
         /// <summary>
@@ -189,38 +217,16 @@ namespace Engine
         /// <summary>
         /// Game status
         /// </summary>
-        public readonly GameStatus GameStatus = new();
+        public GameStatus GameStatus { get; set; } = new();
+        /// <summary>
+        /// Logger instance
+        /// </summary>
+        public static readonly Log Logger = new();
 
         /// <summary>
         /// Game status collected event
         /// </summary>
         public event GameStatusCollectedHandler GameStatusCollected;
-
-        /// <summary>
-        /// Gets desktop mode description
-        /// </summary>
-        /// <returns>Returns current desktop mode description</returns>
-        private static OutputDescription1 GetDesktopMode()
-        {
-            using var factory = new Factory1();
-            using var factory5 = factory.QueryInterface<Factory5>();
-            using var adapter = factory5.GetAdapter1(0);
-            using var adapter4 = adapter.QueryInterface<Adapter4>();
-            using var adapterOutput = adapter4.GetOutput(0);
-            using var adapterOutput6 = adapterOutput.QueryInterface<Output6>();
-            return adapterOutput6.Description1;
-        }
-        /// <summary>
-        /// Gets the log level base on frame time
-        /// </summary>
-        /// <param name="frameTime">Frame time</param>
-        /// <returns>Returns the log level</returns>
-        private static LogLevel EvaluateTime(long frameTime)
-        {
-            if (frameTime > 500) return LogLevel.Warning;
-            if (frameTime > 30) return LogLevel.Information;
-            else return LogLevel.Debug;
-        }
 
         /// <summary>
         /// Constructor
@@ -229,7 +235,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, true, 0, 0, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -243,7 +249,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, screenWidth, screenHeight, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -257,7 +263,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -270,7 +276,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, Vector2I screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, screenSize.X, screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -283,7 +289,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, uint refreshRate = 0, uint multiSampling = 0) :
             this(name, false, (int)screenSize.X, (int)screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
         {
 
@@ -298,7 +304,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, int refreshRate, int multiSampling)
+        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, uint refreshRate, uint multiSampling)
         {
             Name = name;
 
@@ -313,11 +319,11 @@ namespace Engine
             bool isFullScreen = fullScreen;
             if (screenWidth == 0 || screenHeight == 0)
             {
-                var mode = GetDesktopMode();
+                var coords = Graphics.GetDesktopMode();
 
                 isFullScreen = true;
-                screenWidth = mode.DesktopCoordinates.Right - mode.DesktopCoordinates.Left;
-                screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
+                screenWidth = coords.Width;
+                screenHeight = coords.Height;
             }
 
             Form = EngineServiceFactory.Instance<IEngineForm>();
@@ -420,8 +426,7 @@ namespace Engine
                 }
 
                 BuiltIn.Drawers.BuiltInShaders.DisposeResources();
-
-                FontMapCache.Clear();
+                FontMapCache<BuiltIn.Format.VertexFont>.Clear();
 
                 Input?.Dispose();
                 Input = null;
@@ -567,7 +572,7 @@ namespace Engine
             scenes.ForEach(s => s.Active = false);
 
             //Copy collection for disposing
-            List<Scene> toDispose = new(scenes);
+            List<Scene> toDispose = [.. scenes];
 
             //Clear scene collection
             scenes.Clear();
@@ -612,7 +617,11 @@ namespace Engine
         /// </summary>
         public Scene GetActiveScene()
         {
-            return scenes.Find(s => s.Active);
+            for (int i = 0; i < scenes.Count; i++)
+            {
+                if (scenes[i].Active) return scenes[i];
+            }
+            return null;
         }
 
         /// <summary>
@@ -654,13 +663,9 @@ namespace Engine
                 gr.End();
             }
         }
-        /// <summary>
-        /// Integrates the resource groups in the resource queue
-        /// </summary>
-        /// <returns>Returns the integrated resource groups</returns>
-        private async Task<ILoadResourceGroup[]> IntegrateResourcesAsync()
+        private async Task<List<ILoadResourceGroup>> IntegrateResourcesAsync()
         {
-            List<ILoadResourceGroup> res = [];
+            integratedGroups.Clear();
 
             try
             {
@@ -678,7 +683,7 @@ namespace Engine
                     ResourceManager.CreateResources(loadResourceGroup.Id);
                     Logger.WriteInformation(this, $"{logText} => ResourceManager: New resources created");
 
-                    res.Add(loadResourceGroup);
+                    integratedGroups.Add(loadResourceGroup);
                 }
             }
             finally
@@ -686,7 +691,7 @@ namespace Engine
                 integratingResources = false;
             }
 
-            return [.. res];
+            return integratedGroups;
         }
 
         /// <summary>
@@ -739,8 +744,7 @@ namespace Engine
 
             Logger.WriteInformation(this, $"##### Frame {FrameCounters.FrameCount} Start ####");
 
-            Stopwatch gSW = new();
-            gSW.Start();
+            frameSW.Restart();
 
             FrameInput();
 
@@ -750,13 +754,16 @@ namespace Engine
 
             FramePresent();
 
-            gSW.Stop();
-            GameStatus.Add("TOTAL", gSW);
+            frameSW.Stop();
+            GameStatus.Add("TOTAL", frameSW);
 
-            LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
-            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+            var level = Log.EvaluateTime(frameSW.ElapsedMilliseconds);
+            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {frameSW.ElapsedMilliseconds} milliseconds ####");
 
-            Task.Run(IntegrateResources).ConfigureAwait(false);
+            if (!integratingResources && (!resourceRequests.IsEmpty || ResourceManager.HasRequests))
+            {
+                Task.Run(IntegrateResources).ConfigureAwait(false);
+            }
 
             if (ResourceManager.HasRequests)
             {
@@ -787,10 +794,10 @@ namespace Engine
         /// </summary>
         private void FrameInput()
         {
-            var iSW = Stopwatch.StartNew();
+            inputSW.Restart();
             Input.Update(GameTime);
-            iSW.Stop();
-            GameStatus.Add(nameof(FrameInput), iSW);
+            inputSW.Stop();
+            GameStatus.Add(nameof(FrameInput), inputSW);
         }
         /// <summary>
         /// Update scene state
@@ -798,10 +805,10 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            var uSW = Stopwatch.StartNew();
+            updateSW.Restart();
             scene.Update(GameTime);
-            uSW.Stop();
-            GameStatus.Add(nameof(FrameSceneUpdate), uSW);
+            updateSW.Stop();
+            GameStatus.Add(nameof(FrameSceneUpdate), updateSW);
         }
         /// <summary>
         /// Draw scene
@@ -809,20 +816,20 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            var dSW = Stopwatch.StartNew();
+            drawSW.Restart();
             scene.Draw(GameTime);
-            dSW.Stop();
-            GameStatus.Add(nameof(FrameSceneDraw), dSW);
+            drawSW.Stop();
+            GameStatus.Add(nameof(FrameSceneDraw), drawSW);
         }
         /// <summary>
         /// Present frame
         /// </summary>
         private void FramePresent()
         {
-            var pSW = Stopwatch.StartNew();
+            presentSW.Restart();
             Graphics.Present();
-            pSW.Stop();
-            GameStatus.Add(nameof(FramePresent), pSW);
+            presentSW.Stop();
+            GameStatus.Add(nameof(FramePresent), presentSW);
         }
         /// <summary>
         /// Refreshes frame counters
@@ -842,11 +849,8 @@ namespace Engine
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            GameStatusCollected?.Invoke(this, new()
-            {
-                Trace = GameStatus.Copy(),
-            });
-
+            statusArgs.Trace = GameStatus.Copy();
+            GameStatusCollected?.Invoke(this, statusArgs);
             CollectGameStatus = false;
         }
 

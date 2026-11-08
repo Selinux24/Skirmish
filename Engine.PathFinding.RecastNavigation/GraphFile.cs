@@ -73,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
         public static GraphFile FromGraph(Graph graph)
         {
             //Calculate hash
-            var tris = graph.Input.GetTriangles(graph.Settings.Bounds);
+            var tris = graph.Input.GetTriangles(graph.Settings.Bounds).ToArray();
             string hash = GetHash(graph.Settings, tris);
 
             var meshFiles = graph.GetAgents().Select(a => (a.Agent, NavMeshFile.FromNavmesh(a.NavMesh))).ToList();
@@ -153,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -173,7 +173,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
 
                 throw;
             }
@@ -195,7 +195,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }
@@ -217,7 +217,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             catch (Exception ex)
             {
-                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+                Game.Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
 
                 throw;
             }

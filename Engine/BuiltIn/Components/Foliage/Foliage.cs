@@ -1,4 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Foliage;
+using Engine.Collections;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,12 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Foliage
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Foliage;
-    using Engine.Collections;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Foliage class helper
     /// </summary>
@@ -271,8 +270,7 @@ namespace Engine.BuiltIn.Components.Foliage
             float sizeParts = MathF.Max(gbbox.Width, gbbox.Depth) / Description.NodeSize;
 
             int levels = Math.Max(1, (int)MathF.Log(sizeParts, 2));
-
-            foliageQuadtree = new(gbbox, levels);
+            foliageQuadtree = new(gbbox, new(levels));
 
             //Creates the foliage patch structure
             int channelCount = foliageMapChannels.Count;
@@ -389,7 +387,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var volume = (IntersectionVolumeFrustum)frustum;
 
-            return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint).ToArray();
+            return [.. nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint)];
         }
 
         /// <summary>
@@ -516,11 +514,11 @@ namespace Engine.BuiltIn.Components.Foliage
                 .Where(p => !p.ReadyForDrawing && !p.Planting && !p.Planted)
                 .ToArray();
 
-            Parallel.For(0, toPlant.Length, (i) =>
+            Parallel.For(0, toPlant.Length, async (i) =>
             {
                 var p = toPlant[i];
 
-                p.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
+                await p.Plant(Scene, foliageMap, foliageMapChannels[i], gbbox, nbbox, () =>
                 {
                     //Enqueue
                     callback?.Invoke(p);
@@ -607,7 +605,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
                 var state = new BuiltInFoliageState
                 {
-                    TintColor = Color4.White,
+                    TintColor = new(1f, 1f, 1f, 1f),
 
                     StartRadius = channelData.StartRadius,
                     EndRadius = channelData.EndRadius,
@@ -718,9 +716,7 @@ namespace Engine.BuiltIn.Components.Foliage
         /// </summary>
         public (QuadTreeNode Node, bool WithData, bool Ready)[] GetPatches()
         {
-            return foliagePatches
-                .Select(patch => (patch.Node, patch.Planted && patch.HasData, patch.ReadyForDrawing))
-                .ToArray();
+            return [.. foliagePatches.Select(patch => (patch.Node, patch.Planted && patch.HasData, patch.ReadyForDrawing))];
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
+    using Engine.Mathematics;
+
     public interface ISteeringAgent
     {
         Vector3 Position { get; set; }

@@ -1,20 +1,21 @@
-﻿using Engine.Physics;
-using Engine.Physics.Colliders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Solver = Engine.Physics.GJK.Solver;
 
 namespace Engine.PhysicsTests
 {
+    using Engine.Mathematics;
+    using Engine.Physics;
+    using Engine.Physics.Colliders;
+    using Solver = Engine.Physics.GJK.Solver;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class GJKTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
-        static BoxCollider BoxFromExtents(Vector3 extents, Matrix transform)
+        static BoxCollider BoxFromExtents(Vector3 extents, Matrix4x4 transform)
         {
             var collider = new BoxCollider(extents);
             var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
@@ -22,7 +23,7 @@ namespace Engine.PhysicsTests
 
             return collider;
         }
-        static SphereCollider SphereFromRadius(float r, Matrix transform)
+        static SphereCollider SphereFromRadius(float r, Matrix4x4 transform)
         {
             var collider = new SphereCollider(r);
             var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
@@ -30,7 +31,7 @@ namespace Engine.PhysicsTests
 
             return collider;
         }
-        static ConvexMeshCollider MeshFromExtents(Vector3 extents, Matrix transform)
+        static ConvexMeshCollider MeshFromExtents(Vector3 extents, Matrix4x4 transform)
         {
             var triangles = Triangle.ComputeTriangleList(new BoundingBox(-extents, extents));
             var collider = new ConvexMeshCollider(triangles);
@@ -40,23 +41,17 @@ namespace Engine.PhysicsTests
             return collider;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
         public void SphereSphere1Test()
         {
-            var s1 = SphereFromRadius(1, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = SphereFromRadius(1, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -65,8 +60,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere2Test()
         {
-            var s1 = SphereFromRadius(1, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(3, 0, 0)));
+            var s1 = SphereFromRadius(1, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -75,8 +70,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere3Test()
         {
-            var s1 = SphereFromRadius(1, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(1, 0, 0)));
+            var s1 = SphereFromRadius(1, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -85,8 +80,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere4Test()
         {
-            var s1 = SphereFromRadius(1, Matrix.Identity);
-            var s2 = SphereFromRadius(2, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = SphereFromRadius(1, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(2, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -96,8 +91,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeSphere1Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -106,8 +101,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeSphere2Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(3, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -116,8 +111,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeSphere3Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(1, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(1, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -126,8 +121,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeSphere4Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = SphereFromRadius(2, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = SphereFromRadius(2, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -137,8 +132,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube1Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -147,8 +142,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube2Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(3, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -157,8 +152,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube3Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(1, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -167,8 +162,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube4Test()
         {
-            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = BoxFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -178,8 +173,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubePolytope1Test()
         {
-            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -188,8 +183,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubePolytope2Test()
         {
-            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(3, 0, 0)));
+            var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -198,8 +193,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubePolytope3Test()
         {
-            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(1, 0, 0)));
+            var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix4x4.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 
@@ -208,8 +203,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubePolytope4Test()
         {
-            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
-            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix.Translation(new Vector3(2, 0, 0)));
+            var s1 = MeshFromExtents(Vector3.One, Matrix4x4.Identity);
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix4x4.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, out _);
 

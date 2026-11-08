@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Decals pixel shader
     /// </summary>
-    public class DecalsPs : IBuiltInShader<EnginePixelShader>
+    public class DecalsPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Per decal constant buffer

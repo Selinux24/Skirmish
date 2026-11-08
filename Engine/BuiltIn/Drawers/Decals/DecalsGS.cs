@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Decals geometry shader
     /// </summary>
-    public class DecalsGS : IBuiltInShader<EngineGeometryShader>
+    public class DecalsGS : IShader<EngineGeometryShader>
     {
         /// <inheritdoc/>
         public EngineGeometryShader Shader { get; private set; }

@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Deferred stencil vertex shader
     /// </summary>
-    public class DeferredStencilVs : IBuiltInShader<EngineVertexShader>
+    public class DeferredStencilVs : IShader<EngineVertexShader>
     {
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }

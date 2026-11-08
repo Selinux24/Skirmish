@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.BuiltIn.Components.Flares
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Flare description
     /// </summary>
@@ -12,7 +13,7 @@ namespace Engine.BuiltIn.Components.Flares
     /// <param name="scale">Relative scale</param>
     /// <param name="color">Color</param>
     /// <param name="texture">Texture name</param>
-    public class LensFlareArtifact(float distance, float scale, Color color, string texture)
+    public class LensFlareArtifact(float distance, float scale, Color3 color, string texture)
     {
         /// <summary>
         /// Distance from light source along light ray
@@ -25,7 +26,7 @@ namespace Engine.BuiltIn.Components.Flares
         /// <summary>
         /// Color
         /// </summary>
-        public Color Color { get; set; } = color;
+        public Color3 Color { get; set; } = color;
         /// <summary>
         /// Texture
         /// </summary>

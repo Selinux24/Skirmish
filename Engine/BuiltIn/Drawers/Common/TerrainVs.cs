@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Terrain vertex shader
     /// </summary>
-    public class TerrainVs : IBuiltInShader<EngineVertexShader>
+    public class TerrainVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per terrain constant buffer

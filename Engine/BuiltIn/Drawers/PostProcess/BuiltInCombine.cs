@@ -1,9 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.PostProcess
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Combine textures drawer
     /// </summary>

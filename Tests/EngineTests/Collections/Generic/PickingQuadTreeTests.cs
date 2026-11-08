@@ -1,8 +1,4 @@
-using Engine;
-using Engine.Collections.Generic;
-using Engine.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,11 +6,18 @@ using System.Linq;
 
 namespace EngineTests.Collections.Generic
 {
+    using Engine;
+    using Engine.Collections;
+    using Engine.Collections.Generic;
+    using Engine.Common;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass]
+    [OSCondition(OperatingSystems.Windows)]
     public class PickingQuadTreeTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
         static Triangle[] mesh;
 
@@ -31,42 +34,36 @@ namespace EngineTests.Collections.Generic
         static float t1PickingDistance0;
         static float t1PickingDistance1;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
             var tris = Triangle.ComputeTriangleList(geom.Vertices, geom.Indices);
-            tris = Triangle.Transform(tris, Matrix.Translation(-7.5f, 0, -7.5f));
+            tris = Triangle.Transform(tris, Matrix4x4.Translation(-7.5f, 0, -7.5f));
 
             mesh =
             [
-                .. Triangle.Transform(tris, Matrix.Translation(0,10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,10,5)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,10,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,10,5)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(0,10,0)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(0,10,5)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(5,10,0)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(5,10,5)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(10,5,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(10,5,5)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,5,0)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,5,5)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(10,5,0)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(10,5,5)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(15,5,0)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(15,5,5)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(0,-5,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(0,-5,15)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,-5,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(5,-5,15)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(0,-5,10)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(0,-5,15)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(5,-5,10)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(5,-5,15)),
 
-                .. Triangle.Transform(tris, Matrix.Translation(10,-10,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(10,-10,15)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,-10,10)),
-                .. Triangle.Transform(tris, Matrix.Translation(15,-10,15)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(10,-10,10)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(10,-10,15)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(15,-10,10)),
+                .. Triangle.Transform(tris, Matrix4x4.Translation(15,-10,15)),
             ];
 
             t0 = mesh[0];
@@ -89,7 +86,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestConstructor()
         {
-            PickingQuadTree<Triangle> q = new([], 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new([], options);
 
             Assert.IsNotNull(q);
             Assert.IsNotNull(q.Root);
@@ -97,22 +95,23 @@ namespace EngineTests.Collections.Generic
             var children = q.Root.Children.ToArray();
             Assert.IsNotNull(children);
 
-            Assert.AreEqual(4, children.Length);
+            Assert.HasCount(4, children);
             Assert.IsNotNull(children[0]);
             Assert.IsNotNull(children[1]);
             Assert.IsNotNull(children[2]);
             Assert.IsNotNull(children[3]);
 
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[0].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[1].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[2].Children.ToArray());
-            CollectionAssert.AreEqual(Array.Empty<PickingQuadTreeNode<Triangle>>(), children[3].Children.ToArray());
+            Assert.AreSequenceEqual([], children[0].Children.ToArray());
+            Assert.AreSequenceEqual([], children[1].Children.ToArray());
+            Assert.AreSequenceEqual([], children[2].Children.ToArray());
+            Assert.AreSequenceEqual([], children[3].Children.ToArray());
         }
 
         [TestMethod]
         public void TestParent()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             Assert.IsNull(q.Root.Parent);
 
             var children = q.Root.Children.ToArray();
@@ -149,7 +148,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLeaf()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             Assert.IsFalse(q.Root.IsLeaf);
 
             var children = q.Root.Children.ToArray();
@@ -186,7 +186,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestIds()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             Assert.AreEqual(-1, q.Root.Id);
 
             var children = q.Root.Children.ToArray();
@@ -223,7 +224,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestLevels()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             Assert.AreEqual(0, q.Root.Level);
 
             var children = q.Root.Children.ToArray();
@@ -247,11 +249,12 @@ namespace EngineTests.Collections.Generic
             BoundingBox bbox = new(min, max);
 
             Vector3 topLeft = new(-5, 0, -5);
-            Vector3 topRight = new(5, 0, -5);
-            Vector3 bottomLeft = new(-5, 0, 5);
+            Vector3 bottomLeft = new(5, 0, -5);
+            Vector3 topRight = new(-5, 0, 5);
             Vector3 bottomRight = new(5, 0, 5);
 
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             Assert.AreEqual(bbox, q.BoundingBox);
             Assert.AreEqual(q.Root.BoundingBox, q.BoundingBox);
@@ -259,14 +262,14 @@ namespace EngineTests.Collections.Generic
 
             var children = q.Root.Children.ToArray();
 
-            Assert.IsTrue(bbox.Contains(children[0].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[1].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[2].BoundingBox) == ContainmentType.Contains);
-            Assert.IsTrue(bbox.Contains(children[3].BoundingBox) == ContainmentType.Contains);
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[0].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[1].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[2].BoundingBox));
+            Assert.AreEqual(ContainmentType.Contains, bbox.Contains(children[3].BoundingBox));
 
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[1].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[2].BoundingBox) != ContainmentType.Contains);
-            Assert.IsTrue(children[0].BoundingBox.Contains(children[3].BoundingBox) != ContainmentType.Contains);
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[1].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[2].BoundingBox));
+            Assert.AreNotEqual(ContainmentType.Contains, children[0].BoundingBox.Contains(children[3].BoundingBox));
 
             Assert.AreEqual(topLeft, q.Root.TopLeftChild.BoundingBox.Center);
             Assert.AreEqual(topRight, q.Root.TopRightChild.BoundingBox.Center);
@@ -277,7 +280,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestNeighbors()
         {
-            PickingQuadTree<Triangle> q = new([], 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new([], options);
 
             Assert.IsNull(q.Root.TopLeftChild.LeftNeighbor);
             Assert.IsNull(q.Root.TopLeftChild.TopLeftNeighbor);
@@ -319,26 +323,28 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestGetBoundingBoxes()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             var boxes = q.GetBoundingBoxes();
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(1);
-            Assert.AreEqual(4, boxes.Count());
+            Assert.HasCount(4, boxes);
 
             boxes = q.GetBoundingBoxes(2);
-            Assert.AreEqual(16, boxes.Count());
+            Assert.HasCount(16, boxes);
 
             boxes = q.GetBoundingBoxes(-1);
-            Assert.AreEqual(0, boxes.Count());
+            Assert.IsEmpty(boxes);
         }
 
         [TestMethod]
         public void TestLeafNodes()
         {
-            PickingQuadTree<Triangle> q = new([], 2);
+            QuadTreeOptions options = new(2);
+            PickingQuadTree<Triangle> q = new([], options);
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(16, nodes.Length);
+            Assert.HasCount(16, nodes);
 
             PickingQuadTreeNode<Triangle>[] lNodes =
             [
@@ -348,13 +354,14 @@ namespace EngineTests.Collections.Generic
                 .. q.Root.Children.ToArray()[3].Children
             ];
 
-            CollectionAssert.AreEquivalent(lNodes, nodes);
+            Assert.AreSequenceEqual(lNodes, nodes, SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
         public void TestTraversePosition()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
             var cn = q.FindClosestNode(Vector3.Zero);
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
@@ -369,14 +376,24 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(cn, q.Root.TopLeftChild);
             Assert.IsTrue(cn.IsLeaf);
 
-            cn = q.FindClosestNode(new(1, 0, -1));
+            cn = q.FindClosestNode(new(-1, 0, 1));
             Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+            cn = q.FindClosestNode(new(-10, 0, 10));
+            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+            cn = q.FindClosestNode(new(-100, 0, 100));
+            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.IsTrue(cn.IsLeaf);
+
+            cn = q.FindClosestNode(new(1, 0, -1));
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
             cn = q.FindClosestNode(new(10, 0, -10));
-            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
             cn = q.FindClosestNode(new(100, 0, -100));
-            Assert.AreEqual(cn, q.Root.TopRightChild);
+            Assert.AreEqual(cn, q.Root.BottomLeftChild);
             Assert.IsTrue(cn.IsLeaf);
 
             cn = q.FindClosestNode(new(1, 0, 1));
@@ -388,60 +405,52 @@ namespace EngineTests.Collections.Generic
             cn = q.FindClosestNode(new(100, 0, 100));
             Assert.AreEqual(cn, q.Root.BottomRightChild);
             Assert.IsTrue(cn.IsLeaf);
-
-            cn = q.FindClosestNode(new(-1, 0, 1));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
-            cn = q.FindClosestNode(new(-10, 0, 10));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
-            cn = q.FindClosestNode(new(-100, 0, 100));
-            Assert.AreEqual(cn, q.Root.BottomLeftChild);
-            Assert.IsTrue(cn.IsLeaf);
         }
 
         [TestMethod]
         public void TestTraverseVolume()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             IntersectionVolumeAxisAlignedBox volume = new BoundingBox(Vector3.One * -100, Vector3.One * -90);
             var ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(Array.Empty<PickingQuadTreeNode<Triangle>>(), ln.ToArray());
+            Assert.AreSequenceEqual([], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(-1, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, -5), new(5, 5, -1));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.TopRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomLeftChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, 1), new(-1, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomLeftChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.TopRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(1, -5, 1), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(new PickingQuadTreeNode<Triangle>[] { q.Root.BottomRightChild }, ln.ToArray());
+            Assert.AreSequenceEqual([q.Root.BottomRightChild], [.. ln], SequenceOrder.InAnyOrder);
 
             volume = new BoundingBox(new(-5, -5, -5), new(5, 5, 5));
             ln = q.FindNodesInVolume(volume);
-            CollectionAssert.AreEquivalent(q.GetLeafNodes().ToArray(), ln.ToArray());
+            Assert.AreSequenceEqual([.. q.GetLeafNodes()], [.. ln], SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
         public void TestItems()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             var nodes = q.GetLeafNodes().ToArray();
-            Assert.AreEqual(4, nodes.Length);
+            Assert.HasCount(4, nodes);
 
-            Assert.AreEqual(18, nodes[0].Items.Count());
-            Assert.AreEqual(12, nodes[1].Items.Count());
-            Assert.AreEqual(12, nodes[2].Items.Count());
-            Assert.AreEqual(8, nodes[3].Items.Count());
+            Assert.HasCount(18, nodes[0].Items);
+            Assert.HasCount(12, nodes[1].Items);
+            Assert.HasCount(12, nodes[2].Items);
+            Assert.HasCount(8, nodes[3].Items);
 
             Triangle[] expected0 =
             [
@@ -453,30 +462,31 @@ namespace EngineTests.Collections.Generic
             ];
             Triangle[] expected1 =
             [
-                ..mesh.Skip(8).Take(8),
-                ..mesh.Skip(24).Take(2),
-                ..mesh.Skip(28).Take(2)
+                ..mesh.Skip(16).Take(8),
+                ..mesh.Skip(24).Take(4)
             ];
             Triangle[] expected2 =
             [
-                ..mesh.Skip(16).Take(8),
-                ..mesh.Skip(24).Take(4)
+                ..mesh.Skip(8).Take(8),
+                ..mesh.Skip(24).Take(2),
+                ..mesh.Skip(28).Take(2)
             ];
             Triangle[] expected3 =
             [
                 ..mesh.Skip(24).Take(8)
             ];
 
-            CollectionAssert.AreEquivalent(expected0, nodes[0].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected1, nodes[1].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected2, nodes[2].Items.ToArray());
-            CollectionAssert.AreEquivalent(expected3, nodes[3].Items.ToArray());
+            Assert.AreSequenceEqual(expected0, [.. nodes[0].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected1, [.. nodes[1].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected2, [.. nodes[2].Items], SequenceOrder.InAnyOrder);
+            Assert.AreSequenceEqual(expected3, [.. nodes[3].Items], SequenceOrder.InAnyOrder);
         }
 
         [TestMethod]
         public void TestPickNearest()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             //True pick
             bool picked = q.PickNearest(t0PickingRay, out PickingResult<Triangle> t);
@@ -495,7 +505,8 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestPickFirst()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             bool picked = q.PickFirst(t1PickingRay, out PickingResult<Triangle> t);
 
@@ -514,11 +525,12 @@ namespace EngineTests.Collections.Generic
         [TestMethod]
         public void TestPickAll()
         {
-            PickingQuadTree<Triangle> q = new(mesh, 1);
+            QuadTreeOptions options = new(1);
+            PickingQuadTree<Triangle> q = new(mesh, options);
 
             bool picked = q.PickAll(t1PickingRay, out IEnumerable<PickingResult<Triangle>> tlist);
             Assert.IsTrue(picked);
-            Assert.AreEqual(2, tlist.Count());
+            Assert.HasCount(2, tlist);
 
             var t0 = tlist.ElementAt(0);
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
@@ -534,12 +546,12 @@ namespace EngineTests.Collections.Generic
             var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
             picked = q.PickAll(t1Short, out tlist);
             Assert.IsFalse(picked);
-            CollectionAssert.AreEquivalent(Array.Empty<IEnumerable<PickingResult<Triangle>>>(), tlist.ToArray());
+            Assert.AreSequenceEqual([], tlist.ToArray(), SequenceOrder.InAnyOrder);
 
             //Middle pick
             t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance1 * 0.5f);
             picked = q.PickAll(t1Short, out tlist);
-            Assert.AreEqual(1, tlist.Count());
+            Assert.HasCount(1, tlist);
             Assert.IsTrue(picked);
 
             t0 = tlist.ElementAt(0);

@@ -1,16 +1,16 @@
-﻿using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
+﻿using Engine.Common;
+using Engine.Helpers;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Vortice.Direct3D;
+using Vortice.Direct3D11;
+using Vortice.Direct3D11.Debug;
+using Vortice.DXGI;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Helpers;
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Graphics class
     /// </summary>
@@ -25,29 +25,33 @@ namespace Engine
         /// <summary>
         /// Debug device
         /// </summary>
-        private DeviceDebug deviceDebug = null;
+        private ID3D11Debug deviceDebug = null;
         /// <summary>
         /// Debug information queue
         /// </summary>
-        private InfoQueue deviceDebugInfoQueue = null;
+        private ID3D11InfoQueue deviceDebugInfoQueue = null;
 #endif
 
         /// <summary>
-        /// Vertical sync enabled
+        /// Sync interval
         /// </summary>
-        private readonly bool vsyncEnabled = false;
+        private readonly uint syncInterval = 0;
         /// <summary>
         /// Multisample count
         /// </summary>
-        private readonly int msCount = 1;
+        private readonly uint msCount = 1;
         /// <summary>
         /// Multisample quality
         /// </summary>
-        private readonly int msQuality = 0;
+        private readonly uint msQuality = 0;
+        /// <summary>
+        /// Graphics factory
+        /// </summary>
+        private IDXGIFactory2 factory = null;
         /// <summary>
         /// Graphics device
         /// </summary>
-        private Device3 device = null;
+        private ID3D11Device3 device = null;
         /// <summary>
         /// Immediate context
         /// </summary>
@@ -55,7 +59,7 @@ namespace Engine
         /// <summary>
         /// Swap chain
         /// </summary>
-        private SwapChain4 swapChain = null;
+        private IDXGISwapChain4 swapChain = null;
         /// <summary>
         /// Back buffer format
         /// </summary>
@@ -64,6 +68,10 @@ namespace Engine
         /// Depth buffer format
         /// </summary>
         private readonly Format depthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
+        /// <summary>
+        /// Color space
+        /// </summary>
+        private ColorSpaceType colorSpace = ColorSpaceType.RgbFullG22NoneP709;
 
         /// <summary>
         /// Device description
@@ -77,7 +85,7 @@ namespace Engine
         /// <summary>
         /// Screen viewport
         /// </summary>
-        public ViewportF Viewport { get; private set; }
+        public Viewport Viewport { get; private set; }
         /// <summary>
         /// Gets if the device was created with multi-sampling active
         /// </summary>
@@ -100,98 +108,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Finds mode description
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="refreshRate">Refresh date</param>
-        /// <param name="mode">Returns found mode description</param>
-        private static void FindModeDescription(Device3 device, Format format, int width, int height, int refreshRate, out ModeDescription1 mode)
-        {
-#if DEBUG
-            using (var tmpFactory = new Factory2(true))
-#else
-            using (var tmpFactory = new Factory2())
-#endif
-            using (var factory = tmpFactory.QueryInterface<Factory5>())
-            {
-                using var tmpAdapter = factory.GetAdapter1(0);
-                using var adapter = tmpAdapter.QueryInterface<Adapter4>();
-                using var tmpOutput = adapter.GetOutput(0);
-                using var output = tmpOutput.QueryInterface<Output6>();
-                try
-                {
-                    var displayModeList = output.GetDisplayModeList1(
-                        format,
-                        DisplayModeEnumerationFlags.Interlaced);
-
-                    displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
-                    if (displayModeList.Length > 0)
-                    {
-                        if (refreshRate > 0)
-                        {
-                            Array.Sort(displayModeList, (d1, d2) =>
-                            {
-                                float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                f1 = MathF.Abs(refreshRate - f1);
-                                f2 = MathF.Abs(refreshRate - f2);
-
-                                return f1.CompareTo(f2);
-                            });
-                        }
-                        else
-                        {
-                            Array.Sort(displayModeList, (d1, d2) =>
-                            {
-                                float f1 = d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                float f2 = d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                return f2.CompareTo(f1);
-                            });
-                        }
-
-                        mode = displayModeList[0];
-
-                        return;
-                    }
-
-                    var desc = new ModeDescription1()
-                    {
-                        Width = width,
-                        Height = height,
-                        Format = format,
-                    };
-                    output.FindClosestMatchingMode1(
-                        ref desc,
-                        out mode,
-                        device);
-
-                    mode.Width = width;
-                    mode.Height = height;
-
-                    return;
-                }
-                catch
-                {
-                    // Display mode not found
-                }
-            }
-
-            mode = new ModeDescription1()
-            {
-                Width = width,
-                Height = height,
-                Format = format,
-                RefreshRate = new Rational(0, 1),
-                Scaling = DisplayModeScaling.Unspecified,
-                ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
-            };
-        }
-        /// <summary>
         /// Checks the multi-sample specified count
         /// </summary>
         /// <param name="device">Temporary device</param>
@@ -200,11 +116,11 @@ namespace Engine
         /// <param name="sampleCount">Sample count</param>
         /// <param name="maxQualityLevel">Maximum quality level</param>
         /// <returns>Returns true y the device supports MS for the specified format</returns>
-        private static bool CheckMultisample(Device3 device, Format format, int multiSampling, out int sampleCount, out int maxQualityLevel)
+        private static bool CheckMultisample(ID3D11Device3 device, Format format, uint multiSampling, out uint sampleCount, out uint maxQualityLevel)
         {
             sampleCount = 1;
             maxQualityLevel = 0;
-            int maxQuality = device.CheckMultisampleQualityLevels1(format, multiSampling, CheckMultisampleQualityLevelsFlags.None);
+            uint maxQuality = device.CheckMultisampleQualityLevels1(format, multiSampling, CheckMultisampleQualityLevelsFlags.None);
             if (maxQuality > 0)
             {
                 sampleCount = multiSampling;
@@ -223,119 +139,241 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical sync enabled</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multisampling</param>
-        public Graphics(IEngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
+        public Graphics(IEngineForm form, bool vsyncEnabled = false, uint refreshRate = 0, uint multiSampling = 0)
         {
-            FindModeDescription(
-                device,
-                bufferFormat,
-                form.RenderWidth,
-                form.RenderHeight,
-                refreshRate,
-                out var displayMode);
+            ArgumentNullException.ThrowIfNull(form);
 
-            this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
+            syncInterval = vsyncEnabled ? 1u : 0u;
 
 #if DEBUG
-            using (var tmpFactory = new Factory2(true))
+            factory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(true);
 #else
-            using (var tmpFactory = new Factory2())
+            factory = DXGI.CreateDXGIFactory2<IDXGIFactory2>(false);
 #endif
-            using (var factory = tmpFactory.QueryInterface<Factory5>())
+            if (factory == null) throw new InvalidOperationException($"Cannot detect {nameof(IDXGIFactory2)}.");
+            factory.DebugName = "Graphics Factory6";
+
+            using (var adapter = GetHardwareAdapter())
             {
-                int adapterIndex = SelectBestAdapter(factory);
-
-                using (var tmpAdapter = factory.GetAdapter1(adapterIndex))
-                using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
-                {
-                    DeviceDescription = string.Format("{0}", adapter.Description2.Description);
-
-                    DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
-
+                DeviceCreationFlags creationFlags = DeviceCreationFlags.BgraSupport;
 #if DEBUG
+                if (D3D11.SdkLayersAvailable())
+                {
                     creationFlags |= DeviceCreationFlags.Debug;
+                }
 #endif
-                    using var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0);
-
-                    device = tmpDevice.QueryInterface<Device3>();
-                    device.DebugName = "GraphicsDevice";
+                if (D3D11.D3D11CreateDevice(
+                    adapter,
+                    DriverType.Unknown,
+                    creationFlags,
+                    [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0],
+                    out ID3D11Device tmpDevice, out FeatureLevel _, out ID3D11DeviceContext tempContext).Failure)
+                {
+                    // If the initialization fails, fall back to the WARP device.
+                    // For more information on WARP, see:
+                    // http://go.microsoft.com/fwlink/?LinkId=286690
+                    D3D11.D3D11CreateDevice(
+                        IntPtr.Zero,
+                        DriverType.Warp,
+                        creationFlags,
+                        [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0],
+                        out tmpDevice, out FeatureLevel _, out tempContext).CheckError();
                 }
 
-                if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
-                {
-                    throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, bufferFormat));
-                }
-
-                var desc = new SwapChainDescription1()
-                {
-                    BufferCount = 2,
-                    Format = displayMode.Format,
-                    Width = displayMode.Width,
-                    Height = displayMode.Height,
-                    Stereo = displayMode.Stereo,
-                    SampleDescription = CurrentSampleDescription,
-                    AlphaMode = AlphaMode.Ignore,
-                    Scaling = Scaling.Stretch,
-                    Usage = Usage.RenderTargetOutput,
-                    SwapEffect = SwapEffect.Sequential,
-                    Flags = SwapChainFlags.None,
-                };
-                var fsdesc = new SwapChainFullScreenDescription()
-                {
-                    RefreshRate = displayMode.RefreshRate,
-                    Scaling = displayMode.Scaling,
-                    ScanlineOrdering = displayMode.ScanlineOrdering,
-                    Windowed = !form.IsFullscreen,
-                };
-
-                using var tmpSwapChain = new SwapChain1(factory, device, form.Handle, ref desc, fsdesc);
-
-                swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
-                swapChain.DebugName = "GraphicsSwapChain";
+                device = tmpDevice.QueryInterface<ID3D11Device3>();
+                device.DebugName = "Graphics Device";
             }
 
-            const string icName = "Immediate Context";
-            device.ImmediateContext3.DebugName = icName;
-            immediateContext = new(icName, true, -1, device.ImmediateContext3);
+            if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
+            {
+                throw new EngineException($"The specified multisampling value [{multiSampling}] is not supported for {bufferFormat}");
+            }
 
-            PrepareDevice(displayMode.Width, displayMode.Height, false);
+            var scdesc = new SwapChainDescription1()
+            {
+                Width = form.RenderWidth,
+                Height = form.RenderHeight,
+                Format = bufferFormat,
+                BufferCount = 2,
+                BufferUsage = Usage.RenderTargetOutput,
+                SampleDescription = CurrentSampleDescription,
+                Scaling = Scaling.Stretch,
+                SwapEffect = SwapEffect.FlipDiscard,
+                AlphaMode = AlphaMode.Ignore,
+            };
+
+            var fsdesc = new SwapChainFullscreenDescription()
+            {
+                Windowed = !form.IsFullscreen,
+            };
+
+            using var tmpSwapChain = factory.CreateSwapChainForHwnd(device, form.Handle, scdesc, fsdesc);
+            swapChain = tmpSwapChain.QueryInterface<IDXGISwapChain4>() ?? throw new InvalidOperationException($"Cannot create swap chain {nameof(IDXGISwapChain4)}.");
+            swapChain.DebugName = "Graphics Swap Chain";
+
+            UpdateColorSpace(form);
+
+            immediateContext = new("Immediate Context", true, -1, device.ImmediateContext3);
+
+            PrepareDevice(form.RenderWidth, form.RenderHeight, false);
+
+            factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
 
 #if DEBUG
             ConfigureDebugLayer();
 #endif
+        }
+        /// <summary>
+        /// Gets the hardware adapter
+        /// </summary>
+        private IDXGIAdapter1 GetHardwareAdapter()
+        {
+            using var factory6 = factory.QueryInterface<IDXGIFactory6>() ?? throw new InvalidOperationException($"Cannot detect {nameof(IDXGIFactory6)}.");
+            factory6.DebugName = "Graphics Factory6";
 
-            #region Alt + Enter
-
-            using (var factory = swapChain.GetParent<Factory5>())
+            for (uint idx = 0; factory6.EnumAdapterByGpuPreference(idx, GpuPreference.HighPerformance, out IDXGIAdapter1 adapter1).Success; idx++)
             {
-                factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
+                if (adapter1 == null) continue;
+
+                var desc = adapter1.Description1;
+
+                if ((desc.Flags & AdapterFlags.Software) != AdapterFlags.None)
+                {
+                    adapter1.Dispose();
+                    continue;
+                }
+
+                adapter1.DebugName = $"Graphics Adapter - {desc.Description}";
+                return adapter1;
             }
 
-            #endregion
+            for (uint idx = 0; factory.EnumAdapters1(idx, out IDXGIAdapter1 adapter1).Success; idx++)
+            {
+                if (adapter1 == null) continue;
+
+                var desc = adapter1.Description1;
+
+                if ((desc.Flags & AdapterFlags.Software) != AdapterFlags.None)
+                {
+                    adapter1.Dispose();
+                    continue;
+                }
+
+                adapter1.DebugName = $"Graphics Adapter - {desc.Description}";
+                return adapter1;
+            }
+
+            throw new InvalidOperationException("Cannot detect D3D11 adapter.");
         }
+        private void UpdateColorSpace(IEngineForm form)
+        {
+            bool isDisplayHDR10 = false;
+
+            var windowBounds = form.RenderRectangle;
+
+            IDXGIOutput bestOutput = default;
+            long bestIntersectArea = -1;
+
+            for (uint idx = 0; factory.EnumAdapters1(idx, out IDXGIAdapter1 adapter).Success; idx++)
+            {
+                for (uint outIdx = 0; adapter.EnumOutputs(outIdx, out IDXGIOutput output).Success; outIdx++)
+                {
+                    // Get the rectangle bounds of current output.
+                    var r = output.Description.DesktopCoordinates;
+
+                    // Compute the intersection.
+                    int intersectArea = RectI.ComputeIntersectionArea(windowBounds, r);
+                    if (intersectArea > bestIntersectArea)
+                    {
+                        bestOutput = output;
+                        bestIntersectArea = intersectArea;
+                    }
+                    else
+                    {
+                        output?.Dispose();
+                    }
+                }
+
+                adapter.Dispose();
+            }
+
+            using var output6 = bestOutput?.QueryInterfaceOrNull<IDXGIOutput6>();
+            if (output6 != null)
+            {
+                var outputDesc = output6.Description1;
+                if (outputDesc.ColorSpace == ColorSpaceType.RgbFullG2084NoneP2020)
+                {
+                    // Display output is HDR10.
+                    isDisplayHDR10 = true;
+                }
+            }
+
+            if (isDisplayHDR10)
+            {
+                colorSpace = bufferFormat switch
+                {
+                    // The application creates the HDR10 signal.
+                    Format.R10G10B10A2_UNorm => ColorSpaceType.RgbFullG2084NoneP2020,
+                    // The system creates the HDR10 signal, application uses linear values.
+                    Format.R16G16B16A16_Float => ColorSpaceType.RgbFullG10NoneP709,
+                    _ => ColorSpaceType.RgbFullG22NoneP709,
+                };
+            }
+
+            using var swapChain3 = swapChain.QueryInterfaceOrNull<IDXGISwapChain3>();
+            if (swapChain3 == null) return;
+
+            var colorSpaceSupport = swapChain3.CheckColorSpaceSupport(colorSpace);
+            if ((colorSpaceSupport & SwapChainColorSpaceSupportFlags.Present) != SwapChainColorSpaceSupportFlags.None)
+            {
+                swapChain3.SetColorSpace1(colorSpace);
+            }
+        }
+
         /// <summary>
         /// Selects the best adapter based in dedicated video memory
         /// </summary>
         /// <param name="factory">Factory</param>
         /// <returns>Returns the best adapter index</returns>
-        private static int SelectBestAdapter(Factory5 factory)
+        private static uint SelectBestAdapter(IDXGIFactory5 factory)
         {
-            int bestIndex = 0;
-
-            int adapterCount = factory.GetAdapterCount1();
-
-            long bestSize = 0;
-            for (int i = 0; i < adapterCount; i++)
+            uint bestIndex = 0;
+            ulong bestSize = 0;
+            for (uint i = 0; factory.EnumAdapters1(i, out var adapter).Success; i++)
             {
-                using var adapter = factory.GetAdapter1(i);
-                long size = adapter.Description1.DedicatedVideoMemory;
-                if (size > bestSize)
+                using (adapter)
                 {
-                    bestSize = size;
-                    bestIndex = i;
+                    ulong size = adapter.Description1.DedicatedVideoMemory;
+                    if (size > bestSize)
+                    {
+                        bestSize = size;
+                        bestIndex = i;
+                    }
                 }
             }
 
             return bestIndex;
+        }
+
+        /// <summary>
+        /// Gets desktop mode description
+        /// </summary>
+        /// <returns>Returns current desktop mode description</returns>
+        public static RectI GetDesktopMode()
+        {
+            using var factory = DXGI.CreateDXGIFactory1<IDXGIFactory1>();
+            using var factory5 = factory.QueryInterface<IDXGIFactory5>();
+            factory5.EnumAdapters1(0, out var adapter);
+            using (adapter)
+            {
+                using var adapter4 = adapter.QueryInterface<IDXGIAdapter4>();
+                adapter4.EnumOutputs(0, out var adapterOutput);
+                using (adapterOutput)
+                {
+                    using var adapterOutput6 = adapterOutput.QueryInterface<IDXGIOutput6>();
+                    return adapterOutput6.Description1.DesktopCoordinates;
+                }
+            }
         }
 
         /// <summary>
@@ -365,15 +403,18 @@ namespace Engine
                 return;
             }
 
-            if (swapChain?.IsFullScreen == true)
+            if (swapChain?.IsFullscreen == true)
             {
-                swapChain.IsFullScreen = false;
+                swapChain.SetFullscreenState(false);
             }
 
             swapChain?.Dispose();
             swapChain = null;
 
             DisposeResources();
+
+            factory?.Dispose();
+            factory = null;
 
             device?.Dispose();
             device = null;
@@ -382,7 +423,7 @@ namespace Engine
             deviceDebugInfoQueue?.Dispose();
             deviceDebugInfoQueue = null;
 
-            deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
+            deviceDebug?.ReportLiveDeviceObjects(ReportLiveDeviceObjectFlags.Detail);
             deviceDebug?.Dispose();
             deviceDebug = null;
 #endif
@@ -394,7 +435,7 @@ namespace Engine
         /// <param name="width">Render width</param>
         /// <param name="height">Render height</param>
         /// <param name="resizing">Sets whether the render screen is resizing or not</param>
-        public void PrepareDevice(int width, int height, bool resizing)
+        public void PrepareDevice(uint width, uint height, bool resizing)
         {
             if (resizing)
             {
@@ -405,7 +446,7 @@ namespace Engine
 
             #region Viewport
 
-            Viewport = new ViewportF()
+            Viewport = new()
             {
                 X = 0,
                 Y = 0,
@@ -419,23 +460,26 @@ namespace Engine
 
             #region Render Target
 
-            using (var backBuffer = Resource.FromSwapChain<Resource>(swapChain, 0))
+            swapChain.GetBuffer(0, out ID3D11Resource backBuffer);
+            using (backBuffer)
             {
-                renderTargetView = new EngineRenderTargetView("DefaultRenderTarget", new RenderTargetView1(device, backBuffer));
+                backBuffer.DebugName = "Default Render Target Surface";
+
+                renderTargetView = new("Default Render Target", device.CreateRenderTargetView1(backBuffer));
             }
 
             #endregion
 
             #region Depth Stencil Buffer and View
 
-            depthStencilView = CreateDepthStencilBuffer("DefaultDepthStencil", depthFormat, width, height, true);
+            depthStencilView = CreateDepthStencilBuffer("Default Depth Stencil", depthFormat, width, height, true);
 
             #endregion
 
             #region Set Defaults
 
             ImmediateContext.SetViewport(Viewport);
-            ImmediateContext.SetRenderTargets(DefaultRenderTarget, true, Color.Transparent, DefaultDepthStencil, true, true, false);
+            ImmediateContext.SetRenderTargets(DefaultRenderTarget, true, new(0), DefaultDepthStencil, true, true, false);
 
             ImmediateContext.SetRasterizerState(GetRasterizerDefault());
             ImmediateContext.SetBlendState(GetBlendDefault());
@@ -456,8 +500,8 @@ namespace Engine
         /// </summary>
         private void ConfigureDebugLayer()
         {
-            deviceDebug = device.QueryInterface<DeviceDebug>();
-            deviceDebugInfoQueue = deviceDebug.QueryInterface<InfoQueue>();
+            deviceDebug = device.QueryInterface<ID3D11Debug>();
+            deviceDebugInfoQueue = deviceDebug.QueryInterface<ID3D11InfoQueue>();
 
             var severityFilter = new InfoQueueFilter()
             {
@@ -469,7 +513,7 @@ namespace Engine
                 {
                     Severities =
                     [
-                        MessageSeverity.Information,
+                        MessageSeverity.Info,
                         MessageSeverity.Message,
                     ],
                 }
@@ -485,7 +529,7 @@ namespace Engine
                 {
                     Ids =
                     [
-                        MessageId.MessageIdDeviceDrawRenderTargetViewNotSet,
+                        MessageId.DeviceDrawRenderTargetViewNotSet,
                     ],
                 }
             };
@@ -506,7 +550,7 @@ namespace Engine
 
             StringBuilder sb = new();
 
-            for (int i = 0; i < mcount; i++)
+            for (uint i = 0; i < mcount; i++)
             {
                 var message = deviceDebugInfoQueue.GetMessage(i);
                 string desc = message.Description.Replace('\0', ' ');
@@ -525,12 +569,11 @@ namespace Engine
         /// </summary>
         public void Present()
         {
-            int syncInterval = vsyncEnabled ? 1 : 0;
             var res = swapChain.Present(syncInterval, PresentFlags.None);
 
             if (!res.Success)
             {
-                Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
+                Game.Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
         }
 
@@ -542,7 +585,7 @@ namespace Engine
             var res = device.DeviceRemovedReason;
             if (res.Failure)
             {
-                removedReason = ResultDescriptor.Find(res)?.Description;
+                removedReason = res.ToString();
 
                 return true;
             }
@@ -559,7 +602,7 @@ namespace Engine
         /// <param name="passIndex">Pass index</param>
         public IEngineDeviceContext CreateDeferredContext(string name, int passIndex)
         {
-            return new EngineDeviceContext(name, false, passIndex, new(device) { DebugName = name });
+            return new EngineDeviceContext(name, false, passIndex, device.CreateDeferredContext3());
         }
 
         /// <summary>
@@ -570,7 +613,7 @@ namespace Engine
         /// <returns>Returns a new depth stencil state</returns>
         public EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description)
         {
-            return new(name, new(device, (DepthStencilStateDescription)description));
+            return new(name, device.CreateDepthStencilState((DepthStencilDescription)description));
         }
 
         /// <summary>
@@ -581,9 +624,13 @@ namespace Engine
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
         /// <returns>Returns a new blend state</returns>
-        public EngineBlendState CreateBlendState(string name, EngineBlendStateDescription description, Color4? blendFactor, int sampleMask)
+        public EngineBlendState CreateBlendState(string name, EngineBlendStateDescription description, Vector4 blendFactor, uint sampleMask)
         {
-            return new(name, new(device, (BlendStateDescription1)description), blendFactor, sampleMask);
+            return new(
+                name,
+                device.CreateBlendState1((BlendDescription1)description),
+                blendFactor,
+                sampleMask);
         }
 
         /// <summary>
@@ -593,7 +640,9 @@ namespace Engine
         /// <returns>Returns a new rasterizer state</returns>
         public EngineRasterizerState CreateRasterizerState(string name, EngineRasterizerStateDescription description)
         {
-            return new(name, new(device, (RasterizerStateDescription2)description));
+            return new(
+                name,
+                device.CreateRasterizerState2((RasterizerDescription2)description));
         }
 
         /// <summary>
@@ -604,7 +653,9 @@ namespace Engine
         /// <returns>Returns the new sampler state</returns>
         public EngineSamplerState CreateSamplerState(string name, EngineSamplerStateDescription description)
         {
-            return new(name, new(device, (SamplerStateDescription)description));
+            return new(
+                name,
+                device.CreateSamplerState((SamplerDescription)description));
         }
 
         /// <summary>
@@ -616,7 +667,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a depth stencil view</returns>
-        public EngineDepthStencilView CreateDepthStencilBuffer(string name, Format format, int width, int height, bool useSamples)
+        public EngineDepthStencilView CreateDepthStencilBuffer(string name, Format format, uint width, uint height, bool useSamples)
         {
             bool multiSampled = false;
             var sampleDescription = new SampleDescription(1, 0);
@@ -626,31 +677,32 @@ namespace Engine
                 sampleDescription = CurrentSampleDescription;
             }
 
-            using var texture = new Texture2D1(
-                device,
-                new()
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = format,
-                    SampleDescription = sampleDescription,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None,
-                });
+            var textureDesc = new Texture2DDescription1()
+            {
+                Width = width,
+                Height = height,
+                MipLevels = 1,
+                ArraySize = 1,
+                Format = format,
+                SampleDescription = sampleDescription,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.DepthStencil,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None,
+            };
+            using var texture = device.CreateTexture2D1(textureDesc);
+            texture.DebugName = $"{name}.TEX";
 
             var description = new DepthStencilViewDescription()
             {
                 Format = format,
-                Dimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
+                ViewDimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
                 Texture2D = new(),
                 Texture2DMS = new(),
             };
+            var dsv = device.CreateDepthStencilView(texture, description);
 
-            return new($"{name}.DSV", new(device, texture, description));
+            return new($"{name}.DSV", dsv);
         }
 
         /// <summary>
@@ -662,7 +714,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a render target and its texture</returns>
-        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool useSamples)
+        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, uint width, uint height, bool useSamples)
         {
             FrameCounters.Textures++;
 
@@ -678,13 +730,12 @@ namespace Engine
                 SampleDescription = useSamples ? CurrentSampleDescription : new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None
             };
-            var texture = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX"
-            };
+            var texture = device.CreateTexture2D1(desc);
+            texture.DebugName = $"{name}.TEX";
+
             using (texture)
             {
                 var rtvDesc = new RenderTargetViewDescription1()
@@ -698,30 +749,28 @@ namespace Engine
 
                 if (multiSampled)
                 {
-                    rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                    rtvDesc.ViewDimension = RenderTargetViewDimension.Texture2DMultisampled;
                     rtvDesc.Texture2DMS = new();
 
-                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                    srvDesc.ViewDimension = ShaderResourceViewDimension.Texture2DMultisampled;
                     srvDesc.Texture2DMS = new();
                 }
                 else
                 {
-                    rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                    rtvDesc.ViewDimension = RenderTargetViewDimension.Texture2D;
                     rtvDesc.Texture2D = new();
 
-                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                    srvDesc.ViewDimension = ShaderResourceViewDimension.Texture2D;
                     srvDesc.Texture2D = new() { MipLevels = 1 };
                 }
 
-                var rtv = new EngineRenderTargetView($"{name}.RTV", new(device, texture, rtvDesc)
-                {
-                    DebugName = $"{name}.RTV"
-                });
+                var rtv1 = device.CreateRenderTargetView1(texture, rtvDesc);
+                rtv1.DebugName = $"{name}.RTV";
+                var rtv = new EngineRenderTargetView($"{name}.RTV", rtv1);
 
-                var srv = new EngineShaderResourceView($"{name}.SRV", new(device, texture, srvDesc)
-                {
-                    DebugName = $"{name}.SRV"
-                });
+                var srv1 = device.CreateShaderResourceView1(texture, srvDesc);
+                srv1.DebugName = $"{name}.SRV";
+                var srv = new EngineShaderResourceView($"{name}.SRV", srv1);
 
                 return (rtv, srv);
             }
@@ -736,7 +785,7 @@ namespace Engine
         /// <param name="arraySize">Render target list size</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a render target and its textures</returns>
-        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView[] ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
+        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView[] ShaderResources) CreateRenderTargetTexture(string name, Format format, uint width, uint height, uint arraySize, bool useSamples)
         {
             FrameCounters.Textures++;
 
@@ -755,16 +804,14 @@ namespace Engine
                 SampleDescription = useSamples ? CurrentSampleDescription : new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None
             };
 
             for (int i = 0; i < arraySize; i++)
             {
-                var texture = new Texture2D1(device, desc)
-                {
-                    DebugName = $"{name}.TEX_array({arraySize})[{i}]"
-                };
+                var texture = device.CreateTexture2D1(desc);
+                texture.DebugName = $"{name}.TEX_array({arraySize})[{i}]";
                 using (texture)
                 {
                     var rtvDesc = new RenderTargetViewDescription1()
@@ -778,26 +825,31 @@ namespace Engine
 
                     if (multiSampled)
                     {
-                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                        rtvDesc.ViewDimension = RenderTargetViewDimension.Texture2DMultisampled;
                         rtvDesc.Texture2DMS = new();
 
-                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                        srvDesc.ViewDimension = ShaderResourceViewDimension.Texture2DMultisampled;
                         srvDesc.Texture2DMS = new();
                     }
                     else
                     {
-                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                        rtvDesc.ViewDimension = RenderTargetViewDimension.Texture2D;
                         rtvDesc.Texture2D = new();
 
-                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                        srvDesc.ViewDimension = ShaderResourceViewDimension.Texture2D;
                         srvDesc.Texture2D = new() { MipLevels = 1 };
                     }
 
                     string rtvName = $"{name}.RTV_array({arraySize})[{i}]";
                     string srvName = $"{name}.SRV_array({arraySize})[{i}]";
 
-                    rtv.Add(new(device, texture, rtvDesc) { DebugName = rtvName });
-                    srv[i] = new(srvName, new(device, texture, srvDesc) { DebugName = srvName });
+                    var rtv1 = device.CreateRenderTargetView1(texture, rtvDesc);
+                    rtv1.DebugName = rtvName;
+                    rtv.Add(rtv1);
+
+                    var srv1 = device.CreateShaderResourceView1(texture, srvDesc);
+                    srv1.DebugName = srvName;
+                    srv[i] = new(srvName, srv1);
                 }
             }
 
@@ -811,7 +863,7 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, uint width, uint height)
         {
             var desc = new Texture2DDescription1()
             {
@@ -823,39 +875,36 @@ namespace Engine
                 SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None
             };
-
-            var depthMap = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX"
-            };
+            var depthMap = device.CreateTexture2D1(desc);
+            depthMap.DebugName = $"{name}.TEX";
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
                 {
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
-                    Dimension = DepthStencilViewDimension.Texture2D,
+                    ViewDimension = DepthStencilViewDimension.Texture2D,
                     Texture2D = new()
                     {
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV", new(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV", device.CreateDepthStencilView(depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    ViewDimension = ShaderResourceViewDimension.Texture2D,
                     Texture2D = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV", new(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", device.CreateShaderResourceView1(depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -868,7 +917,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="mapCount">Per stencil view map count</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height, int mapCount)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, uint width, uint height, uint mapCount)
         {
             var desc = new Texture2DDescription1()
             {
@@ -880,21 +929,18 @@ namespace Engine
                 SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None
             };
-
-            var depthMap = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX_array({mapCount})"
-            };
+            var depthMap = device.CreateTexture2D1(desc);
+            depthMap.DebugName = $"{name}.TEX_array({mapCount})";
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
                 {
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
-                    Dimension = DepthStencilViewDimension.Texture2DArray,
+                    ViewDimension = DepthStencilViewDimension.Texture2DArray,
                     Texture2DArray = new()
                     {
                         ArraySize = mapCount,
@@ -902,19 +948,19 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV_array({mapCount})", new(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV_array({mapCount})", device.CreateDepthStencilView(depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    ViewDimension = ShaderResourceViewDimension.Texture2D,
                     Texture2D = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV_array({mapCount})", new(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_array({mapCount})", device.CreateShaderResourceView1(depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -928,7 +974,7 @@ namespace Engine
         /// <param name="mapCount">Per stencil view map count</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, int width, int height, int mapCount, int arraySize)
+        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, uint width, uint height, uint mapCount, uint arraySize)
         {
             var desc = new Texture2DDescription1()
             {
@@ -940,25 +986,22 @@ namespace Engine
                 SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.None,
                 TextureLayout = TextureLayout.Undefined,
             };
-
-            var depthMap = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX_array({arraySize},{mapCount})"
-            };
+            var depthMap = device.CreateTexture2D1(desc);
+            depthMap.DebugName = $"{name}.TEX_array({arraySize},{mapCount})";
             using (depthMap)
             {
                 var dsv = new EngineDepthStencilView[arraySize];
-                for (int i = 0; i < arraySize; i++)
+                for (uint i = 0; i < arraySize; i++)
                 {
                     var dsDescription = new DepthStencilViewDescription
                     {
                         Flags = DepthStencilViewFlags.None,
                         Format = Format.D24_UNorm_S8_UInt,
-                        Dimension = DepthStencilViewDimension.Texture2DArray,
+                        ViewDimension = DepthStencilViewDimension.Texture2DArray,
                         Texture2DArray = new()
                         {
                             ArraySize = mapCount,
@@ -966,13 +1009,13 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new($"{name}.DSV_array({arraySize},{mapCount})[{i}]", new(device, depthMap, dsDescription));
+                    dsv[i] = new($"{name}.DSV_array({arraySize},{mapCount})[{i}]", device.CreateDepthStencilView(depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.Texture2DArray,
+                    ViewDimension = ShaderResourceViewDimension.Texture2DArray,
                     Texture2DArray = new()
                     {
                         MipLevels = 1,
@@ -982,7 +1025,7 @@ namespace Engine
                         PlaneSlice = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV_array({arraySize},{mapCount})", new(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_array({arraySize},{mapCount})", device.CreateShaderResourceView1(depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -994,7 +1037,7 @@ namespace Engine
         /// <param name="width">Face width</param>
         /// <param name="height">Face height</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextures(string name, int width, int height)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextures(string name, uint width, uint height)
         {
             var desc = new Texture2DDescription1()
             {
@@ -1003,25 +1046,22 @@ namespace Engine
                 ArraySize = 6,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
                 Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
+                CPUAccessFlags = CpuAccessFlags.None,
                 Format = Format.R24G8_Typeless,
                 MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.TextureCube,
+                MiscFlags = ResourceOptionFlags.TextureCube,
                 SampleDescription = new SampleDescription(1, 0),
                 TextureLayout = TextureLayout.Undefined,
             };
-
-            var depthMap = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX_cube"
-            };
+            var depthMap = device.CreateTexture2D1(desc);
+            depthMap.DebugName = $"{name}.TEX_cube";
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
                 {
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
-                    Dimension = DepthStencilViewDimension.Texture2DArray,
+                    ViewDimension = DepthStencilViewDimension.Texture2DArray,
                     Texture2DArray = new()
                     {
                         ArraySize = 6,
@@ -1029,19 +1069,19 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView($"{name}.DSV_cube", new(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV_cube", device.CreateDepthStencilView(depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.TextureCube,
+                    ViewDimension = ShaderResourceViewDimension.TextureCube,
                     TextureCube = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV_cube", new(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_cube", device.CreateShaderResourceView1(depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -1054,7 +1094,7 @@ namespace Engine
         /// <param name="height">Face height</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, int width, int height, int arraySize)
+        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, uint width, uint height, uint arraySize)
         {
             var desc = new Texture2DDescription1()
             {
@@ -1066,25 +1106,22 @@ namespace Engine
                 SampleDescription = new(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.TextureCube,
+                CPUAccessFlags = CpuAccessFlags.None,
+                MiscFlags = ResourceOptionFlags.TextureCube,
                 TextureLayout = TextureLayout.Undefined,
             };
-
-            var depthMap = new Texture2D1(device, desc)
-            {
-                DebugName = $"{name}.TEX_cube_array({arraySize})"
-            };
+            var depthMap = device.CreateTexture2D1(desc);
+            depthMap.DebugName = $"{name}.TEX_cube_array({arraySize})";
             using (depthMap)
             {
                 var dsv = new EngineDepthStencilView[arraySize];
-                for (int i = 0; i < arraySize; i++)
+                for (uint i = 0; i < arraySize; i++)
                 {
                     var dsDescription = new DepthStencilViewDescription
                     {
                         Flags = DepthStencilViewFlags.None,
                         Format = Format.D24_UNorm_S8_UInt,
-                        Dimension = DepthStencilViewDimension.Texture2DArray,
+                        ViewDimension = DepthStencilViewDimension.Texture2DArray,
                         Texture2DArray = new()
                         {
                             ArraySize = 6,
@@ -1092,22 +1129,22 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new($"{name}.DSV_cube_array({arraySize})[{i}]", new(device, depthMap, dsDescription));
+                    dsv[i] = new($"{name}.DSV_cube_array({arraySize})[{i}]", device.CreateDepthStencilView(depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.TextureCubeArray,
+                    ViewDimension = ShaderResourceViewDimension.TextureCubeArray,
                     TextureCubeArray = new()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
-                        CubeCount = arraySize,
+                        NumCubes = arraySize,
                         First2DArrayFace = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView($"{name}.SRV_cube_array({arraySize})", new(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV_cube_array({arraySize})", device.CreateShaderResourceView1(depthMap, rvDescription));
 
                 return (dsv, srv);
             }

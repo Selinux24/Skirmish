@@ -1,13 +1,11 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Deferred
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Directional light drawer
     /// </summary>
-    public class BuiltInLightDirectional : BuiltInDrawer
+    public class BuiltInLightDirectional : BuiltInDrawer, ILightDirectionalDrawer
     {
         /// <summary>
         /// Pixel shader

@@ -1,6 +1,6 @@
-﻿using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.PathFinding.RecastNavigation.Detour.Helpers;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxNodes">Maximum number of search nodes.</param>
         public NavMeshQuery(NavMesh nav, int maxNodes)
         {
-            ArgumentNullException.ThrowIfNull(nameof(nav));
+            ArgumentNullException.ThrowIfNull(nav);
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(maxNodes, 0);
 
             m_nav = nav;
@@ -336,7 +336,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Choose random polygon weighted by area, using reservoi sampling.
                 areaSum += polyArea;
-                float u = Helper.RandomGenerator.NextFloat(0, 1);
+                float u = Helper.RandomGenerator.NextSingle(0, 1);
                 if (u * areaSum <= polyArea)
                 {
                     bestPoly = poly;

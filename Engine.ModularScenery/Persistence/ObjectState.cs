@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
@@ -15,6 +14,6 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Transitions list
         /// </summary>
-        public IEnumerable<ObjectStateTransition> Transitions { get; set; } = Enumerable.Empty<ObjectStateTransition>();
+        public IEnumerable<ObjectStateTransition> Transitions { get; set; } = [];
     }
 }

@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -258,9 +258,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <inheritdoc/>
         public (int Id, Vector3 Position)[] GetPositions()
         {
-            return crowdAgents
-                .Select(a => (a.Id, a.Agent.NPos))
-                .ToArray();
+            return [.. crowdAgents.Select(a => (a.Id, a.Agent.NPos))];
         }
         /// <inheritdoc/>
         public Vector3 GetPosition(int id)
@@ -434,7 +432,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     int idx = crowdAgents.FindIndex(a => a.Agent == ag);
 
-                    Logger.WriteError(this, $"RequestMoveTargetReplan error: Id=>{idx} from {ag.TargetRef} to {ag.TargetPos}");
+                    Game.Logger.WriteError(this, $"RequestMoveTargetReplan error: Id=>{idx} from {ag.TargetRef} to {ag.TargetPos}");
                 }
             }
         }
@@ -461,7 +459,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // FIX: this can snap agents, how to handle that?
                 navquery.FindNearestPoly(
                     ag.NPos, agentPlacementHalfExtents, filters[ag.Settings.QueryFilterTypeIndex],
-                    out agentRef, out Vector3 nearest);
+                    out agentRef, out var nearest);
 
                 agentPos = nearest;
 
@@ -500,7 +498,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     // Current target is not valid, try to reposition.
                     navquery.FindNearestPoly(
                         ag.TargetPos, agentPlacementHalfExtents, filters[ag.Settings.QueryFilterTypeIndex],
-                        out int r, out Vector3 nearest);
+                        out int r, out var nearest);
 
                     ag.TargetRef = r;
                     ag.TargetPos = nearest;
@@ -613,7 +611,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (path.Length == 0)
             {
-                Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Game.Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             // Quick search towards the goal.
@@ -720,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (path.Length == 0)
             {
-                Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Game.Logger.WriteWarning(this, $"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             // Apply results.
@@ -756,7 +754,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Put the old path infront of the old path.
             if (path.Length > 1)
             {
-                res.Merge(path, path.Length);
+                res.Merge(path);
             }
 
             // Check for partial path.

@@ -10,7 +10,7 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Clips
         /// </summary>
-        public List<AnimationClipFile> Clips { get; set; } = new List<AnimationClipFile>();
+        public List<AnimationClipFile> Clips { get; set; } = [];
         /// <summary>
         /// Time step
         /// </summary>

@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Decals
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Decals drawer
     /// </summary>
@@ -47,9 +45,9 @@ namespace Engine.BuiltIn.Drawers.Decals
             public Color4 TintColor;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerDecal));
+                return (uint)Marshal.SizeOf<PerDecal>();
             }
         }
 

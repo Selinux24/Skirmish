@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using CommandList = Vortice.Direct3D11.ID3D11CommandList;
 
     /// <summary>
     /// Command list interface

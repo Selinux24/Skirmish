@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Common
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position color instanced vertex shader
     /// </summary>
-    public class PositionColorSkinnedVsI : IBuiltInShader<EngineVertexShader>
+    public class PositionColorSkinnedVsI : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

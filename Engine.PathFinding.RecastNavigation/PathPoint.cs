@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Path point
     /// </summary>
@@ -24,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nm">Navigation mesh</param>
         public readonly bool IsValid(NavMesh nm)
         {
-            return !Pos.IsInfinity() && nm.IsValidPolyRef(Ref);
+            return !Pos.IsInfinity && nm.IsValidPolyRef(Ref);
         }
 
         /// <inheritdoc/>

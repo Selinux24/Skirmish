@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
-    using Engine.Common;
-
     /// <summary>
     /// Clouds drawer state
     /// </summary>

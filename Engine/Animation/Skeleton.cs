@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +30,11 @@ namespace Engine.Animation
         /// <summary>
         /// Number of joints in the skeleton
         /// </summary>
-        public int JointCount
+        public uint JointCount
         {
             get
             {
-                return jointNames.Count;
+                return (uint)jointNames.Count;
             }
         }
 
@@ -117,9 +117,9 @@ namespace Engine.Animation
             Vector3 scale = Vector3.Lerp(sca1, sca2, factor);
 
             joint.LocalTransform =
-                Matrix.Scaling(scale) *
-                Matrix.RotationQuaternion(rotation) *
-                Matrix.Translation(translation);
+                Matrix4x4.Scaling(scale) *
+                Matrix4x4.RotationQuaternion(rotation) *
+                Matrix4x4.Translation(translation);
 
             if ((joint.Childs?.Length ?? 0) == 0)
             {
@@ -189,9 +189,9 @@ namespace Engine.Animation
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
         /// <returns>Returns the transforms list of the pose at specified time</returns>
-        public IEnumerable<Matrix> GetPoseAtTime(float time, IEnumerable<JointAnimation> animations)
+        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, IEnumerable<JointAnimation> animations)
         {
-            Matrix[] transforms = new Matrix[JointCount];
+            Matrix4x4[] transforms = new Matrix4x4[JointCount];
 
             BuildTransforms(Root, time, animations);
 
@@ -210,7 +210,7 @@ namespace Engine.Animation
         /// <param name="animations2">Second joint animation set</param>
         /// <param name="factor">Interpolation factor</param>
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor, ref Matrix[] transforms)
+        public void GetPoseAtTime(float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor, ref Matrix4x4[] transforms)
         {
             BuildTransforms(Root, time1, animations1, time2, animations2, factor);
 
@@ -222,7 +222,7 @@ namespace Engine.Animation
         /// Applies joint transforms
         /// </summary>
         /// <param name="transforms">Returns the transforms list of the pose</param>
-        private void ApplyTranforms(ref Matrix[] transforms)
+        private void ApplyTranforms(ref Matrix4x4[] transforms)
         {
             if (boneNames.Count == 0)
             {

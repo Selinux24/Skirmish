@@ -1,18 +1,19 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Decals;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Components.Water;
 using Engine.BuiltIn.Drawers.PostProcess;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Linq;
 using System.Text;
@@ -47,10 +48,10 @@ namespace TerrainSamples.SceneSkybox
 
         private const float alpha = 0.25f;
 
-        private readonly Color4 ruinsVolumeColor = new(Color.Green.RGB(), alpha);
-        private readonly Color4 torchVolumeColor = new(Color.GreenYellow.RGB(), alpha);
-        private readonly Color4 obeliskVolumeColor = new(Color.DarkGreen.RGB(), alpha);
-        private readonly Color4 fountainVolumeColor = new(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly Color4 ruinsVolumeColor = new(Color.Green, alpha);
+        private readonly Color4 torchVolumeColor = new(Color.GreenYellow, alpha);
+        private readonly Color4 obeliskVolumeColor = new(Color.DarkGreen, alpha);
+        private readonly Color4 fountainVolumeColor = new(Color.DarkSeaGreen, alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions =
@@ -69,7 +70,7 @@ namespace TerrainSamples.SceneSkybox
         ];
         private readonly Quaternion[] obeliskRotations =
         [
-            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.75f, MathUtil.PiOverTwo*1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(-Helper.PiOver2 * 0.75f, Helper.PiOver2 * 1.03f, 0.45f),
             Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
@@ -95,10 +96,10 @@ namespace TerrainSamples.SceneSkybox
         private Scenery lakeBottom = null;
         private Scenery ruins = null;
         private Water water = null;
-        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Line3D> volumesDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
 
-        private readonly int mapSize = 256;
+        private readonly uint mapSize = 256;
         private readonly float terrainSize = 512;
         private readonly float terrainHeight = 20;
 
@@ -164,8 +165,8 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeTextComponents()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont18 = FontDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = FontDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
@@ -182,10 +183,10 @@ namespace TerrainSamples.SceneSkybox
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new GeometryColorDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new GeometryColorDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
         private void InitializeUICompleted(LoadResourcesResult res)
@@ -277,7 +278,7 @@ namespace TerrainSamples.SceneSkybox
             };
             var groundDesc = SceneryDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
-            groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
+            groundDesc.Heightmap.Transform = Matrix4x4.Translation(0, -terrainHeight * 0.33f, 0);
             groundDesc.StartsVisible = false;
 
             lakeBottom = await AddComponentEffect<Scenery, SceneryDescription>("Lake Bottom", "Lake Bottom", groundDesc);
@@ -286,7 +287,7 @@ namespace TerrainSamples.SceneSkybox
         {
             var torchDesc = new ModelInstancedDescription()
             {
-                Instances = firePositions.Length,
+                Instances = (uint)firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(resourceTorchFolder, resourceTorchFile),
                 StartsVisible = false,
@@ -299,7 +300,7 @@ namespace TerrainSamples.SceneSkybox
         {
             var obeliskDesc = new ModelInstancedDescription()
             {
-                Instances = firePositions.Length,
+                Instances = (uint)firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(resourceObeliskFolder, resourceObeliskFile),
                 StartsVisible = false,
@@ -322,7 +323,7 @@ namespace TerrainSamples.SceneSkybox
         private async Task InitializeRuins()
         {
             var ruinsDesc = SceneryDescription.FromFile(resourceRuinsFolder, resourceRuinsFile);
-            ruinsDesc.Quadtree.MaximumDepth = 1;
+            ruinsDesc.Quadtree = new(1);
             ruinsDesc.StartsVisible = false;
 
             ruins = await AddComponentGround<Scenery, SceneryDescription>("Ruins", "Ruins", ruinsDesc);
@@ -330,8 +331,8 @@ namespace TerrainSamples.SceneSkybox
         private async Task InitializeWater()
         {
             var waterDesc = WaterDescription.CreateCalm(5000f, -2f);
-            waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
-            waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
+            waterDesc.BaseColor = new(0.067f, 0.065f, 0.003f);
+            waterDesc.WaterColor = new(0.003f, 0.267f, 0.096f, 0.98f);
             waterDesc.StartsVisible = false;
 
             water = await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
@@ -339,7 +340,7 @@ namespace TerrainSamples.SceneSkybox
         private async Task InitializeEmitter()
         {
             var mat = MaterialCookTorranceContent.Default;
-            mat.EmissiveColor = Color.Yellow.RGB();
+            mat.EmissiveColor = Color.Yellow;
 
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 32);
 
@@ -402,10 +403,10 @@ namespace TerrainSamples.SceneSkybox
                     return;
                 }
 
-                var color = Color.Yellow.RGB();
-                if (i == 1) color = Color.Red.RGB();
-                if (i == 2) color = Color.Green.RGB();
-                if (i == 3) color = Color.LightBlue.RGB();
+                var color = Color.Yellow;
+                if (i == 1) color = Color.Red;
+                if (i == 2) color = Color.Green;
+                if (i == 3) color = Color.LightBlue;
 
                 FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 var firePositions3D = result.Position;
@@ -703,14 +704,14 @@ namespace TerrainSamples.SceneSkybox
             var lights = Lights.PointLights.Select(l => new { Color = l.DiffuseColor, Sphere = l.BoundingSphere });
             foreach (var light in lights)
             {
-                volumesDrawer.SetPrimitives(new Color4(light.Color, alpha), Line3D.CreateSphere(light.Sphere, bsphSlices, bsphStacks));
+                volumesDrawer.SetPrimitives(new(light.Color, alpha), Line3D.CreateSphere(light.Sphere, bsphSlices, bsphStacks));
             }
         }
         private void DEBUGUpdateMovingVolumesDrawer()
         {
             var light = Lights.PointLights[0];
 
-            volumesDrawer.SetPrimitives(new Color4(light.DiffuseColor, alpha), Line3D.CreateSphere(light.BoundingSphere, bsphSlices, bsphStacks));
+            volumesDrawer.SetPrimitives(new(light.DiffuseColor, alpha), Line3D.CreateSphere(light.BoundingSphere, bsphSlices, bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
         {
@@ -729,7 +730,7 @@ namespace TerrainSamples.SceneSkybox
 
             foreach (var node in nodes)
             {
-                var color = Helper.IntToCol(node.Id, 128);
+                var color = Color4.IntToCol(node.Id, 128);
                 graphDrawer.AddPrimitives(color, node.Triangles);
             }
         }
@@ -775,8 +776,8 @@ namespace TerrainSamples.SceneSkybox
             movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Orange.RGB(),
-                Color.Orange.RGB(),
+                Color.Orange,
+                Color.Orange,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 

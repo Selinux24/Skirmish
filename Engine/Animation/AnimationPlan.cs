@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -273,7 +273,7 @@ namespace Engine.Animation
         /// Gets the transformation matrix list at current time
         /// </summary>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public IEnumerable<Matrix> GetCurrentPose(ISkinningData skinningData)
+        public IEnumerable<Matrix4x4> GetCurrentPose(ISkinningData skinningData)
         {
             if (skinningData == null)
             {

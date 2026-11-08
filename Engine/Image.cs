@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine
@@ -6,32 +6,24 @@ namespace Engine
     /// <summary>
     /// Image
     /// </summary>
-    public struct Image
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public struct Image(int width, int height)
     {
         /// <summary>
         /// Image pixel colors
         /// </summary>
-        private readonly Color4[,] colors = new Color4[0, 0];
+        private readonly Color4[,] colors = new Color4[width, height];
 
         /// <summary>
         /// Gets the image width in pixels
         /// </summary>
-        public int Width { get; private set; } = 0;
+        public int Width { get; private set; } = width;
         /// <summary>
         /// Gets the image height in pixels
         /// </summary>
-        public int Height { get; private set; } = 0;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Image(int width, int height)
-        {
-            colors = new Color4[width, height];
-
-            Width = width;
-            Height = height;
-        }
+        public int Height { get; private set; } = height;
 
         /// <summary>
         /// Sets the pixel color value at position
@@ -42,6 +34,16 @@ namespace Engine
         public readonly void SetPixel(int width, int height, Color color)
         {
             colors[width, height] = color;
+        }
+        /// <summary>
+        /// Sets the pixel color value at position
+        /// </summary>
+        /// <param name="width">Width value</param>
+        /// <param name="height">Height value</param>
+        /// <param name="color">Color value</param>
+        public readonly void SetPixel(int width, int height, Color3 color)
+        {
+            colors[width, height] = (Color4)color;
         }
         /// <summary>
         /// Sets the pixel color value at position

@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Particles
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// CPU particles vertex shader
     /// </summary>
-    public class ParticlesVs : IBuiltInShader<EngineVertexShader>
+    public class ParticlesVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per emitter constant buffer

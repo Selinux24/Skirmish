@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Engine.UI
@@ -7,18 +6,18 @@ namespace Engine.UI
     /// <summary>
     /// Font map caché helper
     /// </summary>
-    static class FontMapCache
+    static class FontMapCache<T> where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Font cache
         /// </summary>
-        private static readonly ConcurrentBag<FontMap> gCache = [];
+        private static readonly ConcurrentBag<FontMap<T>> gCache = [];
 
         /// <summary>
         /// Adds a new map to the caché
         /// </summary>
         /// <param name="fMap"></param>
-        public static void Add(FontMap fMap)
+        public static void Add(FontMap<T> fMap)
         {
             gCache.Add(fMap);
         }
@@ -27,7 +26,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="fontName">Font name (case sensitive)</param>
         /// <returns>Returns the font map</returns>
-        public static FontMap Get(string fontName)
+        public static FontMap<T> Get(string fontName)
         {
             return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontName));
         }
@@ -38,9 +37,9 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the font map</returns>
-        public static FontMap Get(string fontFamily, float size, FontMapStyles style)
+        public static FontMap<T> Get(string fontFamily, float size, FontMapStyles style)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && MathUtil.NearEqual(f.FontSize, size) && f.FontStyle == style);
+            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && Helper.NearEqual(f.FontSize, size) && f.FontStyle == style);
         }
 
         /// <summary>
@@ -50,7 +49,7 @@ namespace Engine.UI
         {
             while (!gCache.IsEmpty)
             {
-                if (gCache.TryTake(out FontMap fmap))
+                if (gCache.TryTake(out FontMap<T> fmap))
                 {
                     fmap.Dispose();
                 }

@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Skinned position texture vertex shader
     /// </summary>
-    public class PositionTextureSkinnedVs : IBuiltInShader<EngineVertexShader>
+    public class PositionTextureSkinnedVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

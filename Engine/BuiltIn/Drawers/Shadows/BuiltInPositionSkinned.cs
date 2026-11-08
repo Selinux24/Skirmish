@@ -1,9 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Point shadow skinned position drawer
     /// </summary>

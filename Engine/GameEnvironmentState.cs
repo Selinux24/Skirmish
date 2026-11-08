@@ -1,4 +1,4 @@
-﻿using Engine.Content;
+﻿using Engine.Mathematics;
 
 namespace Engine
 {
@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public ColorRgba Background { get; set; }
+        public Color4 Background { get; set; }
         /// <summary>
         /// Gravity
         /// </summary>
-        public Direction3 Gravity { get; set; }
+        public Vector3 Gravity { get; set; }
 
         /// <summary>
         /// Maximum distance for high level of detail models

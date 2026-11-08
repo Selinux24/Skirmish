@@ -1,18 +1,17 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using Engine.Collections.Helpers;
+using Engine.Common;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Collections.Helpers;
-
     /// <summary>
     /// Picking quad tree
     /// </summary>
     public class PickingQuadTree<T> : IQuadTree<PickingQuadTreeNode<T>> where T : IVertexList, IRayIntersectable
     {
-        const string cName = nameof(PickingQuadTree<T>);
+        const string cName = nameof(PickingQuadTree<>);
 
         /// <inheritdoc/>
         public PickingQuadTreeNode<T> Root { get; private set; }
@@ -23,8 +22,8 @@ namespace Engine.Collections.Generic
         /// Constructor
         /// </summary>
         /// <param name="items">Partitioning items</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(IEnumerable<T> items, int maxDepth)
+        /// <param name="options">Options</param>
+        public PickingQuadTree(IEnumerable<T> items, QuadTreeOptions options)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
@@ -34,7 +33,7 @@ namespace Engine.Collections.Generic
             Root = PickingQuadTreeNode<T>.CreatePartitions(
                 null,
                 bbox, items,
-                maxDepth,
+                options,
                 0,
                 ref nodeCount);
         }

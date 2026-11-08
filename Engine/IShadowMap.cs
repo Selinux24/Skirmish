@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Engine.Common;
+using System;
 
 namespace Engine
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Shadow map interface
     /// </summary>
@@ -36,13 +34,22 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         void Bind(IEngineDeviceContext dc);
+
         /// <summary>
-        /// Gets the drawer to draw this shadow map
+        /// Gets the drawer to draw the specified vertex mesh
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
+        /// <param name="mesh">Mesh</param>
         /// <param name="instanced">Use instancing data</param>
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
-        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
+        IDrawer GetDrawer(IMesh mesh, bool instanced, bool useTextureAlpha);
+        /// <summary>
+        /// Gets the drawer to draw the specified vertex data type
+        /// </summary>
+        /// <typeparam name="T">Vertex data type</typeparam>
+        /// <param name="instanced">Use instancing data</param>
+        /// <param name="useTextureAlpha">Uses alpha channel</param>
+        /// <returns>Returns a drawer</returns>
+        IDrawer GetDrawer<T>(bool instanced, bool useTextureAlpha) where T : unmanaged, IVertexData;
     }
 }

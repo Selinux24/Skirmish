@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="verts">Polygon vertices</param>
         /// <returns>Returns the resulting triangle list</returns>
-        public static (bool Result, Int3[] Tris) Triangulate(Int3[] verts)
+        public static (bool Result, Vector3I[] Tris) Triangulate(Vector3I[] verts)
         {
             // Initializes index array if no set using a sequential value list
             var indices = Helper.CreateSequentialArray(verts.Length);
@@ -36,14 +36,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="verts">Polygon vertices</param>
         /// <param name="indices">Polygon indices</param>
         /// <returns>Returns the resulting triangle list</returns>
-        public static (bool Result, Int3[] Tris) Triangulate(Int3[] verts, int[] indices)
+        public static (bool Result, Vector3I[] Tris) Triangulate(Vector3I[] verts, int[] indices)
         {
             if ((verts?.Length ?? 0) == 0 || (indices?.Length ?? 0) == 0)
             {
                 return (false, []);
             }
 
-            List<Int3> dst = [];
+            List<Vector3I> dst = [];
 
             // The last bit of the index is used to indicate if the vertex can be removed.
             var idx = SetRemovableIndices(verts, indices);
@@ -116,7 +116,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="verts">Polygon vertices</param>
         /// <param name="indices">Polygon indices</param>
         /// <returns>Returns a new collection of indices marked with the "removable index" flag</returns>
-        private static int[] SetRemovableIndices(Int3[] verts, int[] indices)
+        private static int[] SetRemovableIndices(Vector3I[] verts, int[] indices)
         {
             var idx = indices.ToArray();
 
@@ -141,7 +141,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nindices">Number of indices to evaluate</param>
         /// <param name="verts">Vertex list</param>
         /// <returns>Returns the mininum distance index</returns>
-        private static int FindMinIndex2D(int[] indices, int nindices, Int3[] verts)
+        private static int FindMinIndex2D(int[] indices, int nindices, Vector3I[] verts)
         {
             int mini = -1;
 
@@ -176,7 +176,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="cb">B point</param>
         /// <param name="cc">C point</param>
         /// <param name="p">Point to test</param>
-        public static bool InCone2D(Int3 ca, Int3 cb, Int3 cc, Int3 p)
+        public static bool InCone2D(Vector3I ca, Vector3I cb, Vector3I cc, Vector3I p)
         {
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn2D(cc, ca, cb))
@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="indices">Index list</param>
         /// <param name="n">Number of indices</param>
         /// <param name="verts">Vertex list</param>
-        private static bool InCone2D(int i, int j, int[] indices, int n, Int3[] verts)
+        private static bool InCone2D(int i, int j, int[] indices, int n, Vector3I[] verts)
         {
             var a = verts[indices[i] & REM_REMOVABLE_INDEX];
             var b = verts[indices[ArrayUtils.Next(i, n)] & REM_REMOVABLE_INDEX];
@@ -213,7 +213,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="indices">Index list</param>
         /// <param name="n">Number of indices</param>
         /// <param name="verts">Vertex list</param>
-        private static bool Diagonal2D(int i, int j, int[] indices, int n, Int3[] verts)
+        private static bool Diagonal2D(int i, int j, int[] indices, int n, Vector3I[] verts)
         {
             return InCone2D(i, j, indices, n, verts) && Diagonalie2D(i, j, indices, n, verts);
         }
@@ -225,7 +225,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="indices">Index list</param>
         /// <param name="n">Number of indices</param>
         /// <param name="verts">Vertex list</param>
-        private static bool Diagonalie2D(int i, int j, int[] indices, int n, Int3[] verts)
+        private static bool Diagonalie2D(int i, int j, int[] indices, int n, Vector3I[] verts)
         {
             var d0 = verts[indices[i] & REM_REMOVABLE_INDEX];
             var d1 = verts[indices[j] & REM_REMOVABLE_INDEX];
@@ -264,7 +264,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="b">Segment ab Point b</param>
         /// <param name="c">Segment cd Point c</param>
         /// <param name="d">Segment cd Point d</param>
-        public static bool Intersect2D(Int3 a, Int3 b, Int3 c, Int3 d)
+        public static bool Intersect2D(Vector3I a, Vector3I b, Vector3I c, Vector3I d)
         {
             if (IntersectProp2D(a, b, c, d))
             {
@@ -288,7 +288,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Segment cd Point c</param>
         /// <param name="d">Segment cd Point d</param>
         /// <returns>Returns true iff ab properly intersects cd</returns>
-        private static bool IntersectProp2D(Int3 a, Int3 b, Int3 c, Int3 d)
+        private static bool IntersectProp2D(Vector3I a, Vector3I b, Vector3I c, Vector3I d)
         {
             // Eliminate improper cases.
             if (Collinear2D(a, b, c) || Collinear2D(a, b, d) || Collinear2D(c, d, a) || Collinear2D(c, d, b))
@@ -306,7 +306,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="c">Point C</param>
         /// <returns>Returns true if collinear</returns>
         /// <remarks>Three points of a triangle are collinear if the its area is zero</remarks>
-        private static bool Collinear2D(Int3 a, Int3 b, Int3 c)
+        private static bool Collinear2D(Vector3I a, Vector3I b, Vector3I c)
         {
             return Utils.TriArea2D(a, b, c) == 0;
         }
@@ -316,7 +316,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="a">Point A</param>
         /// <param name="b">Point B</param>
         /// <param name="c">Point C</param>
-        private static bool Between2D(Int3 a, Int3 b, Int3 c)
+        private static bool Between2D(Vector3I a, Vector3I b, Vector3I c)
         {
             if (!Collinear2D(a, b, c))
             {
@@ -339,7 +339,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="sa">Segment a point</param>
         /// <param name="sb">Segment b point</param>
         /// <param name="p">Point to test</param>
-        private static bool Left2D(Int3 sa, Int3 sb, Int3 p)
+        private static bool Left2D(Vector3I sa, Vector3I sb, Vector3I p)
         {
             return Utils.TriArea2D(sa, sb, p) > 0;
         }
@@ -349,7 +349,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="sa">Segment a point</param>
         /// <param name="sb">Segment b point</param>
         /// <param name="p">Point to test</param>
-        private static bool LeftOn2D(Int3 sa, Int3 sb, Int3 p)
+        private static bool LeftOn2D(Vector3I sa, Vector3I sb, Vector3I p)
         {
             return Utils.TriArea2D(sa, sb, p) >= 0;
         }
@@ -361,9 +361,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="nin">Number of initial vertices</param>
         /// <param name="hull">Hull indices</param>
         /// <returns>Returns the indexed triangle list</returns>
-        public static Int3[] TriangulateHull(Vector3[] verts, int nin, int[] hull)
+        public static Vector3I[] TriangulateHull(Vector3[] verts, int nin, int[] hull)
         {
-            var tris = new List<Int3>();
+            var tris = new List<Vector3I>();
 
             int nhull = hull.Length;
 
@@ -399,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Add first triangle
-            tris.Add(new Int3()
+            tris.Add(new()
             {
                 X = hull[start],
                 Y = hull[left],

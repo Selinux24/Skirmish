@@ -1,9 +1,10 @@
 ﻿using Engine;
 using Engine.BuiltIn.Components.Models;
+using Engine.BuiltIn.UI;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.Tween;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Threading.Tasks;
 
@@ -71,13 +72,13 @@ namespace IntermediateSamples.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, true);
+            var titleFont = FontDescription.FromFamily(titleFonts, 72, true);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
             title.Text = "Intermediate Samples";
             title.TextForeColor = Color.Gold;
-            title.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            title.TextShadowColor = new(Color.LightYellow, 0.25f);
             title.TextShadowDelta = new Vector2(4, 4);
             title.TextHorizontalAlign = TextHorizontalAlign.Center;
             title.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -89,14 +90,14 @@ namespace IntermediateSamples.SceneStart
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(3));
 
-            var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 24, true);
+            var buttonFont = FontDescription.FromFamily(buttonFonts, 24, true);
 
             var highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red + highlightColor);
             buttonDesc.TextForeColor = Color.Gold;
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
-            var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange, Color.Orange.ToColor4() + highlightColor);
+            var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange, Color.Orange + highlightColor);
             exitDesc.TextForeColor = Color.Gold;
             exitDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitDesc.TextVerticalAlign = TextVerticalAlign.Middle;

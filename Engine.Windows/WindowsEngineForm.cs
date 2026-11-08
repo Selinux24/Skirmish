@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.Windows.Helpers;
+using Engine.Windows.Properties;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Engine.Windows
 {
-    using Engine.Windows.Helpers;
-    using Engine.Windows.Properties;
-    using SharpDX;
-    using SharpDX.Mathematics.Interop;
-
     /// <summary>
     /// Engine render form
     /// </summary>
@@ -41,7 +39,7 @@ namespace Engine.Windows
         private const int SC_SCREENSAVE = 0xF140;
         private const int WM_DISPLAYCHANGE = 0x007E;
         private const int MNC_CLOSE = 1;
-        private Size cachedSize;
+        private System.Drawing.Size cachedSize;
         private FormWindowState previousWindowState;
         private bool allowUserResizing;
         private bool isBackgroundFirstDraw;
@@ -59,15 +57,15 @@ namespace Engine.Windows
         }
 
         /// <inheritdoc/>
-        public int RenderWidth { get; private set; }
+        public uint RenderWidth { get; private set; }
         /// <inheritdoc/>
-        public int RenderHeight { get; private set; }
+        public uint RenderHeight { get; private set; }
         /// <inheritdoc/>
-        public RectangleF RenderRectangle
+        public Rect RenderRectangle
         {
             get
             {
-                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+                return new Rect(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <inheritdoc/>
@@ -109,6 +107,7 @@ namespace Engine.Windows
         /// for <c>false</c> - <see cref="FormBorderStyle.FixedSingle"/>.
         /// </remarks>
         /// <value><c>true</c> if this form can be resized by the user (by default); otherwise, <c>false</c>.</value>
+        [DefaultValue(true)]
         public bool AllowUserResizing
         {
             get
@@ -132,6 +131,7 @@ namespace Engine.Windows
         /// If Toolkit is used, this property is set automatically,
         /// otherwise user should maintain it himself as it affects the behavior of <see cref="AllowUserResizing"/> property.
         /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsFullscreen { get; set; }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Engine.Windows
             Name = text;
             Text = text;
             KeyPreview = true;
-            ClientSize = new Size(800, 600);
+            ClientSize = new System.Drawing.Size(800, 600);
 
             ResizeRedraw = true;
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
@@ -195,12 +195,12 @@ namespace Engine.Windows
             {
                 if (RenderWidth != Size.Width)
                 {
-                    RenderWidth = Size.Width;
+                    RenderWidth = (uint)Size.Width;
                     SizeUpdated = true;
                 }
                 if (RenderHeight != Size.Height)
                 {
-                    RenderHeight = Size.Height;
+                    RenderHeight = (uint)Size.Height;
                     SizeUpdated = true;
                 }
             }
@@ -208,19 +208,19 @@ namespace Engine.Windows
             {
                 if (RenderWidth != ClientSize.Width)
                 {
-                    RenderWidth = ClientSize.Width;
+                    RenderWidth = (uint)ClientSize.Width;
                     SizeUpdated = true;
                 }
                 if (RenderHeight != ClientSize.Height)
                 {
-                    RenderHeight = ClientSize.Height;
+                    RenderHeight = (uint)ClientSize.Height;
                     SizeUpdated = true;
                 }
             }
 
             if (SizeUpdated)
             {
-                RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
+                RenderCenter = new Point((int)RenderWidth / 2, (int)RenderHeight / 2);
                 ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
             }
         }
@@ -444,17 +444,17 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public Viewport GetViewport()
         {
-            return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
+            return new(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
         }
         /// <inheritdoc/>
-        public Matrix GetOrthoProjectionMatrix()
+        public Matrix4x4 GetOrthoProjectionMatrix()
         {
-            Matrix view = Matrix.LookAtLH(
+            Matrix4x4 view = Matrix4x4.LookAtLH(
                 Vector3.Zero,
                 Vector3.ForwardLH,
                 Vector3.Up);
 
-            Matrix projection = Matrix.OrthoLH(
+            Matrix4x4 projection = Matrix4x4.OrthoLH(
                 RenderWidth,
                 RenderHeight,
                 0f, 100f);
@@ -464,23 +464,27 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public Vector2 ToScreenSpace(Vector2 position)
         {
-            var screenSpace = position - RenderRectangle.Center;
+            var center = new Vector2(
+                RenderRectangle.Left + (RenderRectangle.Width / 2),
+                RenderRectangle.Top + (RenderRectangle.Height / 2));
+
+            var screenSpace = position - center;
 
             screenSpace.Y *= -1f;
 
             return screenSpace;
         }
         /// <inheritdoc/>
-        public Point PointToClient(Point p)
+        public new Point PointToClient(Point p)
         {
-            var drRes = PointToClient(new System.Drawing.Point(p.X, p.Y));
+            var drRes = base.PointToClient(new Point(p.X, p.Y));
 
             return new Point(drRes.X, drRes.Y);
         }
         /// <inheritdoc/>
-        public Point PointToScreen(Point p)
+        public new Point PointToScreen(Point p)
         {
-            var drRes = PointToScreen(new System.Drawing.Point(p.X, p.Y));
+            var drRes = base.PointToScreen(new Point(p.X, p.Y));
 
             return new Point(drRes.X, drRes.Y);
         }
@@ -530,7 +534,7 @@ namespace Engine.Windows
                 return;
             }
 
-            NativeMethods.GetClientRect(hwnd, out RawRectangle rect);
+            NativeMethods.GetClientRect(hwnd, out var rect);
             if (rect.Bottom - rect.Top == 0)
             {
                 // Rapidly clicking the task bar to minimize and restore a window
@@ -569,7 +573,7 @@ namespace Engine.Windows
                 previousWindowState = FormWindowState.Normal;
 
                 // Only update when cachedSize is != 0
-                if (cachedSize != Size.Empty)
+                if (cachedSize != System.Drawing.Size.Empty)
                 {
                     isSizeChangedWithoutResizeBegin = true;
                 }

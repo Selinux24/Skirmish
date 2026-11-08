@@ -19,6 +19,6 @@ namespace Engine
         /// <summary>
         /// Ends the load resource group
         /// </summary>
-        void End();
+        Task End();
     }
 }

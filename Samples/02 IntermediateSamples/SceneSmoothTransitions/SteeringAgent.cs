@@ -1,10 +1,10 @@
-﻿using Engine;
-using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
+    using Engine.Mathematics;
+
     class SteeringAgent : ISteeringAgent
     {
         private Vector3 acceleration;
@@ -34,7 +34,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 var distance = force.Length();
                 if (distance < ArrivalRadius)
                 {
-                    desiredSpeed = MathUtil.Lerp(0, MaxSpeed, distance / ArrivalRadius);
+                    desiredSpeed = float.Lerp(0, MaxSpeed, distance / ArrivalRadius);
                 }
             }
 

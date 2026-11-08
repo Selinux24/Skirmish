@@ -2,33 +2,33 @@
 using Engine.Animation;
 using Engine.BuiltIn.Components.Flares;
 using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.Components.Skies;
 using Engine.BuiltIn.Drawers.PostProcess;
-using Engine.Collada;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtCollada;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.SceneRts.AI;
+using TerrainSamples.SceneRts.AI.Agents;
+using TerrainSamples.SceneRts.Controllers;
+using TerrainSamples.SceneRts.Emitters;
+using TerrainSamples.SceneStart;
 
 namespace TerrainSamples.SceneRts
 {
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.BuiltIn.Components.Skies;
-    using TerrainSamples.SceneRts.AI;
-    using TerrainSamples.SceneRts.AI.Agents;
-    using TerrainSamples.SceneRts.Controllers;
-    using TerrainSamples.SceneRts.Emitters;
-    using TerrainSamples.SceneStart;
-
     public class RtsScene : WalkableScene
     {
         private const string resourceTarjetFile = "Common/UI/Cursor/target.png";
@@ -143,17 +143,17 @@ namespace TerrainSamples.SceneRts
         private readonly Vector3 helicopterHeightOffset = Vector3.Up * 15f;
         private readonly Color4 curvesColor = Color.Red;
         private readonly Color4 pointsColor = Color.Blue;
-        private readonly Color4 segmentsColor = new(Color.Cyan.ToColor3(), 0.8f);
+        private readonly Color4 segmentsColor = new(Color.Cyan, 0.8f);
         private readonly Color4 hAxisColor = Color.YellowGreen;
         private readonly Color4 wAxisColor = Color.White;
 
-        private PrimitiveListDrawer<Line3D> staticObjLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> movingObjLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
-        private PrimitiveListDrawer<Line3D> curveLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> terrainLineDrawer = null;
-        private PrimitiveListDrawer<Line3D> terrainPointDrawer = null;
-        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Line3D> staticObjLineDrawer = null;
+        private GeometryColorDrawer<Line3D> movingObjLineDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
+        private GeometryColorDrawer<Line3D> curveLineDrawer = null;
+        private GeometryColorDrawer<Line3D> terrainLineDrawer = null;
+        private GeometryColorDrawer<Line3D> terrainPointDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
@@ -229,9 +229,9 @@ namespace TerrainSamples.SceneRts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var defaultFont18 = TextDrawerDescription.FromFamily(fontFamily, 18);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
-            var defaultFont10 = TextDrawerDescription.FromFamily(fontFamily, 10);
+            var defaultFont18 = FontDescription.FromFamily(fontFamily, 18);
+            var defaultFont12 = FontDescription.FromFamily(fontFamily, 12);
+            var defaultFont10 = FontDescription.FromFamily(fontFamily, 10);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -363,8 +363,8 @@ namespace TerrainSamples.SceneRts
 
             int width = 300;
             int height = 300;
-            int smLeft = Game.Form.RenderWidth - width;
-            int smTop = Game.Form.RenderHeight - height;
+            int smLeft = (int)Game.Form.RenderWidth - width;
+            int smTop = (int)Game.Form.RenderHeight - height;
 
             var smDesc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
             smDesc.DeferredEnabled = false;
@@ -378,10 +378,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Lights Volume
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Lights",
                 "++DEBUG++ Lights",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 5000,
                     StartsVisible = false,
@@ -391,10 +391,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Path finding Graph
 
-            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "++DEBUG++ Path finding Graph",
                 "++DEBUG++ Path finding Graph",
-                new PrimitiveListDrawerDescription<Triangle>()
+                new GeometryColorDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
                     StartsVisible = false,
@@ -404,10 +404,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Picking test
 
-            terrainPointDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            terrainPointDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Picking test",
                 "++DEBUG++ Picking test",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = MaxPickingTest,
                     StartsVisible = false,
@@ -417,10 +417,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Trajectory
 
-            curveLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            curveLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Trajectory",
                 "++DEBUG++ Trajectory",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 20000,
                     StartsVisible = false,
@@ -430,10 +430,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Helicopter manipulator
 
-            movingObjLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            movingObjLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Helicopter manipulator",
                 "++DEBUG++ Helicopter manipulator",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 1000,
                     StartsVisible = false,
@@ -443,10 +443,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG static volumes
 
-            staticObjLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            staticObjLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Static Volumes",
                 "++DEBUG++ Static Volumes",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 20000,
                     StartsVisible = false,
@@ -456,10 +456,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Ground position test
 
-            terrainLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            terrainLineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "++DEBUG++ Ground position test",
                 "++DEBUG++ Ground position test",
-                new PrimitiveListDrawerDescription<Line3D>()
+                new GeometryColorDrawerDescription<Line3D>()
                 {
                     Count = 10000,
                     StartsVisible = false,
@@ -506,18 +506,16 @@ namespace TerrainSamples.SceneRts
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlareFlare1File),
-
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlareFlare2File),
-
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
             await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
@@ -933,14 +931,14 @@ namespace TerrainSamples.SceneRts
 
                 float scale = i switch
                 {
-                    < 5 => posRnd.NextFloat(2f, 5f),
-                    < 30 => posRnd.NextFloat(0.5f, 2f),
-                    _ => posRnd.NextFloat(0.1f, 0.2f)
+                    < 5 => posRnd.NextSingle(2f, 5f),
+                    < 30 => posRnd.NextSingle(0.5f, 2f),
+                    _ => posRnd.NextSingle(0.1f, 0.2f)
                 };
 
                 rocks[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi),
+                    posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi),
                     scale);
             }
             rocks.Visible = true;
@@ -963,8 +961,8 @@ namespace TerrainSamples.SceneRts
 
                 tree1[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
-                    posRnd.NextFloat(0.25f, 0.75f));
+                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0.25f, 0.75f));
             }
             tree1.Visible = true;
 
@@ -984,8 +982,8 @@ namespace TerrainSamples.SceneRts
 
                 tree2[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0,
-                    posRnd.NextFloat(0.25f, 0.75f));
+                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0.25f, 0.75f));
             }
             tree2.Visible = true;
         }
@@ -1003,7 +1001,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
             {
                 garage.Manipulator.SetPosition(r.Position);
-                garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                garage.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
             }
             garage.Visible = true;
             garage.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1013,7 +1011,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
             {
                 building.Manipulator.SetPosition(r.Position);
-                building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                building.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
             }
             building.Visible = true;
             building.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1039,7 +1037,7 @@ namespace TerrainSamples.SceneRts
 
                 obeliskInstance.Manipulator.SetPosition(r.Position);
                 obeliskInstance.Manipulator.SetScaling(1.5f);
-                obeliskInstance.Manipulator.SetTransform(r.Position, MathUtil.PiOverFour, 0, 0, 1.5f);
+                obeliskInstance.Manipulator.SetTransform(r.Position, Helper.PiOver4, 0, 0, 1.5f);
             }
             obelisk.Visible = true;
         }
@@ -1296,7 +1294,7 @@ namespace TerrainSamples.SceneRts
             }
 
             // Axis
-            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix4x4.Identity, 20f));
             curveLineDrawer.Visible = false;
         }
         private void BeginToggleGarageLights()
@@ -1730,7 +1728,10 @@ namespace TerrainSamples.SceneRts
 
             if (curveLineDrawer.Visible)
             {
-                Matrix rot = Matrix.RotationQuaternion(helicopter.Manipulator.Rotation) * Matrix.Translation(helicopter.Manipulator.Position);
+                Matrix4x4 rot =
+                    Matrix4x4.RotationQuaternion(helicopter.Manipulator.Rotation) *
+                    Matrix4x4.Translation(helicopter.Manipulator.Position);
+
                 curveLineDrawer.SetPrimitives(hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
@@ -1930,7 +1931,7 @@ namespace TerrainSamples.SceneRts
                 soundEffectsManager.PlayTank2Moving(tankP2);
             }
 
-            if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f && (e.Active == tankP1Agent || e.Active == tankP2Agent))
+            if (Helper.RandomGenerator.NextSingle(0, 1) > 0.8f && (e.Active == tankP1Agent || e.Active == tankP2Agent))
             {
                 AddDustSystem(e.Active, tankLeftCat);
                 AddDustSystem(e.Active, tankRightCat);
@@ -2061,8 +2062,8 @@ namespace TerrainSamples.SceneRts
                 plumeSmoke = pManager.GetParticleSystem("plumeSmoke");
             }
 
-            float duration = Helper.RandomGenerator.NextFloat(6, 36);
-            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextSingle(6, 36);
+            float rate = Helper.RandomGenerator.NextSingle(0.1f, 1f);
 
             if (plumeFire == null)
             {
@@ -2111,7 +2112,7 @@ namespace TerrainSamples.SceneRts
                 smoke = pManager.GetParticleSystem(smokeSystemName);
             }
 
-            float duration = Helper.RandomGenerator.NextFloat(5, 15);
+            float duration = Helper.RandomGenerator.NextSingle(5, 15);
 
             if (smoke == null)
             {
@@ -2119,7 +2120,7 @@ namespace TerrainSamples.SceneRts
                 {
                     Velocity = Vector3.Up,
                     Duration = duration + (duration * 0.1f),
-                    EmissionRate = Helper.RandomGenerator.NextFloat(0.1f, 1f),
+                    EmissionRate = Helper.RandomGenerator.NextSingle(0.1f, 1f),
                     InfiniteDuration = false,
                     MaximumDistance = 500f,
                 };
@@ -2197,7 +2198,7 @@ namespace TerrainSamples.SceneRts
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
-        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color pathColor)
+        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color4 pathColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2220,13 +2221,13 @@ namespace TerrainSamples.SceneRts
                 terrainPointDrawer.SetPrimitives(pathColor, lines);
             }
         }
-        private void DEBUGDrawArrow(Vector3 from, Vector3 direction, Color arrowColor)
+        private void DEBUGDrawArrow(Vector3 from, Vector3 direction, Color4 arrowColor)
         {
             terrainPointDrawer.Clear(arrowColor);
             var arrow = Line3D.CreateArrow(from, from + direction, 10f);
             terrainPointDrawer.SetPrimitives(arrowColor, arrow);
         }
-        private void DEBUGDrawTankPath(TankAIAgent tank, Color pathColor, Color arrowColor)
+        private void DEBUGDrawTankPath(TankAIAgent tank, Color4 pathColor, Color4 arrowColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2267,7 +2268,7 @@ namespace TerrainSamples.SceneRts
 
                 foreach (var node in nodes)
                 {
-                    var color = Helper.IntToCol(node.Id, 128);
+                    var color = Color4.IntToCol(node.Id, 128);
                     terrainGraphDrawer.AddPrimitives(color, node.Triangles);
                 }
             }
@@ -2284,7 +2285,7 @@ namespace TerrainSamples.SceneRts
 
                     var node = nodes.ToArray()[graphIndex];
 
-                    var color = Helper.IntToCol(node.Id, 128);
+                    var color = Color4.IntToCol(node.Id, 128);
                     terrainGraphDrawer.SetPrimitives(color, node.Triangles);
                 }
             }
@@ -2302,14 +2303,14 @@ namespace TerrainSamples.SceneRts
             {
                 var lines = spot.GetVolume(10);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new(point.DiffuseColor, 0.15f), lines);
             }
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
@@ -2327,7 +2328,7 @@ namespace TerrainSamples.SceneRts
                 Lights.SpotLights.Select(l => l.BoundingSphere)
                 .Concat(Lights.PointLights.Select(l => l.BoundingSphere));
 
-            lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), Line3D.CreateSpheres(spheres, 10, 10));
+            lightsVolumeDrawer.AddPrimitives(new(Color.Red, 0.55f), Line3D.CreateSpheres(spheres, 10, 10));
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
@@ -2372,12 +2373,12 @@ namespace TerrainSamples.SceneRts
             var hsph = helicopter.GetBoundingSphere();
             var t1sph = tankP1.GetBoundingSphere();
             var t2sph = tankP2.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateSpheres([hsph, t1sph, t2sph], 50, 20));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White, 0.55f), Line3D.CreateSpheres([hsph, t1sph, t2sph], 50, 20));
 
             var hbox = helicopter.GetOrientedBoundingBox();
             var t1box = tankP1.GetOrientedBoundingBox();
             var t2box = tankP2.GetOrientedBoundingBox();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateBoxes([hbox, t1box, t2box]));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen, 0.55f), Line3D.CreateBoxes([hbox, t1box, t2box]));
         }
     }
 }

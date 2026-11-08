@@ -1,8 +1,7 @@
-﻿using Engine.Common;
+﻿using Engine.Mathematics;
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -13,9 +12,9 @@ namespace Engine.PhysicsTests
     [TestClass()]
     public class ContactDetectorBoxAndBoxTests
     {
-        static TestContext _testContext;
+        public TestContext TestContext { get; set; }
 
-        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {
             var box = new BoxCollider(extents);
             var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
@@ -23,7 +22,7 @@ namespace Engine.PhysicsTests
 
             return box;
         }
-        static ConvexMeshCollider FromBox(Vector3 extents, Matrix transform)
+        static ConvexMeshCollider FromBox(Vector3 extents, Matrix4x4 transform)
         {
             var tris = Triangle.ComputeTriangleList(new BoundingBox(-extents, extents));
             var box = new ConvexMeshCollider(tris);
@@ -33,16 +32,10 @@ namespace Engine.PhysicsTests
             return box;
         }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
-
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -51,12 +44,8 @@ namespace Engine.PhysicsTests
             var data2 = new ContactResolver();
             var data3 = new ContactResolver();
 
-            //Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
-            //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
-            //var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
-
-            var boxTrn1 = Matrix.Translation(new Vector3(0, 0, 0));
-            var boxTrn2 = Matrix.Translation(new Vector3(2, 0, 0));
+            var boxTrn1 = Matrix4x4.Translation(new Vector3(0, 0, 0));
+            var boxTrn2 = Matrix4x4.Translation(new Vector3(2, 0, 0));
 
             var box1 = FromAABB(Vector3.One, boxTrn1);
             var box2 = FromAABB(Vector3.One, boxTrn2);
@@ -68,15 +57,17 @@ namespace Engine.PhysicsTests
             Assert.IsTrue(intersectionWith3);
 
             var contactsWith2 = data2.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith2.Length != 0);
+            Assert.IsNotEmpty(contactsWith2);
 
             var contactsWith3 = data3.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.IsTrue(contactsWith3.Length != 0);
+            Assert.IsNotEmpty(contactsWith3);
 
-            var pointInBox2 = Intersection.ClosestPointInBox(contactsWith2[0].Position, box1.OrientedBoundingBox);
+            var obb = box1.OrientedBoundingBox;
+
+            Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);
 
-            var pointInBox3 = Intersection.ClosestPointInBox(contactsWith3[0].Position, box1.OrientedBoundingBox);
+            Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
             Assert.AreEqual(contactsWith3[0].Position, pointInBox3);
         }
     }

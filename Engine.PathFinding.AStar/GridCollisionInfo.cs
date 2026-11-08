@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.PathFinding.AStar
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Collision info helper
     /// </summary>

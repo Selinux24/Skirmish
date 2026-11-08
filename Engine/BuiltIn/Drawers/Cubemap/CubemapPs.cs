@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Cubemap
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Cubemap pixel shader
     /// </summary>
-    public class CubemapPs : IBuiltInShader<EnginePixelShader>
+    public class CubemapPs : IShader<EnginePixelShader>
     {
         /// <summary>
         /// Cubemap resource view

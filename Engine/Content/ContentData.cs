@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Engine.Animation;
+using Engine.Common;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
-    using Engine.Common;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Model content
     /// </summary>
@@ -31,39 +30,6 @@ namespace Engine.Content
         /// Mesh string
         /// </summary>
         private const string MeshString = "-mesh";
-
-        /// <summary>
-        /// Skinning information
-        /// </summary>
-        struct SkinningInfo
-        {
-            /// <summary>
-            /// Bind shape matrix
-            /// </summary>
-            public Matrix BindShapeMatrix { get; set; }
-            /// <summary>
-            /// Weight list
-            /// </summary>
-            public IEnumerable<Weight> Weights { get; set; }
-            /// <summary>
-            /// Bone names
-            /// </summary>
-            public IEnumerable<string> BoneNames { get; set; }
-        }
-        /// <summary>
-        /// Mesh information
-        /// </summary>
-        struct MeshInfo
-        {
-            /// <summary>
-            /// Created mesh
-            /// </summary>
-            public Mesh Mesh { get; set; }
-            /// <summary>
-            /// Material name
-            /// </summary>
-            public string MaterialName { get; set; }
-        }
 
         /// <summary>
         /// Light dictionary
@@ -230,7 +196,7 @@ namespace Engine.Content
                 textured = false;
             }
 
-            SubMeshContent geo = new(topology, materialName, textured, false, Matrix.Identity);
+            SubMeshContent geo = new(topology, materialName, textured, false, Matrix4x4.Identity);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
@@ -503,11 +469,11 @@ namespace Engine.Content
             if (skinningContent != null)
             {
                 //Filter content by existing joints
-                animationContent[animationLib] = content.Where(a => SkinHasJointData(a.JointName)).ToArray();
+                animationContent[animationLib] = [.. content.Where(a => SkinHasJointData(a.JointName))];
             }
             else
             {
-                animationContent[animationLib] = content.ToArray();
+                animationContent[animationLib] = [.. content];
             }
         }
         /// <summary>
@@ -791,7 +757,7 @@ namespace Engine.Content
 
             if (!matDict.TryAdd(materialName, meshContent))
             {
-                Logger.WriteWarning(this, $"{materialName} already exists for {meshName}");
+                Game.Logger.WriteWarning(this, $"{materialName} already exists for {meshName}");
 
                 return;
             }
@@ -845,7 +811,7 @@ namespace Engine.Content
                 }
                 else
                 {
-                    joint.Offset = Matrix.Identity;
+                    joint.Offset = Matrix4x4.Identity;
                 }
             }
 
@@ -867,10 +833,7 @@ namespace Engine.Content
         /// <returns>Returns the skin name list</returns>
         private string[] GetControllerSkins()
         {
-            return controllerContent.Values
-                .Select(item => item.Skin)
-                .Distinct()
-                .ToArray();
+            return [.. controllerContent.Values.Select(item => item.Skin).Distinct()];
         }
         /// <summary>
         /// Get controller for mesh by mesh name
@@ -978,18 +941,15 @@ namespace Engine.Content
 
             var materials = GetMaterialContent();
             var skinningInfo = loadAnimation ? GetSkinningInfo(meshName) : null;
-            var isSkinned = skinningInfo.HasValue;
 
             MeshByMaterialCollection meshes = new();
 
             foreach (var subMesh in submeshes)
             {
                 var geometry = subMesh.Value;
+                var meshMaterial = materials.FirstOrDefault(m => m.Name == subMesh.Key).Content;
 
-                //Get vertex type
-                var vertexType = GetVertexType(geometry.VertexType, isSkinned, loadNormalMaps, materials, subMesh.Key);
-
-                var meshInfo = await CreateMesh(meshName, geometry, vertexType, constraint, skinningInfo);
+                var meshInfo = await MeshInfo.CreateMesh(meshName, geometry, loadNormalMaps, meshMaterial, skinningInfo, constraint);
                 if (meshInfo == null)
                 {
                     continue;
@@ -1002,106 +962,6 @@ namespace Engine.Content
             }
 
             return meshes;
-        }
-        /// <summary>
-        /// Get vertex type from geometry
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="isSkinned">Sets whether the current geometry has skinning data or not</param>
-        /// <param name="loadNormalMaps">Load normal maps flag</param>
-        /// <param name="materials">Material dictionary</param>
-        /// <param name="material">Material name</param>
-        /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, IEnumerable<(string Name, IMaterialContent Content)> materials, string material)
-        {
-            var res = vertexType;
-            if (isSkinned)
-            {
-                //Get skinned equivalent
-                res = VertexData.GetSkinnedEquivalent(res);
-            }
-
-            if (!loadNormalMaps)
-            {
-                return res;
-            }
-
-            if (VertexData.IsTextured(res) && !VertexData.IsTangent(res))
-            {
-                var meshMaterial = materials
-                    .Where(m => m.Name == material)
-                    .Select(m => m.Content)
-                    .FirstOrDefault();
-
-                if (meshMaterial?.NormalMapTexture != null)
-                {
-                    //Get tangent equivalent
-                    res = VertexData.GetTangentEquivalent(res);
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Creates a mesh
-        /// </summary>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="geometry">Submesh content</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="constraint">Geometry constraint</param>
-        /// <param name="skinningInfo">Skinning information</param>
-        private static async Task<MeshInfo?> CreateMesh(string meshName, SubMeshContent geometry, VertexTypes vertexType, BoundingBox? constraint, SkinningInfo? skinningInfo)
-        {
-            //Process the vertex data
-            var vertexData = await geometry.ProcessVertexData(vertexType, constraint);
-            var vertices = vertexData.vertices;
-            var indices = vertexData.indices;
-
-            IEnumerable<IVertexData> vertexList;
-            if (skinningInfo.HasValue)
-            {
-                if (!skinningInfo.Value.BindShapeMatrix.IsIdentity)
-                {
-                    vertices = VertexData.Transform(vertices, skinningInfo.Value.BindShapeMatrix);
-                }
-
-                //Convert the vertex data to final mesh data
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    skinningInfo.Value.Weights,
-                    skinningInfo.Value.BoneNames);
-            }
-            else
-            {
-                vertexList = await VertexData.Convert(
-                    vertexType,
-                    vertices,
-                    [],
-                    []);
-            }
-
-            if (!vertexList.Any())
-            {
-                return null;
-            }
-
-            //Create the mesh
-            var nMesh = new Mesh(
-                meshName,
-                geometry.Topology,
-                geometry.Transform,
-                vertexList,
-                indices);
-
-            //Material name
-            string materialName = string.IsNullOrEmpty(geometry.Material) ? NoMaterial : geometry.Material;
-
-            return new MeshInfo()
-            {
-                Mesh = nMesh,
-                MaterialName = materialName,
-            };
         }
 
         /// <summary>
@@ -1217,7 +1077,7 @@ namespace Engine.Content
         /// <returns>Returns triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            return geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles())).ToArray();
+            return [.. geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles()))];
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name
@@ -1284,7 +1144,7 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ContentData FilterMask(string mask)
         {
-            return FilterMask(new[] { mask });
+            return FilterMask([mask]);
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name mask list
@@ -1614,10 +1474,7 @@ namespace Engine.Content
         private Triangle[] GetHullMesh(string meshName)
         {
             //Extract hull geometry
-            return geometryContent[meshName]
-                .Where(g => g.Value.IsHull)
-                .SelectMany(material => material.Value.GetTriangles())
-                .ToArray();
+            return [.. geometryContent[meshName].Where(g => g.Value.IsHull).SelectMany(material => material.Value.GetTriangles())];
         }
         /// <summary>
         /// Marks hull flag for all the geometry contained into the model
@@ -1652,7 +1509,7 @@ namespace Engine.Content
         /// <returns>Returns the number of meshes setted</returns>
         public int SetHullMark(bool isHull, string mask)
         {
-            return SetHullMark(isHull, new[] { mask });
+            return SetHullMark(isHull, [mask]);
         }
         /// <summary>
         /// Marks hull flag for all the geometry filtered by the specified mask list

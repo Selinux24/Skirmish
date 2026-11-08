@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 
 namespace Engine.Physics
@@ -126,32 +126,12 @@ namespace Engine.Physics
                 contactTangent2.Z = contactNormal.X * contactTangent1.Y;
             }
 
-            return new Matrix3x3()
+            return new()
             {
                 Column1 = contactNormal,
                 Column2 = contactTangent1,
                 Column3 = contactTangent2,
             };
-        }
-        /// <summary>
-        /// Gets the symmetric matrix based on the specified vector
-        /// </summary>
-        /// <param name="vector">Vector</param>
-        /// <returns>Returns the symmetric matrix based on the specified vector</returns>
-        /// <remarks>
-        /// The symmetric matrix is the equivalent to the cross product of the specified vector, such that a x b = A_s b, where a and b are vectors and A_s is the symmetric form of a
-        /// </remarks>
-        private static Matrix3x3 SkewSymmetric(Vector3 vector)
-        {
-            Matrix3x3 result;
-            result.M11 = result.M22 = result.M33 = 0f;
-            result.M12 = -vector.Z;
-            result.M13 = vector.Y;
-            result.M21 = vector.Z;
-            result.M23 = -vector.X;
-            result.M31 = -vector.Y;
-            result.M32 = vector.X;
-            return result;
         }
 
         /// <summary>
@@ -362,7 +342,7 @@ namespace Engine.Physics
 
                 // We have the linear amount of motion required to rotate the body.
                 // Now you have to calculate the desired rotation to make it rotate.
-                if (MathUtil.IsZero(angularMove))
+                if (Helper.IsZero(angularMove))
                 {
                     // There is no angular movement. No rotation.
                     angularChange[i] = Vector3.Zero;
@@ -462,7 +442,7 @@ namespace Engine.Physics
 
             // Calculate the impulse on each contact axis
             Vector3 impulseContact;
-            if (MathUtil.IsZero(friction))
+            if (Helper.IsZero(friction))
             {
                 // Frictionless impulse
                 impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);
@@ -548,13 +528,11 @@ namespace Engine.Physics
         /// </remarks>
         private Vector3 CalculateFrictionImpulse(Matrix3x3[] inverseInertiaTensor)
         {
-            Vector3 impulseContact;
             float inverseMass = body1.InverseMass;
 
             // The equivalent of the cross product in matrices is multiplication by the skew symmetric matrix.
             // The matrix will be used to convert linear quantities to angular ones.
-            Matrix3x3 impulseToTorque;
-            impulseToTorque = SkewSymmetric(relativeContactPositionsWorld1);
+            var impulseToTorque = Matrix3x3.SkewSymmetric(relativeContactPositionsWorld1);
 
             // Get the matrix to convert contact impulse to velocity variation in world coordinates.
             var deltaVelWorld = impulseToTorque;
@@ -564,7 +542,7 @@ namespace Engine.Physics
 
             if (body2.HasFiniteMass())
             {
-                impulseToTorque = SkewSymmetric(relativeContactPositionsWorld2);
+                impulseToTorque = Matrix3x3.SkewSymmetric(relativeContactPositionsWorld2);
 
                 // Calculate the velocity modification matrix
                 var deltaVelWorld2 = impulseToTorque;
@@ -590,7 +568,7 @@ namespace Engine.Physics
             deltaVelocity.M33 += inverseMass;
 
             // Reverse to get the momentum needed per unit of speed.
-            var impulseMatrix = Matrix3x3.Invert(deltaVelocity);
+            Matrix3x3.Invert(ref deltaVelocity, out var impulseMatrix);
 
             // Find the velocities to kill.
             var velKill = new Vector3(
@@ -599,7 +577,7 @@ namespace Engine.Physics
                 -velocity.Z);
 
             // Find the momentum to nullify the velocities
-            impulseContact = impulseMatrix.Transform(velKill);
+            var impulseContact = impulseMatrix.Transform(velKill);
 
             // Check for excessive friction
             float planarImpulse = MathF.Sqrt(impulseContact.Y * impulseContact.Y + impulseContact.Z * impulseContact.Z);

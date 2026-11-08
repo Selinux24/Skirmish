@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
@@ -180,7 +180,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Iterates over contour triangles
         /// </summary>
-        public IEnumerable<(int i, Int3 a, Int3 b, Int3 c)> IterateTriangles()
+        public IEnumerable<(int i, Vector3I a, Vector3I b, Vector3I c)> IterateTriangles()
         {
             if (nvertices < 3)
             {
@@ -203,7 +203,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Triangulates the polygon's contour
         /// </summary>
         /// <returns>Returns the triangulated indices and vertices list</returns>
-        public Int3[] Triangulate()
+        public Vector3I[] Triangulate()
         {
             var verts = ContourVertex.ToInt3List(vertices);
 
@@ -212,7 +212,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (!triRes || tris.Length <= 0)
             {
                 // Bad triangulation, should not happen.
-                Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
+                Game.Logger.WriteWarning(nameof(Contour), $"rcBuildPolyMesh: Bad triangulation Contour {RegionId}.");
             }
 
             return tris;
@@ -232,7 +232,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return Vector3.Zero;
             }
 
-            Int3 center = Int3.Zero;
+            Vector3I center = Vector3I.Zero;
             for (int i = 0; i < nvertices; i++)
             {
                 var v = vertices[i];

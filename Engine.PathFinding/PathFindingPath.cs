@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -141,7 +141,7 @@ namespace Engine.PathFinding
                 return;
             }
 
-            Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
+            Game.Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
 
             var lPositions = new List<Vector3>();
             var lNormals = new List<Vector3>();

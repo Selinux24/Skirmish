@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Foliage
@@ -44,9 +44,9 @@ namespace Engine.BuiltIn.Drawers.Foliage
         public uint NormalMapCount;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerMaterial));
+            return (uint)Marshal.SizeOf<PerMaterial>();
         }
     }
 
@@ -119,9 +119,9 @@ namespace Engine.BuiltIn.Drawers.Foliage
         public float WindEffect;
 
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
-            return Marshal.SizeOf(typeof(PerPatch));
+            return (uint)Marshal.SizeOf<PerPatch>();
         }
     }
 }

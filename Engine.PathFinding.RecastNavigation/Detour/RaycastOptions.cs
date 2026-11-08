@@ -8,6 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Raycast should calculate movement cost along the ray and fill RaycastHit::cost
         /// </summary>
-        DT_RAYCAST_USE_COSTS = 0x01,		
+        DT_RAYCAST_USE_COSTS = 0x01,
     }
 }

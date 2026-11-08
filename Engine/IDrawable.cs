@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Common;
+
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Drawable interface
     /// </summary>
@@ -31,7 +30,7 @@ namespace Engine
         /// <summary>
         /// Maximum instance count
         /// </summary>
-        int InstanceCount { get; }
+        uint InstanceCount { get; }
 
         /// <summary>
         /// Draw shadows

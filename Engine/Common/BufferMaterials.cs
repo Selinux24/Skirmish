@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -60,8 +60,8 @@ namespace Engine.Common
         /// <returns>Returns the packed material</returns>
         public readonly Vector4[] Pack()
         {
-            return new[]
-            {
+            return
+            [
                 new Vector4(Algorithm, Block11, Block12, Block13),
                 Block2,
                 Block3,
@@ -70,20 +70,20 @@ namespace Engine.Common
                 Emissive,
                 Ambient,
                 Specular,
-            };
+            ];
         }
 
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
 #if DEBUG
-            int size = Marshal.SizeOf(typeof(BufferMaterials));
+            uint size = (uint)Marshal.SizeOf<BufferMaterials>();
             if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf(typeof(BufferMaterials));
+            return (uint)Marshal.SizeOf<BufferMaterials>();
 #endif
         }
     };

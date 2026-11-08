@@ -1,6 +1,6 @@
-﻿using Engine.Modular;
+﻿using Engine.Mathematics;
+using Engine.Modular;
 using Engine.Modular.Persistence;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +16,26 @@ namespace Engine.Content.OnePageDungeon
     public static class DungeonCreator
     {
         /// <summary>
+        /// Zero rotation
+        /// </summary>
+        const string Rotation0 = "Rot0";
+        /// <summary>
+        /// 90º rotation
+        /// </summary>
+        const string Rotation90 = "Rot90";
+        /// <summary>
+        /// 180º rotation
+        /// </summary>
+        const string Rotation180 = "Rot180";
+        /// <summary>
+        /// 270º rotation
+        /// </summary>
+        const string Rotation270 = "Rot270";
+
+        /// <summary>
         /// Rotation string list
         /// </summary>
-        private static readonly string[] rotationStrings = [RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270];
+        private static readonly string[] rotationStrings = [Rotation0, Rotation90, Rotation180, Rotation270];
 
         /// <summary>
         /// Creates an asset map
@@ -30,14 +47,14 @@ namespace Engine.Content.OnePageDungeon
             return new AssetMap
             {
                 MaintainTextureDirection = configuration.MaintainTextureDirection,
-                Assets = CreateRooms(dungeon, configuration).ToArray(),
+                Assets = [.. CreateRooms(dungeon, configuration)],
             };
         }
         /// <summary>
         /// Gets the chamber tile list
         /// </summary>
         /// <param name="rect">Chamber rectangle</param>
-        private static IEnumerable<Rectangle> GetRects(Rect rect)
+        private static IEnumerable<RectI> GetRects(Chamber rect)
         {
             for (int x = 0; x < rect.W; x++)
             {
@@ -46,7 +63,7 @@ namespace Engine.Content.OnePageDungeon
                     int vx = (int)rect.X + x;
                     int vy = (int)rect.Y + y;
 
-                    yield return new Rectangle(vx, vy, 1, 1);
+                    yield return new(vx, vy, 1, 1);
                 }
             }
         }
@@ -86,21 +103,21 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="cell">Cell</param>
         /// <param name="neis">Neighbor list</param>
         /// <returns>Returns the wall directions enumeration</returns>
-        private static WallDirections EvaluateDirection(Rectangle cell, IEnumerable<Rectangle> neis)
+        private static WallDirections EvaluateDirection(RectI cell, IEnumerable<RectI> neis)
         {
-            var ctl = cell.TopLeft();
-            var ctr = cell.TopRight();
-            var cbl = cell.BottomLeft();
-            var cbr = cell.BottomRight();
+            var ctl = cell.TopLeft;
+            var ctr = cell.TopRight;
+            var cbl = cell.BottomLeft;
+            var cbr = cell.BottomRight;
 
             var cDirs = WallDirections.N | WallDirections.S | WallDirections.E | WallDirections.W;
 
             foreach (var nei in neis)
             {
-                var ntl = nei.TopLeft();
-                var ntr = nei.TopRight();
-                var nbl = nei.BottomLeft();
-                var nbr = nei.BottomRight();
+                var ntl = nei.TopLeft;
+                var ntr = nei.TopRight;
+                var nbl = nei.BottomLeft;
+                var nbr = nei.BottomRight;
 
                 if (ctl == nbl && ctr == nbr)
                 {
@@ -154,7 +171,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="walls">Wall list</param>
         /// <param name="configuration">Asset configuration</param>
-        private static List<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
+        private static List<AssetReference> CreateRoom(Chamber rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
         {
             List<AssetReference> references = [];
 
@@ -168,9 +185,9 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, Quaternion.Identity));
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, Quaternion.Identity));
 
                     var cellWalls = walls
                         .Where(w => w.Cell.X == ix && w.Cell.Y == iy)
@@ -188,7 +205,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="assetType"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Position3 position, RotationQ rotation)
+        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Vector3 position, Quaternion rotation)
         {
             if (prop?.Assets?.Any() != true)
             {
@@ -224,7 +241,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.N))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz - blockDelta);
+                var position = new Vector3(-vx, 0, vz - blockDelta);
                 var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -233,7 +250,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.S))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz + blockDelta);
+                var position = new Vector3(-vx, 0, vz + blockDelta);
                 var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -242,7 +259,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.E))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx - blockDelta, 0, vz);
+                var position = new Vector3(-vx - blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -251,7 +268,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.W))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx + blockDelta, 0, vz);
+                var position = new Vector3(-vx + blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
@@ -265,7 +282,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="dungeon">Dungeon</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnections(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetConnection> CreateConnections(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var roomRect = rect.GetRectangle();
             roomRect.Inflate(1, 1);
@@ -296,7 +313,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="one">Room rectangle one</param>
         /// <param name="two">Room rectangle two</param>
         /// <param name="configuration">Asset configuration</param>
-        private static List<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
+        private static List<AssetConnection> CreateConnection(Chamber one, Chamber two, DungeonAssetConfiguration configuration)
         {
             List<AssetConnection> connections = [];
 
@@ -307,7 +324,7 @@ namespace Engine.Content.OnePageDungeon
                     int ix = (int)one.X + x;
                     int iy = (int)one.Y + y;
 
-                    connections.AddRange(CreateConnection(two, new RectangleF(ix, iy, 1, 1), configuration));
+                    connections.AddRange(CreateConnection(two, new RectI(ix, iy, 1, 1), configuration));
                 }
             }
 
@@ -319,7 +336,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="two">Area</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnection(Rect rect, RectangleF two, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetConnection> CreateConnection(Chamber rect, RectI two, DungeonAssetConfiguration configuration)
         {
             float tvx = two.X * configuration.BlockSize;
             float tvz = two.Y * configuration.BlockSize;
@@ -335,8 +352,8 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    var r1 = new RectangleF(ix, iy, 1, 1);
-                    var r2 = new RectangleF(ix, iy, 1, 1);
+                    var r1 = new RectI(ix, iy, 1, 1);
+                    var r2 = new RectI(ix, iy, 1, 1);
                     r1.Inflate(1, 0);
                     r2.Inflate(0, 1);
 
@@ -370,7 +387,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="dungeon">Dungeon</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetReference> CreateColumns(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<AssetReference> CreateColumns(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var roomRect = rect.GetRectangle();
             float half = configuration.BlockSize * 0.5f;
@@ -384,7 +401,7 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = column.X * configuration.BlockSize;
                 float vz = column.Y * configuration.BlockSize;
-                var position = new Position3(-vx + half, 0, vz - half);
+                var position = new Vector3(-vx + half, 0, vz - half);
 
                 var dColumn = configuration.GetRandonColumn();
 
@@ -433,8 +450,8 @@ namespace Engine.Content.OnePageDungeon
                 Name = dungeon.Title,
                 StartPosition = Vector3.Zero,
                 LookingVector = dir,
-                Map = maps.ToArray(),
-                Objects = objs.ToArray(),
+                Map = [.. maps],
+                Objects = [.. objs],
             };
         }
         /// <summary>
@@ -477,8 +494,8 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = door.X * configuration.BlockSize;
                 float vz = door.Y * configuration.BlockSize;
-                var dir = new Position3(door.Dir.X, 0, -door.Dir.Y);
-                var pos = new Position3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
+                var dir = new Vector3(door.Dir.X, 0, -door.Dir.Y);
+                var pos = new Vector3(-vx, 0, vz) - (dir * (configuration.BlockSize * 0.5f));
                 var rot = EvaluateRotation(dir, configuration.RotationDelta);
 
                 if (dDoor.Door != null)
@@ -522,55 +539,55 @@ namespace Engine.Content.OnePageDungeon
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static RotationQ EvaluateRotation(Vector3 dir, int index)
+        private static Quaternion EvaluateRotation(Vector3 dir, int index)
         {
+            Quaternion? res = null;
+
             if (dir == Vector3.Left)
             {
-                return rotationStrings[index % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[index % 4]);
             }
             else if (dir == Vector3.ForwardLH)
             {
-                return rotationStrings[(1 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(1 + index) % 4]);
             }
             else if (dir == Vector3.Right)
             {
-                return rotationStrings[(2 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(2 + index) % 4]);
             }
             else if (dir == Vector3.BackwardLH)
             {
-                return rotationStrings[(3 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(3 + index) % 4]);
             }
-            else
-            {
-                return null;
-            }
+
+            return res ?? Quaternion.Identity;
         }
         /// <summary>
         /// Evaluates rotation from direction
         /// </summary>
         /// <param name="dir">Direction</param>
-        private static RotationQ EvaluateRotation(WallDirections dir, int index)
+        private static Quaternion EvaluateRotation(WallDirections dir, int index)
         {
+            Quaternion? res = null;
+
             if (dir.HasFlag(WallDirections.E))
             {
-                return rotationStrings[index % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[index % 4]);
             }
             else if (dir.HasFlag(WallDirections.S))
             {
-                return rotationStrings[(1 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(1 + index) % 4]);
             }
             else if (dir.HasFlag(WallDirections.W))
             {
-                return rotationStrings[(2 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(2 + index) % 4]);
             }
             else if (dir.HasFlag(WallDirections.N))
             {
-                return rotationStrings[(3 + index) % 4];
+                res = ContentHelper.ReadRotation(rotationStrings[(3 + index) % 4]);
             }
-            else
-            {
-                return "";
-            }
+
+            return res ?? Quaternion.Identity;
         }
 
         /// <summary>
@@ -581,7 +598,7 @@ namespace Engine.Content.OnePageDungeon
             /// <summary>
             /// Cell
             /// </summary>
-            public Rectangle Cell { get; set; }
+            public RectI Cell { get; set; }
             /// <summary>
             /// Wall direction
             /// </summary>

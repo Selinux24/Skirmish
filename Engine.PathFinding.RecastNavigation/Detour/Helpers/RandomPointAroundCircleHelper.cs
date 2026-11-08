@@ -1,4 +1,4 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
 using System;
 using System.Linq;
 
@@ -86,7 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Validate input
             if (startRef == 0 || !m_nav.IsValidPolyRef(startRef) ||
-                centerPos.IsInfinity() ||
+                centerPos.IsInfinity ||
                 maxRadius < 0 || float.IsNaN(maxRadius) ||
                 filter == null)
             {
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Helpers
 
             // Choose random polygon weighted by area, using reservoi sampling.
             areaSum += polyArea;
-            float u = Helper.RandomGenerator.NextFloat(0, 1);
+            float u = Helper.RandomGenerator.NextSingle(0, 1);
             if (u * areaSum <= polyArea)
             {
                 return tileFrom;

@@ -1,5 +1,5 @@
 ﻿using Engine.Common;
-using SharpDX;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace Engine
         /// <param name="line">Line</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line</returns>
-        public static Line3D Transform(Line3D line, Matrix transform)
+        public static Line3D Transform(Line3D line, Matrix4x4 transform)
         {
             if (transform.IsIdentity)
             {
@@ -53,7 +53,7 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static IEnumerable<Line3D> Transform(IEnumerable<Line3D> lines, Matrix transform)
+        public static IEnumerable<Line3D> Transform(IEnumerable<Line3D> lines, Matrix4x4 transform)
         {
             if (lines?.Any() != true)
             {
@@ -215,6 +215,26 @@ namespace Engine
 
             return CreateFromVertices(geometry);
         }
+        public static IEnumerable<Line3D> CreateTetrahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateTetrahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateOctahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateOctahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateIcosahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateIcosahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
+        public static IEnumerable<Line3D> CreateDodecahedron(Vector3 center, float width, float height, float depth)
+        {
+            var geometry = GeometryUtil.CreateDodecahedron(Topology.LineList, center, width, height, depth);
+            return CreateFromVertices(geometry);
+        }
         public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
             List<Line3D> lines = [];
@@ -223,7 +243,7 @@ namespace Engine
 
             for (int i = 0; i < segments; ++i)
             {
-                float a = i / (float)segments * MathUtil.TwoPi;
+                float a = i / (float)segments * Helper.TwoPi;
                 dir[i * 2 + 0] = MathF.Cos(a);
                 dir[i * 2 + 1] = MathF.Sin(a);
             }
@@ -250,7 +270,7 @@ namespace Engine
                 .SelectMany(c => CreateCircle(c.center, c.r, segments))
                 .AsEnumerable();
         }
-        public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
+        public static IEnumerable<Line3D> CreateAxis(Matrix4x4 transform, float size)
         {
             List<Line3D> lines = [];
 
@@ -273,7 +293,7 @@ namespace Engine
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateAxis(IEnumerable<Matrix> transforms, float size)
+        public static IEnumerable<Line3D> CreateAxis(IEnumerable<Matrix4x4> transforms, float size)
         {
             if (transforms?.Any() != true)
             {
@@ -477,14 +497,11 @@ namespace Engine
         /// <inheritdoc/>
         public readonly IEnumerable<Vector3> GetVertices()
         {
-            return
-            [
-                Point1,
-                Point2,
-            ];
+            yield return Point1;
+            yield return Point2;
         }
         /// <inheritdoc/>
-        public readonly int GetStride()
+        public readonly uint GetStride()
         {
             return 2;
         }

@@ -1,11 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers.Clouds
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Clouds drawer
     /// </summary>
@@ -78,9 +76,9 @@ namespace Engine.BuiltIn.Drawers.Clouds
             public float Brightness;
 
             /// <inheritdoc/>
-            public readonly int GetStride()
+            public readonly uint GetStride()
             {
-                return Marshal.SizeOf(typeof(PerCloud));
+                return (uint)Marshal.SizeOf<PerCloud>();
             }
         }
 

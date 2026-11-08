@@ -1,9 +1,8 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using Engine.Mathematics;
 
 namespace Engine.BuiltIn.Drawers.Fonts
 {
-    using Engine.Common;
-
     /// <summary>
     /// Font drawer state
     /// </summary>
@@ -28,7 +27,7 @@ namespace Engine.BuiltIn.Drawers.Fonts
         /// <summary>
         /// Clipping rectangle
         /// </summary>
-        public Rectangle ClippingRectangle { get; set; }
+        public RectI ClippingRectangle { get; set; }
         /// <summary>
         /// Font texture
         /// </summary>

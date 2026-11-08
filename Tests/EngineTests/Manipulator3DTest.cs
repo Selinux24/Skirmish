@@ -1,28 +1,24 @@
-﻿using Engine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EngineTests
 {
+    using Engine;
+    using Engine.Mathematics;
+
     [ExcludeFromCodeCoverage]
     [TestClass()]
+    [OSCondition(OperatingSystems.Windows)]
     public class Manipulator3DTest
     {
-        static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _testContext = context;
-        }
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void SetupTest()
         {
-            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+            Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
         }
 
         [TestMethod()]
@@ -41,8 +37,8 @@ namespace EngineTests
             Assert.AreEqual(Quaternion.Identity, man.Rotation, "Rotation quaternion error");
             Assert.AreEqual(Vector3.One, man.Scaling, "Scaling error");
 
-            Assert.AreEqual(Matrix.Identity, man.LocalTransform, "LocalTransform error");
-            Assert.AreEqual(Matrix.Identity, man.GlobalTransform, "GlobalTransform error");
+            Assert.AreEqual(Matrix4x4.Identity, man.LocalTransform, "LocalTransform error");
+            Assert.AreEqual(Matrix4x4.Identity, man.GlobalTransform, "GlobalTransform error");
         }
 
         [TestMethod()]
@@ -50,7 +46,7 @@ namespace EngineTests
         {
             Manipulator3D man = new();
             var point = Vector3.One;
-            var trn = Matrix.Translation(point);
+            var trn = Matrix4x4.Translation(point);
 
             man.Reset();
             man.SetPosition(point.X, point.Y, point.Z);
@@ -60,7 +56,7 @@ namespace EngineTests
             man.SetPosition(point);
             ValidateSetPosition(point, trn, man);
         }
-        private static void ValidateSetPosition(Vector3 point, Matrix trn, Manipulator3D man)
+        private static void ValidateSetPosition(Vector3 point, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
             Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
@@ -80,9 +76,9 @@ namespace EngineTests
         public void SetRotationTest()
         {
             Manipulator3D man = new();
-            var angle = MathUtil.PiOverTwo;
+            var angle = Helper.PiOver2;
             var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
-            var trn = Matrix.RotationQuaternion(rot);
+            var trn = Matrix4x4.RotationQuaternion(rot);
 
             man.Reset();
             man.SetRotation(Vector3.Up, angle);
@@ -96,7 +92,7 @@ namespace EngineTests
             man.SetRotation(rot);
             ValidateSetRotation(rot, trn, man);
         }
-        private static void ValidateSetRotation(Quaternion rot, Matrix trn, Manipulator3D man)
+        private static void ValidateSetRotation(Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(-trn.Forward, man.Forward, "Forward direction vector error");
             Assert.AreEqual(-trn.Backward, man.Backward, "Backward direction vector error");
@@ -118,7 +114,7 @@ namespace EngineTests
             Manipulator3D man = new();
             float scale = 2f;
             var scaling = new Vector3(scale);
-            var trn = Matrix.Scaling(scaling);
+            var trn = Matrix4x4.Scaling(scaling);
 
             man.Reset();
             man.SetScaling(scale);
@@ -132,7 +128,7 @@ namespace EngineTests
             man.SetScaling(scaling);
             ValidateSetScaling(scaling, trn, man);
         }
-        private static void ValidateSetScaling(Vector3 scaling, Matrix trn, Manipulator3D man)
+        private static void ValidateSetScaling(Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
             Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
@@ -153,12 +149,12 @@ namespace EngineTests
         {
             Manipulator3D man = new();
             var point = Vector3.One;
-            var angle = MathUtil.PiOverTwo;
+            var angle = Helper.PiOver2;
             float scale = 2f;
             var scaling = new Vector3(scale);
             var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
-            var rotTrn = Matrix.RotationQuaternion(rot);
-            var trn = Matrix.Scaling(scaling) * rotTrn * Matrix.Translation(point);
+            var rotTrn = Matrix4x4.RotationQuaternion(rot);
+            var trn = Matrix4x4.Scaling(scaling) * rotTrn * Matrix4x4.Translation(point);
 
             man.Reset();
             man.SetTransform(point, Vector3.Up, angle, scale);
@@ -184,9 +180,9 @@ namespace EngineTests
             man.SetTransform(point, rot, scaling);
             ValidateSetTransform(point, rot, scaling, trn, man);
         }
-        private static void ValidateSetTransform(Vector3 point, Quaternion rot, Vector3 scaling, Matrix trn, Manipulator3D man)
+        private static void ValidateSetTransform(Vector3 point, Quaternion rot, Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
-            var rotTrn = Matrix.RotationQuaternion(rot);
+            var rotTrn = Matrix4x4.RotationQuaternion(rot);
 
             Assert.AreEqual(-rotTrn.Forward, man.Forward, "Forward direction vector error");
             Assert.AreEqual(-rotTrn.Backward, man.Backward, "Backward direction vector error");
@@ -386,7 +382,7 @@ namespace EngineTests
             time.SetupAllProperties();
             man.Reset();
             man.Move(time.Object, Vector3.One, 1);
-            ValidateMove(Vector3.Zero, Matrix.Identity, man);
+            ValidateMove(Vector3.Zero, Matrix4x4.Identity, man);
 
             //Direction == zero
             time = new();
@@ -394,7 +390,7 @@ namespace EngineTests
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             man.Reset();
             man.Move(time.Object, Vector3.Zero, 1);
-            ValidateMove(Vector3.Zero, Matrix.Identity, man);
+            ValidateMove(Vector3.Zero, Matrix4x4.Identity, man);
 
             //Velocity == zero
             time = new();
@@ -402,7 +398,7 @@ namespace EngineTests
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             man.Reset();
             man.Move(time.Object, Vector3.One, 0);
-            ValidateMove(Vector3.Zero, Matrix.Identity, man);
+            ValidateMove(Vector3.Zero, Matrix4x4.Identity, man);
 
             time = new();
             time.SetupAllProperties();
@@ -412,61 +408,61 @@ namespace EngineTests
 
             var direction = Vector3.One;
             var translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            var trn = Matrix.Translation(point + translation);
+            var trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.Move(time.Object, direction, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Forward;
+            direction = Matrix4x4.Identity.Forward;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveForward(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Backward;
+            direction = Matrix4x4.Identity.Backward;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveBackward(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Left;
+            direction = Matrix4x4.Identity.Left;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveLeft(time.Object, -velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Right;
+            direction = Matrix4x4.Identity.Right;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveRight(time.Object, -velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Up;
+            direction = Matrix4x4.Identity.Up;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveUp(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            direction = Matrix.Identity.Down;
+            direction = Matrix4x4.Identity.Down;
             translation = Vector3.Normalize(direction) * velocity * timeSeconds;
-            trn = Matrix.Translation(point + translation);
+            trn = Matrix4x4.Translation(point + translation);
             man.Reset();
             man.SetPosition(point);
             man.MoveDown(time.Object, velocity);
             ValidateMove(point + translation, trn, man);
 
-            trn = Matrix.Translation(point);
+            trn = Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.MoveForward(time.Object, velocity);
@@ -477,7 +473,7 @@ namespace EngineTests
             man.MoveDown(time.Object, velocity);
             ValidateMove(point, trn, man);
         }
-        private static void ValidateMove(Vector3 point, Matrix trn, Manipulator3D man)
+        private static void ValidateMove(Vector3 point, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(Vector3.ForwardLH, man.Forward, "Forward direction vector error");
             Assert.AreEqual(Vector3.BackwardLH, man.Backward, "Backward direction vector error");
@@ -505,8 +501,8 @@ namespace EngineTests
             Mock<IGameTime> time = new();
             time.SetupAllProperties();
             man.Reset();
-            man.Rotate(time.Object, MathUtil.PiOverTwo, 0, 0);
-            ValidateRotate(Vector3.Zero, Quaternion.Identity, Matrix.Identity, man);
+            man.Rotate(time.Object, Helper.PiOver2, 0, 0);
+            ValidateRotate(Vector3.Zero, Quaternion.Identity, Matrix4x4.Identity, man);
 
             //Rotation == zero
             time = new();
@@ -514,67 +510,67 @@ namespace EngineTests
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             man.Reset();
             man.Rotate(time.Object, 0, 0, 0);
-            ValidateRotate(Vector3.Zero, Quaternion.Identity, Matrix.Identity, man);
+            ValidateRotate(Vector3.Zero, Quaternion.Identity, Matrix4x4.Identity, man);
 
             time = new();
             time.SetupAllProperties();
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             var point = new Vector3(10, 0, 10);
-            float yaw = MathUtil.PiOverTwo;
-            float pitch = MathUtil.PiOverTwo;
-            float roll = MathUtil.PiOverTwo;
+            float yaw = Helper.PiOver2;
+            float pitch = Helper.PiOver2;
+            float roll = Helper.PiOver2;
 
             var rot = Quaternion.RotationYawPitchRoll(yaw * timeSeconds, pitch * timeSeconds, roll * timeSeconds);
-            var trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            var trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Rotate(time.Object, yaw, pitch, roll);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(-yaw * timeSeconds, 0, 0);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawLeft(time.Object, yaw);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(yaw * timeSeconds, 0, 0);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawRight(time.Object, yaw);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(0, -pitch * timeSeconds, 0);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.PitchDown(time.Object, pitch);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(0, pitch * timeSeconds, 0);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.PitchUp(time.Object, pitch);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(0, 0, -roll * timeSeconds);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.RollLeft(time.Object, roll);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.RotationYawPitchRoll(0, 0, roll * timeSeconds);
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.RollRight(time.Object, roll);
             ValidateRotate(point, rot, trn, man);
 
             rot = Quaternion.Identity;
-            trn = Matrix.RotationQuaternion(rot) * Matrix.Translation(point);
+            trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.YawLeft(time.Object, yaw);
@@ -585,7 +581,7 @@ namespace EngineTests
             man.RollRight(time.Object, roll);
             ValidateRotate(point, rot, trn, man);
         }
-        private static void ValidateRotate(Vector3 point, Quaternion rot, Matrix trn, Manipulator3D man)
+        private static void ValidateRotate(Vector3 point, Quaternion rot, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(-trn.Forward, man.Forward, "Forward direction vector error");
             Assert.AreEqual(-trn.Backward, man.Backward, "Backward direction vector error");
@@ -614,7 +610,7 @@ namespace EngineTests
             time.SetupAllProperties();
             man.Reset();
             man.Scale(time.Object, 2);
-            ValidateScale(Vector3.Zero, Vector3.One, Matrix.Identity, man);
+            ValidateScale(Vector3.Zero, Vector3.One, Matrix4x4.Identity, man);
 
             //Scaling == zero
             time = new();
@@ -622,7 +618,7 @@ namespace EngineTests
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             man.Reset();
             man.Scale(time.Object, 0);
-            ValidateScale(Vector3.Zero, Vector3.One, Matrix.Identity, man);
+            ValidateScale(Vector3.Zero, Vector3.One, Matrix4x4.Identity, man);
 
             //Scaling == zero
             time = new();
@@ -630,7 +626,7 @@ namespace EngineTests
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             man.Reset();
             man.Scale(time.Object, Vector3.Zero);
-            ValidateScale(Vector3.Zero, Vector3.One, Matrix.Identity, man);
+            ValidateScale(Vector3.Zero, Vector3.One, Matrix4x4.Identity, man);
 
             time = new();
             time.SetupAllProperties();
@@ -639,26 +635,26 @@ namespace EngineTests
             float scale = 2;
             Vector3 scaling = new(scale);
 
-            var trn = Matrix.Scaling(Vector3.One + scaling * timeSeconds) * Matrix.Translation(point);
+            var trn = Matrix4x4.Scaling(Vector3.One + scaling * timeSeconds) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, scaling);
             ValidateScale(point, Vector3.One + scaling * timeSeconds, trn, man);
 
-            trn = Matrix.Scaling(Vector3.One + scaling * timeSeconds) * Matrix.Translation(point);
+            trn = Matrix4x4.Scaling(Vector3.One + scaling * timeSeconds) * Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, scale);
             ValidateScale(point, Vector3.One + scaling * timeSeconds, trn, man);
 
-            trn = Matrix.Translation(point);
+            trn = Matrix4x4.Translation(point);
             man.Reset();
             man.SetPosition(point);
             man.Scale(time.Object, 2f);
             man.Scale(time.Object, -2f);
             ValidateScale(point, Vector3.One, trn, man);
         }
-        private static void ValidateScale(Vector3 point, Vector3 scaling, Matrix trn, Manipulator3D man)
+        private static void ValidateScale(Vector3 point, Vector3 scaling, Matrix4x4 trn, Manipulator3D man)
         {
             Assert.AreEqual(Vector3.Normalize(-trn.Forward), man.Forward, "Forward direction vector error");
             Assert.AreEqual(Vector3.Normalize(-trn.Backward), man.Backward, "Backward direction vector error");

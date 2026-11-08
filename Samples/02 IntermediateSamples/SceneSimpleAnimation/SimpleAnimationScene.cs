@@ -1,11 +1,13 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Models;
-using Engine.BuiltIn.Components.Primitives;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
+using Engine.Mathematics;
 using Engine.UI;
-using SharpDX;
+using Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,10 +65,10 @@ namespace IntermediateSamples.SceneSimpleAnimation
         private ModelInstanced doors;
         private ModelInstanced jails;
 
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.6f);
-        private readonly Color itemLinesColor = new(Color.Red.ToColor3(), 1f);
+        private GeometryColorDrawer<Triangle> itemTris = null;
+        private GeometryColorDrawer<Line3D> itemLines = null;
+        private readonly Color4 itemTrisColor = new(Color.Yellow, 0.6f);
+        private readonly Color4 itemLinesColor = new(Color.Red, 1f);
         private bool showItemDEBUG = false;
         private bool showItem = true;
         private int itemIndex = 0;
@@ -152,9 +154,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
         }
         private async Task InitializeUITitle()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
-            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
+            var defaultFont18 = FontDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = FontDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = FontDescription.FromFamily("Consolas", 11);
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow, MaxTextLength = 256 });
@@ -254,8 +256,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersA[0].Manipulator.SetPosition(-4f, 1, 0);
             laddersA[1].Manipulator.SetPosition(-4.5f, 1, 5);
 
-            laddersA[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersA[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersA[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersA[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersA[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersA[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -274,8 +276,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersB[0].Manipulator.SetPosition(-3f, 1, 0);
             laddersB[1].Manipulator.SetPosition(-3.5f, 1, 5);
 
-            laddersB[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersB[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersB[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersB[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersB[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersB[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -294,8 +296,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersC[0].Manipulator.SetPosition(-2f, 1, 0);
             laddersC[1].Manipulator.SetPosition(-2.5f, 1, 5);
 
-            laddersC[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            laddersC[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            laddersC[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersC[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
 
             laddersC[0].AnimationController.AppendPlan(ladderPaths[PushString]);
             laddersC[1].AnimationController.AppendPlan(ladderPaths[PushString]);
@@ -392,11 +394,11 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8);
-            doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             doors[0].Manipulator.SetScaling(2.5f);
 
             walls[0].Manipulator.SetPosition(-10, 0, 8);
-            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
@@ -433,7 +435,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             jails[0].Manipulator.SetPosition(10, 0, 8);
-            jails[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            jails[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             jails[0].Manipulator.SetScaling(2.5f);
 
             var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -448,7 +450,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8);
-            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
@@ -476,12 +478,12 @@ namespace IntermediateSamples.SceneSimpleAnimation
             const string dbItemTrisString = "DebugItemTris";
             const string dbItemLinesString = "DebugItemLines";
 
-            itemTris = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            itemTris = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 dbItemTrisString,
                 dbItemTrisString,
                 new() { Count = 5000, Color = itemTrisColor, DepthEnabled = false });
 
-            itemLines = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            itemLines = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 dbItemLinesString,
                 dbItemLinesString,
                 new() { Count = 1000, Color = itemLinesColor, DepthEnabled = false });
@@ -516,12 +518,12 @@ namespace IntermediateSamples.SceneSimpleAnimation
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             var bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
-                bbox = SharpDX.BoundingBox.Merge(bbox, item.GetBoundingBox());
+                bbox = BoundingBox.Merge(bbox, item.GetBoundingBox());
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
@@ -687,15 +689,9 @@ namespace IntermediateSamples.SceneSimpleAnimation
             }
             else
             {
-                if (itemTris != null)
-                {
-                    itemTris.Active = itemTris.Visible = false;
-                }
+                itemTris?.Active = itemTris.Visible = false;
 
-                if (itemLines != null)
-                {
-                    itemLines.Active = itemLines.Visible = false;
-                }
+                itemLines?.Active = itemLines.Visible = false;
             }
         }
 

@@ -1,4 +1,10 @@
-﻿using SharpDX;
+﻿using Engine.BuiltIn.Drawers;
+using Engine.BuiltIn.Drawers.Common;
+using Engine.BuiltIn.Drawers.Deferred;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Content;
+using Engine.Mathematics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,12 +12,6 @@ using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.BuiltIn.Drawers.Common;
-    using Engine.BuiltIn.Drawers.Deferred;
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Terrain class
     /// </summary>
@@ -194,7 +194,7 @@ namespace Engine.BuiltIn.Components.Ground
                 return false;
             }
 
-            var shadowDrawer = context.ShadowMap?.GetDrawer(VertexTypes.Terrain, false, false);
+            var shadowDrawer = context.ShadowMap?.GetDrawer<VertexTerrain>(false, false);
             if (shadowDrawer == null)
             {
                 return false;
@@ -204,7 +204,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var meshState = new BuiltInDrawerMeshState
             {
-                Local = Matrix.Identity,
+                Local = Matrix4x4.Identity,
             };
             shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 
@@ -241,7 +241,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// Gets the terrain drawer, based on the drawing context
         /// </summary>
         /// <param name="context">Drawing context</param>
-        private IBuiltInDrawer GetDrawer(DrawContext context)
+        private IDrawer GetDrawer(DrawContext context)
         {
             if (context.DrawerMode.HasFlag(DrawerModes.Forward))
             {

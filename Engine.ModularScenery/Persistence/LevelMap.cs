@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
@@ -27,10 +26,10 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Particle systems
         /// </summary>
-        public IEnumerable<ParticleSystemFile> ParticleSystems { get; set; } = Enumerable.Empty<ParticleSystemFile>();
+        public IEnumerable<ParticleSystemFile> ParticleSystems { get; set; } = [];
         /// <summary>
         /// Levels
         /// </summary>
-        public IEnumerable<Level> Levels { get; set; } = Enumerable.Empty<Level>();
+        public IEnumerable<Level> Levels { get; set; } = [];
     }
 }

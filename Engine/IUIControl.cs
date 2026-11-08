@@ -1,10 +1,9 @@
-﻿using SharpDX;
+﻿using Engine.Mathematics;
+using Engine.UI;
 using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.UI;
-
     /// <summary>
     /// Control interface
     /// </summary>
@@ -95,19 +94,19 @@ namespace Engine
         /// <summary>
         /// Gets the control's rectangle local coordinates
         /// </summary>
-        RectangleF LocalRectangle { get; }
+        Rect LocalRectangle { get; }
         /// <summary>
         /// Gets the control's rectangle absolute coordinates from screen origin
         /// </summary>
-        RectangleF AbsoluteRectangle { get; }
+        Rect AbsoluteRectangle { get; }
         /// <summary>
         /// Gets the control's rectangle coordinates relative to immediate parent control position
         /// </summary>
-        RectangleF RelativeToParentRectangle { get; }
+        Rect RelativeToParentRectangle { get; }
         /// <summary>
         /// Gets the control's rectangle coordinates relative to root control position
         /// </summary>
-        RectangleF RelativeToRootRectangle { get; }
+        Rect RelativeToRootRectangle { get; }
 
         /// <summary>
         /// Gets the control's local center coordinates
@@ -163,7 +162,7 @@ namespace Engine
         /// </summary>
         /// <returns>Returns the transform matrix</returns>
         /// <remarks>If the control is parent-fitted, returns the parent's transform</remarks>
-        Matrix GetTransform();
+        Matrix4x4 GetTransform();
 
         /// <summary>
         /// Resize
@@ -214,7 +213,7 @@ namespace Engine
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
-        bool Contains(Point point);
+        bool Contains(System.Drawing.Point point);
 
         /// <summary>
         /// Increments position component d distance along left vector
@@ -259,18 +258,18 @@ namespace Engine
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
-        void SetRectangle(RectangleF rectangle);
+        void SetRectangle(Rect rectangle);
 
         /// <summary>
         /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
         /// <param name="applyPadding">Apply the padding to the resulting rectangle, if any.</param>
         /// <returns>Returns the control render area</returns>
-        RectangleF GetRenderArea(bool applyPadding);
+        Rect GetRenderArea(bool applyPadding);
         /// <summary>
         /// Gets the total control area in absolute coordinates from screen origin
         /// </summary>
         /// <returns>Returns the total control area</returns>
-        RectangleF GetControlArea();
+        Rect GetControlArea();
     }
 }

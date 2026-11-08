@@ -21,16 +21,16 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using SharpDX;
-
 namespace Engine.Physics.GJK
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Simplex. Just a set of points (a is always most recently added)
     /// </summary>
     public struct Simplex
     {
-        private static readonly Vector3 ZeroTolerance = new(0.0001f);
+        private static readonly float ZeroTolerance = 0.0001f;
 
         /// <summary>
         /// Point A. Last added point
@@ -94,7 +94,7 @@ namespace Engine.Physics.GJK
             B = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(B.Point, SearchDir);
-            if (!MathUtil.IsZero(d) && d < 0)
+            if (!Helper.IsZero(d) && d < 0)
             {
                 // We didn't reach the origin, won't enclose it
                 return false;
@@ -131,7 +131,7 @@ namespace Engine.Physics.GJK
             A = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(A.Point, SearchDir);
-            if (!MathUtil.IsZero(d) && d < 0)
+            if (!Helper.IsZero(d) && d < 0)
             {
                 return false;
             }

@@ -2,24 +2,27 @@
 using Engine.Animation;
 using Engine.BuiltIn.Components.Flares;
 using Engine.BuiltIn.Components.Foliage;
+using Engine.BuiltIn.Components.Geometry;
 using Engine.BuiltIn.Components.Ground;
 using Engine.BuiltIn.Components.Models;
 using Engine.BuiltIn.Components.Particles;
-using Engine.BuiltIn.Components.Primitives;
 using Engine.BuiltIn.Components.Skies;
+using Engine.BuiltIn.UI;
 using Engine.Common;
 using Engine.Content;
-using Engine.Content.FmtObj;
+using Engine.Content.FmtObj.Fmt;
+using Engine.Mathematics;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
-using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TerrainSamples.Common.Dialogs;
 
 namespace TerrainSamples.SceneHeightmap
 {
@@ -84,6 +87,11 @@ namespace TerrainSamples.SceneHeightmap
         private const float fogStart = 500f;
         private const float fogRange = 500f;
 
+        private const string uiFontFamily = "Tahoma";
+        private const int dialogWidth = 600;
+        private const int dialogHeight = 350;
+        private const int dialogItemsPerPage = 10;
+
         private float time = 0.23f;
 
         private UIControlTweener uiTweener;
@@ -97,6 +105,7 @@ namespace TerrainSamples.SceneHeightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
+        private UICursor cursor;
         private UIPanel fadePanel;
         private Sprite panel;
         private UITextArea title = null;
@@ -104,10 +113,17 @@ namespace TerrainSamples.SceneHeightmap
         private UITextArea help = null;
         private UITextArea help2 = null;
 
-        private PrimitiveListDrawer<Triangle> bboxesTriDrawer = null;
-        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsDrawer = null;
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
+        private bool dialogVisible = false;
+        private string dialogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private readonly Color4 dialogButtonColor = Color4.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color4 dialogButtonTextColor = Color.WhiteSmoke;
+        private readonly Color4 dialogBackgroundColor = Color.CornflowerBlue;
+        private UISaveFileDialog saveFileDialog = null;
+
+        private GeometryColorDrawer<Triangle> bboxesTriDrawer = null;
+        private GeometryColorDrawer<Line3D> bboxesDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsDrawer = null;
+        private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
 
         private SkyScattering skydom = null;
 
@@ -142,10 +158,10 @@ namespace TerrainSamples.SceneHeightmap
         private ModelInstanced trees2 = null;
 
         private Model soldier = null;
-        private PrimitiveListDrawer<Triangle> soldierTris = null;
-        private PrimitiveListDrawer<Line3D> soldierLines = null;
+        private GeometryColorDrawer<Triangle> soldierTris = null;
+        private GeometryColorDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
-        private Color4 soldierColorDEBUG = new(Color.Orange.ToColor3(), 0.6f);
+        private readonly Color4 soldierColorDEBUG = new(Color.Orange, 0.6f);
 
         private ModelInstanced troops = null;
 
@@ -158,7 +174,7 @@ namespace TerrainSamples.SceneHeightmap
         private bool drawLightsDEBUG = false;
         private bool drawLightsVolumesDEBUG = false;
 
-        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
 
         private readonly GraphAgentType agent = new()
@@ -223,6 +239,7 @@ namespace TerrainSamples.SceneHeightmap
                     InitializeUICursor,
                     InitializeUIFadePanel,
                     InitializeUIAssets,
+                    InitializeUIDialogs,
                     InitializeDebug,
                 ],
                 LoadingTaskUICompleted);
@@ -238,19 +255,19 @@ namespace TerrainSamples.SceneHeightmap
         {
             var desc = UICursorDescription.Default(resourceCursor, 20, 20, true, Color.Red);
 
-            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
+            cursor = await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", desc);
         }
         private async Task InitializeUIFadePanel()
         {
-            var desc = UIPanelDescription.Screen(this, Color4.Black * 0.3333f);
+            var desc = UIPanelDescription.Screen(this, Color.Black * 0.3333f);
             desc.StartsVisible = false;
 
             fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", desc, LayerUIEffects);
         }
         private async Task InitializeUIAssets()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Tahoma", 11);
+            var defaultFont18 = FontDescription.FromFamily(uiFontFamily, 18);
+            var defaultFont11 = FontDescription.FromFamily(uiFontFamily, 11);
             defaultFont18.LineAdjust = true;
             defaultFont11.LineAdjust = true;
 
@@ -267,6 +284,45 @@ namespace TerrainSamples.SceneHeightmap
             var desc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
 
             panel = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, LayerUI - 1);
+        }
+        private async Task InitializeUIDialogs()
+        {
+            saveFileDialog = new(this, nameof(saveFileDialog), dialogWidth, dialogHeight, dialogItemsPerPage)
+            {
+                ButtonColor = dialogButtonColor,
+                ButtonTextColor = dialogButtonTextColor,
+                BackgroundColor = dialogBackgroundColor,
+            };
+
+            saveFileDialog.OnAcceptHandler += (sender, args) =>
+            {
+                try
+                {
+                    string fileName = saveFileDialog.SelectedFileName;
+                    if (string.IsNullOrWhiteSpace(fileName))
+                    {
+                        return;
+                    }
+                    dialogFolder = Path.GetDirectoryName(fileName);
+
+                    //Save navigation triangles
+                    LoaderObj.Save(GetTrianglesForNavigationGraph(), fileName);
+                }
+                finally
+                {
+                    cursor.Visible = true;
+                    SetMouse(false);
+                    dialogVisible = false;
+                }
+            };
+            saveFileDialog.OnCancelHandler += (sender, args) =>
+            {
+                cursor.Visible = true;
+                SetMouse(false);
+                dialogVisible = false;
+            };
+
+            await saveFileDialog.Initialize(dialogFolder, uiFontFamily);
         }
         private async Task InitializeDebug()
         {
@@ -471,8 +527,8 @@ namespace TerrainSamples.SceneHeightmap
             pDust.MaxHorizontalVelocity = 15f;
             pDust.MinVerticalVelocity = 0f;
             pDust.MaxVerticalVelocity = 0f;
-            pDust.MinColor = new Color(Color.SandyBrown.ToColor3(), 0.05f);
-            pDust.MaxColor = new Color(Color.SandyBrown.ToColor3(), 0.10f);
+            pDust.MinColor = new Color4(Color.SandyBrown, 0.05f);
+            pDust.MaxColor = new Color4(Color.SandyBrown, 0.10f);
             pDust.MinEndSize = 2f;
             pDust.MaxEndSize = 20f;
         }
@@ -516,18 +572,18 @@ namespace TerrainSamples.SceneHeightmap
                 GlowTexture = resourceFlareGlowFile,
                 Flares =
                 [
-                    new (-0.5f, 0.7f, new Color( 50,  25,  50), resourceFlareFlare1File),
-                    new ( 0.3f, 0.4f, new Color(100, 255, 200), resourceFlareFlare1File),
-                    new ( 1.2f, 1.0f, new Color(100,  50,  50), resourceFlareFlare1File),
-                    new ( 1.5f, 1.5f, new Color( 50, 100,  50), resourceFlareFlare1File),
+                    new (-0.5f, 0.7f, new( 50,  25,  50), resourceFlareFlare1File),
+                    new ( 0.3f, 0.4f, new(100, 255, 200), resourceFlareFlare1File),
+                    new ( 1.2f, 1.0f, new(100,  50,  50), resourceFlareFlare1File),
+                    new ( 1.5f, 1.5f, new( 50, 100,  50), resourceFlareFlare1File),
 
-                    new (-0.3f, 0.7f, new Color(200,  50,  50), resourceFlareFlare2File),
-                    new ( 0.6f, 0.9f, new Color( 50, 100,  50), resourceFlareFlare2File),
-                    new ( 0.7f, 0.4f, new Color( 50, 200, 200), resourceFlareFlare2File),
+                    new (-0.3f, 0.7f, new(200,  50,  50), resourceFlareFlare2File),
+                    new ( 0.6f, 0.9f, new( 50, 100,  50), resourceFlareFlare2File),
+                    new ( 0.7f, 0.4f, new( 50, 200, 200), resourceFlareFlare2File),
 
-                    new (-0.7f, 0.7f, new Color( 50, 100,  25), resourceFlareFlare3File),
-                    new ( 0.0f, 0.6f, new Color( 25,  25,  25), resourceFlareFlare3File),
-                    new ( 2.0f, 1.4f, new Color( 25,  50, 100), resourceFlareFlare3File),
+                    new (-0.7f, 0.7f, new( 50, 100,  25), resourceFlareFlare3File),
+                    new ( 0.0f, 0.6f, new( 25,  25,  25), resourceFlareFlare3File),
+                    new ( 2.0f, 1.4f, new( 25,  50, 100), resourceFlareFlare3File),
                 ]
             };
 
@@ -554,27 +610,27 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task InitializeDebugAssets()
         {
-            bboxesDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            bboxesDrawer = await AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ bounding boxes",
                 "DEBUG++ bounding boxes",
                 new() { Count = 50000, StartsVisible = false, }, LayerUI - 1);
 
-            bboxesTriDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            bboxesTriDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ bounding boxes faces",
                 "DEBUG++ bounding boxes faces",
                 new() { Count = 1000, DepthEnabled = true, StartsVisible = false, }, LayerUI - 1);
 
-            lightsDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ Lights",
                 "DEBUG++ Lights",
                 new() { Count = 50000, StartsVisible = false, DepthEnabled = true }, LayerEffects + 1);
 
-            lightsVolumeDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            lightsVolumeDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(
                 "DEBUG++ Light Volumes",
                 "DEBUG++ Light Volumes",
                 new() { Count = 50000, StartsVisible = false, }, LayerEffects + 1);
 
-            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ Graph",
                 "DEBUG++ Graph",
                 new() { Count = 50000, }, LayerEffects + 1);
@@ -593,7 +649,7 @@ namespace TerrainSamples.SceneHeightmap
 
             GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
 
-            Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+            Lights.BaseFogColor = new Color(95, 147, 233) * 0.5f;
             ToggleFog();
 
             Camera.NearPlaneDistance = near;
@@ -803,13 +859,13 @@ namespace TerrainSamples.SceneHeightmap
                 {
                     float scale = i switch
                     {
-                        < 5 => posRnd.NextFloat(10f, 30f),
-                        < 30 => posRnd.NextFloat(2f, 5f),
-                        _ => posRnd.NextFloat(0.1f, 1f),
+                        < 5 => posRnd.NextSingle(10f, 30f),
+                        < 30 => posRnd.NextSingle(2f, 5f),
+                        _ => posRnd.NextSingle(0.1f, 1f),
                     };
 
                     rocks[i].Manipulator.SetPosition(r.Position);
-                    rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    rocks[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi));
                     rocks[i].Manipulator.SetScaling(scale);
                 }
             }
@@ -832,11 +888,11 @@ namespace TerrainSamples.SceneHeightmap
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     var treePosition = r.Position;
-                    treePosition.Y -= posRnd.NextFloat(1f, 5f);
+                    treePosition.Y -= posRnd.NextSingle(1f, 5f);
 
                     trees[i].Manipulator.SetPosition(treePosition);
-                    trees[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0);
-                    trees[i].Manipulator.SetScaling(posRnd.NextFloat(1.5f, 2.5f));
+                    trees[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(-Helper.PiOver4 * 0.5f, Helper.PiOver4 * 0.5f), 0);
+                    trees[i].Manipulator.SetScaling(posRnd.NextSingle(1.5f, 2.5f));
                 }
             }
 
@@ -854,11 +910,11 @@ namespace TerrainSamples.SceneHeightmap
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     var treePosition = r.Position;
-                    treePosition.Y -= posRnd.NextFloat(0f, 2f);
+                    treePosition.Y -= posRnd.NextSingle(0f, 2f);
 
                     trees2[i].Manipulator.SetPosition(treePosition);
-                    trees2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0);
-                    trees2[i].Manipulator.SetScaling(posRnd.NextFloat(1.5f, 2.5f));
+                    trees2[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(-Helper.PiOver4 * 0.15f, Helper.PiOver4 * 0.15f), 0);
+                    trees2[i].Manipulator.SetScaling(posRnd.NextSingle(1.5f, 2.5f));
                 }
             }
 
@@ -869,7 +925,7 @@ namespace TerrainSamples.SceneHeightmap
             if (FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
                 watchTower.Manipulator.SetPosition(r.Position);
-                watchTower.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0);
+                watchTower.Manipulator.SetRotation(Helper.Pi / 3f, 0, 0);
                 watchTower.Manipulator.SetScaling(1.5f);
             }
 
@@ -897,7 +953,7 @@ namespace TerrainSamples.SceneHeightmap
 
                     containers[i].Manipulator.SetScaling(5);
                     containers[i].Manipulator.SetPosition(pos);
-                    containers[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
+                    containers[i].Manipulator.SetRotation(Helper.Pi / 16f * (i - 2), 0, 0);
                     containers[i].Manipulator.SetNormal(res.Primitive.Normal);
                     containers[i].Manipulator.UpdateInternals(true);
                 }
@@ -922,16 +978,16 @@ namespace TerrainSamples.SceneHeightmap
                 spotLight1 = new SceneLightSpot(
                     "Red Spot",
                     true,
-                    Color.Red.RGB(),
-                    Color.Red.RGB(),
+                    Color.Red,
+                    Color.Red,
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
                 spotLight2 = new SceneLightSpot(
                     "Blue Spot",
                     true,
-                    Color.Blue.RGB(),
-                    Color.Blue.RGB(),
+                    Color.Blue,
+                    Color.Blue,
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
@@ -943,14 +999,14 @@ namespace TerrainSamples.SceneHeightmap
             for (int i = 1; i < torchs.InstanceCount; i++)
             {
                 var color = new Color3(
-                    posRnd.NextFloat(0, 1),
-                    posRnd.NextFloat(0, 1),
-                    posRnd.NextFloat(0, 1));
+                    posRnd.NextSingle(0, 1),
+                    posRnd.NextSingle(0, 1),
+                    posRnd.NextSingle(0, 1));
 
                 var position = new Vector3(
-                    posRnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                    posRnd.NextSingle(bbox.Minimum.X, bbox.Maximum.X),
                     0f,
-                    posRnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+                    posRnd.NextSingle(bbox.Minimum.Z, bbox.Maximum.Z));
 
                 FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
@@ -981,8 +1037,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             var hPositions = new[]
             {
-                new Vector3(-120, -10, MathUtil.Pi * 0.1f),
-                new Vector3(-220, -8, MathUtil.Pi * 0.15f),
+                new Vector3(-120, -10, Helper.Pi * 0.1f),
+                new Vector3(-220, -8, Helper.Pi * 0.15f),
                 new Vector3(-320, -10, 0),
             };
 
@@ -1011,11 +1067,11 @@ namespace TerrainSamples.SceneHeightmap
         {
             var bPositions = new[]
             {
-                new Vector3(-100, 220, MathUtil.Pi * +0.3f),
-                new Vector3(-50, 210, MathUtil.Pi * +0.15f),
-                new Vector3(0, 200, MathUtil.Pi * 0),
-                new Vector3(50, 210, MathUtil.Pi * -0.15f),
-                new Vector3(100, 220, MathUtil.Pi * -0.3f),
+                new Vector3(-100, 220, Helper.Pi * +0.3f),
+                new Vector3(-50, 210, Helper.Pi * +0.15f),
+                new Vector3(0, 200, Helper.Pi * 0),
+                new Vector3(50, 210, Helper.Pi * -0.15f),
+                new Vector3(100, 220, Helper.Pi * -0.3f),
             };
 
             for (int i = 0; i < bPositions.Length; i++)
@@ -1040,11 +1096,11 @@ namespace TerrainSamples.SceneHeightmap
         {
             var bPositions = new[]
             {
-                new Vector3(-160, -190, MathUtil.Pi),
-                new Vector3(-080, -190, MathUtil.Pi),
-                new Vector3(+000, -190, MathUtil.Pi),
-                new Vector3(+080, -190, MathUtil.Pi),
-                new Vector3(+160, -190, MathUtil.Pi),
+                new Vector3(-160, -190, Helper.Pi),
+                new Vector3(-080, -190, Helper.Pi),
+                new Vector3(+000, -190, Helper.Pi),
+                new Vector3(+080, -190, Helper.Pi),
+                new Vector3(+160, -190, Helper.Pi),
             };
 
             for (int i = 0; i < bPositions.Length; i++)
@@ -1069,7 +1125,7 @@ namespace TerrainSamples.SceneHeightmap
             if (FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
                 soldier.Manipulator.SetPosition(res.Last().Position);
-                soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+                soldier.Manipulator.SetRotation(Helper.Pi, 0, 0);
             }
 
             soldier.AnimationController.Start(animations["soldier_idle"]);
@@ -1080,10 +1136,10 @@ namespace TerrainSamples.SceneHeightmap
         {
             Vector3[] iPos =
             [
-                new (4, -2, MathUtil.PiOverFour),
-                new (5, -5, MathUtil.PiOverTwo),
-                new (-4, -2, -MathUtil.PiOverFour),
-                new (-5, -5, -MathUtil.PiOverTwo),
+                new (4, -2, Helper.PiOver4),
+                new (5, -5, Helper.PiOver2),
+                new (-4, -2, -Helper.PiOver4),
+                new (-5, -5, -Helper.PiOver2),
             ];
 
             for (int i = 0; i < 4; i++)
@@ -1095,7 +1151,7 @@ namespace TerrainSamples.SceneHeightmap
                     troops[i].TextureIndex = 1;
 
                     troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                    troops[i].AnimationController.Start(animations["soldier_idle"], Helper.RandomGenerator.NextFloat(0f, 8f));
+                    troops[i].AnimationController.Start(animations["soldier_idle"], Helper.RandomGenerator.NextSingle(0f, 8f));
                 }
             }
 
@@ -1111,7 +1167,7 @@ namespace TerrainSamples.SceneHeightmap
             }
 
             var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
-            lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
+            lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, false, lanternDesc);
             Lights.Add(lantern);
 
             SetPathFindingInfo();
@@ -1176,6 +1232,11 @@ namespace TerrainSamples.SceneHeightmap
 
         private void UpdateInput(IGameTime gameTime)
         {
+            if (dialogVisible)
+            {
+                return;
+            }
+
             if (Game.Input.KeyJustReleased(Keys.R))
             {
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
@@ -1401,8 +1462,8 @@ namespace TerrainSamples.SceneHeightmap
             {
                 showSoldierDEBUG = !showSoldierDEBUG;
 
-                if (soldierTris != null) soldierTris.Visible = showSoldierDEBUG;
-                if (soldierLines != null) soldierLines.Visible = showSoldierDEBUG;
+                soldierTris?.Visible = showSoldierDEBUG;
+                soldierLines?.Visible = showSoldierDEBUG;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F3))
@@ -1448,27 +1509,13 @@ namespace TerrainSamples.SceneHeightmap
 
             if (Game.Input.KeyJustReleased(Keys.F8))
             {
-                //Save navigation triangles
+                cursor.Visible = false;
                 SetMouse(true);
 
-                try
-                {
-                    System.Windows.Forms.SaveFileDialog dlg = new()
-                    {
-                        Filter = "obj files (*.obj)|*.obj|All files (*.*)|*.*",
-                        FilterIndex = 1,
-                        RestoreDirectory = true
-                    };
+                string fileName = Path.Combine(dialogFolder, "terrain.obj");
 
-                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        LoaderObj.Save(GetTrianglesForNavigationGraph(), dlg.FileName);
-                    }
-                }
-                finally
-                {
-                    SetMouse(false);
-                }
+                saveFileDialog.ShowDialog("Save terrain to file", fileName, "*.obj");
+                dialogVisible = true;
             }
         }
         private void UpdateInputLights()
@@ -1581,7 +1628,7 @@ namespace TerrainSamples.SceneHeightmap
             {
                 windDuration = 0;
 
-                windNextStrength = windStrength + Helper.RandomGenerator.NextFloat(-0.5f, +0.5f);
+                windNextStrength = windStrength + Helper.RandomGenerator.NextSingle(-0.5f, +0.5f);
                 if (windNextStrength > 100f) windNextStrength = 100f;
                 if (windNextStrength < 0f) windNextStrength = 0f;
             }
@@ -1610,7 +1657,7 @@ namespace TerrainSamples.SceneHeightmap
 
                 var hbsph = helicopterI[nextDustHeli++].GetBoundingSphere();
 
-                nextDustHeli %= helicopterI.InstanceCount;
+                nextDustHeli %= (int)helicopterI.InstanceCount;
 
                 hbsph.Radius *= 0.8f;
 
@@ -1642,8 +1689,8 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void ToggleFog()
         {
-            Lights.FogStart = MathUtil.IsZero(Lights.FogStart) ? fogStart : 0f;
-            Lights.FogRange = MathUtil.IsZero(Lights.FogRange) ? fogRange : 0f;
+            Lights.FogStart = Helper.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = Helper.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
         private void UpdateDrawers()
         {
@@ -1668,8 +1715,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             Color4 terrainColor = new(1.0f, 0.0f, 0.0f, 0.55f);
 
-            Color4 frustumLColor = new(Color.LightPink.ToColor3(), 0.75f);
-            Color4 frustumTColor = new(Color.LightPink.ToColor3(), 0.25f);
+            Color4 frustumLColor = new(Color.LightPink, 0.75f);
+            Color4 frustumTColor = new(Color.LightPink, 0.25f);
 
             lightsVolumeDrawer.Clear();
             lightsVolumeDrawer.Clear();
@@ -1738,10 +1785,10 @@ namespace TerrainSamples.SceneHeightmap
                 if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
-                var abox = SharpDX.BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
+                var abox = BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
 
-                var colL = Helper.IntToCol(nodes[i].Id, 128);
-                var colT = Helper.IntToCol(nodes[i].Id, 64);
+                var colL = Color4.IntToCol(nodes[i].Id, 128);
+                var colT = Color4.IntToCol(nodes[i].Id, 64);
 
                 var lines = Line3D.CreateBox(abox);
                 bboxesDrawer.AddPrimitives(colL, lines);
@@ -1756,7 +1803,7 @@ namespace TerrainSamples.SceneHeightmap
             //Adjust gbox
             var gbbox = g.GetPlantingBounds();
             gbbox.Minimum.Y = minY;
-            var col = Helper.IntToCol(0, 128);
+            var col = Color4.IntToCol(0, 128);
             var glines = Line3D.CreateBox(gbbox);
             bboxesDrawer.AddPrimitives(col, glines);
         }
@@ -1766,13 +1813,13 @@ namespace TerrainSamples.SceneHeightmap
 
             if (soldierTris == null)
             {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+                var desc = new GeometryColorDrawerDescription<Triangle>()
                 {
                     DepthEnabled = false,
-                    Primitives = tris.ToArray(),
+                    Primitives = [.. tris],
                     Color = soldierColorDEBUG
                 };
-                var t = AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
+                var t = AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
                 soldierTris = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else
@@ -1793,12 +1840,12 @@ namespace TerrainSamples.SceneHeightmap
 
             if (soldierLines == null)
             {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+                var desc = new GeometryColorDrawerDescription<Line3D>()
                 {
-                    Primitives = lines.ToArray(),
+                    Primitives = [.. lines],
                     Color = soldierColorDEBUG
                 };
-                var t = AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
+                var t = AddComponent<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
                 soldierLines = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else
@@ -1828,7 +1875,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             lightsVolumeDrawer.Clear();
 
-            var lColor = new Color4(Color.MediumPurple.RGB(), 0.15f);
+            var lColor = new Color4(Color.MediumPurple, 0.15f);
 
             BoundingSphere[] sphList =
             [
@@ -1878,7 +1925,7 @@ namespace TerrainSamples.SceneHeightmap
 
                     foreach (var node in nodes)
                     {
-                        var color = Helper.IntToCol(node.Id, 128);
+                        var color = Color4.IntToCol(node.Id, 128);
                         graphDrawer.AddPrimitives(color, node.Triangles);
                     }
                 }

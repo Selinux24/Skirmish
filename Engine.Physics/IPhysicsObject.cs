@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.Physics
 {
+    using Engine.Mathematics;
+
     /// <summary>
     /// Physics object interface
     /// </summary>
@@ -40,7 +41,7 @@ namespace Engine.Physics
         /// Resets the object state
         /// </summary>
         /// <param name="transform">Transform</param>
-        void Reset(Matrix transform);
+        void Reset(Matrix4x4 transform);
         /// <summary>
         /// Resets the object state
         /// </summary>

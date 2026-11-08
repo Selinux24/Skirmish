@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Animation;
+using Engine.Content.Persistence;
+using Engine.Mathematics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
-    using Engine.Animation;
-    using Engine.Content;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Object reference
     /// </summary>
@@ -53,15 +52,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Animation plan list
         /// </summary>
-        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = Enumerable.Empty<ObjectAnimationPlan>();
+        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = [];
         /// <summary>
         /// Action list
         /// </summary>
-        public IEnumerable<ObjectAction> Actions { get; set; } = Enumerable.Empty<ObjectAction>();
+        public IEnumerable<ObjectAction> Actions { get; set; } = [];
         /// <summary>
         /// States list
         /// </summary>
-        public IEnumerable<ObjectState> States { get; set; } = Enumerable.Empty<ObjectState>();
+        public IEnumerable<ObjectState> States { get; set; } = [];
         /// <summary>
         /// Next level
         /// </summary>
@@ -70,15 +69,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = Position3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        public Quaternion Rotation { get; set; } = Quaternion.Identity;
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = Scale3.One;
+        public Vector3 Scale { get; set; } = Vector3.One;
         /// <summary>
         /// Load model lights into scene
         /// </summary>

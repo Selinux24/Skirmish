@@ -1,14 +1,12 @@
-﻿using Engine.Shaders.Properties;
+﻿using Engine.Common;
+using Engine.Shaders.Properties;
 
 namespace Engine.BuiltIn.Drawers.Shadows
 {
-    using Engine.BuiltIn.Drawers;
-    using Engine.Common;
-
     /// <summary>
     /// Position texture vertex shader
     /// </summary>
-    public class PositionTextureVs : IBuiltInShader<EngineVertexShader>
+    public class PositionTextureVs : IShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer
