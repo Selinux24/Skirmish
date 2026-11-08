@@ -1,5 +1,5 @@
 # Skirmish
-Game and prototypes with SharpDX and Directx 11
+Game and prototypes with Vortice and Directx 11
 
 ![Build](https://github.com/Selinux24/Skirmish/actions/workflows/build.yml/badge.svg)
 [![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish) 
@@ -231,6 +231,14 @@ There are several prototypes:
 
  ![screenshot](/Docs/Images/05_VirtualWorld.png?raw=true)
  
+ ## Credits
+
+ For collision and intersection tests, I have used some code from: https://github.com/sharpdx/SharpDX
+
+ For the structures of basic mathematical primitives, I have been inspired by: https://github.com/amerkoleci/Vortice.Windows
+
+ For the navigation mesh, I have refactored the original Recast Navigation library: https://github.com/recastnavigation/recastnavigation
+
  ## Other Credits
 
  This project is a long time work, and I have used several resources from the internet. I want to thank all the people that have shared their knowledge and resources.
