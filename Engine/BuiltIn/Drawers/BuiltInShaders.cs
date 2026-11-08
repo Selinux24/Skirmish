@@ -182,7 +182,7 @@ namespace Engine.BuiltIn.Drawers
         /// <param name="entryPoint">Entry point function name</param>
         /// <param name="byteCode">Shader byte code</param>
         /// <param name="profile">Shader profile</param>
-        public static EngineHullShader CompileHullShader<T>(string entryPoint, byte[] byteCode, string profile = null) 
+        public static EngineHullShader CompileHullShader<T>(string entryPoint, byte[] byteCode, string profile = null)
             where T : IShader<EngineHullShader>
         {
             string name = typeof(T).FullName;
@@ -210,7 +210,7 @@ namespace Engine.BuiltIn.Drawers
         /// <param name="entryPoint">Entry point function name</param>
         /// <param name="byteCode">Shader byte code</param>
         /// <param name="profile">Shader profile</param>
-        public static EngineGeometryShader CompileGeometryShader<T>(string entryPoint, byte[] byteCode, string profile = null) 
+        public static EngineGeometryShader CompileGeometryShader<T>(string entryPoint, byte[] byteCode, string profile = null)
             where T : IShader<EngineGeometryShader>
         {
             string name = typeof(T).FullName;
@@ -238,7 +238,7 @@ namespace Engine.BuiltIn.Drawers
         /// <param name="entryPoint">Entry point function name</param>
         /// <param name="byteCode">Shader byte code</param>
         /// <param name="profile">Shader profile</param>
-        public static EnginePixelShader CompilePixelShader<T>(string entryPoint, byte[] byteCode, string profile = null) 
+        public static EnginePixelShader CompilePixelShader<T>(string entryPoint, byte[] byteCode, string profile = null)
             where T : IShader<EnginePixelShader>
         {
             string name = typeof(T).FullName;
@@ -294,7 +294,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetVertexShader<T>(bool singleton = true) 
+        public static T GetVertexShader<T>(bool singleton = true)
             where T : IShader<EngineVertexShader>
         {
             if (!singleton)
@@ -318,7 +318,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetHullShader<T>(bool singleton = true) 
+        public static T GetHullShader<T>(bool singleton = true)
             where T : IShader<EngineHullShader>
         {
             if (!singleton)
@@ -342,7 +342,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetDomainShader<T>(bool singleton = true) 
+        public static T GetDomainShader<T>(bool singleton = true)
             where T : IShader<EngineDomainShader>
         {
             if (!singleton)
@@ -366,7 +366,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetGeometryShader<T>(bool singleton = true) 
+        public static T GetGeometryShader<T>(bool singleton = true)
             where T : IShader<EngineGeometryShader>
         {
             if (!singleton)
@@ -390,7 +390,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetPixelShader<T>(bool singleton = true) 
+        public static T GetPixelShader<T>(bool singleton = true)
             where T : IShader<EnginePixelShader>
         {
             if (!singleton)
@@ -414,7 +414,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetComputeShader<T>(bool singleton = true) 
+        public static T GetComputeShader<T>(bool singleton = true)
             where T : IShader<EngineComputeShader>
         {
             if (!singleton)
@@ -438,7 +438,7 @@ namespace Engine.BuiltIn.Drawers
         /// </summary>
         /// <typeparam name="T">Drawer type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetDrawer<T>(bool singleton = true) 
+        public static T GetDrawer<T>(bool singleton = true)
             where T : IDrawer
         {
             if (!singleton)

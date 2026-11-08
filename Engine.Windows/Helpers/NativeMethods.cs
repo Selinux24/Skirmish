@@ -33,7 +33,7 @@ namespace Engine.Windows.Helpers
         /// <param name="uFlags">Flags</param>
         /// <returns>Return the number of characters in the result buffer</returns>
         [LibraryImport("user32.dll", EntryPoint = "ToUnicode", StringMarshalling = StringMarshalling.Utf16)]
-        private static partial int ToUnicode(uint uVirtKey, uint scanCode, [In , Optional] byte[] lpKeyState, [Out] char[] lpChar, int bufferSize, uint uFlags);
+        private static partial int ToUnicode(uint uVirtKey, uint scanCode, [In, Optional] byte[] lpKeyState, [Out] char[] lpChar, int bufferSize, uint uFlags);
         /// <summary>
         /// Maps a virtual key code
         /// </summary>

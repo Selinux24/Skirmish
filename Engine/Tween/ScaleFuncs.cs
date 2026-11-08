@@ -108,7 +108,7 @@ namespace Engine.Tween
         private static float QuarticEaseInImpl(float progress) { return EaseInPower(progress, 4); }
         private static float QuarticEaseOutImpl(float progress) { return EaseOutPower(progress, 4); }
         private static float QuarticEaseInOutImpl(float progress) { return EaseInOutPower(progress, 4); }
-      
+
         private static float QuinticEaseInImpl(float progress) { return EaseInPower(progress, 5); }
         private static float QuinticEaseOutImpl(float progress) { return EaseOutPower(progress, 5); }
         private static float QuinticEaseInOutImpl(float progress) { return EaseInOutPower(progress, 5); }

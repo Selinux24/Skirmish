@@ -1,8 +1,6 @@
 ﻿
 namespace Engine
 {
-    using Engine.Animation;
-
     /// <summary>
     /// The instance use skinning data for render
     /// </summary>

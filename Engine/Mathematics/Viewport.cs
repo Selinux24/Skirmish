@@ -361,8 +361,8 @@ namespace Engine.Mathematics
                 Helper.NearEqual(X, other.X) &&
                 Helper.NearEqual(Y, other.Y) &&
                 Helper.NearEqual(Width, other.Width) &&
-                Helper.NearEqual(Height, other.Height) && 
-                Helper.NearEqual(MinDepth, other.MinDepth) && 
+                Helper.NearEqual(Height, other.Height) &&
+                Helper.NearEqual(MinDepth, other.MinDepth) &&
                 Helper.NearEqual(MaxDepth, other.MaxDepth);
         }
 

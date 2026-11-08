@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Engine
+﻿namespace Engine
 {
     /// <summary>
     /// Ground interface

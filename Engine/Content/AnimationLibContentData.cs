@@ -19,7 +19,7 @@ namespace Engine.Content
         {
             get
             {
-                return [..animationList];
+                return [.. animationList];
             }
         }
 

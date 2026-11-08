@@ -10,8 +10,8 @@ namespace Engine.Common
         {
             string resourceName = Path.GetFileNameWithoutExtension(fileName);
 
-            byte[] bytes = 
-                (byte[])LibResources.ResourceManager.GetObject(resourceName) ?? 
+            byte[] bytes =
+                (byte[])LibResources.ResourceManager.GetObject(resourceName) ??
                 throw new FileNotFoundException($"No se encontró el shader include: {fileName}");
 
             return new MemoryStream(bytes);

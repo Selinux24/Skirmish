@@ -22,7 +22,7 @@ namespace TerrainSamples.SceneGrid.Rules
         {
             get
             {
-                return [..soldiers];
+                return [.. soldiers];
             }
         }
 

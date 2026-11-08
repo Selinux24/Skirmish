@@ -28,7 +28,7 @@ namespace Engine.Common
         /// </summary>
         public IEnumerable<T> GetResources()
         {
-            if(resources.Count == 0)
+            if (resources.Count == 0)
             {
                 return [];
             }

@@ -1,8 +1,7 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Content.FmtObj
 {
-    using Engine.Mathematics;
-
     struct Material
     {
         public string Name { get; set; }
@@ -13,19 +12,19 @@ namespace Engine.Content.FmtObj
 
         public Vector3 Ka { get; set; }
         public string MapKa { get; set; }
-        
+
         public Vector3 Kd { get; set; }
         public string MapKd { get; set; }
-        
+
         public Vector3 Ks { get; set; }
         public string MapKs { get; set; }
-        
+
         public Vector3 Ke { get; set; }
         public float Ni { get; set; }
-        
+
         public float D { get; set; }
         public string MapD { get; set; }
-        
+
         public string MapBump { get; set; }
     }
 }

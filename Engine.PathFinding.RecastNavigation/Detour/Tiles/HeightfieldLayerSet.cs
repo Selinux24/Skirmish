@@ -72,7 +72,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return lset;
         }
-       
+
         /// <summary>
         /// Allocates voxel heightfield where we rasterize our input data to 
         /// </summary>

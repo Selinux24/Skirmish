@@ -498,7 +498,7 @@ namespace TerrainSamples.SceneGrid.Rules
 
         public void UseItem(Phase phase, Item item, int points)
         {
-            if(phase == Phase.Movement)
+            if (phase == Phase.Movement)
             {
                 item.Use();
 
