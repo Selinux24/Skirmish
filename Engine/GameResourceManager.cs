@@ -38,19 +38,10 @@ namespace Engine
                 return false;
             }
 
-            bool allRegistered = true;
-
             var loaderDelegate = loader.GetLoaderDelegate();
+            var notRegistered = extensions.Where(extension => !RegisterLoaderForFile(extension, loaderDelegate)).ToArray();
 
-            foreach (var extension in extensions)
-            {
-                if (!RegisterLoaderForFile(extension, loaderDelegate))
-                {
-                    allRegistered = false;
-                }
-            }
-
-            return allRegistered;
+            return notRegistered.Length == 0;
         }
         /// <summary>
         /// Register a loader for the specified extension

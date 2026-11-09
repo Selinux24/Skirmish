@@ -40,14 +40,13 @@ namespace Engine.Audio.Tween
 
                 List<Func<float, bool>> toDelete = [];
 
-                activeTasks.ForEach(t =>
+                foreach (var activeTask in activeTasks)
                 {
-                    bool finished = t.Invoke(gameTime.ElapsedSeconds);
-                    if (finished)
+                    if (activeTask(gameTime.ElapsedSeconds))
                     {
-                        toDelete.Add(t);
+                        toDelete.Add(activeTask);
                     }
-                });
+                }
 
                 if (toDelete.Count > 0)
                 {

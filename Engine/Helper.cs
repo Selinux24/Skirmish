@@ -3,8 +3,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Hashing;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -164,8 +164,8 @@ namespace Engine
         /// <param name="amount">Value between 0 and 1 indicating interpolation amount.</param>
         public static float SmoothStep(float amount)
         {
-            if(amount <= 0) return 0;
-            if(amount >= 1) return 1;
+            if (amount <= 0) return 0;
+            if (amount >= 1) return 1;
             return amount * amount * (3 - (2 * amount));
         }
 
@@ -263,18 +263,14 @@ namespace Engine
         #region Security
 
         /// <summary>
-        /// Create the md5 sum string of the specified buffer
+        /// Create a deterministic, non-cryptographic xxHash64 string for the specified buffer.
         /// </summary>
         /// <param name="buffer">Buffer</param>
-        /// <returns>Returns the md5 sum string of the specified buffer</returns>
+        /// <returns>Returns the xxHash64 string of the specified buffer</returns>
         public static string GetMd5Sum(this byte[] buffer)
         {
-            byte[] result = null;
-            result = MD5.HashData(buffer);
-
-            var sb = new StringBuilder();
-            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
-            return sb.ToString();
+            ArgumentNullException.ThrowIfNull(buffer);
+            return XxHash64.HashToUInt64(buffer).ToString("X16");
         }
         /// <summary>
         /// Create the md5 sum string of the specified string

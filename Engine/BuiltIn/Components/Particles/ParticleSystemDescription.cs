@@ -481,7 +481,7 @@ namespace Engine.BuiltIn.Components.Particles
             MaxVerticalVelocity *= scale;
             MinVerticalVelocity *= scale;
 
-            Gravity = (Vector3)Gravity * scale;
+            Gravity *= scale;
             EndVelocity *= scale;
 
             MinStartSize *= scale;

@@ -108,9 +108,9 @@ namespace Engine.Mathematics
                 maximum = Vector3.Max(maximum, points[i]);
             }
 
-            var Center = minimum + (maximum - minimum) / 2f;
-            Extents = maximum - Center;
-            Transformation = Matrix4x4.Translation(Center);
+            var center = minimum + (maximum - minimum) / 2f;
+            Extents = maximum - center;
+            Transformation = Matrix4x4.Translation(center);
         }
 
         /// <summary>
