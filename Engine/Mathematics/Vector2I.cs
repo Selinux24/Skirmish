@@ -9,7 +9,6 @@ namespace Engine.Mathematics
     /// <summary>
     /// A 2d vector represented by integers.
     /// </summary>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     [JsonObject(MemberSerialization.OptIn)]
     public struct Vector2I : IEquatable<Vector2I>, IFormattable

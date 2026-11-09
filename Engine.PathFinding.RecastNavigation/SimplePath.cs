@@ -47,7 +47,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
+            if (furthestPath == -1)
             {
                 return;
             }
@@ -168,7 +168,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
+            if (furthestPath == -1)
             {
                 return;
             }
@@ -226,7 +226,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
+            if (furthestPath == -1)
             {
                 return;
             }
@@ -272,7 +272,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
+            if (furthestPath == -1)
             {
                 return;
             }
@@ -370,7 +370,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the reference list array</returns>
         public int[] GetPath()
         {
-            return referenceList.Take(Count).ToArray();
+            return [.. referenceList.Take(Count)];
         }
 
         /// <summary>
@@ -399,7 +399,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             int count = size > maxSize ? maxSize : size;
 
-            int[] newPath = rlist.Take(count).ToArray();
+            int[] newPath = [.. rlist.Take(count)];
             int[] tmpPath = new int[maxSize];
             Array.Copy(newPath, 0, tmpPath, 0, count);
 
@@ -530,7 +530,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new SimplePath(max)
                 {
-                    referenceList = referenceList.Take(max).ToArray(),
+                    referenceList = [.. referenceList.Take(max)],
                     Count = max,
                 };
             }

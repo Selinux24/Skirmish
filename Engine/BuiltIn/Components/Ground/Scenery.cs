@@ -357,12 +357,10 @@ namespace Engine.BuiltIn.Components.Ground
                 return;
             }
 
-            foreach (var taskResult in taskResults)
+            var faultPatches = taskResults.Where(r => !Helper.Retry(() => patchDictionary.TryAdd(r.Id, r.Patch), 10));
+            foreach (var patch in faultPatches)
             {
-                if (!Helper.Retry(() => patchDictionary.TryAdd(taskResult.Id, taskResult.Patch), 10))
-                {
-                    Game.Logger.WriteWarning(nameof(Scenery), $"The node {taskResult.Id} has no created patch.");
-                }
+                Game.Logger.WriteWarning(nameof(Scenery), $"The node {patch.Id} has no created patch.");
             }
 
             watch.Stop();

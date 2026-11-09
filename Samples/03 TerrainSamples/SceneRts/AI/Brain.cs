@@ -49,12 +49,9 @@ namespace TerrainSamples.SceneRts.AI
         {
             var targets = new List<AIAgent>();
 
-            foreach (var key in groups.Keys)
+            foreach (var key in groups.Keys.Where(key => !groups[key].Contains(agent)))
             {
-                if (!groups[key].Contains(agent))
-                {
-                    targets.AddRange(groups[key]);
-                }
+                targets.AddRange(groups[key]);
             }
 
             return [.. targets];
