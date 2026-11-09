@@ -931,9 +931,9 @@ namespace Engine
             lightStats.Directional = swDirectional.ElapsedTicks;
             lightStats.Point = swPoint.ElapsedTicks;
             lightStats.Spot = swSpot.ElapsedTicks;
-            lightStats.DirectionalLights = directionalLights?.Count() ?? 0;
-            lightStats.PointLights = pointLights?.Count() ?? 0;
-            lightStats.SpotLights = spotLights?.Count() ?? 0;
+            lightStats.DirectionalLights = directionalLights.Count();
+            lightStats.PointLights = pointLights.Count();
+            lightStats.SpotLights = spotLights.Count();
 
             lightStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
