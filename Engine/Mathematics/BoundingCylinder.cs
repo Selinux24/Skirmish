@@ -208,11 +208,11 @@ namespace Engine.Mathematics
             return Equals(ref value);
         }
         /// <inheritdoc/>
-        public readonly override bool Equals(object value)
+        public readonly override bool Equals(object obj)
         {
-            if (value is not BoundingCylinder) return false;
+            if (obj is not BoundingCylinder) return false;
 
-            var strongValue = (BoundingCylinder)value;
+            var strongValue = (BoundingCylinder)obj;
             return Equals(ref strongValue);
         }
 

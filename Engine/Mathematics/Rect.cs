@@ -43,22 +43,10 @@ namespace Engine.Mathematics
     {
         const string RectStr = "X:{0} Y:{1} Width:{2} Height:{3}";
 
-        static Rect()
-        {
-            Empty = new Rect();
-            Infinite = new Rect
-            {
-                Left = float.NegativeInfinity,
-                Top = float.NegativeInfinity,
-                Right = float.PositiveInfinity,
-                Bottom = float.PositiveInfinity
-            };
-        }
-
         /// <summary>
         /// An empty rectangle.
         /// </summary>
-        public static readonly Rect Empty;
+        public static readonly Rect Empty = new();
         /// <summary>
         /// An infinite rectangle. See remarks.
         /// </summary>
@@ -67,7 +55,13 @@ namespace Engine.Mathematics
         /// Any properties that involve computations, like <see cref="Center"/>, <see cref="Width"/> or <see cref="Height"/>
         /// may return incorrect results - <see cref="float.NaN"/>.
         /// </remarks>
-        public static readonly Rect Infinite;
+        public static readonly Rect Infinite = new()
+        {
+            Left = float.NegativeInfinity,
+            Top = float.NegativeInfinity,
+            Right = float.PositiveInfinity,
+            Bottom = float.PositiveInfinity
+        };
 
         /// <summary>
         /// The left.

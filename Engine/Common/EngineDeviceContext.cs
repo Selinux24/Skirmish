@@ -553,19 +553,19 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vbBindings)
+        public void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vertexBufferBindings)
         {
-            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vbBindings))
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
             {
-                ID3D11Buffer[] buffers = [.. vbBindings.Select(v => v.Buffer?.GetBuffer())];
-                uint[] strides = [.. vbBindings.Select(v => v.Stride)];
-                uint[] offsets = [.. vbBindings.Select(v => v.Offset)];
+                ID3D11Buffer[] buffers = [.. vertexBufferBindings.Select(v => v.Buffer?.GetBuffer())];
+                uint[] strides = [.. vertexBufferBindings.Select(v => v.Stride)];
+                uint[] offsets = [.. vertexBufferBindings.Select(v => v.Offset)];
 
                 deviceContext.IASetVertexBuffers(firstSlot, buffers, strides, offsets);
                 frameCounters.IAVertexBuffersSets++;
 
                 currentVertexBufferFirstSlot = firstSlot;
-                currentVertexBufferBindings = vbBindings;
+                currentVertexBufferBindings = vertexBufferBindings;
             }
         }
         /// <inheritdoc/>

@@ -43,15 +43,10 @@ namespace Engine.Mathematics
     {
         const string RectIStr = "X:{0} Y:{1} Width:{2} Height:{3}";
 
-        static RectI()
-        {
-            Empty = new RectI();
-        }
-
         /// <summary>
         /// An empty rectangle.
         /// </summary>
-        public static readonly RectI Empty;
+        public static readonly RectI Empty = new();
 
         /// <summary>
         /// The left.

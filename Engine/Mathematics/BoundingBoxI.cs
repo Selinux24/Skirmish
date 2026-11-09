@@ -297,11 +297,11 @@ namespace Engine.Mathematics
             return Equals(ref value);
         }
         /// <inheritdoc/>
-        public readonly override bool Equals(object value)
+        public readonly override bool Equals(object obj)
         {
-            if (value is not BoundingBoxI) return false;
+            if (obj is not BoundingBoxI) return false;
 
-            var strongValue = (BoundingBoxI)value;
+            var strongValue = (BoundingBoxI)obj;
             return Equals(ref strongValue);
         }
     }

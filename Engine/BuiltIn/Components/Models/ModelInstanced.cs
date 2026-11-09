@@ -369,7 +369,7 @@ namespace Engine.BuiltIn.Components.Models
                 Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
                 if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
-                    count += (uint)mesh.Count;
+                    count += mesh.Count;
                 }
             }
 
@@ -498,7 +498,7 @@ namespace Engine.BuiltIn.Components.Models
                 Game.Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
                 if (drawer.Draw(dc, [mesh], instancesToDraw, startInstanceLocation))
                 {
-                    count += (uint)mesh.Count;
+                    count += mesh.Count;
                 }
             }
 

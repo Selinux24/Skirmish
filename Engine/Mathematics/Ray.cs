@@ -358,11 +358,11 @@ namespace Engine.Mathematics
             return Equals(ref value);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Ray) return false;
+            if (obj is not Ray) return false;
 
-            var strongValue = (Ray)value;
+            var strongValue = (Ray)obj;
             return Equals(ref strongValue);
         }
 

@@ -49,14 +49,14 @@ namespace Engine.Audio.Tween
                     }
                 });
 
-                if (toDelete.Count != 0)
+                if (toDelete.Count > 0)
                 {
                     toDelete.ForEach(t => task.Value.Remove(t));
                 }
             }
 
             var emptyControls = tasks.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();
-            if (emptyControls.Count != 0)
+            if (emptyControls.Count > 0)
             {
                 emptyControls.ForEach(c => tasks.TryRemove(c, out _));
             }

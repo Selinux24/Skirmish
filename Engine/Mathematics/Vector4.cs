@@ -60,6 +60,7 @@ namespace Engine.Mathematics
     {
         const string Vector4Str = "X:{0} Y:{1} Z:{2} W:{3}";
         const string Vector4DescStr = "X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}; W:{3:0.000}";
+        const string ArrayValidationMessage = "The destination array must be of same length or larger length than the source array.";
 
         /// <summary>
         /// The size of the <see cref="Vector4"/> type, in bytes.
@@ -1007,7 +1008,7 @@ namespace Engine.Mathematics
 
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(destination);
-            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), "The destination array must be of same length or larger length than the source array.");
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
 
             for (int i = 0; i < source.Length; ++i)
             {
@@ -1050,7 +1051,7 @@ namespace Engine.Mathematics
 
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(destination);
-            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), "The destination array must be of same length or larger length than the source array.");
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
 
             for (int i = 0; i < source.Length; ++i)
             {
@@ -1117,7 +1118,7 @@ namespace Engine.Mathematics
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(destination);
-            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), "The destination array must be of same length or larger length than the source array.");
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
 
             float x = rotation.X + rotation.X;
             float y = rotation.Y + rotation.Y;
@@ -1189,7 +1190,7 @@ namespace Engine.Mathematics
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(destination);
-            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), "The destination array must be of same length or larger length than the source array.");
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
 
             for (int i = 0; i < source.Length; ++i)
             {
@@ -1447,11 +1448,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Vector4) return false;
+            if (obj is not Vector4) return false;
 
-            var strongValue = (Vector4)value;
+            var strongValue = (Vector4)obj;
             return Equals(ref strongValue);
         }
 
