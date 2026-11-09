@@ -211,15 +211,15 @@ namespace IntermediateSamples.SceneInstancing
                 {
                     iPos = new Vector3((i - ((side * 0) + (side * 0.5f))) * side, 0, +groundSide);
                 }
-                else if (i >= side && i < side * 2)
+                else if (i < side * 2)
                 {
                     iPos = new Vector3(+groundSide, 0, (i - ((side * 1) + (side * 0.5f))) * side);
                 }
-                else if (i >= side * 2 && i < side * 3)
+                else if (i < side * 3)
                 {
                     iPos = new Vector3((i - ((side * 2) + (side * 0.5f))) * side, 0, -groundSide);
                 }
-                else if (i >= side * 3 && i < side * 4)
+                else if (i < side * 4)
                 {
                     iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
                 }

@@ -42,15 +42,7 @@ namespace Engine.UI.Tween
                 }
 
                 List<Func<float, bool>> toDelete = [];
-
-                foreach (var activeTask in activeTasks)
-                {
-                    if (activeTask(gameTime.ElapsedSeconds))
-                    {
-                        toDelete.Add(activeTask);
-                    }
-                }
-
+                toDelete.AddRange(activeTasks.Where(activeTask => activeTask(gameTime.ElapsedSeconds)));
                 if (toDelete.Count > 0)
                 {
                     toDelete.ForEach(t => task.Value.Remove(t));

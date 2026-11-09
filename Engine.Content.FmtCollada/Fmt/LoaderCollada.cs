@@ -55,10 +55,7 @@ namespace Engine.Content.FmtCollada.Fmt
 
 #if DEBUG
             var currentThread = System.Threading.Thread.CurrentThread;
-            if (currentThread == null)
-            {
-                currentThread.Name = $"LoaderCollada_{contentFolder}/{fileName}";
-            }
+            currentThread?.Name = $"LoaderCollada_{contentFolder}/{fileName}";
 #endif
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);

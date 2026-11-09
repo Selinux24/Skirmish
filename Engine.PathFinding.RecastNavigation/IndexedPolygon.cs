@@ -966,20 +966,14 @@ namespace Engine.PathFinding.RecastNavigation
                 throw new SerializationException("The deserialized polygon has inconsistent capacity or adjacency data.");
             }
 
-            foreach (int vertex in vertices)
+            if (vertices.Any(vertex => vertex < RC_MESH_NULL_IDX))
             {
-                if (vertex < RC_MESH_NULL_IDX)
-                {
-                    throw new SerializationException("The deserialized polygon contains an invalid vertex index.");
-                }
+                throw new SerializationException("The deserialized polygon contains an invalid vertex index.");
             }
 
-            foreach (int adjacencyIndex in adjacency)
+            if (adjacency.Any(adjacencyIndex => adjacencyIndex < RC_MESH_NULL_IDX))
             {
-                if (adjacencyIndex < RC_MESH_NULL_IDX)
-                {
-                    throw new SerializationException("The deserialized polygon contains an invalid adjacency index.");
-                }
+                throw new SerializationException("The deserialized polygon contains an invalid adjacency index.");
             }
         }
     }
