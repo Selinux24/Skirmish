@@ -2,14 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Indexed polygon
     /// </summary>
-    [Serializable]
     public class IndexedPolygon
     {
         /// <summary>
@@ -954,26 +952,6 @@ namespace Engine.PathFinding.RecastNavigation
             else
             {
                 return $"Indices: {vertices.Join(",")}";
-            }
-        }
-
-        /// <inheritdoc/>
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            if (Capacity <= 0 || vertices is null || vertices.Length != Capacity || adjacency is null || adjacency.Length != (UseAdjacency ? Capacity : 0))
-            {
-                throw new SerializationException("The deserialized polygon has inconsistent capacity or adjacency data.");
-            }
-
-            if (vertices.Any(vertex => vertex < RC_MESH_NULL_IDX))
-            {
-                throw new SerializationException("The deserialized polygon contains an invalid vertex index.");
-            }
-
-            if (adjacency.Any(adjacencyIndex => adjacencyIndex < RC_MESH_NULL_IDX))
-            {
-                throw new SerializationException("The deserialized polygon contains an invalid adjacency index.");
             }
         }
     }

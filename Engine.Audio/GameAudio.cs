@@ -103,6 +103,8 @@ namespace Engine.Audio
                 return operationSetActive ? operationSet : XAudio2.CommitNow;
             }
         }
+        /// <inheritdoc/>
+        public bool Running { get; private set; } = false;
 
         /// <summary>
         /// Constructor
@@ -179,12 +181,16 @@ namespace Engine.Audio
         /// <inheritdoc/>
         public void Start()
         {
+            if (Running) return;
             device.StartEngine();
+            Running = true;
         }
         /// <inheritdoc/>
         public void Stop()
         {
+            if (!Running) return;
             device.StopEngine();
+            Running = false;
         }
 
         /// <inheritdoc/>

@@ -21,15 +21,16 @@ namespace Engine.AudioTests
             _gameAudio = new GameAudioLoader().GetDelegate(48000)();
         }
 
-        [TestCleanup] // Changed from [TearDown] to use MSTest attribute
+        [TestCleanup]
         public void Teardown()
         {
             // Ensure resources are cleaned up after each test.
             _gameAudio?.Dispose();
             _gameAudio = null;
+            Assert.IsNull(_gameAudio, "GameAudio instance should be null after disposal.");
         }
 
-        [TestMethod] // Changed from [Test] to use MSTest attribute
+        [TestMethod]
         public void Constructor_InitializesDefaultValuesCorrectly()
         {
             // Check default values (e.g., MasterVolume should be 1f initially)
@@ -50,7 +51,9 @@ namespace Engine.AudioTests
         public void StartAndStop_CallsEngineMethods()
         {
             _gameAudio.Start();
+            Assert.IsTrue(_gameAudio.Running);
             _gameAudio.Stop();
+            Assert.IsFalse(_gameAudio.Running);
         }
 
         [TestMethod]
@@ -119,7 +122,7 @@ namespace Engine.AudioTests
             writer.Write(new byte[dataSize]);
         }
 
-        [TestMethod] // Changed from [Test] to use MSTest attribute
+        [TestMethod]
         public void MasterVolume_SetAndGetCorrectlyClampsValue()
         {
             // 1. Set volume to a valid value
@@ -136,7 +139,7 @@ namespace Engine.AudioTests
             Assert.AreEqual(0.0f, _gameAudio.MasterVolume, "Volume should clamp at 0.0 when set too low.");
         }
 
-        [TestMethod] // Changed from [Test] to use MSTest attribute
+        [TestMethod]
         public void UseMasteringLimiter_TogglingChangesStateAndCallsAPI()
         {
             // Test initial state check (already covered in Setup, but good practice)
@@ -182,7 +185,7 @@ namespace Engine.AudioTests
 
         [TestMethod]
         [DataRow(0u, 50u)]
-        [DataRow((uint)XAPO.MaxRelease + 1u, 50u)]
+        [DataRow(XAPO.MaxRelease + 1u, 50u)]
         public void SetMasteringLimit_InvalidRelease_ThrowsArgumentOutOfRangeException(uint invalidRelease, uint validLoudness)
         {
             Assert.Throws<ArgumentOutOfRangeException>(
@@ -190,8 +193,8 @@ namespace Engine.AudioTests
         }
 
         [TestMethod]
-        [DataRow(10u, (uint)XAPO.MinLoudness - 1u)]
-        [DataRow(10u, (uint)XAPO.MaxLoudness + 1u)]
+        [DataRow(10u, XAPO.MinLoudness - 1u)]
+        [DataRow(10u, XAPO.MaxLoudness + 1u)]
         public void SetMasteringLimit_InvalidLoudness_ThrowsArgumentOutOfRangeException(uint validRelease, uint invalidLoudness)
         {
             Assert.Throws<ArgumentOutOfRangeException>(
