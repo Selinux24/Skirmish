@@ -36,6 +36,10 @@ namespace Engine
         /// </summary>
         /// <remarks>Returns the commit now Id if not operation set is active</remarks>
         uint OperationSet { get; }
+        /// <summary>
+        /// Gets whether the audio device is currently running or not
+        /// </summary>
+        bool Running { get; }
 
         /// <summary>
         /// Creates a new effect
