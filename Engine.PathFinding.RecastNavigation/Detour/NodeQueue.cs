@@ -93,7 +93,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         public int GetMemUsed()
         {
-            return Marshal.SizeOf(this) + Marshal.SizeOf(typeof(Node)) * (m_capacity + 1);
+            return Marshal.SizeOf(this) + Marshal.SizeOf<Node>() * (m_capacity + 1);
         }
 
         public int GetCapacity()

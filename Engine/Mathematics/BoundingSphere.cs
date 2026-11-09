@@ -463,11 +463,11 @@ namespace Engine.Mathematics
             return Equals(ref value);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not BoundingSphere) return false;
+            if (obj is not BoundingSphere) return false;
 
-            var strongValue = (BoundingSphere)value;
+            var strongValue = (BoundingSphere)obj;
             return Equals(ref strongValue);
         }
 

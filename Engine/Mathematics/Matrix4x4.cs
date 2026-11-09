@@ -60,6 +60,7 @@ namespace Engine.Mathematics
     {
         const string Matrix4x4Str = "[M11:{0} M12:{1} M13:{2} M14:{3}] [M21:{4} M22:{5} M23:{6} M24:{7}] [M31:{8} M32:{9} M33:{10} M34:{11}] [M41:{12} M42:{13} M43:{14} M44:{15}]";
         const string Matrix4x4DescStr = "S:{0,-30} T:{1,-30} R:{2,-30}";
+        const string RowValidationMessage = "Rows and columns for matrices run from 0 to 3, inclusive.";
 
         /// <summary>
         /// The size of the <see cref="Matrix4x4"/> type, in bytes.
@@ -519,12 +520,12 @@ namespace Engine.Mathematics
             {
                 if (row < 0 || row > 3)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(row), "Rows and columns for matrices run from 0 to 3, inclusive.");
+                    throw new ArgumentOutOfRangeException(nameof(row), RowValidationMessage);
                 }
 
                 if (column < 0 || column > 3)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(column), "Rows and columns for matrices run from 0 to 3, inclusive.");
+                    throw new ArgumentOutOfRangeException(nameof(column), RowValidationMessage);
                 }
 
                 return this[(row * 4) + column];
@@ -533,12 +534,12 @@ namespace Engine.Mathematics
             {
                 if (row < 0 || row > 3)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(row), "Rows and columns for matrices run from 0 to 3, inclusive.");
+                    throw new ArgumentOutOfRangeException(nameof(row), RowValidationMessage);
                 }
 
                 if (column < 0 || column > 3)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(column), "Rows and columns for matrices run from 0 to 3, inclusive.");
+                    throw new ArgumentOutOfRangeException(nameof(column), RowValidationMessage);
                 }
 
                 this[(row * 4) + column] = value;
@@ -3115,11 +3116,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Matrix4x4) return false;
+            if (obj is not Matrix4x4) return false;
 
-            var strongValue = (Matrix4x4)value;
+            var strongValue = (Matrix4x4)obj;
             return Equals(ref strongValue);
         }
 

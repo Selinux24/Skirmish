@@ -1452,11 +1452,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Quaternion) return false;
+            if (obj is not Quaternion) return false;
 
-            var strongValue = (Quaternion)value;
+            var strongValue = (Quaternion)obj;
             return Equals(ref strongValue);
         }
 

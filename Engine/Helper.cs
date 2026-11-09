@@ -164,9 +164,9 @@ namespace Engine
         /// <param name="amount">Value between 0 and 1 indicating interpolation amount.</param>
         public static float SmoothStep(float amount)
         {
-            return (amount <= 0) ? 0
-                : (amount >= 1) ? 1
-                : amount * amount * (3 - (2 * amount));
+            if(amount <= 0) return 0;
+            if(amount >= 1) return 1;
+            return amount * amount * (3 - (2 * amount));
         }
 
         #endregion

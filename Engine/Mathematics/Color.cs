@@ -41,7 +41,9 @@ namespace Engine.Mathematics
         }
         private static byte IntToByte(int value)
         {
-            return (byte)(value < 0 ? 0 : value > 255 ? 255 : value);
+            if(value < 0) return 0;
+
+            return (byte)Math.Min(value, 255);
         }
 
         /// <summary>
@@ -320,15 +322,15 @@ namespace Engine.Mathematics
 
             delta = max - min;
 
-            if (r == max)
+            if (Helper.NearEqual(r, max))
             {
                 hue = (g - b) / delta;
             }
-            else if (g == max)
+            else if (Helper.NearEqual(g, max))
             {
                 hue = 2 + (b - r) / delta;
             }
-            else if (b == max)
+            else if (Helper.NearEqual(b, max))
             {
                 hue = 4 + (r - g) / delta;
             }
@@ -362,7 +364,7 @@ namespace Engine.Mathematics
             if (b < min) min = b;
 
             // if max == min, then there is no color and the saturation is zero.
-            if (max != min)
+            if (!Helper.NearEqual(max, min))
             {
                 l = (max + min) / 2;
 
@@ -1001,11 +1003,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Color) return false;
+            if (obj is not Color) return false;
 
-            var strongValue = (Color)value;
+            var strongValue = (Color)obj;
             return Equals(ref strongValue);
         }
 

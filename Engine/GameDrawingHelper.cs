@@ -71,7 +71,7 @@ namespace Engine
                 return false;
             }
 
-            var vertexBufferDescriptor = bufferManager.GetVertexBufferDescriptor((int)descriptor.BufferDescriptionIndex);
+            var vertexBufferDescriptor = bufferManager.GetVertexBufferDescriptor(descriptor.BufferDescriptionIndex);
             if (vertexBufferDescriptor.Dirty)
             {
                 Game.Logger.WriteWarning(game, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
@@ -118,14 +118,14 @@ namespace Engine
                 return false;
             }
 
-            var indexBufferDescriptor = bufferManager.GetIndexBufferDescriptor((int)descriptor.BufferDescriptionIndex);
+            var indexBufferDescriptor = bufferManager.GetIndexBufferDescriptor(descriptor.BufferDescriptionIndex);
             if (indexBufferDescriptor.Dirty)
             {
                 Game.Logger.WriteWarning(game, $"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
-            dc.IASetIndexBuffer(bufferManager.GetIndexBuffer((int)descriptor.BufferDescriptionIndex), Format.R32_UInt, 0);
+            dc.IASetIndexBuffer(bufferManager.GetIndexBuffer(descriptor.BufferDescriptionIndex), Format.R32_UInt, 0);
 
             return true;
         }

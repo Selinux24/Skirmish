@@ -870,11 +870,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public readonly override bool Equals(object value)
+        public readonly override bool Equals(object obj)
         {
-            if (value is not Color4) return false;
+            if (obj is not Color4) return false;
 
-            var strongValue = (Color4)value;
+            var strongValue = (Color4)obj;
             return Equals(ref strongValue);
         }
 

@@ -1557,8 +1557,8 @@ You will lost all the game progress.",
             Rect terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
-            Vector2 tank1 = tanks[0].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
-            Vector2 tank2 = tanks[1].Manipulator.Position.XZ - (Vector2)terrainRect.TopLeft;
+            Vector2 tank1 = tanks[0].Manipulator.Position.XZ - terrainRect.TopLeft;
+            Vector2 tank2 = tanks[1].Manipulator.Position.XZ - terrainRect.TopLeft;
 
             // Get the mini map rectangle
             Rect miniMapRect = miniMapBackground.GetRenderArea(false);
@@ -1578,8 +1578,8 @@ You will lost all the game progress.",
             Vector2 markerToMinimap2 = new(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
 
             // Translate and center into the minimap
-            Vector2 mt1Position = markerToMinimap1 + (Vector2)miniMapRect.TopLeft - (markerBounds1 * 0.5f);
-            Vector2 mt2Position = markerToMinimap2 + (Vector2)miniMapRect.TopLeft - (markerBounds2 * 0.5f);
+            Vector2 mt1Position = markerToMinimap1 + miniMapRect.TopLeft - (markerBounds1 * 0.5f);
+            Vector2 mt2Position = markerToMinimap2 + miniMapRect.TopLeft - (markerBounds2 * 0.5f);
 
             // Set marker position
             miniMapTank1.SetPosition(mt1Position);

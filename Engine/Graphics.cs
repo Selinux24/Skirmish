@@ -76,7 +76,7 @@ namespace Engine
         /// <summary>
         /// Device description
         /// </summary>
-        public string DeviceDescription { get; private set; }
+        public string DeviceDescription { get; set; }
         /// <summary>
         /// Gets the graphics immmediate context
         /// </summary>
@@ -265,6 +265,10 @@ namespace Engine
 
             throw new InvalidOperationException("Cannot detect D3D11 adapter.");
         }
+        /// <summary>
+        /// Updates color space based on the current display output and buffer format
+        /// </summary>
+        /// <param name="form">Form</param>
         private void UpdateColorSpace(IEngineForm form)
         {
             bool isDisplayHDR10 = false;
@@ -290,7 +294,7 @@ namespace Engine
                     }
                     else
                     {
-                        output?.Dispose();
+                        output.Dispose();
                     }
                 }
 
@@ -329,32 +333,6 @@ namespace Engine
                 swapChain3.SetColorSpace1(colorSpace);
             }
         }
-
-        /// <summary>
-        /// Selects the best adapter based in dedicated video memory
-        /// </summary>
-        /// <param name="factory">Factory</param>
-        /// <returns>Returns the best adapter index</returns>
-        private static uint SelectBestAdapter(IDXGIFactory5 factory)
-        {
-            uint bestIndex = 0;
-            ulong bestSize = 0;
-            for (uint i = 0; factory.EnumAdapters1(i, out var adapter).Success; i++)
-            {
-                using (adapter)
-                {
-                    ulong size = adapter.Description1.DedicatedVideoMemory;
-                    if (size > bestSize)
-                    {
-                        bestSize = size;
-                        bestIndex = i;
-                    }
-                }
-            }
-
-            return bestIndex;
-        }
-
         /// <summary>
         /// Gets desktop mode description
         /// </summary>

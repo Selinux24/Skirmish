@@ -357,10 +357,10 @@ namespace Engine.Mathematics
         /// <returns>The zoom to fit distance</returns>
         public readonly float GetZoomToExtentsShiftDistance(Vector3[] points)
         {
-            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(Vector3.Dot(pNear.Normal, pTop.Normal))));
-            float vSin = (float)Math.Sin(vAngle);
-            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(Vector3.Dot(pNear.Normal, pLeft.Normal))));
-            float hSin = (float)Math.Sin(hAngle);
+            float vAngle = Helper.PiOver2 - MathF.Acos(Vector3.Dot(pNear.Normal, pTop.Normal));
+            float vSin = MathF.Sin(vAngle);
+            float hAngle = Helper.PiOver2 - MathF.Acos(Vector3.Dot(pNear.Normal, pLeft.Normal));
+            float hSin = MathF.Sin(hAngle);
             float horizontalToVerticalMapping = vSin / hSin;
 
             var ioFrustrum = GetInsideOutClone();

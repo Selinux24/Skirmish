@@ -82,15 +82,15 @@ namespace Engine.Mathematics
         }
         public OrientedBoundingBox(BoundingBox bb)
         {
-            var Center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
-            Extents = bb.Maximum - Center;
-            Transformation = Matrix4x4.Translation(Center);
+            var center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
+            Extents = bb.Maximum - center;
+            Transformation = Matrix4x4.Translation(center);
         }
         public OrientedBoundingBox(Vector3 minimum, Vector3 maximum)
         {
-            var Center = minimum + (maximum - minimum) / 2f;
-            Extents = maximum - Center;
-            Transformation = Matrix4x4.Translation(Center);
+            var center = minimum + (maximum - minimum) / 2f;
+            Extents = maximum - center;
+            Transformation = Matrix4x4.Translation(center);
         }
         public OrientedBoundingBox(Vector3[] points)
         {
@@ -395,11 +395,11 @@ namespace Engine.Mathematics
             return Equals(ref value);
         }
         /// <inheritdoc/>
-        public readonly override bool Equals(object value)
+        public readonly override bool Equals(object obj)
         {
-            if (value is not OrientedBoundingBox) return false;
+            if (obj is not OrientedBoundingBox) return false;
 
-            var strongValue = (OrientedBoundingBox)value;
+            var strongValue = (OrientedBoundingBox)obj;
             return Equals(ref strongValue);
         }
     }

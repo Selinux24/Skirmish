@@ -800,17 +800,14 @@ namespace Engine.Mathematics
             Vector3 cross = Vector3.Cross(ray1.Direction, ray2.Direction);
             float denominator = cross.Length();
 
-            //Lines are parallel.
-            if (Helper.IsZero(denominator))
+            //Lines are parallel and on top of each other.
+            if (Helper.IsZero(denominator) &&
+                Helper.NearEqual(ray2.Position.X, ray1.Position.X) &&
+                Helper.NearEqual(ray2.Position.Y, ray1.Position.Y) &&
+                Helper.NearEqual(ray2.Position.Z, ray1.Position.Z))
             {
-                //Lines are parallel and on top of each other.
-                if (Helper.NearEqual(ray2.Position.X, ray1.Position.X) &&
-                    Helper.NearEqual(ray2.Position.Y, ray1.Position.Y) &&
-                    Helper.NearEqual(ray2.Position.Z, ray1.Position.Z))
-                {
-                    point = Vector3.Zero;
-                    return true;
-                }
+                point = Vector3.Zero;
+                return true;
             }
 
             denominator *= denominator;
@@ -927,7 +924,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsSegment(ref PickingRay ray, ref Segment segment, out Vector3 point)
         {
-            var r = ray;
+            Ray r = ray;
             return RayIntersectsSegment(ref r, ref segment, out _, out point);
         }
         /// <summary>
@@ -940,7 +937,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsSegment(ref PickingRay ray, ref Segment segment, out float distance, out Vector3 point)
         {
-            var r = ray;
+            Ray r = ray;
             return RayIntersectsSegment(ref r, ref segment, out distance, out point);
         }
 
@@ -2230,37 +2227,6 @@ namespace Engine.Mathematics
             return dot <= sphere.Radius * sphere.Radius;
         }
         /// <summary>
-        /// Determines whether there is an intersection between a <see cref="BoundingSphere"/> and a <see cref="BoundingSphere"/>.
-        /// </summary>
-        /// <param name="sphere1">First sphere to test.</param>
-        /// <param name="sphere2">Second sphere to test.</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public static bool SphereIntersectsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
-        {
-            float radiisum = sphere1.Radius + sphere2.Radius;
-            return Vector3.DistanceSquared(sphere1.Center, sphere2.Center) <= radiisum * radiisum;
-        }
-        /// <summary>
-        /// Determines whether a sphere intersects with a box
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="box">Axis aligned box</param>
-        /// <returns>Returns true if the sphere intersects the box</returns>
-        public static bool SphereIntersectsBox(ref BoundingSphere sphere, ref BoundingBox box)
-        {
-            return BoxIntersectsSphere(ref box, ref sphere);
-        }
-        /// <summary>
-        /// Determines whether a sphere intersects with a frustum
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="frustum">Frustum</param>
-        /// <returns>Returns true if the sphere intersects the frustum</returns>
-        public static bool SphereIntersectsFrustum(ref BoundingSphere sphere, ref BoundingFrustum frustum)
-        {
-            return SphereContainsFrustum(ref sphere, ref frustum) != ContainmentType.Disjoint;
-        }
-        /// <summary>
         /// Determines whether a sphere intersects with a triangle
         /// </summary>
         /// <param name="sphere">Sphere</param>
@@ -2303,6 +2269,37 @@ namespace Engine.Mathematics
             };
 
             return false;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="BoundingSphere"/> and a <see cref="BoundingSphere"/>.
+        /// </summary>
+        /// <param name="sphere1">First sphere to test.</param>
+        /// <param name="sphere2">Second sphere to test.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool SphereIntersectsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
+        {
+            float radiisum = sphere1.Radius + sphere2.Radius;
+            return Vector3.DistanceSquared(sphere1.Center, sphere2.Center) <= radiisum * radiisum;
+        }
+        /// <summary>
+        /// Determines whether a sphere intersects with a box
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="box">Axis aligned box</param>
+        /// <returns>Returns true if the sphere intersects the box</returns>
+        public static bool SphereIntersectsBox(ref BoundingSphere sphere, ref BoundingBox box)
+        {
+            return BoxIntersectsSphere(ref box, ref sphere);
+        }
+        /// <summary>
+        /// Determines whether a sphere intersects with a frustum
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns true if the sphere intersects the frustum</returns>
+        public static bool SphereIntersectsFrustum(ref BoundingSphere sphere, ref BoundingFrustum frustum)
+        {
+            return SphereContainsFrustum(ref sphere, ref frustum) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle mesh

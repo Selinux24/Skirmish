@@ -60,6 +60,7 @@ namespace Engine.Mathematics
     {
         const string Matrix3x3Str = "[M11:{0} M12:{1} M13:{2}] [M21:{3} M22:{4} M23:{5}] [M31:{6} M32:{7} M33:{8}]";
         const string Matrix3x3DescStr = "S:{0,-30} R:{1,-30}";
+        const string RowValidationMessage = "Rows and columns for matrices run from 0 to 2, inclusive.";
 
         /// <summary>
         /// The size of the <see cref="Matrix3x3"/> type, in bytes.
@@ -245,15 +246,15 @@ namespace Engine.Mathematics
         {
             readonly get
             {
-                if (row < 0 || row > 2) throw new ArgumentOutOfRangeException(nameof(row), "Rows and columns for matrices run from 0 to 2, inclusive.");
-                if (column < 0 || column > 2) throw new ArgumentOutOfRangeException(nameof(column), "Rows and columns for matrices run from 0 to 2, inclusive.");
+                if (row < 0 || row > 2) throw new ArgumentOutOfRangeException(nameof(row), RowValidationMessage);
+                if (column < 0 || column > 2) throw new ArgumentOutOfRangeException(nameof(column), RowValidationMessage);
 
                 return this[(row * 3) + column];
             }
             set
             {
-                if (row < 0 || row > 2) throw new ArgumentOutOfRangeException(nameof(row), "Rows and columns for matrices run from 0 to 2, inclusive.");
-                if (column < 0 || column > 2) throw new ArgumentOutOfRangeException(nameof(column), "Rows and columns for matrices run from 0 to 2, inclusive.");
+                if (row < 0 || row > 2) throw new ArgumentOutOfRangeException(nameof(row), RowValidationMessage);
+                if (column < 0 || column > 2) throw new ArgumentOutOfRangeException(nameof(column), RowValidationMessage);
 
                 this[(row * 3) + column] = value;
             }
@@ -2045,11 +2046,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Matrix3x3) return false;
+            if (obj is not Matrix3x3) return false;
 
-            var strongValue = (Matrix3x3)value;
+            var strongValue = (Matrix3x3)obj;
             return Equals(ref strongValue);
         }
 

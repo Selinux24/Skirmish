@@ -499,11 +499,11 @@ namespace Engine.Mathematics
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override readonly bool Equals(object value)
+        public override readonly bool Equals(object obj)
         {
-            if (value is not Vector2I) return false;
+            if (obj is not Vector2I) return false;
 
-            var strongValue = (Vector2I)value;
+            var strongValue = (Vector2I)obj;
             return Equals(ref strongValue);
         }
 
