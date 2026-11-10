@@ -251,7 +251,7 @@ namespace Engine.Common
                 ];
             }
         }
-    
+
         /// <summary>
         /// Toggle coordinates from left-handed to right-handed and vice versa
         /// </summary>
@@ -273,7 +273,7 @@ namespace Engine.Common
 
             return res;
         }
-      
+
         /// <summary>
         /// Generate normals for a triangle list topology geometry
         /// </summary>
@@ -304,7 +304,7 @@ namespace Engine.Common
 
             return normals;
         }
-      
+
         /// <summary>
         /// Creates a new UV map from parameters
         /// </summary>
@@ -318,12 +318,12 @@ namespace Engine.Common
         public static Vector4 CreateUVMap(float width, float height, float texU, float texV, float texWidth, float texHeight)
         {
             //Texture map
-            float u0 = texWidth > 0 ? (texU) / texWidth : 0;
-            float v0 = texHeight > 0 ? (texV) / texHeight : 0;
+            float u0 = texWidth > 0 ? texU / texWidth : 0;
+            float v0 = texHeight > 0 ? texV / texHeight : 0;
             float u1 = texWidth > 0 ? (texU + width) / texWidth : 1;
             float v1 = texHeight > 0 ? (texV + height) / texHeight : 1;
 
-            return new Vector4(u0, v0, u1, v1);
+            return new(u0, v0, u1, v1);
         }
 
         /// <summary>
