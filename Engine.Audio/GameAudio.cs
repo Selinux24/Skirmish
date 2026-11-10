@@ -49,62 +49,30 @@ namespace Engine.Audio
         /// Mastering voice
         /// </summary>
         internal IXAudio2MasteringVoice MasteringVoice { get; private set; }
+
+        /// <inheritdoc/>
+        public bool Running { get; private set; } = false;
         /// <inheritdoc/>
         public uint InputSampleRate { get; private set; }
         /// <inheritdoc/>
         public uint InputChannelCount { get; private set; }
         /// <inheritdoc/>
-        public bool UseRedirectToLFE
-        {
-            get
-            {
-                return speakers.HasFlag(GameAudioSpeakers.LowFrequency);
-            }
-        }
+        public bool UseRedirectToLFE => speakers.HasFlag(GameAudioSpeakers.LowFrequency);
 
         /// <inheritdoc/>
         public float MasterVolume
         {
-            get
-            {
-                return MasteringVoice.Volume;
-            }
-            set
-            {
-                MasteringVoice.Volume = Math.Clamp(value, 0.0f, 1.0f);
-            }
+            get => MasteringVoice.Volume; set => MasteringVoice.Volume = Math.Clamp(value, 0.0f, 1.0f);
         }
         /// <inheritdoc/>
-        public bool UseMasteringLimiter
-        {
-            get
-            {
-                return useMasteringLimiter;
-            }
-            set
-            {
-                useMasteringLimiter = value;
+        public bool UseMasteringLimiter => useMasteringLimiter;
+        /// <inheritdoc/>
+        public uint ReleaseLimit { get; private set; }
+        /// <inheritdoc/>
+        public uint LoudnessLimit { get; private set; }
 
-                if (useMasteringLimiter)
-                {
-                    EnableMasteringLimiter();
-                }
-                else
-                {
-                    DisableMasteringLimiter();
-                }
-            }
-        }
         /// <inheritdoc/>
-        public uint OperationSet
-        {
-            get
-            {
-                return operationSetActive ? operationSet : XAudio2.CommitNow;
-            }
-        }
-        /// <inheritdoc/>
-        public bool Running { get; private set; } = false;
+        public uint OperationSet => operationSetActive ? operationSet : XAudio2.CommitNow;
 
         /// <summary>
         /// Constructor
@@ -200,7 +168,7 @@ namespace Engine.Audio
         }
 
         /// <inheritdoc/>
-        public void SetMasteringLimit(uint release, uint loudness)
+        public void EnableMasteringLimiter(uint release, uint loudness)
         {
             if (release < XAPO.MinRelease || release > XAPO.MaxRelease)
             {
@@ -212,24 +180,27 @@ namespace Engine.Audio
                 throw new ArgumentOutOfRangeException(nameof(loudness), $"Must be a value between {XAPO.MinLoudness} and {XAPO.MaxLoudness}");
             }
 
-            if (useMasteringLimiter)
-            {
-                var parameters = new MasteringLimiterParameters
-                {
-                    Loudness = loudness,
-                    Release = release
-                };
+            EnableMasteringLimiter();
 
-                MasteringVoice?.SetEffectParameters(0, parameters).CheckError();
-            }
+            MasteringLimiterParameters parameters = new()
+            {
+                Release = release,
+                Loudness = loudness,
+            };
+
+            MasteringVoice?.SetEffectParameters(0, parameters, operationSet).CheckError();
+
+            ReleaseLimit = release;
+            LoudnessLimit = loudness;
         }
         /// <summary>
         /// Enables the mastering limiter
         /// </summary>
         private void EnableMasteringLimiter()
         {
-            Guid clsidLimiter = XAPO.CLSID_FXMasteringLimiter;
-            var limiterEffect = XAPO.CreateFX(clsidLimiter);
+            if (useMasteringLimiter) return;
+
+            var limiterEffect = XAPO.CreateFX(XAPO.CLSID_FXMasteringLimiter);
 
             EffectDescriptor descriptor = new(limiterEffect)
             {
@@ -238,13 +209,23 @@ namespace Engine.Audio
             };
 
             MasteringVoice?.SetEffectChain(descriptor).CheckError();
+
+            ReleaseLimit = 0;
+            LoudnessLimit = 0;
+
+            useMasteringLimiter = true;
         }
-        /// <summary>
-        /// Disables the mastering limiter
-        /// </summary>
-        private void DisableMasteringLimiter()
+        /// <inheritdoc/>
+        public void DisableMasteringLimiter()
         {
-            MasteringVoice?.DisableEffect(0).CheckError();
+            if (!useMasteringLimiter) return;
+
+            MasteringVoice?.DisableEffect(0, operationSet).CheckError();
+
+            ReleaseLimit = 0;
+            LoudnessLimit = 0;
+
+            useMasteringLimiter = false;
         }
 
         /// <summary>

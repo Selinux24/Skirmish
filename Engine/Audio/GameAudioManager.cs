@@ -16,7 +16,7 @@ namespace Engine.Audio
         /// <summary>
         /// Effect instance helper class
         /// </summary>
-        class EffectInstance
+        struct EffectInstance
         {
             /// <summary>
             /// Effect name
@@ -65,7 +65,6 @@ namespace Engine.Audio
         public bool UseMasteringLimiter
         {
             get => gameAudio.UseMasteringLimiter;
-            set => gameAudio.UseMasteringLimiter = value;
         }
 
         /// <summary>
@@ -114,19 +113,18 @@ namespace Engine.Audio
         /// <param name="disposing">Free managed resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing) return;
+
+            foreach (var i in effectInstances)
             {
-                effectInstances.ForEach(i =>
-                {
-                    i.Effect.Stop(true);
-                    i.Effect.Dispose();
-                });
-                effectInstances.Clear();
-
-                soundList.Clear();
-
-                gameAudio?.Dispose();
+                i.Effect.Stop(true);
+                i.Effect.Dispose();
             }
+            effectInstances.Clear();
+
+            soundList.Clear();
+
+            gameAudio?.Dispose();
         }
 
         /// <summary>
@@ -192,6 +190,7 @@ namespace Engine.Audio
                 }
             }
         }
+
         /// <summary>
         /// Adds an effect parametrization to the library
         /// </summary>
@@ -201,6 +200,7 @@ namespace Engine.Audio
         {
             effectParamsLib.TryAdd(effectName, effectParams);
         }
+
         /// <summary>
         /// Creates an effect instance
         /// </summary>
@@ -315,13 +315,20 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Sets the mastering limiter parameters
+        /// Enables the mastering limiter
         /// </summary>
         /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
         /// <param name="loudness">Threshold of the limiter</param>
-        public void SetMasteringLimit(uint release, uint loudness)
+        public void EnableMasteringLimiter(uint release, uint loudness)
         {
-            gameAudio.SetMasteringLimit(release, loudness);
+            gameAudio.EnableMasteringLimiter(release, loudness);
+        }
+        /// <summary>
+        /// Disables the mastering limiter
+        /// </summary>
+        public void DisableMasteringLimiter()
+        {
+            gameAudio.DisableMasteringLimiter();
         }
     }
 }

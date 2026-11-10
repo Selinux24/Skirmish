@@ -23,7 +23,6 @@ namespace Engine.AudioTests
         {
             _audioMock = new Mock<IGameAudio>();
             _audioMock.SetupProperty(audio => audio.MasterVolume, 0.75f);
-            _audioMock.SetupProperty(audio => audio.UseMasteringLimiter, false);
             TestAudioLoader.Audio = _audioMock.Object;
             TestAudioLoader.RequestedSampleRate = 0;
 
@@ -52,10 +51,6 @@ namespace Engine.AudioTests
             Assert.AreEqual(0.75f, _manager.MasterVolume);
             _manager.MasterVolume = 0.3f;
             Assert.AreEqual(0.3f, _audioMock.Object.MasterVolume);
-
-            Assert.IsFalse(_manager.UseMasteringLimiter);
-            _manager.UseMasteringLimiter = true;
-            Assert.IsTrue(_audioMock.Object.UseMasteringLimiter);
         }
 
         [TestMethod]
@@ -63,11 +58,11 @@ namespace Engine.AudioTests
         {
             _manager.Start();
             _manager.Stop();
-            _manager.SetMasteringLimit(10, 50);
+            _manager.EnableMasteringLimiter(10, 50);
 
             _audioMock.Verify(audio => audio.Start(), Times.Once);
             _audioMock.Verify(audio => audio.Stop(), Times.Once);
-            _audioMock.Verify(audio => audio.SetMasteringLimit(10, 50), Times.Once);
+            _audioMock.Verify(audio => audio.EnableMasteringLimiter(10, 50), Times.Once);
         }
 
         [TestMethod]
