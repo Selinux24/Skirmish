@@ -2861,6 +2861,20 @@ namespace Engine.Mathematics
             Transformation(ref scalingCenter, ref scalingRotation, ref scaling, ref rotationCenter, ref rotation, ref translation, out var result);
             return result;
         }
+        /// <summary>
+        /// Creates a transformation matrix.
+        /// </summary>
+        /// <param name="translation">The translation factor of the transformation.</param>
+        /// <param name="rotation">The rotation of the transformation.</param>
+        /// <param name="scaling">Scaling factor.</param>
+        /// <returns>The created transformation matrix.</returns>
+        public static Matrix4x4 Transformation(Vector3 translation, Quaternion rotation, Vector3 scaling)
+        {
+            return Transformation(
+                Vector3.Zero, Quaternion.Identity, scaling,
+                Vector3.Zero, rotation,
+                translation);
+        }
 
         /// <summary>
         /// Creates a 2D transformation matrix.

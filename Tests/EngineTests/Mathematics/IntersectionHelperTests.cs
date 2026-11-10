@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine;
+using Engine.Mathematics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EngineTests.Common
+namespace EngineTests.Mathematics
 {
-    using Engine;
-    using Engine.Mathematics;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     [OSCondition(OperatingSystems.Windows)]

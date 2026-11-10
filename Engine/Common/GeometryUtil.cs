@@ -251,6 +251,7 @@ namespace Engine.Common
                 ];
             }
         }
+    
         /// <summary>
         /// Toggle coordinates from left-handed to right-handed and vice versa
         /// </summary>
@@ -272,20 +273,7 @@ namespace Engine.Common
 
             return res;
         }
-        /// <summary>
-        /// Gets the asset transform
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="rotation">Rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <returns>Returns a matrix with the reference transform</returns>
-        public static Matrix4x4 Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
-        {
-            return Matrix4x4.Transformation(
-                Vector3.Zero, Quaternion.Identity, scale,
-                Vector3.Zero, rotation,
-                position);
-        }
+      
         /// <summary>
         /// Generate normals for a triangle list topology geometry
         /// </summary>
@@ -316,6 +304,7 @@ namespace Engine.Common
 
             return normals;
         }
+      
         /// <summary>
         /// Creates a new UV map from parameters
         /// </summary>

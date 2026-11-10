@@ -304,7 +304,7 @@ namespace Engine.Modular
                     .ToArray();
 
                 //Positioning
-                var transforms = objList.Select(o => GeometryUtil.Transformation(o.Position, o.Rotation, o.Scale));
+                var transforms = objList.Select(o => Matrix4x4.Transformation(o.Position, o.Rotation, o.Scale));
                 model.SetTransforms(transforms);
 
                 //Lights
@@ -507,7 +507,7 @@ namespace Engine.Modular
         /// <param name="transforms">Transforms dictionary</param>
         private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix4x4>> transforms)
         {
-            var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
+            var complexAssetTransform = Matrix4x4.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
 
             AssetMapItem aMap = new()

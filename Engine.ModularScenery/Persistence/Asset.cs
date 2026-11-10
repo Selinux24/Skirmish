@@ -42,7 +42,7 @@ namespace Engine.Modular.Persistence
             {
                 var transforms = References
                     .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                    .Select(a => GeometryUtil.Transformation(a.Position, a.Rotation, a.Scale))
+                    .Select(a => Matrix4x4.Transformation(a.Position, a.Rotation, a.Scale))
                     .ToArray();
 
                 res.Add(assetName, transforms);

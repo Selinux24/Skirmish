@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EngineTests.Common
+namespace EngineTests.Mathematics
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
