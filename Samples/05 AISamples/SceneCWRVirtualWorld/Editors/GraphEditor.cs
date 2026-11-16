@@ -17,8 +17,8 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         private const float hLayer = 0.5f;
         private const float hDelta = 0.1f;
 
-        private GeometryColorDrawer<Triangle> graphDrawer = null;
-        private GeometryColorDrawer<Triangle> graphHighlightsDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> graphHighlightsDrawer = null;
 
         private readonly World world = world;
         private readonly float height = height;
@@ -67,20 +67,20 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         {
             this.scene = scene;
 
-            var descT = new GeometryColorDrawerDescription<Triangle>()
+            var descT = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 Count = 100000,
                 DepthEnabled = false,
                 BlendMode = BlendModes.Alpha,
             };
 
-            graphDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+            graphDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
                 nameof(graphDrawer),
                 nameof(graphDrawer),
                 descT,
                 Scene.LayerEffects + 3);
 
-            graphHighlightsDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+            graphHighlightsDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
                 nameof(graphHighlightsDrawer),
                 nameof(graphHighlightsDrawer),
                 descT,
@@ -90,7 +90,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         public void UpdateInputEditor(IGameTime gameTime)
         {
             var pRay = scene.GetPickingRay(PickingHullTypes.Geometry);
-            if (!scene.PickFirst<Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
+            if (!scene.PickFirst<Engine.Mathematics.Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
             {
                 return;
             }
@@ -229,16 +229,16 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
                 DrawSegment(new Segment2(selected.Value, hovered ?? mouse), height + hLayer, lineThickness, graphHighlightsDrawer, graphColor);
             }
         }
-        private static void DrawPoint(Vector2 point, float height, float strokeSize, GeometryColorDrawer<Triangle> drawer, Color4 tColor)
+        private static void DrawPoint(Vector2 point, float height, float strokeSize, GeometryColorDrawer<Engine.Mathematics.Triangle> drawer, Color4 tColor)
         {
             var tp = new Vector3(point.X, height + hDelta, point.Y);
             var t = GeometryUtil.CreateCircle(Topology.TriangleList, tp, strokeSize, 32);
-            drawer.AddPrimitives(tColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(tColor, GeometryUtil.ComputeTriangleList(t));
         }
-        private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Triangle> drawer, Color4 lineColor)
+        private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Engine.Mathematics.Triangle> drawer, Color4 lineColor)
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, segment.P1, segment.P2, lineThickness, height + hDelta);
-            drawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(lineColor, GeometryUtil.ComputeTriangleList(t));
         }
     }
 }

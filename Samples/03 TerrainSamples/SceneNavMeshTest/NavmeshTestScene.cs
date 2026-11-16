@@ -74,7 +74,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private readonly Color4 sceneBackgroundColor = Color.CornflowerBlue;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
-        private GeometryColorDrawer<Triangle> triangleDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> triangleDrawer = null;
 
         private Model inputGeometry = null;
         private Model debugGeometry = null;
@@ -591,13 +591,13 @@ namespace TerrainSamples.SceneNavMeshTest
         }
         private async Task InitializeDebugDrawers()
         {
-            var markDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
+            var markDrawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 Count = 100000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            triangleDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
+            triangleDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("DEBUG++ Marks", "DEBUG++ Marks", markDrawerDesc);
 
             var volumesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
             {
@@ -1069,7 +1069,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1116,7 +1116,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1154,7 +1154,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateRasterization()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1221,7 +1221,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1297,7 +1297,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateObstacleAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1364,7 +1364,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateAreaAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1432,7 +1432,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateConnectionAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1496,7 +1496,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1576,7 +1576,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateGroupAddAgent()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1606,7 +1606,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateGroupMoveTarget()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
             {
                 return;
             }
@@ -1629,7 +1629,7 @@ namespace TerrainSamples.SceneNavMeshTest
             var cross = Line3D.CreateCross(position, size);
             lineDrawer.AddPrimitives(color, cross);
         }
-        private void DrawTriangle(Triangle triangle, Color4 color)
+        private void DrawTriangle(Engine.Mathematics.Triangle triangle, Color4 color)
         {
             var tri = Line3D.CreateTriangle(triangle);
             lineDrawer.AddPrimitives(color, tri);
@@ -1642,7 +1642,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void DrawPolygonFill(IEnumerable<Vector3> points, Color4 color)
         {
             var poly = GeometryUtil.CreatePolygon(Topology.TriangleList, points);
-            triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(poly.Vertices, poly.Indices));
+            triangleDrawer.AddPrimitives(color, GeometryUtil.ComputeTriangleList(poly.Vertices, poly.Indices));
         }
         private void DrawCircle(Vector3 position, float radius, Color4 color)
         {
@@ -1664,7 +1664,7 @@ namespace TerrainSamples.SceneNavMeshTest
                 var gt = GeometryUtil.CreateCylinder(Topology.TriangleList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
                 var gl = GeometryUtil.CreateCylinder(Topology.LineList, cylMarker.Center, cylMarker.Radius, cylMarker.MaxH, 12);
 
-                triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                triangleDrawer.AddPrimitives(color, GeometryUtil.ComputeTriangleList(gt.Vertices, gt.Indices));
                 lineDrawer.AddPrimitives(strongColor, Line3D.CreateLineList(gl.Vertices));
             }
             else if (area is ConvexAreaMarker cvMarker)
@@ -1674,14 +1674,14 @@ namespace TerrainSamples.SceneNavMeshTest
                     var gt = GeometryUtil.CreatePolygon(Topology.TriangleList, poly, ccw);
                     var gl = GeometryUtil.CreatePolygon(Topology.LineList, poly, ccw);
 
-                    triangleDrawer.AddPrimitives(color, Triangle.ComputeTriangleList(gt.Vertices, gt.Indices));
+                    triangleDrawer.AddPrimitives(color, GeometryUtil.ComputeTriangleList(gt.Vertices, gt.Indices));
                     lineDrawer.AddPrimitives(strongColor, Line3D.CreateLineList(gl.Vertices));
                 }
             }
         }
         private void DrawObstacle(ObstacleMarker obs, Color4 color, Color4 strongColor)
         {
-            var gt = Triangle.ComputeTriangleList(obs.Obstacle, 12);
+            var gt = GeometryUtil.ComputeTriangleList(obs.Obstacle, 12);
             var gl = Line3D.CreateCylinder(obs.Obstacle, 12);
 
             triangleDrawer.AddPrimitives(color, gt);

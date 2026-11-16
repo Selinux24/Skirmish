@@ -28,7 +28,7 @@ namespace PhysicsSamples.ScenePhysics
         {
             var tris = model.GetGeometry(true);
             var inv = Matrix4x4.Invert(model.Manipulator.GlobalTransform);
-            tris = Triangle.Transform(tris, inv);
+            tris = Engine.Mathematics.Triangle.Transform(tris, inv);
 
             return new ConvexMeshCollider(tris);
         }

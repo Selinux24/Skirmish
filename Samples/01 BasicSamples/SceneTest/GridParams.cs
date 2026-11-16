@@ -30,7 +30,7 @@ namespace BasicSamples.SceneTest
                 float x = rx + delta.X;
                 float y = height;
                 float z = (i % ZCount * Sz) - AreaSize + delta.Z + dz;
-                float angle = Helper.Pi * prnd.Next(0, 2);
+                float angle = MathUtils.Pi * prnd.Next(0, 2);
 
                 return (new(x, y, z), angle);
             }
@@ -43,7 +43,7 @@ namespace BasicSamples.SceneTest
                 float x = (ci % XCount * Sx) - AreaSize + delta.X + dx;
                 float y = height;
                 float z = rz + delta.Z;
-                float angle = Helper.Pi * prnd.Next(0, 2);
+                float angle = MathUtils.Pi * prnd.Next(0, 2);
 
                 return (new(x, y, z), angle);
             }

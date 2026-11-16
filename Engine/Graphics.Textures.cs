@@ -631,7 +631,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTexture(string name, string filename, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            using var resource = TextureData.ReadTexture(filename, (Vortice.Mathematics.RectI)rectangle);
+            using var resource = TextureData.ReadTexture(filename, rectangle.ToRectI());
 
             return new EngineShaderResourceView(name, CreateResourceView(name, resource, mipAutogen, dynamic));
         }
@@ -646,7 +646,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTexture(string name, MemoryStream stream, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            using var resource = TextureData.ReadTexture(stream, (Vortice.Mathematics.RectI)rectangle);
+            using var resource = TextureData.ReadTexture(stream, rectangle.ToRectI());
 
             return new EngineShaderResourceView(name, CreateResourceView(name, resource, mipAutogen, dynamic));
         }
@@ -661,7 +661,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTextureArray(string name, string filename, IEnumerable<RectI> rectangles, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(filename, rectangles.Select(r => (Vortice.Mathematics.RectI)r));
+            var textureList = TextureData.ReadTextureArray(filename, rectangles.Select(r => r.ToRectI()));
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
@@ -680,7 +680,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTextureArray(string name, MemoryStream stream, IEnumerable<RectI> rectangles, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(stream, rectangles.Select(r => (Vortice.Mathematics.RectI)r));
+            var textureList = TextureData.ReadTextureArray(stream, rectangles.Select(r => r.ToRectI()));
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
@@ -735,7 +735,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<string> filenames, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(filenames, (Vortice.Mathematics.RectI)rectangle);
+            var textureList = TextureData.ReadTextureArray(filenames, rectangle.ToRectI());
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
@@ -754,7 +754,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<MemoryStream> streams, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(streams, (Vortice.Mathematics.RectI)rectangle);
+            var textureList = TextureData.ReadTextureArray(streams, rectangle.ToRectI());
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
@@ -775,7 +775,7 @@ namespace Engine
         {
             if (faces?.Count() == 6)
             {
-                var resources = TextureData.ReadTextureCubic(filename, faces.Select(r => (Vortice.Mathematics.RectI)r));
+                var resources = TextureData.ReadTextureCubic(filename, faces.Select(r => r.ToRectI()));
 
                 var srv = new EngineShaderResourceView(name, CreateCubicResourceView(name, resources, mipAutogen, dynamic));
 
@@ -803,7 +803,7 @@ namespace Engine
         {
             if (faces?.Count() == 6)
             {
-                var resources = TextureData.ReadTextureCubic(stream, faces.Select(r => (Vortice.Mathematics.RectI)r));
+                var resources = TextureData.ReadTextureCubic(stream, faces.Select(r => r.ToRectI()));
 
                 var srv = new EngineShaderResourceView(name, CreateCubicResourceView(name, resources, mipAutogen, dynamic));
 

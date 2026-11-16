@@ -118,7 +118,7 @@ namespace Engine.Content
 
                 if (float.TryParse(degrees, NumberStyles.Float, Local, out float d))
                 {
-                    return Quaternion.RotationAxis(Vector3.Up, Helper.DegreesToRadians(d));
+                    return Quaternion.RotationAxis(Vector3.Up, MathUtils.DegreesToRadians(d));
                 }
             }
 

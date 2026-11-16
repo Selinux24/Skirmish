@@ -249,7 +249,7 @@ namespace Engine.Animation
             }
 
             float tunedElapsedTime = elapsedSeconds * TimeDelta;
-            if (Helper.IsZero(tunedElapsedTime))
+            if (MathUtils.IsZero(tunedElapsedTime))
             {
                 return;
             }

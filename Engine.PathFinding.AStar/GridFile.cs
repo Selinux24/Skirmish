@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="settings">Settings</param>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns the hash string</returns>
-        public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
+        public static string GetHash(PathFinderSettings settings, IEnumerable<Mathematics.Triangle> triangles)
         {
             List<byte> buffer = [];
 

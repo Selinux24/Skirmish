@@ -602,7 +602,7 @@ namespace Engine.BuiltIn.Drawers
                 }
 
                 float radius = light.Radius;
-                var perspectiveMatrix = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1, 0.1f, radius + 0.1f);
+                var perspectiveMatrix = Matrix4x4.PerspectiveFovLH(MathUtils.PiOver2, 1, 0.1f, radius + 0.1f);
 
                 return new BufferLightPoint
                 {

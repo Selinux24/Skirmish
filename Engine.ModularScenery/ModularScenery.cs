@@ -74,7 +74,7 @@ namespace Engine.Modular
         /// <summary>
         /// Scene triangle list
         /// </summary>
-        private IEnumerable<Triangle> sceneTriangles;
+        private IEnumerable<Mathematics.Triangle> sceneTriangles;
 
         /// <summary>
         /// First level
@@ -713,14 +713,14 @@ namespace Engine.Modular
             return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public override IEnumerable<Mathematics.Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             if (sceneTriangles != null)
             {
                 return sceneTriangles;
             }
 
-            List<Triangle> triangleLits = [];
+            List<Mathematics.Triangle> triangleLits = [];
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))

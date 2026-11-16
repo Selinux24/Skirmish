@@ -471,7 +471,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <param name="scale">Scale to apply</param>
         public void Scale(float scale)
         {
-            if (Helper.IsOne(scale))
+            if (MathUtils.IsOne(scale))
             {
                 return;
             }

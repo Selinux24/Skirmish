@@ -333,7 +333,7 @@ namespace Engine
                         coarse.Add(new(obj, d, p));
                     }
                 }
-                else if (obj is IRayPickable<Triangle> pickable)
+                else if (obj is IRayPickable<Mathematics.Triangle> pickable)
                 {
                     bool picked = TestCoarse(pickable, ray, out var d, out var p);
                     if (picked)
@@ -356,7 +356,7 @@ namespace Engine
         /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
         private static bool TestCoarse(IComposed componsed, PickingRay ray, out float distance, out Vector3 position)
         {
-            var pickComponents = componsed.GetComponents<IRayPickable<Triangle>>();
+            var pickComponents = componsed.GetComponents<IRayPickable<Mathematics.Triangle>>();
 
             foreach (var pickable in pickComponents)
             {
@@ -387,7 +387,7 @@ namespace Engine
         {
             Ray rRay = ray;
             var bsph = obj.GetBoundingSphere();
-            var intersects = Collision.RayIntersectsSphere(ref rRay, ref bsph, out float d);
+            var intersects = Mathematics.Collision.RayIntersectsSphere(ref rRay, ref bsph, out float d);
             if (intersects && d <= ray.MaxDistance)
             {
                 distance = d;

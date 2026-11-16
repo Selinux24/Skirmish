@@ -114,7 +114,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 rayleighScattering = value;
-                RayleighScattering4PI = value * 4.0f * Helper.Pi;
+                RayleighScattering4PI = value * 4.0f * MathUtils.Pi;
             }
         }
         /// <summary>
@@ -133,7 +133,7 @@ namespace Engine.BuiltIn.Components.Skies
             set
             {
                 mieScattering = value;
-                MieScattering4PI = value * 4.0f * Helper.Pi;
+                MieScattering4PI = value * 4.0f * MathUtils.Pi;
             }
         }
         /// <summary>
@@ -385,7 +385,7 @@ namespace Engine.BuiltIn.Components.Skies
             Vector3.AnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
 
-            float pitch = Helper.DegreesToRadians(10.0f);
+            float pitch = MathUtils.DegreesToRadians(10.0f);
 
             uint samples = 10;
 
@@ -402,16 +402,16 @@ namespace Engine.BuiltIn.Components.Skies
 
                 if (i <= samples / 2)
                 {
-                    yaw += Helper.DegreesToRadians(5.0f);
+                    yaw += MathUtils.DegreesToRadians(5.0f);
                 }
                 else
                 {
-                    originalYaw += Helper.DegreesToRadians(-5.0f);
+                    originalYaw += MathUtils.DegreesToRadians(-5.0f);
 
                     yaw = originalYaw;
                 }
 
-                yaw = Helper.Mod(yaw, Helper.TwoPi);
+                yaw = MathUtils.Mod(yaw, MathUtils.TwoPi);
             }
 
             outColor *= 1f / samples;

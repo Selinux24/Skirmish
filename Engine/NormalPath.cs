@@ -81,7 +81,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return checkPoints[0];
             }
@@ -118,7 +118,7 @@ namespace Engine
                 return Vector3.Up;
             }
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return normals[0];
             }
@@ -155,7 +155,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return checkPoints[0];
             }

@@ -30,7 +30,7 @@ namespace IntermediateSamples.SceneTransforms
 
             Tree.Manipulator.SetNormal(CollisionVector, 0.1f);
 
-            if (Helper.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
+            if (MathUtils.NearEqual(1f, Vector3.Dot(CollisionVector, Tree.Manipulator.Up)))
             {
                 Active = false;
 

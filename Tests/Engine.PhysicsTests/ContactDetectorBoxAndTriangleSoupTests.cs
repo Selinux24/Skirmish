@@ -16,7 +16,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly float Epsilon = Helper.ZeroTolerance;
+        static readonly float Epsilon = MathUtils.ZeroTolerance;
 
         static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {
@@ -166,7 +166,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Over the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
@@ -174,7 +174,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Front face perfect contact",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -190,7 +190,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Front face 0.1 penetration",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -206,7 +206,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Plane cuts in the middle",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -222,7 +222,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Back face perfect contact. Front face below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -238,7 +238,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
                     ],
@@ -246,7 +246,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Front face to plane. Far below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
                     ],
@@ -256,7 +256,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Over the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
@@ -264,7 +264,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Top face perfect contact",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -280,7 +280,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 90º - Top face to plane. Top face 0.1 penetration",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Up * 0.9f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -296,7 +296,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Plane cuts in the middle",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -312,7 +312,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Bottom face perfect contact. Top face below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -328,7 +328,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
                     ],
@@ -336,7 +336,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 180º - Top face to plane. Far below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
                     ],
@@ -346,7 +346,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Over the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
@@ -354,7 +354,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Back face perfect contact",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -370,7 +370,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Back face 0.1 penetration",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -386,7 +386,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Plane cuts in the middle",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -402,7 +402,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Front face perfect contact. Back face below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -418,7 +418,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
                     ],
@@ -426,7 +426,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "X-axis 270º - Back face to plane. Far below the plane",
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
                     ],
@@ -436,7 +436,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Over the plane",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
@@ -444,7 +444,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Left face perfect contact",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -460,7 +460,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Left face 0.1 penetration",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -476,7 +476,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Plane cuts in the middle",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -492,7 +492,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Right face perfect contact. Left face below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -508,7 +508,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
                     ],
@@ -516,7 +516,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis 90º - Left face to plane. Far below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
                     ],
@@ -526,7 +526,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Over the plane",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
@@ -534,7 +534,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Right face perfect contact",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -550,7 +550,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Right face 0.1 penetration",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -566,7 +566,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Plane cuts in the middle",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -582,7 +582,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Left face perfect contact. Right face below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             ContactCount = 1,
                             Contacts =
@@ -598,7 +598,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = false
                         }
                     ],
@@ -606,7 +606,7 @@ namespace Engine.PhysicsTests
                         new BoxAndTriangleSoupData
                         {
                             CaseName = "Z-axis -90º - Right face to plane. Far below the plane",
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = false
                         }
                     ],
@@ -651,7 +651,7 @@ namespace Engine.PhysicsTests
                 var expectedPosition = box.OrientedBoundingBox.GetVertex(expectedContact.Corner);
                 var expectedNormal = Vector3.Up;
 
-                Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
+                Assert.IsTrue(MathUtils.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
                 Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
                 Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
             }

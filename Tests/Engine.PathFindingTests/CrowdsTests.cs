@@ -40,7 +40,7 @@ namespace Engine.PathFindingTests
             Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var pZero = GeometryUtil.CreateXZPlane(20, 20, hZero);
-            zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
+            zeroPlaneTris = GeometryUtil.ComputeTriangleList(pZero.Vertices, pZero.Indices);
 
             agentDefault = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f };
 

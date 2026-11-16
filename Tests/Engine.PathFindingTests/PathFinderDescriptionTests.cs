@@ -45,21 +45,21 @@ namespace Engine.PathFindingTests
             agentInclined = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
 
             var pZero = GeometryUtil.CreateXZPlane(10, 10, hZero);
-            zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
+            zeroPlaneTris = GeometryUtil.ComputeTriangleList(pZero.Vertices, pZero.Indices);
             pointZero = Vector3.Up * hZero;
 
             var pOne = GeometryUtil.CreateXZPlane(10, 10, hOne);
-            hOnePlaneTris = Triangle.ComputeTriangleList(pOne.Vertices, pOne.Indices);
+            hOnePlaneTris = GeometryUtil.ComputeTriangleList(pOne.Vertices, pOne.Indices);
             pointOne = Vector3.Up * hOne;
 
             var pTwo = GeometryUtil.CreateXZPlane(10, 10, hTwo);
-            hTwoPlaneTris = Triangle.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
+            hTwoPlaneTris = GeometryUtil.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
             pointTwo = Vector3.Up * hTwo;
 
             sceneryTris = (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t);
 
             var pInclined = GeometryUtil.CreatePlane(10, 0, Vector3.Normalize(new Vector3(1, 1, 0)));
-            inclinedPlaneTris = Triangle.ComputeTriangleList(pInclined.Vertices, pInclined.Indices);
+            inclinedPlaneTris = GeometryUtil.ComputeTriangleList(pInclined.Vertices, pInclined.Indices);
         }
 
         [TestInitialize]

@@ -321,7 +321,7 @@ namespace Engine
         /// <param name="segmentTime">Relative time value for curve</param>
         public void FindCurve(float time, out int curve, out float segmentTime)
         {
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 curve = 0;
                 segmentTime = 0;

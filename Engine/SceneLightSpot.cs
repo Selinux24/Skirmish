@@ -31,11 +31,11 @@ namespace Engine
         {
             get
             {
-                return Helper.DegreesToRadians(FallOffAngle);
+                return MathUtils.DegreesToRadians(FallOffAngle);
             }
             set
             {
-                FallOffAngle = Helper.RadiansToDegrees(value);
+                FallOffAngle = MathUtils.RadiansToDegrees(value);
             }
         }
         /// <inheritdoc/>
@@ -88,7 +88,7 @@ namespace Engine
         public static Matrix4x4 CreateFromPositionDirection(Vector3 position, Vector3 direction)
         {
             float f = MathF.Abs(Vector3.Dot(direction, Vector3.Up));
-            Vector3 up = Helper.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
+            Vector3 up = MathUtils.IsOne(f) ? Vector3.ForwardLH : Vector3.Up;
             return Matrix4x4.CreateWorld(position, direction, up);
         }
 
@@ -212,11 +212,11 @@ namespace Engine
             var coneLines = Line3D.CreateConeCupAngle(FallOffAngleRadians, Radius, sliceCount);
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
-            Matrix4x4 rot = Matrix4x4.RotationX(Helper.PiOver2);
+            Matrix4x4 rot = Matrix4x4.RotationX(MathUtils.PiOver2);
 
             //Then move and rotate the cone to light position and direction
             float f = MathF.Abs(Vector3.Dot(Direction, Vector3.Up));
-            Matrix4x4 trn = Matrix4x4.CreateWorld(Position, Direction, Helper.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
+            Matrix4x4 trn = Matrix4x4.CreateWorld(Position, Direction, MathUtils.IsOne(f) ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }

@@ -255,7 +255,7 @@ namespace Engine.Content
 
             var vertices = GetVertices().ToArray();
 
-            List<Triangle> triangles = [];
+            List<Mathematics.Triangle> triangles = [];
 
             if (Indices.Length > 0)
             {

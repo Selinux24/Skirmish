@@ -313,19 +313,19 @@ namespace IntermediateSamples.SceneInstancing
             for (int i = 10; i < 20; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
-                wall[i].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+                wall[i].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
             }
 
             for (int i = 20; i < 30; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
-                wall[i].Manipulator.SetRotation(Helper.Pi, 0, 0);
+                wall[i].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
             }
 
             for (int i = 30; i < 40; i++)
             {
                 wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
-                wall[i].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
+                wall[i].Manipulator.SetRotation(MathUtils.PiOver2 * 3, 0, 0);
             }
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)

@@ -77,7 +77,7 @@ namespace Engine
         /// <summary>
         /// Field of view angle
         /// </summary>
-        private float fieldOfView = Helper.PiOver4;
+        private float fieldOfView = MathUtils.PiOver4;
         /// <summary>
         /// Near plane distance
         /// </summary>
@@ -997,7 +997,7 @@ namespace Engine
 
             //Smooth rotation
             Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
-            Quaternion targetRotation = Quaternion.RotationAxis(axis, Helper.DegreesToRadians(degrees));
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtils.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
             Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
@@ -1005,8 +1005,8 @@ namespace Engine
 
             if (clampY)
             {
-                float newAngle = Vector3.Angle(Vector3.Up, newDir) - Helper.PiOver2;
-                if (newAngle >= Helper.DegreesToRadians(clampFrom) && newAngle <= Helper.DegreesToRadians(clampTo))
+                float newAngle = Vector3.Angle(Vector3.Up, newDir) - MathUtils.PiOver2;
+                if (newAngle >= MathUtils.DegreesToRadians(clampFrom) && newAngle <= MathUtils.DegreesToRadians(clampTo))
                 {
                     nextInterest = nextPosition + newDir;
                     updateNeeded = true;
@@ -1052,7 +1052,7 @@ namespace Engine
             float delta = slow ? SlowZoomDelta : ZoomDelta;
             float zooming = zoomIn ? +delta : -delta;
 
-            if (Helper.IsZero(zooming))
+            if (MathUtils.IsZero(zooming))
             {
                 return 0;
             }

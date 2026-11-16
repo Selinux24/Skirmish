@@ -40,7 +40,7 @@ namespace EngineTests.Collections.Generic
             Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
-            var tris = Triangle.ComputeTriangleList(geom.Vertices, geom.Indices);
+            var tris = GeometryUtil.ComputeTriangleList(geom.Vertices, geom.Indices);
             tris = Triangle.Transform(tris, Matrix4x4.Translation(-7.5f, 0, -7.5f));
 
             mesh =

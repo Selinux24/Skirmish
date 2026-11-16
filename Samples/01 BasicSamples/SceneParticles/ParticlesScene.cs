@@ -153,7 +153,7 @@ namespace BasicSamples.SceneParticles
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
             geo.Uvs = geo.Uvs.Select(uv => uv * 10f);
-            geo.Transform(Matrix4x4.RotationY(Helper.PiOver2));
+            geo.Transform(Matrix4x4.RotationY(MathUtils.PiOver2));
 
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = resourcesFloor;

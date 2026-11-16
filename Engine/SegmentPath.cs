@@ -125,7 +125,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return path[0];
             }
@@ -167,7 +167,7 @@ namespace Engine
                 return Vector3.Zero;
             }
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return path[0];
             }

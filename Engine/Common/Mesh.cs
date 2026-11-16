@@ -220,7 +220,7 @@ namespace Engine.Common
             return [.. positionCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
+        public IEnumerable<Mathematics.Triangle> GetTriangles(bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
@@ -235,17 +235,17 @@ namespace Engine.Common
 
             if (!indices.Any())
             {
-                triangleCache = Triangle.ComputeTriangleList(positions);
+                triangleCache = GeometryUtil.ComputeTriangleList(positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(positions, indices);
+                triangleCache = GeometryUtil.ComputeTriangleList(positions, indices);
             }
 
             return [.. triangleCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public IEnumerable<Mathematics.Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
@@ -260,11 +260,11 @@ namespace Engine.Common
 
             if (!indices.Any())
             {
-                triangleCache = Triangle.ComputeTriangleList(positions);
+                triangleCache = GeometryUtil.ComputeTriangleList(positions);
             }
             else
             {
-                triangleCache = Triangle.ComputeTriangleList(positions, indices);
+                triangleCache = GeometryUtil.ComputeTriangleList(positions, indices);
             }
 
             return [.. triangleCache];

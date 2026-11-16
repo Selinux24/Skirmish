@@ -76,7 +76,7 @@ namespace EngineTests
         public void SetRotationTest()
         {
             Manipulator3D man = new();
-            var angle = Helper.PiOver2;
+            var angle = MathUtils.PiOver2;
             var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
             var trn = Matrix4x4.RotationQuaternion(rot);
 
@@ -149,7 +149,7 @@ namespace EngineTests
         {
             Manipulator3D man = new();
             var point = Vector3.One;
-            var angle = Helper.PiOver2;
+            var angle = MathUtils.PiOver2;
             float scale = 2f;
             var scaling = new Vector3(scale);
             var rot = Quaternion.RotationYawPitchRoll(angle, 0, 0);
@@ -501,7 +501,7 @@ namespace EngineTests
             Mock<IGameTime> time = new();
             time.SetupAllProperties();
             man.Reset();
-            man.Rotate(time.Object, Helper.PiOver2, 0, 0);
+            man.Rotate(time.Object, MathUtils.PiOver2, 0, 0);
             ValidateRotate(Vector3.Zero, Quaternion.Identity, Matrix4x4.Identity, man);
 
             //Rotation == zero
@@ -516,9 +516,9 @@ namespace EngineTests
             time.SetupAllProperties();
             time.Setup(x => x.ElapsedSeconds).Returns(() => timeSeconds);
             var point = new Vector3(10, 0, 10);
-            float yaw = Helper.PiOver2;
-            float pitch = Helper.PiOver2;
-            float roll = Helper.PiOver2;
+            float yaw = MathUtils.PiOver2;
+            float pitch = MathUtils.PiOver2;
+            float roll = MathUtils.PiOver2;
 
             var rot = Quaternion.RotationYawPitchRoll(yaw * timeSeconds, pitch * timeSeconds, roll * timeSeconds);
             var trn = Matrix4x4.RotationQuaternion(rot) * Matrix4x4.Translation(point);

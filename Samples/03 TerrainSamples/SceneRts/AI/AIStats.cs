@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Mathematics;
 
 namespace TerrainSamples.SceneRts.AI
 {
@@ -58,7 +59,7 @@ namespace TerrainSamples.SceneRts.AI
             initialLife = description.Life;
             Life = description.Life;
             SightDistance = description.SightDistance;
-            SightAngle = Helper.DegreesToRadians(description.SightAngle);
+            SightAngle = MathUtils.DegreesToRadians(description.SightAngle);
 
             CurrentWeapon = PrimaryWeapon;
         }

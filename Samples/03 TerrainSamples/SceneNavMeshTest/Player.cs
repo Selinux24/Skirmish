@@ -1,4 +1,4 @@
-﻿using Engine;
+﻿using Engine.Mathematics;
 using Engine.PathFinding.RecastNavigation;
 using System;
 
@@ -27,8 +27,8 @@ namespace TerrainSamples.SceneNavMeshTest
             if (obj is Player other)
             {
                 return
-                    Helper.NearEqual(other.Velocity, Velocity) &&
-                    Helper.NearEqual(other.VelocitySlow, VelocitySlow);
+                    MathUtils.NearEqual(other.Velocity, Velocity) &&
+                    MathUtils.NearEqual(other.VelocitySlow, VelocitySlow);
             }
 
             return false;

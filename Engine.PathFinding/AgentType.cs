@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -46,7 +47,7 @@ namespace Engine.PathFinding
             {
                 return
                     other.Name == Name &&
-                    Helper.NearEqual(other.Height, Height);
+                    MathUtils.NearEqual(other.Height, Height);
             }
 
             return false;

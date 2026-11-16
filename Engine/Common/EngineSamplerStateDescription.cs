@@ -23,7 +23,7 @@ namespace Engine.Common
                 MipLODBias = obj.MipLodBias,
                 MaxAnisotropy = obj.MaximumAnisotropy,
                 ComparisonFunc = (DXComparison)obj.ComparisonFunction,
-                BorderColor = obj.BorderColor,
+                BorderColor = obj.BorderColor.ToColor4(),
                 MinLOD = obj.MinimumLod,
                 MaxLOD = obj.MaximumLod,
             };
@@ -39,7 +39,7 @@ namespace Engine.Common
                 MipLodBias = obj.MipLODBias,
                 MaximumAnisotropy = obj.MaxAnisotropy,
                 ComparisonFunction = (Comparison)obj.ComparisonFunc,
-                BorderColor = obj.BorderColor,
+                BorderColor = obj.BorderColor.ToColor4(),
                 MinimumLod = obj.MinLOD,
                 MaximumLod = obj.MaxLOD,
             };

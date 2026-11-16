@@ -107,8 +107,8 @@ namespace Tanks
         private readonly string tankBarrelPart = "Barrel-mesh";
         private readonly string tankTurretPart = "Turret-mesh";
         private readonly string tankHullPart = "Hull-mesh";
-        private readonly float maxBarrelPitch = Helper.DegreesToRadians(85);
-        private readonly float minBarrelPitch = Helper.DegreesToRadians(-5);
+        private readonly float maxBarrelPitch = MathUtils.DegreesToRadians(85);
+        private readonly float minBarrelPitch = MathUtils.DegreesToRadians(-5);
         private Model projectile;
 
         private readonly List<ModelInstanced> treeModels = [];
@@ -505,7 +505,7 @@ namespace Tanks
                 trajectoryMarker.BaseColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
-                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, Helper.TwoPi, 1000, ScaleFuncs.Linear);
+                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, MathUtils.TwoPi, 1000, ScaleFuncs.Linear);
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
@@ -885,10 +885,10 @@ namespace Tanks
             while (treeCount > 0)
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
-                var rot = Helper.RandomGenerator.NextSingle(0, Helper.TwoPi);
+                var rot = Helper.RandomGenerator.NextSingle(0, MathUtils.TwoPi);
                 var scale = Helper.RandomGenerator.NextSingle(2.5f, 5f);
 
-                if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
+                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(point.X, point.Y, out var result))
                 {
                     continue;
                 }
@@ -918,12 +918,12 @@ namespace Tanks
             var p2 = new Vector3(+140, 100, 0);
             var n2 = Vector3.Up;
 
-            if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
+            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Primitive.Normal;
             }
-            if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
+            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Primitive.Normal;
@@ -1360,7 +1360,7 @@ You will lost all the game progress.",
             else
             {
                 playerTurnMarker.Left = Game.Form.RenderCenter.X + 120;
-                playerTurnMarker.Rotation = Helper.Pi;
+                playerTurnMarker.Rotation = MathUtils.Pi;
             }
         }
         private void UpdatePlayersStatus()
@@ -1480,7 +1480,7 @@ You will lost all the game progress.",
         }
         private void ModelToGround(ModelInstance model)
         {
-            if (FindTopGroundPosition<Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
+            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
             {
                 model.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
                 model.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
@@ -1532,7 +1532,7 @@ You will lost all the game progress.",
             var newDir = Vector3.Normalize(barrelPos - position);
 
             var angle = Vector3.AngleSigned(barrelDir, newDir);
-            if (Helper.IsZero(angle))
+            if (MathUtils.IsZero(angle))
             {
                 return;
             }

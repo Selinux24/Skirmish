@@ -231,10 +231,10 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the north east position</returns>
         private static Vector3? GetNorthEast(float maxX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            if (Helper.NearEqual(p0.X, maxX) && Helper.NearEqual(p0.Z, maxZ)) return p0;
-            else if (Helper.NearEqual(p1.X, maxX) && Helper.NearEqual(p1.Z, maxZ)) return p1;
-            else if (Helper.NearEqual(p2.X, maxX) && Helper.NearEqual(p2.Z, maxZ)) return p2;
-            else if (Helper.NearEqual(p3.X, maxX) && Helper.NearEqual(p3.Z, maxZ)) return p3;
+            if (MathUtils.NearEqual(p0.X, maxX) && MathUtils.NearEqual(p0.Z, maxZ)) return p0;
+            else if (MathUtils.NearEqual(p1.X, maxX) && MathUtils.NearEqual(p1.Z, maxZ)) return p1;
+            else if (MathUtils.NearEqual(p2.X, maxX) && MathUtils.NearEqual(p2.Z, maxZ)) return p2;
+            else if (MathUtils.NearEqual(p3.X, maxX) && MathUtils.NearEqual(p3.Z, maxZ)) return p3;
 
             return null;
         }
@@ -250,10 +250,10 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the north west position</returns>
         private static Vector3? GetNorthWest(float minX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            if (Helper.NearEqual(p0.X, minX) && Helper.NearEqual(p0.Z, maxZ)) return p0;
-            else if (Helper.NearEqual(p1.X, minX) && Helper.NearEqual(p1.Z, maxZ)) return p1;
-            else if (Helper.NearEqual(p2.X, minX) && Helper.NearEqual(p2.Z, maxZ)) return p2;
-            else if (Helper.NearEqual(p3.X, minX) && Helper.NearEqual(p3.Z, maxZ)) return p3;
+            if (MathUtils.NearEqual(p0.X, minX) && MathUtils.NearEqual(p0.Z, maxZ)) return p0;
+            else if (MathUtils.NearEqual(p1.X, minX) && MathUtils.NearEqual(p1.Z, maxZ)) return p1;
+            else if (MathUtils.NearEqual(p2.X, minX) && MathUtils.NearEqual(p2.Z, maxZ)) return p2;
+            else if (MathUtils.NearEqual(p3.X, minX) && MathUtils.NearEqual(p3.Z, maxZ)) return p3;
 
             return null;
         }
@@ -269,10 +269,10 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the south west position</returns>
         private static Vector3? GetSouthWest(float minX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            if (Helper.NearEqual(p0.X, minX) && Helper.NearEqual(p0.Z, minZ)) return p0;
-            else if (Helper.NearEqual(p1.X, minX) && Helper.NearEqual(p1.Z, minZ)) return p1;
-            else if (Helper.NearEqual(p2.X, minX) && Helper.NearEqual(p2.Z, minZ)) return p2;
-            else if (Helper.NearEqual(p3.X, minX) && Helper.NearEqual(p3.Z, minZ)) return p3;
+            if (MathUtils.NearEqual(p0.X, minX) && MathUtils.NearEqual(p0.Z, minZ)) return p0;
+            else if (MathUtils.NearEqual(p1.X, minX) && MathUtils.NearEqual(p1.Z, minZ)) return p1;
+            else if (MathUtils.NearEqual(p2.X, minX) && MathUtils.NearEqual(p2.Z, minZ)) return p2;
+            else if (MathUtils.NearEqual(p3.X, minX) && MathUtils.NearEqual(p3.Z, minZ)) return p3;
 
             return null;
         }
@@ -288,10 +288,10 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the south east position</returns>
         private static Vector3? GetSouthEast(float maxX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            if (Helper.NearEqual(p0.X, maxX) && Helper.NearEqual(p0.Z, minZ)) return p0;
-            else if (Helper.NearEqual(p1.X, maxX) && Helper.NearEqual(p1.Z, minZ)) return p1;
-            else if (Helper.NearEqual(p2.X, maxX) && Helper.NearEqual(p2.Z, minZ)) return p2;
-            else if (Helper.NearEqual(p3.X, maxX) && Helper.NearEqual(p3.Z, minZ)) return p3;
+            if (MathUtils.NearEqual(p0.X, maxX) && MathUtils.NearEqual(p0.Z, minZ)) return p0;
+            else if (MathUtils.NearEqual(p1.X, maxX) && MathUtils.NearEqual(p1.Z, minZ)) return p1;
+            else if (MathUtils.NearEqual(p2.X, maxX) && MathUtils.NearEqual(p2.Z, minZ)) return p2;
+            else if (MathUtils.NearEqual(p3.X, maxX) && MathUtils.NearEqual(p3.Z, minZ)) return p3;
 
             return null;
         }

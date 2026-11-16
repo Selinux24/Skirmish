@@ -35,7 +35,7 @@ namespace Engine
         /// <remarks>0 to PI</remarks>
         public static float CalcAzimuth(float lattitude, float decline, float meridianAngle)
         {
-            return MathF.Atan2(MathF.Sin(meridianAngle), MathF.Cos(meridianAngle) * MathF.Sin(lattitude) - MathF.Tan(decline) * MathF.Cos(lattitude)) + Helper.Pi;
+            return MathF.Atan2(MathF.Sin(meridianAngle), MathF.Cos(meridianAngle) * MathF.Sin(lattitude) - MathF.Tan(decline) * MathF.Cos(lattitude)) + MathUtils.Pi;
         }
         /// <summary>
         /// Gets the sun light direction based upon elevation and azimuth angles
@@ -93,7 +93,7 @@ namespace Engine
         /// </summary> 
         public float MeridianAngle
         {
-            get { return TimeOfDayValue * Helper.TwoPi; }
+            get { return TimeOfDayValue * MathUtils.TwoPi; }
         }
         /// <summary>
         /// Angle from true north of celestial object in degrees
@@ -102,11 +102,11 @@ namespace Engine
         {
             get
             {
-                return Helper.RadiansToDegrees(Azimuth);
+                return MathUtils.RadiansToDegrees(Azimuth);
             }
             set
             {
-                Azimuth = Helper.DegreesToRadians(value);
+                Azimuth = MathUtils.DegreesToRadians(value);
             }
         }
         /// <summary>
@@ -116,11 +116,11 @@ namespace Engine
         {
             get
             {
-                return Helper.RadiansToDegrees(Elevation);
+                return MathUtils.RadiansToDegrees(Elevation);
             }
             set
             {
-                Elevation = Helper.DegreesToRadians(value);
+                Elevation = MathUtils.DegreesToRadians(value);
             }
         }
         /// <summary>
@@ -130,11 +130,11 @@ namespace Engine
         {
             get
             {
-                return Helper.RadiansToDegrees(SunDecline);
+                return MathUtils.RadiansToDegrees(SunDecline);
             }
             set
             {
-                SunDecline = Helper.DegreesToRadians(value);
+                SunDecline = MathUtils.DegreesToRadians(value);
             }
         }
         /// <summary>
@@ -164,7 +164,7 @@ namespace Engine
         {
             get
             {
-                return !Helper.NearEqual(PreviuosElevation, Elevation);
+                return !MathUtils.NearEqual(PreviuosElevation, Elevation);
             }
         }
 
@@ -183,7 +183,7 @@ namespace Engine
             NextElevation = 0;
             AzimuthOverride = 1.0f;
 
-            SunDecline = Helper.DegreesToRadians(23.44f);
+            SunDecline = MathUtils.DegreesToRadians(23.44f);
             Elevation = 0.0f;
             Azimuth = 0.0f;
 
@@ -212,7 +212,7 @@ namespace Engine
         {
             PreviuosElevation = NextElevation;
 
-            if (Helper.IsZero(AzimuthOverride))
+            if (MathUtils.IsZero(AzimuthOverride))
             {
                 //Simplified azimuth/elevation calculation.
 
@@ -225,14 +225,14 @@ namespace Engine
                 Azimuth = CalcAzimuth(0.0f, sunDecline, meridianAngle);
 
                 //Calculate normalized elevation (0=sunrise, PI/2=zenith, PI=sunset, 3PI/4=nadir)
-                float normalizedElevation = Helper.Pi * Elevation / (2 * CalcElevation(0.0f, sunDecline, 0.0f));
-                if (Azimuth > Helper.Pi)
+                float normalizedElevation = MathUtils.Pi * Elevation / (2 * CalcElevation(0.0f, sunDecline, 0.0f));
+                if (Azimuth > MathUtils.Pi)
                 {
-                    normalizedElevation = Helper.Pi - normalizedElevation;
+                    normalizedElevation = MathUtils.Pi - normalizedElevation;
                 }
                 else if (Elevation < 0)
                 {
-                    normalizedElevation = Helper.TwoPi + normalizedElevation;
+                    normalizedElevation = MathUtils.TwoPi + normalizedElevation;
                 }
 
                 NextElevation = normalizedElevation;

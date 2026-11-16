@@ -435,7 +435,7 @@ Progress: {(int)(progressValue * 100f)}%";
         }
         private void UpdateLorem(IGameTime gameTime)
         {
-            if (Helper.IsZero(textInterval))
+            if (MathUtils.IsZero(textInterval))
             {
                 return;
             }

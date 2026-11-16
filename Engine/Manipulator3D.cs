@@ -179,12 +179,12 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return;
             }
 
-            if (Helper.IsZero(velocity))
+            if (MathUtils.IsZero(velocity))
             {
                 return;
             }
@@ -236,12 +236,12 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return;
             }
 
-            if (Helper.IsZero(yaw) && Helper.IsZero(pitch) && Helper.IsZero(roll))
+            if (MathUtils.IsZero(yaw) && MathUtils.IsZero(pitch) && MathUtils.IsZero(roll))
             {
                 return;
             }
@@ -300,12 +300,12 @@ namespace Engine
         {
             float time = gameTime.ElapsedSeconds;
 
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return;
             }
 
-            if (Helper.IsZero(scaling.X) && Helper.IsZero(scaling.Y) && Helper.IsZero(scaling.Z))
+            if (MathUtils.IsZero(scaling.X) && MathUtils.IsZero(scaling.Y) && MathUtils.IsZero(scaling.Z))
             {
                 return;
             }
@@ -502,7 +502,7 @@ namespace Engine
         {
             float angle = Vector3.AngleSigned(Up, normal);
 
-            var axis = Helper.IsZero(angle % Helper.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
+            var axis = MathUtils.IsZero(angle % MathUtils.Pi) ? Vector3.Left : Vector3.Cross(Up, normal);
 
             var newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
 

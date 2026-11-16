@@ -50,7 +50,7 @@ namespace TerrainSamples.SceneRts.Controllers
             // A vector pointing from the location to the target
             var desired = (next - position);
             float dToNext = desired.Length();
-            if (Helper.IsZero(dToNext))
+            if (MathUtils.IsZero(dToNext))
             {
                 return;
             }
@@ -86,7 +86,7 @@ namespace TerrainSamples.SceneRts.Controllers
             //Calculates a delta using the future angle
             var futureRotation = Quaternion.LookAtLH(position, futureTarget, futureNormal, Axis.Y);
             float futureAngle = Quaternion.GetAngle(rotation, futureRotation);
-            float maxRot = Helper.PiOver2;
+            float maxRot = MathUtils.PiOver2;
             futureAngle = MathF.Min(futureAngle, maxRot);
             float velDelta = 1.0f - (futureAngle / maxRot);
 
@@ -94,7 +94,7 @@ namespace TerrainSamples.SceneRts.Controllers
             newVelocity *= velDelta;
             Velocity = newVelocity;
 
-            if (Helper.IsZero(velDelta) && !Helper.IsZero(futureAngle))
+            if (MathUtils.IsZero(velDelta) && !MathUtils.IsZero(futureAngle))
             {
                 //Rotates only
                 manipulator.RotateTo(futureTarget, futureNormal, Axis.Y, 0.01f);

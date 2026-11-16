@@ -286,7 +286,7 @@ namespace Engine
                     var r = output.Description.DesktopCoordinates;
 
                     // Compute the intersection.
-                    int intersectArea = RectI.ComputeIntersectionArea(windowBounds, r);
+                    int intersectArea = RectI.ComputeIntersectionArea(windowBounds, r.ToRectI());
                     if (intersectArea > bestIntersectArea)
                     {
                         bestOutput = output;
@@ -349,7 +349,7 @@ namespace Engine
                 using (adapterOutput)
                 {
                     using var adapterOutput6 = adapterOutput.QueryInterface<IDXGIOutput6>();
-                    return adapterOutput6.Description1.DesktopCoordinates;
+                    return adapterOutput6.Description1.DesktopCoordinates.ToRectI();
                 }
             }
         }

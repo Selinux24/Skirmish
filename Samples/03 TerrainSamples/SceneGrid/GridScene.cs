@@ -442,7 +442,7 @@ namespace TerrainSamples.SceneGrid
             }
 
             var cursorRay = GetPickingRay();
-            bool pickedGround = this.PickNearest<Triangle>(cursorRay, SceneObjectUsages.Ground, out var r);
+            bool pickedGround = this.PickNearest<Engine.Mathematics.Triangle>(cursorRay, SceneObjectUsages.Ground, out var r);
 
             //3D
             UpdateInput3D(gameTime, cursorRay, pickedGround, r);
@@ -525,7 +525,7 @@ namespace TerrainSamples.SceneGrid
 
             return PointerStates.HUD;
         }
-        private void UpdateInput3D(IGameTime gameTime, PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
+        private void UpdateInput3D(IGameTime gameTime, PickingRay cursorRay, bool picked, ScenePickingResult<Engine.Mathematics.Triangle> r)
         {
             if (picked)
             {
@@ -599,7 +599,7 @@ namespace TerrainSamples.SceneGrid
                 Camera.LookTo(pickedPosition, CameraTranslations.UseDelta);
             }
         }
-        private void UpdateInputActions(PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
+        private void UpdateInputActions(PickingRay cursorRay, bool picked, ScenePickingResult<Engine.Mathematics.Triangle> r)
         {
             if (CurrentAction == null)
             {
@@ -782,7 +782,7 @@ namespace TerrainSamples.SceneGrid
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
 
-                    if (!FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
+                    if (!FindTopGroundPosition(x, z, out PickingResult<Engine.Mathematics.Triangle> r))
                     {
                         throw new GameLogicException("Bad position");
                     }
@@ -793,7 +793,7 @@ namespace TerrainSamples.SceneGrid
 
                     if (teamIndex == 0)
                     {
-                        soldier.Manipulator.SetRotation(Helper.DegreesToRadians(180), 0, 0);
+                        soldier.Manipulator.SetRotation(MathUtils.DegreesToRadians(180), 0, 0);
                     }
 
                     soldierModels.Add(soldierC, soldier);

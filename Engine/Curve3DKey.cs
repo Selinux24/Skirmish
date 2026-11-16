@@ -79,7 +79,7 @@ namespace Engine
             }
 
             return
-                Helper.NearEqual(value1.Position, value2.Position) &&
+                MathUtils.NearEqual(value1.Position, value2.Position) &&
                 (value1.Value == value2.Value) &&
                 (value1.TangentIn == value2.TangentIn) &&
                 (value1.TangentOut == value2.TangentOut) &&

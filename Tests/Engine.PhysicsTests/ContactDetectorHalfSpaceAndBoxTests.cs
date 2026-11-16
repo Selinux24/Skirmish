@@ -15,7 +15,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly float Epsilon = Helper.ZeroTolerance;
+        static readonly float Epsilon = MathUtils.ZeroTolerance;
 
         static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix4x4 transform)
         {
@@ -160,14 +160,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -181,7 +181,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -195,7 +195,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -213,7 +213,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -231,7 +231,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -251,14 +251,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -272,7 +272,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -286,7 +286,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -304,7 +304,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -322,7 +322,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -342,14 +342,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -363,7 +363,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -377,7 +377,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -395,7 +395,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -413,7 +413,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationX(Helper.Pi + Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationX(MathUtils.Pi + MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -433,14 +433,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -454,7 +454,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -468,7 +468,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -486,7 +486,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -504,7 +504,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -524,14 +524,14 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up * 5f),
                             IntersectioExpected = false,
                         }
                     ],
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Up),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Up),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -545,7 +545,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -559,7 +559,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -577,7 +577,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 2f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -595,7 +595,7 @@ namespace Engine.PhysicsTests
                     [
                         new HalfSpaceAndBoxData
                         {
-                            BoxTransform = Matrix4x4.RotationZ(-Helper.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
+                            BoxTransform = Matrix4x4.RotationZ(-MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.Down * 5f),
                             IntersectioExpected = true,
                             Contacts =
                             [
@@ -642,7 +642,7 @@ namespace Engine.PhysicsTests
                 var expectedPosition = box.OrientedBoundingBox.GetVertex(expectedContact.Corner);
                 var expectedNormal = plane.Normal;
 
-                Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
+                Assert.IsTrue(MathUtils.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
                 Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
                 Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
             }

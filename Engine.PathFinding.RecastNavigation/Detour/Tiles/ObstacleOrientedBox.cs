@@ -33,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Quaternion rotation)
         {
-            if (Helper.IsZero(rotation.Angle))
+            if (MathUtils.IsZero(rotation.Angle))
             {
                 return 0f;
             }

@@ -1,4 +1,5 @@
-﻿using Engine.Mathematics;
+﻿using Engine.Common;
+using Engine.Mathematics;
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,7 +25,7 @@ namespace Engine.PhysicsTests
         }
         static ConvexMeshCollider FromBox(Vector3 extents, Matrix4x4 transform)
         {
-            var tris = Triangle.ComputeTriangleList(new BoundingBox(-extents, extents));
+            var tris = GeometryUtil.ComputeTriangleList(new BoundingBox(-extents, extents));
             var box = new ConvexMeshCollider(tris);
             var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
@@ -64,10 +65,10 @@ namespace Engine.PhysicsTests
 
             var obb = box1.OrientedBoundingBox;
 
-            Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
+            Mathematics.Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);
 
-            Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
+            Mathematics.Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
             Assert.AreEqual(contactsWith3[0].Position, pointInBox3);
         }
     }

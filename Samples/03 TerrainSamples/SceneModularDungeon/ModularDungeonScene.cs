@@ -73,7 +73,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = [];
 
-        private GeometryColorDrawer<Triangle> selectedItemDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> selectedItemDrawer = null;
         private Item selectedItem = null;
 
         private ModelInstanced human = null;
@@ -348,13 +348,13 @@ namespace TerrainSamples.SceneModularDungeon
                 });
             };
 
-            var drawerDesc = new GeometryColorDrawerDescription<Triangle>()
+            var drawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
                 StartsVisible = false,
             };
-            selectedItemDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
+            selectedItemDrawer = await AddComponentUI<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
         }
         private async Task InitializeMapTexture()
         {
@@ -954,7 +954,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var sph = item.Instance.GetBoundingSphere();
                 Ray r = ray;
-                Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
+                Engine.Mathematics.Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
                 return distance;
             }
         }
@@ -1348,7 +1348,7 @@ namespace TerrainSamples.SceneModularDungeon
             for (int i = 0; i < human.InstanceCount; i++)
             {
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29);
-                human[i].Manipulator.SetRotation(-Helper.PiOver2, 0, 0);
+                human[i].Manipulator.SetRotation(-MathUtils.PiOver2, 0, 0);
 
                 human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);

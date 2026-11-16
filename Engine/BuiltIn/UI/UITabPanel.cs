@@ -93,7 +93,7 @@ namespace Engine.BuiltIn.UI
             }
             set
             {
-                if (Helper.NearEqual(tabButtonsAreaSize, value))
+                if (MathUtils.NearEqual(tabButtonsAreaSize, value))
                 {
                     return;
                 }

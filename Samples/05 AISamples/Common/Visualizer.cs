@@ -6,14 +6,14 @@ using System;
 
 namespace AISamples.Common
 {
-    class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
+    class Visualizer(GeometryColorDrawer<Engine.Mathematics.Triangle> opaqueDrawer, GeometryColorDrawer<Engine.Mathematics.Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
     {
         private static readonly Color4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
         private static readonly Color4 wPositiveColor = Color.Yellow;
         private static readonly Color4 wNegativeColor = Color.Blue;
 
-        private readonly GeometryColorDrawer<Triangle> opaqueDrawer = opaqueDrawer;
-        private readonly GeometryColorDrawer<Triangle> triangleDrawer = triangleDrawer;
+        private readonly GeometryColorDrawer<Engine.Mathematics.Triangle> opaqueDrawer = opaqueDrawer;
+        private readonly GeometryColorDrawer<Engine.Mathematics.Triangle> triangleDrawer = triangleDrawer;
         private readonly GeometryColorDrawer<Line3D> lineDrawer = lineDrawer;
 
         public void DrawNetwork(NeuralNetwork network, Vector3 position, int margin, int totalWidth, int totalHeight, float nodeRadius)
@@ -54,7 +54,7 @@ namespace AISamples.Common
             Vector3 p3 = new(left + width, top, 1.5f + depth);
 
             var bgT = GeometryUtil.CreatePolygonTriangleList([p0, p1, p2, p3], false);
-            opaqueDrawer.AddPrimitives(bColor, Triangle.ComputeTriangleList(bgT));
+            opaqueDrawer.AddPrimitives(bColor, GeometryUtil.ComputeTriangleList(bgT));
         }
 
         private void DrawLevel(Level level, float nodeRadius, int left, int top, int width, int heigth, float depth)
@@ -87,7 +87,7 @@ namespace AISamples.Common
 
                 float iv = level.GetInput(i);
                 var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, bottom, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
-                triangleDrawer.AddPrimitives(ColorFromValue(iv), Triangle.ComputeTriangleList(gT));
+                triangleDrawer.AddPrimitives(ColorFromValue(iv), GeometryUtil.ComputeTriangleList(gT));
             }
 
             for (int o = 0; o < outputCount; o++)
@@ -96,7 +96,7 @@ namespace AISamples.Common
 
                 float ov = level.GetOutput(o);
                 var gT = GeometryUtil.CreateCircle(Topology.TriangleList, new(x, top, 0.5f + depth), tNodeRadius, stacks, Vector3.ForwardLH);
-                triangleDrawer.AddPrimitives(ColorFromValue(ov), Triangle.ComputeTriangleList(gT));
+                triangleDrawer.AddPrimitives(ColorFromValue(ov), GeometryUtil.ComputeTriangleList(gT));
 
                 float bv = level.GetBias(o);
                 var gL = GeometryUtil.CreateCircle(Topology.LineList, new(x, top, 0.5f + depth), nodeRadius, stacks, Vector3.ForwardLH);

@@ -84,7 +84,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         public void UpdateInputEditor(IGameTime gameTime)
         {
             var pRay = scene.GetPickingRay(PickingHullTypes.Geometry);
-            if (!scene.PickFirst<Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
+            if (!scene.PickFirst<Engine.Mathematics.Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
             {
                 return;
             }

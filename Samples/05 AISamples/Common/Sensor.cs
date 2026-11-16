@@ -8,7 +8,7 @@ namespace AISamples.Common
     using Engine;
     using Engine.Mathematics;
 
-    class Sensor(Car car, int rayCount, float rayLength, float raySpread = Helper.PiOver4)
+    class Sensor(Car car, int rayCount, float rayLength, float raySpread = MathUtils.PiOver4)
     {
         private readonly Car car = car;
         private readonly int rayCount = rayCount;

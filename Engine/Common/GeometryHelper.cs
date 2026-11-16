@@ -51,7 +51,7 @@ namespace Engine.Common
             if (!update)
             {
                 //Copy collection
-                return positionCache.ToArray();
+                return [.. positionCache];
             }
 
             if (drawingData == null)
@@ -76,7 +76,7 @@ namespace Engine.Common
             updatePoints = false;
 
             //Copy collection
-            return positionCache.ToArray();
+            return [.. positionCache];
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -86,14 +86,14 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
+        public IEnumerable<Mathematics.Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
         {
             bool update = refresh || updateTriangles;
 
             if (!update)
             {
                 //Copy collection
-                return triangleCache.ToArray();
+                return [.. triangleCache];
             }
 
             if (drawingData == null)
@@ -118,7 +118,7 @@ namespace Engine.Common
             updateTriangles = false;
 
             //Copy collection
-            return triangleCache.ToArray();
+            return [.. triangleCache];
         }
     }
 }

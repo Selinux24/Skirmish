@@ -268,7 +268,7 @@ namespace Engine.PathFinding
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>
         /// <returns>Returns a triangle list</returns>
-        public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
+        public virtual IEnumerable<Mathematics.Triangle> GetTrianglesForNavigationGraph()
         {
             var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Usage == SceneObjectUsages.Ground);
 
@@ -354,11 +354,11 @@ namespace Engine.PathFinding
 
             Game.Logger.WriteTrace(this, $"FindPathAsync looking for nearest ground end-point positions {from} -> {to}.");
 
-            if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
+            if (FindNearestGroundPosition(from, out PickingResult<Mathematics.Triangle> rFrom))
             {
                 groundFrom = rFrom.Position;
             }
-            if (FindNearestGroundPosition(to, out PickingResult<Triangle> rTo))
+            if (FindNearestGroundPosition(to, out PickingResult<Mathematics.Triangle> rTo))
             {
                 groundTo = rTo.Position;
             }
@@ -384,7 +384,7 @@ namespace Engine.PathFinding
 
                 for (int i = 0; i < positions.Count; i++)
                 {
-                    if (FindNearestGroundPosition<Triangle>(positions[i], out var r))
+                    if (FindNearestGroundPosition<Mathematics.Triangle>(positions[i], out var r))
                     {
                         positions[i] = r.Position;
                         normals[i] = r.Primitive.Normal;
@@ -434,7 +434,7 @@ namespace Engine.PathFinding
                 return false;
             }
 
-            bool found = FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
+            bool found = FindAllGroundPosition<Mathematics.Triangle>(newPosition.X, newPosition.Z, out var results);
             if (!found)
             {
                 return false;
@@ -487,7 +487,7 @@ namespace Engine.PathFinding
         {
             //Find nearest ground position
             Vector3 finalPosition;
-            if (FindNearestGroundPosition(position, out PickingResult<Triangle> nearestResult))
+            if (FindNearestGroundPosition(position, out PickingResult<Mathematics.Triangle> nearestResult))
             {
                 //Use nearest ground position found
                 finalPosition = nearestResult.Position;
@@ -667,7 +667,7 @@ namespace Engine.PathFinding
             {
                 var v = rnd.NextVector3(bbox.Minimum, bbox.Maximum);
 
-                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Mathematics.Triangle> r))
                 {
                     point = r.Position + offset;
 
@@ -689,7 +689,7 @@ namespace Engine.PathFinding
         /// <returns>Returns true if a position were found</returns>
         public bool GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph, out Vector3 point)
         {
-            if (Helper.IsZero(bsph.Radius))
+            if (MathUtils.IsZero(bsph.Radius))
             {
                 point = Vector3.Zero;
 
@@ -704,7 +704,7 @@ namespace Engine.PathFinding
 
                 var v = bsph.Center + (dist * Vector3.Normalize(dir));
 
-                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Mathematics.Triangle> r))
                 {
                     point = r.Position + offset;
 

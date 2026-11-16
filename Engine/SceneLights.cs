@@ -193,12 +193,12 @@ namespace Engine
             [
                 .. new[]
                 {
-                    new Tuple<float, Color3>(Helper.Pi * -1.00f, Color.Black),
-                    new Tuple<float, Color3>(Helper.Pi * 0.02f, Color.Orange),
-                    new Tuple<float, Color3>(Helper.Pi * 0.20f, Color.White),
-                    new Tuple<float, Color3>(Helper.Pi * 0.70f, Color.White),
-                    new Tuple<float, Color3>(Helper.Pi * 0.98f, Color.Orange),
-                    new Tuple<float, Color3>(Helper.Pi * 2.00f, Color.Black),
+                    new Tuple<float, Color3>(MathUtils.Pi * -1.00f, Color.Black),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.02f, Color.Orange),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.20f, Color.White),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.70f, Color.White),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.98f, Color.Orange),
+                    new Tuple<float, Color3>(MathUtils.Pi * 2.00f, Color.Black),
                 },
             ];
         /// <summary>
@@ -395,8 +395,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (MathUtils.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtils.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -433,8 +433,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (MathUtils.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtils.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -580,7 +580,7 @@ namespace Engine
         /// <returns>Returns the color base on time of day meridian angle</returns>
         private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
-            float angle = Math.Clamp(timeOfDay.MeridianAngle - Helper.PiOver2, 0, Helper.Pi);
+            float angle = Math.Clamp(timeOfDay.MeridianAngle - MathUtils.PiOver2, 0, MathUtils.Pi);
 
             for (int i = 0; i < SunColorPalette.Count; i++)
             {

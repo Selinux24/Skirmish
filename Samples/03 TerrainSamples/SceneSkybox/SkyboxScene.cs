@@ -70,7 +70,7 @@ namespace TerrainSamples.SceneSkybox
         ];
         private readonly Quaternion[] obeliskRotations =
         [
-            Quaternion.RotationYawPitchRoll(-Helper.PiOver2 * 0.75f, Helper.PiOver2 * 1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(-MathUtils.PiOver2 * 0.75f, MathUtils.PiOver2 * 1.03f, 0.45f),
             Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
@@ -97,7 +97,7 @@ namespace TerrainSamples.SceneSkybox
         private Scenery ruins = null;
         private Water water = null;
         private GeometryColorDrawer<Line3D> volumesDrawer = null;
-        private GeometryColorDrawer<Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> graphDrawer = null;
 
         private readonly uint mapSize = 256;
         private readonly float terrainSize = 512;
@@ -186,7 +186,7 @@ namespace TerrainSamples.SceneSkybox
             volumesDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new GeometryColorDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new GeometryColorDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
         private void InitializeUICompleted(LoadResourcesResult res)
@@ -408,7 +408,7 @@ namespace TerrainSamples.SceneSkybox
                 if (i == 2) color = Color.Green;
                 if (i == 3) color = Color.LightBlue;
 
-                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
+                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Engine.Mathematics.Triangle> result);
                 var firePositions3D = result.Position;
 
                 torchs[i].Manipulator.SetTransform(firePositions3D, Quaternion.Identity, 0.2f);
@@ -519,7 +519,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 var pRay = GetPickingRay();
 
-                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (ruins.PickNearest(pRay, out PickingResult<Engine.Mathematics.Triangle> r))
                 {
                     var tri = Line3D.CreateTriangle(r.Primitive);
                     var cross = Line3D.CreateCross(r.Position, 0.1f);
@@ -533,7 +533,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 var pRay = GetPickingRay();
 
-                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (ruins.PickNearest(pRay, out PickingResult<Engine.Mathematics.Triangle> r))
                 {
                     decalEmitter.AddDecal(
                         r.Position,

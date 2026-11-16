@@ -86,7 +86,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public Poly[] GetPolys()
         {
-            return Polys.Take(Header.PolyCount).ToArray();
+            return [.. Polys.Take(Header.PolyCount)];
         }
         /// <summary>
         /// Gets the polygon specified by index
@@ -202,10 +202,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public OffMeshConnection[] GetOffMeshConnections()
         {
-            return OffMeshCons
-                .Take(Header.OffMeshConCount)
-                .Where(o => o != null)
-                .ToArray();
+            return [.. OffMeshCons.Take(Header.OffMeshConCount).Where(o => o != null)];
         }
         /// <summary>
         /// Gets the off-mesh connection by off-mesh connection index
@@ -355,7 +352,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="vertBase">Detail vertex base index</param>
         /// <param name="tris">Triangle indexes</param>
         /// <returns>Returns the triangle</returns>
-        public Triangle GetDetailTri(Poly poly, int vertBase, PolyMeshTriangleIndices tris)
+        public Mathematics.Triangle GetDetailTri(Poly poly, int vertBase, PolyMeshTriangleIndices tris)
         {
             Vector3[] v = new Vector3[3];
 
@@ -371,16 +368,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return new Triangle(v);
+            return new Mathematics.Triangle(v);
         }
         /// <summary>
         /// Gets the detail triangle list
         /// </summary>
         /// <param name="p">Polygon</param>
         /// <returns>Returns a triangle array</returns>
-        public List<Triangle> GetDetailTris(Poly p)
+        public List<Mathematics.Triangle> GetDetailTris(Poly p)
         {
-            List<Triangle> tris = [];
+            List<Mathematics.Triangle> tris = [];
 
             var pd = GetDetailMesh(p);
 

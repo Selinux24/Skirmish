@@ -221,8 +221,8 @@ namespace BasicSamples.SceneWater
 
         private void ToggleFog()
         {
-            Lights.FogStart = Helper.IsZero(Lights.FogStart) ? fogStart : 0f;
-            Lights.FogRange = Helper.IsZero(Lights.FogRange) ? fogRange : 0f;
+            Lights.FogStart = MathUtils.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = MathUtils.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
     }
 }

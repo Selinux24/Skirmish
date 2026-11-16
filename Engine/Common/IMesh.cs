@@ -94,7 +94,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false);
+        IEnumerable<Mathematics.Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false);
 
         /// <summary>
         /// Vertex type

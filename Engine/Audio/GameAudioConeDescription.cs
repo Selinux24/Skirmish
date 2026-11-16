@@ -1,4 +1,5 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.Audio
 {
     /// <summary>
@@ -15,8 +16,8 @@ namespace Engine.Audio
             {
                 return new GameAudioConeDescription()
                 {
-                    InnerAngle = Helper.Pi * 5.0f / 6.0f,
-                    OuterAngle = Helper.Pi * 11.0f / 6.0f,
+                    InnerAngle = MathUtils.Pi * 5.0f / 6.0f,
+                    OuterAngle = MathUtils.Pi * 11.0f / 6.0f,
                     InnerVolume = 1.0f,
                     OuterVolume = 0.75f,
                     InnerLpf = 0.0f,

@@ -22,7 +22,7 @@ namespace Engine.Collections.Helpers
         public static bool PickNearest(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
-            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -104,7 +104,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var obb = child.BoundingBox;
-                if (Collision.RayIntersectsBox(ref ray, ref obb, out float d))
+                if (Mathematics.Collision.RayIntersectsBox(ref ray, ref obb, out float d))
                 {
                     while (boxHitsByDistance.ContainsKey(d))
                     {
@@ -129,7 +129,7 @@ namespace Engine.Collections.Helpers
         public static bool PickFirst(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
-            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -161,7 +161,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var bbox = child.BoundingBox;
-                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+                var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;
@@ -196,7 +196,7 @@ namespace Engine.Collections.Helpers
         public static bool PickAll(PickingQuadTreeNode<T> node, PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
             var bbox = node.BoundingBox;
-            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 results = [];
@@ -229,7 +229,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var bbox = child.BoundingBox;
-                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+                var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;

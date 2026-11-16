@@ -1454,9 +1454,9 @@ namespace Engine.Content
         /// <summary>
         /// Gets hull meshes
         /// </summary>
-        public IEnumerable<Triangle> GetHullMeshes()
+        public IEnumerable<Mathematics.Triangle> GetHullMeshes()
         {
-            var meshes = new List<Triangle>();
+            var meshes = new List<Mathematics.Triangle>();
 
             var meshNames = geometryContent.Keys.ToArray();
 
@@ -1471,7 +1471,7 @@ namespace Engine.Content
         /// Gets hull mesh by mesh name
         /// </summary>
         /// <param name="meshName">Mesh name</param>
-        private Triangle[] GetHullMesh(string meshName)
+        private Mathematics.Triangle[] GetHullMesh(string meshName)
         {
             //Extract hull geometry
             return [.. geometryContent[meshName].Where(g => g.Value.IsHull).SelectMany(material => material.Value.GetTriangles())];

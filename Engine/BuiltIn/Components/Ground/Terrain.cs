@@ -159,7 +159,7 @@ namespace Engine.BuiltIn.Components.Ground
                 uvDisplacement);
 
             // Compute triangles for ray - mesh picking
-            var tris = Triangle.ComputeTriangleList(
+            var tris = GeometryUtil.ComputeTriangleList(
                 Vertices.Select(v => v.Position.Value).ToArray(),
                 Indices.ToArray());
 

@@ -350,25 +350,25 @@ namespace TerrainSamples.ScenePerlinNoise
 
             bool updateMap = false;
 
-            if (!Helper.NearEqual(Scale, pbScale.ProgressValue))
+            if (!MathUtils.NearEqual(Scale, pbScale.ProgressValue))
             {
                 Scale = pbScale.ProgressValue;
                 updateMap = true;
             }
 
-            if (!Helper.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
+            if (!MathUtils.NearEqual(Lacunarity, pbLacunarity.ProgressValue))
             {
                 Lacunarity = pbLacunarity.ProgressValue;
                 updateMap = true;
             }
 
-            if (!Helper.NearEqual(Persistance, pbPersistance.ProgressValue))
+            if (!MathUtils.NearEqual(Persistance, pbPersistance.ProgressValue))
             {
                 Persistance = pbPersistance.ProgressValue;
                 updateMap = true;
             }
 
-            if (!Helper.NearEqual(Octaves, pbOctaves.ProgressValue))
+            if (!MathUtils.NearEqual(Octaves, pbOctaves.ProgressValue))
             {
                 Octaves = pbOctaves.ProgressValue;
                 updateMap = true;

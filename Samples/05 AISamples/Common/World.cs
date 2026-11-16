@@ -74,7 +74,7 @@ namespace AISamples.Common
 
         private readonly Color4 carSensorColor = Color.YellowGreen;
         private readonly Color4 carSensorContactColor = Color.OrangeRed;
-        private GeometryColorDrawer<Triangle> carSensorDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> carSensorDrawer = null;
 
         public Graph Graph { get => graph; }
         public Guid Version { get; private set; } = Guid.NewGuid();
@@ -467,7 +467,7 @@ namespace AISamples.Common
             var bbox = carDrawer[0].GetBoundingBox();
             carScale = MathF.Max(MathF.Max(carWidth / bbox.Width, carHeight / bbox.Height), carLength / bbox.Depth);
 
-            var sDesc = new GeometryColorDrawerDescription<Triangle>()
+            var sDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 Count = 1000,
                 BlendMode = BlendModes.Opaque,
@@ -475,7 +475,7 @@ namespace AISamples.Common
                 StartsVisible = false,
             };
 
-            carSensorDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
+            carSensorDrawer = await scene.AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
                 nameof(carSensorDrawer),
                 nameof(carSensorDrawer),
                 sDesc);
@@ -581,15 +581,15 @@ namespace AISamples.Common
             if (rayReading == null)
             {
                 //No reading, draw the ray
-                var tris = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, p1, 0.3f, 16));
+                var tris = GeometryUtil.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, p1, 0.3f, 16));
                 return tris.Select(t => (carSensorColor, t));
             }
 
             var pi = rayReading.Position;
             pi.Y = height;
 
-            var tris1 = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, pi, 0.3f, 16));
-            var tris2 = Triangle.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, pi, p1, 0.3f, 16));
+            var tris1 = GeometryUtil.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, p0, pi, 0.3f, 16));
+            var tris2 = GeometryUtil.ComputeTriangleList(GeometryUtil.CreateCylinder(Topology.TriangleList, pi, p1, 0.3f, 16));
 
             return
             [

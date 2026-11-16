@@ -25,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tris">Triangle list</param>
         /// <param name="settings">Settings</param>
         /// <returns>Returns true if the rasterization finishes correctly</returns>
-        public static IEnumerable<RasterizeData> Rasterize(Triangle[] tris, RasterizerSettings settings)
+        public static IEnumerable<RasterizeData> Rasterize(Mathematics.Triangle[] tris, RasterizerSettings settings)
         {
             if (EnableDebug)
             {
@@ -56,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tris">Triangle list</param>
         /// <param name="walkableSlopeAngle">Slope angle in degrees</param>
         /// <returns>Returns a rasterize item collection</returns>
-        private static RasterizeItem[] MarkWalkableTriangles(Triangle[] tris, float walkableSlopeAngle)
+        private static RasterizeItem[] MarkWalkableTriangles(Mathematics.Triangle[] tris, float walkableSlopeAngle)
         {
             RasterizeItem[] res = new RasterizeItem[tris.Length];
 
@@ -386,7 +386,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Base triangle
         /// </summary>
-        public Triangle Triangle { get; set; }
+        public Mathematics.Triangle Triangle { get; set; }
         /// <summary>
         /// Rasterized division data
         /// </summary>

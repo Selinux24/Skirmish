@@ -185,8 +185,8 @@ namespace Engine.Animation
             return
                 Joint == other.Joint &&
                 Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
-                Helper.NearEqual(StartTime, other.StartTime) &&
-                Helper.NearEqual(EndTime, other.EndTime);
+                MathUtils.NearEqual(StartTime, other.StartTime) &&
+                MathUtils.NearEqual(EndTime, other.EndTime);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

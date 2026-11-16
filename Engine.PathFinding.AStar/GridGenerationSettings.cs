@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.AStar
 {
@@ -12,6 +13,6 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Path node maximum inclination
         /// </summary>
-        public float NodeInclination { get; set; } = Helper.PiOver4;
+        public float NodeInclination { get; set; } = MathUtils.PiOver4;
     }
 }

@@ -566,8 +566,8 @@ namespace Engine.Common
             //North pole
             vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
 
-            float phiStep = Helper.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * Helper.Pi / sliceCount;
+            float phiStep = MathUtils.Pi / (stackCount + 1);
+            float thetaStep = 2.0f * MathUtils.Pi / sliceCount;
 
             //Compute vertices for each stack ring (do not count the poles as rings).
             for (int st = 1; st < (stackCount + 1); ++st)
@@ -620,8 +620,8 @@ namespace Engine.Common
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 0.0f));
 
-            float phiStep = Helper.Pi / stackCount;
-            float thetaStep = 2.0f * Helper.Pi / sliceCount;
+            float phiStep = MathUtils.Pi / stackCount;
+            float thetaStep = 2.0f * MathUtils.Pi / sliceCount;
 
             for (int st = 1; st <= stackCount - 1; ++st)
             {
@@ -644,8 +644,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / Helper.Pi * 2f;
-                    float v = phi / Helper.Pi;
+                    float u = theta / MathUtils.Pi * 2f;
+                    float v = phi / MathUtils.Pi;
 
                     var texture = new Vector2(u, v);
 
@@ -816,8 +816,8 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = Helper.PiOver2 / stackCount;
-            float thetaStep = Helper.TwoPi / sliceCount;
+            float phiStep = MathUtils.PiOver2 / stackCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -862,9 +862,9 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = Helper.PiOver2 / stackCount;
-            float thetaStep = Helper.TwoPi / sliceCount;
-            float halfStep = thetaStep / Helper.TwoPi / 2f;
+            float phiStep = MathUtils.PiOver2 / stackCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
+            float halfStep = thetaStep / MathUtils.TwoPi / 2f;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -892,8 +892,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / Helper.TwoPi;
-                    float v = phi / Helper.PiOver2;
+                    float u = theta / MathUtils.TwoPi;
+                    float v = phi / MathUtils.PiOver2;
 
                     if (st == 0)
                     {
@@ -1285,16 +1285,16 @@ namespace Engine.Common
             vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
             vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
-            float thetaStep = Helper.TwoPi / sliceCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
 
             for (int sl = 0; sl < sliceCount; sl++)
             {
                 float theta = sl * thetaStep;
 
                 var position = new Vector3(
-                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Cos(theta),
+                    baseRadius * MathF.Sin(MathUtils.PiOver2) * MathF.Cos(theta),
                     -height,
-                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Sin(theta));
+                    baseRadius * MathF.Sin(MathUtils.PiOver2) * MathF.Sin(theta));
 
                 vertList.Add(position);
             }
@@ -2236,7 +2236,7 @@ namespace Engine.Common
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = j / (float)sliceCount * 2 * Helper.Pi;
+                    float theta = j / (float)sliceCount * 2 * MathUtils.Pi;
                     float st = MathF.Sin(theta), ct = MathF.Cos(theta);
                     var v = new Vector3(radius * st, height * i, radius * ct);
                     verts.Add(Vector3.TransformCoordinate(v, trn));
@@ -2605,7 +2605,7 @@ namespace Engine.Common
 
             for (int i = 0; i < stackCount; i++)
             {
-                float a = i / (float)stackCount * Helper.TwoPi;
+                float a = i / (float)stackCount * MathUtils.TwoPi;
                 float x = MathF.Cos(a) * radius;
                 float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
@@ -2614,7 +2614,7 @@ namespace Engine.Common
                 {
                     var axis = Vector3.Cross(up, Vector3.Up);
 
-                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, Helper.PiOver2));
+                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, MathUtils.PiOver2));
                 }
 
                 verts.Add(v + center);
@@ -2873,7 +2873,7 @@ namespace Engine.Common
             float angle = Vector3.AngleSigned(Vector3.Up, rotNormal);
 
             Vector3 axis;
-            if (Helper.NearEqual(angle, Helper.Pi))
+            if (MathUtils.NearEqual(angle, MathUtils.Pi))
             {
                 //Parallel negative axis: Vector3.Down
                 axis = Vector3.Left;
@@ -3341,7 +3341,7 @@ namespace Engine.Common
             float angle = MathF.Acos(Vector3.Dot(dir, Vector3.Up));
 
             Matrix4x4 matrix = Matrix4x4.Translation(-vBase);
-            if (!Helper.IsZero(angle))
+            if (!MathUtils.IsZero(angle))
             {
                 //Find rotation axis
                 var axis = Vector3.Cross(dir, Vector3.Up);
@@ -3352,6 +3352,149 @@ namespace Engine.Common
             }
 
             return Matrix4x4.Invert(matrix);
+        }
+
+        /// <summary>
+        /// Generate a triangle list from geometry
+        /// </summary>
+        /// <param name="geometry">Geometry descriptot</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(GeometryDescriptor geometry)
+        {
+            if (geometry == null)
+            {
+                return [];
+            }
+
+            return ComputeTriangleList(geometry.Vertices, geometry.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from vertices
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(IEnumerable<Vector3> vertices)
+        {
+            if (vertices?.Any() != true)
+            {
+                yield break;
+            }
+
+            var tmpVerts = vertices.ToArray();
+
+            for (int i = 0; i < tmpVerts.Length; i += 3)
+            {
+                yield return new(
+                    tmpVerts[i + 0],
+                    tmpVerts[i + 1],
+                    tmpVerts[i + 2]);
+            }
+        }
+        /// <summary>
+        /// Generate a triangle list from vertices and indices
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
+        {
+            if (vertices?.Any() != true || indices?.Any() != true)
+            {
+                yield break;
+            }
+
+            var tmpVerts = vertices.ToArray();
+            var tmpIndxs = indices.ToArray();
+
+            for (int i = 0; i < tmpIndxs.Length; i += 3)
+            {
+                yield return new(
+                    tmpVerts[tmpIndxs[i + 0]],
+                    tmpVerts[tmpIndxs[i + 1]],
+                    tmpVerts[tmpIndxs[i + 2]]);
+            }
+        }
+        /// <summary>
+        /// Generate a triangle list from AABB
+        /// </summary>
+        /// <param name="bbox">AABB</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingBox bbox)
+        {
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, bbox);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from OBB
+        /// </summary>
+        /// <param name="obb">OBB</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(OrientedBoundingBox obb)
+        {
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, obb);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from sphere
+        /// </summary>
+        /// <param name="sph">Sphere</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingSphere sph, int sliceCount, int stackCount)
+        {
+            var geom = GeometryUtil.CreateSphere(Topology.TriangleList, sph, sliceCount, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from cylinder
+        /// </summary>
+        /// <param name="cylinder">Cylinder</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingCylinder cylinder, int stackCount)
+        {
+            var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, cylinder, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from capsule
+        /// </summary>
+        /// <param name="capsule">Capsule</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(BoundingCapsule capsule, int sliceCount, int stackCount)
+        {
+            var geom = GeometryUtil.CreateCapsule(Topology.TriangleList, capsule, sliceCount, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+
+        /// <summary>
+        /// Gets the cylinder vertices
+        /// </summary>
+        /// <param name="sliceCount">Slice count</param>
+        /// <returns>Returns a point array of vertices</returns>
+        public static IEnumerable<Vector3> GetVertices(BoundingCylinder bc, int sliceCount)
+        {
+            var geom = CreateCylinder(Topology.TriangleList, bc.Center, bc.Radius, bc.Height, sliceCount);
+
+            return [.. geom.Vertices];
+        }
+        /// <summary>
+        /// Gets the capsule segment vertices
+        /// </summary>
+        /// <returns>Returns a two point array of vertices, representing the capsule axis segment</returns>
+        public static IEnumerable<Vector3> GetVertices(BoundingCapsule bc, int sliceCount, int stackCount)
+        {
+            var geom = CreateCapsule(Topology.TriangleList, bc.Center, bc.Radius, bc.Height, sliceCount, stackCount);
+
+            return [.. geom.Vertices];
         }
     }
 }

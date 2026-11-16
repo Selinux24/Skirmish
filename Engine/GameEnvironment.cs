@@ -77,7 +77,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(lodDistanceHigh, value))
+                if (!MathUtils.NearEqual(lodDistanceHigh, value))
                 {
                     lodDistanceHigh = value;
 
@@ -96,7 +96,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(lodDistanceMedium, value))
+                if (!MathUtils.NearEqual(lodDistanceMedium, value))
                 {
                     lodDistanceMedium = value;
 
@@ -115,7 +115,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(lodDistanceLow, value))
+                if (!MathUtils.NearEqual(lodDistanceLow, value))
                 {
                     lodDistanceLow = value;
 
@@ -134,7 +134,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(lodDistanceMinimum, value))
+                if (!MathUtils.NearEqual(lodDistanceMinimum, value))
                 {
                     lodDistanceMinimum = value;
 
@@ -153,7 +153,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(shadowRadiusDistanceThreshold, value))
+                if (!MathUtils.NearEqual(shadowRadiusDistanceThreshold, value))
                 {
                     shadowRadiusDistanceThreshold = value;
 
@@ -173,7 +173,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(shadowDistanceHigh, value))
+                if (!MathUtils.NearEqual(shadowDistanceHigh, value))
                 {
                     shadowDistanceHigh = value;
 
@@ -192,7 +192,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(shadowDistanceMedium, value))
+                if (!MathUtils.NearEqual(shadowDistanceMedium, value))
                 {
                     shadowDistanceMedium = value;
 
@@ -211,7 +211,7 @@ namespace Engine
             }
             set
             {
-                if (!Helper.NearEqual(shadowDistanceLow, value))
+                if (!MathUtils.NearEqual(shadowDistanceLow, value))
                 {
                     shadowDistanceLow = value;
 

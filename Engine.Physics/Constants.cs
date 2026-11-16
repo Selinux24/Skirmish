@@ -51,10 +51,10 @@ namespace Engine.Physics
         /// <summary>
         /// Zero tolerance value
         /// </summary>
-        public static float ZeroTolerance { get; set; } = Helper.ZeroTolerance;
+        public static float ZeroTolerance { get; set; } = MathUtils.ZeroTolerance;
         /// <summary>
         /// Zero tolerance vector
         /// </summary>
-        public static Vector3 ZeroToleranceVector { get; set; } = Helper.ZeroToleranceVector3;
+        public static Vector3 ZeroToleranceVector { get; set; } = MathUtils.ZeroToleranceVector3;
     }
 }

@@ -243,7 +243,7 @@ namespace Engine
 
             for (int i = 0; i < segments; ++i)
             {
-                float a = i / (float)segments * Helper.TwoPi;
+                float a = i / (float)segments * MathUtils.TwoPi;
                 dir[i * 2 + 0] = MathF.Cos(a);
                 dir[i * 2 + 1] = MathF.Sin(a);
             }
@@ -504,11 +504,6 @@ namespace Engine
         public readonly uint GetStride()
         {
             return 2;
-        }
-        /// <inheritdoc/>
-        public readonly Topology GetTopology()
-        {
-            return Topology.LineList;
         }
 
         /// <inheritdoc/>

@@ -137,7 +137,7 @@ namespace Engine
         private Matrix4x4[] UpdateFromLightViewProjection()
         {
             // Orthogonal projection from center
-            var projection = Matrix4x4.PerspectiveFovLH(Helper.PiOver2, 1f, 0.1f, Radius);
+            var projection = Matrix4x4.PerspectiveFovLH(MathUtils.PiOver2, 1f, 0.1f, Radius);
 
             return
             [

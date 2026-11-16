@@ -65,7 +65,7 @@ namespace Engine.Physics.Colliders
             var cNorm = Vector3.Normalize(cap - bse);
             var dir = Vector3.Cross(normal, cNorm);
 
-            if (Helper.IsZero(dir.Length()))
+            if (MathUtils.IsZero(dir.Length()))
             {
                 return [bse, cap];
             }

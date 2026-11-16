@@ -16,8 +16,8 @@ namespace TerrainSamples.SceneModularDungeon
     {
         private GeometryColorDrawer<Line3D> bboxesDrawer = null;
         private GeometryColorDrawer<Line3D> modelDrawer = null;
-        private GeometryColorDrawer<Triangle> graphDrawer = null;
-        private GeometryColorDrawer<Triangle> obstacleDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Engine.Mathematics.Triangle> obstacleDrawer = null;
         private GeometryColorDrawer<Line3D> connectionDrawer = null;
 
         private readonly Color4 connectionColor = new(Color.LightBlue, 1f);
@@ -30,11 +30,11 @@ namespace TerrainSamples.SceneModularDungeon
         {
             this.agents = agents;
 
-            var graphDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
+            var graphDrawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 Count = 50000,
             };
-            graphDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await base.Scene.AddComponentUI<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
@@ -53,12 +53,12 @@ namespace TerrainSamples.SceneModularDungeon
             modelDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
             modelDrawer.Visible = false;
 
-            var obstacleDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
+            var obstacleDrawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
             {
                 DepthEnabled = false,
                 Count = 10000,
             };
-            obstacleDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
+            obstacleDrawer = await base.Scene.AddComponentUI<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
             obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
@@ -119,19 +119,19 @@ namespace TerrainSamples.SceneModularDungeon
 
             foreach (var obstacle in obstacles.Select(o => o.Bounds))
             {
-                IEnumerable<Triangle> obstacleTris;
+                IEnumerable<Engine.Mathematics.Triangle> obstacleTris;
 
                 if (obstacle is BoundingCylinder bc)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(bc, 32);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(bc, 32);
                 }
                 else if (obstacle is BoundingBox bbox)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(bbox);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(bbox);
                 }
                 else if (obstacle is OrientedBoundingBox obb)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(obb);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(obb);
                 }
                 else
                 {
@@ -172,7 +172,7 @@ namespace TerrainSamples.SceneModularDungeon
             graphDrawer.Clear();
             graphDrawer.SetPrimitives(nodes);
         }
-        private static Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
+        private static Dictionary<Color4, IEnumerable<Engine.Mathematics.Triangle>> BuildGraphNodeDebugAreas(WalkableScene scene, AgentType agent)
         {
             var nodes = scene.GetNodes(agent).OfType<GraphNode>();
             if (!nodes.Any())
@@ -180,7 +180,7 @@ namespace TerrainSamples.SceneModularDungeon
                 return [];
             }
 
-            Dictionary<Color4, IEnumerable<Triangle>> res = [];
+            Dictionary<Color4, IEnumerable<Engine.Mathematics.Triangle>> res = [];
 
             foreach (var node in nodes)
             {
@@ -189,12 +189,12 @@ namespace TerrainSamples.SceneModularDungeon
 
                 if (!res.TryGetValue(color, out var value))
                 {
-                    value = new List<Triangle>(tris);
+                    value = [.. tris];
                     res.Add(color, value);
                 }
                 else
                 {
-                    ((List<Triangle>)value).AddRange(tris);
+                    ((List<Engine.Mathematics.Triangle>)value).AddRange(tris);
                 }
             }
 

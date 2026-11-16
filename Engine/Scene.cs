@@ -600,13 +600,13 @@ namespace Engine
             {
                 if (obj is IComposed composed)
                 {
-                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<Mathematics.Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
                         yield return pickable.GetBoundingBox();
                     }
                 }
-                else if (obj is IRayPickable<Triangle> pickable)
+                else if (obj is IRayPickable<Mathematics.Triangle> pickable)
                 {
                     yield return pickable.GetBoundingBox();
                 }

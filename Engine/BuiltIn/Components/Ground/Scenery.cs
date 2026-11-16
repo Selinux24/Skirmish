@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
+            public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Mathematics.Triangle> node)
             {
                 Stopwatch watch = new();
                 watch.Start();
@@ -272,7 +272,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode<Triangle>[] visibleNodes = [];
+        private PickingQuadTreeNode<Mathematics.Triangle>[] visibleNodes = [];
 
         /// <summary>
         /// Gets the visible node count

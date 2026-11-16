@@ -189,9 +189,9 @@ namespace Engine.PathFinding.RecastNavigation
             float cs = hf.CellSize;
             float ch = hf.CellHeight;
 
-            List<Triangle> walkableTriangles = [];
-            List<Triangle> nullTriangles = [];
-            List<Triangle> multiTriangles = [];
+            List<Mathematics.Triangle> walkableTriangles = [];
+            List<Mathematics.Triangle> nullTriangles = [];
+            List<Mathematics.Triangle> multiTriangles = [];
 
             foreach (var (row, col, span) in hf.IterateSpans())
             {
@@ -1114,7 +1114,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="min">Box minimum point</param>
         /// <param name="max">Box maximum point</param>
         /// <param name="scale">Scale</param>
-        private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max, float scale = 1f)
+        private static IEnumerable<Mathematics.Triangle> TriangulateBox(Vector3 min, Vector3 max, float scale = 1f)
         {
             var extents = (max - min) * 0.5f * (1f - scale);
             min += extents;

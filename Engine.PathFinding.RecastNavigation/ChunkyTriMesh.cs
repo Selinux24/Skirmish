@@ -110,7 +110,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="triangles">Triangles</param>
         /// <param name="trisPerChunk">Triangles per chunk</param>
         /// <returns>The resulting chunky mesh</returns>
-        public static ChunkyTriMesh Build(IEnumerable<Triangle> triangles, int trisPerChunk = 256)
+        public static ChunkyTriMesh Build(IEnumerable<Mathematics.Triangle> triangles, int trisPerChunk = 256)
         {
             if (triangles?.Any() != true)
             {
@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Triangle list
         /// </summary>
-        private IEnumerable<Triangle> triangles;
+        private IEnumerable<Mathematics.Triangle> triangles;
         /// <summary>
         /// Chunk triangle indices
         /// </summary>
@@ -267,7 +267,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets all the triangles in the mesh
         /// </summary>
         /// <returns>Returns the triangle list</returns>
-        public Triangle[] GetTriangles()
+        public Mathematics.Triangle[] GetTriangles()
         {
             return triangles?.ToArray() ?? [];
         }
@@ -276,7 +276,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="index">Node index</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public Triangle[] GetTriangles(int index)
+        public Mathematics.Triangle[] GetTriangles(int index)
         {
             return GetTriangles(nodes[index]);
         }
@@ -285,7 +285,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public Triangle[] GetTriangles(ChunkyTriMeshNode node)
+        public Mathematics.Triangle[] GetTriangles(ChunkyTriMeshNode node)
         {
             if (node.Index < 0)
             {
@@ -300,7 +300,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var indices = triangleIndices.Skip(node.Index).Take(node.Count);
 
-            var res = new List<Triangle>();
+            var res = new List<Mathematics.Triangle>();
 
             foreach (var index in indices)
             {

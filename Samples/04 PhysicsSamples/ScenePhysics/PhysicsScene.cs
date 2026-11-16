@@ -297,7 +297,7 @@ namespace PhysicsSamples.ScenePhysics
         private async Task InitializeFrustums()
         {
             var view = Matrix4x4.LookAtLH(Vector3.Zero, Vector3.Down, Vector3.ForwardLH);
-            var proj = Matrix4x4.PerspectiveFovLH(Helper.PiOver4, 1, 2, 4);
+            var proj = Matrix4x4.PerspectiveFovLH(MathUtils.PiOver4, 1, 2, 4);
             var bFrustum = new BoundingFrustum(view * proj);
             var geo = GeometryUtil.CreateFrustum(Topology.TriangleList, bFrustum);
             var wired = Line3D.CreateFrustum(bFrustum);
@@ -555,7 +555,7 @@ namespace PhysicsSamples.ScenePhysics
 
         private void GenerateExplosion(PickingRay pickingRay, bool big)
         {
-            if (!this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.None, out var p))
+            if (!this.PickNearest<Engine.Mathematics.Triangle>(pickingRay, SceneObjectUsages.None, out var p))
             {
                 return;
             }

@@ -146,7 +146,7 @@ namespace BasicSamples.SceneLighting
             var geo = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
-            geo.Transform(Matrix4x4.RotationX(Helper.PiOver2) * Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
+            geo.Transform(Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
 
             var vertices = VertexData.FromDescriptor(geo).Select(v =>
             {
@@ -301,7 +301,7 @@ namespace BasicSamples.SceneLighting
             float r = 10.0f;
             float hv = 1.0f;
             float av = 0.5f;
-            float s = Helper.Pi;
+            float s = MathUtils.Pi;
 
             position.X = r * MathF.Cos(av * Game.GameTime.TotalSeconds);
             position.Y = hv * MathF.Sin(av * Game.GameTime.TotalSeconds);

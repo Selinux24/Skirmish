@@ -206,7 +206,7 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            return nodes.Cast<IGraphNode>().ToArray();
+            return [.. nodes.Cast<IGraphNode>()];
         }
         /// <inheritdoc/>
         public IGraphNode FindNode(AgentType agent, Vector3 point)

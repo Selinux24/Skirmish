@@ -85,7 +85,7 @@ namespace Engine.Physics
 
             // Gets the simulation elapsed time
             float time = gameTime.ElapsedSeconds * Velocity / iterations;
-            if (Helper.IsZero(time))
+            if (MathUtils.IsZero(time))
             {
                 return;
             }

@@ -272,11 +272,6 @@ namespace Engine.Common
         {
             return 1;
         }
-        /// <inheritdoc/>
-        public readonly Topology GetTopology()
-        {
-            return Topology.PointList;
-        }
 
         /// <summary>
         /// Evaluates the vertex data content

@@ -99,10 +99,10 @@ namespace Engine.UI
         public readonly bool Equals(Padding other)
         {
             return
-                Helper.NearEqual(other.Left, Left) &&
-                Helper.NearEqual(other.Top, Top) &&
-                Helper.NearEqual(other.Bottom, Bottom) &&
-                Helper.NearEqual(other.Right, Right);
+                MathUtils.NearEqual(other.Left, Left) &&
+                MathUtils.NearEqual(other.Top, Top) &&
+                MathUtils.NearEqual(other.Bottom, Bottom) &&
+                MathUtils.NearEqual(other.Right, Right);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

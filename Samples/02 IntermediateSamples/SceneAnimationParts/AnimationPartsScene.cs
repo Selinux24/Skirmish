@@ -333,9 +333,9 @@ namespace IntermediateSamples.SceneAnimationParts
             var box = tank.GetBoundingBox();
             var obb = tank.GetOrientedBoundingBox();
 
-            itemTris.SetPrimitives(sphTrisColor, Triangle.ComputeTriangleList(sph, 20, 20));
-            itemTris.SetPrimitives(boxTrisColor, Triangle.ComputeTriangleList(box));
-            itemTris.SetPrimitives(obbTrisColor, Triangle.ComputeTriangleList(obb));
+            itemTris.SetPrimitives(sphTrisColor, GeometryUtil.ComputeTriangleList(sph, 20, 20));
+            itemTris.SetPrimitives(boxTrisColor, GeometryUtil.ComputeTriangleList(box));
+            itemTris.SetPrimitives(obbTrisColor, GeometryUtil.ComputeTriangleList(obb));
             itemTris.Active = itemTris.Visible = true;
 
             itemLines.SetPrimitives(sphLinesColor, Line3D.CreateSphere(sph, 20, 20));

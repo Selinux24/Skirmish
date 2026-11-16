@@ -115,8 +115,8 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                Helper.NearEqual(Metallic, other.Metallic) &&
-                Helper.NearEqual(Roughness, other.Roughness);
+                MathUtils.NearEqual(Metallic, other.Metallic) &&
+                MathUtils.NearEqual(Roughness, other.Roughness);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

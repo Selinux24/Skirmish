@@ -256,8 +256,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersA[0].Manipulator.SetPosition(-4f, 1, 0);
             laddersA[1].Manipulator.SetPosition(-4.5f, 1, 5);
 
-            laddersA[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
-            laddersA[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersA[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
+            laddersA[1].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
 
             laddersA[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersA[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -276,8 +276,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersB[0].Manipulator.SetPosition(-3f, 1, 0);
             laddersB[1].Manipulator.SetPosition(-3.5f, 1, 5);
 
-            laddersB[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
-            laddersB[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersB[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
+            laddersB[1].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
 
             laddersB[0].AnimationController.AppendPlan(ladderPaths[PullString]);
             laddersB[1].AnimationController.AppendPlan(ladderPaths[PullString]);
@@ -296,8 +296,8 @@ namespace IntermediateSamples.SceneSimpleAnimation
             laddersC[0].Manipulator.SetPosition(-2f, 1, 0);
             laddersC[1].Manipulator.SetPosition(-2.5f, 1, 5);
 
-            laddersC[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
-            laddersC[1].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            laddersC[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
+            laddersC[1].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
 
             laddersC[0].AnimationController.AppendPlan(ladderPaths[PushString]);
             laddersC[1].AnimationController.AppendPlan(ladderPaths[PushString]);
@@ -394,11 +394,11 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8);
-            doors[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            doors[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
             doors[0].Manipulator.SetScaling(2.5f);
 
             walls[0].Manipulator.SetPosition(-10, 0, 8);
-            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            walls[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();
@@ -435,7 +435,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             jails[0].Manipulator.SetPosition(10, 0, 8);
-            jails[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            jails[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
             jails[0].Manipulator.SetScaling(2.5f);
 
             var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -450,7 +450,7 @@ namespace IntermediateSamples.SceneSimpleAnimation
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8);
-            walls[0].Manipulator.SetRotation(Helper.PiOver2, 0, 0);
+            walls[0].Manipulator.SetRotation(MathUtils.PiOver2, 0, 0);
             walls[0].Manipulator.SetScaling(2.5f);
 
             var def = new AnimationPath();

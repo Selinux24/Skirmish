@@ -1,4 +1,6 @@
-﻿namespace Engine
+﻿using Engine.Mathematics;
+
+namespace Engine
 {
     /// <summary>
     /// Ground interface

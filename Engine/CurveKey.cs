@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine
 {
@@ -78,10 +79,10 @@ namespace Engine
             }
 
             return
-                Helper.NearEqual(value1.Position, value2.Position) &&
-                Helper.NearEqual(value1.Value, value2.Value) &&
-                Helper.NearEqual(value1.TangentIn, value2.TangentIn) &&
-                Helper.NearEqual(value1.TangentOut, value2.TangentOut) &&
+                MathUtils.NearEqual(value1.Position, value2.Position) &&
+                MathUtils.NearEqual(value1.Value, value2.Value) &&
+                MathUtils.NearEqual(value1.TangentIn, value2.TangentIn) &&
+                MathUtils.NearEqual(value1.TangentOut, value2.TangentOut) &&
                 (value1.Continuity == value2.Continuity);
         }
         /// <inheritdoc/>

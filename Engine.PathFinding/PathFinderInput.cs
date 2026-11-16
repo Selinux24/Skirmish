@@ -14,7 +14,7 @@ namespace Engine.PathFinding
     /// Constructor
     /// </remarks>
     /// <param name="fnc">Get triangle function</param>
-    public abstract class PathFinderInput(Func<IEnumerable<Triangle>> fnc)
+    public abstract class PathFinderInput(Func<IEnumerable<Mathematics.Triangle>> fnc)
     {
         /// <summary>
         /// Maximum areas
@@ -65,7 +65,7 @@ namespace Engine.PathFinding
                     tris = tris.Where(t =>
                     {
                         var bb = bounds.Value;
-                        return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
+                        return Mathematics.Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                     });
                 }
 
@@ -94,7 +94,7 @@ namespace Engine.PathFinding
                 tris = tris.Where(t =>
                 {
                     var bb = bounds.Value;
-                    return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
+                    return Mathematics.Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                 });
             }
 

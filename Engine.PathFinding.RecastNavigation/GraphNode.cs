@@ -146,13 +146,13 @@ namespace Engine.PathFinding.RecastNavigation
                 .Where(p => p.Type != PolyTypes.OffmeshConnection)
                 .ToArray();
 
-            List<Triangle> tris = [];
+            List<Mathematics.Triangle> tris = [];
 
             foreach (var p in polys)
             {
                 var dtris = tile.GetDetailTris(p);
 
-                if (!Collision.MeshIntersectsPoint(dtris, ref point))
+                if (!Mathematics.Collision.MeshIntersectsPoint(dtris, ref point))
                 {
                     continue;
                 }
@@ -190,12 +190,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Node triangle list
         /// </summary>
-        public IEnumerable<Triangle> Triangles { get; private set; }
+        public IEnumerable<Mathematics.Triangle> Triangles { get; private set; }
 
         /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
-            return Collision.MeshIntersectsPoint(Triangles, ref point);
+            return Mathematics.Collision.MeshIntersectsPoint(Triangles, ref point);
         }
         /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()

@@ -479,8 +479,8 @@ F7 to F10: Toggle object visibility.";
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 Lights.BaseFogColor = new Color(54, 56, 68);
-                Lights.FogStart = Helper.IsZero(Lights.FogStart) ? far * fogStart : 0f;
-                Lights.FogRange = Helper.IsZero(Lights.FogRange) ? far * fogRange : 0f;
+                Lights.FogStart = MathUtils.IsZero(Lights.FogStart) ? far * fogStart : 0f;
+                Lights.FogRange = MathUtils.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
 
             if (Game.Input.KeyJustReleased(Keys.G))

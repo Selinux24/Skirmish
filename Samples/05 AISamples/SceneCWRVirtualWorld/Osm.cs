@@ -88,7 +88,7 @@ namespace AISamples.SceneCWRVirtualWorld
 
             var deltaLon = maxLon - minLon;
             var deltaLat = maxLat - minLat;
-            var ar = deltaLon / deltaLat * MathF.Cos(Helper.DegreesToRadians(maxLat));
+            var ar = deltaLon / deltaLat * MathF.Cos(MathUtils.DegreesToRadians(maxLat));
             float height = deltaLat * 111000;
             float width = height * ar;
             height *= scale;

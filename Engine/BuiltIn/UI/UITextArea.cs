@@ -483,8 +483,8 @@ namespace Engine.BuiltIn.UI
             var absRect = base.GetRenderArea(false);
 
             //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
-            if (GrowControlWithText && !HasParent || Helper.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
-            if (GrowControlWithText && !HasParent || Helper.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
+            if (GrowControlWithText && !HasParent || MathUtils.IsZero(absRect.Width)) absRect.Width = Game.Form.RenderWidth - absRect.Left;
+            if (GrowControlWithText && !HasParent || MathUtils.IsZero(absRect.Height)) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
             return applyPadding ? Padding.Apply(absRect) : absRect;
         }
@@ -606,8 +606,8 @@ namespace Engine.BuiltIn.UI
             var minHeight = textDrawer?.GetLineHeight() ?? 0;
 
             //Set sizes if grow control with text or sizes not setted
-            if (GrowControlWithText || Helper.IsZero(Width)) Width = size.X;
-            if (GrowControlWithText || Helper.IsZero(Height)) Height = Helper.IsZero(size.Y) ? minHeight : size.Y;
+            if (GrowControlWithText || MathUtils.IsZero(Width)) Width = size.X;
+            if (GrowControlWithText || MathUtils.IsZero(Height)) Height = MathUtils.IsZero(size.Y) ? minHeight : size.Y;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Graph file
     /// </summary>

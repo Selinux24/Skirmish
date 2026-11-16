@@ -465,7 +465,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor.ToColor4());
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -489,7 +489,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor.ToColor4());
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -546,7 +546,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor.ToColor4(), state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;

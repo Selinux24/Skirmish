@@ -96,7 +96,7 @@ namespace Engine.BuiltIn.Components.Geometry
 
             T tmp = default;
             stride = tmp.GetStride();
-            topology = tmp.GetTopology();
+            topology = stride == 2 ? Topology.LineList : Topology.TriangleList;
 
             uint count;
             if (Description.Primitives?.Length > 0)

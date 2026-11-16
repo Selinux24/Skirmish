@@ -113,7 +113,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var rayList = CalculatePickingRays(scene, map, description, gbbox, nbbox, rnd);
 
-            return scene.PickFirstAsync<Triangle>(rayList, SceneObjectUsages.Ground, (res) =>
+            return scene.PickFirstAsync(rayList, SceneObjectUsages.Ground, (IEnumerable<(bool, ScenePickingResult<Mathematics.Triangle>)> res) =>
             {
                 foreach (var (found, r) in res)
                 {

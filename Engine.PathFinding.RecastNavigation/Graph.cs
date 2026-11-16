@@ -103,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public IEnumerable<(GraphAgentType Agent, NavMesh NavMesh)> GetAgents()
         {
-            return agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh)).ToArray();
+            return [.. agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh))];
         }
         /// <summary>
         /// Gets a query for the specified agent

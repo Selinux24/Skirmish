@@ -1,4 +1,5 @@
-﻿using Engine.Tween;
+﻿using Engine.Mathematics;
+using Engine.Tween;
 using System;
 
 namespace Engine.BuiltIn.Drawers.PostProcess.Tween
@@ -78,7 +79,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess.Tween
 
                 propertyUpdater(control, ft.CurrentValue);
 
-                if (Helper.NearEqual(ft.CurrentValue, ft.EndValue))
+                if (MathUtils.NearEqual(ft.CurrentValue, ft.EndValue))
                 {
                     return true;
                 }
@@ -101,7 +102,7 @@ namespace Engine.BuiltIn.Drawers.PostProcess.Tween
 
                 propertyUpdater(control, ft.CurrentValue);
 
-                if (Helper.NearEqual(ft.CurrentValue, ft.EndValue))
+                if (MathUtils.NearEqual(ft.CurrentValue, ft.EndValue))
                 {
                     var newStart = ft.EndValue;
                     var newEnd = ft.StartValue;

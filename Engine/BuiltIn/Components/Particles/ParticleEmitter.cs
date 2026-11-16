@@ -290,7 +290,7 @@ namespace Engine.BuiltIn.Components.Particles
                 parameters.HorizontalVelocity.Y,
                 hVelVariance);
 
-            float horizontalAngle = hAngleVariance * Helper.TwoPi;
+            float horizontalAngle = hAngleVariance * MathUtils.TwoPi;
 
             velocity.X += horizontalVelocity * MathF.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * MathF.Sin(horizontalAngle);

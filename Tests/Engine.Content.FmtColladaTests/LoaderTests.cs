@@ -18,7 +18,7 @@ namespace Engine.Content.FmtColladaTests
     {
         public TestContext TestContext { get; set; }
 
-        private const float tolerance = Helper.ZeroTolerance;
+        private const float tolerance = MathUtils.ZeroTolerance;
 
         private const string resourceTree = "Resources/Tree";
         private const string tree = "tree1.json";
@@ -154,8 +154,8 @@ namespace Engine.Content.FmtColladaTests
             //Sets the transform of the current instance
             Matrix4x4 instanceTrn = Matrix4x4.Translation(Vector3.One);
             Matrix4x4 hullTrn = Matrix4x4.Identity;
-            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, Helper.PiOver2));
-            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, Helper.PiOver4));
+            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, MathUtils.PiOver2));
+            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, MathUtils.PiOver4));
 
             model[0].Manipulator.SetTransform(instanceTrn);
             model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);

@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="tris">Triangle list</param>
         /// <param name="walkableSlopeAngle">Slope angle</param>
         /// <param name="walkableClimb">Maximum climb</param>
-        public void Rasterize(Triangle[] tris, float walkableSlopeAngle, int walkableClimb)
+        public void Rasterize(Mathematics.Triangle[] tris, float walkableSlopeAngle, int walkableClimb)
         {
             // Rasterizer settings
             RasterizerSettings settings = new()

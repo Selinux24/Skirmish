@@ -965,7 +965,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var p = verts[j] + orig;
 
-                if (!Helper.IsZero(cellHeight))
+                if (!MathUtils.IsZero(cellHeight))
                 {
                     p.Y += cellHeight;// Is this offset necessary?
                 }

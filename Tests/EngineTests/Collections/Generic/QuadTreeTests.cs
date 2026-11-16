@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace EngineTests.Collections.Generic
 {
+    using Engine;
     using Engine.Collections;
     using Engine.Collections.Generic;
     using Engine.Mathematics;

@@ -88,7 +88,7 @@ namespace Engine
         /// <returns>Returns the clamped value</returns>
         private static float InverseLerp(float a, float b, float value)
         {
-            if (Helper.NearEqual(a, b))
+            if (MathUtils.NearEqual(a, b))
             {
                 return 0.0f;
             }
