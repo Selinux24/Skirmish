@@ -210,7 +210,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// Gets all the used materials
             /// </summary>
             /// <returns>Returns the used materials array</returns>
-            public IEnumerable<IMeshMaterial> GetMaterials()
+            public IMeshMaterial[] GetMaterials()
             {
                 return DrawingData.GetMaterials();
             }

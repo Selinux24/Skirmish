@@ -146,7 +146,7 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         /// <param name="paths">Animation path list</param>
-        public AnimationPlan(params AnimationPath[] paths)
+        public AnimationPlan(AnimationPath[] paths)
         {
             ArgumentNullException.ThrowIfNull(paths);
             if (paths.Length == 0) throw new ArgumentException(PathCountError, nameof(paths));
@@ -403,7 +403,9 @@ namespace Engine.Animation
         /// </summary>
         public AnimationPlan Clone()
         {
-            return new AnimationPlan([.. animationPaths.Select(p => p.Clone())]);
+            AnimationPath[] cloned = [.. animationPaths.Select(p => p.Clone())];
+
+            return new(cloned);
         }
 
         /// <summary>
