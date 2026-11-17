@@ -58,17 +58,18 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="jointAnimations">Joint list</param>
         /// <param name="animationDescription">Animation description</param>
-        private static Dictionary<string, IEnumerable<JointAnimation>> InitializeAnimationDictionary(IEnumerable<JointAnimation> jointAnimations, AnimationFile animationDescription)
+        private static Dictionary<string, JointAnimation[]> InitializeAnimationDictionary(JointAnimation[] jointAnimations, AnimationFile animationDescription)
         {
-            var dictAnimations = new Dictionary<string, IEnumerable<JointAnimation>>();
+            var dictAnimations = new Dictionary<string, JointAnimation[]>();
 
             foreach (var clip in animationDescription.Clips)
             {
-                var ja = new List<JointAnimation>(jointAnimations.Count());
+                var ja = new JointAnimation[jointAnimations.Length];
 
+                int i = 0;
                 foreach (var j in jointAnimations)
                 {
-                    ja.Add(j.Copy(clip.From, clip.To));
+                    ja[i++] = j.Copy(clip.From, clip.To);
                 }
 
                 dictAnimations.Add(clip.Name, ja);
@@ -78,7 +79,7 @@ namespace Engine.Animation
         }
 
         /// <inheritdoc/>
-        public void Initialize(IEnumerable<JointAnimation> jointAnimations, AnimationFile animationDescription)
+        public void Initialize(JointAnimation[] jointAnimations, AnimationFile animationDescription)
         {
             if (animationDescription != null)
             {
@@ -120,7 +121,7 @@ namespace Engine.Animation
                 {
                     var mat = GetPoseAtTime(t * TimeStep, i);
 
-                    offset += mat.Count() * 4;
+                    offset += mat.Length * 4;
                 }
             }
         }
@@ -172,7 +173,7 @@ namespace Engine.Animation
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Matrix4x4> GetPoseBase()
+        public Matrix4x4[] GetPoseBase()
         {
             if (animations.Count != 0)
             {
@@ -184,7 +185,7 @@ namespace Engine.Animation
             }
         }
         /// <inheritdoc/>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, string clipName)
+        public Matrix4x4[] GetPoseAtTime(float time, string clipName)
         {
             int clipIndex = GetClipIndex(clipName);
 
@@ -196,7 +197,7 @@ namespace Engine.Animation
             return GetPoseBase();
         }
         /// <inheritdoc/>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, int clipIndex)
+        public Matrix4x4[] GetPoseAtTime(float time, int clipIndex)
         {
             if (clipIndex < 0)
             {
@@ -206,12 +207,12 @@ namespace Engine.Animation
             return skeleton.GetPoseAtTime(time, animations[clipIndex].Animations);
         }
         /// <inheritdoc/>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor)
+        public Matrix4x4[] GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor)
         {
             return GetPoseAtTime(time, GetClipIndex(clipName1), GetClipIndex(clipName2), offset1, offset2, factor);
         }
         /// <inheritdoc/>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, int clipIndex1, int clipIndex2, float offset1, float offset2, float factor)
+        public Matrix4x4[] GetPoseAtTime(float time, int clipIndex1, int clipIndex2, float offset1, float offset2, float factor)
         {
             var res = new Matrix4x4[skeleton.JointCount];
 
@@ -228,7 +229,7 @@ namespace Engine.Animation
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vector4> Pack()
+        public Vector4[] Pack()
         {
             var values = new List<Vector4>();
 

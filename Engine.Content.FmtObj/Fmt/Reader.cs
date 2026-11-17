@@ -336,8 +336,8 @@ namespace Engine.Content.FmtObj.Fmt
 
             var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix4x4.Identity);
 
-            content.SetVertices(vertexList);
-            content.SetIndices(indexList);
+            content.SetVertices([.. vertexList]);
+            content.SetIndices([.. indexList]);
 
             return content;
         }

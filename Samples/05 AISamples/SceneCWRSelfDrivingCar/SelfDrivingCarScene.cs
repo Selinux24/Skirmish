@@ -39,7 +39,7 @@ namespace AISamples.SceneCWRSelfDrivingCar
         private UITextArea info = null;
         private UITextArea brain = null;
         private GeometryColorDrawer<Line3D> sensorDrawer = null;
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> roadDrawer = null;
+        private GeometryColorDrawer<Triangle> roadDrawer = null;
         private GeometryColorDrawer<Line3D> roadLaneDrawer = null;
         private Model terrain = null;
         private float carScale = 1f;
@@ -153,7 +153,7 @@ ESC - EXIT";
             float h = 0f;
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
-            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * 5f)];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceTerrainDiffuse;
@@ -196,12 +196,12 @@ ESC - EXIT";
         }
         private async Task InitializeTriangleDrawer()
         {
-            var desc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
             };
-            roadDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            roadDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "roadDrawer",
                 "roadDrawer",
                 desc,
@@ -220,24 +220,24 @@ ESC - EXIT";
                 "visualizerLineDrawer",
                 descL);
 
-            var descT = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var descT = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Alpha,
             };
-            var visualizerTriangleDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            var visualizerTriangleDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "visualizerTriangleDrawer",
                 "visualizerTriangleDrawer",
                 descT);
 
-            var descO = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var descO = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 20000,
                 DepthEnabled = true,
                 BlendMode = BlendModes.Opaque,
             };
-            var visualizerOpaqueDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            var visualizerOpaqueDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "visualizerOpaqueDrawer",
                 "visualizerOpaqueDrawer",
                 descO,

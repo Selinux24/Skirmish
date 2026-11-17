@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -37,20 +35,20 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="uvs">UV coordinates</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalTexture> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector2> uvs)
+        public static VertexPositionNormalTexture[] Generate(Vector3[] vertices, Vector3[] normals, Vector2[] uvs)
         {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(normals);
+            ArgumentNullException.ThrowIfNull(uvs);
 
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-            var uvArray = uvs.ToArray();
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Length != normals.Length) throw new ArgumentException("Vertices and normals must have the same length");
 
-            VertexPositionNormalTexture[] res = new VertexPositionNormalTexture[vArray.Length];
+            VertexPositionNormalTexture[] res = new VertexPositionNormalTexture[vertices.Length];
 
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                res[i] = new VertexPositionNormalTexture() { Position = vArray[i], Normal = nArray[i], Texture = uvArray[i] };
+                res[i] = new VertexPositionNormalTexture() { Position = vertices[i], Normal = normals[i], Texture = uvs[i] };
             }
 
             return res;
@@ -59,15 +57,15 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPositionNormalTexture>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPositionNormalTexture[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            ArgumentNullException.ThrowIfNull(vertices);
 
-            var res = new VertexPositionNormalTexture[vArray.Length];
+            var res = new VertexPositionNormalTexture[vertices.Length];
 
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPositionNormalTexture
                 {

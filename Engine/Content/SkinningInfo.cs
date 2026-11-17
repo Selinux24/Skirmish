@@ -1,6 +1,5 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
 
 namespace Engine.Content
 {
@@ -16,10 +15,10 @@ namespace Engine.Content
         /// <summary>
         /// Weight list
         /// </summary>
-        public IEnumerable<Weight> Weights { get; set; }
+        public Weight[] Weights { get; set; }
         /// <summary>
         /// Bone names
         /// </summary>
-        public IEnumerable<string> BoneNames { get; set; }
+        public string[] BoneNames { get; set; }
     }
 }

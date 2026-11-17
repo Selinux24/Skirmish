@@ -725,17 +725,17 @@ namespace BasicSamples.SceneTest
             float size = 1f;
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
-            var cubeTris = GeometryUtil.ComputeTriangleList(bbox);
-            cubeTris = Engine.Mathematics.Triangle.Transform(cubeTris, Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
+            var cubeTris = GeometryUtil.ComputeTriangleList(bbox).ToArray();
+            cubeTris = Triangle.Transform(cubeTris, Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
-            var desc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. cubeTris],
                 Color = Color.Red,
                 BlendMode = BlendModes.Alpha,
             };
 
-            await AddComponent<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "TestCube",
                 "Test Cube",
                 desc);
@@ -771,10 +771,10 @@ namespace BasicSamples.SceneTest
             ];
 
             var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
-            var cubeTris = GeometryUtil.ComputeTriangleList(bbox);
+            var cubeTris = GeometryUtil.ComputeTriangleList(bbox).ToArray();
 
             particlePlumes = new IParticleSystem<ParticleEmitter, ParticleSystemParams>[positions.Length];
-            List<Engine.Mathematics.Triangle> markers = [];
+            List<Triangle> markers = [];
             for (int i = 0; i < positions.Length; i++)
             {
                 particlePlumes[i] = pManager.AddParticleSystem(
@@ -788,16 +788,16 @@ namespace BasicSamples.SceneTest
                         MaximumDistance = 1000f,
                     });
 
-                markers.AddRange(Engine.Mathematics.Triangle.Transform(cubeTris, Matrix4x4.Translation(positions[i])));
+                markers.AddRange(Triangle.Transform(cubeTris, Matrix4x4.Translation(positions[i])));
             }
 
-            var desc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var desc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Primitives = [.. markers],
                 Color = new(Color.Yellow, 0.3333f),
                 BlendMode = BlendModes.Alpha,
             };
-            await AddComponent<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            await AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DebugPM",
                 "Marker Cubes",
                 desc);
@@ -1165,7 +1165,7 @@ namespace BasicSamples.SceneTest
         private void GameStatusCollected(object sender, GameStatusCollectedEventArgs e)
         {
             var lines = e.Trace.ReadStatus();
-            if (lines.Any())
+            if (lines.Count != 0)
             {
                 var file = $"frame.{Game.GameTime.Ticks}.txt";
 

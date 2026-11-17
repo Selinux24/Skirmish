@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
@@ -16,25 +15,25 @@ namespace Engine.Common
     /// <param name="transform">World transform</param>
     /// <param name="vertices">Vertices</param>
     /// <param name="indices">Indices</param>
-    public class Mesh<T>(string name, Topology topology, Matrix4x4 transform, IEnumerable<T> vertices, IEnumerable<uint> indices) : IMesh
+    public class Mesh<T>(string name, Topology topology, Matrix4x4 transform, T[] vertices, uint[] indices) : IMesh
         where T : unmanaged, IVertexData
     {
         /// <summary>
         /// Vertices cache
         /// </summary>
-        private readonly IEnumerable<T> vertices = vertices ?? [];
+        private readonly T[] vertices = vertices ?? [];
         /// <summary>
         /// Indices cache
         /// </summary>
-        private readonly IEnumerable<uint> indices = indices ?? [];
+        private readonly uint[] indices = indices ?? [];
         /// <summary>
         /// Position list cache
         /// </summary>
-        private IEnumerable<Vector3> positionCache = null;
+        private Vector3[] positionCache = null;
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private IEnumerable<Triangle> triangleCache = null;
+        private Triangle[] triangleCache = null;
 
         /// <summary>
         /// Mesh id
@@ -43,7 +42,7 @@ namespace Engine.Common
         /// <summary>
         /// Indexed model
         /// </summary>
-        public bool Indexed { get; } = indices?.Any() == true;
+        public bool Indexed { get; } = (indices?.Length ?? 0) > 0;
         /// <summary>
         /// Name
         /// </summary>
@@ -155,14 +154,14 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public Vector3[] GetPoints(bool refresh = false)
         {
             if (!refresh && positionCache != null)
             {
                 return [.. positionCache];
             }
 
-            if (!vertices.Any())
+            if (vertices.Length == 0)
             {
                 return [];
             }
@@ -173,29 +172,30 @@ namespace Engine.Common
                 return [];
             }
 
-            positionCache = vertices.Select(v =>
-            {
-                var p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
-
-                if (!Transform.IsIdentity)
+            positionCache = [.. vertices
+                .Select(v =>
                 {
-                    p = Vector3.TransformCoordinate(p, Transform);
-                }
+                    var p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
 
-                return p;
-            });
+                    if (!Transform.IsIdentity)
+                    {
+                        p = Vector3.TransformCoordinate(p, Transform);
+                    }
+
+                    return p;
+                })];
 
             return [.. positionCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Vector3[] GetPoints(Matrix4x4[] boneTransforms, bool refresh = false)
         {
             if (!refresh && positionCache != null)
             {
                 return [.. positionCache];
             }
 
-            if (!vertices.Any())
+            if (vertices.Length == 0)
             {
                 return [];
             }
@@ -208,19 +208,20 @@ namespace Engine.Common
                 return [];
             }
 
-            positionCache = vertices.Select(v =>
-            {
-                var p = VertexData.ApplyWeight(v, boneTransforms);
+            positionCache = [.. vertices
+                .Select(v =>
+                {
+                    var p = VertexData.ApplyWeight(v, boneTransforms);
 
-                if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+                    if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
 
-                return p;
-            });
+                    return p;
+                })];
 
             return [.. positionCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(bool refresh = false)
+        public Triangle[] GetTriangles(bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
@@ -228,12 +229,12 @@ namespace Engine.Common
             }
 
             var positions = GetPoints(refresh);
-            if (!positions.Any())
+            if (positions.Length == 0)
             {
                 return [];
             }
 
-            if (!indices.Any())
+            if (indices.Length == 0)
             {
                 triangleCache = GeometryUtil.ComputeTriangleList(positions);
             }
@@ -245,7 +246,7 @@ namespace Engine.Common
             return [.. triangleCache];
         }
         /// <inheritdoc/>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Triangle[] GetTriangles(Matrix4x4[] boneTransforms, bool refresh = false)
         {
             if (!refresh && triangleCache != null)
             {
@@ -253,12 +254,12 @@ namespace Engine.Common
             }
 
             var positions = GetPoints(boneTransforms, refresh);
-            if (!positions.Any())
+            if (positions.Length == 0)
             {
                 return [];
             }
 
-            if (!indices.Any())
+            if (indices.Length == 0)
             {
                 triangleCache = GeometryUtil.ComputeTriangleList(positions);
             }
@@ -280,8 +281,8 @@ namespace Engine.Common
         public override string ToString()
         {
             return Indexed ?
-                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}; Indices: {indices.Count()}" :
-                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Count()}";
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Length}; Indices: {indices.Length}" :
+                $"Id: {Id}; {nameof(T)}; Vertices: {vertices.Length}";
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -35,18 +33,17 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="uvs">Uv texture coordinates</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionTexture> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs)
+        public static VertexPositionTexture[] Generate(Vector3[] vertices, Vector2[] uvs)
         {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(uvs);
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length.");
 
-            var vArray = vertices.ToArray();
-            var uvArray = uvs.ToArray();
+            VertexPositionTexture[] res = new VertexPositionTexture[vertices.Length];
 
-            var res = new List<VertexPositionTexture>();
-
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                res.Add(new VertexPositionTexture() { Position = vArray[i], Texture = uvArray[i] });
+                res[i] = new() { Position = vertices[i], Texture = uvs[i] };
             }
 
             return res;
@@ -55,15 +52,13 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPositionTexture>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPositionTexture[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            var res = new VertexPositionTexture[vertices.Length];
 
-            var res = new VertexPositionTexture[vArray.Length];
-
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPositionTexture
                 {

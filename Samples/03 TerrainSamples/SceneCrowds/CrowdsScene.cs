@@ -52,7 +52,7 @@ namespace TerrainSamples.SceneCrowds
         private ModelInstanced trees = null;
 
         private GeometryColorDrawer<Line3D> lineDrawer = null;
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private readonly Dictionary<string, AnimationPlan> animations = [];
 
@@ -230,13 +230,13 @@ namespace TerrainSamples.SceneCrowds
             };
             lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
 
-            var terrainGraphDrawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var terrainGraphDrawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
                 BlendMode = BlendModes.Alpha,
                 StartsVisible = false,
             };
-            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
         }
         private void InitializeSceneComponentsCompleted(LoadResourcesResult res)
         {
@@ -319,14 +319,14 @@ namespace TerrainSamples.SceneCrowds
         }
         private void StartTerrain()
         {
-            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(20, -20, out var treePos))
+            if (FindTopGroundPosition<Triangle>(20, -20, out var treePos))
             {
                 tree.Manipulator.SetTransform(treePos.Position, Quaternion.Identity, 0.5f);
             }
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (FindTopGroundPosition<Engine.Mathematics.Triangle>((i * 10) - 35, 17, out var pos))
+                if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
                 {
                     trees[i].Manipulator.SetTransform(pos.Position, Vector3.Up, i, 0.5f);
                 }
@@ -339,7 +339,7 @@ namespace TerrainSamples.SceneCrowds
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                if (FindTopGroundPosition<Engine.Mathematics.Triangle>((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
+                if (FindTopGroundPosition<Triangle>((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
                 {
                     tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
                     tankAgents[i].Manipulator.SetNormal(t1Pos.Primitive.Normal);
@@ -441,7 +441,7 @@ namespace TerrainSamples.SceneCrowds
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest<Engine.Mathematics.Triangle>(pRay, SceneObjectUsages.None, out var r))
+            if (!this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
             {
                 return;
             }
@@ -512,11 +512,11 @@ namespace TerrainSamples.SceneCrowds
             var c3 = new Vector2(rect.Left, rect.Bottom);
             var ct = rect.Center;
 
-            FindFirstGroundPosition<Engine.Mathematics.Triangle>(c0.X, c0.Y, out var r0);
-            FindFirstGroundPosition<Engine.Mathematics.Triangle>(c1.X, c1.Y, out var r1);
-            FindFirstGroundPosition<Engine.Mathematics.Triangle>(c2.X, c2.Y, out var r2);
-            FindFirstGroundPosition<Engine.Mathematics.Triangle>(c3.X, c3.Y, out var r3);
-            FindFirstGroundPosition<Engine.Mathematics.Triangle>(ct.X, ct.Y, out var rt);
+            FindFirstGroundPosition<Triangle>(c0.X, c0.Y, out var r0);
+            FindFirstGroundPosition<Triangle>(c1.X, c1.Y, out var r1);
+            FindFirstGroundPosition<Triangle>(c2.X, c2.Y, out var r2);
+            FindFirstGroundPosition<Triangle>(c3.X, c3.Y, out var r3);
+            FindFirstGroundPosition<Triangle>(ct.X, ct.Y, out var rt);
 
             lines.AddRange(Line3D.CreateSquare([r0.Position, r1.Position, r2.Position, r3.Position]));
 

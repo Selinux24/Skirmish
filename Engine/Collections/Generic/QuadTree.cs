@@ -1,6 +1,5 @@
 ﻿using Engine.Collections.Helpers;
 using Engine.Mathematics;
-using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
 {
@@ -22,7 +21,7 @@ namespace Engine.Collections.Generic
         /// <param name="bbox">Bounding box</param>
         /// <param name="items">Partitioning items</param>
         /// <param name="options">Options</param>
-        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, QuadTreeOptions options)
+        public QuadTree(BoundingBox bbox, (BoundingBox Box, T Item)[] items, QuadTreeOptions options)
         {
             BoundingBox = bbox;
 
@@ -36,12 +35,12 @@ namespace Engine.Collections.Generic
         }
 
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
+        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
         {
             return QuadTreeNodeHelper<QuadTreeNode<T>>.GetBoundingBoxes(Root, maxDepth);
         }
         /// <inheritdoc/>
-        public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
+        public QuadTreeNode<T>[] GetLeafNodes()
         {
             return QuadTreeNodeHelper<QuadTreeNode<T>>.GetLeafNodes(Root);
         }
@@ -60,7 +59,7 @@ namespace Engine.Collections.Generic
             return QuadTreeNodeHelper<QuadTreeNode<T>>.GetClosestNodeAtPosition(Root, position);
         }
         /// <inheritdoc/>
-        public IEnumerable<QuadTreeNode<T>> FindNodesInVolume(ICullingVolume volume)
+        public QuadTreeNode<T>[] FindNodesInVolume(ICullingVolume volume)
         {
             return QuadTreeNodeHelper<QuadTreeNode<T>>.GetNodesInVolume(Root, volume);
         }

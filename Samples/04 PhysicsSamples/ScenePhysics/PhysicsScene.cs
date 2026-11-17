@@ -555,7 +555,7 @@ namespace PhysicsSamples.ScenePhysics
 
         private void GenerateExplosion(PickingRay pickingRay, bool big)
         {
-            if (!this.PickNearest<Engine.Mathematics.Triangle>(pickingRay, SceneObjectUsages.None, out var p))
+            if (!this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.None, out var p))
             {
                 return;
             }

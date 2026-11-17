@@ -52,7 +52,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="triangles">Triangle list</param>
         /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new grid</returns>
-        public static Grid CreateGrid(PathFinderSettings settings, PathFinderInput input, IEnumerable<Triangle> triangles, Action<float> progressCallback)
+        public static Grid CreateGrid(PathFinderSettings settings, PathFinderInput input, Triangle[] triangles, Action<float> progressCallback)
         {
             var grid = new Grid(settings as GridGenerationSettings, input);
 
@@ -80,11 +80,11 @@ namespace Engine.PathFinding.AStar
                     bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
                     if (intersects)
                     {
-                        info = new GridCollisionInfo[picks.Count()];
+                        info = new GridCollisionInfo[picks.Length];
 
-                        for (int i = 0; i < picks.Count(); i++)
+                        for (int i = 0; i < picks.Length; i++)
                         {
-                            var pick = picks.ElementAt(i);
+                            var pick = picks[i];
 
                             info[i] = new GridCollisionInfo()
                             {

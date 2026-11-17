@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -37,18 +35,17 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Color4 color)
+        public static VertexPositionNormalColor[] Generate(Vector3[] vertices, Vector3[] normals, Color4 color)
         {
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(normals);
+            if (vertices.Length != normals.Length) throw new ArgumentException("Vertices and normals must have the same length");
 
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
+            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vertices.Length];
 
-            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
-
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = color };
+                res[i] = new VertexPositionNormalColor() { Position = vertices[i], Normal = normals[i], Color = color };
             }
 
             return res;
@@ -60,20 +57,19 @@ namespace Engine.BuiltIn.Format
         /// <param name="normals">Normals</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Color4> colors)
+        public static VertexPositionNormalColor[] Generate(Vector3[] vertices, Vector3[] normals, Color4[] colors)
         {
-            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(normals);
+            ArgumentNullException.ThrowIfNull(colors);
+            if (vertices.Length != colors.Length) throw new ArgumentException("Vertices and colors must have the same length");
+            if (vertices.Length != normals.Length) throw new ArgumentException("Vertices and normals must have the same length");
 
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-            var cArray = colors.ToArray();
+            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vertices.Length];
 
-            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
-
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = cArray[i] };
+                res[i] = new VertexPositionNormalColor() { Position = vertices[i], Normal = normals[i], Color = colors[i] };
             }
 
             return res;
@@ -82,15 +78,15 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPositionNormalColor>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPositionNormalColor[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            ArgumentNullException.ThrowIfNull(vertices);
 
-            var res = new VertexPositionNormalColor[vArray.Length];
+            var res = new VertexPositionNormalColor[vertices.Length];
 
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPositionNormalColor
                 {

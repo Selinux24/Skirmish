@@ -110,7 +110,7 @@ namespace EngineTests
             Setup(mockQuad2, bsph2, bbox1Tris, t2);
             Setup(mockQuad3, bsph3, bbox1Tris, t3);
         }
-        private static void Setup(Mock<IRayPickable<Triangle>> pickableMock, BoundingSphere sphere, IEnumerable<Triangle> boxTris, IEnumerable<Triangle> mesh)
+        private static void Setup(Mock<IRayPickable<Triangle>> pickableMock, BoundingSphere sphere, Triangle[] boxTris, Triangle[] mesh)
         {
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
             pickableMock.Setup(o => o.GetGeometry(GeometryTypes.Picking, It.IsAny<bool>())).Returns(mesh);

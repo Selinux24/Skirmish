@@ -75,7 +75,7 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Quadtree item type</typeparam>
         /// <param name="items">Quadtree items</param>
-        public virtual PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
+        public virtual PickingQuadTree<T> ReadQuadTree<T>(T[] items) where T : IVertexList, IRayIntersectable
         {
             if (Quadtree != null)
             {

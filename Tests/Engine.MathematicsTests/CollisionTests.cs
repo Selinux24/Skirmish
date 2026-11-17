@@ -334,15 +334,15 @@ namespace Engine.MathematicsTests
         [TestMethod()]
         public void IntersectableMeshComparerTest()
         {
-            Assert.AreSequenceEqual(tmesh1, (Triangle[])mesh1);
-            Assert.AreSequenceEqual((Triangle[])mesh1, tmesh1);
-            Assert.AreNotSequenceEqual(tmesh1, (Triangle[])mesh2);
-            Assert.AreNotSequenceEqual((Triangle[])mesh1, tmesh2);
+            Assert.AreSequenceEqual(tmesh1, mesh1.GetTriangles());
+            Assert.AreSequenceEqual(mesh1.GetTriangles(), tmesh1);
+            Assert.AreNotSequenceEqual(tmesh1, mesh2.GetTriangles());
+            Assert.AreNotSequenceEqual(mesh1.GetTriangles(), tmesh2);
 
-            Assert.AreEqual((IntersectionVolumeMesh)tmesh1, mesh1);
-            Assert.AreEqual(mesh1, (IntersectionVolumeMesh)tmesh1);
-            Assert.AreNotEqual((IntersectionVolumeMesh)tmesh1, mesh2);
-            Assert.AreNotEqual(mesh1, (IntersectionVolumeMesh)tmesh2);
+            Assert.AreEqual(new IntersectionVolumeMesh(tmesh1), mesh1);
+            Assert.AreEqual(mesh1, new IntersectionVolumeMesh(tmesh1));
+            Assert.AreNotEqual(new IntersectionVolumeMesh(tmesh1), mesh2);
+            Assert.AreNotEqual(mesh1, new IntersectionVolumeMesh(tmesh2));
         }
         [TestMethod()]
         public void IntersectableFrustumComparerTest()
@@ -382,12 +382,12 @@ namespace Engine.MathematicsTests
         {
             var mesh = new IntersectionVolumeMesh(tmesh1);
 
-            Assert.AreSequenceEqual(tmesh1, (Triangle[])mesh);
+            Assert.AreSequenceEqual(tmesh1, mesh.GetTriangles());
         }
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh([]); });
+            Assert.Throws<ArgumentException>(() => { var mesh = new IntersectionVolumeMesh([]); });
         }
 
         [TestMethod()]

@@ -1,5 +1,4 @@
 ﻿using Engine.Mathematics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,27 +12,27 @@ namespace Engine.Common
         /// <summary>
         /// Vertex data
         /// </summary>
-        public IEnumerable<Vector3> Vertices { get; set; }
+        public Vector3[] Vertices { get; set; }
         /// <summary>
         /// Normals
         /// </summary>
-        public IEnumerable<Vector3> Normals { get; set; }
+        public Vector3[] Normals { get; set; }
         /// <summary>
         /// UV texture coordinates
         /// </summary>
-        public IEnumerable<Vector2> Uvs { get; set; }
+        public Vector2[] Uvs { get; set; }
         /// <summary>
         /// Tangents
         /// </summary>
-        public IEnumerable<Vector3> Tangents { get; set; }
+        public Vector3[] Tangents { get; set; }
         /// <summary>
         /// Binormals
         /// </summary>
-        public IEnumerable<Vector3> Binormals { get; set; }
+        public Vector3[] Binormals { get; set; }
         /// <summary>
         /// Index data
         /// </summary>
-        public IEnumerable<uint> Indices { get; set; }
+        public uint[] Indices { get; set; }
         /// <summary>
         /// Gets whether the descriptor has any data or not
         /// </summary>
@@ -55,27 +54,27 @@ namespace Engine.Common
         /// <summary>
         /// Gets whether the descriptor has vertex data or not
         /// </summary>
-        public bool ContainsVertexData { get { return Vertices?.Any() ?? false; } }
+        public bool ContainsVertexData { get { return (Vertices?.Length ?? 0) > 0; } }
         /// <summary>
         /// Gets whether the descriptor has normal data or not
         /// </summary>
-        public bool ContainsNormalData { get { return Normals?.Any() ?? false; } }
+        public bool ContainsNormalData { get { return (Normals?.Length ?? 0) > 0; } }
         /// <summary>
         /// Gets whether the descriptor has UV data or not
         /// </summary>
-        public bool ContainsUvData { get { return Uvs?.Any() ?? false; } }
+        public bool ContainsUvData { get { return (Uvs?.Length ?? 0) > 0; } }
         /// <summary>
         /// Gets whether the descriptor has tangent data or not
         /// </summary>
-        public bool ContainsTangentData { get { return Tangents?.Any() ?? false; } }
+        public bool ContainsTangentData { get { return (Tangents?.Length ?? 0) > 0; } }
         /// <summary>
         /// Gets whether the descriptor has bi-normal data or not
         /// </summary>
-        public bool ContainsBinormalData { get { return Binormals?.Any() ?? false; } }
+        public bool ContainsBinormalData { get { return (Binormals?.Length ?? 0) > 0; } }
         /// <summary>
         /// Gets whether the descriptor has index data or not
         /// </summary>
-        public bool ContainsIndexData { get { return Indices?.Any() ?? false; } }
+        public bool ContainsIndexData { get { return (Indices?.Length ?? 0) > 0; } }
 
         /// <summary>
         /// Constructor
@@ -101,10 +100,10 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         public void Transform(Matrix4x4 transform)
         {
-            Vertices = Vertices?.Select(v => Vector3.TransformCoordinate(v, transform));
-            Normals = Normals?.Select(v => Vector3.TransformNormal(v, transform));
-            Tangents = Tangents?.Select(v => Vector3.TransformNormal(v, transform));
-            Binormals = Binormals?.Select(v => Vector3.TransformNormal(v, transform));
+            if (ContainsVertexData) Vector3.TransformCoordinate(Vertices, ref transform, Vertices);
+            if (ContainsNormalData) Vector3.TransformNormal(Normals, ref transform, Normals);
+            if (ContainsTangentData) Vector3.TransformNormal(Tangents, ref transform, Tangents);
+            if (ContainsBinormalData) Vector3.TransformNormal(Binormals, ref transform, Binormals);
         }
 
         /// <summary>
@@ -155,34 +154,36 @@ namespace Engine.Common
             uint indexOffset = 0;
             if (geom.ContainsVertexData)
             {
-                indexOffset = (uint)(Vertices?.Count() ?? 0);
+                indexOffset = (uint)(Vertices?.Length ?? 0);
 
-                Vertices = Vertices?.Concat(geom.Vertices) ?? geom.Vertices;
+                Vertices = [.. Vertices, .. geom.Vertices ?? []];
             }
 
             if (geom.ContainsNormalData)
             {
-                Normals = Normals?.Concat(geom.Normals) ?? geom.Normals;
+                Normals = [.. Normals, .. geom.Normals ?? []];
             }
 
             if (geom.ContainsUvData)
             {
-                Uvs = Uvs?.Concat(geom.Uvs) ?? geom.Uvs;
+                Uvs = [.. Uvs, .. geom.Uvs ?? []];
             }
 
             if (geom.ContainsTangentData)
             {
-                Tangents = Tangents?.Concat(geom.Tangents) ?? geom.Tangents;
+                Tangents = [.. Tangents, .. geom.Tangents ?? []];
             }
 
             if (geom.ContainsBinormalData)
             {
-                Binormals = Binormals?.Concat(geom.Binormals) ?? geom.Binormals;
+                Binormals = [.. Binormals, .. geom.Binormals ?? []];
             }
 
             if (geom.ContainsIndexData)
             {
-                Indices = Indices?.Concat(geom.Indices.Select(i => i + indexOffset)) ?? geom.Indices;
+                uint[] idx = geom.Indices?.Select(i => i + indexOffset).ToArray() ?? [];
+
+                Indices = [.. Indices, .. idx];
             }
 
             return true;

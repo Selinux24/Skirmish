@@ -83,7 +83,7 @@ namespace Engine.Common
         /// <summary>
         /// Hull mesh
         /// </summary>
-        public IEnumerable<Mathematics.Triangle> HullMesh
+        public Triangle[] HullMesh
         {
             get
             {
@@ -308,7 +308,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public Vector3[] GetPoints(bool refresh = false)
         {
             return GetPoints(Matrix4x4.Identity, refresh);
         }
@@ -318,7 +318,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, bool refresh = false)
+        public Vector3[] GetPoints(Matrix4x4 transform, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(refresh))
@@ -338,7 +338,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Vector3[] GetPoints(Matrix4x4[] boneTransforms, bool refresh = false)
         {
             return GetPoints(Matrix4x4.Identity, boneTransforms, refresh);
         }
@@ -349,7 +349,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Vector3[] GetPoints(Matrix4x4 transform, Matrix4x4[] boneTransforms, bool refresh = false)
         {
             var points = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetPoints(boneTransforms, refresh))
@@ -369,7 +369,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(bool refresh = false)
+        public Triangle[] GetTriangles(bool refresh = false)
         {
             return GetTriangles(Matrix4x4.Identity, refresh);
         }
@@ -379,15 +379,16 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(Matrix4x4 transform, bool refresh = false)
+        public Triangle[] GetTriangles(Matrix4x4 transform, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(refresh))
-                .Distinct();
+                .Distinct()
+                .ToArray();
 
             if (!transform.IsIdentity)
             {
-                triangles = Mathematics.Triangle.Transform(triangles, transform);
+                triangles = Triangle.Transform(triangles, transform);
             }
 
             return [.. triangles];
@@ -398,7 +399,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Triangle[] GetTriangles(Matrix4x4[] boneTransforms, bool refresh = false)
         {
             return GetTriangles(Matrix4x4.Identity, boneTransforms, refresh);
         }
@@ -409,15 +410,16 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(Matrix4x4 transform, IEnumerable<Matrix4x4> boneTransforms, bool refresh = false)
+        public Triangle[] GetTriangles(Matrix4x4 transform, Matrix4x4[] boneTransforms, bool refresh = false)
         {
             var triangles = IterateMeshes()
                 .SelectMany(m => m.Mesh.GetTriangles(boneTransforms, refresh))
-                .Distinct();
+                .Distinct()
+                .ToArray();
 
             if (!transform.IsIdentity)
             {
-                triangles = Mathematics.Triangle.Transform(triangles, transform);
+                triangles = Triangle.Transform(triangles, transform);
             }
 
             return [.. triangles];
@@ -427,22 +429,19 @@ namespace Engine.Common
         /// Gets a list of meshes by mesh name
         /// </summary>
         /// <param name="name">Name</param>
-        public IEnumerable<IMesh> GetMeshesByName(string name)
+        public IMesh[] GetMeshesByName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                yield break;
-            }
+            if (string.IsNullOrWhiteSpace(name)) return [];
 
-            if (!meshes.TryGetValue(name, out var meshMaterials))
-            {
-                yield break;
-            }
+            if (!meshes.TryGetValue(name, out var meshMaterials)) return [];
 
-            foreach (var value in meshMaterials.GetValues())
+            var matValues = meshMaterials.GetValues().ToArray();
+            IMesh[] res = new IMesh[matValues.Length];
+            for (int i = 0; i < matValues.Length; i++)
             {
-                yield return value;
+                res[i] = matValues[i];
             }
+            return res;
         }
         /// <summary>
         /// Gets the first mesh by mesh name
@@ -471,7 +470,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the material list
         /// </summary>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return materials.GetMaterials();
         }
@@ -479,7 +478,7 @@ namespace Engine.Common
         /// Gets the material list by name
         /// </summary>
         /// <param name="meshMaterialName">Mesh material name</param>
-        public IEnumerable<IMeshMaterial> GetMaterials(string meshMaterialName)
+        public IMeshMaterial[] GetMaterials(string meshMaterialName)
         {
             return materials.GetMaterials(meshMaterialName);
         }
@@ -506,7 +505,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets a copy of the lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> GetLights()
+        public ISceneLight[] GetLights()
         {
             return [.. lights.Select(l => l.Clone())];
         }

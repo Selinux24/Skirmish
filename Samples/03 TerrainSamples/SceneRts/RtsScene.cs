@@ -153,7 +153,7 @@ namespace TerrainSamples.SceneRts
         private GeometryColorDrawer<Line3D> curveLineDrawer = null;
         private GeometryColorDrawer<Line3D> terrainLineDrawer = null;
         private GeometryColorDrawer<Line3D> terrainPointDrawer = null;
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> terrainGraphDrawer = null;
+        private GeometryColorDrawer<Triangle> terrainGraphDrawer = null;
 
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
@@ -391,10 +391,10 @@ namespace TerrainSamples.SceneRts
 
             #region DEBUG Path finding Graph
 
-            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            terrainGraphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "++DEBUG++ Path finding Graph",
                 "++DEBUG++ Path finding Graph",
-                new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+                new GeometryColorDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
                     StartsVisible = false,
@@ -924,7 +924,7 @@ namespace TerrainSamples.SceneRts
                     continue;
                 }
 
-                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     continue;
                 }
@@ -954,7 +954,7 @@ namespace TerrainSamples.SceneRts
                     continue;
                 }
 
-                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     continue;
                 }
@@ -975,7 +975,7 @@ namespace TerrainSamples.SceneRts
                     continue;
                 }
 
-                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     continue;
                 }
@@ -989,7 +989,7 @@ namespace TerrainSamples.SceneRts
         }
         private void StartHeliport()
         {
-            if (FindTopGroundPosition(75, 75, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
             {
                 heliport.Manipulator.SetPosition(r.Position);
             }
@@ -998,7 +998,7 @@ namespace TerrainSamples.SceneRts
         }
         private void StartGarage()
         {
-            if (FindTopGroundPosition(-10, -40, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
             {
                 garage.Manipulator.SetPosition(r.Position);
                 garage.Manipulator.SetRotation(MathUtils.PiOver4 * 0.5f + MathUtils.Pi, 0, 0);
@@ -1008,7 +1008,7 @@ namespace TerrainSamples.SceneRts
         }
         private void StartBuildings()
         {
-            if (FindTopGroundPosition(-30, -40, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
             {
                 building.Manipulator.SetPosition(r.Position);
                 building.Manipulator.SetRotation(MathUtils.PiOver4 * 0.5f + MathUtils.Pi, 0, 0);
@@ -1028,7 +1028,7 @@ namespace TerrainSamples.SceneRts
                     _ => new Vector2(-1, -1),
                 };
 
-                if (!FindTopGroundPosition(o.X * 50, o.Y * 50, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (!FindTopGroundPosition(o.X * 50, o.Y * 50, out PickingResult<Triangle> r))
                 {
                     continue;
                 }
@@ -1097,7 +1097,7 @@ namespace TerrainSamples.SceneRts
 
             // Set position
             var ray = GetTopDownRay(heliport.Manipulator.Position, PickingHullTypes.Geometry);
-            if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Engine.Mathematics.Triangle> r))
+            if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
                 helicopter.Manipulator.SetNormal(r.PickingResult.Primitive.Normal);
@@ -1165,13 +1165,13 @@ namespace TerrainSamples.SceneRts
         }
         private void StartTanks()
         {
-            if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Engine.Mathematics.Triangle> r1))
+            if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Engine.Mathematics.Triangle> r2))
+            if (this.PickNearest(GetTopDownRay(-70, 70, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
@@ -1232,7 +1232,7 @@ namespace TerrainSamples.SceneRts
             //Adjust check-points
             for (int i = 0; i < t1CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t1CheckPoints[i] = r.Position;
                 }
@@ -1240,7 +1240,7 @@ namespace TerrainSamples.SceneRts
 
             for (int i = 0; i < t2CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t2CheckPoints[i] = r.Position;
                 }
@@ -1273,7 +1273,7 @@ namespace TerrainSamples.SceneRts
             {
                 for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
-                    if (FindTopGroundPosition(x, z, out PickingResult<Engine.Mathematics.Triangle> r))
+                    if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
                         oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
                     }
@@ -1371,7 +1371,7 @@ namespace TerrainSamples.SceneRts
                     cursor2D.Visible = true;
 
                     var pos = heliport.Manipulator.Position;
-                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var pPos = r.Position;
                         pPos.Y += walkerAgentType.Height;
@@ -1470,7 +1470,7 @@ namespace TerrainSamples.SceneRts
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                bool picked = this.PickNearest<Engine.Mathematics.Triangle>(pickingRay, SceneObjectUsages.Agent, out var agent);
+                bool picked = this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.Agent, out var agent);
                 if (picked)
                 {
                     followTarget = agent.SceneObject;
@@ -1499,7 +1499,7 @@ namespace TerrainSamples.SceneRts
             }
 
             if (follow &&
-                followTarget is IRayPickable<Engine.Mathematics.Triangle> pickable &&
+                followTarget is IRayPickable<Triangle> pickable &&
                 followTarget is ITransformable3D transform)
             {
                 var sph = pickable.GetBoundingSphere();
@@ -1535,7 +1535,7 @@ namespace TerrainSamples.SceneRts
             {
                 terrainPointDrawer.Clear();
 
-                if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r))
+                if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
                     DEBUGPickingPosition(r.PickingResult.Position);
                 }
@@ -1666,7 +1666,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateCursor(PickingRay pickingRay)
         {
-            if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
             {
                 cursor3D.Manipulator.SetPosition(r.Position);
             }
@@ -1775,7 +1775,7 @@ namespace TerrainSamples.SceneRts
         }
         private void DrawTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r);
+            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 var t1Position = tankP1.Manipulator.Position;
@@ -1789,7 +1789,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Engine.Mathematics.Triangle> r);
+            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>
@@ -1904,7 +1904,7 @@ namespace TerrainSamples.SceneRts
             }
 
             var hPos = heliport.Manipulator.Position;
-            if (FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
             {
                 cPoints[^2] = r.Position + helicopterHeightOffset;
                 cPoints[^1] = r.Position;
@@ -2163,7 +2163,7 @@ namespace TerrainSamples.SceneRts
                 return;
             }
 
-            if (FindAllGroundPosition<Engine.Mathematics.Triangle>(position.X, position.Z, out var results))
+            if (FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
             {
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Primitive).ToArray();
@@ -2347,7 +2347,7 @@ namespace TerrainSamples.SceneRts
             boxes.AddRange(obelisk.GetInstances().Select(i => i.GetBoundingBox()));
             boxes.AddRange(rocks.GetInstances().Select(i => i.GetBoundingBox()));
 
-            List<Engine.Mathematics.Triangle> tris =
+            List<Triangle> tris =
             [
                 .. tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),
                 .. tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),

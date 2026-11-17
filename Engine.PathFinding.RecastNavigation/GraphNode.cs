@@ -146,13 +146,13 @@ namespace Engine.PathFinding.RecastNavigation
                 .Where(p => p.Type != PolyTypes.OffmeshConnection)
                 .ToArray();
 
-            List<Mathematics.Triangle> tris = [];
+            List<Triangle> tris = [];
 
             foreach (var p in polys)
             {
                 var dtris = tile.GetDetailTris(p);
 
-                if (!Mathematics.Collision.MeshIntersectsPoint(dtris, ref point))
+                if (!Collision.MeshIntersectsPoint(dtris, ref point))
                 {
                     continue;
                 }
@@ -163,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation
             return new()
             {
                 Id = tileNum,
-                Triangles = tris,
+                Triangles = [.. tris],
                 TotalCost = 1,
             };
         }
@@ -184,18 +184,18 @@ namespace Engine.PathFinding.RecastNavigation
                     center += pos;
                 }
 
-                return center / Math.Max(1, Triangles.Count());
+                return center / Math.Max(1, Triangles.Length);
             }
         }
         /// <summary>
         /// Node triangle list
         /// </summary>
-        public IEnumerable<Mathematics.Triangle> Triangles { get; private set; }
+        public Triangle[] Triangles { get; private set; }
 
         /// <inheritdoc/>
         public bool Contains(Vector3 point)
         {
-            return Mathematics.Collision.MeshIntersectsPoint(Triangles, ref point);
+            return Collision.MeshIntersectsPoint(Triangles, ref point);
         }
         /// <inheritdoc/>
         public IEnumerable<Vector3> GetPoints()

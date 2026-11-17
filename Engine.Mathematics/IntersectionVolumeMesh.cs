@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Mathematics
 {
@@ -12,7 +10,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Triangle list
         /// </summary>
-        private readonly IEnumerable<Triangle> mesh;
+        private readonly Triangle[] mesh = [];
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; }
@@ -21,21 +19,23 @@ namespace Engine.Mathematics
         /// Constructor
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        public IntersectionVolumeMesh(IEnumerable<Triangle> mesh)
+        public IntersectionVolumeMesh(Triangle[] mesh)
         {
-            this.mesh = mesh ?? throw new ArgumentNullException(nameof(mesh), "Must specify a mesh.");
-            if (!mesh.Any())
+            ArgumentNullException.ThrowIfNull(mesh);
+            if (mesh.Length == 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(mesh), "Must specify at least one triangle in the mesh.");
+                throw new ArgumentException("Must specify at least one triangle in the mesh.", nameof(mesh));
             }
+
+            this.mesh = mesh;
 
             Vector3 center = Vector3.Zero;
-            for (int i = 0; i < mesh.Count(); i++)
+            for (int i = 0; i < this.mesh.Length; i++)
             {
-                center += mesh.ElementAt(i).GetCenter();
+                center += this.mesh[i].GetCenter();
             }
 
-            Position = center / mesh.Count();
+            Position = center / this.mesh.Length;
         }
 
         /// <inheritdoc/>
@@ -54,20 +54,15 @@ namespace Engine.Mathematics
             return Collision.MeshContainsFrustum(mesh, ref frustum);
         }
         /// <inheritdoc/>
-        public readonly ContainmentType Contains(IEnumerable<Mathematics.Triangle> mesh)
+        public readonly ContainmentType Contains(Triangle[] mesh)
         {
-            return Collision.MeshContainsMesh(this.mesh, [.. mesh]);
+            return Collision.MeshContainsMesh(this.mesh, mesh);
         }
 
         /// <inheritdoc/>
-        public static implicit operator Triangle[](IntersectionVolumeMesh value)
+        public readonly Triangle[] GetTriangles()
         {
-            return value.mesh?.ToArray();
-        }
-        /// <inheritdoc/>
-        public static implicit operator IntersectionVolumeMesh(Mathematics.Triangle[] value)
-        {
-            return new IntersectionVolumeMesh(value);
+            return mesh;
         }
     }
 }

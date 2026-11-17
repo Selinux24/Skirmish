@@ -291,7 +291,7 @@ namespace Engine
             Renderer?.Resize();
 
             var fittedComponents = Components.Get<IScreenFitted>();
-            if (fittedComponents.Any())
+            if (fittedComponents.Length != 0)
             {
                 fittedComponents
                     .AsParallel()
@@ -549,15 +549,15 @@ namespace Engine
         /// </summary>
         /// <typeparam name="TObj">Component type</typeparam>
         /// <param name="components">Component instance list</param>
-        public void RemoveComponents<TObj>(IEnumerable<TObj> components) where TObj : ISceneObject
+        public void RemoveComponents<TObj>(TObj[] components) where TObj : ISceneObject
         {
-            Components.RemoveComponents(components.OfType<ISceneObject>(), ComponentsUpdated);
+            Components.RemoveComponents([.. components.OfType<ISceneObject>()], ComponentsUpdated);
         }
 
         /// <summary>
         /// Components updated event
         /// </summary>
-        private void ComponentsUpdated(IEnumerable<ISceneObject> components)
+        private void ComponentsUpdated(ISceneObject[] components)
         {
             Renderer?.UpdateGlobals();
         }
@@ -580,7 +580,7 @@ namespace Engine
                 return new BoundingBox(Vector3.One * -100f, Vector3.One * 100f);
             }
 
-            Bounds = BoundingBox.Merge(boxes);
+            Bounds = BoundingBox.Merge([.. boxes]);
 
             return Bounds.Value;
         }
@@ -591,7 +591,7 @@ namespace Engine
         public IEnumerable<BoundingBox> GetBoundingBoxes(SceneObjectUsages usage)
         {
             var cmpList = Components.Get(usage);
-            if (!cmpList.Any())
+            if (cmpList.Length == 0)
             {
                 yield break;
             }
@@ -600,13 +600,13 @@ namespace Engine
             {
                 if (obj is IComposed composed)
                 {
-                    var pickComponents = composed.GetComponents<IRayPickable<Mathematics.Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
                         yield return pickable.GetBoundingBox();
                     }
                 }
-                else if (obj is IRayPickable<Mathematics.Triangle> pickable)
+                else if (obj is IRayPickable<Triangle> pickable)
                 {
                     yield return pickable.GetBoundingBox();
                 }

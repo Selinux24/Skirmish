@@ -152,7 +152,7 @@ namespace BasicSamples.SceneMaterials
             float h = 0f;
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
-            geo.Uvs = geo.Uvs.Select(uv => uv * t);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * t)];
 
             var mat = MaterialCookTorranceContent.Default;
             mat.Metallic = 0.9f;
@@ -242,7 +242,10 @@ namespace BasicSamples.SceneMaterials
             ];
 
             //Cook-torrance
-            var ctMaterials = materials.Select(m => (MaterialCookTorranceContent)m).OfType<IMaterialContent>();
+            var ctMaterials = materials
+                .Select(m => (MaterialCookTorranceContent)m)
+                .OfType<IMaterialContent>()
+                .ToArray();
 
             var spheres = await InitializeSphereInstanced("Built-in materials test", (uint)materials.Count, ctMaterials);
 
@@ -288,7 +291,7 @@ namespace BasicSamples.SceneMaterials
                 materials.Add(mat);
             }
 
-            var spheres = await InitializeSphereInstanced("Cook-Torrance Metallics", (uint)materials.Count, materials);
+            var spheres = await InitializeSphereInstanced("Cook-Torrance Metallics", (uint)materials.Count, [.. materials]);
 
             float sep = 2f;
             float x = sep * itemsPerRow * 0.5f;
@@ -304,8 +307,10 @@ namespace BasicSamples.SceneMaterials
                 }
             }
         }
-        private static IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
+        private static IMaterialContent[] GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
         {
+            List<IMaterialContent> res = [];
+
             for (int r = 0; r < colorCount; r += n)
             {
                 for (int g = 0; g < colorCount; g += n)
@@ -316,10 +321,12 @@ namespace BasicSamples.SceneMaterials
                         var specular = diffuse + new Color3(specularFactor);
                         specular = Color3.AdjustSaturation(specular, 1f);
 
-                        yield return GenerateMaterial(diffuse, specular, matParams, nmap);
+                        res.Add(GenerateMaterial(diffuse, specular, matParams, nmap));
                     }
                 }
             }
+
+            return [.. res];
         }
         private static IMaterialContent GenerateMaterial(Vector3 diffuse, Vector3 specular, MaterialParams matParams, bool nmap)
         {
@@ -357,7 +364,7 @@ namespace BasicSamples.SceneMaterials
 
             return MaterialBlinnPhongContent.Default;
         }
-        private async Task<ModelInstanced> InitializeSphereInstanced(string name, uint count, IEnumerable<IMaterialContent> materials)
+        private async Task<ModelInstanced> InitializeSphereInstanced(string name, uint count, IMaterialContent[] materials)
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);

@@ -25,7 +25,7 @@ namespace Engine.PathFindingTests
         static readonly float rDefault = 0.5f;
         static readonly int maxAgents = 3;
 
-        static IEnumerable<Triangle> zeroPlaneTris;
+        static Triangle[] zeroPlaneTris;
         static Graph graph;
         static GraphAgentType agentDefault;
 

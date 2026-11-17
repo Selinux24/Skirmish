@@ -42,11 +42,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -117,6 +116,9 @@ namespace Engine.Mathematics
         /// <returns>An array of points representing the eight corners of the bounding box.</returns>
         public readonly void GetCorners(Vector3[] corners)
         {
+            ArgumentNullException.ThrowIfNull(corners);
+            if (corners.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(corners));
+
             corners[0] = new Vector3(Minimum.X, Maximum.Y, Maximum.Z);
             corners[1] = new Vector3(Maximum.X, Maximum.Y, Maximum.Z);
             corners[2] = new Vector3(Maximum.X, Minimum.Y, Maximum.Z);
@@ -131,16 +133,19 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the face list of the current bounding box</returns>
-        public readonly IEnumerable<Plane> GetFaces()
+        public readonly Plane[] GetFaces()
         {
-            var vertices = GetVertices();
+            Vector3[] vertices = GetVertices();
 
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
-            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
-            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
+            return
+            [
+                new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up),
+                new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down),
+                new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH),
+                new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH),
+                new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left),
+                new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right)
+            ];
         }
         /// <summary>
         /// Gets the bounding box face plane
@@ -149,7 +154,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(BoxFaces face)
         {
-            return GetFace(GetFaces(), face);
+            return GetFace((int)face);
         }
         /// <summary>
         /// Gets the bounding box face plane
@@ -158,7 +163,11 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(int faceIndex)
         {
-            return GetFace(GetFaces(), faceIndex);
+            var faces = GetFaces();
+
+            if (faceIndex >= faces.Length) throw new ArgumentException(null, nameof(faceIndex));
+
+            return faces[faceIndex];
         }
         /// <summary>
         /// Gets the specified vertex
@@ -166,7 +175,7 @@ namespace Engine.Mathematics
         /// <param name="vertex">Box vertex</param>
         public readonly Vector3 GetVertex(BoxVertices vertex)
         {
-            return GetVertex(GetVertices(), (int)vertex);
+            return GetVertex((int)vertex);
         }
         /// <summary>
         /// Gets the specified vertex
@@ -174,29 +183,68 @@ namespace Engine.Mathematics
         /// <param name="index">Vertex index</param>
         public readonly Vector3 GetVertex(int index)
         {
-            return GetVertex(GetVertices(), index);
+            var vertices = GetVertices();
+
+            if (index >= vertices.Length) throw new ArgumentException(null, nameof(index));
+
+            return vertices[index];
         }
         /// <summary>
         /// Gets the bounding box edge list
         /// </summary>
         /// <returns>Returns the edge list of the current bounding box</returns>
-        public readonly IEnumerable<Segment> GetEdges()
+        public readonly Segment[] GetEdges()
         {
-            return GetEdges(GetVertices());
+            var vertices = GetVertices();
+
+            return GetEdges(vertices);
+        }
+        /// <summary>
+        /// Gets the bounding box top edges list
+        /// </summary>
+        /// <returns>Returns the top edge list of the current bounding box</returns>
+        public readonly Segment[] GetEdgesTop()
+        {
+            var vertices = GetVertices();
+
+            return GetEdgesTop(vertices);
+        }
+        /// <summary>
+        /// Gets the bounding box bottom edges list
+        /// </summary>
+        /// <returns>Returns the bottom edge list of the current bounding box</returns>
+        public readonly Segment[] GetEdgesBottom()
+        {
+            var vertices = GetVertices();
+
+            return GetEdgesBottom(vertices);
+        }
+        /// <summary>
+        /// Gets the bounding box vertical edges list
+        /// </summary>
+        /// <returns>Returns the vertical edge list of the current bounding box</returns>
+        public readonly Segment[] GetEdgesVertical()
+        {
+            var vertices = GetVertices();
+
+            return GetEdgesVertical(vertices);
         }
         /// <summary>
         /// Gets the bounding box vertices
         /// </summary>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
-            yield return new Vector3(Maximum.X, Maximum.Y, Maximum.Z);
-            yield return new Vector3(Maximum.X, Maximum.Y, Minimum.Z);
-            yield return new Vector3(Minimum.X, Maximum.Y, Minimum.Z);
-            yield return new Vector3(Minimum.X, Maximum.Y, Maximum.Z);
-            yield return new Vector3(Maximum.X, Minimum.Y, Maximum.Z);
-            yield return new Vector3(Maximum.X, Minimum.Y, Minimum.Z);
-            yield return new Vector3(Minimum.X, Minimum.Y, Minimum.Z);
-            yield return new Vector3(Minimum.X, Minimum.Y, Maximum.Z);
+            return
+            [
+                new Vector3(Maximum.X, Maximum.Y, Maximum.Z),
+                new Vector3(Maximum.X, Maximum.Y, Minimum.Z),
+                new Vector3(Minimum.X, Maximum.Y, Minimum.Z),
+                new Vector3(Minimum.X, Maximum.Y, Maximum.Z),
+                new Vector3(Maximum.X, Minimum.Y, Maximum.Z),
+                new Vector3(Maximum.X, Minimum.Y, Minimum.Z),
+                new Vector3(Minimum.X, Minimum.Y, Minimum.Z),
+                new Vector3(Minimum.X, Minimum.Y, Maximum.Z)
+            ];
         }
         /// <summary>
         /// Gets the XY rectangle of the box
@@ -381,7 +429,7 @@ namespace Engine.Mathematics
         /// <param name="points">The points that will be contained by the box.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="points"/> is <c>null</c>.</exception>
-        public static void FromPoints(IEnumerable<Vector3> points, out BoundingBox result)
+        public static void FromPoints(Vector3[] points, out BoundingBox result)
         {
             ArgumentNullException.ThrowIfNull(points);
 
@@ -402,7 +450,7 @@ namespace Engine.Mathematics
         /// <param name="points">The points that will be contained by the box.</param>
         /// <returns>The newly constructed bounding box.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="points"/> is <c>null</c>.</exception>
-        public static BoundingBox FromPoints(IEnumerable<Vector3> points)
+        public static BoundingBox FromPoints(Vector3[] points)
         {
             FromPoints(points, out var bbox);
             return bbox;
@@ -460,18 +508,20 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="boxes">Array of boxes</param>
         /// <returns>Returns a bounding box containing all the boxes in the array</returns>
-        public static BoundingBox Merge(IEnumerable<BoundingBox> boxes)
+        public static BoundingBox Merge(BoundingBox[] boxes)
         {
+            ArgumentNullException.ThrowIfNull(boxes);
+
             var fbbox = new BoundingBox();
 
-            if (boxes?.Any() != true)
+            if (boxes.Length == 0)
             {
                 return fbbox;
             }
 
             var defaultBox = new BoundingBox();
 
-            foreach (var bbox in boxes.Where(b => b != defaultBox))
+            foreach (var bbox in Array.FindAll(boxes, b => b != defaultBox))
             {
                 fbbox = Merge(fbbox, bbox);
             }
@@ -534,25 +584,77 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="vertices">Box vertices</param>
         /// <returns>Returns the edge list of the current box vertices</returns>
-        public static IEnumerable<Segment> GetEdges(IEnumerable<Vector3> vertices)
+        /// <exception cref="ArgumentException"></exception>
+        public static Segment[] GetEdges(Vector3[] vertices)
         {
-            //Top edges
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.BackRightTop));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackLeftTop));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftTop));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontRightTop));
+            ArgumentNullException.ThrowIfNull(vertices);
+            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
 
-            //Bottom edges
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightBottom), vertices.ElementAt((int)BoxVertices.BackRightBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightBottom), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftBottom), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftBottom), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
+            var top = GetEdgesTop(vertices);
+            var bottom = GetEdgesBottom(vertices);
+            var vertical = GetEdgesVertical(vertices);
 
-            //Vertical edges
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackRightBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
-            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
+            return [.. top, .. bottom, .. vertical];
+        }
+        /// <summary>
+        /// Gets the top edges list
+        /// </summary>
+        /// <param name="vertices">Box vertices</param>
+        /// <returns>Returns the top edge list of the current box vertices</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static Segment[] GetEdgesTop(Vector3[] vertices)
+        {
+            ArgumentNullException.ThrowIfNull(vertices);
+            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+
+            return
+            [
+                //Top edges
+                new Segment(vertices[(int)BoxVertices.FrontRightTop], vertices[(int)BoxVertices.BackRightTop]),
+                new Segment(vertices[(int)BoxVertices.BackRightTop], vertices[(int)BoxVertices.BackLeftTop]),
+                new Segment(vertices[(int)BoxVertices.BackLeftTop], vertices[(int)BoxVertices.FrontLeftTop]),
+                new Segment(vertices[(int)BoxVertices.FrontLeftTop], vertices[(int)BoxVertices.FrontRightTop]),
+            ];
+        }
+        /// <summary>
+        /// Gets the bottom edges list
+        /// </summary>
+        /// <param name="vertices">Box vertices</param>
+        /// <returns>Returns the bottom edge list of the current box vertices</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static Segment[] GetEdgesBottom(Vector3[] vertices)
+        {
+            ArgumentNullException.ThrowIfNull(vertices);
+            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+
+            return
+            [
+                //Bottom edges
+                new Segment(vertices[(int)BoxVertices.FrontRightBottom], vertices[(int)BoxVertices.BackRightBottom]),
+                new Segment(vertices[(int)BoxVertices.BackRightBottom], vertices[(int)BoxVertices.BackLeftBottom]),
+                new Segment(vertices[(int)BoxVertices.BackLeftBottom], vertices[(int)BoxVertices.FrontLeftBottom]),
+                new Segment(vertices[(int)BoxVertices.FrontLeftBottom], vertices[(int)BoxVertices.FrontRightBottom]),
+            ];
+        }
+        /// <summary>
+        /// Gets the vertical edges list
+        /// </summary>
+        /// <param name="vertices">Box vertices</param>
+        /// <returns>Returns the vertical edge list of the current box vertices</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static Segment[] GetEdgesVertical(Vector3[] vertices)
+        {
+            ArgumentNullException.ThrowIfNull(vertices);
+            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+
+            return
+            [
+                //Vertical edges
+                new Segment(vertices[(int)BoxVertices.FrontRightTop], vertices[(int)BoxVertices.FrontRightBottom]),
+                new Segment(vertices[(int)BoxVertices.BackRightTop], vertices[(int)BoxVertices.BackRightBottom]),
+                new Segment(vertices[(int)BoxVertices.BackLeftTop], vertices[(int)BoxVertices.BackLeftBottom]),
+                new Segment(vertices[(int)BoxVertices.FrontLeftTop], vertices[(int)BoxVertices.FrontLeftBottom]),
+            ];
         }
 
         /// <summary>
@@ -560,18 +662,21 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="vertices">Vertices</param>
         /// <param name="vertex">Box vertex</param>
-        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, BoxVertices vertex)
+        public static Vector3 GetVertex(Vector3[] vertices, BoxVertices vertex)
         {
-            return vertices.ElementAtOrDefault((int)vertex);
+            return GetVertex(vertices, (int)vertex);
         }
         /// <summary>
         /// Gets the specified vertex
         /// </summary>
         /// <param name="vertices">Vertices</param>
         /// <param name="index">Vertex index</param>
-        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, int index)
+        public static Vector3 GetVertex(Vector3[] vertices, int index)
         {
-            return vertices.ElementAtOrDefault(index);
+            ArgumentNullException.ThrowIfNull(vertices);
+            if (index >= vertices.Length) throw new ArgumentException(null, nameof(index));
+
+            return vertices[index];
         }
 
         /// <summary>
@@ -579,18 +684,21 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="faces">Box faces collection</param>
         /// <param name="face">Face</param>
-        public static Plane GetFace(IEnumerable<Plane> faces, BoxFaces face)
+        public static Plane GetFace(Plane[] faces, BoxFaces face)
         {
-            return faces.ElementAtOrDefault((int)face);
+            return GetFace(faces, (int)face);
         }
         /// <summary>
         /// Gets the specified box face
         /// </summary>
         /// <param name="faces">Box faces collection</param>
         /// <param name="faceIndex">Face index</param>
-        public static Plane GetFace(IEnumerable<Plane> faces, int faceIndex)
+        public static Plane GetFace(Plane[] faces, int faceIndex)
         {
-            return faces.ElementAtOrDefault(faceIndex);
+            ArgumentNullException.ThrowIfNull(faces);
+            if (faceIndex >= faces.Length) throw new ArgumentException(null, nameof(faceIndex));
+
+            return faces[faceIndex];
         }
 
         /// <summary>
@@ -606,7 +714,7 @@ namespace Engine.Mathematics
         /// 2 - Bottom Left
         /// 3 - Bottom Right
         /// </remarks>
-        public readonly IEnumerable<BoundingBox> SubdivideQuadtree(bool separateBothAxis = false, float separation = float.Epsilon)
+        public readonly BoundingBox[] SubdivideQuadtree(bool separateBothAxis = false, float separation = float.Epsilon)
         {
             var M = Maximum;
             var m = Minimum;
@@ -614,15 +722,18 @@ namespace Engine.Mathematics
             float addAxis = separation;
             float subAxis = separateBothAxis ? separation : 0;
 
-            //-1-1   +0+0 - Top Left
-            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X - subAxis, M.Y, c.Z - subAxis));
-            //-1+0   +0+1 - Top Right
-            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z + addAxis), new Vector3(c.X - subAxis, M.Y, M.Z));
+            return
+            [
+                //-1-1   +0+0 - Top Left
+                new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X - subAxis, M.Y, c.Z - subAxis)),
+                //-1+0   +0+1 - Top Right
+                new BoundingBox(new Vector3(m.X, m.Y, c.Z + addAxis), new Vector3(c.X - subAxis, M.Y, M.Z)),
 
-            //+0-1   +1+0 - Bottom Left
-            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis));
-            //+0+0   +1+1 - Bottom Right
-            yield return new BoundingBox(new Vector3(c.X + addAxis, m.Y, c.Z + addAxis), new Vector3(M.X, M.Y, M.Z));
+                //+0-1   +1+0 - Bottom Left
+                new BoundingBox(new Vector3(c.X + addAxis, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z - subAxis)),
+                //+0+0   +1+1 - Bottom Right
+                new BoundingBox(new Vector3(c.X + addAxis, m.Y, c.Z + addAxis), new Vector3(M.X, M.Y, M.Z)),
+            ];
         }
         /// <summary>
         /// Generates a list of eight bounding boxes which makes an OcTree subdivision of the specified bounding box
@@ -640,31 +751,34 @@ namespace Engine.Mathematics
         /// 6 - Bottom Right Front
         /// 7 - Bottom Right Back
         /// </remarks>
-        public readonly IEnumerable<BoundingBox> SubdivideOctree(float separation = float.Epsilon)
+        public readonly BoundingBox[] SubdivideOctree(float separation = float.Epsilon)
         {
             var m = Minimum;
             var M = Maximum;
             var c = Center;
 
-            //-1+0-1   +0+1+0 - Top Left Front
-            yield return new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-            //-1+0+0   +0+1+1 - Top Left Back
-            yield return new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z));
+            return
+            [
+                //-1+0-1   +0+1+0 - Top Left Front
+                new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z)),
+                //-1+0+0   +0+1+1 - Top Left Back
+                new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z)),
 
-            //+0+0-1   +1+1+0 - Top Right Front
-            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-            //+0+0+0   +1+1+1 - Top Right Back
-            yield return new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z));
+                //+0+0-1   +1+1+0 - Top Right Front
+                new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z)),
+                //+0+0+0   +1+1+1 - Top Right Back
+                new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z)),
 
-            //-1-1-1   +0+0+0 - Bottom Left Front
-            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z));
-            //-1-1+0   +0+0+1 - Bottom Left Back
-            yield return new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z));
+                //-1-1-1   +0+0+0 - Bottom Left Front
+                new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z)),
+                //-1-1+0   +0+0+1 - Bottom Left Back
+                new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z)),
 
-            //+0-1-1   +1+0+0 - Bottom Right Front
-            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z));
-            //+0-1+0   +1+0+1 - Bottom Right Back
-            yield return new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z));
+                //+0-1-1   +1+0+0 - Bottom Right Front
+                new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z)),
+                //+0-1+0   +1+0+1 - Bottom Right Back
+                new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z)),
+            ];
         }
 
         /// <inheritdoc/>

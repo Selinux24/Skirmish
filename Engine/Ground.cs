@@ -53,17 +53,17 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(PickingRay ray, out PickingResult<Mathematics.Triangle> result)
+        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
             return GroundPickingQuadtree?.PickNearest(ray, out result) ?? RayPickingHelper.PickNearest(this, ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickFirst(PickingRay ray, out PickingResult<Mathematics.Triangle> result)
+        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
             return GroundPickingQuadtree?.PickFirst(ray, out result) ?? RayPickingHelper.PickFirst(this, ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Mathematics.Triangle>> results)
+        public bool PickAll(PickingRay ray, out PickingResult<Triangle>[] results)
         {
             return GroundPickingQuadtree?.PickAll(ray, out results) ?? RayPickingHelper.PickAll(this, ray, out results);
         }
@@ -84,7 +84,7 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Mathematics.Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public virtual Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
@@ -106,20 +106,18 @@ namespace Engine
             return [];
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Mathematics.Triangle> GetGeometry(bool refresh = false)
+        public virtual Triangle[] GetGeometry(bool refresh = false)
         {
-            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? [];
+            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).ToArray() ?? [];
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public virtual Vector3[] GetPoints(bool refresh = false)
         {
-            return GetGeometry(refresh)
-                .SelectMany(t => t.GetVertices())
-                .AsEnumerable();
+            return [.. GetGeometry(refresh).SelectMany(t => t.GetVertices())];
         }
 
         /// <inheritdoc/>
-        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Mathematics.Triangle> result)
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             if (GroundPickingQuadtree == null)
             {
@@ -127,17 +125,17 @@ namespace Engine
                 var mesh = GetGeometry(GeometryTypes.Picking);
 
                 BoundingSphere sph = sphere;
-                return Mathematics.Collision.SphereIntersectsMesh(ref sph, mesh, out result);
+                return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
             }
 
-            result = new PickingResult<Mathematics.Triangle>()
+            result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
             };
 
             // Use quadtree
             var nodes = GroundPickingQuadtree.FindNodesInVolume(sphere);
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return false;
             }
@@ -147,7 +145,7 @@ namespace Engine
             foreach (var node in nodes)
             {
                 BoundingSphere sph = sphere;
-                if (Mathematics.Collision.SphereIntersectsMesh(ref sph, node.Items, out var res))
+                if (Collision.SphereIntersectsMesh(ref sph, node.Items, out var res))
                 {
                     intersects = true;
 
@@ -185,7 +183,7 @@ namespace Engine
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
 
-            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
+            return new IntersectionVolumeMesh([.. GetGeometry(GeometryTypes.Picking)]);
         }
 
         /// <inheritdoc/>

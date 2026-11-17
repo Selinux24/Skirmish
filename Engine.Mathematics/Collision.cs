@@ -90,7 +90,7 @@ namespace Engine.Mathematics
 
             if (two is IntersectionVolumeMesh twoMesh)
             {
-                return one.Contains((Mathematics.Triangle[])twoMesh) != ContainmentType.Disjoint;
+                return one.Contains(twoMesh.GetTriangles()) != ContainmentType.Disjoint;
             }
 
             return false;
@@ -588,33 +588,11 @@ namespace Engine.Mathematics
         /// <param name="mesh">Triangle mesh</param>
         /// <param name="closest">Returns the closest triangle from point p</param>
         /// <param name="result">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInMesh(ref Vector3 point, IEnumerable<Triangle> mesh, out Triangle closest, out Vector3 result)
-        {
-            ClosestPointInMesh(ref point, [.. mesh], out closest, out result);
-        }
-        /// <summary>
-        /// Gets the closest point in a triangle mesh from the specified point p
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="closest">Returns the closest triangle from point p</param>
-        /// <param name="result">Returns the closest point in the triangle from point p</param>
         public static void ClosestPointInMesh(ref Vector3 point, Triangle[] mesh, out Triangle closest, out float distance, out Vector3 result)
         {
             ClosestPointInMesh(ref point, mesh, out closest, out result);
 
             Vector3.Distance(ref point, ref result, out distance);
-        }
-        /// <summary>
-        /// Gets the closest point in a triangle mesh from the specified point p
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="closest">Returns the closest triangle from point p</param>
-        /// <param name="result">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInMesh(ref Vector3 point, IEnumerable<Triangle> mesh, out Triangle closest, out float distance, out Vector3 result)
-        {
-            ClosestPointInMesh(ref point, [.. mesh], out closest, out distance, out result);
         }
 
         /// <summary>
@@ -1716,17 +1694,6 @@ namespace Engine.Mathematics
         /// <param name="triangle">Triangle</param>
         /// <param name="mesh">Mesh</param>
         /// <param name="triangles">Returns the intersected triangle list</param>
-        /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(ref Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles)
-        {
-            return TriangleIntersectsMesh(ref triangle, [.. mesh], out triangles);
-        }
-        /// <summary>
-        /// Determines whether the triangle and the mesh intersects or not
-        /// </summary>
-        /// <param name="triangle">Triangle</param>
-        /// <param name="mesh">Mesh</param>
-        /// <param name="triangles">Returns the intersected triangle list</param>
         /// <param name="segments">Returns the intersection segment list</param>
         /// <returns>Returns true if the triangle intersects the mesh</returns>
         public static bool TriangleIntersectsMesh(ref Triangle triangle, Triangle[] mesh, out Triangle[] triangles, out Segment[] segments)
@@ -1751,18 +1718,6 @@ namespace Engine.Mathematics
             segments = [.. segs.FindAll(seg => seg.Point1 != seg.Point2).Distinct()];
 
             return intersected;
-        }
-        /// <summary>
-        /// Determines whether the triangle and the mesh intersects or not
-        /// </summary>
-        /// <param name="triangle">Triangle</param>
-        /// <param name="mesh">Mesh</param>
-        /// <param name="triangles">Returns the intersected triangle list</param>
-        /// <param name="segments">Returns the intersection segment list</param>
-        /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(ref Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles, out Segment[] segments)
-        {
-            return TriangleIntersectsMesh(ref triangle, [.. mesh], out triangles, out segments);
         }
 
         /// <summary>
@@ -1803,16 +1758,6 @@ namespace Engine.Mathematics
             }
 
             return result;
-        }
-        /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Plane"/> and a set of points.
-        /// </summary>
-        /// <param name="plane">The plane to test.</param>
-        /// <param name="points">The points to test.</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public static PlaneIntersectionType PlaneIntersectsPoints(ref Plane plane, IEnumerable<Vector3> points)
-        {
-            return PlaneIntersectsPoints(ref plane, [.. points]);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Plane"/> and a <see cref="Plane"/>.
@@ -2186,16 +2131,6 @@ namespace Engine.Mathematics
             return false;
         }
         /// <summary>
-        /// Determines whether a box intersects with a mesh
-        /// </summary>
-        /// <param name="box">Bounding box</param>
-        /// <param name="mesh">Mesh</param>
-        /// <returns>Returns true if the box intersects the mesh</returns>
-        public static bool BoxIntersectsMesh(ref BoundingBox box, IEnumerable<Triangle> mesh)
-        {
-            return BoxIntersectsMesh(ref box, [.. mesh]);
-        }
-        /// <summary>
         /// Determines whether a box intersects with a plane
         /// </summary>
         /// <param name="box">Axis aligned box</param>
@@ -2347,17 +2282,6 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="mesh">Triangle mesh</param>
-        /// <param name="result">Returns the piking result</param>
-        /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(ref BoundingSphere sphere, IEnumerable<Triangle> mesh, out PickingResult<Triangle> result)
-        {
-            return SphereIntersectsMesh(ref sphere, [.. mesh], out result);
-        }
-        /// <summary>
-        /// Determines whether a sphere intersects with a triangle mesh
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="mesh">Triangle mesh</param>
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <param name="points">Returns the intersection point list</param>
         /// <param name="distances">Returns the distance list from the sphere center to the intersection points</param>
@@ -2381,19 +2305,6 @@ namespace Engine.Mathematics
             results = [.. picks];
 
             return picks.Count != 0;
-        }
-        /// <summary>
-        /// Determines whether a sphere intersects with a triangle mesh
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="triangles">Returns the intersected triangle list</param>
-        /// <param name="points">Returns the intersection point list</param>
-        /// <param name="distances">Returns the distance list from the sphere center to the intersection points</param>
-        /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMeshAll(ref BoundingSphere sphere, IEnumerable<Triangle> mesh, out PickingResult<Triangle>[] results)
-        {
-            return SphereIntersectsMeshAll(ref sphere, [.. mesh], out results);
         }
 
         /// <summary>
@@ -2577,16 +2488,6 @@ namespace Engine.Mathematics
             return false;
         }
         /// <summary>
-        /// Finds whether the point is contained within the triangle mesh, and the distance between the point and the closest triangle.
-        /// </summary>
-        /// <param name="p">A point.</param>
-        /// <param name="mesh">A mesh.</param>
-        /// <returns>A value indicating whether the point is contained within the triangle mesh.</returns>
-        public static bool MeshIntersectsPoint(IEnumerable<Triangle> mesh, ref Vector3 p)
-        {
-            return MeshIntersectsPoint([.. mesh], ref p);
-        }
-        /// <summary>
         /// Determines whether a mesh intersects with a mesh
         /// </summary>
         /// <param name="mesh1">Mesh one</param>
@@ -2609,21 +2510,9 @@ namespace Engine.Mathematics
             }
 
             triangles = [.. tris.Distinct()];
-            segments = [.. segs.Distinct()];
+            segments = [.. segs.FindAll(seg => seg.Point1 != seg.Point2).Distinct()];
 
             return triangles.Length > 0;
-        }
-        /// <summary>
-        /// Determines whether a mesh intersects with a mesh
-        /// </summary>
-        /// <param name="mesh1">Mesh one</param>
-        /// <param name="mesh2">Mesh two</param>
-        /// <param name="triangles">Returns the intersected triangles of the mesh two</param>
-        /// <param name="segments">Returns the intersection segment list</param>
-        /// <returns>Returns true if the mesh one intersects the mesh two</returns>
-        public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out Triangle[] triangles, out Segment[] segments)
-        {
-            return MeshIntersectsMesh([.. mesh1], [.. mesh2], out triangles, out segments);
         }
 
         /// <summary>
@@ -2787,16 +2676,6 @@ namespace Engine.Mathematics
             }
 
             return res;
-        }
-        /// <summary>
-        /// Determines whether a BoundingBox contains a Triangle mesh.
-        /// </summary>
-        /// <param name="box">Axis aligned box</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType BoxContainsMesh(ref BoundingBox box, IEnumerable<Triangle> mesh)
-        {
-            return BoxContainsMesh(ref box, [.. mesh]);
         }
 
         /// <summary>
@@ -3000,16 +2879,6 @@ namespace Engine.Mathematics
 
             return res;
         }
-        /// <summary>
-        /// Determines whether a BoundingSphere contains a Triangle mesh.
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType SphereContainsMesh(ref BoundingSphere sphere, IEnumerable<Triangle> mesh)
-        {
-            return SphereContainsMesh(ref sphere, [.. mesh]);
-        }
 
         /// <summary>
         /// Checks whether a point lay inside, intersects or lay outside the frustum.
@@ -3153,7 +3022,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType FrustumContainsTriangle(ref BoundingFrustum frustum, ref Triangle triangle)
         {
-            var vertices = triangle.GetVertices().ToArray();
+            var vertices = triangle.GetVertices();
 
             List<Vector3> inVerts = [];
             for (int i = 0; i < vertices.Length; i++)
@@ -3224,16 +3093,6 @@ namespace Engine.Mathematics
             return res;
         }
         /// <summary>
-        /// Determines whether a BoundingFrustum contains a Triangle mesh.
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType FrustumContainsMesh(ref BoundingFrustum frustum, IEnumerable<Triangle> mesh)
-        {
-            return FrustumContainsMesh(ref frustum, [.. mesh]);
-        }
-        /// <summary>
         /// Gets whether the frustum contains the point list
         /// </summary>
         /// <param name="frustum">Frustum</param>
@@ -3267,15 +3126,6 @@ namespace Engine.Mathematics
             }
 
             return ContainmentType.Intersects;
-        }
-        /// <summary>
-        /// Gets whether the frustum contains the point list
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        /// <param name="points">Point collection</param>
-        public static ContainmentType FrustumContainsPoints(ref BoundingFrustum frustum, IEnumerable<Vector3> points)
-        {
-            return FrustumContainsPoints(ref frustum, [.. points]);
         }
 
         /// <summary>
@@ -3351,6 +3201,12 @@ namespace Engine.Mathematics
             return ContainmentType.Contains;
         }
 
+
+        static Vector3[] GetVerticesFromMesh(Triangle[] mesh)
+        {
+            return [.. mesh.SelectMany(t => t.GetVertices()).Distinct()];
+        }
+
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingSphere.
         /// </summary>
@@ -3359,19 +3215,9 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsSphere(Triangle[] mesh, ref BoundingSphere sphere)
         {
-            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints(GetVerticesFromMesh(mesh));
 
             return BoxContainsSphere(ref mbox, ref sphere);
-        }
-        /// <summary>
-        /// Determines whether a Triangle mesh contains a BoundingSphere.
-        /// </summary>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="sphere">Sphere</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, ref BoundingSphere sphere)
-        {
-            return MeshContainsSphere([.. mesh], ref sphere);
         }
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingBox.
@@ -3381,19 +3227,9 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsBox(Triangle[] mesh, ref BoundingBox box)
         {
-            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints(GetVerticesFromMesh(mesh));
 
             return BoxContainsBox(ref mbox, ref box);
-        }
-        /// <summary>
-        /// Determines whether a Triangle mesh contains a BoundingBox.
-        /// </summary>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="box">Axis aligned box</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, ref BoundingBox box)
-        {
-            return MeshContainsBox([.. mesh], ref box);
         }
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingFrustum.
@@ -3403,19 +3239,9 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsFrustum(Triangle[] mesh, ref BoundingFrustum frustum)
         {
-            var mbox = BoundingBox.FromPoints([.. mesh.SelectMany(t => t.GetVertices())]);
+            var mbox = BoundingBox.FromPoints(GetVerticesFromMesh(mesh));
 
             return BoxContainsFrustum(ref mbox, ref frustum);
-        }
-        /// <summary>
-        /// Determines whether a Triangle mesh contains a BoundingFrustum.
-        /// </summary>
-        /// <param name="mesh">Triangle mesh</param>
-        /// <param name="frustum">Frustum</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, ref BoundingFrustum frustum)
-        {
-            return MeshContainsFrustum([.. mesh], ref frustum);
         }
         /// <summary>
         /// Determines whether a Triangle mesh contains a Triangle mesh.
@@ -3426,8 +3252,8 @@ namespace Engine.Mathematics
         public static ContainmentType MeshContainsMesh(Triangle[] mesh1, Triangle[] mesh2)
         {
             // A mesh is not a volume. Calculate the bounding volumes of the tow meshes
-            var bbox1 = BoundingBox.FromPoints([.. mesh1.SelectMany(t => t.GetVertices())]);
-            var bbox2 = BoundingBox.FromPoints([.. mesh2.SelectMany(t => t.GetVertices())]);
+            var bbox1 = BoundingBox.FromPoints(GetVerticesFromMesh(mesh1));
+            var bbox2 = BoundingBox.FromPoints(GetVerticesFromMesh(mesh2));
 
             if (BoxContainsBox(ref bbox1, ref bbox2) == ContainmentType.Disjoint)
             {
@@ -3452,16 +3278,6 @@ namespace Engine.Mathematics
 
             // If no intersection found, must be a containment result
             return ContainmentType.Contains;
-        }
-        /// <summary>
-        /// Determines whether a Triangle mesh contains a Triangle mesh.
-        /// </summary>
-        /// <param name="mesh1">Triangle mesh one</param>
-        /// <param name="mesh2">Triangle mesh two</param>
-        /// <returns>Returns the type of containment the two objects have between them</returns>
-        public static ContainmentType MeshContainsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2)
-        {
-            return MeshContainsMesh([.. mesh1], [.. mesh2]);
         }
 
         private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)

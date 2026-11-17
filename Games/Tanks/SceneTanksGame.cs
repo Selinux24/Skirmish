@@ -888,7 +888,7 @@ namespace Tanks
                 var rot = Helper.RandomGenerator.NextSingle(0, MathUtils.TwoPi);
                 var scale = Helper.RandomGenerator.NextSingle(2.5f, 5f);
 
-                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(point.X, point.Y, out var result))
+                if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
                     continue;
                 }
@@ -918,12 +918,12 @@ namespace Tanks
             var p2 = new Vector3(+140, 100, 0);
             var n2 = Vector3.Up;
 
-            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(p1.X, p1.Z, out var r1))
+            if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Primitive.Normal;
             }
-            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(p2.X, p2.Z, out var r2))
+            if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Primitive.Normal;
@@ -1480,7 +1480,7 @@ You will lost all the game progress.",
         }
         private void ModelToGround(ModelInstance model)
         {
-            if (FindTopGroundPosition<Engine.Mathematics.Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
+            if (FindTopGroundPosition<Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
             {
                 model.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
                 model.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);

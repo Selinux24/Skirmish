@@ -1,6 +1,5 @@
 ﻿using Engine.Collections.Helpers;
 using Engine.Mathematics;
-using System.Collections.Generic;
 
 namespace Engine.Collections
 {
@@ -36,12 +35,12 @@ namespace Engine.Collections
         }
 
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
+        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
         {
             return QuadTreeNodeHelper<QuadTreeNode>.GetBoundingBoxes(Root, maxDepth);
         }
         /// <inheritdoc/>
-        public IEnumerable<QuadTreeNode> GetLeafNodes()
+        public QuadTreeNode[] GetLeafNodes()
         {
             return QuadTreeNodeHelper<QuadTreeNode>.GetLeafNodes(Root);
         }
@@ -60,7 +59,7 @@ namespace Engine.Collections
             return QuadTreeNodeHelper<QuadTreeNode>.GetClosestNodeAtPosition(Root, position);
         }
         /// <inheritdoc/>
-        public IEnumerable<QuadTreeNode> FindNodesInVolume(ICullingVolume volume)
+        public QuadTreeNode[] FindNodesInVolume(ICullingVolume volume)
         {
             return QuadTreeNodeHelper<QuadTreeNode>.GetNodesInVolume(Root, volume);
         }

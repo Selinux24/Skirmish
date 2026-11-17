@@ -73,7 +73,7 @@ namespace TerrainSamples.SceneModularDungeon
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = [];
 
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> selectedItemDrawer = null;
+        private GeometryColorDrawer<Triangle> selectedItemDrawer = null;
         private Item selectedItem = null;
 
         private ModelInstanced human = null;
@@ -348,13 +348,13 @@ namespace TerrainSamples.SceneModularDungeon
                 });
             };
 
-            var drawerDesc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+            var drawerDesc = new GeometryColorDrawerDescription<Triangle>()
             {
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
                 StartsVisible = false,
             };
-            selectedItemDrawer = await AddComponentUI<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
+            selectedItemDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
         }
         private async Task InitializeMapTexture()
         {
@@ -801,12 +801,12 @@ namespace TerrainSamples.SceneModularDungeon
             }
 
             var tris = selectedItem.Instance.GetGeometry();
-            if (tris.Any())
+            if (tris.Length != 0)
             {
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
 
-                Game.Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
+                Game.Logger.WriteDebug(this, $"Processing {tris.Length} triangles in the selected item drawer");
 
                 selectedItemDrawer.SetPrimitives(sItemColor, tris);
                 selectedItemDrawer.Visible = true;
@@ -954,7 +954,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var sph = item.Instance.GetBoundingSphere();
                 Ray r = ray;
-                Engine.Mathematics.Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
+                Collision.ClosestPointInRay(ref r, ref sph.Center, out float distance, out _);
                 return distance;
             }
         }
@@ -1018,7 +1018,7 @@ namespace TerrainSamples.SceneModularDungeon
         private void SetSelectedItemLight(Item item)
         {
             var lights = item.Instance.Lights;
-            if (lights.Any())
+            if (lights.Length != 0)
             {
                 var msg = string.Format("Press space to {0} the light...", lights.First().Enabled ? "turn off" : "turn on");
 
@@ -1088,7 +1088,7 @@ namespace TerrainSamples.SceneModularDungeon
                 bool enabled = false;
 
                 var lights = item.Instance.Lights;
-                if (lights.Any())
+                if (lights.Length != 0)
                 {
                     enabled = !lights.First().Enabled;
 

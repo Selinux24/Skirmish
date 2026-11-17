@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Mathematics
 {
     /// <summary>
@@ -45,7 +44,7 @@ namespace Engine.Mathematics
             return Collision.BoxContainsFrustum(ref bbox, ref frustum);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public ContainmentType Contains(Triangle[] mesh)
         {
             return Collision.BoxContainsMesh(ref bbox, mesh);
         }

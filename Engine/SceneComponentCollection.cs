@@ -113,7 +113,7 @@ namespace Engine
         /// <param name="layer">Processing layer</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns the added component</returns>
-        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int layer, Action<IEnumerable<ISceneObject>> callback = null)
+        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int layer, Action<ISceneObject[]> callback = null)
         {
             if (component == null)
             {
@@ -154,7 +154,7 @@ namespace Engine
         /// Removes and disposes the specified component
         /// </summary>
         /// <param name="component">Component</param>
-        public void RemoveComponent(ISceneObject component, Action<IEnumerable<ISceneObject>> callback = null)
+        public void RemoveComponent(ISceneObject component, Action<ISceneObject[]> callback = null)
         {
             if (component == null)
             {
@@ -186,9 +186,11 @@ namespace Engine
         /// Removes and disposes the specified component list
         /// </summary>
         /// <param name="components">List of components</param>
-        public void RemoveComponents(IEnumerable<ISceneObject> components, Action<IEnumerable<ISceneObject>> callback = null)
+        public void RemoveComponents(ISceneObject[] components, Action<ISceneObject[]> callback = null)
         {
-            if (components?.Any() != true)
+            ArgumentNullException.ThrowIfNull(components);
+
+            if (components.Length == 0)
             {
                 return;
             }
@@ -215,52 +217,45 @@ namespace Engine
         /// Gets the component collection
         /// </summary>
         /// <returns>Returns the component collection</returns>
-        public IEnumerable<ISceneObject> Get()
+        public ISceneObject[] Get()
         {
-            return internalComponents
-                .AsEnumerable();
+            return [.. internalComponents];
         }
         /// <summary>
         /// Gets the component collection which validates the predicate
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(Func<ISceneObject, bool> predicate)
+        public ISceneObject[] Get(Func<ISceneObject, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
-            return internalComponents
-                .Where(predicate)
-                .AsEnumerable();
+            return [.. internalComponents.Where(predicate)];
         }
         /// <summary>
         /// Gets the component collection which validates the predicate
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(Func<ISceneObject, int, bool> predicate)
+        public ISceneObject[] Get(Func<ISceneObject, int, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
-            return internalComponents
-                .Where(predicate)
-                .AsEnumerable();
+            return [.. internalComponents.Where(predicate)];
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag
         /// </summary>
         /// <param name="usage">Usage</param>
         /// <returns>Returns the component collection which has the specified usage flag</returns>
-        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage)
+        public ISceneObject[] Get(SceneObjectUsages usage)
         {
             if (usage == SceneObjectUsages.None)
             {
                 return Get();
             }
 
-            return internalComponents
-                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
-                .AsEnumerable();
+            return [.. internalComponents.Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))];
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag and  validates the predicate
@@ -268,7 +263,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
+        public ISceneObject[] Get(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
@@ -277,9 +272,7 @@ namespace Engine
                 return Get(predicate);
             }
 
-            return internalComponents
-                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c) ?? true))
-                .AsEnumerable();
+            return [.. internalComponents.Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c) ?? true))];
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag and  validates the predicate
@@ -287,7 +280,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, int, bool> predicate)
+        public ISceneObject[] Get(SceneObjectUsages usage, Func<ISceneObject, int, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
@@ -296,9 +289,7 @@ namespace Engine
                 return Get(predicate);
             }
 
-            return internalComponents
-                .Where((c, i) => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c, i) ?? true))
-                .AsEnumerable();
+            return [.. internalComponents.Where((c, i) => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage) && (predicate?.Invoke(c, i) ?? true))];
         }
 
         /// <summary>
@@ -306,11 +297,9 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
         /// <returns>Returns the component collection</returns>
-        public IEnumerable<T> Get<T>()
+        public T[] Get<T>()
         {
-            return internalComponents
-                .OfType<T>()
-                .ToArray();
+            return [.. internalComponents.OfType<T>()];
         }
         /// <summary>
         /// Gets the component collection which validates the predicate
@@ -318,14 +307,11 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which validates the predicate</returns>
-        public IEnumerable<T> Get<T>(Func<T, bool> predicate)
+        public T[] Get<T>(Func<T, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
-            return internalComponents
-                .OfType<T>()
-                .Where(predicate)
-                .ToArray();
+            return [.. internalComponents.OfType<T>().Where(predicate)];
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag
@@ -333,17 +319,14 @@ namespace Engine
         /// <typeparam name="T">Result type</typeparam>
         /// <param name="usage">Usage</param>
         /// <returns>Returns the component collection which has the specified usage flag</returns>
-        public IEnumerable<T> Get<T>(SceneObjectUsages usage)
+        public T[] Get<T>(SceneObjectUsages usage)
         {
             if (usage == SceneObjectUsages.None)
             {
                 return Get<T>();
             }
 
-            return internalComponents
-                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
-                .OfType<T>()
-                .ToArray();
+            return [.. internalComponents.Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage)).OfType<T>()];
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag and  validates the predicate
@@ -352,7 +335,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
-        public IEnumerable<T> Get<T>(SceneObjectUsages usage, Func<T, bool> predicate)
+        public T[] Get<T>(SceneObjectUsages usage, Func<T, bool> predicate)
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
@@ -361,11 +344,7 @@ namespace Engine
                 return Get(predicate);
             }
 
-            return internalComponents
-                .Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage))
-                .OfType<T>()
-                .Where(predicate)
-                .ToArray();
+            return [.. internalComponents.Where(c => c.Usage != SceneObjectUsages.None && usage.HasFlag(c.Usage)).OfType<T>().Where(predicate)];
         }
 
         /// <summary>

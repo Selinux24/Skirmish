@@ -1,3 +1,7 @@
+using Engine.Collections;
+using Engine.Collections.Generic;
+using Engine.Common;
+using Engine.Mathematics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,12 +10,6 @@ using System.Linq;
 
 namespace EngineTests.Collections.Generic
 {
-    using Engine;
-    using Engine.Collections;
-    using Engine.Collections.Generic;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     [ExcludeFromCodeCoverage]
     [TestClass]
     [OSCondition(OperatingSystems.Windows)]
@@ -40,7 +38,7 @@ namespace EngineTests.Collections.Generic
             Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var geom = GeometryUtil.CreateXZPlane(5, 5, 0);
-            var tris = GeometryUtil.ComputeTriangleList(geom.Vertices, geom.Indices);
+            var tris = GeometryUtil.ComputeTriangleList(geom.Vertices, geom.Indices).ToArray();
             tris = Triangle.Transform(tris, Matrix4x4.Translation(-7.5f, 0, -7.5f));
 
             mesh =
@@ -528,7 +526,7 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(1);
             PickingQuadTree<Triangle> q = new(mesh, options);
 
-            bool picked = q.PickAll(t1PickingRay, out IEnumerable<PickingResult<Triangle>> tlist);
+            bool picked = q.PickAll(t1PickingRay, out PickingResult<Triangle>[] tlist);
             Assert.IsTrue(picked);
             Assert.HasCount(2, tlist);
 

@@ -120,7 +120,7 @@ namespace TerrainSamples.SceneHeightmap
         private readonly Color4 dialogBackgroundColor = Color.CornflowerBlue;
         private UISaveFileDialog saveFileDialog = null;
 
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> bboxesTriDrawer = null;
+        private GeometryColorDrawer<Triangle> bboxesTriDrawer = null;
         private GeometryColorDrawer<Line3D> bboxesDrawer = null;
         private GeometryColorDrawer<Line3D> lightsDrawer = null;
         private GeometryColorDrawer<Line3D> lightsVolumeDrawer = null;
@@ -158,7 +158,7 @@ namespace TerrainSamples.SceneHeightmap
         private ModelInstanced trees2 = null;
 
         private Model soldier = null;
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> soldierTris = null;
+        private GeometryColorDrawer<Triangle> soldierTris = null;
         private GeometryColorDrawer<Line3D> soldierLines = null;
         private bool showSoldierDEBUG = false;
         private readonly Color4 soldierColorDEBUG = new(Color.Orange, 0.6f);
@@ -174,7 +174,7 @@ namespace TerrainSamples.SceneHeightmap
         private bool drawLightsDEBUG = false;
         private bool drawLightsVolumesDEBUG = false;
 
-        private GeometryColorDrawer<Engine.Mathematics.Triangle> graphDrawer = null;
+        private GeometryColorDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
 
         private readonly GraphAgentType agent = new()
@@ -615,7 +615,7 @@ namespace TerrainSamples.SceneHeightmap
                 "DEBUG++ bounding boxes",
                 new() { Count = 50000, StartsVisible = false, }, LayerUI - 1);
 
-            bboxesTriDrawer = await AddComponentUI<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            bboxesTriDrawer = await AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ bounding boxes faces",
                 "DEBUG++ bounding boxes faces",
                 new() { Count = 1000, DepthEnabled = true, StartsVisible = false, }, LayerUI - 1);
@@ -630,7 +630,7 @@ namespace TerrainSamples.SceneHeightmap
                 "DEBUG++ Light Volumes",
                 new() { Count = 50000, StartsVisible = false, }, LayerEffects + 1);
 
-            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>(
+            graphDrawer = await AddComponentEffect<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>(
                 "DEBUG++ Graph",
                 "DEBUG++ Graph",
                 new() { Count = 50000, }, LayerEffects + 1);
@@ -855,7 +855,7 @@ namespace TerrainSamples.SceneHeightmap
                     continue;
                 }
 
-                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     float scale = i switch
                     {
@@ -885,7 +885,7 @@ namespace TerrainSamples.SceneHeightmap
                     continue;
                 }
 
-                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextSingle(1f, 5f);
@@ -907,7 +907,7 @@ namespace TerrainSamples.SceneHeightmap
                     continue;
                 }
 
-                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextSingle(0f, 2f);
@@ -922,7 +922,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task SetWatchTowerPosition()
         {
-            if (FindTopGroundPosition(-40, -40, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
                 watchTower.Manipulator.SetPosition(r.Position);
                 watchTower.Manipulator.SetRotation(MathUtils.Pi / 3f, 0, 0);
@@ -946,7 +946,7 @@ namespace TerrainSamples.SceneHeightmap
             {
                 var position = positions[i];
 
-                if (FindTopGroundPosition(position.X, position.Z, out PickingResult<Engine.Mathematics.Triangle> res))
+                if (FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res))
                 {
                     var pos = res.Position;
                     pos.Y -= 0.5f;
@@ -965,7 +965,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task SetTorchsPosition(Random posRnd, BoundingBox bbox)
         {
-            if (FindTopGroundPosition(15, 15, out PickingResult<Engine.Mathematics.Triangle> r))
+            if (FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
             {
                 var position = r.Position;
 
@@ -1008,7 +1008,7 @@ namespace TerrainSamples.SceneHeightmap
                     0f,
                     posRnd.NextSingle(bbox.Minimum.Z, bbox.Maximum.Z));
 
-                FindTopGroundPosition(position.X, position.Z, out PickingResult<Engine.Mathematics.Triangle> res);
+                FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
                 var pos = res.Position;
                 torchs[i].Manipulator.SetScaling(0.20f);
@@ -1044,7 +1044,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < hPositions.Length; i++)
             {
-                if (FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
                 {
                     helicopterI[i].Manipulator.SetScaling(1.25f);
                     helicopterI[i].Manipulator.SetPosition(r.Position);
@@ -1076,7 +1076,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < bPositions.Length; i++)
             {
-                if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
                     bradleyI[i].Manipulator.SetScaling(1.2f);
                     bradleyI[i].Manipulator.SetPosition(r.Position);
@@ -1105,7 +1105,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < bPositions.Length; i++)
             {
-                if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
                     buildings[i].Manipulator.SetScaling(3f);
                     buildings[i].Manipulator.SetPosition(r.Position);
@@ -1122,7 +1122,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private async Task SetPlayerPosition()
         {
-            if (FindAllGroundPosition<Engine.Mathematics.Triangle>(-20, -40, out var res))
+            if (FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
                 soldier.Manipulator.SetPosition(res.Last().Position);
                 soldier.Manipulator.SetRotation(MathUtils.Pi, 0, 0);
@@ -1144,7 +1144,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < 4; i++)
             {
-                if (FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Engine.Mathematics.Triangle> r))
+                if (FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
                 {
                     troops[i].Manipulator.SetPosition(r.Position);
                     troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0);
@@ -1780,11 +1780,11 @@ namespace TerrainSamples.SceneHeightmap
             {
                 //Adjust box
                 var box = nodes[i].BoundingBox;
-                var vedges = box.GetEdges().Skip(8).ToArray();
-                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(vedges[0].Point1.X, vedges[0].Point1.Z, out var p0)) continue;
-                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
-                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
-                if (!FindTopGroundPosition<Engine.Mathematics.Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
+                var vedges = box.GetEdgesVertical();
+                if (!FindTopGroundPosition<Triangle>(vedges[0].Point1.X, vedges[0].Point1.Z, out var p0)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
+                if (!FindTopGroundPosition<Triangle>(vedges[3].Point1.X, vedges[3].Point1.Z, out var p3)) continue;
                 var abox = BoundingBox.FromPoints([p0.Position, p1.Position, p2.Position, p3.Position]);
 
                 var colL = Color4.IntToCol(nodes[i].Id, 128);
@@ -1793,9 +1793,9 @@ namespace TerrainSamples.SceneHeightmap
                 var lines = Line3D.CreateBox(abox);
                 bboxesDrawer.AddPrimitives(colL, lines);
 
-                var tris = GeometryUtil.ComputeTriangleList(abox);
+                var tris = GeometryUtil.ComputeTriangleList(abox).ToArray();
                 bboxesTriDrawer.AddPrimitives(colT, tris);
-                bboxesTriDrawer.AddPrimitives(colT, Engine.Mathematics.Triangle.ReverseNormal(tris));
+                bboxesTriDrawer.AddPrimitives(colT, Triangle.ReverseNormal(tris));
 
                 minY = Math.Min(minY, abox.Minimum.Y);
             }
@@ -1813,13 +1813,13 @@ namespace TerrainSamples.SceneHeightmap
 
             if (soldierTris == null)
             {
-                var desc = new GeometryColorDrawerDescription<Engine.Mathematics.Triangle>()
+                var desc = new GeometryColorDrawerDescription<Triangle>()
                 {
                     DepthEnabled = false,
                     Primitives = [.. tris],
                     Color = soldierColorDEBUG
                 };
-                var t = AddComponent<GeometryColorDrawer<Engine.Mathematics.Triangle>, GeometryColorDrawerDescription<Engine.Mathematics.Triangle>>("SoldierTris", "SoldierTris", desc);
+                var t = AddComponent<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
                 soldierTris = t.ConfigureAwait(true).GetAwaiter().GetResult();
             }
             else

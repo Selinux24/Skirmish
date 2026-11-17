@@ -69,7 +69,7 @@ namespace Engine.Animation
         /// <param name="joint">Joint</param>
         /// <param name="time">Time</param>
         /// <param name="animations">Animation list</param>
-        private static void BuildTransforms(Joint joint, float time, IEnumerable<JointAnimation> animations)
+        private static void BuildTransforms(Joint joint, float time, JointAnimation[] animations)
         {
             if (joint == null)
             {
@@ -102,7 +102,7 @@ namespace Engine.Animation
         /// <param name="time2">Time 2</param>
         /// <param name="animations2">Animation list 2</param>
         /// <param name="factor">Interpolation factor</param>
-        private static void BuildTransforms(Joint joint, float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor)
+        private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
         {
             if (joint == null)
             {
@@ -189,7 +189,7 @@ namespace Engine.Animation
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
         /// <returns>Returns the transforms list of the pose at specified time</returns>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, IEnumerable<JointAnimation> animations)
+        public Matrix4x4[] GetPoseAtTime(float time, JointAnimation[] animations)
         {
             Matrix4x4[] transforms = new Matrix4x4[JointCount];
 
@@ -210,7 +210,7 @@ namespace Engine.Animation
         /// <param name="animations2">Second joint animation set</param>
         /// <param name="factor">Interpolation factor</param>
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor, ref Matrix4x4[] transforms)
+        public void GetPoseAtTime(float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor, ref Matrix4x4[] transforms)
         {
             BuildTransforms(Root, time1, animations1, time2, animations2, factor);
 
@@ -242,7 +242,7 @@ namespace Engine.Animation
         /// Gets the joint names list
         /// </summary>
         /// <returns>Returns the joint names list</returns>
-        public IEnumerable<string> GetJointNames()
+        public string[] GetJointNames()
         {
             return [.. jointNames];
         }
@@ -250,7 +250,7 @@ namespace Engine.Animation
         /// Gets the bone names list
         /// </summary>
         /// <returns>Returns the bone names list</returns>
-        public IEnumerable<string> GetBoneNames()
+        public string[] GetBoneNames()
         {
             return [.. boneNames];
         }

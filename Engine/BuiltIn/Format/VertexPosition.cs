@@ -1,7 +1,5 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -32,15 +30,13 @@ namespace Engine.BuiltIn.Format
         /// <param name="vertices">Vertices</param>
         /// <param name="uvs">Uv texture coordinates</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPosition> Generate(IEnumerable<Vector3> vertices)
+        public static VertexPosition[] Generate(Vector3[] vertices)
         {
-            var vArray = vertices.ToArray();
+            VertexPosition[] res = new VertexPosition[vertices.Length];
 
-            var res = new List<VertexPosition>();
-
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                res.Add(new VertexPosition() { Position = vArray[i] });
+                res[i] = new VertexPosition() { Position = vertices[i] };
             }
 
             return res;
@@ -49,15 +45,13 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPosition>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPosition[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            var res = new VertexPosition[vertices.Length];
 
-            var res = new VertexPosition[vArray.Length];
-
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPosition
                 {

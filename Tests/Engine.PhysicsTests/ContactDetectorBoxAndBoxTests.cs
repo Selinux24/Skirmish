@@ -65,10 +65,10 @@ namespace Engine.PhysicsTests
 
             var obb = box1.OrientedBoundingBox;
 
-            Mathematics.Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
+            Collision.ClosestPointInBox(ref contactsWith2[0].Position, ref obb, out var pointInBox2);
             Assert.AreEqual(contactsWith2[0].Position, pointInBox2);
 
-            Mathematics.Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
+            Collision.ClosestPointInBox(ref contactsWith3[0].Position, ref obb, out var pointInBox3);
             Assert.AreEqual(contactsWith3[0].Position, pointInBox3);
         }
     }

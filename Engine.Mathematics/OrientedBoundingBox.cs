@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -38,66 +36,41 @@ namespace Engine.Mathematics
         public readonly Vector3 Center => Transformation.TranslationVector;
 
         /// <summary>
-        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// Constructor
         /// </summary>
-        /// <param name="points">Point list</param>
-        /// <returns>Returns the new oriented bounding box</returns>
-        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points)
-        {
-            return FromPoints(points, Matrix4x4.Identity);
-        }
-        /// <summary>
-        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
-        /// </summary>
-        /// <param name="points">Point list</param>
-        /// <param name="transform">Transform matrix</param>
-        /// <returns>Returns the new oriented bounding box</returns>
-        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points, Matrix4x4 transform)
-        {
-            if (transform.IsIdentity)
-            {
-                return new OrientedBoundingBox([.. points]);
-            }
-
-            //First, get item points
-            var ptArray = points.ToArray();
-
-            //Next, remove any point transform and set points to origin
-            Matrix4x4.Invert(ref transform, out var inv);
-            Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
-
-            //Create the OBB from origin points
-            var obb = new OrientedBoundingBox(ptArray);
-
-            //Apply the original transform to OBB
-            obb.Transformation *= transform;
-
-            return obb;
-        }
-
         public OrientedBoundingBox()
         {
             Extents = Vector3.Zero;
             Transformation = new(0);
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="bb">Bounding box</param>
         public OrientedBoundingBox(BoundingBox bb)
         {
             var center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
             Extents = bb.Maximum - center;
             Transformation = Matrix4x4.Translation(center);
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="minimum">Minimum point</param>
+        /// <param name="maximum">Maximum point</param>
         public OrientedBoundingBox(Vector3 minimum, Vector3 maximum)
         {
             var center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - center;
             Transformation = Matrix4x4.Translation(center);
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="points">Point list</param>
         public OrientedBoundingBox(Vector3[] points)
         {
-            if (points == null || points.Length == 0)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
+            ArgumentNullException.ThrowIfNull(points);
 
             Vector3 minimum = new(float.MaxValue);
             Vector3 maximum = new(float.MinValue);
@@ -174,37 +147,38 @@ namespace Engine.Mathematics
         /// Gets the oriented bounding box edge list
         /// </summary>
         /// <returns>Returns the edge list of the current oriented bounding box</returns>
-        public readonly IEnumerable<Segment> GetEdges()
+        public readonly Segment[] GetEdges()
         {
-            return BoundingBox.GetEdges(GetVertices());
+            var vertices = GetVertices();
+
+            return BoundingBox.GetEdges(vertices);
         }
         /// <summary>
         /// Gets the oriented bounding box face planes list
         /// </summary>
         /// <returns>Returns the face list of the current bounding box</returns>
-        public readonly IEnumerable<Plane> GetFaces()
+        public readonly Plane[] GetFaces()
         {
             var vertices = GetVertices();
 
             var edges = BoundingBox.GetEdges(vertices);
 
-            var topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
+            var topNormal = Vector3.Cross(edges[0].Direction, edges[1].Direction);
+            var bottomNormal = Vector3.Cross(edges[5].Direction, edges[4].Direction);
+            var frontNormal = Vector3.Cross(edges[8].Direction, edges[3].Direction);
+            var backNormal = Vector3.Cross(edges[9].Direction, edges[1].Direction);
+            var leftNormal = Vector3.Cross(edges[10].Direction, edges[2].Direction);
+            var rightNormal = Vector3.Cross(edges[8].Direction, edges[0].Direction);
 
-            var bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
-
-            var frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
-
-            var backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
-
-            var leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
-
-            var rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
-            yield return new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
+            return
+            [
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal),
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal),
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal),
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.BackLeftTop), backNormal),
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal),
+                new Plane(BoundingBox.GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal),
+            ];
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -213,7 +187,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(BoxFaces face)
         {
-            return BoundingBox.GetFace(GetFaces(), face);
+            return GetFace((int)face);
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -222,7 +196,9 @@ namespace Engine.Mathematics
         /// <returns>Returns the face list of the current bounding box</returns>
         public readonly Plane GetFace(int faceIndex)
         {
-            return BoundingBox.GetFace(GetFaces(), faceIndex);
+            var faces = GetFaces();
+
+            return BoundingBox.GetFace(faces, faceIndex);
         }
 
         /// <summary>
@@ -231,7 +207,7 @@ namespace Engine.Mathematics
         /// <param name="vertex">Box vertex</param>
         public readonly Vector3 GetVertex(BoxVertices vertex)
         {
-            return BoundingBox.GetVertex(GetVertices(), (int)vertex);
+            return GetVertex((int)vertex);
         }
         /// <summary>
         /// Gets the specified vertex
@@ -239,13 +215,15 @@ namespace Engine.Mathematics
         /// <param name="index">Vertex index</param>
         public readonly Vector3 GetVertex(int index)
         {
-            return BoundingBox.GetVertex(GetVertices(), index);
+            var vertices = GetVertices();
+
+            return BoundingBox.GetVertex(vertices, index);
         }
 
         /// <summary>
         /// Gets the oriented bounding box vertices
         /// </summary>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
             var extents = Extents;
             var trn = Transformation;
@@ -258,14 +236,17 @@ namespace Engine.Mathematics
             normal3 = Vector3.TransformNormal(normal3, trn);
             Vector3 translationVector = trn.TranslationVector;
 
-            yield return translationVector + normal + normal2 + normal3;
-            yield return translationVector + normal + normal2 - normal3;
-            yield return translationVector - normal + normal2 - normal3;
-            yield return translationVector - normal + normal2 + normal3;
-            yield return translationVector + normal - normal2 + normal3;
-            yield return translationVector + normal - normal2 - normal3;
-            yield return translationVector - normal - normal2 - normal3;
-            yield return translationVector - normal - normal2 + normal3;
+            return
+            [
+                translationVector + normal + normal2 + normal3,
+                translationVector + normal + normal2 - normal3,
+                translationVector - normal + normal2 - normal3,
+                translationVector - normal + normal2 + normal3,
+                translationVector + normal - normal2 + normal3,
+                translationVector + normal - normal2 - normal3,
+                translationVector - normal - normal2 - normal3,
+                translationVector - normal - normal2 + normal3,
+            ];
         }
         /// <summary>
         /// Gets the oriented bounding box corner points
@@ -318,6 +299,42 @@ namespace Engine.Mathematics
                 extents.X * MathF.Abs(Vector3.Dot(vector, xAxis)) +
                 extents.Y * MathF.Abs(Vector3.Dot(vector, yAxis)) +
                 extents.Z * MathF.Abs(Vector3.Dot(vector, zAxis));
+        }
+
+        /// <summary>
+        /// Creates an oriented bounding box from point list
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(Vector3[] points)
+        {
+            return new OrientedBoundingBox([.. points]);
+        }
+        /// <summary>
+        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(Vector3[] points, Matrix4x4 transform)
+        {
+            ArgumentNullException.ThrowIfNull(points);
+
+            if (transform.IsIdentity)
+            {
+                return new OrientedBoundingBox([.. points]);
+            }
+
+            //Next, remove any point transform and set points to origin
+            Matrix4x4.Invert(ref transform, out var inv);
+            Vector3[] trPoints = new Vector3[points.Length];
+            Vector3.TransformCoordinate(points, ref inv, trPoints);
+            var obb = new OrientedBoundingBox(trPoints);
+
+            //Apply the original transform to OBB
+            obb.Transformation *= transform;
+
+            return obb;
         }
 
         /// <inheritdoc/>

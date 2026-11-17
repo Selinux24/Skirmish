@@ -283,6 +283,9 @@ namespace Engine.Mathematics
         /// <returns>The 8 corners of the frustum</returns>
         public void GetCorners(Vector3[] corners)
         {
+            ArgumentNullException.ThrowIfNull(corners);
+            if (corners.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(corners));
+
             Collision.PlanesIntersectsPoint(ref pNear, ref pBottom, ref pRight, out corners[0]);   //Near1
             Collision.PlanesIntersectsPoint(ref pNear, ref pTop, ref pRight, out corners[1]);      //Near2
             Collision.PlanesIntersectsPoint(ref pNear, ref pTop, ref pLeft, out corners[2]);       //Near3

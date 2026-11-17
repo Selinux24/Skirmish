@@ -2,7 +2,6 @@
 using Engine.Content;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -372,7 +371,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="textureScale">Texture scale</param>
         /// <param name="textureDisplacement">Texture displacement</param>
         /// <returns>Returns a vertex list, and a index list</returns>
-        public async Task<(IEnumerable<VertexData> Vertices, IEnumerable<uint> Indices)> BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
+        public async Task<(VertexData[] Vertices, uint[] Indices)> BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
         {
             var vertTask = Task.Run(() =>
             {

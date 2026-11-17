@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Mathematics
 {
     /// <summary>
@@ -28,7 +27,7 @@ namespace Engine.Mathematics
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results);
+        bool PickAll(PickingRay ray, out PickingResult<T>[] results);
 
         /// <summary>
         /// Gets bounding sphere
@@ -63,19 +62,19 @@ namespace Engine.Mathematics
         /// <param name="geometryType">Geometry type</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns the geometry of the instance</returns>
-        IEnumerable<T> GetGeometry(GeometryTypes geometryType, bool refresh = false);
+        T[] GetGeometry(GeometryTypes geometryType, bool refresh = false);
         /// <summary>
         /// Gets primitive list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns></returns>
-        IEnumerable<T> GetGeometry(bool refresh = false);
+        T[] GetGeometry(bool refresh = false);
         /// <summary>
         /// Gets point list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns></returns>
-        IEnumerable<Vector3> GetPoints(bool refresh = false);
+        Vector3[] GetPoints(bool refresh = false);
     }
 
     /// <summary>

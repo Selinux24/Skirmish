@@ -1,16 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using AISamples.Common;
+using AISamples.Common.Markings;
+using AISamples.Common.Primitives;
+using Engine;
+using Engine.BuiltIn.Components.Geometry;
+using Engine.BuiltIn.Format;
+using Engine.Content;
+using Engine.Mathematics;
+using System.Threading.Tasks;
 
 namespace AISamples.SceneCWRVirtualWorld.Editors
 {
-    using AISamples.Common;
-    using AISamples.Common.Markings;
-    using AISamples.Common.Primitives;
-    using Engine;
-    using Engine.BuiltIn.Components.Geometry;
-    using Engine.BuiltIn.Format;
-    using Engine.Content;
-    using Engine.Mathematics;
-
     abstract class MarkingEditor(string name, World world, float height, bool is3d = false) : IEditor
     {
         private const float editorPointRadius = 10f;
@@ -84,7 +83,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         public void UpdateInputEditor(IGameTime gameTime)
         {
             var pRay = scene.GetPickingRay(PickingHullTypes.Geometry);
-            if (!scene.PickFirst<Engine.Mathematics.Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
+            if (!scene.PickFirst<Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
             {
                 return;
             }

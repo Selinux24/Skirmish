@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Mathematics
 {
     /// <summary>
@@ -35,6 +34,6 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
-        ContainmentType Contains(IEnumerable<Triangle> mesh);
+        ContainmentType Contains(Triangle[] mesh);
     }
 }

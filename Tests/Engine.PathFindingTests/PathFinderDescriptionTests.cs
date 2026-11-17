@@ -22,11 +22,11 @@ namespace Engine.PathFindingTests
         static GraphAgentType agentDefault;
         static GraphAgentType agentInclined;
 
-        static IEnumerable<Triangle> zeroPlaneTris;
-        static IEnumerable<Triangle> hOnePlaneTris;
-        static IEnumerable<Triangle> hTwoPlaneTris;
-        static IEnumerable<Triangle> sceneryTris;
-        static IEnumerable<Triangle> inclinedPlaneTris;
+        static Triangle[] zeroPlaneTris;
+        static Triangle[] hOnePlaneTris;
+        static Triangle[] hTwoPlaneTris;
+        static Triangle[] sceneryTris;
+        static Triangle[] inclinedPlaneTris;
 
         static Vector3 pointZero;
         static Vector3 pointOne;
@@ -56,7 +56,7 @@ namespace Engine.PathFindingTests
             hTwoPlaneTris = GeometryUtil.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
             pointTwo = Vector3.Up * hTwo;
 
-            sceneryTris = (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t);
+            sceneryTris = [.. (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t)];
 
             var pInclined = GeometryUtil.CreatePlane(10, 0, Vector3.Normalize(new Vector3(1, 1, 0)));
             inclinedPlaneTris = GeometryUtil.ComputeTriangleList(pInclined.Vertices, pInclined.Indices);

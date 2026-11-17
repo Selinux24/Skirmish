@@ -45,8 +45,8 @@ namespace Engine.Mathematics
         /// <param name="maxY">The maximum Y bound.</param>
         public BoundingRectangleI(int minX, int minY, int maxX, int maxY)
         {
-            Minimum = new Vector2I(minX, minY);
-            Maximum = new Vector2I(maxX, maxY);
+            Minimum = new(minX, minY);
+            Maximum = new(maxX, maxY);
         }
 
         /// <inheritdoc/>

@@ -74,15 +74,13 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPositionColor>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPositionColor[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            var res = new VertexPositionColor[vertices.Length];
 
-            var res = new VertexPositionColor[vArray.Length];
-
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPositionColor
                 {

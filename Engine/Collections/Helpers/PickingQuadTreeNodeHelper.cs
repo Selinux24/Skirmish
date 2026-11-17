@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Mathematics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Collections.Helpers
 {
@@ -22,7 +21,7 @@ namespace Engine.Collections.Helpers
         public static bool PickNearest(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
-            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -104,7 +103,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var obb = child.BoundingBox;
-                if (Mathematics.Collision.RayIntersectsBox(ref ray, ref obb, out float d))
+                if (Collision.RayIntersectsBox(ref ray, ref obb, out float d))
                 {
                     while (boxHitsByDistance.ContainsKey(d))
                     {
@@ -129,7 +128,7 @@ namespace Engine.Collections.Helpers
         public static bool PickFirst(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
-            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 result = new PickingResult<T>
@@ -161,7 +160,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var bbox = child.BoundingBox;
-                var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;
@@ -193,10 +192,10 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        public static bool PickAll(PickingQuadTreeNode<T> node, PickingRay ray, out IEnumerable<PickingResult<T>> results)
+        public static bool PickAll(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T>[] results)
         {
             var bbox = node.BoundingBox;
-            var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+            var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
                 results = [];
@@ -220,7 +219,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        private static bool PickAllNode(PickingQuadTreeNode<T> node, PickingRay ray, out IEnumerable<PickingResult<T>> results)
+        private static bool PickAllNode(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T>[] results)
         {
             bool intersect = false;
 
@@ -229,7 +228,7 @@ namespace Engine.Collections.Helpers
             foreach (var child in node.Children)
             {
                 var bbox = child.BoundingBox;
-                var inBox = Mathematics.Collision.RayIntersectsBox(ref ray, ref bbox, out _);
+                var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
                 if (!inBox)
                 {
                     continue;
@@ -241,18 +240,19 @@ namespace Engine.Collections.Helpers
                     continue;
                 }
 
-                for (int i = 0; i < thisHits.Count(); i++)
+                for (int i = 0; i < thisHits.Length; i++)
                 {
-                    if (!hits.Contains(thisHits.ElementAt(i)))
+                    var h = thisHits[i];
+                    if (!hits.Contains(h))
                     {
-                        hits.Add(thisHits.ElementAt(i));
+                        hits.Add(h);
                     }
                 }
 
                 intersect = true;
             }
 
-            results = hits;
+            results = [.. hits];
 
             return intersect;
         }

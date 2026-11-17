@@ -149,7 +149,7 @@ namespace Engine.Collections.Helpers
         /// <param name="node">Node</param>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public static IEnumerable<BoundingBox> GetBoundingBoxes(T node, int maxDepth = 0)
+        public static BoundingBox[] GetBoundingBoxes(T node, int maxDepth = 0)
         {
             if (node == null)
             {
@@ -171,14 +171,14 @@ namespace Engine.Collections.Helpers
                 return [node.BoundingBox];
             }
 
-            return node.Children.SelectMany(c => GetBoundingBoxes(c, maxDepth)).ToArray();
+            return [.. node.Children.SelectMany(c => GetBoundingBoxes(c, maxDepth))];
         }
         /// <summary>
         /// Gets all leaf nodes
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns all leaf nodes</returns>
-        public static IEnumerable<T> GetLeafNodes(T node)
+        public static T[] GetLeafNodes(T node)
         {
             if (node == null)
             {
@@ -190,7 +190,7 @@ namespace Engine.Collections.Helpers
                 return [node];
             }
 
-            return node.Children.SelectMany(c => GetLeafNodes(c));
+            return [.. node.Children.SelectMany(GetLeafNodes)];
         }
         /// <summary>
         /// Gets maximum level value
@@ -295,37 +295,29 @@ namespace Engine.Collections.Helpers
         /// <param name="node">Node</param>
         /// <param name="volume">Bounding volume</param>
         /// <returns>Returns the leaf nodes contained into the bounding volume</returns>
-        public static IEnumerable<T> GetNodesInVolume(T node, ICullingVolume volume)
+        public static T[] GetNodesInVolume(T node, ICullingVolume volume)
         {
-            if (node == null)
-            {
-                yield break;
-            }
+            if (node == null) return [];
 
-            if (volume == null)
-            {
-                yield break;
-            }
+            if (volume == null) return [];
 
-            if (volume.Contains(node.BoundingBox) == ContainmentType.Disjoint)
-            {
-                // Early exit
-                yield break;
-            }
+            if (volume.Contains(node.BoundingBox) == ContainmentType.Disjoint) return [];
 
             if (node.IsLeaf)
             {
-                yield return node;
+                return [node];
             }
 
+            List<T> res = [];
             foreach (var child in node.Children)
             {
                 var nodesIn = GetNodesInVolume(child, volume);
                 foreach (var nIn in nodesIn)
                 {
-                    yield return nIn;
+                    res.Add(nIn);
                 }
             }
+            return [.. res];
         }
     }
 }

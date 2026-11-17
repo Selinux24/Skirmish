@@ -495,10 +495,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
-            yield return Point1;
-            yield return Point2;
+            return [Point1, Point2];
         }
         /// <inheritdoc/>
         public readonly uint GetStride()

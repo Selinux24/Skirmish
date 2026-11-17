@@ -2,7 +2,6 @@
 using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
@@ -14,7 +13,7 @@ namespace Engine.PathFinding
     /// Constructor
     /// </remarks>
     /// <param name="fnc">Get triangle function</param>
-    public abstract class PathFinderInput(Func<IEnumerable<Mathematics.Triangle>> fnc)
+    public abstract class PathFinderInput(Func<Triangle[]> fnc)
     {
         /// <summary>
         /// Maximum areas
@@ -36,7 +35,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Get triangle function
         /// </summary>
-        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = fnc;
+        private readonly Func<Triangle[]> getTrianglesFnc = fnc;
         /// <summary>
         /// Bounding box
         /// </summary>
@@ -46,14 +45,14 @@ namespace Engine.PathFinding
         /// Gets the triangle list
         /// </summary>
         /// <param name="bounds">Bounding box to filter the triangle list</param>
-        public async Task<IEnumerable<Triangle>> GetTrianglesAsync(BoundingBox? bounds)
+        public async Task<Triangle[]> GetTrianglesAsync(BoundingBox? bounds)
         {
             if (getTrianglesFnc == null)
             {
                 return [];
             }
 
-            IEnumerable<Triangle> tris = null;
+            Triangle[] tris = null;
             BoundingBox bbox = default;
 
             await Task.Run(() =>
@@ -62,10 +61,10 @@ namespace Engine.PathFinding
 
                 if (bounds.HasValue)
                 {
-                    tris = tris.Where(t =>
+                    tris = Array.FindAll(tris, t =>
                     {
                         var bb = bounds.Value;
-                        return Mathematics.Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
+                        return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                     });
                 }
 
@@ -80,7 +79,7 @@ namespace Engine.PathFinding
         /// Gets the triangle list
         /// </summary>
         /// <param name="bounds">Bounding box to filter the triangle list</param>
-        public IEnumerable<Triangle> GetTriangles(BoundingBox? bounds)
+        public Triangle[] GetTriangles(BoundingBox? bounds)
         {
             if (getTrianglesFnc == null)
             {
@@ -91,10 +90,10 @@ namespace Engine.PathFinding
 
             if (bounds.HasValue)
             {
-                tris = tris.Where(t =>
+                tris = Array.FindAll(tris, t =>
                 {
                     var bb = bounds.Value;
-                    return Mathematics.Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
+                    return Collision.BoxContainsTriangle(ref bb, ref t) != ContainmentType.Disjoint;
                 });
             }
 

@@ -1,7 +1,6 @@
 ﻿using Engine.Collections.Helpers;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
@@ -23,7 +22,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="items">Partitioning items</param>
         /// <param name="options">Options</param>
-        public PickingQuadTree(IEnumerable<T> items, QuadTreeOptions options)
+        public PickingQuadTree(T[] items, QuadTreeOptions options)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
@@ -39,12 +38,12 @@ namespace Engine.Collections.Generic
         }
 
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
+        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
         {
             return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetBoundingBoxes(Root, maxDepth);
         }
         /// <inheritdoc/>
-        public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
+        public PickingQuadTreeNode<T>[] GetLeafNodes()
         {
             return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetLeafNodes(Root);
         }
@@ -63,7 +62,7 @@ namespace Engine.Collections.Generic
             return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetClosestNodeAtPosition(Root, position);
         }
         /// <inheritdoc/>
-        public IEnumerable<PickingQuadTreeNode<T>> FindNodesInVolume(ICullingVolume volume)
+        public PickingQuadTreeNode<T>[] FindNodesInVolume(ICullingVolume volume)
         {
             return QuadTreeNodeHelper<PickingQuadTreeNode<T>>.GetNodesInVolume(Root, volume);
         }
@@ -114,7 +113,7 @@ namespace Engine.Collections.Generic
         /// <param name="ray">Ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results)
+        public bool PickAll(PickingRay ray, out PickingResult<T>[] results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try

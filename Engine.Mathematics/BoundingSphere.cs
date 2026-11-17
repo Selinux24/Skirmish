@@ -45,9 +45,7 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -212,26 +210,28 @@ namespace Engine.Mathematics
         /// <param name="start">The start index from points array to start compute the bounding sphere.</param>
         /// <param name="count">The count of points to process to compute the bounding sphere.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        /// <exception cref="System.ArgumentNullException">points</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentNullException">points</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
         /// start
         /// or
         /// count
         /// </exception>
-        public static void FromPoints(IEnumerable<Vector3> points, int start, int count, out BoundingSphere result)
+        public static void FromPoints(Vector3[] points, int start, int count, out BoundingSphere result)
         {
             ArgumentNullException.ThrowIfNull(points);
 
+            int pointCount = points.Length;
+
             // Check that start is in the correct range
-            if (start < 0 || start >= points.Count())
+            if (start < 0 || start >= pointCount)
             {
-                throw new ArgumentOutOfRangeException(nameof(start), start, string.Format("Must be in the range [0, {0}]", points.Count() - 1));
+                throw new ArgumentOutOfRangeException(nameof(start), start, string.Format("Must be in the range [0, {0}]", pointCount - 1));
             }
 
             // Check that count is in the correct range
-            if (count < 0 || (start + count) > points.Count())
+            if (count < 0 || (start + count) > pointCount)
             {
-                throw new ArgumentOutOfRangeException(nameof(count), count, string.Format("Must be in the range <= {0}", points.Count()));
+                throw new ArgumentOutOfRangeException(nameof(count), count, string.Format("Must be in the range <= {0}", pointCount));
             }
 
             var upperEnd = start + count;
@@ -240,7 +240,7 @@ namespace Engine.Mathematics
             Vector3 center = Vector3.Zero;
             for (int i = start; i < upperEnd; ++i)
             {
-                center = Vector3.Add(points.ElementAt(i), center);
+                center = Vector3.Add(points[i], center);
             }
 
             //This is the center of our sphere.
@@ -252,11 +252,9 @@ namespace Engine.Mathematics
             {
                 //We are doing a relative distance comparison to find the maximum distance
                 //from the center of our sphere.
-                float distance;
-                distance = Vector3.DistanceSquared(center, points.ElementAt(i));
+                float distance = Vector3.DistanceSquared(center, points[i]);
 
-                if (distance > radius)
-                    radius = distance;
+                if (distance > radius) radius = distance;
             }
 
             //Find the real distance from the DistanceSquared.
@@ -271,18 +269,18 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        public static void FromPoints(IEnumerable<Vector3> points, out BoundingSphere result)
+        public static void FromPoints(Vector3[] points, out BoundingSphere result)
         {
             ArgumentNullException.ThrowIfNull(points);
 
-            FromPoints(points, 0, points.Count(), out result);
+            FromPoints(points, 0, points.Length, out result);
         }
         /// <summary>
         /// Constructs a <see cref="BoundingSphere"/> that fully contains the given points.
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <returns>The newly constructed bounding sphere.</returns>
-        public static BoundingSphere FromPoints(IEnumerable<Vector3> points)
+        public static BoundingSphere FromPoints(Vector3[] points)
         {
             FromPoints(points, out var result);
             return result;

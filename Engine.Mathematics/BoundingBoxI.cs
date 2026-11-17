@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -65,6 +63,9 @@ namespace Engine.Mathematics
         /// <returns>An array of points representing the eight corners of the bounding box.</returns>
         public readonly void GetCorners(Vector3I[] corners)
         {
+            ArgumentNullException.ThrowIfNull(corners);
+            if (corners.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(corners));
+
             corners[0] = new Vector3I(Minimum.X, Maximum.Y, Maximum.Z);
             corners[1] = new Vector3I(Maximum.X, Maximum.Y, Maximum.Z);
             corners[2] = new Vector3I(Maximum.X, Minimum.Y, Maximum.Z);
@@ -80,7 +81,7 @@ namespace Engine.Mathematics
         /// <param name="vertex">Box vertex</param>
         public readonly Vector3I GetVertex(BoxVertices vertex)
         {
-            return GetVertex(GetVertices(), (int)vertex);
+            return GetVertex((int)vertex);
         }
         /// <summary>
         /// Gets the specified vertex
@@ -88,21 +89,28 @@ namespace Engine.Mathematics
         /// <param name="index">Vertex index</param>
         public readonly Vector3I GetVertex(int index)
         {
-            return GetVertex(GetVertices(), index);
+            var vertices = GetVertices();
+
+            if (index >= vertices.Length) throw new ArgumentException(null, nameof(index));
+
+            return vertices[index];
         }
         /// <summary>
         /// Gets the bounding box vertices
         /// </summary>
-        public readonly IEnumerable<Vector3I> GetVertices()
+        public readonly Vector3I[] GetVertices()
         {
-            yield return new Vector3I(Maximum.X, Maximum.Y, Maximum.Z);
-            yield return new Vector3I(Maximum.X, Maximum.Y, Minimum.Z);
-            yield return new Vector3I(Minimum.X, Maximum.Y, Minimum.Z);
-            yield return new Vector3I(Minimum.X, Maximum.Y, Maximum.Z);
-            yield return new Vector3I(Maximum.X, Minimum.Y, Maximum.Z);
-            yield return new Vector3I(Maximum.X, Minimum.Y, Minimum.Z);
-            yield return new Vector3I(Minimum.X, Minimum.Y, Minimum.Z);
-            yield return new Vector3I(Minimum.X, Minimum.Y, Maximum.Z);
+            return
+            [
+                new Vector3I(Maximum.X, Maximum.Y, Maximum.Z),
+                new Vector3I(Maximum.X, Maximum.Y, Minimum.Z),
+                new Vector3I(Minimum.X, Maximum.Y, Minimum.Z),
+                new Vector3I(Minimum.X, Maximum.Y, Maximum.Z),
+                new Vector3I(Maximum.X, Minimum.Y, Maximum.Z),
+                new Vector3I(Maximum.X, Minimum.Y, Minimum.Z),
+                new Vector3I(Minimum.X, Minimum.Y, Minimum.Z),
+                new Vector3I(Minimum.X, Minimum.Y, Maximum.Z),
+            ];
         }
         /// <summary>
         /// Gets the XY rectangle of the box
@@ -139,7 +147,7 @@ namespace Engine.Mathematics
         /// <param name="points">The points that will be contained by the box.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="points"/> is <c>null</c>.</exception>
-        public static void FromPoints(IEnumerable<Vector3I> points, out BoundingBoxI result)
+        public static void FromPoints(Vector3I[] points, out BoundingBoxI result)
         {
             ArgumentNullException.ThrowIfNull(points);
 
@@ -184,42 +192,25 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="boxes">Array of boxes</param>
         /// <returns>Returns a bounding box containing all the boxes in the array</returns>
-        public static BoundingBoxI Merge(IEnumerable<BoundingBoxI> boxes)
+        public static BoundingBoxI Merge(BoundingBoxI[] boxes)
         {
+            ArgumentNullException.ThrowIfNull(boxes);
+
             var fbbox = new BoundingBoxI();
 
-            if (boxes?.Any() != true)
+            if (boxes.Length == 0)
             {
                 return fbbox;
             }
 
             var defaultBox = new BoundingBoxI();
 
-            foreach (var bbox in boxes.Where(b => b != defaultBox))
+            foreach (var bbox in Array.FindAll(boxes, b => b != defaultBox))
             {
                 fbbox = Merge(fbbox, bbox);
             }
 
             return fbbox;
-        }
-
-        /// <summary>
-        /// Gets the specified vertex
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="vertex">Box vertex</param>
-        public static Vector3I GetVertex(IEnumerable<Vector3I> vertices, BoxVertices vertex)
-        {
-            return vertices.ElementAtOrDefault((int)vertex);
-        }
-        /// <summary>
-        /// Gets the specified vertex
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="index">Vertex index</param>
-        public static Vector3I GetVertex(IEnumerable<Vector3I> vertices, int index)
-        {
-            return vertices.ElementAtOrDefault(index);
         }
 
         /// <inheritdoc/>

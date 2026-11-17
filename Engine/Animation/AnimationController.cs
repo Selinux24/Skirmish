@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Engine.Animation
@@ -409,7 +408,7 @@ namespace Engine.Animation
         /// Gets the transformation matrix list at current time
         /// </summary>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public IEnumerable<Matrix4x4> GetCurrentPose()
+        public Matrix4x4[] GetCurrentPose()
         {
             return animationPlan.GetCurrentPose(SkinningData);
         }

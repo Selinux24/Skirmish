@@ -6,14 +6,14 @@ using System;
 
 namespace AISamples.Common
 {
-    class Visualizer(GeometryColorDrawer<Engine.Mathematics.Triangle> opaqueDrawer, GeometryColorDrawer<Engine.Mathematics.Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
+    class Visualizer(GeometryColorDrawer<Triangle> opaqueDrawer, GeometryColorDrawer<Triangle> triangleDrawer, GeometryColorDrawer<Line3D> lineDrawer)
     {
         private static readonly Color4 bColor = new(0.2f, 0.2f, 0.2f, 1f);
         private static readonly Color4 wPositiveColor = Color.Yellow;
         private static readonly Color4 wNegativeColor = Color.Blue;
 
-        private readonly GeometryColorDrawer<Engine.Mathematics.Triangle> opaqueDrawer = opaqueDrawer;
-        private readonly GeometryColorDrawer<Engine.Mathematics.Triangle> triangleDrawer = triangleDrawer;
+        private readonly GeometryColorDrawer<Triangle> opaqueDrawer = opaqueDrawer;
+        private readonly GeometryColorDrawer<Triangle> triangleDrawer = triangleDrawer;
         private readonly GeometryColorDrawer<Line3D> lineDrawer = lineDrawer;
 
         public void DrawNetwork(NeuralNetwork network, Vector3 position, int margin, int totalWidth, int totalHeight, float nodeRadius)

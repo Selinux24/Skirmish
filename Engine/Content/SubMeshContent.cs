@@ -55,18 +55,20 @@ namespace Engine.Content
         /// <param name="meshArray">Mesh array</param>
         /// <param name="optimizedMesh">Optimized mesh result</param>
         /// <returns>Returns true if the mesh array was optimized</returns>
-        public static bool OptimizeMeshes(IEnumerable<SubMeshContent> meshArray, out SubMeshContent optimizedMesh)
+        public static bool OptimizeMeshes(SubMeshContent[] meshArray, out SubMeshContent optimizedMesh)
         {
-            if (meshArray?.Any() != true)
+            ArgumentNullException.ThrowIfNull(meshArray);
+
+            if (meshArray.Length == 0)
             {
                 optimizedMesh = null;
 
                 return false;
             }
 
-            if (meshArray.Count() == 1)
+            if (meshArray.Length == 1)
             {
-                optimizedMesh = meshArray.First();
+                optimizedMesh = meshArray[0];
 
                 return true;
             }
@@ -111,8 +113,8 @@ namespace Engine.Content
 
             optimizedMesh = new(meshTopology, meshMaterial, meshTextured, false, Matrix4x4.Identity);
 
-            optimizedMesh.SetVertices(verts);
-            optimizedMesh.SetIndices(idx);
+            optimizedMesh.SetVertices([.. verts]);
+            optimizedMesh.SetIndices([.. idx]);
 
             return true;
         }
@@ -121,7 +123,7 @@ namespace Engine.Content
         /// Sets the submesh vertex list
         /// </summary>
         /// <param name="vertices">Vertex list</param>
-        public void SetVertices(IEnumerable<VertexData> vertices)
+        public void SetVertices(VertexData[] vertices)
         {
             Vertices = vertices?.ToArray() ?? [];
         }
@@ -129,7 +131,7 @@ namespace Engine.Content
         /// Sets the submesh index list
         /// </summary>
         /// <param name="indices">Index list</param>
-        public void SetIndices(IEnumerable<uint> indices)
+        public void SetIndices(uint[] indices)
         {
             Indices = indices?.ToArray() ?? [];
         }
@@ -233,11 +235,11 @@ namespace Engine.Content
         /// Gets vertex data list
         /// </summary>
         /// <returns>Returns the vertex data list</returns>
-        public IEnumerable<VertexData> GetVertices()
+        public VertexData[] GetVertices()
         {
             if (Transform.IsIdentity)
             {
-                return Vertices.AsReadOnly();
+                return [.. Vertices.AsReadOnly()];
             }
 
             return VertexData.Transform(Vertices, Transform);
@@ -246,7 +248,7 @@ namespace Engine.Content
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns the triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles()
+        public Triangle[] GetTriangles()
         {
             if (Topology != Topology.TriangleList)
             {
@@ -255,7 +257,7 @@ namespace Engine.Content
 
             var vertices = GetVertices().ToArray();
 
-            List<Mathematics.Triangle> triangles = [];
+            List<Triangle> triangles = [];
 
             if (Indices.Length > 0)
             {
@@ -278,7 +280,7 @@ namespace Engine.Content
                 }
             }
 
-            return triangles;
+            return [.. triangles];
         }
         /// <summary>
         /// Transforms the vertex data and resets de internal transform to identity
@@ -308,7 +310,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="computeTangents">Compute tangent space</param>
         /// <param name="constraint">Constraint</param>
-        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(bool computeTangents, BoundingBox? constraint)
+        public async Task<(VertexData[] vertices, uint[] indices)> ProcessVertexData(bool computeTangents, BoundingBox? constraint)
         {
             if (computeTangents)
             {

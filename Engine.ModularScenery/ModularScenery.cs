@@ -74,7 +74,7 @@ namespace Engine.Modular
         /// <summary>
         /// Scene triangle list
         /// </summary>
-        private IEnumerable<Mathematics.Triangle> sceneTriangles;
+        private Triangle[] sceneTriangles;
 
         /// <summary>
         /// First level
@@ -193,8 +193,8 @@ namespace Engine.Modular
             ClearCache();
 
             //Removes previous level components from scene
-            Scene.RemoveComponents(assets.Select(a => a.Value));
-            Scene.RemoveComponents(objects.Select(o => o.Value));
+            Scene.RemoveComponents(assets.Select(a => a.Value).ToArray());
+            Scene.RemoveComponents(objects.Select(o => o.Value).ToArray());
 
             //Clear internal lists and data
             assets.Clear();
@@ -335,7 +335,7 @@ namespace Engine.Modular
             var trn = instance.Manipulator.LocalTransform;
 
             var lights = instance.Lights;
-            if (lights?.Any() != true)
+            if ((lights?.Length ?? 0) == 0)
             {
                 return;
             }
@@ -713,14 +713,14 @@ namespace Engine.Modular
             return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Mathematics.Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public override Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             if (sceneTriangles != null)
             {
                 return sceneTriangles;
             }
 
-            List<Mathematics.Triangle> triangleLits = [];
+            List<Triangle> triangleLits = [];
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
@@ -734,7 +734,7 @@ namespace Engine.Modular
 
             triangleLits.AddRange(objTriangles);
 
-            sceneTriangles = triangleLits;
+            sceneTriangles = [.. triangleLits];
 
             return sceneTriangles;
         }

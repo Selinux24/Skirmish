@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -35,32 +33,28 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexSkinnedPositionColor>> Convert(IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
+        public static async Task<VertexSkinnedPositionColor[]> Convert(VertexData[] vertices, Weight[] weights, string[] skinBoneNames)
         {
-            var vArray = vertices.ToArray();
-            var vWeights = weights.ToArray();
-            var vBones = skinBoneNames.ToArray();
+            var res = new VertexSkinnedPositionColor[vertices.Length];
 
-            var res = new VertexSkinnedPositionColor[vArray.Length];
-
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 var p = v.Position ?? Vector3.Zero;
                 var c = v.Color ?? Color4.White;
 
-                var vw = Array.FindAll(vWeights, w => w.VertexIndex == v.VertexIndex);
+                var vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
                 int vwCount = vw?.Length ?? 0;
 
-                var wg0 = vwCount > 0 ? vw[0].WeightValue : 0f;
-                var wg1 = vwCount > 1 ? vw[1].WeightValue : 0f;
-                var wg2 = vwCount > 2 ? vw[2].WeightValue : 0f;
+                float wg0 = vwCount > 0 ? vw[0].WeightValue : 0f;
+                float wg1 = vwCount > 1 ? vw[1].WeightValue : 0f;
+                float wg2 = vwCount > 2 ? vw[2].WeightValue : 0f;
 
-                var bn0 = vwCount > 0 ? Math.Max(0, Array.IndexOf(vBones, vw[0].Joint)) : 0;
-                var bn1 = vwCount > 1 ? Math.Max(0, Array.IndexOf(vBones, vw[1].Joint)) : 0;
-                var bn2 = vwCount > 2 ? Math.Max(0, Array.IndexOf(vBones, vw[2].Joint)) : 0;
-                var bn3 = vwCount > 3 ? Math.Max(0, Array.IndexOf(vBones, vw[3].Joint)) : 0;
+                int bn0 = vwCount > 0 ? Math.Max(0, Array.IndexOf(skinBoneNames, vw[0].Joint)) : 0;
+                int bn1 = vwCount > 1 ? Math.Max(0, Array.IndexOf(skinBoneNames, vw[1].Joint)) : 0;
+                int bn2 = vwCount > 2 ? Math.Max(0, Array.IndexOf(skinBoneNames, vw[2].Joint)) : 0;
+                int bn3 = vwCount > 3 ? Math.Max(0, Array.IndexOf(skinBoneNames, vw[3].Joint)) : 0;
 
                 res[index] = new VertexSkinnedPositionColor
                 {

@@ -84,7 +84,7 @@ namespace BasicSamples.SceneLighting
             float h = 0f;
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
-            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * 5f)];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceFloorDiffuse;
@@ -148,11 +148,13 @@ namespace BasicSamples.SceneLighting
             //Transform base position
             geo.Transform(Matrix4x4.RotationX(MathUtils.PiOver2) * Matrix4x4.Translation(Vector3.ForwardLH * 0.5f));
 
-            var vertices = VertexData.FromDescriptor(geo).Select(v =>
-            {
-                v.Color = Color.Gray;
-                return v;
-            });
+            var vertices = VertexData.FromDescriptor(geo)
+                .Select(v =>
+                {
+                    v.Color = Color.Gray;
+                    return v;
+                })
+                .ToArray();
 
             var indices = geo.Indices;
 

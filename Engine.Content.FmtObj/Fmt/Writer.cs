@@ -7,7 +7,7 @@ namespace Engine.Content.FmtObj.Fmt
 {
     static class Writer
     {
-        public static void WriteObj(StreamWriter wr, IEnumerable<Mathematics.Triangle> triangles)
+        public static void WriteObj(StreamWriter wr, IEnumerable<Triangle> triangles)
         {
             var points = new List<Vector3>();
             triangles.ToList().ForEach(t => points.AddRange([t.Point1, t.Point2, t.Point3]));

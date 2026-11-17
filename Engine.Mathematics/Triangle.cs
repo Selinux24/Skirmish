@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Mathematics
 {
@@ -45,6 +43,45 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        public Triangle(Vector3 point1, Vector3 point2, Vector3 point3)
+        {
+            Point1 = point1;
+            Point2 = point2;
+            Point3 = point3;
+            Normal = new Plane(Point1, Point2, Point3).Normal;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="v1X">Point 1 X</param>
+        /// <param name="v1Y">Point 1 Y</param>
+        /// <param name="v1Z">Point 1 Z</param>
+        /// <param name="v2X">Point 2 X</param>
+        /// <param name="v2Y">Point 2 Y</param>
+        /// <param name="v2Z">Point 2 Z</param>
+        /// <param name="v3X">Point 3 X</param>
+        /// <param name="v3Y">Point 3 Y</param>
+        /// <param name="v3Z">Point 3 Z</param>
+        public Triangle(float v1X, float v1Y, float v1Z, float v2X, float v2Y, float v2Z, float v3X, float v3Y, float v3Z)
+            : this(new Vector3(v1X, v1Y, v1Z), new Vector3(v2X, v2Y, v2Z), new Vector3(v3X, v3Y, v3Z))
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="points">Point array</param>
+        public Triangle(Vector3[] points) : this(points[0], points[1], points[2])
+        {
+
+        }
+
+        /// <summary>
         /// Transform triangle coordinates
         /// </summary>
         /// <param name="triangle">Triangle</param>
@@ -68,17 +105,18 @@ namespace Engine.Mathematics
         /// <param name="triangles">Triangle list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new triangle list</returns>
-        public static IEnumerable<Triangle> Transform(IEnumerable<Triangle> triangles, Matrix4x4 transform)
+        public static Triangle[] Transform(Triangle[] triangles, Matrix4x4 transform)
         {
-            if (triangles?.Any() != true)
-            {
-                yield break;
-            }
+            ArgumentNullException.ThrowIfNull(triangles);
 
-            foreach (var tri in triangles)
+            if (triangles.Length == 0) return [];
+
+            Triangle[] trTris = new Triangle[triangles.Length];
+            for (int i = 0; i < triangles.Length; i++)
             {
-                yield return Transform(tri, transform);
+                trTris[i] = Transform(triangles[i], transform);
             }
+            return trTris;
         }
 
         /// <summary>
@@ -86,84 +124,64 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns a new triangle list</returns>
-        public static IEnumerable<Triangle> ReverseNormal(IEnumerable<Triangle> triangles)
+        public static Triangle[] ReverseNormal(Triangle[] triangles)
         {
-            if (triangles?.Any() != true)
-            {
-                return [];
-            }
+            ArgumentNullException.ThrowIfNull(triangles);
 
-            return ReverseNormalIterator(triangles);
+            if (triangles.Length == 0) return [];
+
+            Triangle[] trTris = new Triangle[triangles.Length];
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                trTris[i] = triangles[i].ReverseNormal();
+            }
+            return trTris;
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
         /// </summary>
         /// <param name="vertices">Point list</param>
         /// <returns>Returns a new point list</returns>
-        public static IEnumerable<Vector3> ReverseNormal(IEnumerable<Vector3> vertices)
+        public static Vector3[] ReverseNormal(Vector3[] vertices)
         {
-            if (vertices.Count() % 3 != 0)
+            ArgumentNullException.ThrowIfNull(vertices);
+
+            if (vertices.Length % 3 != 0)
             {
                 throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
             }
 
-            return ReverseNormalIterator(vertices);
+            Vector3[] trVertices = new Vector3[vertices.Length];
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                trVertices[i + 0] = vertices[i + 0];
+                trVertices[i + 1] = vertices[i + 2];
+                trVertices[i + 2] = vertices[i + 1];
+            }
+            return trVertices;
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
         /// </summary>
         /// <param name="indices">Index list</param>
         /// <returns>Returns a new index list</returns>
-        public static IEnumerable<uint> ReverseNormal(IEnumerable<uint> indices)
+        public static uint[] ReverseNormal(uint[] indices)
         {
-            if (indices.Count() % 3 != 0)
+            ArgumentNullException.ThrowIfNull(indices);
+
+            if (indices.Length % 3 != 0)
             {
                 throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
             }
 
-            return ReverseNormalIterator(indices);
-        }
-
-        /// <summary>
-        /// Triangles reverse lazy iterator
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        private static IEnumerable<Triangle> ReverseNormalIterator(IEnumerable<Triangle> triangles)
-        {
-            foreach (var tri in triangles)
+            uint[] trIndices = new uint[indices.Length];
+            for (int i = 0; i < indices.Length; i += 3)
             {
-                yield return tri.ReverseNormal();
+                trIndices[i + 0] = indices[i + 0];
+                trIndices[i + 1] = indices[i + 2];
+                trIndices[i + 2] = indices[i + 1];
             }
-        }
-        /// <summary>
-        /// Vertices reverse lazy iterator
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        private static IEnumerable<Vector3> ReverseNormalIterator(IEnumerable<Vector3> vertices)
-        {
-            var vArray = vertices.ToArray();
-
-            for (int i = 0; i < vArray.Length; i += 3)
-            {
-                yield return vArray[i + 0];
-                yield return vArray[i + 2];
-                yield return vArray[i + 1];
-            }
-        }
-        /// <summary>
-        /// Indices reverse lazy iterator
-        /// </summary>
-        /// <param name="indices">Indices</param>
-        private static IEnumerable<uint> ReverseNormalIterator(IEnumerable<uint> indices)
-        {
-            var iArray = indices.ToArray();
-
-            for (int i = 0; i < iArray.Length; i += 3)
-            {
-                yield return iArray[i + 0];
-                yield return iArray[i + 2];
-                yield return iArray[i + 1];
-            }
+            return trIndices;
         }
 
         /// <summary>
@@ -207,45 +225,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="point1">Point 1</param>
-        /// <param name="point2">Point 2</param>
-        /// <param name="point3">Point 3</param>
-        public Triangle(Vector3 point1, Vector3 point2, Vector3 point3)
-        {
-            Point1 = point1;
-            Point2 = point2;
-            Point3 = point3;
-            Normal = new Plane(Point1, Point2, Point3).Normal;
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="v1X">Point 1 X</param>
-        /// <param name="v1Y">Point 1 Y</param>
-        /// <param name="v1Z">Point 1 Z</param>
-        /// <param name="v2X">Point 2 X</param>
-        /// <param name="v2Y">Point 2 Y</param>
-        /// <param name="v2Z">Point 2 Z</param>
-        /// <param name="v3X">Point 3 X</param>
-        /// <param name="v3Y">Point 3 Y</param>
-        /// <param name="v3Z">Point 3 Z</param>
-        public Triangle(float v1X, float v1Y, float v1Z, float v2X, float v2Y, float v2Z, float v3X, float v3Y, float v3Z)
-            : this(new Vector3(v1X, v1Y, v1Z), new Vector3(v2X, v2Y, v2Z), new Vector3(v3X, v3Y, v3Z))
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="points">Point array</param>
-        public Triangle(Vector3[] points) : this(points[0], points[1], points[2])
-        {
-
-        }
-
-        /// <summary>
         /// Projects the triangle into the given vector
         /// </summary>
         /// <param name="vector">Direction vector</param>
@@ -270,11 +249,14 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
-            yield return Point1;
-            yield return Point2;
-            yield return Point3;
+            return
+            [
+                Point1,
+                Point2,
+                Point3,
+            ];
         }
         /// <inheritdoc/>
         public readonly uint GetStride()

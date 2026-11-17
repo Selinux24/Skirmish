@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.Mathematics;
+using Engine.Physics;
+using Engine.Physics.Colliders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PhysicsSamples.ScenePhysics
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.Physics.Colliders;
-
     /// <summary>
     /// Physics object
     /// </summary>
@@ -26,9 +25,9 @@ namespace PhysicsSamples.ScenePhysics
 
         private static ConvexMeshCollider CollisionTriangleSoupFromModel(Model model)
         {
-            var tris = model.GetGeometry(true);
+            var tris = model.GetGeometry(true).ToArray();
             var inv = Matrix4x4.Invert(model.Manipulator.GlobalTransform);
-            tris = Engine.Mathematics.Triangle.Transform(tris, inv);
+            tris = Triangle.Transform(tris, inv);
 
             return new ConvexMeshCollider(tris);
         }

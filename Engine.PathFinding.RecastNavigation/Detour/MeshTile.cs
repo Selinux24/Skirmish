@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
@@ -352,7 +351,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="vertBase">Detail vertex base index</param>
         /// <param name="tris">Triangle indexes</param>
         /// <returns>Returns the triangle</returns>
-        public Mathematics.Triangle GetDetailTri(Poly poly, int vertBase, PolyMeshTriangleIndices tris)
+        public Triangle GetDetailTri(Poly poly, int vertBase, PolyMeshTriangleIndices tris)
         {
             Vector3[] v = new Vector3[3];
 
@@ -368,24 +367,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return new Mathematics.Triangle(v);
+            return new Triangle(v);
         }
         /// <summary>
         /// Gets the detail triangle list
         /// </summary>
         /// <param name="p">Polygon</param>
         /// <returns>Returns a triangle array</returns>
-        public List<Mathematics.Triangle> GetDetailTris(Poly p)
+        public Triangle[] GetDetailTris(Poly p)
         {
-            List<Mathematics.Triangle> tris = [];
-
             var pd = GetDetailMesh(p);
+
+            Triangle[] tris = new Triangle[pd.TriCount];
 
             for (int k = 0; k < pd.TriCount; k++)
             {
                 var pmt = DetailTris[pd.TriBase + k];
 
-                tris.Add(GetDetailTri(p, pd.VertBase, pmt));
+                tris[k] = GetDetailTri(p, pd.VertBase, pmt);
             }
 
             return tris;

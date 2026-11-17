@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Common;
+using Engine.Content.Persistence;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace Engine.Content
 {
-    using Engine.Common;
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Content description
     /// </summary>
@@ -45,7 +44,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="material">Material</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
+        public static ContentDescription FromContentData(VertexData[] vertices, uint[] indices, IMaterialContent material = null)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, material);
 
@@ -61,7 +60,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="materials">Materials</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
+        public static ContentDescription FromContentData(VertexData[] vertices, uint[] indices, IMaterialContent[] materials)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, materials);
 
@@ -91,7 +90,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IMaterialContent[] materials)
         {
             var contentData = ContentData.GenerateTriangleList(geometry, materials);
 
@@ -118,7 +117,7 @@ namespace Engine.Content
         /// Reads the content data file
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<ContentData>> ReadContentData()
+        public async Task<ContentData[]> ReadContentData()
         {
             if (!string.IsNullOrWhiteSpace(ContentFilename))
             {

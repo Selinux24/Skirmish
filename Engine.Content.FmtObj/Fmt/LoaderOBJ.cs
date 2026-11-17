@@ -58,7 +58,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <param name="fileName">File name</param>
-        public static void Save(IEnumerable<Mathematics.Triangle> triangles, string fileName)
+        public static void Save(IEnumerable<Triangle> triangles, string fileName)
         {
             // Write the file
             using var wr = new StreamWriter(fileName, false, Encoding.Default);
@@ -107,7 +107,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// Gets the extensions list which this loader is valid
         /// </summary>
         /// <returns>Returns a extension array list</returns>
-        public IEnumerable<string> GetExtensions()
+        public string[] GetExtensions()
         {
             return [".obj"];
         }
@@ -118,7 +118,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
+        public async Task<ContentData[]> Load(string contentFolder, ContentDataFile content)
         {
             var transform = content.GetTransform();
 

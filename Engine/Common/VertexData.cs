@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,7 +50,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex data</param>
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the weighted position</returns>
-        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix4x4> boneTransforms)
+        public static Vector3 ApplyWeight(IVertexData vertex, Matrix4x4[] boneTransforms)
         {
             if (!vertex.HasChannel(VertexDataChannels.Position))
             {
@@ -67,7 +66,6 @@ namespace Engine.Common
 
             var boneIndices = vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices);
             var boneWeights = vertex.GetChannelValue<float[]>(VertexDataChannels.Weights);
-            var transforms = boneTransforms.ToArray();
 
             var t = Vector3.Zero;
 
@@ -81,7 +79,7 @@ namespace Engine.Common
                 }
 
                 var index = boneIndices[w];
-                var boneTransform = transforms[index];
+                var boneTransform = boneTransforms[index];
                 if (!boneTransform.IsIdentity)
                 {
                     p = Vector3.TransformCoordinate(position, boneTransform);
@@ -99,9 +97,11 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix4x4 transform)
+        public static VertexData[] Transform(VertexData[] vertices, Matrix4x4 transform)
         {
-            if (vertices?.Any() != true)
+            ArgumentNullException.ThrowIfNull(vertices);
+
+            if (vertices.Length == 0)
             {
                 return [];
             }
@@ -160,10 +160,12 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the transformed vertex list</returns>
-        public static IEnumerable<T> Transform<T>(IEnumerable<T> vertices, Matrix4x4 transform)
+        public static T[] Transform<T>(T[] vertices, Matrix4x4 transform)
             where T : unmanaged, IVertexData
         {
-            if (vertices?.Any() != true)
+            ArgumentNullException.ThrowIfNull(vertices);
+
+            if (vertices.Length == 0)
             {
                 return [];
             }
@@ -227,13 +229,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="descriptor">Geometry descriptor</param>
         /// <returns>Returns a vertex array</returns>
-        public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
+        public static VertexData[] FromDescriptor(GeometryDescriptor descriptor)
         {
-            var vertices = descriptor.Vertices?.ToArray() ?? [];
-            var normals = descriptor.Normals?.ToArray() ?? [];
-            var uvs = descriptor.Uvs?.ToArray() ?? [];
-            var tangents = descriptor.Tangents?.ToArray() ?? [];
-            var binormals = descriptor.Binormals?.ToArray() ?? [];
+            var vertices = descriptor.Vertices ?? [];
+            var normals = descriptor.Normals ?? [];
+            var uvs = descriptor.Uvs ?? [];
+            var tangents = descriptor.Tangents ?? [];
+            var binormals = descriptor.Binormals ?? [];
 
             VertexData[] res = new VertexData[vertices.Length];
 
@@ -263,9 +265,9 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
-            yield return Position.Value;
+            return [Position.Value];
         }
         /// <inheritdoc/>
         public readonly uint GetStride()

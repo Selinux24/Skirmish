@@ -45,7 +45,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Mathematics.Triangle> node)
+            public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
             {
                 Stopwatch watch = new();
                 watch.Start();
@@ -272,7 +272,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode<Mathematics.Triangle>[] visibleNodes = [];
+        private PickingQuadTreeNode<Triangle>[] visibleNodes = [];
 
         /// <summary>
         /// Gets the visible node count
@@ -345,7 +345,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             // Generate initial patches
             var nodes = GroundPickingQuadtree.GetLeafNodes();
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return;
             }
@@ -367,7 +367,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var taskDuration = TimeSpan.FromMilliseconds(taskResults.Sum(p => p.Duration.TotalMilliseconds));
             var maxTaskDuration = TimeSpan.FromMilliseconds(taskResults.Max(p => p.Duration.TotalMilliseconds));
-            Game.Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Count()} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
+            Game.Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Length} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
         }
 
         /// <inheritdoc/>

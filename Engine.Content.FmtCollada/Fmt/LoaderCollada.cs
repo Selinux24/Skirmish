@@ -38,7 +38,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// Gets the extensions list which this loader is valid
         /// </summary>
         /// <returns>Returns a extension array list</returns>
-        public IEnumerable<string> GetExtensions()
+        public string[] GetExtensions()
         {
             return [".dae"];
         }
@@ -49,7 +49,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
+        public async Task<ContentData[]> Load(string contentFolder, ContentDataFile content)
         {
             string fileName = content.ModelFileName;
 
@@ -141,10 +141,10 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="armatureName">Armature name</param>
         /// <param name="meshesByLOD">Level of detail meshes</param>
         /// <returns>Returns the filtered model content parts</returns>
-        private static List<ContentData> FilterGeometry(ContentData modelContent, string armatureName, IEnumerable<string> meshesByLOD)
+        private static List<ContentData> FilterGeometry(ContentData modelContent, string armatureName, string[] meshesByLOD)
         {
             bool filterByArmature = !string.IsNullOrWhiteSpace(armatureName);
-            bool filterByMeshes = meshesByLOD?.Any() == true;
+            bool filterByMeshes = (meshesByLOD?.Length ?? 0) > 0;
 
             if (!filterByArmature && !filterByMeshes)
             {
@@ -179,9 +179,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="geometryName">Geometry name</param>
         /// <param name="hulls">List of hull name prefixes</param>
         /// <returns>Returns true if the geometry name starts with any of the hull names in the collection</returns>
-        private static bool IsHull(string geometryName, IEnumerable<string> hulls)
+        private static bool IsHull(string geometryName, string[] hulls)
         {
-            if (hulls?.Any() != true)
+            if ((hulls?.Length ?? 0) == 0)
             {
                 return false;
             }
@@ -364,7 +364,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="hulls">Hull mesh names</param>
-        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> hulls)
+        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, string[] hulls)
         {
             if ((dae.LibraryGeometries?.Length ?? 0) == 0)
             {
@@ -447,7 +447,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="geometry">Geometry info</param>
         /// <param name="hulls">Hull mesh names</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, IEnumerable<string> hulls)
+        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, string[] hulls)
         {
             bool isHull = IsHull(geometry.Name, hulls);
 
@@ -472,7 +472,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="mesh">Mesh</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Content.FmtCollada.Mesh mesh, bool isHull)
+        private static IEnumerable<SubMeshContent> ProcessMesh(Mesh mesh, bool isHull)
         {
             //Procesar por topología
             if ((mesh.Lines?.Length ?? 0) != 0)
@@ -680,8 +680,8 @@ namespace Engine.Content.FmtCollada.Fmt
 
                 SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull, Matrix4x4.Identity);
 
-                meshInfo.SetVertices(verts);
-                meshInfo.SetIndices(indices);
+                meshInfo.SetVertices([.. verts]);
+                meshInfo.SetIndices([.. indices]);
 
                 res.Add(meshInfo);
             }

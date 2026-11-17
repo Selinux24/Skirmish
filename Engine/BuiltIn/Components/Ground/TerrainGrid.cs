@@ -141,7 +141,7 @@ namespace Engine.BuiltIn.Components.Ground
             }
 
             var bbox = BoundingBox.FromPoints([.. vertices.SelectMany(v => v.GetVertices()).Distinct()]);
-            var items = vertices.Select(v => (BoundingBox.FromPoints([.. v.GetVertices()]), v));
+            var items = vertices.Select(v => (BoundingBox.FromPoints([.. v.GetVertices()]), v)).ToArray();
             res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, new(LODLevels, false, 0));
 
             //Populate nodes dictionary

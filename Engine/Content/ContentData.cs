@@ -84,7 +84,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -97,7 +97,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, uint[] indices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -110,7 +110,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, uint[] indices, IMaterialContent[] materials)
         {
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -133,7 +133,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IMaterialContent[] materials)
         {
             var vertices = VertexData.FromDescriptor(geometry);
 
@@ -145,7 +145,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateLineList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        public static ContentData GenerateLineList(VertexData[] vertices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -159,13 +159,13 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
+        private static ContentData Generate(Topology topology, VertexData[] vertices, uint[] indices, IMaterialContent[] materials)
         {
             ContentData modelContent = new();
             string materialName;
             bool textured;
 
-            int materialCount = materials.Count();
+            int materialCount = materials.Length;
             if (materialCount == 1)
             {
                 var material = materials.First();
@@ -787,7 +787,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="joint">Joint to initialize</param>
         /// <param name="skinController">Skin controller</param>
-        private IEnumerable<JointAnimation> InitializeJoints(Joint joint, IEnumerable<string> skinController)
+        private JointAnimation[] InitializeJoints(Joint joint, string[] skinController)
         {
             var animations = new List<JointAnimation>();
 
@@ -1016,17 +1016,19 @@ namespace Engine.Content
                 }
 
                 string firstMesh = null;
-                List<SubMeshContent> subMeshList = [];
+                SubMeshContent[] subMeshList = new SubMeshContent[meshes.Count];
 
-                foreach (var (meshName, subMesh) in meshes)
+                for (int i = 0; i < meshes.Count; i++)
                 {
+                    var (meshName, subMesh) = meshes[i];
+
                     //Group using the first mesh name
                     firstMesh ??= $"opt_{idx++}.{meshName}";
-                    subMeshList.Add(subMesh);
+                    subMeshList[i] = subMesh;
                 }
 
                 var gmesh = subMeshList[0];
-                if (subMeshList.Count > 1)
+                if (subMeshList.Length > 1)
                 {
                     SubMeshContent.OptimizeMeshes(subMeshList, out gmesh);
                 }
@@ -1075,7 +1077,7 @@ namespace Engine.Content
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles()
+        public Triangle[] GetTriangles()
         {
             return [.. geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles()))];
         }
@@ -1454,9 +1456,9 @@ namespace Engine.Content
         /// <summary>
         /// Gets hull meshes
         /// </summary>
-        public IEnumerable<Mathematics.Triangle> GetHullMeshes()
+        public IEnumerable<Triangle> GetHullMeshes()
         {
-            var meshes = new List<Mathematics.Triangle>();
+            var meshes = new List<Triangle>();
 
             var meshNames = geometryContent.Keys.ToArray();
 
@@ -1471,7 +1473,7 @@ namespace Engine.Content
         /// Gets hull mesh by mesh name
         /// </summary>
         /// <param name="meshName">Mesh name</param>
-        private Mathematics.Triangle[] GetHullMesh(string meshName)
+        private Triangle[] GetHullMesh(string meshName)
         {
             //Extract hull geometry
             return [.. geometryContent[meshName].Where(g => g.Value.IsHull).SelectMany(material => material.Value.GetTriangles())];

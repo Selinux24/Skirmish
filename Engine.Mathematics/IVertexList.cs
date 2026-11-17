@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Mathematics
 {
     /// <summary>
@@ -11,7 +10,7 @@ namespace Engine.Mathematics
         /// Gets vertex position list
         /// </summary>
         /// <returns>Returns the vertex position list</returns>
-        IEnumerable<Vector3> GetVertices();
+        Vector3[] GetVertices();
         /// <summary>
         /// Gets the vertex list stride
         /// </summary>

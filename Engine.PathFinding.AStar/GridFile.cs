@@ -19,7 +19,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="settings">Settings</param>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns the hash string</returns>
-        public static string GetHash(PathFinderSettings settings, IEnumerable<Mathematics.Triangle> triangles)
+        public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
             List<byte> buffer = [];
 

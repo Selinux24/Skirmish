@@ -1,7 +1,5 @@
 ﻿using Engine.Animation;
 using Engine.Mathematics;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -21,11 +19,11 @@ namespace Engine.Common
         /// <summary>
         /// Points cache
         /// </summary>
-        private IEnumerable<Vector3> positionCache = [];
+        private Vector3[] positionCache = [];
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private IEnumerable<Triangle> triangleCache = [];
+        private Triangle[] triangleCache = [];
 
         /// <summary>
         /// Invalidates internal state
@@ -44,7 +42,7 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or position list</returns>
-        public IEnumerable<Vector3> GetPoints(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
+        public Vector3[] GetPoints(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
         {
             bool update = refresh || updatePoints;
 
@@ -86,7 +84,7 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Mathematics.Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
+        public Triangle[] GetTriangles(DrawingData drawingData, AnimationController controller, IManipulator3D manipulator, bool refresh = false)
         {
             bool update = refresh || updateTriangles;
 

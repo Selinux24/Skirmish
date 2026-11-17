@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -22,54 +20,6 @@ namespace Engine.Mathematics
     public struct BoundingCapsule(Vector3 center, float radius, float height) : IEquatable<BoundingCapsule>, IFormattable
     {
         const string BoundingCapsuleStr = "Base:{0} Cap:{1} Radius:{2}";
-
-        /// <summary>
-        /// Constructs a BoundingCapsule that fully contains the given points.
-        /// </summary>
-        /// <param name="points">The points that will be contained by the capsule</param>
-        /// <returns>When the method completes, contains the newly constructed bounding capsule</returns>
-        public static BoundingCapsule FromPoints(IEnumerable<Vector3> points)
-        {
-            //Find radius and height
-            float minX = float.MaxValue;
-            float minY = float.MaxValue;
-            float minZ = float.MaxValue;
-
-            float maxX = float.MinValue;
-            float maxY = float.MinValue;
-            float maxZ = float.MinValue;
-
-            for (int i = 0; i < points.Count(); i++)
-            {
-                var p = points.ElementAt(i);
-
-                if (p.X < minX) minX = p.X;
-                if (p.X > maxX) maxX = p.X;
-
-                if (p.Y < minY) minY = p.Y;
-                if (p.Y > maxY) maxY = p.Y;
-
-                if (p.Z < minZ) minZ = p.Z;
-                if (p.Z > maxZ) maxZ = p.Z;
-            }
-
-            float h = maxY - minY;
-            float r = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
-
-            //Find center
-            Vector3 c = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
-
-            return new BoundingCapsule(c, r, h);
-        }
-        /// <summary>
-        /// Constructs a BoundingCapsule that fully contains the given points
-        /// </summary>
-        /// <param name="points">The points that will be contained by the capsule</param>
-        /// <param name="result">When the method completes, contains the newly constructed bounding capsule</param>
-        public static void FromPoints(IEnumerable<Vector3> points, out BoundingCapsule result)
-        {
-            result = FromPoints(points);
-        }
 
         /// <summary>
         /// Radius
@@ -113,6 +63,57 @@ namespace Engine.Mathematics
         public readonly ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
+        }
+
+        /// <summary>
+        /// Constructs a BoundingCapsule that fully contains the given points.
+        /// </summary>
+        /// <param name="points">The points that will be contained by the capsule</param>
+        /// <returns>When the method completes, contains the newly constructed bounding capsule</returns>
+        public static BoundingCapsule FromPoints(Vector3[] points)
+        {
+            FromPoints(points, out var result);
+            return result;
+        }
+        /// <summary>
+        /// Constructs a BoundingCapsule that fully contains the given points
+        /// </summary>
+        /// <param name="points">The points that will be contained by the capsule</param>
+        /// <param name="result">When the method completes, contains the newly constructed bounding capsule</param>
+        public static void FromPoints(Vector3[] points, out BoundingCapsule result)
+        {
+            ArgumentNullException.ThrowIfNull(points);
+
+            //Find radius and height
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float minZ = float.MaxValue;
+
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+            float maxZ = float.MinValue;
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                var p = points[i];
+
+                if (p.X < minX) minX = p.X;
+                if (p.X > maxX) maxX = p.X;
+
+                if (p.Y < minY) minY = p.Y;
+                if (p.Y > maxY) maxY = p.Y;
+
+                if (p.Z < minZ) minZ = p.Z;
+                if (p.Z > maxZ) maxZ = p.Z;
+            }
+
+            float h = maxY - minY;
+            float r = Vector2.Distance(new Vector2(minX, minZ), new Vector2(maxX, maxZ)) * 0.5f;
+
+            //Find center
+            Vector3 c = (new Vector3(minX, minY, minZ) + new Vector3(maxX, minY, maxZ)) * 0.5f;
+
+            result = new BoundingCapsule(c, r, h);
         }
 
         /// <inheritdoc/>

@@ -70,8 +70,8 @@ namespace Engine.PhysicsTests
         {
             var extents = Vector3.Up;
             var sourceBox = new BoundingBox(-extents, extents);
-            var sphere = BoundingSphere.FromPoints([.. sourceBox.GetVertices()]);
-            var obb = new OrientedBoundingBox([.. sourceBox.GetVertices()]);
+            var sphere = BoundingSphere.FromPoints(sourceBox.GetVertices());
+            var obb = new OrientedBoundingBox(sourceBox.GetVertices());
 
             var box = new BoxCollider(extents);
             Assert.AreEqual(box.Extents, extents);
@@ -104,7 +104,7 @@ namespace Engine.PhysicsTests
             float radius = 1f;
             var sourceSphere = new BoundingSphere(Vector3.Zero, radius);
             var box = BoundingBox.FromSphere(sourceSphere);
-            var obb = new OrientedBoundingBox([.. box.GetVertices()]);
+            var obb = new OrientedBoundingBox(box.GetVertices());
 
             var sphere = new SphereCollider(radius);
             Assert.AreEqual(sphere.Radius, radius);
