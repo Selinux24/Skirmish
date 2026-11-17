@@ -1020,7 +1020,7 @@ namespace TerrainSamples.SceneModularDungeon
             var lights = item.Instance.Lights;
             if (lights.Length != 0)
             {
-                var msg = string.Format("Press space to {0} the light...", lights.First().Enabled ? "turn off" : "turn on");
+                var msg = $"Press space to {(lights[0].Enabled ? "turn off" : "turn on")} the light...";
 
                 PrepareMessage(true, msg);
             }
@@ -1090,7 +1090,7 @@ namespace TerrainSamples.SceneModularDungeon
                 var lights = item.Instance.Lights;
                 if (lights.Length != 0)
                 {
-                    enabled = !lights.First().Enabled;
+                    enabled = !lights[0].Enabled;
 
                     foreach (var light in lights)
                     {

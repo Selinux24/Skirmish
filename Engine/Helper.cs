@@ -703,92 +703,52 @@ namespace Engine
         {
             return new(value.Left, value.Top, value.Right, value.Bottom);
         }
-        public static RectI ToRectI(this Vortice.RawRect value)
-        {
-            return new(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
-        }
-
         public static Vortice.RawRect ToRawRect(this Rect value)
         {
             return new((int)value.Left, (int)value.Top, (int)value.Right, (int)value.Bottom);
         }
-        public static Rect ToRect(this Vortice.RawRect value)
+
+        public static RectI ToRectI(this Vortice.RawRect value)
         {
             return new(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
         }
-
         public static Vortice.Mathematics.RectI ToRectI(this RectI value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
-        public static Vortice.Mathematics.Rect ToRect(this RectI value)
-        {
-            return new(value.X, value.Y, value.Width, value.Height);
-        }
-
         public static Vortice.Mathematics.RectI ToRectI(this Rect value)
         {
             return new((int)value.X, (int)value.Y, (int)value.Width, (int)value.Height);
+        }
+
+        public static Rect ToRect(this Vortice.RawRect value)
+        {
+            return new(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
+        }
+        public static Vortice.Mathematics.Rect ToRect(this RectI value)
+        {
+            return new(value.X, value.Y, value.Width, value.Height);
         }
         public static Vortice.Mathematics.Rect ToRect(this Rect value)
         {
             return new(value.X, value.Y, value.Width, value.Height);
         }
 
-        public static Vortice.Mathematics.Color4 ToColor4(this Color value)
-        {
-            return new(
-                value.R / 255f,
-                value.G / 255f,
-                value.B / 255f,
-                value.A / 255f);
-        }
-        public static Color ToColor(this Vortice.Mathematics.Color4 value)
-        {
-            return new(value.R, value.G, value.B, value.A);
-        }
-
-        public static Vortice.Mathematics.Color3 ToColor3(this Color3 value)
-        {
-            return new(value.Red, value.Green, value.Blue);
-        }
-        public static Color3 ToColor3(this Vortice.Mathematics.Color3 value)
-        {
-            return new(value.R, value.G, value.B);
-        }
-
-        public static Vortice.Mathematics.Color4 ToColor4(this Color4 value)
-        {
-            return new(value.Red, value.Green, value.Blue, value.Alpha);
-        }
-        public static Color4 ToColor4(this Vortice.Mathematics.Color4 value)
-        {
-            return new(value.R, value.G, value.B, value.A);
-        }
-
-        public static Vector2 ToVector2(this Vortice.Mathematics.Size Value)
-        {
-            return new(Value.Width, Value.Height);
-        }
-        public static Vortice.Mathematics.Size ToSize(this Vector2 Value)
+        public static Vortice.Mathematics.Int2 ToInt2(this Vector2I Value)
         {
             return new(Value.X, Value.Y);
+        }
+
+        public static Vortice.Mathematics.Int3 ToInt3(this Vector3I Value)
+        {
+            return new(Value.X, Value.Y, Value.Z);
         }
 
         public static Vector2I ToVector2I(this Vortice.Mathematics.SizeI Value)
         {
             return new(Value.Width, Value.Height);
         }
-        public static Vortice.Mathematics.SizeI ToSizeI(this Vector2I Value)
-        {
-            return new(Value.X, Value.Y);
-        }
-
         public static Vector2I ToVector2I(this Vortice.Mathematics.Int2 Value)
-        {
-            return new(Value.X, Value.Y);
-        }
-        public static Vortice.Mathematics.Int2 ToInt2(this Vector2I Value)
         {
             return new(Value.X, Value.Y);
         }
@@ -797,18 +757,60 @@ namespace Engine
         {
             return new(Value.Width, Value.Height, Value.Depth);
         }
+        public static Vector3I ToVector3I(this Vortice.Mathematics.Int3 Value)
+        {
+            return new(Value.X, Value.Y, Value.Z);
+        }
+
+        public static Color ToColor(this Vortice.Mathematics.Color4 value)
+        {
+            return new(value.R, value.G, value.B, value.A);
+        }
+
+        public static Color3 ToColor3(this Vortice.Mathematics.Color3 value)
+        {
+            return new(value.R, value.G, value.B);
+        }
+        public static Vortice.Mathematics.Color3 ToColor3(this Color3 value)
+        {
+            return new(value.Red, value.Green, value.Blue);
+        }
+
+        public static Color4 ToColor4(this Vortice.Mathematics.Color4 value)
+        {
+            return new(value.R, value.G, value.B, value.A);
+        }
+        public static Vortice.Mathematics.Color4 ToColor4(this Color value)
+        {
+            return new(
+                value.R / 255f,
+                value.G / 255f,
+                value.B / 255f,
+                value.A / 255f);
+        }
+        public static Vortice.Mathematics.Color4 ToColor4(this Color4 value)
+        {
+            return new(value.Red, value.Green, value.Blue, value.Alpha);
+        }
+
+        public static Vortice.Mathematics.Size ToSize(this Vector2 Value)
+        {
+            return new(Value.X, Value.Y);
+        }
+
+        public static Vortice.Mathematics.SizeI ToSizeI(this Vector2I Value)
+        {
+            return new(Value.X, Value.Y);
+        }
+
         public static Vortice.Mathematics.Size3 ToSize3(this Vector3I Value)
         {
             return new(Value.X, Value.Y, Value.Z);
         }
 
-        public static Vector3I ToVector3I(this Vortice.Mathematics.Int3 Value)
+        public static Vector2 ToVector2(this Vortice.Mathematics.Size Value)
         {
-            return new(Value.X, Value.Y, Value.Z);
-        }
-        public static Vortice.Mathematics.Int3 ToInt3(this Vector3I Value)
-        {
-            return new(Value.X, Value.Y, Value.Z);
+            return new(Value.Width, Value.Height);
         }
 
         #endregion

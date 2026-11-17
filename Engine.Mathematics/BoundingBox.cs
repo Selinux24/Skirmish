@@ -64,6 +64,7 @@ namespace Engine.Mathematics
     public struct BoundingBox(Vector3 minimum, Vector3 maximum) : IEquatable<BoundingBox>, IFormattable
     {
         const string BoundingBoxStr = "Minimum:{0} Maximum:{1}";
+        const string CornerArrayError = "The array must have exactly 8 elements.";
 
         /// <summary>
         /// The minimum point of the box.
@@ -117,7 +118,7 @@ namespace Engine.Mathematics
         public readonly void GetCorners(Vector3[] corners)
         {
             ArgumentNullException.ThrowIfNull(corners);
-            if (corners.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(corners));
+            if (corners.Length != 8) throw new ArgumentException(CornerArrayError, nameof(corners));
 
             corners[0] = new Vector3(Minimum.X, Maximum.Y, Maximum.Z);
             corners[1] = new Vector3(Maximum.X, Maximum.Y, Maximum.Z);
@@ -588,7 +589,7 @@ namespace Engine.Mathematics
         public static Segment[] GetEdges(Vector3[] vertices)
         {
             ArgumentNullException.ThrowIfNull(vertices);
-            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+            if (vertices.Length != 8) throw new ArgumentException(CornerArrayError, nameof(vertices));
 
             var top = GetEdgesTop(vertices);
             var bottom = GetEdgesBottom(vertices);
@@ -605,7 +606,7 @@ namespace Engine.Mathematics
         public static Segment[] GetEdgesTop(Vector3[] vertices)
         {
             ArgumentNullException.ThrowIfNull(vertices);
-            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+            if (vertices.Length != 8) throw new ArgumentException(CornerArrayError, nameof(vertices));
 
             return
             [
@@ -625,7 +626,7 @@ namespace Engine.Mathematics
         public static Segment[] GetEdgesBottom(Vector3[] vertices)
         {
             ArgumentNullException.ThrowIfNull(vertices);
-            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+            if (vertices.Length != 8) throw new ArgumentException(CornerArrayError, nameof(vertices));
 
             return
             [
@@ -645,7 +646,7 @@ namespace Engine.Mathematics
         public static Segment[] GetEdgesVertical(Vector3[] vertices)
         {
             ArgumentNullException.ThrowIfNull(vertices);
-            if (vertices.Length != 8) throw new ArgumentException("The array must have exactly 8 elements.", nameof(vertices));
+            if (vertices.Length != 8) throw new ArgumentException(CornerArrayError, nameof(vertices));
 
             return
             [

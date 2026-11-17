@@ -301,11 +301,11 @@ namespace Engine
                 return false;
             }
 
-            var first = results.First();
+            var first = results[0];
 
             result = new()
             {
-                PickingResult = first.PickingResults.First(),
+                PickingResult = first.PickingResults[0],
                 SceneObject = first.SceneObject,
             };
 

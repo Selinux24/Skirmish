@@ -2474,9 +2474,9 @@ namespace Engine.Common
             //Base (reverse faces)
             for (uint i = 0; i < hemispheric.Indices.Length; i += 3)
             {
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 0) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 2) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 1) + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 0] + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 2] + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 1] + offset);
             }
 
             //Add the side faces

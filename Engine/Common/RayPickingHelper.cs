@@ -237,7 +237,7 @@ namespace Engine.Common
             }
 
             //Returns the first result of the results list
-            result = results.First();
+            result = results[0];
 
             return true;
         }

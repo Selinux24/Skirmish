@@ -1016,9 +1016,8 @@ namespace Engine.Mathematics
             directioncrossedge2.Z = (ray.Direction.X * edge2.Y) - (ray.Direction.Y * edge2.X);
 
             //Compute the determinant.
-            float determinant;
             //Dot product of edge1 and the first part of determinant.
-            determinant = (edge1.X * directioncrossedge2.X) + (edge1.Y * directioncrossedge2.Y) + (edge1.Z * directioncrossedge2.Z);
+            float determinant = (edge1.X * directioncrossedge2.X) + (edge1.Y * directioncrossedge2.Y) + (edge1.Z * directioncrossedge2.Z);
 
             //If the ray is parallel to the triangle plane, there is no collision.
             //This also means that we are not culling, the ray may hit both the
@@ -1037,8 +1036,7 @@ namespace Engine.Mathematics
             distanceVector.Y = ray.Position.Y - vertex1.Y;
             distanceVector.Z = ray.Position.Z - vertex1.Z;
 
-            float triangleU;
-            triangleU = (distanceVector.X * directioncrossedge2.X) + (distanceVector.Y * directioncrossedge2.Y) + (distanceVector.Z * directioncrossedge2.Z);
+            float triangleU = (distanceVector.X * directioncrossedge2.X) + (distanceVector.Y * directioncrossedge2.Y) + (distanceVector.Z * directioncrossedge2.Z);
             triangleU *= inversedeterminant;
 
             //Make sure it is inside the triangle.
@@ -1054,8 +1052,7 @@ namespace Engine.Mathematics
             distancecrossedge1.Y = (distanceVector.Z * edge1.X) - (distanceVector.X * edge1.Z);
             distancecrossedge1.Z = (distanceVector.X * edge1.Y) - (distanceVector.Y * edge1.X);
 
-            float triangleV;
-            triangleV = ((ray.Direction.X * distancecrossedge1.X) + (ray.Direction.Y * distancecrossedge1.Y)) + (ray.Direction.Z * distancecrossedge1.Z);
+            float triangleV = ((ray.Direction.X * distancecrossedge1.X) + (ray.Direction.Y * distancecrossedge1.Y)) + (ray.Direction.Z * distancecrossedge1.Z);
             triangleV *= inversedeterminant;
 
             //Make sure it is inside the triangle.
@@ -1066,8 +1063,7 @@ namespace Engine.Mathematics
             }
 
             //Compute the distance along the ray to the triangle.
-            float raydistance;
-            raydistance = (edge2.X * distancecrossedge1.X) + (edge2.Y * distancecrossedge1.Y) + (edge2.Z * distancecrossedge1.Z);
+            float raydistance = (edge2.X * distancecrossedge1.X) + (edge2.Y * distancecrossedge1.Y) + (edge2.Z * distancecrossedge1.Z);
             raydistance *= inversedeterminant;
 
             //Is the triangle behind the ray origin?

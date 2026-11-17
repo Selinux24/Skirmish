@@ -166,7 +166,7 @@ namespace Engine.Common
                 return [];
             }
 
-            var first = vertices.First();
+            var first = vertices[0];
             if (!first.HasChannel(VertexDataChannels.Position))
             {
                 return [];
@@ -200,7 +200,7 @@ namespace Engine.Common
                 return [];
             }
 
-            var first = vertices.First();
+            var first = vertices[0];
             if (!first.HasChannel(VertexDataChannels.Position) ||
                 !first.HasChannel(VertexDataChannels.BoneIndices) ||
                 !first.HasChannel(VertexDataChannels.Weights))

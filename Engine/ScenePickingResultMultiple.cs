@@ -1,5 +1,4 @@
 ﻿using Engine.Mathematics;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -17,7 +16,7 @@ namespace Engine
         /// <summary>
         /// Picking results
         /// </summary>
-        public IEnumerable<PickingResult<T>> PickingResults { get; set; }
+        public PickingResult<T>[] PickingResults { get; set; }
 
         /// <summary>
         /// Gets the first result

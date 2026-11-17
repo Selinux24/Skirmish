@@ -80,7 +80,7 @@ namespace Engine.Content
                 return false;
             }
 
-            var firstMesh = meshArray.First();
+            var firstMesh = meshArray[0];
 
             var meshTopology = firstMesh.Topology;
             string meshMaterial = firstMesh.Material;

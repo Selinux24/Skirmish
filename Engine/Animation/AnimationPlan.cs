@@ -10,6 +10,8 @@ namespace Engine.Animation
     /// </summary>
     public class AnimationPlan
     {
+        const string PathCountError = "Must specify one animation path at least.";
+
         private readonly List<AnimationPath> animationPaths = [];
 
         /// <summary>
@@ -136,6 +138,8 @@ namespace Engine.Animation
         /// <param name="path">Animation path</param>
         public AnimationPlan(AnimationPath path)
         {
+            ArgumentNullException.ThrowIfNull(path);
+
             animationPaths.Add(path);
         }
         /// <summary>
@@ -144,14 +148,9 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public AnimationPlan(params AnimationPath[] paths)
         {
-            animationPaths.AddRange(paths);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="paths">Animation path list</param>
-        public AnimationPlan(IEnumerable<AnimationPath> paths)
-        {
+            ArgumentNullException.ThrowIfNull(paths);
+            if (paths.Length == 0) throw new ArgumentException(PathCountError, nameof(paths));
+
             animationPaths.AddRange(paths);
         }
 

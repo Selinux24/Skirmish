@@ -287,7 +287,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<SceneLight> Lights { get; private set; }
+        public SceneLight[] Lights { get; private set; }
 
         /// <summary>
         /// Destructor
@@ -436,7 +436,7 @@ namespace Engine.BuiltIn.Components.Ground
             }
 
             // Launch creation tasks
-            LoadPatches(taskList);
+            LoadPatches([.. taskList]);
         }
 
         /// <inheritdoc/>
@@ -496,17 +496,14 @@ namespace Engine.BuiltIn.Components.Ground
         /// Launch an async resource load with the task list
         /// </summary>
         /// <param name="taskList">Task list to launch</param>
-        private void LoadPatches(IEnumerable<Func<Task<SceneryPatchTask>>> taskList)
+        private void LoadPatches(Func<Task<SceneryPatchTask>>[] taskList)
         {
-            if (!taskList.Any())
-            {
-                return;
-            }
+            if (taskList.Length == 0) return;
 
             const string loadTaskName = nameof(LoadPatches);
 
             // Fire and forget
-            Game.Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
+            Game.Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Length} tasks.");
 
             var loadGroup = LoadResourceGroup<SceneryPatchTask>.FromTasks(taskList, LoadPatchesCompleted, null, $"{loadTaskName}");
 
@@ -540,7 +537,7 @@ namespace Engine.BuiltIn.Components.Ground
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return [.. patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? [])];
         }

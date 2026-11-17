@@ -5,7 +5,6 @@ using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Content;
 using Engine.Mathematics;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -160,8 +159,8 @@ namespace Engine.BuiltIn.Components.Ground
 
             // Compute triangles for ray - mesh picking
             var tris = GeometryUtil.ComputeTriangleList(
-                Vertices.Select(v => v.Position.Value).ToArray(),
-                Indices.ToArray());
+                [.. Vertices.Select(v => v.Position.Value)],
+                [.. Indices]);
 
             // Initialize quad-tree for ray picking
             GroundPickingQuadtree = Description.ReadQuadTree(tris);
@@ -313,7 +312,7 @@ namespace Engine.BuiltIn.Components.Ground
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return terrainMaterial != null ? [terrainMaterial] : [];
         }

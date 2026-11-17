@@ -1,7 +1,6 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Content
@@ -98,7 +97,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> TryCreateMesh(MeshCreateParams createParams, bool preferTextured, bool useNormalMapping, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
             if (!v.Position.HasValue)
             {
                 return null;
@@ -120,7 +119,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> GetPositionOnlyVariant(MeshCreateParams createParams, bool preferTextured, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
             if (preferTextured && v.Texture.HasValue)
             {
                 return await GetPositionTextureVariant(createParams, useSkinning);
@@ -177,7 +176,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> GetPositionNormalVariant(MeshCreateParams createParams, bool preferTextured, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
 
             if (preferTextured && v.Texture.HasValue)
             {
@@ -201,7 +200,7 @@ namespace Engine.Content
         }
         private static async Task<IMesh> GetPositionNormalTangentVariant(MeshCreateParams createParams, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
 
             if (useSkinning)
             {

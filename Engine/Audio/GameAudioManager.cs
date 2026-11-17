@@ -115,10 +115,10 @@ namespace Engine.Audio
         {
             if (!disposing) return;
 
-            foreach (var i in effectInstances)
+            foreach (var effect in effectInstances.Select(i => i.Effect))
             {
-                i.Effect.Stop(true);
-                i.Effect.Dispose();
+                effect.Stop(true);
+                effect.Dispose();
             }
             effectInstances.Clear();
 

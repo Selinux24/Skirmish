@@ -380,7 +380,7 @@ namespace Engine.BuiltIn.Components.Foliage
         private QuadTreeNode[] GetVisibleNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
             var nodes = foliageQuadtree.FindNodesInVolume((IntersectionVolumeSphere)sph);
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return [];
             }
@@ -666,7 +666,7 @@ namespace Engine.BuiltIn.Components.Foliage
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return foliageMaterial != null ? [foliageMaterial] : [];
         }

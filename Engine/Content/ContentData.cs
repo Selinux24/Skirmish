@@ -168,7 +168,7 @@ namespace Engine.Content
             int materialCount = materials.Length;
             if (materialCount == 1)
             {
-                var material = materials.First();
+                var material = materials[0];
                 materialName = DefaultMaterial;
                 textured = material.Textured;
 
@@ -178,12 +178,12 @@ namespace Engine.Content
             else if (materialCount > 1)
             {
                 materialName = DefaultMaterial;
-                textured = materials.First().Textured;
+                textured = materials[0].Textured;
 
                 for (int i = 0; i < materialCount; i++)
                 {
                     string name = i == 0 ? materialName : $"{materialName}_{i}";
-                    var material = materials.ElementAt(i);
+                    var material = materials[i];
 
                     modelContent.ImportTextures(ref material);
                     modelContent.AddMaterialContent(name, material);
