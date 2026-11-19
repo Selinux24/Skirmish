@@ -535,6 +535,27 @@ namespace Engine.Mathematics
             }
         }
 
+        private static bool CheckMinMax(ref Triangle a, ref Triangle b)
+        {
+            Vector3.Subtract(ref b.Point1, ref a.Point2, out var b1a2);
+            Vector3.Subtract(ref a.Point1, ref a.Point2, out var a1a2);
+            Vector3.Subtract(ref b.Point2, ref a.Point2, out var b2a2);
+
+            Vector3.Cross(ref b1a2, ref a1a2, out var n1);
+            Vector3.Dot(ref b2a2, ref n1, out float d);
+            if (d > 0f) return false;
+
+            Vector3.Subtract(ref b.Point1, ref a.Point1, out var b1a3);
+            Vector3.Subtract(ref a.Point3, ref a.Point1, out var a3a1);
+            Vector3.Subtract(ref b.Point3, ref a.Point1, out var b3a1);
+
+            Vector3.Cross(ref b1a3, ref a3a1, out n1);
+            Vector3.Dot(ref b3a1, ref n1, out d);
+            if (d > 0f) return false;
+
+            return true;
+        }
+
         private static bool Coplanar3D(ref Triangle a, ref Triangle b, ref Vector3 n1)
         {
             Vector2 p1;
@@ -585,81 +606,49 @@ namespace Engine.Mathematics
                 r2 = b.Point3.XY;
             }
 
-            Triangle2D t1 = new(p1, q1, r1);
-            Triangle2D t2 = new(p2, q2, r2);
-
-            return Overlap2D(ref t1, ref t2);
+            return Overlap2D(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
         }
-        private static bool Overlap2D(ref Triangle2D a, ref Triangle2D b)
+  
+        private static bool Overlap2D(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            ref var p1 = ref a.Point1;
-            ref var q1 = ref a.Point2;
-            ref var r1 = ref a.Point3;
-
-            ref var p2 = ref b.Point1;
-            ref var q2 = ref b.Point2;
-            ref var r2 = ref b.Point3;
-
-            Triangle2D pq1 = new(p1, q1, r1);
-            Triangle2D pq2 = new(p2, q2, r2);
-
-            Triangle2D pr1 = new(p1, r1, q1);
-            Triangle2D pr2 = new(p2, r2, q2);
-
-            if (Orient2D(ref pq1) < 0f)
+            if (Orient2D(ref p1, ref q1, ref r1) < 0f)
             {
-                if (Orient2D(ref pq2) < 0f) return DetectIntersection2D(ref pr1, ref pr2);
-
-                return DetectIntersection2D(ref pr1, ref pq2);
+                if (Orient2D(ref p2, ref q2, ref r2) < 0f)
+                {
+                    return DetectIntersection2D(ref p1, ref r1, ref q1, ref p2, ref r2, ref q2);
+                }
+                else
+                {
+                    return DetectIntersection2D(ref p1, ref r1, ref q1, ref p2, ref q2, ref r2);
+                }
             }
             else
             {
-                if (Orient2D(ref pq2) < 0f) return DetectIntersection2D(ref pq1, ref pr2);
-
-                return DetectIntersection2D(ref pq1, ref pq2);
+                if (Orient2D(ref p2, ref q2, ref r2) < 0f)
+                {
+                    return DetectIntersection2D(ref p1, ref q1, ref r1, ref p2, ref r2, ref q2);
+                }
+                else
+                {
+                    return DetectIntersection2D(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
+                }
             }
         }
-        private static float Orient2D(ref Triangle2D t)
+        private static float Orient2D(
+            ref Vector2 p1, ref Vector2 p2, ref Vector2 p3)
         {
             return
-                (t.Point1.X - t.Point3.X) * (t.Point2.Y - t.Point3.Y) -
-                (t.Point1.Y - t.Point3.Y) * (t.Point2.X - t.Point3.X);
+                (p1.X - p3.X) * (p2.Y - p3.Y) -
+                (p1.Y - p3.Y) * (p2.X - p3.X);
         }
 
-        private static bool CheckMinMax(ref Triangle a, ref Triangle b)
+        private static bool DetectIntersection2D(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            Vector3.Subtract(ref b.Point1, ref a.Point2, out var b1a2);
-            Vector3.Subtract(ref a.Point1, ref a.Point2, out var a1a2);
-            Vector3.Subtract(ref b.Point2, ref a.Point2, out var b2a2);
-
-            Vector3.Cross(ref b1a2, ref a1a2, out var n1);
-            Vector3.Dot(ref b2a2, ref n1, out float d);
-            if (d > 0f) return false;
-
-            Vector3.Subtract(ref b.Point1, ref a.Point1, out var b1a3);
-            Vector3.Subtract(ref a.Point3, ref a.Point1, out var a3a1);
-            Vector3.Subtract(ref b.Point3, ref a.Point1, out var b3a1);
-
-            Vector3.Cross(ref b1a3, ref a3a1, out n1);
-            Vector3.Dot(ref b3a1, ref n1, out d);
-            if (d > 0f) return false;
-
-            return true;
-        }
-
-        private static bool DetectIntersection2D(ref Triangle2D a, ref Triangle2D b)
-        {
-            ref var p1 = ref a.Point1;
-            ref var q1 = ref a.Point2;
-            ref var r1 = ref a.Point3;
-
-            ref var p2 = ref b.Point1;
-            ref var q2 = ref b.Point2;
-            ref var r2 = ref b.Point3;
-
-            Triangle2D t = new(p2, q2, p1);
-
-            if (Orient2D(ref t) >= 0f)
+            if (Orient2D(ref p2, ref q2, ref p1) >= 0f)
             {
                 return TestIntersection2DMajor(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
             }
@@ -668,179 +657,117 @@ namespace Engine.Mathematics
                 return TestIntersection2DMinor(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
             }
         }
-        private static bool TestIntersection2DMajor(ref Vector2 p1, ref Vector2 q1, ref Vector2 r1, ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
+        private static bool TestIntersection2DMajor(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            Triangle2D pq1 = new(p1, q1, r1);
-            Triangle2D pq2 = new(p2, q2, r2);
-            Triangle2D qr2 = new(q2, r2, p1);
-            Triangle2D rp2 = new(r2, p2, p1);
-            Triangle2D rp22 = new(r2, p2, q2);
-
-            if (Orient2D(ref qr2) >= 0f)
+            if (Orient2D(ref q2, ref r2, ref p1) >= 0f)
             {
-                if (Orient2D(ref rp2) >= 0f) return true;
-
-                return IntersectionEdge(ref pq1, ref pq2);
+                if (Orient2D(ref r2, ref p2, ref p1) >= 0f)
+                {
+                    return true;
+                }
+                else
+                {
+                    return IntersectionEdge(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
+                }
             }
             else
             {
-                if (Orient2D(ref rp2) >= 0f) return IntersectionEdge(ref pq1, ref rp22);
-
-                return IntersectionVertex(ref pq1, ref pq2);
+                if (Orient2D(ref r2, ref p2, ref p1) >= 0f)
+                {
+                    return IntersectionEdge(ref p1, ref q1, ref r1, ref r2, ref p2, ref q2);
+                }
+                else
+                {
+                    return IntersectionVertex(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
+                }
             }
         }
-        private static bool TestIntersection2DMinor(ref Vector2 p1, ref Vector2 q1, ref Vector2 r1, ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
+        private static bool TestIntersection2DMinor(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            Triangle2D pq1 = new(p1, q1, r1);
-            Triangle2D qr2 = new(q2, r2, p1);
-            Triangle2D qr22 = new(q2, r2, p2);
-            Triangle2D rp2 = new(r2, p2, p1);
-            Triangle2D rp22 = new(r2, p2, q2);
-
-            if (Orient2D(ref qr2) >= 0f)
+            if (Orient2D(ref q2, ref r2, ref p1) >= 0f)
             {
-                if (Orient2D(ref rp2) >= 0f) return IntersectionEdge(ref pq1, ref qr22);
-
-                return IntersectionVertex(ref pq1, ref qr22);
+                if (Orient2D(ref r2, ref p2, ref p1) >= 0f)
+                {
+                    return IntersectionEdge(ref p1, ref q1, ref r1, ref q2, ref r2, ref p2);
+                }
+                else
+                {
+                    return IntersectionVertex(ref p1, ref q1, ref r1, ref q2, ref r2, ref p2);
+                }
             }
-
-            return IntersectionVertex(ref pq1, ref rp22);
+            else
+            {
+                return IntersectionVertex(ref p1, ref q1, ref r1, ref r2, ref p2, ref q2);
+            }
         }
 
-        private static bool IntersectionVertex(ref Triangle2D a, ref Triangle2D b)
+        private static bool IntersectionVertex(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            ref var p1 = ref a.Point1;
-            ref var q1 = ref a.Point2;
-            ref var r1 = ref a.Point3;
-
-            ref var p2 = ref b.Point1;
-            ref var q2 = ref b.Point2;
-            ref var r2 = ref b.Point3;
-
-            Triangle2D t;
-            Triangle2D t2;
-
-            t = new(r2, p2, q1);
-            if (Orient2D(ref t) >= 0.0f)
+            if (Orient2D(ref r2, ref p2, ref q1) >= 0f)
             {
-                t = new(r2, q2, q1);
-                if (Orient2D(ref t) <= 0.0f)
+                if (Orient2D(ref r2, ref q2, ref q1) <= 0f)
                 {
-                    t = new(p1, p2, q1);
-                    if (Orient2D(ref t) > 0.0f)
+                    if (Orient2D(ref p1, ref p2, ref q1) > 0f)
                     {
-                        t = new(p1, q2, q1);
-                        return Orient2D(ref t) <= 0.0f;
+                        return Orient2D(ref p1, ref q2, ref q1) <= 0f;
                     }
-
-                    t = new(p1, p2, r1);
-                    if (Orient2D(ref t) >= 0.0f)
+                    else if (Orient2D(ref p1, ref p2, ref r1) >= 0f)
                     {
-                        t = new(q1, r1, p2);
-                        return Orient2D(ref t) >= 0.0f;
+                        return Orient2D(ref q1, ref r1, ref p2) >= 0f;
                     }
                 }
-
-                t = new(p1, q2, q1);
-                t2 = new(r2, q2, r1);
-                if (Orient2D(ref t) <= 0.0f && Orient2D(ref t2) <= 0.0f)
+                else if (Orient2D(ref p1, ref q2, ref q1) <= 0f && Orient2D(ref r2, ref q2, ref r1) <= 0f)
                 {
-                    t = new(q1, r1, q2);
-                    return Orient2D(ref t) >= 0.0f;
+                    return Orient2D(ref q1, ref r1, ref q2) >= 0f;
                 }
             }
-
-            t = new(r2, p2, r1);
-            if (Orient2D(ref t) >= 0.0f)
+            else if (Orient2D(ref r2, ref p2, ref r1) >= 0f)
             {
-                t = new(q1, r1, r2);
-                if (Orient2D(ref t) >= 0.0f)
+                if (Orient2D(ref q1, ref r1, ref r2) >= 0f)
                 {
-                    t = new(p1, p2, r1);
-                    return Orient2D(ref t) >= 0.0f;
+                    return Orient2D(ref p1, ref p2, ref r1) >= 0f;
                 }
-
-                t = new(q1, r1, q2);
-                if (Orient2D(ref t) >= 0.0f)
+                else if (Orient2D(ref q1, ref r1, ref q2) >= 0f)
                 {
-                    t = new(r2, r1, q2);
-                    return Orient2D(ref t) >= 0.0f;
+                    return Orient2D(ref r2, ref r1, ref q2) >= 0f;
                 }
             }
 
             return false;
         }
 
-        private static bool IntersectionEdge(ref Triangle2D a, ref Triangle2D b)
+        private static bool IntersectionEdge(
+            ref Vector2 p1, ref Vector2 q1, ref Vector2 r1,
+            ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            ref var p1 = ref a.Point1;
-            ref var q1 = ref a.Point2;
-            ref var r1 = ref a.Point3;
-
-            ref var p2 = ref b.Point1;
-            ref var r2 = ref b.Point3;
-
-            Triangle2D t;
-            Triangle2D t2;
-
-            t = new(r2, p2, q1);
-            if (Orient2D(ref t) >= 0.0f)
+            if (Orient2D(ref r2, ref p2, ref q1) >= 0f)
             {
-                t = new(p1, p2, q1);
-                if (Orient2D(ref t) >= 0.0f)
+                if (Orient2D(ref p1, ref p2, ref q1) >= 0f)
                 {
-                    t = new(p1, q1, r2);
-                    return Orient2D(ref t) >= 0.0f;
+                    return Orient2D(ref p1, ref q1, ref r2) >= 0f;
                 }
-
-                t = new(q1, r1, p2);
-                if (Orient2D(ref t) >= 0.0f)
+                else if (Orient2D(ref q1, ref r1, ref p2) >= 0f)
                 {
-                    t = new(r1, p1, p2);
-                    return Orient2D(ref t) >= 0.0f;
+                    return Orient2D(ref r1, ref p1, ref p2) >= 0f;
                 }
             }
-
-            t = new(r2, p2, r1);
-            t2 = new(p1, p2, r1);
-            if (Orient2D(ref t) >= 0.0f && Orient2D(ref t2) >= 0.0f)
+            else if (Orient2D(ref r2, ref p2, ref r1) >= 0f && Orient2D(ref p1, ref p2, ref r1) >= 0f)
             {
-                t = new(p1, r1, r2);
-                if (Orient2D(ref t) >= 0.0f)
+                if (Orient2D(ref p1, ref r1, ref r2) >= 0f)
                 {
                     return true;
                 }
 
-                t = new(q1, r1, r2);
-                return Orient2D(ref t) >= 0.0f;
+                return Orient2D(ref q1, ref r1, ref r2) >= 0f;
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Triangle 2D
-        /// </summary>
-        /// <remarks>
-        /// Constructor
-        /// </remarks>
-        /// <param name="point1">Point 1</param>
-        /// <param name="point2">Point 2</param>
-        /// <param name="point3">Point 3</param>
-        struct Triangle2D(Vector2 point1, Vector2 point2, Vector2 point3)
-        {
-            /// <summary>
-            /// Point 1
-            /// </summary>
-            public Vector2 Point1 = point1;
-            /// <summary>
-            /// Point 2
-            /// </summary>
-            public Vector2 Point2 = point2;
-            /// <summary>
-            /// Point 3
-            /// </summary>
-            public Vector2 Point3 = point3;
         }
     }
 }

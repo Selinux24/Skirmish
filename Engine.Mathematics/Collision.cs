@@ -1045,9 +1045,17 @@ namespace Engine.Mathematics
             return RayIntersectsPlane(ref ray.Position, ref ray.Direction, ref plane, out distance, out point);
         }
 
-        static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 v1, ref Vector3 v2, ref Vector3 v3)
+        /// <summary>
+        /// Determine whether the specified direction vector is oriented against the triangle's normal.
+        /// </summary>
+        /// <param name="v">Direction vector</param>
+        /// <param name="t1">Triangle point 1</param>
+        /// <param name="t2">Triangle point 2</param>
+        /// <param name="t3">Triangle point 3</param>
+        /// <returns>Returns true if the specified direction vector is oriented against the triangle's normal.</returns>
+        static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 t1, ref Vector3 t2, ref Vector3 t3)
         {
-            MathUtils.CalculateTriPointNormalLH(ref v1, ref v2, ref v3, out var normal);
+            MathUtils.CalculateTriPointNormalLH(ref t1, ref t2, ref t3, out var normal);
             Vector3.Dot(ref v, ref normal, out float l);
             return l < 0f;
         }
@@ -1258,13 +1266,10 @@ namespace Engine.Mathematics
         public static bool RayIntersectsTriangle(ref PickingRay ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
         {
             var rDir = ray.Direction;
-            if (ray.FacingOnly)
+            if (ray.FacingOnly && !VectorFacingTriangle(ref rDir, ref vertex1, ref vertex2, ref vertex3))
             {
-                if (!VectorFacingTriangle(ref rDir, ref vertex1, ref vertex2, ref vertex3))
-                {
-                    distance = float.MaxValue;
-                    return false;
-                }
+                distance = float.MaxValue;
+                return false;
             }
 
             if (!RayIntersectsTriangle(ref ray.Position, ref rDir, ref vertex1, ref vertex2, ref vertex3, out float d))
@@ -2169,14 +2174,14 @@ namespace Engine.Mathematics
                 Vector3.Subtract(ref cylinder.Center, ref cDir, out Vector3 basePosition);
 
                 Vector3.Add(ref basePosition, ref dir, out Vector3 base1);
-                Vector3.Dot(ref plane.Normal, ref base1, out float distance); ;
+                Vector3.Dot(ref plane.Normal, ref base1, out float distance);
                 if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;
                 }
 
                 Vector3.Add(ref capPosition, ref dir, out Vector3 cap1);
-                Vector3.Dot(ref plane.Normal, ref cap1, out distance); ;
+                Vector3.Dot(ref plane.Normal, ref cap1, out distance);
                 if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;

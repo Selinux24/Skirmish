@@ -106,7 +106,7 @@ namespace PhysicsSamples.ScenePhysics
         {
             var desc = new GeometryColorDrawerDescription<Line3D>()
             {
-                Count = 50000,
+                Count = 100000,
                 DepthEnabled = true,
             };
             lineDrawer = await AddComponentEffect<GeometryColorDrawer<Line3D>, GeometryColorDrawerDescription<Line3D>>(

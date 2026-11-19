@@ -8,11 +8,6 @@ namespace Engine.Mathematics
     public static class MathUtils
     {
         /// <summary>
-        /// One radian
-        /// </summary>
-        public const float Radian = 0.0174532924f;
-
-        /// <summary>
         /// Zero tolerance value
         /// </summary>
         public const float ZeroTolerance = 1e-6f;
@@ -45,6 +40,14 @@ namespace Engine.Mathematics
         /// Pi over 4 number
         /// </summary>
         public const float PiOver4 = MathF.PI * 0.25f;
+        /// <summary>
+        /// To radians
+        /// </summary>
+        public const float ToRadians = Pi / 180.0f;
+        /// <summary>
+        /// To degrees
+        /// </summary>
+        public const float ToDegrees = 180.0f / Pi;
 
         /// <summary>
         /// Checks if a - b are almost equals within a float epsilon.
@@ -133,7 +136,7 @@ namespace Engine.Mathematics
         /// <returns>The equivalent value in radians.</returns>
         public static float DegreesToRadians(float degree)
         {
-            return degree * (Pi / 180.0f);
+            return degree * ToRadians;
         }
         /// <summary>
         /// Converts radians to degrees
@@ -142,7 +145,7 @@ namespace Engine.Mathematics
         /// <returns>The equivalent value in degrees.</returns>
         public static float RadiansToDegrees(float radians)
         {
-            return radians * (180.0f / Pi);
+            return radians * ToDegrees;
         }
 
         /// <summary>
