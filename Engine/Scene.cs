@@ -702,7 +702,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickNearest<T>(ray, SceneObjectUsages.Ground, out var res))
+            if (this.PickNearest<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
                 result = res.PickingResult;
 
@@ -727,7 +727,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickFirst<T>(ray, SceneObjectUsages.Ground, out var res))
+            if (this.PickFirst<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
                 result = res.PickingResult;
 
@@ -752,7 +752,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickAll<T>(ray, SceneObjectUsages.Ground, out var res))
+            if (this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
                 results = res.SelectMany(r => r.PickingResults);
 
@@ -773,7 +773,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll<T>(ray, SceneObjectUsages.Ground, out var pResults);
+            bool picked = this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var pResults);
             if (picked)
             {
                 result = pResults

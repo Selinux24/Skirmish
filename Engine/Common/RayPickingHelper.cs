@@ -16,17 +16,17 @@ namespace Engine.Common
         /// <param name="obj">Object to test</param>
         /// <param name="ray">Ray</param>
         /// <returns>Returns true if the test results in contact</returns>
-        private static bool Test<T>(IRayPickable<T> obj, PickingRay ray) where T : IRayIntersectable
+        private static bool Test<T>(IRayPickable<T> obj, ref PickingRay ray) where T : IRayIntersectable
         {
-            if (ray.RayPickingParams == PickingHullTypes.None)
+            if (ray.PickingParams == PickingHullTypes.None)
             {
                 //Halt here
                 return false;
             }
 
-            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+            bool testGeom = ray.PickingParams.HasFlag(PickingHullTypes.Geometry);
 
-            bool coarseInt = TestCoarse(obj, ray);
+            bool coarseInt = TestCoarse(obj, ref ray);
             if (!coarseInt || !testGeom)
             {
                 //Halt here
@@ -42,11 +42,10 @@ namespace Engine.Common
         /// <param name="obj">Object to test</param>
         /// <param name="ray">Ray</param>
         /// <returns>Returns true if the coarse test results in contact</returns>
-        private static bool TestCoarse<T>(IRayPickable<T> obj, PickingRay ray) where T : IRayIntersectable
+        private static bool TestCoarse<T>(IRayPickable<T> obj, ref PickingRay ray) where T : IRayIntersectable
         {
             var bsph = obj.GetBoundingSphere();
-            Ray rRay = ray;
-            return bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
+            return Collision.RayIntersectsSphere(ref ray, ref bsph, out _);
         }
 
         /// <summary>
@@ -57,11 +56,11 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        public static bool PickFirst<T>(IRayPickable<T> obj, ref PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+            bool testGeom = ray.PickingParams.HasFlag(PickingHullTypes.Geometry);
 
-            bool intersects = Test(obj, ray);
+            bool intersects = Test(obj, ref ray);
             if (!intersects || !testGeom)
             {
                 result = new PickingResult<T>
@@ -74,7 +73,7 @@ namespace Engine.Common
 
             var triangles = obj.GetGeometry(GeometryTypes.Picking);
 
-            return PickFirstFromList(triangles, ray, out result);
+            return PickFirstFromList(triangles, ref ray, out result);
         }
 
         /// <summary>
@@ -85,11 +84,11 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T>[] results) where T : IRayIntersectable
+        public static bool PickAll<T>(IRayPickable<T> obj, ref PickingRay ray, out PickingResult<T>[] results) where T : IRayIntersectable
         {
-            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+            bool testGeom = ray.PickingParams.HasFlag(PickingHullTypes.Geometry);
 
-            bool intersects = Test(obj, ray);
+            bool intersects = Test(obj, ref ray);
             if (!intersects || !testGeom)
             {
                 results = [];
@@ -99,7 +98,7 @@ namespace Engine.Common
 
             var triangles = obj.GetGeometry(GeometryTypes.Picking);
 
-            return PickAllFromlist(triangles, ray, out results);
+            return PickAllFromlist(triangles, ref ray, out results);
         }
 
         /// <summary>
@@ -110,9 +109,9 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        public static bool PickNearest<T>(IRayPickable<T> obj, ref PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            if (!PickAll(obj, ray, out var results))
+            if (!PickAll(obj, ref ray, out var results))
             {
                 result = new PickingResult<T>
                 {
@@ -139,11 +138,11 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirstFromList<T>(T[] collection, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        public static bool PickFirstFromList<T>(T[] collection, ref PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
             foreach (var intersectable in collection)
             {
-                if (!intersectable.Intersects(ray, out var pos, out var d))
+                if (!intersectable.Intersects(ref ray, out var pos, out var d))
                 {
                     continue;
                 }
@@ -173,7 +172,7 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAllFromlist<T>(T[] collection, PickingRay ray, out PickingResult<T>[] results) where T : IRayIntersectable
+        public static bool PickAllFromlist<T>(T[] collection, ref PickingRay ray, out PickingResult<T>[] results) where T : IRayIntersectable
         {
             if (collection.Length == 0)
             {
@@ -188,7 +187,7 @@ namespace Engine.Common
             foreach (var intersectable in collection)
             {
                 //Tests the intersection
-                var intersects = intersectable.Intersects(ray, out var pos, out var d);
+                var intersects = intersectable.Intersects(ref ray, out var pos, out var d);
                 if (!intersects)
                 {
                     //No intersection found
@@ -224,9 +223,9 @@ namespace Engine.Common
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearestFromList<T>(T[] collection, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        public static bool PickNearestFromList<T>(T[] collection, ref PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            if (!PickAllFromlist(collection, ray, out var results))
+            if (!PickAllFromlist(collection, ref ray, out var results))
             {
                 result = new PickingResult<T>
                 {

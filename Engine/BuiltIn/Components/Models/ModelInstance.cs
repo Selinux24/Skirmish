@@ -303,19 +303,19 @@ namespace Engine.BuiltIn.Components.Models
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickNearest(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return RayPickingHelper.PickNearest(this, ray, out result);
+            return RayPickingHelper.PickNearest(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickFirst(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return RayPickingHelper.PickFirst(this, ray, out result);
+            return RayPickingHelper.PickFirst(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickAll(PickingRay ray, out PickingResult<Triangle>[] results)
+        public bool PickAll(ref PickingRay ray, out PickingResult<Triangle>[] results)
         {
-            return RayPickingHelper.PickAll(this, ray, out results);
+            return RayPickingHelper.PickAll(this, ref ray, out results);
         }
 
         /// <inheritdoc/>

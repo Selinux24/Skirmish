@@ -1,66 +1,61 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Mathematics
 {
     /// <summary>
     /// Picking ray
     /// </summary>
-    /// <remarks>
-    /// Constructor
-    /// </remarks>
-    public struct PickingRay(Vector3 start, Vector3 direction, PickingHullTypes rayPickingParams, float length) : IEquatable<PickingRay>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
+    public struct PickingRay : IEquatable<PickingRay>
     {
         /// <summary>
-        /// Start position
+        /// Position
         /// </summary>
-        public Vector3 Start { get; set; } = start;
+        [JsonProperty]
+        public Vector3 Position;
         /// <summary>
-        /// End position
+        /// Target
         /// </summary>
-        public readonly Vector3 End { get { return Start + Direction * RayLength; } }
+        public readonly Vector3 Target { get { return Position + (Direction * Length); } }
         /// <summary>
         /// Direction
         /// </summary>
-        public Vector3 Direction { get; set; } = direction;
+        [JsonProperty]
+        public Vector3 Direction;
         /// <summary>
-        /// Ray length
+        /// Length
         /// </summary>
-        public float RayLength { get; set; } = length;
+        [JsonProperty]
+        public float Length;
         /// <summary>
         /// Picking parameters
         /// </summary>
-        public PickingHullTypes RayPickingParams { get; set; } = rayPickingParams;
+        [JsonProperty]
+        public PickingHullTypes PickingParams;
         /// <summary>
         /// Detect facing only primitive normals
         /// </summary>
-        public readonly bool FacingOnly
-        {
-            get
-            {
-                return RayPickingParams.HasFlag(PickingHullTypes.FacingOnly);
-            }
-        }
-        /// <summary>
-        /// Maximum ray distance
-        /// </summary>
-        public readonly float MaxDistance
-        {
-            get
-            {
-                return RayLength <= 0 ? float.MaxValue : RayLength;
-            }
-        }
-        /// <summary>
-        /// Gets the ray segment
-        /// </summary>
-        public readonly Segment Segment
-        {
-            get
-            {
-                return new Segment(Start, End);
-            }
-        }
+        public readonly bool FacingOnly => PickingParams.HasFlag(PickingHullTypes.FacingOnly);
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="position">Start position</param>
+        /// <param name="direction">Ray direction</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <param name="length">Ray length</param>
+        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes pickingParams, float length)
+        {
+            if (length < 0) throw new ArgumentException("Ray length must be 0 or positive.", nameof(length));
+
+            Position = position;
+            Direction = Vector3.Normalize(direction);
+            PickingParams = pickingParams;
+            Length = length;
+        }
         /// <summary>
         /// Constructor
         /// </summary>
@@ -85,14 +80,14 @@ namespace Engine.Mathematics
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 start, Vector3 direction) : this(start, direction, PickingHullTypes.Default, float.MaxValue)
+        public PickingRay(Vector3 position, Vector3 direction) : this(position, direction, PickingHullTypes.Default, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 start, Vector3 direction, PickingHullTypes rayPickingParams) : this(start, direction, rayPickingParams, float.MaxValue)
+        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams) : this(position, direction, rayPickingParams, float.MaxValue)
         {
 
         }
@@ -137,7 +132,7 @@ namespace Engine.Mathematics
         /// </summary>
         public static implicit operator Ray(PickingRay value)
         {
-            return new Ray(value.Start, value.Direction);
+            return new Ray(value.Position, value.Direction);
         }
         /// <summary>
         /// Implicit conversion between PickingRay and Ray
@@ -162,15 +157,15 @@ namespace Engine.Mathematics
         public readonly bool Equals(PickingRay other)
         {
             return
-                Start == other.Start &&
+                Position == other.Position &&
                 Direction == other.Direction &&
-                MathUtils.NearEqual(RayLength, other.RayLength) &&
-                RayPickingParams == other.RayPickingParams;
+                MathUtils.NearEqual(Length, other.Length) &&
+                PickingParams == other.PickingParams;
         }
         /// <inheritdoc/>
         public override readonly int GetHashCode()
         {
-            return HashCode.Combine(Start, Direction, RayLength, RayPickingParams);
+            return HashCode.Combine(Position, Direction, Length, PickingParams);
         }
     }
 }

@@ -100,7 +100,7 @@ namespace Engine.MathematicsTests
         {
             Triangle t = new(p1, p2, p3);
             Vector3 n = t.Normal;
-            Triangle rt = t.ReverseNormal();
+            Triangle rt = t.Reverse();
             Vector3 rn = rt.Normal;
 
             Assert.AreEqual(-n, rn);
@@ -110,13 +110,13 @@ namespace Engine.MathematicsTests
         {
             Triangle t = new(p1, p2, p3);
             Vector3 n = t.Normal;
-            t.Reverse();
-            Vector3 rn = t.Normal;
+            var t2 = t.Reverse();
+            Vector3 rn = t2.Normal;
 
             Assert.AreEqual(-n, rn);
-            Assert.AreEqual(p1, t.Point1);
-            Assert.AreEqual(p2, t.Point3);
-            Assert.AreEqual(p3, t.Point2);
+            Assert.AreEqual(p1, t2.Point1);
+            Assert.AreEqual(p2, t2.Point3);
+            Assert.AreEqual(p3, t2.Point2);
         }
         [TestMethod()]
         public void PlaneTest()

@@ -127,7 +127,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefault1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -138,7 +138,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefault2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -149,7 +149,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefault3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -160,28 +160,28 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefaultReverse1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultNoContact1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -192,7 +192,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefaultNoContact2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -203,7 +203,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestDefaultNoContact3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -215,7 +215,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfect1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -226,7 +226,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfect2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -237,7 +237,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfect3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -248,7 +248,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectReverse1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -259,7 +259,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectReverse2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -270,7 +270,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectReverse3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -281,7 +281,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectNoContact1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -292,7 +292,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectNoContact2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -303,7 +303,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestPerfectNoContact3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -315,7 +315,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarse1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -326,7 +326,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarse2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -337,7 +337,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarse3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -348,7 +348,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseReverse1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -359,7 +359,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseReverse2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -370,7 +370,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseReverse3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -381,7 +381,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseNoContact1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -392,7 +392,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseNoContact2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -403,7 +403,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickNearestTestCoarseNoContact3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -415,7 +415,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefault1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -426,7 +426,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefault2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -437,7 +437,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefault3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -448,28 +448,28 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefaultReverse1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefaultReverse, out _);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultNoContact1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -480,7 +480,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefaultNoContact2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -491,7 +491,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestDefaultNoContact3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -503,7 +503,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfect1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -514,7 +514,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfect2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -525,7 +525,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfect3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -536,7 +536,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectReverse1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
             Assert.AreEqual(3, res.Distance);
@@ -546,7 +546,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectReverse2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
             Assert.AreEqual(2, res.Distance);
@@ -556,7 +556,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectReverse3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
             Assert.AreEqual(1, res.Distance);
@@ -566,7 +566,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectNoContact1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -577,7 +577,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectNoContact2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -588,7 +588,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestPerfectNoContact3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -600,7 +600,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarse1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -611,7 +611,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarse2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -622,7 +622,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarse3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -633,7 +633,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseReverse1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -644,7 +644,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseReverse2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -655,7 +655,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseReverse3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -666,7 +666,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseNoContact1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -677,7 +677,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseNoContact2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -688,7 +688,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickFirstTestCoarseNoContact3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -700,7 +700,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefault1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -730,7 +730,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefault2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -760,7 +760,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefault3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayDefault, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayDefault, out var res);
 
             Assert.IsTrue(picked);
 
@@ -790,7 +790,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultReverse1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayDefaultReverse, out var res);
 
             Assert.IsFalse(picked);
 
@@ -799,7 +799,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultReverse2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayDefaultReverse, out var res);
 
             Assert.IsFalse(picked);
 
@@ -808,7 +808,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultReverse3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayDefaultReverse, out var res);
 
             Assert.IsFalse(picked);
 
@@ -817,7 +817,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultNoContact1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -826,7 +826,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultNoContact2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -835,7 +835,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestDefaultNoContact3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayDefaultNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayDefaultNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -845,7 +845,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverse1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -875,7 +875,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverse2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -905,7 +905,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverse3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayAllDirections, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
 
@@ -935,7 +935,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseReverse1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -965,7 +965,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseReverse2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -995,7 +995,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseReverse3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayAllDirectionsReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1025,7 +1025,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseNoContact1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -1034,7 +1034,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseNoContact2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -1043,7 +1043,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestReverseNoContact3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayAllDirectionsNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayAllDirectionsNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -1053,7 +1053,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarse1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1062,7 +1062,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarse2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1071,7 +1071,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarse3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayCoarse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayCoarse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1080,7 +1080,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseReverse1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1089,7 +1089,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseReverse2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1098,7 +1098,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseReverse3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayCoarseReverse, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayCoarseReverse, out var res);
 
             Assert.IsTrue(picked);
 
@@ -1107,7 +1107,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseNoContact1()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad1.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -1116,7 +1116,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseNoContact2()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad2.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 
@@ -1125,7 +1125,7 @@ namespace EngineTests
         [TestMethod()]
         public void PickAllTestCoarseNoContact3()
         {
-            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayCoarseNoContact, out var res);
+            bool picked = RayPickingHelper.PickAll(mockQuad3.Object, ref rayCoarseNoContact, out var res);
 
             Assert.IsFalse(picked);
 

@@ -73,12 +73,12 @@ namespace Engine.Collections.Generic
         /// <param name="ray">Ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(PickingRay ray, out PickingResult<T> result)
+        public bool PickNearest(ref PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return PickingQuadTreeNodeHelper<T>.PickNearest(Root, ray, out result);
+                return PickingQuadTreeNodeHelper<T>.PickNearest(Root, ref ray, out result);
             }
             finally
             {
@@ -93,12 +93,12 @@ namespace Engine.Collections.Generic
         /// <param name="ray">Ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(PickingRay ray, out PickingResult<T> result)
+        public bool PickFirst(ref PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return PickingQuadTreeNodeHelper<T>.PickFirst(Root, ray, out result);
+                return PickingQuadTreeNodeHelper<T>.PickFirst(Root, ref ray, out result);
             }
             finally
             {
@@ -113,12 +113,12 @@ namespace Engine.Collections.Generic
         /// <param name="ray">Ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(PickingRay ray, out PickingResult<T>[] results)
+        public bool PickAll(ref PickingRay ray, out PickingResult<T>[] results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return PickingQuadTreeNodeHelper<T>.PickAll(Root, ray, out results);
+                return PickingQuadTreeNodeHelper<T>.PickAll(Root, ref ray, out results);
             }
             finally
             {

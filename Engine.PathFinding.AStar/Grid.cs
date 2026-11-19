@@ -77,7 +77,7 @@ namespace Engine.PathFinding.AStar
 
                     var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
-                    bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
+                    bool intersects = RayPickingHelper.PickAllFromlist(triangles, ref ray, out var picks);
                     if (intersects)
                     {
                         info = new GridCollisionInfo[picks.Length];

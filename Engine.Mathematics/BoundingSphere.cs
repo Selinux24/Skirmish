@@ -100,12 +100,13 @@ namespace Engine.Mathematics
         /// Determines if there is an intersection between the current object and a <see cref="Ray"/>.
         /// </summary>
         /// <param name="ray">The ray to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point)
+        public bool Intersects(ref Ray ray, out float distance, out Vector3 point)
         {
-            return Collision.RayIntersectsSphere(ref ray, ref this, out point);
+            return Collision.RayIntersectsSphere(ref ray, ref this, out distance, out point);
         }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="Plane"/>.

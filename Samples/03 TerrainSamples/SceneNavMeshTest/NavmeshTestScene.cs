@@ -1069,7 +1069,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1116,7 +1116,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1154,7 +1154,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateRasterization()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1221,7 +1221,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1297,7 +1297,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateObstacleAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1364,7 +1364,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateAreaAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1432,7 +1432,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateConnectionAdd()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1496,7 +1496,7 @@ namespace TerrainSamples.SceneNavMeshTest
             }
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1576,7 +1576,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateGroupAddAgent()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
@@ -1606,7 +1606,7 @@ namespace TerrainSamples.SceneNavMeshTest
         private void UpdateGroupMoveTarget()
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
             {
                 return;
             }

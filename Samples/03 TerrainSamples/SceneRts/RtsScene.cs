@@ -1097,7 +1097,7 @@ namespace TerrainSamples.SceneRts
 
             // Set position
             var ray = GetTopDownRay(heliport.Manipulator.Position, PickingHullTypes.Geometry);
-            if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
+            if (this.PickNearest(ref ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
                 helicopter.Manipulator.SetNormal(r.PickingResult.Primitive.Normal);
@@ -1165,13 +1165,15 @@ namespace TerrainSamples.SceneRts
         }
         private void StartTanks()
         {
-            if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r1))
+            var ray1 = GetTopDownRay(-60, -60, PickingHullTypes.Geometry);
+            if (this.PickNearest(ref ray1, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r2))
+            var ray2 = GetTopDownRay(-70, 70, PickingHullTypes.Geometry);
+            if (this.PickNearest(ref ray2, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
@@ -1470,7 +1472,7 @@ namespace TerrainSamples.SceneRts
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                bool picked = this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.Agent, out var agent);
+                bool picked = this.PickNearest<Triangle>(ref pickingRay, SceneObjectUsages.Agent, out var agent);
                 if (picked)
                 {
                     followTarget = agent.SceneObject;
@@ -1535,7 +1537,7 @@ namespace TerrainSamples.SceneRts
             {
                 terrainPointDrawer.Clear();
 
-                if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+                if (this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
                     DEBUGPickingPosition(r.PickingResult.Position);
                 }
@@ -1666,7 +1668,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateCursor(PickingRay pickingRay)
         {
-            if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
+            if (!walkMode && terrain.PickNearest(ref pickingRay, out PickingResult<Triangle> r))
             {
                 cursor3D.Manipulator.SetPosition(r.Position);
             }
@@ -1775,7 +1777,7 @@ namespace TerrainSamples.SceneRts
         }
         private void DrawTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 var t1Position = tankP1.Manipulator.Position;
@@ -1789,7 +1791,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>

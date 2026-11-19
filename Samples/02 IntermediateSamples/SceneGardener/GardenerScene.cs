@@ -487,7 +487,7 @@ TAB - Change control between Camera and Agent
             }
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
+            if (!this.PickNearest<Triangle>(ref pRay, SceneObjectUsages.Ground, out var r))
             {
                 return;
             }

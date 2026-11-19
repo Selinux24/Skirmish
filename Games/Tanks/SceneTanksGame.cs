@@ -1308,7 +1308,7 @@ You will lost all the game progress.",
 
             var ray = new PickingRay(nextPosition, Vector3.Down);
 
-            if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= radius)
+            if (terrain.PickNearest(ref ray, out var cRes) && cRes.Distance <= radius)
             {
                 var pos = nextPosition;
                 var vw = nextInterest;

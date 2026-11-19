@@ -808,6 +808,12 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the normalized vector.</param>
         public static void Normalize(ref Vector3 value, out Vector3 result)
         {
+            if (value.IsNormalized)
+            {
+                result = value;
+                return;
+            }
+
             result = value;
             result.Normalize();
         }

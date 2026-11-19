@@ -442,7 +442,7 @@ namespace TerrainSamples.SceneGrid
             }
 
             var cursorRay = GetPickingRay();
-            bool pickedGround = this.PickNearest<Triangle>(cursorRay, SceneObjectUsages.Ground, out var r);
+            bool pickedGround = this.PickNearest<Triangle>(ref cursorRay, SceneObjectUsages.Ground, out var r);
 
             //3D
             UpdateInput3D(gameTime, cursorRay, pickedGround, r);
@@ -1218,7 +1218,7 @@ namespace TerrainSamples.SceneGrid
             {
                 foreach (var soldierC in team.Soldiers)
                 {
-                    var picked = soldierModels[soldierC].PickNearest(cursorRay, out var r);
+                    var picked = soldierModels[soldierC].PickNearest(ref cursorRay, out var r);
                     if (!picked)
                     {
                         continue;

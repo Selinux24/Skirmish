@@ -13,6 +13,8 @@ namespace Engine.MathematicsTests
     {
         public TestContext TestContext { get; set; }
 
+        const float delta = 0.0001f;
+
         static BoundingSphere sph1;
         static BoundingSphere sph2;
         static BoundingSphere sph3;
@@ -1625,8 +1627,11 @@ namespace Engine.MathematicsTests
         {
             var res = Collision.RayIntersectsTriangle(ref rayIn, ref tri1, out float distance, out Vector3 position);
 
+            var zero = Vector3.Zero;
+            Vector3.Distance(ref rayIn.Position, ref zero, out float dist);
+
             Assert.IsTrue(res);
-            Assert.AreEqual(Vector3.Distance(rayIn.Position, Vector3.Zero), distance);
+            Assert.AreEqual(dist, distance, delta);
             Assert.AreEqual(Vector3.Zero, position);
         }
         [TestMethod()]
@@ -1642,44 +1647,50 @@ namespace Engine.MathematicsTests
         [TestMethod()]
         public void FrustumIntersectsSegmentContainsTest()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment1A, ref segment1B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment1A, ref segment1B, out float d);
 
             Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, d);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentContainedTest()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment2A, ref segment2B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment2A, ref segment2B, out float d);
 
             Assert.IsTrue(res);
+            Assert.AreEqual(4.5f, d, delta);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentIntersectedTest()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment3A, ref segment3B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment3A, ref segment3B, out float d);
 
             Assert.IsTrue(res);
+            Assert.AreEqual(0.5f, d, delta);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentNotIntersectedTest()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment4A, ref segment4B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment4A, ref segment4B, out float d);
 
             Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, d);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentNotIntersectedTest2()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment5A, ref segment5B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment5A, ref segment5B, out float d);
 
             Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, d);
         }
         [TestMethod()]
         public void FrustumIntersectsSegmentNotIntersectedTest3()
         {
-            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment6A, ref segment6B);
+            var res = Collision.FrustumIntersectsSegment(ref frustum1, ref segment6A, ref segment6B, out float d);
 
             Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, d);
         }
 
         [TestMethod()]

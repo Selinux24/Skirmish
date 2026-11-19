@@ -21,9 +21,9 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="t1">Triangle 1</param>
         /// <param name="t2">Triangle 2</param>
-        public static bool Intersection(Triangle t1, Triangle t2)
+        public static bool Intersection(ref Triangle t1, ref Triangle t2)
         {
-            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            var res = Intersection(ref t1, ref t2, out var coplanar, out var test1, out var test2, out var distances);
             if (!res)
             {
                 // Not intersection.
@@ -33,17 +33,19 @@ namespace Engine.Mathematics
             if (coplanar)
             {
                 // May be coplanar.
-                return Coplanar3D(t1, t2, t1.Normal);
+                var n = t1.Normal;
+                return Coplanar3D(ref t1, ref t2, ref n);
             }
 
-            var intRes = DetectIntersection3D(test1, test2, distances, out var inTest1, out var inTest2);
+            var intRes = DetectIntersection3D(ref test1, ref test2, ref distances, out var inTest1, out var inTest2);
             if (!intRes)
             {
                 // Not intersection or coplanar.
-                return Coplanar3D(test1, test2, t1.Normal);
+                var n = t1.Normal;
+                return Coplanar3D(ref test1, ref test2, ref n);
             }
 
-            return CheckMinMax(inTest1, inTest2);
+            return CheckMinMax(ref inTest1, ref inTest2);
         }
         /// <summary>
         /// Gets whether the specified triangles intersects or not
@@ -51,9 +53,9 @@ namespace Engine.Mathematics
         /// <param name="t1">Triangle 1</param>
         /// <param name="t2">Triangle 2</param>
         /// <param name="segment">If the triangles are not coplanar and there was intersection, returns de intersections segment</param>
-        public static bool Intersection(Triangle t1, Triangle t2, out Segment? segment)
+        public static bool Intersection(ref Triangle t1, ref Triangle t2, out Segment? segment)
         {
-            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            var res = Intersection(ref t1, ref t2, out var coplanar, out var test1, out var test2, out var distances);
             if (!res)
             {
                 // Not intersection.
@@ -61,30 +63,33 @@ namespace Engine.Mathematics
                 return false;
             }
 
+            var n1 = t1.Normal;
+            var n2 = t2.Normal;
+
             if (coplanar)
             {
                 // May be coplanar.
                 segment = null;
-                return Coplanar3D(t1, t2, t1.Normal);
+                return Coplanar3D(ref t1, ref t2, ref n1);
             }
 
-            var intRes = DetectIntersection3D(test1, test2, distances, out var inTest1, out var inTest2);
+            var intRes = DetectIntersection3D(ref test1, ref test2, ref distances, out var inTest1, out var inTest2);
             if (!intRes)
             {
                 // Not intersection or coplanar.
                 segment = null;
-                return Coplanar3D(test1, test2, t1.Normal);
+                return Coplanar3D(ref test1, ref test2, ref n1);
             }
 
-            return ConstructIntersection3D(inTest1, inTest2, t1.Normal, t2.Normal, out segment);
+            return ConstructIntersection3D(ref inTest1, ref inTest2, ref n1, ref n2, out segment);
         }
 
-        private static bool Intersection(Triangle t1, Triangle t2, out bool coplanar, out Triangle test1, out Triangle test2, out Vector3 distances)
+        private static bool Intersection(ref Triangle t1, ref Triangle t2, out bool coplanar, out Triangle test1, out Triangle test2, out Vector3 distances)
         {
             coplanar = false;
 
             // Compute distance signs of p1, q1 and r1 to the plane of triangle(p2,q2,r2)
-            var (dist1, dp1, dq1, dr1) = ComputeDistances(t1, t2);
+            var (dist1, dp1, dq1, dr1) = ComputeDistances(ref t1, ref t2);
             if (!dist1)
             {
                 test1 = new();
@@ -95,7 +100,7 @@ namespace Engine.Mathematics
             }
 
             // Compute distance signs of p2, q2 and r2 to the plane of triangle(p1,q1,r1)
-            var (dist2, dp2, dq2, dr2) = ComputeDistances(t2, t1);
+            var (dist2, dp2, dq2, dr2) = ComputeDistances(ref t2, ref t1);
             if (!dist2)
             {
                 test1 = new();
@@ -109,7 +114,7 @@ namespace Engine.Mathematics
 
             if (dp1 > 0.0f)
             {
-                var resMajor = TestIntersectionDp1Major(t1, t2, dq1, dr1, dp2, dq2, dr2);
+                var resMajor = TestIntersectionDp1Major(ref t1, ref t2, dq1, dr1, dp2, dq2, dr2);
 
                 test1 = resMajor.test1;
                 test2 = resMajor.test2;
@@ -117,7 +122,7 @@ namespace Engine.Mathematics
             }
             else if (dp1 < 0.0f)
             {
-                var resMinor = TestIntersectionDp1Minor(t1, t2, dq1, dr1, dp2, dq2, dr2);
+                var resMinor = TestIntersectionDp1Minor(ref t1, ref t2, dq1, dr1, dp2, dq2, dr2);
 
                 test1 = resMinor.test1;
                 test2 = resMinor.test2;
@@ -125,7 +130,7 @@ namespace Engine.Mathematics
             }
             else
             {
-                var resZero = TestIntersectionDp1Zero(t1, t2, dq1, dr1, dp2, dq2, dr2);
+                var resZero = TestIntersectionDp1Zero(ref t1, ref t2, dq1, dr1, dp2, dq2, dr2);
 
                 test1 = resZero.test1;
                 test2 = resZero.test2;
@@ -135,20 +140,25 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static (bool, float dp, float dq, float dr) ComputeDistances(Triangle a, Triangle b)
+        private static (bool, float dp, float dq, float dr) ComputeDistances(ref Triangle a, ref Triangle b)
         {
-            float dp = Vector3.Dot(Vector3.Subtract(a.Point1, b.Point3), b.Normal);
-            float dq = Vector3.Dot(Vector3.Subtract(a.Point2, b.Point3), b.Normal);
-            float dr = Vector3.Dot(Vector3.Subtract(a.Point3, b.Point3), b.Normal);
+            Vector3.Subtract(ref a.Point1, ref b.Point3, out var s1);
+            Vector3.Subtract(ref a.Point2, ref b.Point3, out var s2);
+            Vector3.Subtract(ref a.Point3, ref b.Point3, out var s3);
 
-            if (((dp * dq) > 0.0f) && ((dp * dr) > 0.0f))
+            var n = b.Normal;
+            Vector3.Dot(ref s1, ref n, out float dp);
+            Vector3.Dot(ref s2, ref n, out float dq);
+            Vector3.Dot(ref s3, ref n, out float dr);
+
+            if (((dp * dq) > 0f) && ((dp * dr) > 0f))
             {
                 return (false, 0f, 0f, 0f);
             }
 
             return (true, dp, dq, dr);
         }
-        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Major(Triangle a, Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Major(ref Triangle a, ref Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -175,7 +185,7 @@ namespace Engine.Mathematics
 
             return (test1, test2, distances);
         }
-        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Minor(Triangle a, Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2, Vector3 distances) TestIntersectionDp1Minor(ref Triangle a, ref Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -202,7 +212,7 @@ namespace Engine.Mathematics
 
             return (test1, test2, distances);
         }
-        private static (Triangle test1, Triangle test2, Vector3 distances, bool coplanar) TestIntersectionDp1Zero(Triangle a, Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2, Vector3 distances, bool coplanar) TestIntersectionDp1Zero(ref Triangle a, ref Triangle b, float dq1, float dr1, float dp2, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -266,7 +276,7 @@ namespace Engine.Mathematics
             return (test1, test2, distances, coplanar);
         }
 
-        private static bool DetectIntersection3D(Triangle a, Triangle b, Vector3 distances, out Triangle test1, out Triangle test2)
+        private static bool DetectIntersection3D(ref Triangle a, ref Triangle b, ref Vector3 distances, out Triangle test1, out Triangle test2)
         {
             test1 = new Triangle();
             test2 = new Triangle();
@@ -277,21 +287,21 @@ namespace Engine.Mathematics
 
             if (dp2 > 0.0f)
             {
-                var resMajor = TestIntersection3DDp2Major(a, b, dq2, dr2);
+                var resMajor = TestIntersection3DDp2Major(ref a, ref b, dq2, dr2);
 
                 test1 = resMajor.test1;
                 test2 = resMajor.test2;
             }
             else if (dp2 < 0.0f)
             {
-                var resMinor = TestIntersection3DDp2Minor(a, b, dq2, dr2);
+                var resMinor = TestIntersection3DDp2Minor(ref a, ref b, dq2, dr2);
 
                 test1 = resMinor.test1;
                 test2 = resMinor.test2;
             }
             else
             {
-                var resZero = TestIntersection3DDp2Zero(a, b, dq2, dr2);
+                var resZero = TestIntersection3DDp2Zero(ref a, ref b, dq2, dr2);
 
                 if (!resZero.res)
                 {
@@ -304,7 +314,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Major(Triangle a, Triangle b, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Major(ref Triangle a, ref Triangle b, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -327,7 +337,7 @@ namespace Engine.Mathematics
 
             return (test1, test2);
         }
-        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Minor(Triangle a, Triangle b, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2) TestIntersection3DDp2Minor(ref Triangle a, ref Triangle b, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -350,7 +360,7 @@ namespace Engine.Mathematics
 
             return (test1, test2);
         }
-        private static (Triangle test1, Triangle test2, bool res) TestIntersection3DDp2Zero(Triangle a, Triangle b, float dq2, float dr2)
+        private static (Triangle test1, Triangle test2, bool res) TestIntersection3DDp2Zero(ref Triangle a, ref Triangle b, float dq2, float dr2)
         {
             Triangle test1;
             Triangle test2;
@@ -402,7 +412,7 @@ namespace Engine.Mathematics
             return (test1, test2, true);
         }
 
-        private static bool ConstructIntersection3D(Triangle a, Triangle b, Vector3 n1, Vector3 n2, out Segment? segment)
+        private static bool ConstructIntersection3D(ref Triangle a, ref Triangle b, ref Vector3 n1, ref Vector3 n2, out Segment? segment)
         {
             var v1 = Vector3.Subtract(a.Point2, a.Point1);
             var v2 = Vector3.Subtract(b.Point3, a.Point1);
@@ -411,41 +421,43 @@ namespace Engine.Mathematics
 
             if (Vector3.Dot(v, N) > 0.0f)
             {
-                return ConstructAxis0(a, b, v, v2, n1, n2, out segment);
+                return ConstructAxis0(ref a, ref b, ref v, ref v2, ref n1, ref n2, out segment);
             }
             else
             {
-                return ConstructAxis1(a, b, v, v1, n1, n2, out segment);
+                return ConstructAxis1(ref a, ref b, ref v, ref v1, ref n1, ref n2, out segment);
             }
         }
-        private static bool ConstructAxis0(Triangle a, Triangle b, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Segment? segment)
+        private static bool ConstructAxis0(ref Triangle a, ref Triangle b, ref Vector3 s1, ref Vector3 s2, ref Vector3 n1, ref Vector3 n2, out Segment? segment)
         {
             segment = null;
 
-            var v1 = Vector3.Subtract(a.Point3, a.Point1);
-            var N = Vector3.Cross(v1, s2);
-            if (Vector3.Dot(s1, N) > 0.0f)
+            Vector3.Subtract(ref a.Point3, ref a.Point1, out var v1);
+            Vector3.Cross(ref v1, ref s2, out var N);
+            Vector3.Dot(ref s1, ref N, out float d);
+            if (d > 0.0f)
             {
                 return false;
             }
 
-            var v2 = Vector3.Subtract(b.Point2, a.Point1);
-            N = Vector3.Cross(v1, v2);
-            if (Vector3.Dot(s1, N) > 0.0f)
+            Vector3.Subtract(ref b.Point2, ref a.Point1, out var v2);
+            Vector3.Cross(ref v1, ref v2, out N);
+            Vector3.Dot(ref s1, ref N, out d);
+            if (d > 0.0f)
             {
-                v1 = Vector3.Subtract(a.Point1, b.Point1);
-                v2 = Vector3.Subtract(a.Point1, a.Point3);
+                Vector3.Subtract(ref a.Point1, ref b.Point1, out v1);
+                Vector3.Subtract(ref a.Point1, ref a.Point3, out v2);
                 float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
                 v1 = v2 * alpha;
 
-                Vector3 source = Vector3.Subtract(a.Point1, v1);
+                Vector3.Subtract(ref a.Point1, ref v1, out Vector3 source);
 
-                v1 = Vector3.Subtract(b.Point1, a.Point1);
-                v2 = Vector3.Subtract(b.Point1, b.Point3);
+                Vector3.Subtract(ref b.Point1, ref a.Point1, out v1);
+                Vector3.Subtract(ref b.Point1, ref b.Point3, out v2);
                 alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
                 v1 = v2 * alpha;
 
-                Vector3 target = Vector3.Subtract(b.Point1, v1);
+                Vector3.Subtract(ref b.Point1, ref v1, out Vector3 target);
 
                 segment = new(source, target);
 
@@ -453,49 +465,51 @@ namespace Engine.Mathematics
             }
             else
             {
-                v1 = Vector3.Subtract(b.Point1, a.Point1);
-                v2 = Vector3.Subtract(b.Point1, b.Point2);
+                Vector3.Subtract(ref b.Point1, ref a.Point1, out v1);
+                Vector3.Subtract(ref b.Point1, ref b.Point2, out v2);
                 float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
                 v1 = v2 * alpha;
-                Vector3 source = Vector3.Subtract(b.Point1, v1);
+                Vector3.Subtract(ref b.Point1, ref v1, out Vector3 source);
 
-                v1 = Vector3.Subtract(b.Point1, a.Point1);
-                v2 = Vector3.Subtract(b.Point1, b.Point3);
+                Vector3.Subtract(ref b.Point1, ref a.Point1, out v1);
+                Vector3.Subtract(ref b.Point1, ref b.Point3, out v2);
                 alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
                 v1 = v2 * alpha;
-                Vector3 target = Vector3.Subtract(b.Point1, v1);
+                Vector3.Subtract(ref b.Point1, ref v1, out Vector3 target);
 
                 segment = new(source, target);
 
                 return true;
             }
         }
-        private static bool ConstructAxis1(Triangle a, Triangle b, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Segment? segment)
+        private static bool ConstructAxis1(ref Triangle a, ref Triangle b, ref Vector3 s1, ref Vector3 s2, ref Vector3 n1, ref Vector3 n2, out Segment? segment)
         {
             segment = null;
 
-            var v2 = Vector3.Subtract(b.Point2, a.Point1);
-            var N = Vector3.Cross(s2, v2);
-            if (Vector3.Dot(s1, N) < 0.0f)
+            Vector3.Subtract(ref b.Point2, ref a.Point1, out var v2);
+            Vector3.Cross(ref s2, ref v2, out var N);
+            Vector3.Dot(ref s1, ref N, out var d);
+            if (d < 0.0f)
             {
                 return false;
             }
 
-            var v1 = Vector3.Subtract(a.Point3, a.Point1);
-            N = Vector3.Cross(v1, v2);
-            if (Vector3.Dot(s1, N) >= 0.0f)
+            Vector3.Subtract(ref a.Point3, ref a.Point1, out var v1);
+            Vector3.Cross(ref v1, ref v2, out N);
+            Vector3.Dot(ref s1, ref N, out d);
+            if (d >= 0.0f)
             {
-                v1 = Vector3.Subtract(a.Point1, b.Point1);
-                v2 = Vector3.Subtract(a.Point1, a.Point3);
+                Vector3.Subtract(ref a.Point1, ref b.Point1, out v1);
+                Vector3.Subtract(ref a.Point1, ref a.Point3, out v2);
                 float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
                 v1 = v2 * alpha;
-                Vector3 source = Vector3.Subtract(a.Point1, v1);
+                Vector3.Subtract(ref a.Point1, ref v1, out Vector3 source);
 
-                v1 = Vector3.Subtract(a.Point1, b.Point1);
-                v2 = Vector3.Subtract(a.Point1, a.Point2);
+                Vector3.Subtract(ref a.Point1, ref b.Point1, out v1);
+                Vector3.Subtract(ref a.Point1, ref a.Point2, out v2);
                 alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
                 v1 = v2 * alpha;
-                Vector3 target = Vector3.Subtract(a.Point1, v1);
+                Vector3.Subtract(ref a.Point1, ref v1, out Vector3 target);
 
                 segment = new(source, target);
 
@@ -503,17 +517,17 @@ namespace Engine.Mathematics
             }
             else
             {
-                v1 = Vector3.Subtract(b.Point1, a.Point1);
-                v2 = Vector3.Subtract(b.Point1, b.Point2);
+                Vector3.Subtract(ref b.Point1, ref a.Point1, out v1);
+                Vector3.Subtract(ref b.Point1, ref b.Point2, out v2);
                 float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
                 v1 = v2 * alpha;
-                Vector3 source = Vector3.Subtract(b.Point1, v1);
+                Vector3.Subtract(ref b.Point1, ref v1, out Vector3 source);
 
-                v1 = Vector3.Subtract(a.Point1, b.Point1);
-                v2 = Vector3.Subtract(a.Point1, a.Point2);
+                Vector3.Subtract(ref a.Point1, ref b.Point1, out v1);
+                Vector3.Subtract(ref a.Point1, ref a.Point2, out v2);
                 alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
                 v1 = v2 * alpha;
-                Vector3 target = Vector3.Subtract(a.Point1, v1);
+                Vector3.Subtract(ref a.Point1, ref v1, out Vector3 target);
 
                 segment = new(source, target);
 
@@ -521,7 +535,7 @@ namespace Engine.Mathematics
             }
         }
 
-        private static bool Coplanar3D(Triangle a, Triangle b, Vector3 n1)
+        private static bool Coplanar3D(ref Triangle a, ref Triangle b, ref Vector3 n1)
         {
             Vector2 p1;
             Vector2 q1;
@@ -571,203 +585,234 @@ namespace Engine.Mathematics
                 r2 = b.Point3.XY;
             }
 
-            return Overlap2D(new(p1, q1, r1), new(p2, q2, r2));
+            Triangle2D t1 = new(p1, q1, r1);
+            Triangle2D t2 = new(p2, q2, r2);
+
+            return Overlap2D(ref t1, ref t2);
         }
-        private static bool Overlap2D(Triangle2D a, Triangle2D b)
+        private static bool Overlap2D(ref Triangle2D a, ref Triangle2D b)
         {
-            var p1 = a.Point1;
-            var q1 = a.Point2;
-            var r1 = a.Point3;
+            ref var p1 = ref a.Point1;
+            ref var q1 = ref a.Point2;
+            ref var r1 = ref a.Point3;
 
-            var p2 = b.Point1;
-            var q2 = b.Point2;
-            var r2 = b.Point3;
+            ref var p2 = ref b.Point1;
+            ref var q2 = ref b.Point2;
+            ref var r2 = ref b.Point3;
 
-            if (Orient2D(new(p1, q1, r1)) < 0.0f)
+            Triangle2D pq1 = new(p1, q1, r1);
+            Triangle2D pq2 = new(p2, q2, r2);
+
+            Triangle2D pr1 = new(p1, r1, q1);
+            Triangle2D pr2 = new(p2, r2, q2);
+
+            if (Orient2D(ref pq1) < 0f)
             {
-                if (Orient2D(new(p2, q2, r2)) < 0.0f)
-                {
-                    return DetectIntersection2D(new(p1, r1, q1), new(p2, r2, q2));
-                }
-                else
-                {
-                    return DetectIntersection2D(new(p1, r1, q1), new(p2, q2, r2));
-                }
+                if (Orient2D(ref pq2) < 0f) return DetectIntersection2D(ref pr1, ref pr2);
+
+                return DetectIntersection2D(ref pr1, ref pq2);
             }
             else
             {
-                if (Orient2D(new(p2, q2, r2)) < 0.0f)
-                {
-                    return DetectIntersection2D(new(p1, q1, r1), new(p2, r2, q2));
-                }
-                else
-                {
-                    return DetectIntersection2D(new(p1, q1, r1), new(p2, q2, r2));
-                }
+                if (Orient2D(ref pq2) < 0f) return DetectIntersection2D(ref pq1, ref pr2);
+
+                return DetectIntersection2D(ref pq1, ref pq2);
             }
         }
-        private static float Orient2D(Triangle2D t)
+        private static float Orient2D(ref Triangle2D t)
         {
-            var a = t.Point1;
-            var b = t.Point2;
-            var c = t.Point3;
-
-            return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
+            return
+                (t.Point1.X - t.Point3.X) * (t.Point2.Y - t.Point3.Y) -
+                (t.Point1.Y - t.Point3.Y) * (t.Point2.X - t.Point3.X);
         }
 
-        private static bool CheckMinMax(Triangle a, Triangle b)
+        private static bool CheckMinMax(ref Triangle a, ref Triangle b)
         {
-            var n1 = Vector3.Cross(Vector3.Subtract(b.Point1, a.Point2), Vector3.Subtract(a.Point1, a.Point2));
+            Vector3.Subtract(ref b.Point1, ref a.Point2, out var b1a2);
+            Vector3.Subtract(ref a.Point1, ref a.Point2, out var a1a2);
+            Vector3.Subtract(ref b.Point2, ref a.Point2, out var b2a2);
 
-            if (Vector3.Dot(Vector3.Subtract(b.Point2, a.Point2), n1) > 0.0f)
-            {
-                return false;
-            }
+            Vector3.Cross(ref b1a2, ref a1a2, out var n1);
+            Vector3.Dot(ref b2a2, ref n1, out float d);
+            if (d > 0f) return false;
 
-            n1 = Vector3.Cross(Vector3.Subtract(b.Point1, a.Point1), Vector3.Subtract(a.Point3, a.Point1));
+            Vector3.Subtract(ref b.Point1, ref a.Point1, out var b1a3);
+            Vector3.Subtract(ref a.Point3, ref a.Point1, out var a3a1);
+            Vector3.Subtract(ref b.Point3, ref a.Point1, out var b3a1);
 
-            if (Vector3.Dot(Vector3.Subtract(b.Point3, a.Point1), n1) > 0.0f)
-            {
-                return false;
-            }
+            Vector3.Cross(ref b1a3, ref a3a1, out n1);
+            Vector3.Dot(ref b3a1, ref n1, out d);
+            if (d > 0f) return false;
 
             return true;
         }
 
-        private static bool DetectIntersection2D(Triangle2D a, Triangle2D b)
+        private static bool DetectIntersection2D(ref Triangle2D a, ref Triangle2D b)
         {
-            var p1 = a.Point1;
-            var q1 = a.Point2;
-            var r1 = a.Point3;
+            ref var p1 = ref a.Point1;
+            ref var q1 = ref a.Point2;
+            ref var r1 = ref a.Point3;
 
-            var p2 = b.Point1;
-            var q2 = b.Point2;
-            var r2 = b.Point3;
+            ref var p2 = ref b.Point1;
+            ref var q2 = ref b.Point2;
+            ref var r2 = ref b.Point3;
 
-            if (Orient2D(new Triangle2D(p2, q2, p1)) >= 0.0f)
+            Triangle2D t = new(p2, q2, p1);
+
+            if (Orient2D(ref t) >= 0f)
             {
-                return TestIntersection2DMajor(p1, q1, r1, p2, q2, r2);
+                return TestIntersection2DMajor(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
             }
             else
             {
-                return TestIntersection2DMinor(p1, q1, r1, p2, q2, r2);
+                return TestIntersection2DMinor(ref p1, ref q1, ref r1, ref p2, ref q2, ref r2);
             }
         }
-        private static bool TestIntersection2DMajor(Vector2 p1, Vector2 q1, Vector2 r1, Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool TestIntersection2DMajor(ref Vector2 p1, ref Vector2 q1, ref Vector2 r1, ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            if (Orient2D(new(q2, r2, p1)) >= 0.0f)
+            Triangle2D pq1 = new(p1, q1, r1);
+            Triangle2D pq2 = new(p2, q2, r2);
+            Triangle2D qr2 = new(q2, r2, p1);
+            Triangle2D rp2 = new(r2, p2, p1);
+            Triangle2D rp22 = new(r2, p2, q2);
+
+            if (Orient2D(ref qr2) >= 0f)
             {
-                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
-                {
-                    return true;
-                }
-                else
-                {
-                    return IntersectionEdge(new(p1, q1, r1), new(p2, q2, r2));
-                }
+                if (Orient2D(ref rp2) >= 0f) return true;
+
+                return IntersectionEdge(ref pq1, ref pq2);
             }
             else
             {
-                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
-                {
-                    return IntersectionEdge(new(p1, q1, r1), new(r2, p2, q2));
-                }
-                else
-                {
-                    return IntersectionVertex(new(p1, q1, r1), new(p2, q2, r2));
-                }
+                if (Orient2D(ref rp2) >= 0f) return IntersectionEdge(ref pq1, ref rp22);
+
+                return IntersectionVertex(ref pq1, ref pq2);
             }
         }
-        private static bool TestIntersection2DMinor(Vector2 p1, Vector2 q1, Vector2 r1, Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool TestIntersection2DMinor(ref Vector2 p1, ref Vector2 q1, ref Vector2 r1, ref Vector2 p2, ref Vector2 q2, ref Vector2 r2)
         {
-            if (Orient2D(new(q2, r2, p1)) >= 0.0f)
+            Triangle2D pq1 = new(p1, q1, r1);
+            Triangle2D qr2 = new(q2, r2, p1);
+            Triangle2D qr22 = new(q2, r2, p2);
+            Triangle2D rp2 = new(r2, p2, p1);
+            Triangle2D rp22 = new(r2, p2, q2);
+
+            if (Orient2D(ref qr2) >= 0f)
             {
-                if (Orient2D(new(r2, p2, p1)) >= 0.0f)
-                {
-                    return IntersectionEdge(new(p1, q1, r1), new(q2, r2, p2));
-                }
-                else
-                {
-                    return IntersectionVertex(new(p1, q1, r1), new(q2, r2, p2));
-                }
+                if (Orient2D(ref rp2) >= 0f) return IntersectionEdge(ref pq1, ref qr22);
+
+                return IntersectionVertex(ref pq1, ref qr22);
             }
-            else
-            {
-                return IntersectionVertex(new(p1, q1, r1), new(r2, p2, q2));
-            }
+
+            return IntersectionVertex(ref pq1, ref rp22);
         }
 
-        private static bool IntersectionVertex(Triangle2D a, Triangle2D b)
+        private static bool IntersectionVertex(ref Triangle2D a, ref Triangle2D b)
         {
-            var p1 = a.Point1;
-            var q1 = a.Point2;
-            var r1 = a.Point3;
+            ref var p1 = ref a.Point1;
+            ref var q1 = ref a.Point2;
+            ref var r1 = ref a.Point3;
 
-            var p2 = b.Point1;
-            var q2 = b.Point2;
-            var r2 = b.Point3;
+            ref var p2 = ref b.Point1;
+            ref var q2 = ref b.Point2;
+            ref var r2 = ref b.Point3;
 
-            if (Orient2D(new(r2, p2, q1)) >= 0.0f)
+            Triangle2D t;
+            Triangle2D t2;
+
+            t = new(r2, p2, q1);
+            if (Orient2D(ref t) >= 0.0f)
             {
-                if (Orient2D(new(r2, q2, q1)) <= 0.0f)
+                t = new(r2, q2, q1);
+                if (Orient2D(ref t) <= 0.0f)
                 {
-                    if (Orient2D(new(p1, p2, q1)) > 0.0f)
+                    t = new(p1, p2, q1);
+                    if (Orient2D(ref t) > 0.0f)
                     {
-                        return Orient2D(new(p1, q2, q1)) <= 0.0f;
+                        t = new(p1, q2, q1);
+                        return Orient2D(ref t) <= 0.0f;
                     }
-                    else if (Orient2D(new(p1, p2, r1)) >= 0.0f)
+
+                    t = new(p1, p2, r1);
+                    if (Orient2D(ref t) >= 0.0f)
                     {
-                        return Orient2D(new(q1, r1, p2)) >= 0.0f;
+                        t = new(q1, r1, p2);
+                        return Orient2D(ref t) >= 0.0f;
                     }
                 }
-                else if (Orient2D(new(p1, q2, q1)) <= 0.0f && Orient2D(new(r2, q2, r1)) <= 0.0f)
+
+                t = new(p1, q2, q1);
+                t2 = new(r2, q2, r1);
+                if (Orient2D(ref t) <= 0.0f && Orient2D(ref t2) <= 0.0f)
                 {
-                    return Orient2D(new(q1, r1, q2)) >= 0.0f;
+                    t = new(q1, r1, q2);
+                    return Orient2D(ref t) >= 0.0f;
                 }
             }
-            else if (Orient2D(new(r2, p2, r1)) >= 0.0f)
+
+            t = new(r2, p2, r1);
+            if (Orient2D(ref t) >= 0.0f)
             {
-                if (Orient2D(new(q1, r1, r2)) >= 0.0f)
+                t = new(q1, r1, r2);
+                if (Orient2D(ref t) >= 0.0f)
                 {
-                    return Orient2D(new(p1, p2, r1)) >= 0.0f;
+                    t = new(p1, p2, r1);
+                    return Orient2D(ref t) >= 0.0f;
                 }
-                else if (Orient2D(new(q1, r1, q2)) >= 0.0f)
+
+                t = new(q1, r1, q2);
+                if (Orient2D(ref t) >= 0.0f)
                 {
-                    return Orient2D(new(r2, r1, q2)) >= 0.0f;
+                    t = new(r2, r1, q2);
+                    return Orient2D(ref t) >= 0.0f;
                 }
             }
 
             return false;
         }
 
-        private static bool IntersectionEdge(Triangle2D a, Triangle2D b)
+        private static bool IntersectionEdge(ref Triangle2D a, ref Triangle2D b)
         {
-            var p1 = a.Point1;
-            var q1 = a.Point2;
-            var r1 = a.Point3;
+            ref var p1 = ref a.Point1;
+            ref var q1 = ref a.Point2;
+            ref var r1 = ref a.Point3;
 
-            var p2 = b.Point1;
-            var r2 = b.Point3;
+            ref var p2 = ref b.Point1;
+            ref var r2 = ref b.Point3;
 
-            if (Orient2D(new(r2, p2, q1)) >= 0.0f)
+            Triangle2D t;
+            Triangle2D t2;
+
+            t = new(r2, p2, q1);
+            if (Orient2D(ref t) >= 0.0f)
             {
-                if (Orient2D(new(p1, p2, q1)) >= 0.0f)
+                t = new(p1, p2, q1);
+                if (Orient2D(ref t) >= 0.0f)
                 {
-                    return Orient2D(new(p1, q1, r2)) >= 0.0f;
+                    t = new(p1, q1, r2);
+                    return Orient2D(ref t) >= 0.0f;
                 }
-                else if (Orient2D(new(q1, r1, p2)) >= 0.0f)
+
+                t = new(q1, r1, p2);
+                if (Orient2D(ref t) >= 0.0f)
                 {
-                    return Orient2D(new(r1, p1, p2)) >= 0.0f;
+                    t = new(r1, p1, p2);
+                    return Orient2D(ref t) >= 0.0f;
                 }
             }
-            else if (Orient2D(new(r2, p2, r1)) >= 0.0f && Orient2D(new(p1, p2, r1)) >= 0.0f)
+
+            t = new(r2, p2, r1);
+            t2 = new(p1, p2, r1);
+            if (Orient2D(ref t) >= 0.0f && Orient2D(ref t2) >= 0.0f)
             {
-                if (Orient2D(new(p1, r1, r2)) >= 0.0f)
+                t = new(p1, r1, r2);
+                if (Orient2D(ref t) >= 0.0f)
                 {
                     return true;
                 }
 
-                return Orient2D(new(q1, r1, r2)) >= 0.0f;
+                t = new(q1, r1, r2);
+                return Orient2D(ref t) >= 0.0f;
             }
 
             return false;
@@ -787,15 +832,15 @@ namespace Engine.Mathematics
             /// <summary>
             /// Point 1
             /// </summary>
-            public Vector2 Point1 { get; set; } = point1;
+            public Vector2 Point1 = point1;
             /// <summary>
             /// Point 2
             /// </summary>
-            public Vector2 Point2 { get; set; } = point2;
+            public Vector2 Point2 = point2;
             /// <summary>
             /// Point 3
             /// </summary>
-            public Vector2 Point3 { get; set; } = point3;
+            public Vector2 Point3 = point3;
         }
     }
 }

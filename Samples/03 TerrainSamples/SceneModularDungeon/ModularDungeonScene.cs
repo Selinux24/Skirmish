@@ -908,7 +908,7 @@ namespace TerrainSamples.SceneModularDungeon
                 })
                 .Where(i =>
                 {
-                    if (i.Instance.PickNearest(ray, out _))
+                    if (i.Instance.PickNearest(ref ray, out _))
                     {
                         return true;
                     }
@@ -946,7 +946,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private static float CalcItemPickingDistance(PickingRay ray, Item item)
         {
-            if (item.Instance.PickNearest(ray, out var res))
+            if (item.Instance.PickNearest(ref ray, out var res))
             {
                 return res.Distance;
             }

@@ -18,7 +18,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        public static bool PickNearest(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
+        public static bool PickNearest(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
             var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
@@ -34,11 +34,11 @@ namespace Engine.Collections.Helpers
 
             if (node.IsLeaf)
             {
-                return RayPickingHelper.PickNearestFromList(node.Items, ray, out result);
+                return RayPickingHelper.PickNearestFromList(node.Items, ref ray, out result);
             }
             else
             {
-                return PickNearestNode(node, ray, out result);
+                return PickNearestNode(node, ref ray, out result);
             }
         }
         /// <summary>
@@ -48,9 +48,9 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private static bool PickNearestNode(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
+        private static bool PickNearestNode(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T> result)
         {
-            var boxHitsByDistance = FindContacts(node, ray);
+            var boxHitsByDistance = FindContacts(node, ref ray);
             if (boxHitsByDistance.Count == 0)
             {
                 result = new PickingResult<T>
@@ -71,7 +71,7 @@ namespace Engine.Collections.Helpers
             foreach (var hitNode in boxHitsByDistance.Values)
             {
                 // check that the intersection is closer than the nearest intersection found thus far
-                var inItem = PickNearest(hitNode, ray, out var thisHit);
+                var inItem = PickNearest(hitNode, ref ray, out var thisHit);
                 if (!inItem)
                 {
                     continue;
@@ -96,7 +96,7 @@ namespace Engine.Collections.Helpers
         /// <param name="node">Node</param>
         /// <param name="ray">Ray</param>
         /// <returns>Returns a sorted by distance node list</returns>
-        private static SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(PickingQuadTreeNode<T> node, PickingRay ray)
+        private static SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(PickingQuadTreeNode<T> node, ref PickingRay ray)
         {
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = [];
 
@@ -125,7 +125,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        public static bool PickFirst(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
+        public static bool PickFirst(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T> result)
         {
             var bbox = node.BoundingBox;
             var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
@@ -141,11 +141,11 @@ namespace Engine.Collections.Helpers
 
             if (node.IsLeaf)
             {
-                return RayPickingHelper.PickFirstFromList(node.Items, ray, out result);
+                return RayPickingHelper.PickFirstFromList(node.Items, ref ray, out result);
             }
             else
             {
-                return PickFirstNode(node, ray, out result);
+                return PickFirstNode(node, ref ray, out result);
             }
         }
         /// <summary>
@@ -155,7 +155,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private static bool PickFirstNode(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T> result)
+        private static bool PickFirstNode(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T> result)
         {
             foreach (var child in node.Children)
             {
@@ -166,7 +166,7 @@ namespace Engine.Collections.Helpers
                     continue;
                 }
 
-                var inItem = PickFirst(child, ray, out var thisHit);
+                var inItem = PickFirst(child, ref ray, out var thisHit);
                 if (!inItem)
                 {
                     continue;
@@ -192,7 +192,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        public static bool PickAll(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T>[] results)
+        public static bool PickAll(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T>[] results)
         {
             var bbox = node.BoundingBox;
             var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
@@ -205,11 +205,11 @@ namespace Engine.Collections.Helpers
 
             if (node.IsLeaf)
             {
-                return RayPickingHelper.PickAllFromlist(node.Items, ray, out results);
+                return RayPickingHelper.PickAllFromlist(node.Items, ref ray, out results);
             }
             else
             {
-                return PickAllNode(node, ray, out results);
+                return PickAllNode(node, ref ray, out results);
             }
         }
         /// <summary>
@@ -219,7 +219,7 @@ namespace Engine.Collections.Helpers
         /// <param name="ray">Ray</param>
         /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        private static bool PickAllNode(PickingQuadTreeNode<T> node, PickingRay ray, out PickingResult<T>[] results)
+        private static bool PickAllNode(PickingQuadTreeNode<T> node, ref PickingRay ray, out PickingResult<T>[] results)
         {
             bool intersect = false;
 
@@ -234,7 +234,7 @@ namespace Engine.Collections.Helpers
                     continue;
                 }
 
-                var inItem = PickAll(child, ray, out var thisHits);
+                var inItem = PickAll(child, ref ray, out var thisHits);
                 if (!inItem)
                 {
                     continue;

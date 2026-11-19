@@ -1,28 +1,48 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Mathematics
 {
     /// <summary>
     /// Triangle
     /// </summary>
-    public partial struct Triangle : IEquatable<Triangle>, IRayIntersectable, IVertexList
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="point1">Point 1</param>
+    /// <param name="point2">Point 2</param>
+    /// <param name="point3">Point 3</param>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [JsonObject(MemberSerialization.OptIn)]
+    public struct Triangle(Vector3 point1, Vector3 point2, Vector3 point3) : IEquatable<Triangle>, IRayIntersectable, IVertexList
     {
         /// <summary>
         /// First point
         /// </summary>
-        public Vector3 Point1 { get; set; }
+        [JsonProperty]
+        public Vector3 Point1 = point1;
         /// <summary>
         /// Second point
         /// </summary>
-        public Vector3 Point2 { get; set; }
+        [JsonProperty]
+        public Vector3 Point2 = point2;
         /// <summary>
         /// Third point
         /// </summary>
-        public Vector3 Point3 { get; set; }
+        [JsonProperty]
+        public Vector3 Point3 = point3;
         /// <summary>
         /// Gets the triangle normal
         /// </summary>
-        public Vector3 Normal { get; private set; }
+        public readonly Vector3 Normal
+        {
+            get
+            {
+                return MathUtils.CalculateTriPointNormalLH(Point1, Point2, Point3);
+            }
+        }
+
         /// <summary>
         /// Returns the triangle vertex by index
         /// </summary>
@@ -42,19 +62,6 @@ namespace Engine.Mathematics
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="point1">Point 1</param>
-        /// <param name="point2">Point 2</param>
-        /// <param name="point3">Point 3</param>
-        public Triangle(Vector3 point1, Vector3 point2, Vector3 point3)
-        {
-            Point1 = point1;
-            Point2 = point2;
-            Point3 = point3;
-            Normal = new Plane(Point1, Point2, Point3).Normal;
-        }
         /// <summary>
         /// Constructor
         /// </summary>
@@ -133,7 +140,7 @@ namespace Engine.Mathematics
             Triangle[] trTris = new Triangle[triangles.Length];
             for (int i = 0; i < triangles.Length; i++)
             {
-                trTris[i] = triangles[i].ReverseNormal();
+                trTris[i] = triangles[i].Reverse();
             }
             return trTris;
         }
@@ -379,31 +386,25 @@ namespace Engine.Mathematics
         /// Gets a new triangle with reversed normal vector
         /// </summary>
         /// <returns>Returns a new revered normal triangle</returns>
-        public readonly Triangle ReverseNormal()
+        public readonly Triangle Reverse()
         {
             return new Triangle(Point1, Point3, Point2);
         }
-        /// <summary>
-        /// Reverses the current triangle
-        /// </summary>
-        public void Reverse()
-        {
-            (Point2, Point3) = (Point3, Point2);
-            Normal = -Normal;
-        }
 
         /// <inheritdoc/>
-        public readonly bool Intersects(PickingRay ray)
+        public readonly bool Intersects(ref PickingRay ray)
         {
-            return Intersects(ray, out _, out _);
+            var tri = this;
+            return Collision.RayIntersectsTriangle(ref ray, ref tri, out _);
         }
         /// <inheritdoc/>
-        public readonly bool Intersects(PickingRay ray, out float distance)
+        public readonly bool Intersects(ref PickingRay ray, out float distance)
         {
-            return Intersects(ray, out _, out distance);
+            var tri = this;
+            return Collision.RayIntersectsTriangle(ref ray, ref tri, out distance);
         }
         /// <inheritdoc/>
-        public readonly bool Intersects(PickingRay ray, out Vector3 point, out float distance)
+        public readonly bool Intersects(ref PickingRay ray, out Vector3 point, out float distance)
         {
             var tri = this;
             return Collision.RayIntersectsTriangle(ref ray, ref tri, out distance, out point);

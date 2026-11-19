@@ -110,12 +110,12 @@ namespace Engine.Mathematics
             //Reference: Page 136
 
             //Check if P in vertex region outside A
-            Vector3 ab = vertex2 - vertex1;
-            Vector3 ac = vertex3 - vertex1;
-            Vector3 ap = point - vertex1;
+            Vector3.Subtract(ref vertex2, ref vertex1, out Vector3 ab);
+            Vector3.Subtract(ref vertex3, ref vertex1, out Vector3 ac);
+            Vector3.Subtract(ref point, ref vertex1, out Vector3 ap);
 
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
+            Vector3.Dot(ref ab, ref ap, out float d1);
+            Vector3.Dot(ref ac, ref ap, out float d2);
             if (d1 <= 0.0f && d2 <= 0.0f)
             {
                 result = vertex1; //Barycentric coordinates (1,0,0)
@@ -123,9 +123,9 @@ namespace Engine.Mathematics
             }
 
             //Check if P in vertex region outside B
-            Vector3 bp = point - vertex2;
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
+            Vector3.Subtract(ref point, ref vertex2, out Vector3 bp);
+            Vector3.Dot(ref ab, ref bp, out float d3);
+            Vector3.Dot(ref ac, ref bp, out float d4);
             if (d3 >= 0.0f && d4 <= d3)
             {
                 result = vertex2; // Barycentric coordinates (0,1,0)
@@ -142,9 +142,9 @@ namespace Engine.Mathematics
             }
 
             //Check if P in vertex region outside C
-            Vector3 cp = point - vertex3;
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
+            Vector3.Subtract(ref point, ref vertex3, out Vector3 cp);
+            Vector3.Dot(ref ab, ref cp, out float d5);
+            Vector3.Dot(ref ac, ref cp, out float d6);
             if (d6 >= 0.0f && d5 <= d6)
             {
                 result = vertex3; //Barycentric coordinates (0,0,1)
@@ -187,7 +187,7 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 126
 
-            float dot = Vector3.Dot(plane.Normal, point);
+            Vector3.Dot(ref plane.Normal, ref point, out float dot);
             float t = dot - plane.D;
 
             result = point - (t * plane.Normal);
@@ -204,8 +204,8 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 130
 
-            Vector3 temp = Vector3.Max(point, box.Minimum);
-            result = Vector3.Min(temp, box.Maximum);
+            Vector3.Max(ref point, ref box.Minimum, out Vector3 max);
+            Vector3.Min(ref max, ref box.Maximum, out result);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Engine.Mathematics
             //Reference: None
 
             //Get the unit direction from the sphere's center to the point.
-            result = Vector3.Subtract(point, sphere.Center);
+            Vector3.Subtract(ref point, ref sphere.Center, out result);
             result.Normalize();
 
             //Multiply the unit direction by the sphere's radius to get a vector
@@ -250,7 +250,7 @@ namespace Engine.Mathematics
             //Reference: None
 
             //Get the unit direction from the first sphere's center to the second sphere's center.
-            result = Vector3.Subtract(sphere2.Center, sphere1.Center);
+            Vector3.Subtract(ref sphere2.Center, ref sphere1.Center, out result);
             result.Normalize();
 
             //Multiply the unit direction by the first sphere's radius to get a vector
@@ -269,14 +269,24 @@ namespace Engine.Mathematics
         /// <returns>Returns the resulting point along the ray</returns>
         public static void ClosestPointInRay(ref Ray ray, ref Vector3 point, out Vector3 result)
         {
-            var to = point - ray.Position;
-            float rayLength = ray.Direction.Length();
-            var dir = Vector3.Normalize(ray.Direction);
+            Vector3.Subtract(ref point, ref ray.Position, out var to);
+            Vector3.Normalize(ref ray.Direction, out var dir);
 
-            var dist = Vector3.Dot(to, dir);
-            if (dist < 0f) result = ray.Position;
-            else if (dist > rayLength) result = ray.Position + ray.Direction;
-            else result = ray.Position + (dir * dist);
+            Vector3.Dot(ref to, ref dir, out var dist);
+            if (dist < 0f)
+            {
+                result = ray.Position;
+                return;
+            }
+
+            float rayLength = ray.Direction.Length();
+            if (dist > rayLength)
+            {
+                result = ray.Position + ray.Direction;
+                return;
+            }
+
+            result = ray.Position + (dir * dist);
         }
         /// <summary>
         /// Gets the closest point in a ray from a specified point
@@ -288,7 +298,8 @@ namespace Engine.Mathematics
         public static void ClosestPointInRay(ref Ray ray, ref Vector3 point, out float distance, out Vector3 result)
         {
             ClosestPointInRay(ref ray, ref point, out result);
-            distance = Vector3.Distance(result, point);
+
+            Vector3.Distance(ref result, ref point, out distance);
         }
 
         /// <summary>
@@ -312,11 +323,11 @@ namespace Engine.Mathematics
         /// <returns>Returns the resulting minimum distance from point to segment</returns>
         public static void ClosestPointInSegment(ref Vector3 point1, ref Vector3 point2, ref Vector3 point, out float distance, out Vector3 result)
         {
-            var ab = point2 - point1;
+            Vector3.Subtract(ref point2, ref point1, out var ab);
 
             // Project point onto segment
             distance = Vector3.Dot(point - point1, ab);
-            if (distance <= 0.0f)
+            if (distance <= 0f)
             {
                 // point projects outside the segment on the point1 side
                 distance = -distance;
@@ -324,7 +335,7 @@ namespace Engine.Mathematics
                 return;
             }
 
-            float denom = Vector3.Dot(ab, ab);
+            Vector3.Dot(ref ab, ref ab, out float denom);
             if (distance >= denom)
             {
                 // point projects outside the segment on the point2 side
@@ -355,9 +366,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the resulting minimum distance from point to segment</returns>
         public static void ClosestPointInSegment(ref Segment segment, ref Vector3 point, out float distance, out Vector3 result)
         {
-            var p1 = segment.Point1;
-            var p2 = segment.Point2;
-            ClosestPointInSegment(ref p1, ref p2, ref point, out distance, out result);
+            ClosestPointInSegment(ref segment.Point1, ref segment.Point2, ref point, out distance, out result);
         }
 
         /// <summary>
@@ -396,11 +405,14 @@ namespace Engine.Mathematics
         /// <returns>Returns the point of the box closest to the specified point</returns>
         public static void ClosestPointInBox(ref Vector3 point, ref Vector3 center, ref Vector3 extents, ref Matrix4x4 transform, out Vector3 result)
         {
-            Vector3 diff = point - center;
+            Vector3.Subtract(ref point, ref center, out Vector3 diff);
 
-            float closestX = Vector3.Dot(diff, transform.Right);
-            float closestY = Vector3.Dot(diff, transform.Up);
-            float closestZ = Vector3.Dot(diff, transform.Backward);
+            var vR = transform.Right;
+            var vU = transform.Up;
+            var vB = transform.Backward;
+            Vector3.Dot(ref diff, ref vR, out float closestX);
+            Vector3.Dot(ref diff, ref vU, out float closestY);
+            Vector3.Dot(ref diff, ref vB, out float closestZ);
 
             //X axis
             if (closestX < -extents.X)
@@ -446,17 +458,17 @@ namespace Engine.Mathematics
         /// <returns>Returns the closest point in the triangle from point</returns>
         public static void ClosestPointInTriangle(ref Vector3 point, ref Triangle triangle, out Vector3 result)
         {
-            Vector3 a = triangle.Point1;
-            Vector3 b = triangle.Point2;
-            Vector3 c = triangle.Point3;
+            ref Vector3 a = ref triangle.Point1;
+            ref Vector3 b = ref triangle.Point2;
+            ref Vector3 c = ref triangle.Point3;
 
             // Check if P in vertex region outside A
-            Vector3 ab = Vector3.Subtract(b, a);
-            Vector3 ac = Vector3.Subtract(c, a);
-            Vector3 ap = Vector3.Subtract(point, a);
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
-            if (d1 <= 0.0f && d2 <= 0.0f)
+            Vector3.Subtract(ref b, ref a, out Vector3 ab);
+            Vector3.Subtract(ref c, ref a, out Vector3 ac);
+            Vector3.Subtract(ref point, ref a, out Vector3 ap);
+            Vector3.Dot(ref ab, ref ap, out float d1);
+            Vector3.Dot(ref ac, ref ap, out float d2);
+            if (d1 <= 0f && d2 <= 00f)
             {
                 // barycentric coordinates (1,0,0)
                 result = a;
@@ -464,10 +476,10 @@ namespace Engine.Mathematics
             }
 
             // Check if P in vertex region outside B
-            Vector3 bp = Vector3.Subtract(point, b);
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
-            if (d3 >= 0.0f && d4 <= d3)
+            Vector3.Subtract(ref point, ref b, out Vector3 bp);
+            Vector3.Dot(ref ab, ref bp, out float d3);
+            Vector3.Dot(ref ac, ref bp, out float d4);
+            if (d3 >= 0f && d4 <= d3)
             {
                 // barycentric coordinates (0,1,0)
                 result = b;
@@ -476,11 +488,11 @@ namespace Engine.Mathematics
 
             // Check if P in edge region of AB, if so return projection of P onto AB
             float vc = d1 * d4 - d3 * d2;
-            if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
+            if (vc <= 0f && d1 >= 0f && d3 <= 0f)
             {
                 // barycentric coordinates (1-v,v,0)
                 float v = d1 / (d1 - d3);
-                result = new Vector3
+                result = new()
                 {
                     X = a.X + v * ab.X,
                     Y = a.Y + v * ab.Y,
@@ -490,10 +502,10 @@ namespace Engine.Mathematics
             }
 
             // Check if P in vertex region outside C
-            Vector3 cp = Vector3.Subtract(point, c);
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
-            if (d6 >= 0.0f && d5 <= d6)
+            Vector3.Subtract(ref point, ref c, out Vector3 cp);
+            Vector3.Dot(ref ab, ref cp, out float d5);
+            Vector3.Dot(ref ac, ref cp, out float d6);
+            if (d6 >= 0f && d5 <= d6)
             {
                 // barycentric coordinates (0,0,1)
                 result = c;
@@ -502,11 +514,11 @@ namespace Engine.Mathematics
 
             // Check if P in edge region of AC, if so return projection of P onto AC
             float vb = d5 * d2 - d1 * d6;
-            if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
+            if (vb <= 0f && d2 >= 0f && d6 <= 0f)
             {
                 // barycentric coordinates (1-w,0,w)
                 float w = d2 / (d2 - d6);
-                result = new Vector3
+                result = new()
                 {
                     X = a.X + w * ac.X,
                     Y = a.Y + w * ac.Y,
@@ -517,11 +529,11 @@ namespace Engine.Mathematics
 
             // Check if P in edge region of BC, if so return projection of P onto BC
             float va = d3 * d6 - d5 * d4;
-            if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
+            if (va <= 0f && (d4 - d3) >= 0f && (d5 - d6) >= 0f)
             {
                 // barycentric coordinates (0,1-w,w)
                 float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-                result = new Vector3
+                result = new()
                 {
                     X = b.X + w * (c.X - b.X),
                     Y = b.Y + w * (c.Y - b.Y),
@@ -531,10 +543,10 @@ namespace Engine.Mathematics
             }
 
             // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-            float denom = 1.0f / (va + vb + vc);
+            float denom = 1f / (va + vb + vc);
             float closestV = vb * denom;
             float closestW = vc * denom;
-            result = new Vector3
+            result = new()
             {
                 X = a.X + ab.X * closestV + ac.X * closestW,
                 Y = a.Y + ab.Y * closestV + ac.Y * closestW,
@@ -563,7 +575,7 @@ namespace Engine.Mathematics
         /// <param name="result">Returns the closest point in the triangle from point p</param>
         public static void ClosestPointInMesh(ref Vector3 point, Triangle[] mesh, out Triangle closest, out Vector3 result)
         {
-            closest = new Triangle();
+            closest = new();
             result = point;
 
             float distance = float.MaxValue;
@@ -622,22 +634,16 @@ namespace Engine.Mathematics
 
             float distance = 0f;
 
-            if (point.X < box.Minimum.X)
-                distance += (box.Minimum.X - point.X) * (box.Minimum.X - point.X);
-            if (point.X > box.Maximum.X)
-                distance += (point.X - box.Maximum.X) * (point.X - box.Maximum.X);
+            if (point.X < box.Minimum.X) distance += (box.Minimum.X - point.X) * (box.Minimum.X - point.X);
+            if (point.X > box.Maximum.X) distance += (point.X - box.Maximum.X) * (point.X - box.Maximum.X);
 
-            if (point.Y < box.Minimum.Y)
-                distance += (box.Minimum.Y - point.Y) * (box.Minimum.Y - point.Y);
-            if (point.Y > box.Maximum.Y)
-                distance += (point.Y - box.Maximum.Y) * (point.Y - box.Maximum.Y);
+            if (point.Y < box.Minimum.Y) distance += (box.Minimum.Y - point.Y) * (box.Minimum.Y - point.Y);
+            if (point.Y > box.Maximum.Y) distance += (point.Y - box.Maximum.Y) * (point.Y - box.Maximum.Y);
 
-            if (point.Z < box.Minimum.Z)
-                distance += (box.Minimum.Z - point.Z) * (box.Minimum.Z - point.Z);
-            if (point.Z > box.Maximum.Z)
-                distance += (point.Z - box.Maximum.Z) * (point.Z - box.Maximum.Z);
+            if (point.Z < box.Minimum.Z) distance += (box.Minimum.Z - point.Z) * (box.Minimum.Z - point.Z);
+            if (point.Z > box.Maximum.Z) distance += (point.Z - box.Maximum.Z) * (point.Z - box.Maximum.Z);
 
-            return (float)Math.Sqrt(distance);
+            return MathF.Sqrt(distance);
         }
         /// <summary>
         /// Determines the distance between a <see cref="BoundingBox"/> and a <see cref="BoundingBox"/>.
@@ -688,7 +694,7 @@ namespace Engine.Mathematics
                 distance += delta * delta;
             }
 
-            return (float)Math.Sqrt(distance);
+            return MathF.Sqrt(distance);
         }
         /// <summary>
         /// Determines the distance between a <see cref="BoundingSphere"/> and a point.
@@ -701,7 +707,7 @@ namespace Engine.Mathematics
             //Source: Jorgy343
             //Reference: None
 
-            float distance = Vector3.Distance(sphere.Center, point);
+            Vector3.Distance(ref sphere.Center, ref point, out float distance);
             distance -= sphere.Radius;
 
             return Math.Max(distance, 0f);
@@ -717,7 +723,7 @@ namespace Engine.Mathematics
             //Source: Jorgy343
             //Reference: None
 
-            float distance = Vector3.Distance(sphere1.Center, sphere2.Center);
+            Vector3.Distance(ref sphere1.Center, ref sphere2.Center, out float distance);
             distance -= sphere1.Radius + sphere2.Radius;
 
             return Math.Max(distance, 0f);
@@ -734,20 +740,19 @@ namespace Engine.Mathematics
             //Source: RayIntersectsSphere
             //Reference: None
 
-            Vector3 m = Vector3.Subtract(ray.Position, point);
+            Vector3.Subtract(ref ray.Position, ref point, out Vector3 m);
 
             //Same thing as RayIntersectsSphere except that the radius of the sphere (point)
             //is the epsilon for zero.
-            float b = Vector3.Dot(m, ray.Direction);
-            float c = Vector3.Dot(m, m) - MathUtils.ZeroTolerance;
+            Vector3.Dot(ref m, ref ray.Direction, out float b);
+            Vector3.Dot(ref m, ref m, out float c);
+            c -= MathUtils.ZeroTolerance;
 
-            if (c > 0f && b > 0f)
-                return false;
+            if (c > 0f && b > 0f) return false;
 
             float discriminant = b * b - c;
 
-            if (discriminant < 0f)
-                return false;
+            if (discriminant < 0f) return false;
 
             return true;
         }
@@ -757,6 +762,23 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="ray1">The first ray to test.</param>
         /// <param name="ray2">The second ray to test.</param>
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersect.</returns>
+        public static bool RayIntersectsRay(ref Ray ray1, ref Ray ray2, out Vector3 point)
+        {
+            return RayIntersectsRay(
+                ref ray1.Position, ref ray1.Direction,
+                ref ray2.Position, ref ray2.Direction,
+                out point);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Ray"/>.
+        /// </summary>
+        /// <param name="rPos1">First ray position</param>
+        /// <param name="rDir1">First ray direction</param>
+        /// <param name="rPos2">Second ray position</param>
+        /// <param name="rDir2">Second ray direction</param>
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersect.</returns>
@@ -770,19 +792,19 @@ namespace Engine.Mathematics
         /// of the second ray, det denotes the determinant of a matrix, x denotes the cross
         /// product, [ ] denotes a matrix, and || || denotes the length or magnitude of a vector.
         /// </remarks>
-        public static bool RayIntersectsRay(ref Ray ray1, ref Ray ray2, out Vector3 point)
+        public static bool RayIntersectsRay(ref Vector3 rPos1, ref Vector3 rDir1, ref Vector3 rPos2, ref Vector3 rDir2, out Vector3 point)
         {
             //Source: Real-Time Rendering, Third Edition
             //Reference: Page 780
 
-            Vector3 cross = Vector3.Cross(ray1.Direction, ray2.Direction);
+            Vector3.Cross(ref rDir1, ref rDir2, out Vector3 cross);
             float denominator = cross.Length();
 
             //Lines are parallel and on top of each other.
             if (MathUtils.IsZero(denominator) &&
-                MathUtils.NearEqual(ray2.Position.X, ray1.Position.X) &&
-                MathUtils.NearEqual(ray2.Position.Y, ray1.Position.Y) &&
-                MathUtils.NearEqual(ray2.Position.Z, ray1.Position.Z))
+                MathUtils.NearEqual(rPos2.X, rPos1.X) &&
+                MathUtils.NearEqual(rPos2.Y, rPos1.Y) &&
+                MathUtils.NearEqual(rPos2.Z, rPos1.Z))
             {
                 point = Vector3.Zero;
                 return true;
@@ -791,12 +813,12 @@ namespace Engine.Mathematics
             denominator *= denominator;
 
             //3x3 matrix for the first ray.
-            float m11 = ray2.Position.X - ray1.Position.X;
-            float m12 = ray2.Position.Y - ray1.Position.Y;
-            float m13 = ray2.Position.Z - ray1.Position.Z;
-            float m21 = ray2.Direction.X;
-            float m22 = ray2.Direction.Y;
-            float m23 = ray2.Direction.Z;
+            float m11 = rPos2.X - rPos1.X;
+            float m12 = rPos2.Y - rPos1.Y;
+            float m13 = rPos2.Z - rPos1.Z;
+            float m21 = rDir2.X;
+            float m22 = rDir2.Y;
+            float m23 = rDir2.Z;
             float m31 = cross.X;
             float m32 = cross.Y;
             float m33 = cross.Z;
@@ -811,9 +833,9 @@ namespace Engine.Mathematics
                 m13 * m22 * m31;
 
             //3x3 matrix for the second ray.
-            m21 = ray1.Direction.X;
-            m22 = ray1.Direction.Y;
-            m23 = ray1.Direction.Z;
+            m21 = rDir1.X;
+            m22 = rDir1.Y;
+            m23 = rDir1.Z;
 
             //Determinant of the second matrix.
             float dett =
@@ -829,8 +851,8 @@ namespace Engine.Mathematics
             float t = dett / denominator;
 
             //The points of intersection.
-            Vector3 point1 = ray1.Position + (s * ray1.Direction);
-            Vector3 point2 = ray2.Position + (t * ray2.Direction);
+            var point1 = rPos1 + (s * rDir1);
+            var point2 = rPos2 + (t * rDir2);
 
             //If the points are not equal, no intersection has occurred.
             if (!MathUtils.NearEqual(point2.X, point1.X) ||
@@ -866,11 +888,27 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsSegment(ref Ray ray, ref Segment segment, out float distance, out Vector3 point)
         {
-            Ray rRay1 = ray;
-            Ray rRay2 = new(segment.Point1, segment.Direction);
-            float length = segment.Length;
-
-            bool touch = RayIntersectsRay(ref rRay1, ref rRay2, out Vector3 p);
+            var sDir = segment.Direction;
+            var sLength = segment.Length;
+            return RayIntersectsSegment(
+                ref ray.Position, ref ray.Direction,
+                ref segment.Point1, ref sDir, ref sLength,
+                out distance, out point);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Segment"/>.
+        /// </summary>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
+        /// <param name="sPos">Segment position</param>
+        /// <param name="sDir">Segment direction</param>
+        /// <param name="sLength">Segment length</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSegment(ref Vector3 rPos, ref Vector3 rDir, ref Vector3 sPos, ref Vector3 sDir, ref float sLength, out float distance, out Vector3 point)
+        {
+            bool touch = RayIntersectsRay(ref rPos, ref rDir, ref sPos, ref sDir, out Vector3 p);
             if (!touch)
             {
                 point = Vector3.Zero;
@@ -879,8 +917,8 @@ namespace Engine.Mathematics
                 return false;
             }
 
-            float d = Vector3.Distance(ray.Position, p);
-            if (d > length)
+            Vector3.Distance(ref rPos, ref p, out float d);
+            if (d > sLength)
             {
                 point = Vector3.Zero;
                 distance = float.MaxValue;
@@ -902,8 +940,12 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsSegment(ref PickingRay ray, ref Segment segment, out Vector3 point)
         {
-            Ray r = ray;
-            return RayIntersectsSegment(ref r, ref segment, out _, out point);
+            var sDir = segment.Direction;
+            var sLength = segment.Length;
+            return RayIntersectsSegment(
+                ref ray.Position, ref ray.Direction,
+                ref segment.Point1, ref sDir, ref sLength,
+                out _, out point);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Segment"/>.
@@ -915,24 +957,29 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsSegment(ref PickingRay ray, ref Segment segment, out float distance, out Vector3 point)
         {
-            Ray r = ray;
-            return RayIntersectsSegment(ref r, ref segment, out distance, out point);
+            var sDir = segment.Direction;
+            var sLength = segment.Length;
+            return RayIntersectsSegment(
+                ref ray.Position, ref ray.Direction,
+                ref segment.Point1, ref sDir, ref sLength,
+                out distance, out point);
         }
 
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
         /// <param name="plane">The plane to test.</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersect.</returns>
-        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out float distance)
+        public static bool RayIntersectsPlane(ref Vector3 rPos, ref Vector3 rDir, ref Plane plane, out float distance)
         {
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 175
 
-            float direction = Vector3.Dot(plane.Normal, ray.Direction);
+            Vector3.Dot(ref plane.Normal, ref rDir, out float direction);
 
             if (MathUtils.IsZero(direction))
             {
@@ -940,7 +987,7 @@ namespace Engine.Mathematics
                 return false;
             }
 
-            float position = Vector3.Dot(plane.Normal, ray.Position);
+            Vector3.Dot(ref plane.Normal, ref rPos, out float position);
             distance = (-plane.D - position) / direction;
 
             if (distance < 0f)
@@ -954,6 +1001,40 @@ namespace Engine.Mathematics
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
         /// </summary>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
+        /// <param name="plane">The plane to test</param>
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsPlane(ref Vector3 rPos, ref Vector3 rDir, ref Plane plane, out float distance, out Vector3 point)
+        {
+            if (!RayIntersectsPlane(ref rPos, ref rDir, ref plane, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = rPos + (rDir * d);
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="plane">The plane to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersect.</returns>
+        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out float distance)
+        {
+            return RayIntersectsPlane(ref ray.Position, ref ray.Direction, ref plane, out distance);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
+        /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="plane">The plane to test</param>
         /// <param name="point">When the method completes, contains the point of intersection,
@@ -961,23 +1042,21 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out float distance, out Vector3 point)
         {
-            //Source: Real-Time Collision Detection by Christer Ericson
-            //Reference: Page 175
+            return RayIntersectsPlane(ref ray.Position, ref ray.Direction, ref plane, out distance, out point);
+        }
 
-            if (RayIntersectsPlane(ref ray, ref plane, out distance))
-            {
-                point = ray.Position + (ray.Direction * distance);
-                return true;
-            }
-
-            point = Vector3.Zero;
-            return false;
+        static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 v1, ref Vector3 v2, ref Vector3 v3)
+        {
+            MathUtils.CalculateTriPointNormalLH(ref v1, ref v2, ref v3, out var normal);
+            Vector3.Dot(ref v, ref normal, out float l);
+            return l < 0f;
         }
 
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
         /// <param name="vertex1">The first vertex of the triangle to test.</param>
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
@@ -991,29 +1070,22 @@ namespace Engine.Mathematics
         /// the ray, no intersection is assumed to have happened. In both cases of assumptions,
         /// this method returns false.
         /// </remarks>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        public static bool RayIntersectsTriangle(ref Vector3 rPos, ref Vector3 rDir, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
         {
             //Source: Fast Minimum Storage Ray / Triangle Intersection
             //Reference: http://www.cs.virginia.edu/~gfx/Courses/2003/ImageSynthesis/papers/Acceleration/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 
             //Compute vectors along two edges of the triangle.
-            Vector3 edge1, edge2;
+            Vector3.Normalize(ref rDir, out var dir);
 
             //Edge 1
-            edge1.X = vertex2.X - vertex1.X;
-            edge1.Y = vertex2.Y - vertex1.Y;
-            edge1.Z = vertex2.Z - vertex1.Z;
+            Vector3.Subtract(ref vertex2, ref vertex1, out Vector3 edge1);
 
             //Edge2
-            edge2.X = vertex3.X - vertex1.X;
-            edge2.Y = vertex3.Y - vertex1.Y;
-            edge2.Z = vertex3.Z - vertex1.Z;
+            Vector3.Subtract(ref vertex3, ref vertex1, out Vector3 edge2);
 
             //Cross product of ray direction and edge2 - first part of determinant.
-            Vector3 directioncrossedge2;
-            directioncrossedge2.X = (ray.Direction.Y * edge2.Z) - (ray.Direction.Z * edge2.Y);
-            directioncrossedge2.Y = (ray.Direction.Z * edge2.X) - (ray.Direction.X * edge2.Z);
-            directioncrossedge2.Z = (ray.Direction.X * edge2.Y) - (ray.Direction.Y * edge2.X);
+            Vector3.Cross(ref dir, ref edge2, out Vector3 directioncrossedge2);
 
             //Compute the determinant.
             //Dot product of edge1 and the first part of determinant.
@@ -1031,10 +1103,7 @@ namespace Engine.Mathematics
             float inversedeterminant = 1.0f / determinant;
 
             //Calculate the U parameter of the intersection point.
-            Vector3 distanceVector;
-            distanceVector.X = ray.Position.X - vertex1.X;
-            distanceVector.Y = ray.Position.Y - vertex1.Y;
-            distanceVector.Z = ray.Position.Z - vertex1.Z;
+            Vector3.Subtract(ref rPos, ref vertex1, out Vector3 distanceVector);
 
             float triangleU = (distanceVector.X * directioncrossedge2.X) + (distanceVector.Y * directioncrossedge2.Y) + (distanceVector.Z * directioncrossedge2.Z);
             triangleU *= inversedeterminant;
@@ -1047,12 +1116,9 @@ namespace Engine.Mathematics
             }
 
             //Calculate the V parameter of the intersection point.
-            Vector3 distancecrossedge1;
-            distancecrossedge1.X = (distanceVector.Y * edge1.Z) - (distanceVector.Z * edge1.Y);
-            distancecrossedge1.Y = (distanceVector.Z * edge1.X) - (distanceVector.X * edge1.Z);
-            distancecrossedge1.Z = (distanceVector.X * edge1.Y) - (distanceVector.Y * edge1.X);
+            Vector3.Cross(ref distanceVector, ref edge1, out Vector3 distancecrossedge1);
 
-            float triangleV = ((ray.Direction.X * distancecrossedge1.X) + (ray.Direction.Y * distancecrossedge1.Y)) + (ray.Direction.Z * distancecrossedge1.Z);
+            float triangleV = (dir.X * distancecrossedge1.X) + (dir.Y * distancecrossedge1.Y) + (dir.Z * distancecrossedge1.Z);
             triangleV *= inversedeterminant;
 
             //Make sure it is inside the triangle.
@@ -1079,6 +1145,55 @@ namespace Engine.Mathematics
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
         /// </summary>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
+        /// <param name="vertex1">The first vertex of the triangle to test.</param>
+        /// <param name="vertex2">The second vertex of the triangle to test.</param>
+        /// <param name="vertex3">The third vertex of the triangle to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        /// <remarks>
+        /// This method tests if the ray intersects either the front or back of the triangle.
+        /// If the ray is parallel to the triangle's plane, no intersection is assumed to have
+        /// happened. If the intersection of the ray and the triangle is behind the origin of
+        /// the ray, no intersection is assumed to have happened. In both cases of assumptions,
+        /// this method returns false.
+        /// </remarks>
+        public static bool RayIntersectsTriangle(ref Vector3 rPos, ref Vector3 rDir, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance, out Vector3 point)
+        {
+            if (!RayIntersectsTriangle(ref rPos, ref rDir, ref vertex1, ref vertex2, ref vertex3, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = rPos + (Vector3.Normalize(rDir) * d);
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="vertex1">The first vertex of the triangle to test.</param>
+        /// <param name="vertex2">The second vertex of the triangle to test.</param>
+        /// <param name="vertex3">The third vertex of the triangle to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        {
+            return RayIntersectsTriangle(
+                ref ray.Position, ref ray.Direction,
+                ref vertex1, ref vertex2, ref vertex3,
+                out distance);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="vertex1">The first vertex of the triangle to test.</param>
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
@@ -1089,27 +1204,24 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance, out Vector3 point)
         {
-            if (!RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
-            {
-                point = Vector3.Zero;
-                distance = float.MaxValue;
-                return false;
-            }
-
-            point = ray.Position + ray.Direction * d;
-            distance = Vector3.Distance(point, ray.Position);
-            return true;
+            return RayIntersectsTriangle(
+                ref ray.Position, ref ray.Direction,
+                ref vertex1, ref vertex2, ref vertex3,
+                out distance, out point);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Triangle"/>.
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="tri">Triangle</param>
-        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Triangle tri, out Vector3 point)
+        public static bool RayIntersectsTriangle(ref Ray ray, ref Triangle tri, out float distance)
         {
-            return RayIntersectsTriangle(ref ray, ref tri, out _, out point);
+            return RayIntersectsTriangle(
+                ref ray.Position, ref ray.Direction,
+                ref tri.Point1, ref tri.Point2, ref tri.Point3,
+                out distance);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Triangle"/>.
@@ -1121,10 +1233,10 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref Ray ray, ref Triangle tri, out float distance, out Vector3 point)
         {
-            var v1 = tri.Point1;
-            var v2 = tri.Point2;
-            var v3 = tri.Point3;
-            return RayIntersectsTriangle(ref ray, ref v1, ref v2, ref v3, out distance, out point);
+            return RayIntersectsTriangle(
+                ref ray.Position, ref ray.Direction,
+                ref tri.Point1, ref tri.Point2, ref tri.Point3,
+                out distance, out point);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
@@ -1145,7 +1257,30 @@ namespace Engine.Mathematics
         /// </remarks>
         public static bool RayIntersectsTriangle(ref PickingRay ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
         {
-            return RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out distance, out _);
+            var rDir = ray.Direction;
+            if (ray.FacingOnly)
+            {
+                if (!VectorFacingTriangle(ref rDir, ref vertex1, ref vertex2, ref vertex3))
+                {
+                    distance = float.MaxValue;
+                    return false;
+                }
+            }
+
+            if (!RayIntersectsTriangle(ref ray.Position, ref rDir, ref vertex1, ref vertex2, ref vertex3, out float d))
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            if (d > ray.Length)
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            distance = d;
+            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
@@ -1160,31 +1295,27 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref PickingRay ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance, out Vector3 point)
         {
-            point = Vector3.Zero;
-            distance = float.MaxValue;
-
-            Ray r = ray;
-            if (RayIntersectsTriangle(ref r, ref vertex1, ref vertex2, ref vertex3, out float dist, out var p))
+            if (!RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
             {
-                if (dist > ray.MaxDistance) return false;
-
-                point = p;
-                distance = dist;
-                return true;
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
             }
 
-            return false;
+            distance = d;
+            point = ray.Position + ray.Direction * d;
+            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Triangle"/>.
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="tri">Triangle</param>
-        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref PickingRay ray, ref Triangle tri, out Vector3 point)
+        public static bool RayIntersectsTriangle(ref PickingRay ray, ref Triangle tri, out float distance)
         {
-            return RayIntersectsTriangle(ref ray, ref tri, out _, out point);
+            return RayIntersectsTriangle(ref ray, ref tri.Point1, ref tri.Point2, ref tri.Point3, out distance);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="PickingRay"/> and a <see cref="Triangle"/>.
@@ -1196,46 +1327,19 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref PickingRay ray, ref Triangle tri, out float distance, out Vector3 point)
         {
-            point = Vector3.Zero;
-            distance = float.MaxValue;
-
-            if (ray.FacingOnly)
-            {
-                bool cull = Vector3.Dot(ray.Direction, tri.Normal) >= 0f;
-                if (cull)
-                {
-                    point = Vector3.Zero;
-                    distance = float.MaxValue;
-
-                    return false;
-                }
-            }
-
-            Ray r = ray;
-            var v1 = tri.Point1;
-            var v2 = tri.Point2;
-            var v3 = tri.Point3;
-            if (RayIntersectsTriangle(ref r, ref v1, ref v2, ref v3, out float dist, out var p))
-            {
-                if (dist > ray.MaxDistance) return false;
-
-                point = p;
-                distance = dist;
-                return true;
-            }
-
-            return false;
+            return RayIntersectsTriangle(ref ray, ref tri.Point1, ref tri.Point2, ref tri.Point3, out distance, out point);
         }
 
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingBox"/>.
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
         /// <param name="box">The box to test.</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out float distance)
+        public static bool RayIntersectsBox(ref Vector3 rPos, ref Vector3 rDir, ref BoundingBox box, out float distance)
         {
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 179
@@ -1243,9 +1347,9 @@ namespace Engine.Mathematics
             distance = 0f;
             float tmax = float.MaxValue;
 
-            if (MathUtils.IsZero(ray.Direction.X))
+            if (MathUtils.IsZero(rDir.X))
             {
-                if (ray.Position.X < box.Minimum.X || ray.Position.X > box.Maximum.X)
+                if (rPos.X < box.Minimum.X || rPos.X > box.Maximum.X)
                 {
                     distance = float.MaxValue;
                     return false;
@@ -1253,9 +1357,9 @@ namespace Engine.Mathematics
             }
             else
             {
-                float inverse = 1.0f / ray.Direction.X;
-                float t1 = (box.Minimum.X - ray.Position.X) * inverse;
-                float t2 = (box.Maximum.X - ray.Position.X) * inverse;
+                float inverse = 1f / rDir.X;
+                float t1 = (box.Minimum.X - rPos.X) * inverse;
+                float t2 = (box.Maximum.X - rPos.X) * inverse;
 
                 if (t1 > t2)
                 {
@@ -1272,9 +1376,9 @@ namespace Engine.Mathematics
                 }
             }
 
-            if (MathUtils.IsZero(ray.Direction.Y))
+            if (MathUtils.IsZero(rDir.Y))
             {
-                if (ray.Position.Y < box.Minimum.Y || ray.Position.Y > box.Maximum.Y)
+                if (rPos.Y < box.Minimum.Y || rPos.Y > box.Maximum.Y)
                 {
                     distance = float.MaxValue;
                     return false;
@@ -1282,9 +1386,9 @@ namespace Engine.Mathematics
             }
             else
             {
-                float inverse = 1.0f / ray.Direction.Y;
-                float t1 = (box.Minimum.Y - ray.Position.Y) * inverse;
-                float t2 = (box.Maximum.Y - ray.Position.Y) * inverse;
+                float inverse = 1f / rDir.Y;
+                float t1 = (box.Minimum.Y - rPos.Y) * inverse;
+                float t2 = (box.Maximum.Y - rPos.Y) * inverse;
 
                 if (t1 > t2)
                 {
@@ -1301,9 +1405,9 @@ namespace Engine.Mathematics
                 }
             }
 
-            if (MathUtils.IsZero(ray.Direction.Z))
+            if (MathUtils.IsZero(rDir.Z))
             {
-                if (ray.Position.Z < box.Minimum.Z || ray.Position.Z > box.Maximum.Z)
+                if (rPos.Z < box.Minimum.Z || rPos.Z > box.Maximum.Z)
                 {
                     distance = float.MaxValue;
                     return false;
@@ -1311,9 +1415,9 @@ namespace Engine.Mathematics
             }
             else
             {
-                float inverse = 1.0f / ray.Direction.Z;
-                float t1 = (box.Minimum.Z - ray.Position.Z) * inverse;
-                float t2 = (box.Maximum.Z - ray.Position.Z) * inverse;
+                float inverse = 1f / rDir.Z;
+                float t1 = (box.Minimum.Z - rPos.Z) * inverse;
+                float t2 = (box.Maximum.Z - rPos.Z) * inverse;
 
                 if (t1 > t2)
                 {
@@ -1331,6 +1435,41 @@ namespace Engine.Mathematics
             }
 
             return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingBox"/>.
+        /// </summary>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
+        /// <param name="box">The box to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsBox(ref Vector3 rPos, ref Vector3 rDir, ref BoundingBox box, out float distance, out Vector3 point)
+        {
+            if (!RayIntersectsBox(ref rPos, ref rDir, ref box, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = rPos + (rDir * d);
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingBox"/>.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="box">The box to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out float distance)
+        {
+            return RayIntersectsBox(ref ray.Position, ref ray.Direction, ref box, out distance);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
@@ -1343,14 +1482,7 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out float distance, out Vector3 point)
         {
-            if (!RayIntersectsBox(ref ray, ref box, out distance))
-            {
-                point = Vector3.Zero;
-                return false;
-            }
-
-            point = ray.Position + (ray.Direction * distance);
-            return true;
+            return RayIntersectsBox(ref ray.Position, ref ray.Direction, ref box, out distance, out point);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingBox"/>.
@@ -1362,8 +1494,21 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsBox(ref PickingRay ray, ref BoundingBox box, out float distance)
         {
-            Ray r = ray;
-            return RayIntersectsBox(ref r, ref box, out distance, out _);
+            var rDir = ray.Direction;
+            if (!RayIntersectsBox(ref ray.Position, ref rDir, ref box, out float d))
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            if (d > ray.Length)
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            distance = d;
+            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="Plane"/>.
@@ -1376,27 +1521,37 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsBox(ref PickingRay ray, ref BoundingBox box, out float distance, out Vector3 point)
         {
-            Ray r = ray;
-            return RayIntersectsBox(ref r, ref box, out distance, out point);
+            if (!RayIntersectsBox(ref ray, ref box, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = ray.Position + (ray.Direction * d);
+            return true;
         }
 
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingSphere"/>.
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out float distance)
+        public static bool RayIntersectsSphere(ref Vector3 rPos, ref Vector3 rDir, ref BoundingSphere sphere, out float distance)
         {
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 177
 
-            Vector3 m = Vector3.Subtract(ray.Position, sphere.Center);
+            Vector3.Subtract(ref rPos, ref sphere.Center, out Vector3 m);
 
-            float b = Vector3.Dot(m, ray.Direction);
-            float c = Vector3.Dot(m, m) - (sphere.Radius * sphere.Radius);
+            Vector3.Dot(ref m, ref rDir, out float b);
+            Vector3.Dot(ref m, ref m, out float c);
+            c -= sphere.Radius * sphere.Radius;
 
             if (c > 0f && b > 0f)
             {
@@ -1415,8 +1570,81 @@ namespace Engine.Mathematics
             distance = -b - MathF.Sqrt(discriminant);
 
             if (distance < 0f)
+            {
                 distance = 0f;
+            }
 
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingSphere"/>. 
+        /// </summary>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
+        /// <param name="sphere">The sphere to test.</param>
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSphere(ref Vector3 rPos, ref Vector3 rDir, ref BoundingSphere sphere, out float distance, out Vector3 point)
+        {
+            if (!RayIntersectsSphere(ref rPos, ref rDir, ref sphere, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = rPos + (Vector3.Normalize(rDir) * d);
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingSphere"/>.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="sphere">The sphere to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out float distance)
+        {
+            return RayIntersectsSphere(ref ray.Position, ref ray.Direction, ref sphere, out distance);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingSphere"/>. 
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="sphere">The sphere to test.</param>
+        /// <param name="point">When the method completes, contains the point of intersection,
+        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out float distance, out Vector3 point)
+        {
+            return RayIntersectsSphere(ref ray.Position, ref ray.Direction, ref sphere, out distance, out point);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a <see cref="BoundingSphere"/>.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="sphere">The sphere to test.</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection,
+        /// or 0 if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsSphere(ref PickingRay ray, ref BoundingSphere sphere, out float distance)
+        {
+            if (!RayIntersectsSphere(ref ray.Position, ref ray.Direction, ref sphere, out float d))
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            if (d > ray.Length)
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            distance = d;
             return true;
         }
         /// <summary>
@@ -1427,29 +1655,30 @@ namespace Engine.Mathematics
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out Vector3 point)
+        public static bool RayIntersectsSphere(ref PickingRay ray, ref BoundingSphere sphere, out float distance, out Vector3 point)
         {
-            if (!RayIntersectsSphere(ref ray, ref sphere, out float distance))
+            if (!RayIntersectsSphere(ref ray, ref sphere, out distance))
             {
                 point = Vector3.Zero;
                 return false;
             }
 
-            point = ray.Position + (ray.Direction * distance);
+            point = ray.Position + (Vector3.Normalize(ray.Direction) * distance);
             return true;
         }
 
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Ray.
         /// </summary>
-        /// <param name="ray">The Ray to check for intersection with.</param>
+        /// <param name="rPos">Ray position</param>
+        /// <param name="rDir">Ray direction</param>
         /// <param name="frustum">The BoundingFrustum to check for intersection with.</param>
         /// <param name="inDistance">The distance at which the ray enters the frustum if there is an intersection and the ray starts outside the frustum.</param>
         /// <param name="outDistance">The distance at which the ray exits the frustum if there is an intersection.</param>
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
-        public static bool RayIntersectsFrustum(ref Ray ray, ref BoundingFrustum frustum, out float? inDistance, out float? outDistance)
+        public static bool RayIntersectsFrustum(ref Vector3 rPos, ref Vector3 rDir, ref BoundingFrustum frustum, out float? inDistance, out float? outDistance)
         {
-            if (FrustumContainsPoint(ref frustum, ref ray.Position) != ContainmentType.Disjoint)
+            if (FrustumContainsPoint(ref frustum, ref rPos) != ContainmentType.Disjoint)
             {
                 float nearstPlaneDistance = float.MaxValue;
 
@@ -1457,7 +1686,7 @@ namespace Engine.Mathematics
                 {
                     var plane = frustum.GetPlane(i);
 
-                    if (RayIntersectsPlane(ref ray, ref plane, out float distance) && distance < nearstPlaneDistance)
+                    if (RayIntersectsPlane(ref rPos, ref rDir, ref plane, out float distance) && distance < nearstPlaneDistance)
                     {
                         nearstPlaneDistance = distance;
                     }
@@ -1478,16 +1707,16 @@ namespace Engine.Mathematics
                 {
                     var plane = frustum.GetPlane(i);
 
-                    if (RayIntersectsPlane(ref ray, ref plane, out float distance))
+                    if (RayIntersectsPlane(ref rPos, ref rDir, ref plane, out float distance))
                     {
                         minDist = Math.Min(minDist, distance);
                         maxDist = Math.Max(maxDist, distance);
                     }
                 }
 
-                Vector3 minPoint = ray.Position + ray.Direction * minDist;
-                Vector3 maxPoint = ray.Position + ray.Direction * maxDist;
-                Vector3 center = (minPoint + maxPoint) / 2f;
+                Vector3 minPoint = rPos + rDir * minDist;
+                Vector3 maxPoint = rPos + rDir * maxDist;
+                Vector3 center = (minPoint + maxPoint) * 0.5f;
                 if (FrustumContainsPoint(ref frustum, ref center) != ContainmentType.Disjoint)
                 {
                     inDistance = minDist;
@@ -1501,6 +1730,18 @@ namespace Engine.Mathematics
                     return false;
                 }
             }
+        }
+        /// <summary>
+        /// Checks whether the current BoundingFrustum intersects the specified Ray.
+        /// </summary>
+        /// <param name="ray">The Ray to check for intersection with.</param>
+        /// <param name="frustum">The BoundingFrustum to check for intersection with.</param>
+        /// <param name="inDistance">The distance at which the ray enters the frustum if there is an intersection and the ray starts outside the frustum.</param>
+        /// <param name="outDistance">The distance at which the ray exits the frustum if there is an intersection.</param>
+        /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
+        public static bool RayIntersectsFrustum(ref Ray ray, ref BoundingFrustum frustum, out float? inDistance, out float? outDistance)
+        {
+            return RayIntersectsFrustum(ref ray.Position, ref ray.Direction, ref frustum, out inDistance, out outDistance);
         }
 
         /// <summary>
@@ -1518,17 +1759,17 @@ namespace Engine.Mathematics
             point = Vector3.Zero;
 
             var pFrom = new Plane(center, normal);
-            if (!RayIntersectsPlane(ref ray, ref pFrom, out float dist, out Vector3 p))
+            if (!RayIntersectsPlane(ref ray, ref pFrom, out float d, out Vector3 p))
             {
                 return false;
             }
 
-            if (dist > radius)
+            if (d > radius)
             {
                 return false;
             }
 
-            distance = dist;
+            distance = d;
             point = p;
             return true;
         }
@@ -1542,15 +1783,21 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected</returns>
         public static bool SegmentIntersectsBox(ref Segment segment, ref BoundingBox box, out float distance)
         {
-            var ray = new Ray(segment.Point1, segment.Direction);
-            if (RayIntersectsBox(ref ray, ref box, out distance) && distance <= segment.Length)
+            var rDir = segment.Direction;
+            if (!RayIntersectsBox(ref segment.Point1, ref rDir, ref box, out float d))
             {
+                distance = float.MaxValue;
                 return true;
             }
 
-            distance = float.MaxValue;
+            if (d > segment.Length)
+            {
+                distance = float.MaxValue;
+                return false;
+            }
 
-            return false;
+            distance = d;
+            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="BoundingBox"/>
@@ -1562,26 +1809,18 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected</returns>
         public static bool SegmentIntersectsBox(ref Segment segment, ref BoundingBox box, out float distance, out Vector3 point)
         {
-            point = Vector3.Zero;
-            distance = float.MaxValue;
-
-            var ray = new Ray(segment.Point1, segment.Direction);
-            if (!RayIntersectsBox(ref ray, ref box, out _, out var pos))
+            if (!SegmentIntersectsBox(ref segment, ref box, out float d))
             {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
                 return false;
             }
 
-            float d = Vector3.Distance(segment.Point1, pos);
-            if (d > segment.Length)
-            {
-                return false;
-            }
-
-            point = pos;
             distance = d;
-
+            point = segment.Point1 + (segment.Direction * d);
             return true;
         }
+
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
         /// </summary>
@@ -1591,8 +1830,21 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(ref Segment segment, ref Triangle tri, out float distance)
         {
-            var ray = new PickingRay(segment);
-            return RayIntersectsTriangle(ref ray, ref tri, out distance, out _);
+            var rDir = segment.Direction;
+            if (!RayIntersectsTriangle(ref segment.Point1, ref rDir, ref tri.Point1, ref tri.Point2, ref tri.Point3, out float d))
+            {
+                distance = float.MaxValue;
+                return true;
+            }
+
+            if (d > segment.Length)
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            distance = d;
+            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
@@ -1604,8 +1856,16 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(ref Segment segment, ref Triangle tri, out float distance, out Vector3 point)
         {
-            var ray = new PickingRay(segment);
-            return RayIntersectsTriangle(ref ray, ref tri, out distance, out point);
+            if (!SegmentIntersectsTriangle(ref segment, ref tri, out float d))
+            {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
+                return false;
+            }
+
+            distance = d;
+            point = segment.Point1 + segment.Direction * d;
+            return true;
         }
 
         /// <summary>
@@ -1619,23 +1879,19 @@ namespace Engine.Mathematics
             // Assume the point is in the center of coordinates
 
             // Subtract the triangle points to the test point
-            var p1 = triangle.Point1 - point;
-            var p2 = triangle.Point2 - point;
-            var p3 = triangle.Point3 - point;
+            Vector3.Subtract(ref triangle.Point1, ref point, out var p1);
+            Vector3.Subtract(ref triangle.Point2, ref point, out var p2);
+            Vector3.Subtract(ref triangle.Point3, ref point, out var p3);
 
             // As the point is in the center, all the triangle normals must be facing to the same direction
-            var u = Vector3.Cross(p2, p3);
-            var v = Vector3.Cross(p3, p1);
-            if (Vector3.Dot(u, v) < 0f)
-            {
-                return false;
-            }
+            Vector3.Cross(ref p2, ref p3, out var u);
+            Vector3.Cross(ref p3, ref p1, out var v);
+            Vector3.Dot(ref u, ref v, out float uv);
+            if (uv < 0f) return false;
 
-            var w = Vector3.Cross(p1, p2);
-            if (Vector3.Dot(u, w) < 0f)
-            {
-                return false;
-            }
+            Vector3.Cross(ref p1, ref p2, out var w);
+            Vector3.Dot(ref u, ref w, out float uw);
+            if (uw < 0f) return false;
 
             return true;
         }
@@ -1647,7 +1903,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the triangles intersects</returns>
         public static bool TriangleIntersectsTriangle(ref Triangle triangle1, ref Triangle triangle2)
         {
-            return IntersectionTriangle.Intersection(triangle1, triangle2);
+            return IntersectionTriangle.Intersection(ref triangle1, ref triangle2);
         }
         /// <summary>
         /// Determines whether the triangles intersects or not
@@ -1658,7 +1914,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the triangles intersects</returns>
         public static bool TriangleIntersectsTriangle(ref Triangle triangle1, ref Triangle triangle2, out Segment? segment)
         {
-            return IntersectionTriangle.Intersection(triangle1, triangle2, out segment);
+            return IntersectionTriangle.Intersection(ref triangle1, ref triangle2, out segment);
         }
         /// <summary>
         /// Determines whether the triangle and the mesh intersects or not
@@ -1673,10 +1929,9 @@ namespace Engine.Mathematics
 
             for (int i = 0; i < mesh.Length; i++)
             {
-                var t = mesh[i];
-                if (TriangleIntersectsTriangle(ref triangle, ref t))
+                if (TriangleIntersectsTriangle(ref triangle, ref mesh[i]))
                 {
-                    tris.Add(t);
+                    tris.Add(mesh[i]);
                 }
             }
 
@@ -1700,10 +1955,9 @@ namespace Engine.Mathematics
             bool intersected = false;
             for (int i = 0; i < mesh.Length; i++)
             {
-                var t = mesh[i];
-                if (TriangleIntersectsTriangle(ref triangle, ref t, out var segment))
+                if (TriangleIntersectsTriangle(ref triangle, ref mesh[i], out var segment))
                 {
-                    tris.Add(t);
+                    tris.Add(mesh[i]);
                     if (segment.HasValue) segs.Add(segment.Value);
 
                     intersected = true;
@@ -1724,15 +1978,11 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static PlaneIntersectionType PlaneIntersectsPoint(ref Plane plane, ref Vector3 point)
         {
-            float distance = Vector3.Dot(plane.Normal, point);
+            Vector3.Dot(ref plane.Normal, ref point, out float distance);
             distance += plane.D;
 
-            if (distance > 0f)
-                return PlaneIntersectionType.Front;
-
-            if (distance < 0f)
-                return PlaneIntersectionType.Back;
-
+            if (distance > 0f) return PlaneIntersectionType.Front;
+            if (distance < 0f) return PlaneIntersectionType.Back;
             return PlaneIntersectionType.Intersecting;
         }
         /// <summary>
@@ -1763,16 +2013,13 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool PlaneIntersectsPlane(ref Plane plane1, ref Plane plane2)
         {
-            Vector3 direction = Vector3.Cross(plane1.Normal, plane2.Normal);
+            Vector3.Cross(ref plane1.Normal, ref plane2.Normal, out Vector3 direction);
 
             //If direction is the zero vector, the planes are parallel and possibly
             //coincident. It is not an intersection. The dot product will tell us.
-            float denominator = Vector3.Dot(direction, direction);
+            Vector3.Dot(ref direction, ref direction, out float denominator);
 
-            if (MathUtils.IsZero(denominator))
-                return false;
-
-            return true;
+            return !MathUtils.IsZero(denominator);
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Plane"/> and a <see cref="Plane"/>.
@@ -1792,23 +2039,23 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 207
 
-            Vector3 direction = Vector3.Cross(plane1.Normal, plane2.Normal);
+            Vector3.Cross(ref plane1.Normal, ref plane2.Normal, out Vector3 direction);
 
             //If direction is the zero vector, the planes are parallel and possibly
             //coincident. It is not an intersection. The dot product will tell us.
-            float denominator = Vector3.Dot(direction, direction);
+            Vector3.Dot(ref direction, ref direction, out float denominator);
 
             //We assume the planes are normalized, therefore the denominator
             //only serves as a parallel and coincident check. Otherwise we need
             //to divide the point by the denominator.
             if (MathUtils.IsZero(denominator))
             {
-                line = new Ray();
+                line = new();
                 return false;
             }
 
             Vector3 temp = plane1.D * plane2.Normal - plane2.D * plane1.Normal;
-            Vector3 point = Vector3.Cross(temp, direction);
+            Vector3.Cross(ref temp, ref direction, out Vector3 point);
 
             line.Position = point;
             line.Direction = direction;
@@ -1854,23 +2101,18 @@ namespace Engine.Mathematics
 
             Vector3 min;
             Vector3 max;
+            max.X = (plane.Normal.X >= 0f) ? box.Minimum.X : box.Maximum.X;
+            max.Y = (plane.Normal.Y >= 0f) ? box.Minimum.Y : box.Maximum.Y;
+            max.Z = (plane.Normal.Z >= 0f) ? box.Minimum.Z : box.Maximum.Z;
+            min.X = (plane.Normal.X >= 0f) ? box.Maximum.X : box.Minimum.X;
+            min.Y = (plane.Normal.Y >= 0f) ? box.Maximum.Y : box.Minimum.Y;
+            min.Z = (plane.Normal.Z >= 0f) ? box.Maximum.Z : box.Minimum.Z;
 
-            max.X = (plane.Normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
-            max.Y = (plane.Normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
-            max.Z = (plane.Normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
-            min.X = (plane.Normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
-            min.Y = (plane.Normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
-            min.Z = (plane.Normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
+            Vector3.Dot(ref plane.Normal, ref max, out float distance);
+            if (distance + plane.D > 0f) return PlaneIntersectionType.Front;
 
-            float distance = Vector3.Dot(plane.Normal, max);
-
-            if (distance + plane.D > 0.0f)
-                return PlaneIntersectionType.Front;
-
-            distance = Vector3.Dot(plane.Normal, min);
-
-            if (distance + plane.D < 0.0f)
-                return PlaneIntersectionType.Back;
+            Vector3.Dot(ref plane.Normal, ref min, out distance);
+            if (distance + plane.D < 0f) return PlaneIntersectionType.Back;
 
             return PlaneIntersectionType.Intersecting;
         }
@@ -1885,15 +2127,11 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 160
 
-            float distance = Vector3.Dot(plane.Normal, sphere.Center);
+            Vector3.Dot(ref plane.Normal, ref sphere.Center, out float distance);
             distance += plane.D;
 
-            if (distance > sphere.Radius)
-                return PlaneIntersectionType.Front;
-
-            if (distance < -sphere.Radius)
-                return PlaneIntersectionType.Back;
-
+            if (distance > sphere.Radius) return PlaneIntersectionType.Front;
+            if (distance < -sphere.Radius) return PlaneIntersectionType.Back;
             return PlaneIntersectionType.Intersecting;
         }
         /// <summary>
@@ -1908,49 +2146,52 @@ namespace Engine.Mathematics
             var cDir = Vector3.Up;
 
             // dir points towards the plane and -dir in the opposite direction
-            var dir = Vector3.Cross(plane.Normal, cDir);
+            Vector3.Cross(ref plane.Normal, ref cDir, out var dir);
             if (MathUtils.IsZero(dir.Length()))
             {
                 // Perfect base contact. Test distance from center
                 var h = cylinder.Height * 0.5f;
-                var c = cylinder.Center;
-                float distance = Vector3.Dot(plane.Normal, c) + plane.D - h;
+                Vector3.Dot(ref plane.Normal, ref cylinder.Center, out float distance);
+                distance += plane.D - h;
 
-                return distance <= 0;
+                return distance <= 0f;
             }
             else
             {
-                dir = Vector3.Normalize(Vector3.Cross(dir, cDir)) * cylinder.Radius;
+                Vector3.Cross(ref dir, ref cDir, out var dc);
+                dc.Normalize();
+                dir = dc * cylinder.Radius;
 
                 // Find the 4 points to test with the plane
-                var h = cylinder.Height * 0.5f;
-                var capPosition = cylinder.Center + (cDir * h);
-                var basePosition = cylinder.Center - (cDir * h);
+                float h = cylinder.Height * 0.5f;
+                cDir *= h;
+                Vector3.Add(ref cylinder.Center, ref cDir, out Vector3 capPosition);
+                Vector3.Subtract(ref cylinder.Center, ref cDir, out Vector3 basePosition);
 
-                var base1 = basePosition + dir;
-                float distance = Vector3.Dot(plane.Normal, base1) + plane.D;
-                if (distance <= MathUtils.ZeroTolerance)
+                Vector3.Add(ref basePosition, ref dir, out Vector3 base1);
+                Vector3.Dot(ref plane.Normal, ref base1, out float distance); ;
+                if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;
                 }
 
-                var cap1 = capPosition + dir;
-                distance = Vector3.Dot(plane.Normal, cap1) + plane.D;
-                if (distance <= MathUtils.ZeroTolerance)
+                Vector3.Add(ref capPosition, ref dir, out Vector3 cap1);
+                Vector3.Dot(ref plane.Normal, ref cap1, out distance); ;
+                if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;
                 }
 
-                var base2 = basePosition - dir;
-                distance = Vector3.Dot(plane.Normal, base2) + plane.D;
-                if (distance <= MathUtils.ZeroTolerance)
+                Vector3.Subtract(ref basePosition, ref dir, out Vector3 base2);
+                Vector3.Dot(ref plane.Normal, ref base2, out distance);
+                if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;
                 }
 
-                var cap2 = capPosition - dir;
-                distance = Vector3.Dot(plane.Normal, cap2) + plane.D;
-                if (distance <= MathUtils.ZeroTolerance)
+                Vector3.Subtract(ref capPosition, ref dir, out Vector3 cap2);
+                Vector3.Dot(ref plane.Normal, ref cap2, out distance);
+                if (distance + plane.D <= MathUtils.ZeroTolerance)
                 {
                     return true;
                 }
@@ -1958,6 +2199,7 @@ namespace Engine.Mathematics
 
             return false;
         }
+
         /// <summary>
         /// Determines whether a capsule intersects with a plane
         /// </summary>
@@ -1987,13 +2229,18 @@ namespace Engine.Mathematics
         public static void PlanesIntersectsPoint(ref Plane p1, ref Plane p2, ref Plane p3, out Vector3 result)
         {
             //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
-            var p1p2 = Vector3.Cross(p1.Normal, p2.Normal);
-            var p2p3 = Vector3.Cross(p2.Normal, p3.Normal);
-            var p3p1 = Vector3.Cross(p3.Normal, p1.Normal);
-            result = -
-                p1.D * p2p3 / Vector3.Dot(p1.Normal, p2p3) -
-                p2.D * p3p1 / Vector3.Dot(p2.Normal, p3p1) -
-                p3.D * p1p2 / Vector3.Dot(p3.Normal, p1p2);
+            Vector3.Cross(ref p1.Normal, ref p2.Normal, out var p1p2);
+            Vector3.Cross(ref p2.Normal, ref p3.Normal, out var p2p3);
+            Vector3.Cross(ref p3.Normal, ref p1.Normal, out var p3p1);
+
+            Vector3.Dot(ref p1.Normal, ref p2p3, out var d1);
+            Vector3.Dot(ref p2.Normal, ref p3p1, out var d2);
+            Vector3.Dot(ref p3.Normal, ref p1p2, out var d3);
+
+            result =
+                -p1.D * p2p3 / d1
+                - p2.D * p3p1 / d2
+                - p3.D * p1p2 / d3;
         }
 
         /// <summary>
@@ -2004,14 +2251,11 @@ namespace Engine.Mathematics
         /// <returns>Whether the two objects intersected.</returns>
         public static bool BoxIntersectsBox(ref BoundingBox box1, ref BoundingBox box2)
         {
-            if (box1.Minimum.X > box2.Maximum.X || box2.Minimum.X > box1.Maximum.X)
-                return false;
+            if (box1.Minimum.X > box2.Maximum.X || box2.Minimum.X > box1.Maximum.X) return false;
 
-            if (box1.Minimum.Y > box2.Maximum.Y || box2.Minimum.Y > box1.Maximum.Y)
-                return false;
+            if (box1.Minimum.Y > box2.Maximum.Y || box2.Minimum.Y > box1.Maximum.Y) return false;
 
-            if (box1.Minimum.Z > box2.Maximum.Z || box2.Minimum.Z > box1.Maximum.Z)
-                return false;
+            if (box1.Minimum.Z > box2.Maximum.Z || box2.Minimum.Z > box1.Maximum.Z) return false;
 
             return true;
         }
@@ -2026,8 +2270,8 @@ namespace Engine.Mathematics
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 166
 
-            Vector3 vector = Vector3.Clamp(sphere.Center, box.Minimum, box.Maximum);
-            float distance = Vector3.DistanceSquared(sphere.Center, vector);
+            Vector3.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out Vector3 vector);
+            Vector3.DistanceSquared(ref sphere.Center, ref vector, out float distance);
 
             return distance <= sphere.Radius * sphere.Radius;
         }
@@ -2060,27 +2304,27 @@ namespace Engine.Mathematics
             float fex = MathF.Abs(edge1.X);
             float fey = MathF.Abs(edge1.Y);
             float fez = MathF.Abs(edge1.Z);
-            if (!AxisTestX02(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
-            if (!AxisTestY02(boxExtents, origTri, edge1.Z, edge1.X, fez, fex)) return false;
-            if (!AxisTestZ12(boxExtents, origTri, edge1.Y, edge1.X, fey, fex)) return false;
+            if (!AxisTestX02(ref boxExtents, ref origTri, edge1.Z, edge1.Y, fez, fey)) return false;
+            if (!AxisTestY02(ref boxExtents, ref origTri, edge1.Z, edge1.X, fez, fex)) return false;
+            if (!AxisTestZ12(ref boxExtents, ref origTri, edge1.Y, edge1.X, fey, fex)) return false;
 
             // Test second 3 edges
             var edge2 = triangle.GetEdge2();
             fex = MathF.Abs(edge2.X);
             fey = MathF.Abs(edge2.Y);
             fez = MathF.Abs(edge2.Z);
-            if (!AxisTestX02(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
-            if (!AxisTestY02(boxExtents, origTri, edge2.Z, edge2.X, fez, fex)) return false;
-            if (!AxisTestZ01(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
+            if (!AxisTestX02(ref boxExtents, ref origTri, edge2.Z, edge2.Y, fez, fey)) return false;
+            if (!AxisTestY02(ref boxExtents, ref origTri, edge2.Z, edge2.X, fez, fex)) return false;
+            if (!AxisTestZ01(ref boxExtents, ref origTri, edge2.Y, edge2.X, fey, fex)) return false;
 
             // Test third 3 edges
             var edge3 = triangle.GetEdge3();
             fex = MathF.Abs(edge3.X);
             fey = MathF.Abs(edge3.Y);
             fez = MathF.Abs(edge3.Z);
-            if (!AxisTestX01(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
-            if (!AxisTestY01(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
-            if (!AxisTestZ12(boxExtents, origTri, edge3.Y, edge3.X, fey, fex)) return false;
+            if (!AxisTestX01(ref boxExtents, ref origTri, edge3.Z, edge3.Y, fez, fey)) return false;
+            if (!AxisTestY01(ref boxExtents, ref origTri, edge3.Z, edge3.X, fez, fex)) return false;
+            if (!AxisTestZ12(ref boxExtents, ref origTri, edge3.Y, edge3.X, fey, fex)) return false;
 
             // Test X direction
             MathUtils.MinMax(origTri.Point1.X, origTri.Point2.X, origTri.Point3.X, out float min, out float max);
@@ -2151,11 +2395,11 @@ namespace Engine.Mathematics
             //Reference: Page 167
 
             ClosestPointPointTriangle(ref sphere.Center, ref vertex1, ref vertex2, ref vertex3, out Vector3 point);
-            Vector3 v = point - sphere.Center;
+            Vector3.Subtract(ref point, ref sphere.Center, out Vector3 v);
+            float l2 = v.LengthSquared();
+            float r2 = sphere.Radius * sphere.Radius;
 
-            float dot = Vector3.Dot(v, v);
-
-            return dot <= sphere.Radius * sphere.Radius;
+            return l2 <= r2;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle
@@ -2165,10 +2409,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the sphere intersects the triangle</returns>
         public static bool SphereIntersectsTriangle(ref BoundingSphere sphere, ref Triangle triangle)
         {
-            var p1 = triangle.Point1;
-            var p2 = triangle.Point2;
-            var p3 = triangle.Point3;
-            return SphereIntersectsTriangle(ref sphere, ref p1, ref p2, ref p3);
+            return SphereIntersectsTriangle(ref sphere, ref triangle.Point1, ref triangle.Point2, ref triangle.Point3);
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle
@@ -2179,8 +2420,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the sphere intersects the triangle</returns>
         public static bool SphereIntersectsTriangle(ref BoundingSphere sphere, ref Triangle triangle, out PickingResult<Triangle> result)
         {
-            var center = sphere.Center;
-            Collision.ClosestPointInTriangle(ref center, ref triangle, out float distance, out var point);
+            ClosestPointInTriangle(ref sphere.Center, ref triangle, out float distance, out var point);
 
             if (distance <= sphere.Radius)
             {
@@ -2210,7 +2450,8 @@ namespace Engine.Mathematics
         public static bool SphereIntersectsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
         {
             float radiisum = sphere1.Radius + sphere2.Radius;
-            return Vector3.DistanceSquared(sphere1.Center, sphere2.Center) <= radiisum * radiisum;
+            Vector3.DistanceSquared(ref sphere1.Center, ref sphere2.Center, out float r2);
+            return r2 <= radiisum * radiisum;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a box
@@ -2251,8 +2492,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
         public static bool SphereIntersectsMesh(ref BoundingSphere sphere, Triangle[] mesh, out PickingResult<Triangle> result)
         {
-            var center = sphere.Center;
-            Collision.ClosestPointInMesh(ref center, mesh, out var triangle, out float distance, out var point);
+            ClosestPointInMesh(ref sphere.Center, mesh, out var triangle, out float distance, out var point);
 
             if (distance <= sphere.Radius)
             {
@@ -2288,13 +2528,11 @@ namespace Engine.Mathematics
 
             for (int i = 0; i < mesh.Length; i++)
             {
-                var center = sphere.Center;
-                var t = mesh[i];
-                Collision.ClosestPointInTriangle(ref center, ref t, out float dist, out var closestToTri);
+                ClosestPointInTriangle(ref sphere.Center, ref mesh[i], out float dist, out var closestToTri);
                 if (dist <= sphere.Radius)
                 {
                     // Store intersection data
-                    picks.Add(new PickingResult<Triangle> { Primitive = t, Position = closestToTri, Distance = dist });
+                    picks.Add(new PickingResult<Triangle> { Primitive = mesh[i], Position = closestToTri, Distance = dist });
                 }
             }
 
@@ -2326,26 +2564,31 @@ namespace Engine.Mathematics
         /// <param name="p1">First segment point</param>
         /// <param name="p2">Second segment point</param>
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
-        public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Vector3 p1, ref Vector3 p2)
+        public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Vector3 p1, ref Vector3 p2, out float distance)
         {
-            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+            Vector3.Subtract(ref p2, ref p1, out var rDir);
+            rDir.Normalize();
 
-            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out _))
+            if (!RayIntersectsFrustum(ref p1, ref rDir, ref frustum, out var inDistance, out _))
             {
+                distance = float.MaxValue;
                 return false;
             }
 
             if (!inDistance.HasValue || MathUtils.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
             {
+                distance = float.MaxValue;
                 return false;
             }
 
-            float rayLength = Vector3.Distance(p1, p2);
+            Vector3.Distance(ref p1, ref p2, out float rayLength);
             if (inDistance >= rayLength)
             {
+                distance = float.MaxValue;
                 return false;
             }
 
+            distance = inDistance.Value;
             return true;
         }
         /// <summary>
@@ -2359,30 +2602,17 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Vector3 p1, ref Vector3 p2, out float distance, out Vector3 point)
         {
-            distance = float.MaxValue;
-            point = Vector3.Zero;
-
-            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
-
-            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out _))
+            if (!FrustumIntersectsSegment(ref frustum, ref p1, ref p2, out float d))
             {
+                distance = float.MaxValue;
+                point = Vector3.Zero;
                 return false;
             }
 
-            if (!inDistance.HasValue || MathUtils.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue))
-            {
-                return false;
-            }
+            Vector3.Subtract(ref p2, ref p1, out var rDir);
 
-            float rayLength = Vector3.Distance(p1, p2);
-            if (inDistance >= rayLength)
-            {
-                return false;
-            }
-
-            distance = inDistance.Value;
-            point = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
-
+            distance = d;
+            point = p1 + (Vector3.Normalize(rDir) * d);
             return true;
         }
         /// <summary>
@@ -2396,29 +2626,31 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Vector3 p1, ref Vector3 p2, out Vector3? enteringPoint, out Vector3? exitingPoint)
         {
-            enteringPoint = null;
-            exitingPoint = null;
+            Vector3.Subtract(ref p2, ref p1, out var rDir);
+            rDir.Normalize();
 
-            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
-
-            if (!RayIntersectsFrustum(ref ray, ref frustum, out var inDistance, out var outDistance))
+            if (!RayIntersectsFrustum(ref p1, ref rDir, ref frustum, out var inDistance, out var outDistance))
             {
+                enteringPoint = null;
+                exitingPoint = null;
                 return false;
             }
 
-            float rayLength = Vector3.Distance(p1, p2);
+            Vector3.Distance(ref p1, ref p2, out float rayLength);
 
+            enteringPoint = null;
+            exitingPoint = null;
             bool intoSegmentBounds = false;
 
             if (inDistance.HasValue && !MathUtils.NearEqual(MathF.Abs(inDistance.Value), float.MaxValue) && inDistance <= rayLength)
             {
-                enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
+                enteringPoint = p1 + (rDir * inDistance.Value);
                 intoSegmentBounds = true;
             }
 
             if (outDistance.HasValue && !MathUtils.NearEqual(MathF.Abs(outDistance.Value), float.MaxValue) && outDistance <= rayLength)
             {
-                exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
+                exitingPoint = p1 + (rDir * outDistance.Value);
                 intoSegmentBounds = true;
             }
 
@@ -2432,9 +2664,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Segment segment)
         {
-            var p1 = segment.Point1;
-            var p2 = segment.Point2;
-            return FrustumIntersectsSegment(ref frustum, ref p1, ref p2);
+            return FrustumIntersectsSegment(ref frustum, ref segment.Point1, ref segment.Point2, out _);
         }
         /// <summary>
         /// Gets whether a frustum is intersected with the specified segment or not
@@ -2446,9 +2676,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Segment segment, out float distance, out Vector3 point)
         {
-            var p1 = segment.Point1;
-            var p2 = segment.Point2;
-            return FrustumIntersectsSegment(ref frustum, ref p1, ref p2, out distance, out point);
+            return FrustumIntersectsSegment(ref frustum, ref segment.Point1, ref segment.Point2, out distance, out point);
         }
         /// <summary>
         /// Gets whether a frustum is intersected with the specified segment or not
@@ -2460,9 +2688,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(ref BoundingFrustum frustum, ref Segment segment, out Vector3? enteringPoint, out Vector3? exitingPoint)
         {
-            var p1 = segment.Point1;
-            var p2 = segment.Point2;
-            return FrustumIntersectsSegment(ref frustum, ref p1, ref p2, out enteringPoint, out exitingPoint);
+            return FrustumIntersectsSegment(ref frustum, ref segment.Point1, ref segment.Point2, out enteringPoint, out exitingPoint);
         }
 
         /// <summary>
@@ -2562,15 +2788,14 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType BoxContainsSphere(ref BoundingBox box, ref BoundingSphere sphere)
         {
-            Vector3 vector = Vector3.Clamp(sphere.Center, box.Minimum, box.Maximum);
-            float distance = Vector3.DistanceSquared(sphere.Center, vector);
+            Vector3.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out Vector3 vector);
+            Vector3.DistanceSquared(ref sphere.Center, ref vector, out float distance);
 
-            if (distance > sphere.Radius * sphere.Radius)
-                return ContainmentType.Disjoint;
+            if (distance > sphere.Radius * sphere.Radius) return ContainmentType.Disjoint;
 
-            if ((((box.Minimum.X + sphere.Radius <= sphere.Center.X) && (sphere.Center.X <= box.Maximum.X - sphere.Radius)) && ((box.Maximum.X - box.Minimum.X > sphere.Radius) &&
-                (box.Minimum.Y + sphere.Radius <= sphere.Center.Y))) && (((sphere.Center.Y <= box.Maximum.Y - sphere.Radius) && (box.Maximum.Y - box.Minimum.Y > sphere.Radius)) &&
-                (((box.Minimum.Z + sphere.Radius <= sphere.Center.Z) && (sphere.Center.Z <= box.Maximum.Z - sphere.Radius)) && (box.Maximum.Z - box.Minimum.Z > sphere.Radius))))
+            if ((box.Minimum.X + sphere.Radius <= sphere.Center.X) && (sphere.Center.X <= box.Maximum.X - sphere.Radius) && (box.Maximum.X - box.Minimum.X > sphere.Radius) &&
+                (box.Minimum.Y + sphere.Radius <= sphere.Center.Y) && (sphere.Center.Y <= box.Maximum.Y - sphere.Radius) && (box.Maximum.Y - box.Minimum.Y > sphere.Radius) &&
+                (box.Minimum.Z + sphere.Radius <= sphere.Center.Z) && (sphere.Center.Z <= box.Maximum.Z - sphere.Radius) && (box.Maximum.Z - box.Minimum.Z > sphere.Radius))
             {
                 return ContainmentType.Contains;
             }
@@ -2612,12 +2837,9 @@ namespace Engine.Mathematics
         public static ContainmentType BoxContainsTriangle(ref BoundingBox box, ref Triangle triangle)
         {
             // Test containment
-            var p1 = triangle.Point1;
-            var p2 = triangle.Point2;
-            var p3 = triangle.Point3;
-            var test1 = BoxContainsPoint(ref box, ref p1);
-            var test2 = BoxContainsPoint(ref box, ref p2);
-            var test3 = BoxContainsPoint(ref box, ref p3);
+            var test1 = BoxContainsPoint(ref box, ref triangle.Point1);
+            var test2 = BoxContainsPoint(ref box, ref triangle.Point2);
+            var test3 = BoxContainsPoint(ref box, ref triangle.Point3);
 
             if (test1 == ContainmentType.Contains && test2 == ContainmentType.Contains && test3 == ContainmentType.Contains)
             {
@@ -2682,8 +2904,9 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType SphereContainsPoint(ref BoundingSphere sphere, ref Vector3 point)
         {
-            if (Vector3.DistanceSquared(point, sphere.Center) <= sphere.Radius * sphere.Radius)
-                return ContainmentType.Contains;
+            Vector3.DistanceSquared(ref point, ref sphere.Center, out float d2);
+
+            if (d2 <= sphere.Radius * sphere.Radius) return ContainmentType.Contains;
 
             return ContainmentType.Disjoint;
         }
@@ -2720,10 +2943,7 @@ namespace Engine.Mathematics
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType SphereContainsTriangle(ref BoundingSphere sphere, ref Triangle triangle)
         {
-            var p1 = triangle.Point1;
-            var p2 = triangle.Point2;
-            var p3 = triangle.Point3;
-            return SphereContainsTriangle(ref sphere, ref p1, ref p2, ref p3);
+            return SphereContainsTriangle(ref sphere, ref triangle.Point1, ref triangle.Point2, ref triangle.Point3);
         }
         /// <summary>
         /// Determines whether a <see cref="BoundingSphere"/> contains a <see cref="BoundingBox"/>.
@@ -2733,67 +2953,59 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType SphereContainsBox(ref BoundingSphere sphere, ref BoundingBox box)
         {
-            Vector3 vector;
 
-            if (!BoxIntersectsSphere(ref box, ref sphere))
-                return ContainmentType.Disjoint;
+            if (!BoxIntersectsSphere(ref box, ref sphere)) return ContainmentType.Disjoint;
 
             float radiussquared = sphere.Radius * sphere.Radius;
+
+            Vector3 vector;
             vector.X = sphere.Center.X - box.Minimum.X;
             vector.Y = sphere.Center.Y - box.Maximum.Y;
             vector.Z = sphere.Center.Z - box.Maximum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Maximum.X;
             vector.Y = sphere.Center.Y - box.Maximum.Y;
             vector.Z = sphere.Center.Z - box.Maximum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Maximum.X;
             vector.Y = sphere.Center.Y - box.Minimum.Y;
             vector.Z = sphere.Center.Z - box.Maximum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Minimum.X;
             vector.Y = sphere.Center.Y - box.Minimum.Y;
             vector.Z = sphere.Center.Z - box.Maximum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Minimum.X;
             vector.Y = sphere.Center.Y - box.Maximum.Y;
             vector.Z = sphere.Center.Z - box.Minimum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Maximum.X;
             vector.Y = sphere.Center.Y - box.Maximum.Y;
             vector.Z = sphere.Center.Z - box.Minimum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Maximum.X;
             vector.Y = sphere.Center.Y - box.Minimum.Y;
             vector.Z = sphere.Center.Z - box.Minimum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             vector.X = sphere.Center.X - box.Minimum.X;
             vector.Y = sphere.Center.Y - box.Minimum.Y;
             vector.Z = sphere.Center.Z - box.Minimum.Z;
 
-            if (vector.LengthSquared() > radiussquared)
-                return ContainmentType.Intersects;
+            if (vector.LengthSquared() > radiussquared) return ContainmentType.Intersects;
 
             return ContainmentType.Contains;
         }
@@ -2805,13 +3017,11 @@ namespace Engine.Mathematics
         /// <returns>The type of containment the two objects have.</returns>
         public static ContainmentType SphereContainsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
         {
-            float distance = Vector3.Distance(sphere1.Center, sphere2.Center);
+            Vector3.Distance(ref sphere1.Center, ref sphere2.Center, out float distance);
 
-            if (sphere1.Radius + sphere2.Radius < distance)
-                return ContainmentType.Disjoint;
+            if (sphere1.Radius + sphere2.Radius < distance) return ContainmentType.Disjoint;
 
-            if (sphere1.Radius - sphere2.Radius < distance)
-                return ContainmentType.Intersects;
+            if (sphere1.Radius - sphere2.Radius < distance) return ContainmentType.Intersects;
 
             return ContainmentType.Contains;
         }
@@ -2975,10 +3185,10 @@ namespace Engine.Mathematics
             //Test near to far segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners2[i + 0];
-                var p2 = corners2[i + 4];
+                ref var p1 = ref corners2[i + 0];
+                ref var p2 = ref corners2[i + 4];
 
-                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2))
+                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2, out _))
                 {
                     return ContainmentType.Intersects;
                 }
@@ -2987,10 +3197,10 @@ namespace Engine.Mathematics
             //Test near plane segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners2[i + 0];
-                var p2 = corners2[(i + 1) % 4];
+                ref var p1 = ref corners2[i + 0];
+                ref var p2 = ref corners2[(i + 1) % 4];
 
-                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2))
+                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2, out _))
                 {
                     return ContainmentType.Intersects;
                 }
@@ -2999,10 +3209,10 @@ namespace Engine.Mathematics
             //Test far plane segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners2[i + 4];
-                var p2 = corners2[((i + 1) % 4) + 4];
+                ref var p1 = ref corners2[i + 4];
+                ref var p2 = ref corners2[((i + 1) % 4) + 4];
 
-                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2))
+                if (FrustumIntersectsSegment(ref frustum1, ref p1, ref p2, out _))
                 {
                     return ContainmentType.Intersects;
                 }
@@ -3023,10 +3233,9 @@ namespace Engine.Mathematics
             List<Vector3> inVerts = [];
             for (int i = 0; i < vertices.Length; i++)
             {
-                var v = vertices[i];
-                if (FrustumContainsPoint(ref frustum, ref v) != ContainmentType.Disjoint)
+                if (FrustumContainsPoint(ref frustum, ref vertices[i]) != ContainmentType.Disjoint)
                 {
-                    inVerts.Add(v);
+                    inVerts.Add(vertices[i]);
                 }
             }
 
@@ -3097,10 +3306,9 @@ namespace Engine.Mathematics
         {
             bool allCornersContained = true;
             bool intersects = false;
-            foreach (var vertex in points)
+            for (int i = 0; i < points.Length; i++)
             {
-                var v = vertex;
-                var res = FrustumContainsPoint(ref frustum, ref v);
+                var res = FrustumContainsPoint(ref frustum, ref points[i]);
                 if (res != ContainmentType.Disjoint)
                 {
                     intersects = true;
@@ -3276,7 +3484,7 @@ namespace Engine.Mathematics
             return ContainmentType.Contains;
         }
 
-        private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestX01(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
             float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
@@ -3290,7 +3498,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static bool AxisTestX02(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestX02(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
             float p2 = a * tri.Point3.Y - b * tri.Point3.Z;
@@ -3304,7 +3512,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static bool AxisTestY01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestY01(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
             float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
@@ -3318,7 +3526,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static bool AxisTestY02(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestY02(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
             float p2 = -a * tri.Point3.X + b * tri.Point3.Z;
@@ -3332,7 +3540,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static bool AxisTestZ01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestZ01(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = a * tri.Point1.X - b * tri.Point1.Y;
             float p1 = a * tri.Point2.X - b * tri.Point2.Y;
@@ -3346,7 +3554,7 @@ namespace Engine.Mathematics
 
             return true;
         }
-        private static bool AxisTestZ12(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestZ12(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
         {
             float p1 = a * tri.Point2.X - b * tri.Point2.Y;
             float p2 = a * tri.Point3.X - b * tri.Point3.Y;

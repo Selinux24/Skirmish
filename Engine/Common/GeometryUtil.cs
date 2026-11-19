@@ -3287,21 +3287,19 @@ namespace Engine.Common
             }
 
             var tmpVertices = new List<VertexData>();
-            var dict = new List<Tuple<uint, uint>>();
+            var indexMap = new Dictionary<uint, uint>(tmpIndices.Count);
 
             // Adds all the selected vertices for each unique index, and create a index translator for the new vertex list
             foreach (uint index in tmpIndices.Distinct())
             {
                 tmpVertices.Add(vertices[index]);
-                dict.Add(new Tuple<uint, uint>(index, (uint)tmpVertices.Count - 1));
+                indexMap[index] = (uint)tmpVertices.Count - 1;
             }
 
             // Set the new index values
             for (int i = 0; i < tmpIndices.Count; i++)
             {
-                uint newIndex = dict.Find(d => d.Item1 == tmpIndices[i]).Item2;
-
-                tmpIndices[i] = newIndex;
+                tmpIndices[i] = indexMap[tmpIndices[i]];
             }
 
             resVertices = [.. tmpVertices];

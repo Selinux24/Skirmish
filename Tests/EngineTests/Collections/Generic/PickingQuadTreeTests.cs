@@ -487,15 +487,15 @@ namespace EngineTests.Collections.Generic
             PickingQuadTree<Triangle> q = new(mesh, options);
 
             //True pick
-            bool picked = q.PickNearest(t0PickingRay, out PickingResult<Triangle> t);
+            bool picked = q.PickNearest(ref t0PickingRay, out PickingResult<Triangle> t);
             Assert.IsTrue(picked);
             Assert.AreEqual(t0PickingDistance, t.Distance);
             Assert.AreEqual(t0, t.Primitive);
             Assert.AreEqual(t0PickingPoint, t.Position);
 
             //Short pick
-            var t0Short = new PickingRay(t0PickingRay, t0PickingRay.RayPickingParams, t0PickingDistance * 0.5f);
-            picked = q.PickNearest(t0Short, out t);
+            var t0Short = new PickingRay(t0PickingRay, t0PickingRay.PickingParams, t0PickingDistance * 0.5f);
+            picked = q.PickNearest(ref t0Short, out t);
             Assert.IsFalse(picked);
             Assert.AreEqual(float.MaxValue, t.Distance);
         }
@@ -506,7 +506,7 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(1);
             PickingQuadTree<Triangle> q = new(mesh, options);
 
-            bool picked = q.PickFirst(t1PickingRay, out PickingResult<Triangle> t);
+            bool picked = q.PickFirst(ref t1PickingRay, out PickingResult<Triangle> t);
 
             Assert.IsTrue(picked);
             Assert.AreEqual(t1PickingDistance0, t.Distance, 0.0001f);
@@ -514,8 +514,8 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(t1PickingPoint0, t.Position);
 
             //Short pick
-            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
-            picked = q.PickFirst(t1Short, out t);
+            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.PickingParams, t1PickingDistance0 * 0.5f);
+            picked = q.PickFirst(ref t1Short, out t);
             Assert.IsFalse(picked);
             Assert.AreEqual(float.MaxValue, t.Distance);
         }
@@ -526,7 +526,7 @@ namespace EngineTests.Collections.Generic
             QuadTreeOptions options = new(1);
             PickingQuadTree<Triangle> q = new(mesh, options);
 
-            bool picked = q.PickAll(t1PickingRay, out PickingResult<Triangle>[] tlist);
+            bool picked = q.PickAll(ref t1PickingRay, out PickingResult<Triangle>[] tlist);
             Assert.IsTrue(picked);
             Assert.HasCount(2, tlist);
 
@@ -541,14 +541,14 @@ namespace EngineTests.Collections.Generic
             Assert.AreEqual(t1PickingPoint1, t1.Position);
 
             //Short pick
-            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance0 * 0.5f);
-            picked = q.PickAll(t1Short, out tlist);
+            var t1Short = new PickingRay(t1PickingRay, t1PickingRay.PickingParams, t1PickingDistance0 * 0.5f);
+            picked = q.PickAll(ref t1Short, out tlist);
             Assert.IsFalse(picked);
             Assert.AreSequenceEqual([], tlist.ToArray(), SequenceOrder.InAnyOrder);
 
             //Middle pick
-            t1Short = new PickingRay(t1PickingRay, t1PickingRay.RayPickingParams, t1PickingDistance1 * 0.5f);
-            picked = q.PickAll(t1Short, out tlist);
+            t1Short = new PickingRay(t1PickingRay, t1PickingRay.PickingParams, t1PickingDistance1 * 0.5f);
+            picked = q.PickAll(ref t1Short, out tlist);
             Assert.HasCount(1, tlist);
             Assert.IsTrue(picked);
 

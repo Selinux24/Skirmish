@@ -12,7 +12,7 @@ namespace Engine.Mathematics
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickNearest(PickingRay ray, out PickingResult<T> result);
+        bool PickNearest(ref PickingRay ray, out PickingResult<T> result);
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
@@ -20,14 +20,14 @@ namespace Engine.Mathematics
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
         /// <remarks>Based on geometry, not distance. For distance tests use PickNearest instead.</remarks>
-        bool PickFirst(PickingRay ray, out PickingResult<T> result);
+        bool PickFirst(ref PickingRay ray, out PickingResult<T> result);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(PickingRay ray, out PickingResult<T>[] results);
+        bool PickAll(ref PickingRay ray, out PickingResult<T>[] results);
 
         /// <summary>
         /// Gets bounding sphere

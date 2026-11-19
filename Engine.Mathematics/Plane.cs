@@ -70,7 +70,6 @@ namespace Engine.Mathematics
         /// </summary>
         [JsonProperty]
         public float D;
-
         /// <summary>
         /// Gets or sets the component at the specified index.
         /// </summary>
@@ -134,8 +133,8 @@ namespace Engine.Mathematics
         /// <param name="normal">The normal vector to the plane.</param>
         public Plane(Vector3 point, Vector3 normal)
         {
-            this.Normal = normal;
-            this.D = -Vector3.Dot(normal, point);
+            Normal = normal;
+            D = -Vector3.Dot(normal, point);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.
@@ -155,21 +154,10 @@ namespace Engine.Mathematics
         /// <param name="point3">Third point of a triangle defining the plane.</param>
         public Plane(Vector3 point1, Vector3 point2, Vector3 point3)
         {
-            float x1 = point2.X - point1.X;
-            float y1 = point2.Y - point1.Y;
-            float z1 = point2.Z - point1.Z;
-            float x2 = point3.X - point1.X;
-            float y2 = point3.Y - point1.Y;
-            float z2 = point3.Z - point1.Z;
-            float yz = (y1 * z2) - (z1 * y2);
-            float xz = (z1 * x2) - (x1 * z2);
-            float xy = (x1 * y2) - (y1 * x2);
-            float invPyth = 1.0f / (float)(Math.Sqrt((yz * yz) + (xz * xz) + (xy * xy)));
+            MathUtils.CalculateTriPointNormalLH(ref point1, ref point2, ref point3, out var normal);
 
-            Normal.X = yz * invPyth;
-            Normal.Y = xz * invPyth;
-            Normal.Z = xy * invPyth;
-            D = -((Normal.X * point1.X) + (Normal.Y * point1.Y) + (Normal.Z * point1.Z));
+            Normal = normal;
+            D = -((normal.X * point1.X) + (normal.Y * point1.Y) + (normal.Z * point1.Z));
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.
