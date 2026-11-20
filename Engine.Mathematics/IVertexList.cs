@@ -12,6 +12,13 @@ namespace Engine.Mathematics
         /// <returns>Returns the vertex position list</returns>
         Vector3[] GetVertices();
         /// <summary>
+        /// Gets a vertex position by index
+        /// </summary>
+        Vector3 GetVertex(int index)
+        {
+            return GetVertices()[index];
+        }
+        /// <summary>
         /// Gets the vertex list stride
         /// </summary>
         /// <returns>Returns the list stride</returns>

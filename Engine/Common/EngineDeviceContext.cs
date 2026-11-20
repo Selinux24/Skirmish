@@ -1138,7 +1138,14 @@ namespace Engine.Common
             return WriteDiscardBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data)
+            where T : unmanaged
+        {
+            return WriteDiscardBuffer(buffer, offset, (ReadOnlySpan<T>)data);
+        }
+        /// <inheritdoc/>
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data) 
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1146,7 +1153,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data.Length <= 0)
+            if (data.IsEmpty)
             {
                 return true;
             }
@@ -1155,7 +1162,11 @@ namespace Engine.Common
             frameCounters.SubresourceMaps++;
 
             nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
-            UnsafeUtilities.Write(position, data);
+            var bytes = MemoryMarshal.AsBytes(data);
+            unsafe
+            {
+                bytes.CopyTo(new Span<byte>((void*)position, bytes.Length));
+            }
 
             deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
@@ -1166,12 +1177,20 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data)
+            where T : unmanaged
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data)
+            where T : unmanaged
+        {
+            return WriteNoOverwriteBuffer(buffer, offset, (ReadOnlySpan<T>)data);
+        }
+        /// <inheritdoc/>
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data)
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1179,7 +1198,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data.Length <= 0)
+            if (data.IsEmpty)
             {
                 return true;
             }
@@ -1188,7 +1207,11 @@ namespace Engine.Common
             frameCounters.SubresourceMaps++;
 
             nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
-            UnsafeUtilities.Write(position, data);
+            var bytes = MemoryMarshal.AsBytes(data);
+            unsafe
+            {
+                bytes.CopyTo(new Span<byte>((void*)position, bytes.Length));
+            }
 
             deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
@@ -1199,12 +1222,14 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : unmanaged
+        public T[] ReadBuffer<T>(EngineBuffer buffer, int length)
+            where T : unmanaged
         {
             return ReadBuffer<T>(buffer, 0, length);
         }
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : unmanaged
+        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)

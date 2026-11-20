@@ -21,11 +21,12 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
+using Engine.Mathematics;
 using System;
+using System.Buffers;
 
 namespace Engine.Physics.EPA
 {
-    using Engine.Mathematics;
     using GJKSimplex = GJK.Simplex;
     using GJKSupportPoint = GJK.SupportPoint;
 
@@ -45,51 +46,65 @@ namespace Engine.Physics.EPA
         /// </summary>
         public static (Face face, float dist) EPA(GJKSimplex simplex, ICollider coll1, ICollider coll2)
         {
-            // Array of faces, each with 3 vertices and a normal
-            // Initialize with final simplex from GJK
-            var faces = Initialize(simplex, out int num_faces);
-            int closest_face = 0;
+            Face[] faces = ArrayPool<Face>.Shared.Rent(EPA_MAX_NUM_FACES);
+            Edge[] looseEdges = Array.Empty<Edge>();
 
-            for (int iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++)
+            try
             {
-                // Find face that's closest to origin
-                GetClosestFaceToOrigin(faces, num_faces, out float min_dist, out closest_face);
+                looseEdges = ArrayPool<Edge>.Shared.Rent(EPA_MAX_NUM_LOOSE_EDGES);
 
-                // Search normal to face that's closest to origin
-                var search_dir = faces[closest_face].Normal;
-                GJKSupportPoint p = new(coll1, coll2, search_dir);
+                // Initialize with final simplex from GJK
+                Initialize(simplex, faces, out int num_faces);
+                int closest_face = 0;
 
-                float sdist = Vector3.Dot(p.Point, search_dir);
-                if (sdist - min_dist < EPA_TOLERANCE)
+                for (int iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++)
                 {
-                    // Convergence (new point is not significantly further from origin)
-                    return (faces[closest_face], sdist);
+                    // Find face that's closest to origin
+                    GetClosestFaceToOrigin(faces, num_faces, out float min_dist, out closest_face);
+
+                    // Search normal to face that's closest to origin
+                    var search_dir = faces[closest_face].Normal;
+                    GJKSupportPoint p = new(coll1, coll2, search_dir);
+
+                    float sdist = Vector3.Dot(p.Point, search_dir);
+                    if (sdist - min_dist < EPA_TOLERANCE)
+                    {
+                        // Convergence (new point is not significantly further from origin)
+                        return (faces[closest_face], sdist);
+                    }
+
+                    // Find all triangles that are facing p
+                    FindTriangles(faces, ref num_faces, p, looseEdges, out int num_loose_edges);
+
+                    // Reconstruct polytope with p added
+                    ReconstructPolytope(faces, ref num_faces, looseEdges, num_loose_edges, p);
                 }
 
-                // Find all triangles that are facing p
-                var (loose_edges, num_loose_edges) = FindTriangles(faces, ref num_faces, p);
-
-                // Reconstruct polytope with p added
-                ReconstructPolytope(faces, ref num_faces, loose_edges, num_loose_edges, p);
-            }
-
 #if DEBUG
-            Console.WriteLine("EPA did not converge");
+                Console.WriteLine("EPA did not converge");
 #endif
 
-            // Return most recent closest point
-            return (faces[closest_face], Vector3.Dot(faces[closest_face].A.Point, faces[closest_face].Normal));
+                // Return most recent closest point
+                return (faces[closest_face], Vector3.Dot(faces[closest_face].A.Point, faces[closest_face].Normal));
+            }
+            finally
+            {
+                if (looseEdges.Length != 0)
+                {
+                    ArrayPool<Edge>.Shared.Return(looseEdges);
+                }
+
+                ArrayPool<Face>.Shared.Return(faces);
+            }
         }
         /// <summary>
         /// Initialize the face list
         /// </summary>
         /// <param name="simplex">GJK simplex</param>
+        /// <param name="faces">Face buffer</param>
         /// <param name="num_faces">Number of initial faces</param>
-        private static Face[] Initialize(GJKSimplex simplex, out int num_faces)
+        private static void Initialize(GJKSimplex simplex, Face[] faces, out int num_faces)
         {
-            // Array of faces, each with 3 vertices and a normal
-            Face[] faces = new Face[EPA_MAX_NUM_FACES];
-
             // Initialize with final simplex from GJK
             faces[0] = new Face(simplex.A, simplex.B, simplex.C); //ABC
             faces[1] = new Face(simplex.A, simplex.C, simplex.D); //ACD
@@ -97,8 +112,6 @@ namespace Engine.Physics.EPA
             faces[3] = new Face(simplex.B, simplex.D, simplex.C); //BDC
 
             num_faces = 4;
-
-            return faces;
         }
         /// <summary>
         /// Find face that's closest to origin
@@ -128,12 +141,12 @@ namespace Engine.Physics.EPA
         /// <param name="faces">Face list</param>
         /// <param name="num_faces">Number of faces in the list</param>
         /// <param name="p">Support point</param>
-        private static (Edge[] edges, int num_edges) FindTriangles(Face[] faces, ref int num_faces, GJKSupportPoint p)
+        /// <param name="loose_edges">Buffer for loose edges</param>
+        /// <param name="num_loose_edges">Number of loose edges in the list</param>
+        private static void FindTriangles(Face[] faces, ref int num_faces, GJKSupportPoint p, Edge[] loose_edges, out int num_loose_edges)
         {
-            Edge[] loose_edges = new Edge[EPA_MAX_NUM_LOOSE_EDGES];
-
             // Keep track of edges we need to fix after removing faces
-            int num_loose_edges = 0;
+            num_loose_edges = 0;
 
             int i = 0;
             while (i < num_faces)
@@ -173,8 +186,6 @@ namespace Engine.Physics.EPA
                 faces[i] = faces[num_faces - 1];
                 num_faces--;
             }
-
-            return (loose_edges, num_loose_edges);
         }
         /// <summary>
         /// Checks if the specified edge is already in list

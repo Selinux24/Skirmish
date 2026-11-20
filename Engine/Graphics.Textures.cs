@@ -2,6 +2,7 @@
 using Engine.Mathematics;
 using Engine.TextureReader;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,19 @@ namespace Engine
     /// </summary>
     public sealed partial class Graphics
     {
+        sealed class PinnedSubresourceData(SubresourceData[] data, MemoryHandle[] handles) : IDisposable
+        {
+            public SubresourceData[] Data { get; } = data;
+
+            public void Dispose()
+            {
+                foreach (var handle in handles)
+                {
+                    handle.Dispose();
+                }
+            }
+        }
+
         /// <summary>
         /// Checks mipmap auto-generation in the device
         /// </summary>
@@ -338,18 +352,18 @@ namespace Engine
 
                 var index = texture.CalculateSubResourceIndex(0, 0, out _);
 
-                description.GetDataOffset(0, 0, out byte[] data, out uint stride);
-                fixed (void* ptr = data)
-                {
-                    ID3D11DeviceContext3 ic = immediateContext;
-                    ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
-                }
+                var memory = description.GetDataOffset(0, 0, out uint stride);
+                using var data = memory.Pin();
+
+                ID3D11DeviceContext3 ic = immediateContext;
+                ic.UpdateSubresource(new((IntPtr)data.Pointer, stride, stride), texture, index);
 
                 return texture;
             }
             else
             {
-                var texture = device.CreateTexture2D1(desc, GetSubresourceData(description));
+                using var data = GetSubresourceData(description);
+                var texture = device.CreateTexture2D1(desc, data.Data);
                 texture.DebugName = name;
 
                 return texture;
@@ -402,20 +416,18 @@ namespace Engine
                 {
                     var index = texture.CalculateSubResourceIndex(0, i++, out _);
 
-                    curr.GetDataOffset(0, 0, out byte[] data, out uint stride);
-                    fixed (void* ptr = data)
-                    {
-                        ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
-                    }
+                    var memory = curr.GetDataOffset(0, 0, out uint stride);
+                    using var data = memory.Pin();
+
+                    ic.UpdateSubresource(new((IntPtr)data.Pointer, stride, stride), texture, index);
                 }
 
                 return texture;
             }
             else
             {
-                var data = descriptions.SelectMany(GetSubresourceData);
-
-                var texture = device.CreateTexture2D1(desc, [.. data]);
+                using var data = GetSubresourceData(descriptions);
+                var texture = device.CreateTexture2D1(desc, data.Data);
                 texture.DebugName = name;
 
                 return texture;
@@ -460,18 +472,18 @@ namespace Engine
 
                 var index = texture.CalculateSubResourceIndex(0, 0, out _);
 
-                description.GetDataOffset(0, 0, out byte[] data, out uint stride);
-                fixed (void* ptr = data)
-                {
-                    ID3D11DeviceContext3 ic = immediateContext;
-                    ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
-                }
+                var memory = description.GetDataOffset(0, 0, out uint stride);
+                using var data = memory.Pin();
+
+                ID3D11DeviceContext3 ic = immediateContext;
+                ic.UpdateSubresource(new((IntPtr)data.Pointer, stride, stride), texture, index);
 
                 return texture;
             }
             else
             {
-                var texture = device.CreateTexture2D1(desc, GetSubresourceData(description));
+                using var data = GetSubresourceData(description);
+                var texture = device.CreateTexture2D1(desc, data.Data);
                 texture.DebugName = name;
 
                 return texture;
@@ -524,20 +536,18 @@ namespace Engine
                 {
                     var index = texture.CalculateSubResourceIndex(0, i++, out _);
 
-                    curr.GetDataOffset(0, 0, out byte[] data, out uint stride);
-                    fixed (void* ptr = data)
-                    {
-                        ic.UpdateSubresource(new((IntPtr)ptr, stride, stride), texture, index);
-                    }
+                    var memory = curr.GetDataOffset(0, 0, out uint stride);
+                    using var data = memory.Pin();
+
+                    ic.UpdateSubresource(new((IntPtr)data.Pointer, stride, stride), texture, index);
                 }
 
                 return texture;
             }
             else
             {
-                var data = descriptions.SelectMany(GetSubresourceData);
-
-                var texture = device.CreateTexture2D1(desc, [.. data]);
+                using var data = GetSubresourceData(descriptions);
+                var texture = device.CreateTexture2D1(desc, data.Data);
                 texture.DebugName = name;
 
                 return texture;
@@ -571,25 +581,66 @@ namespace Engine
         /// <summary>
         /// Gets the subresource data array from the texture data
         /// </summary>
-        /// <param name="texData">Texture data</param>
-        private static unsafe SubresourceData[] GetSubresourceData(TextureData texData)
+        /// <param name="textures">Texture list</param>
+        private static unsafe PinnedSubresourceData GetSubresourceData(IEnumerable<TextureData> textures)
         {
-            var res = new SubresourceData[texData.ArraySize * texData.MipMaps];
+            ArgumentNullException.ThrowIfNull(textures);
 
-            uint index = 0;
-            for (uint j = 0; j < texData.ArraySize; j++)
+            if (!textures.Any())
             {
-                for (uint i = 0; i < texData.MipMaps; i++)
+                return new(Array.Empty<SubresourceData>(), Array.Empty<MemoryHandle>());
+            }
+
+            uint count = 0;
+            foreach (var texData in textures)
+            {
+                for (uint j = 0; j < texData.ArraySize; j++)
                 {
-                    texData.GetDataOffset(j, i, out byte[] data, out uint stride);
-                    fixed (void* ptr = data)
-                    {
-                        res[index++] = new(ptr, stride, stride);
-                    }
+                    count += texData.MipMaps;
                 }
             }
 
-            return res;
+            var subresources = new SubresourceData[count];
+            var handles = new MemoryHandle[count];
+
+            try
+            {
+                uint idx = 0;
+                foreach (var texData in textures)
+                {
+                    for (uint j = 0; j < texData.ArraySize; j++)
+                    {
+                        for (uint i = 0; i < texData.MipMaps; i++)
+                        {
+                            var memory = texData.GetDataOffset(j, i, out uint stride);
+                            handles[idx] = default;
+                            handles[idx] = memory.Pin();
+                            subresources[idx] = new((IntPtr)handles[idx].Pointer, stride, stride);
+                            idx++;
+                        }
+                    }
+                }
+
+                return new PinnedSubresourceData(subresources, handles);
+            }
+            catch
+            {
+                foreach (var handle in handles)
+                {
+                    handle.Dispose();
+                }
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// Gets the subresource data of the texture data definition
+        /// </summary>
+        /// <param name="texData">Texture data list</param>
+        /// <returns>Returns the pinned subresource data</returns>
+        private static PinnedSubresourceData GetSubresourceData(TextureData texData)
+        {
+            return GetSubresourceData([texData]);
         }
 
         /// <summary>

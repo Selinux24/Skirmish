@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.TextureReader.DDS;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,8 +9,6 @@ using Vortice.WIC;
 
 namespace Engine.TextureReader
 {
-    using Engine.TextureReader.DDS;
-
     /// <summary>
     /// Texture data
     /// </summary>
@@ -23,15 +22,15 @@ namespace Engine.TextureReader
             /// <summary>
             /// Bitmap width
             /// </summary>
-            public uint Width { get; set; }
+            public uint Width;
             /// <summary>
             /// Bitmap height
             /// </summary>
-            public uint Height { get; set; }
+            public uint Height;
             /// <summary>
             /// Buffer
             /// </summary>
-            public byte[] Buffer { get; set; }
+            public byte[] Buffer;
         }
 
         /// <summary>
@@ -333,140 +332,93 @@ namespace Engine.TextureReader
         /// <returns>Returns the readed bitmap data</returns>
         private static BitmapData[] ReadBitmap(IWICImagingFactory factory, IWICBitmapDecoder bitmapDecoder, Guid format, IEnumerable<RectI> rectangles)
         {
-            var result = new List<BitmapData>();
-
             var frame = bitmapDecoder.GetFrame(0);
+            var cropRectangles = rectangles?.ToArray();
 
-            if (frame.PixelFormat == format)
+            if (cropRectangles == null || cropRectangles.Length == 0)
             {
-                uint rowStride = PixelFormat.GetStride(frame.PixelFormat, (uint)frame.Size.Width);
-
-                // Allocate DataStream to receive the WIC image pixels
-                byte[] dataBuffer = new byte[frame.Size.Height * rowStride];
-                // Copy the content of the WIC to the buffer
-                frame.CopyPixels(rowStride, dataBuffer);
-
-                if (rectangles?.Any() != true)
-                {
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)frame.Size.Width,
-                        Height = (uint)frame.Size.Height,
-                        Buffer = dataBuffer,
-                    });
-                }
-                else
-                {
-                    var bitmaps = CropBuffer(dataBuffer, (uint)frame.Size.Width, (uint)frame.Size.Height, rowStride, rectangles);
-                    result.AddRange(bitmaps);
-                }
+                var bitmap = ReadBitmap(factory, frame, format);
+                return bitmap.HasValue ? [bitmap.Value] : [];
             }
-            else
+
+            var result = new List<BitmapData>(cropRectangles.Length);
+            foreach (var rectangle in cropRectangles)
             {
-                using var formatConverter = factory.CreateFormatConverter();
-                if (!formatConverter.CanConvert(frame.PixelFormat, format))
+                if (rectangle == Rect.Empty)
+                {
+                    var bitmap = ReadBitmap(factory, frame, format);
+                    if (!bitmap.HasValue)
+                    {
+                        return [];
+                    }
+
+                    result.Add(bitmap.Value);
+                    continue;
+                }
+
+                using var croppedFrame = factory.CreateBitmapFromSourceRect(
+                    frame,
+                    checked((uint)rectangle.X),
+                    checked((uint)rectangle.Y),
+                    checked((uint)rectangle.Width),
+                    checked((uint)rectangle.Height));
+                var croppedBitmap = ReadBitmap(factory, croppedFrame, format);
+                if (!croppedBitmap.HasValue)
                 {
                     return [];
                 }
 
-                formatConverter.Initialize(
-                    frame,
-                    format,
-                    BitmapDitherType.ErrorDiffusion,
-                    null,
-                    0.0,
-                    BitmapPaletteType.MedianCut);
-
-
-                // Allocate DataStream to receive the WIC image pixels
-                uint rowStride = PixelFormat.GetStride(formatConverter.PixelFormat, (uint)formatConverter.Size.Width);
-                byte[] dataBuffer = new byte[formatConverter.Size.Height * rowStride];
-
-                // Copy the content of the WIC to the buffer
-                formatConverter.CopyPixels(rowStride, dataBuffer);
-
-                if (rectangles?.Any() != true)
-                {
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)formatConverter.Size.Width,
-                        Height = (uint)formatConverter.Size.Height,
-                        Buffer = dataBuffer,
-                    });
-                }
-                else
-                {
-                    var bitmaps = CropBuffer(dataBuffer, (uint)formatConverter.Size.Width, (uint)formatConverter.Size.Height, rowStride, rectangles);
-                    result.AddRange(bitmaps);
-                }
+                result.Add(croppedBitmap.Value);
             }
 
             return [.. result];
         }
 
-        /// <summary>
-        /// Reads the specified crop rectangle list from a data buffer
-        /// </summary>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="sourceWidth">Source width</param>
-        /// <param name="sourceHeight">Source height</param>
-        /// <param name="sourceRowStride">Row stride in bytes</param>
-        /// <param name="rectangles">Crop rectangle list</param>
-        /// <returns>Returns the readed bitmap data</returns>
-        private static BitmapData[] CropBuffer(byte[] buffer, uint sourceWidth, uint sourceHeight, uint sourceRowStride, IEnumerable<RectI> rectangles)
+        private static BitmapData? ReadBitmap(IWICImagingFactory factory, IWICBitmapSource source, Guid format)
         {
-            var result = new List<BitmapData>();
+            uint width = (uint)source.Size.Width;
+            uint height = (uint)source.Size.Height;
 
-            foreach (var rectangle in rectangles)
+            if (source.PixelFormat == format)
             {
-                if (rectangle == Rect.Empty)
+                uint rowStride = PixelFormat.GetStride(source.PixelFormat, width);
+                byte[] dataBuffer = new byte[height * rowStride];
+                source.CopyPixels(rowStride, dataBuffer);
+
+                return new BitmapData
                 {
-                    result.Add(new BitmapData
-                    {
-                        Width = sourceWidth,
-                        Height = sourceHeight,
-                        Buffer = buffer,
-                    });
-                }
-                else
-                {
-                    var rectBuffer = CropBuffer(buffer, sourceWidth, sourceRowStride, rectangle);
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)rectangle.Width,
-                        Height = (uint)rectangle.Height,
-                        Buffer = rectBuffer,
-                    });
-                }
+                    Width = width,
+                    Height = height,
+                    Buffer = dataBuffer,
+                };
             }
 
-            return [.. result];
-        }
-        /// <summary>
-        /// Reads a rectangle from a image byte buffer
-        /// </summary>
-        /// <param name="buffer">Image buffer</param>
-        /// <param name="sourceWidth">Source width</param>
-        /// <param name="sourceRowStride">Source row stride</param>
-        /// <param name="rectangle">Crop rectangle</param>
-        /// <returns>Returns a new buffer</returns>
-        private static byte[] CropBuffer(byte[] buffer, uint sourceWidth, uint sourceRowStride, RectI rectangle)
-        {
-            uint stride = sourceRowStride / sourceWidth;
-
-            uint dstRowStride = (uint)rectangle.Width * stride;
-            byte[] dstBuffer = new byte[rectangle.Height * dstRowStride];
-
-            uint dstOffset = 0;
-            for (uint i = 0; i < rectangle.Height; i++)
+            using var formatConverter = factory.CreateFormatConverter();
+            if (!formatConverter.CanConvert(source.PixelFormat, format))
             {
-                uint offset = (((uint)rectangle.Y + i) * sourceRowStride) + ((uint)rectangle.X * stride);
-
-                Buffer.BlockCopy(buffer, (int)offset, dstBuffer, (int)dstOffset, (int)dstRowStride);
-                dstOffset += dstRowStride;
+                return null;
             }
 
-            return dstBuffer;
+            formatConverter.Initialize(
+                source,
+                format,
+                BitmapDitherType.ErrorDiffusion,
+                null,
+                0.0,
+                BitmapPaletteType.MedianCut);
+
+            uint convertedWidth = (uint)formatConverter.Size.Width;
+            uint convertedHeight = (uint)formatConverter.Size.Height;
+            uint convertedRowStride = PixelFormat.GetStride(formatConverter.PixelFormat, convertedWidth);
+            byte[] convertedBuffer = new byte[convertedHeight * convertedRowStride];
+            formatConverter.CopyPixels(convertedRowStride, convertedBuffer);
+
+            return new BitmapData
+            {
+                Width = convertedWidth,
+                Height = convertedHeight,
+                Buffer = convertedBuffer,
+            };
         }
 
         /// <summary>
@@ -570,14 +522,13 @@ namespace Engine.TextureReader
         }
 
         /// <summary>
-        /// Get data offset for the specifies slice and mip index
+        /// Gets the data memory for the specified slice and mip index
         /// </summary>
         /// <param name="slice">Array slice</param>
         /// <param name="mip">Mip index</param>
-        /// <param name="bytes">Returns the data bytes</param>
         /// <param name="stride">Returns the slice and mip stride</param>
-        /// <returns>Returns true if the slice and mip were located</returns>
-        public void GetDataOffset(uint slice, uint mip, out byte[] bytes, out uint stride)
+        /// <returns>Returns a view of the slice and mip data</returns>
+        public ReadOnlyMemory<byte> GetDataOffset(uint slice, uint mip, out uint stride)
         {
             uint offset = 0;
             uint size = 0;
@@ -604,10 +555,7 @@ namespace Engine.TextureReader
                     {
                         size = numBytes;
                         stride = rowBytes;
-                        bytes = new byte[size];
-                        Array.Copy(data, offset, bytes, 0, size);
-
-                        return;
+                        return new ReadOnlyMemory<byte>(data, checked((int)offset), checked((int)size));
                     }
 
                     offset += numBytes * depth;
@@ -623,8 +571,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            bytes = new byte[size];
-            Array.Copy(data, offset, bytes, 0, size);
+            return new ReadOnlyMemory<byte>(data, checked((int)offset), checked((int)size));
         }
     }
 }

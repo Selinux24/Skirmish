@@ -500,6 +500,16 @@ namespace Engine
             return [Point1, Point2];
         }
         /// <inheritdoc/>
+        public readonly Vector3 GetVertex(int index)
+        {
+            return index switch
+            {
+                0 => Point1,
+                1 => Point2,
+                _ => throw new ArgumentOutOfRangeException(nameof(index)),
+            };
+        }
+        /// <inheritdoc/>
         public readonly uint GetStride()
         {
             return 2;

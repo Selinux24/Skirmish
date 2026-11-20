@@ -1,7 +1,6 @@
 ﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Animation
 {
@@ -69,19 +68,34 @@ namespace Engine.Animation
         /// <param name="joint">Joint</param>
         /// <param name="time">Time</param>
         /// <param name="animations">Animation list</param>
+        private static bool TryFindAnimation(JointAnimation[] animations, string jointName, out JointAnimation animation)
+        {
+            foreach (var candidate in animations)
+            {
+                if (candidate.Joint == jointName)
+                {
+                    animation = candidate;
+                    return true;
+                }
+            }
+
+            animation = default;
+            return false;
+        }
+        /// <summary>
+        /// Built skeleton transforms interpolated between two times with specified factor
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        /// <param name="time">Time</param>
+        /// <param name="animations">Animation list</param>
         private static void BuildTransforms(Joint joint, float time, JointAnimation[] animations)
         {
-            if (joint == null)
+            if (joint == null || !TryFindAnimation(animations, joint.Name, out var animation))
             {
                 return;
             }
 
-            if (!animations.Any(a => a.Joint == joint.Name))
-            {
-                return;
-            }
-
-            joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
+            joint.LocalTransform = animation.Interpolate(time);
 
             if ((joint.Childs?.Length ?? 0) == 0)
             {
@@ -109,8 +123,14 @@ namespace Engine.Animation
                 return;
             }
 
-            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
-            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
+            if (!TryFindAnimation(animations1, joint.Name, out var animation1) ||
+                !TryFindAnimation(animations2, joint.Name, out var animation2))
+            {
+                throw new InvalidOperationException("Sequence contains no matching element");
+            }
+
+            animation1.Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
+            animation2.Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
             Vector3 translation = Vector3.Lerp(pos1, pos2, factor);
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);

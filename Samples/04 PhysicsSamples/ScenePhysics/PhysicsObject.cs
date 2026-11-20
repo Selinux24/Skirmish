@@ -4,7 +4,6 @@ using Engine.Mathematics;
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace PhysicsSamples.ScenePhysics
@@ -14,10 +13,15 @@ namespace PhysicsSamples.ScenePhysics
     /// </summary>
     public class PhysicsObject : IPhysicsObject
     {
+        /// <summary>
+        /// Colliders
+        /// </summary>
+        private readonly ICollider[] colliders;
+
         /// <inheritdoc/>
         public IRigidBody RigidBody { get; private set; }
         /// <inheritdoc/>
-        public IEnumerable<ICollider> Colliders { get; private set; }
+        public ICollider[] Colliders { get => colliders; }
         /// <summary>
         /// Model
         /// </summary>
@@ -71,7 +75,7 @@ namespace PhysicsSamples.ScenePhysics
             };
             collider.Attach(rigidBody);
 
-            Colliders = [collider];
+            colliders = [collider];
         }
 
         /// <inheritdoc/>
@@ -101,11 +105,14 @@ namespace PhysicsSamples.ScenePhysics
             return Model.Intersects(IntersectDetectionMode.Sphere, obj.GetBroadPhaseBounds());
         }
         /// <inheritdoc/>
-        public IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj)
+        public ICollider[] GetBroadPhaseColliders(IPhysicsObject obj)
         {
             var cullingVolume = obj.GetBroadPhaseBounds();
+            var collider = colliders[0];
 
-            return Colliders.Where(c => Collision.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
+            return Collision.Intersects(cullingVolume, (IntersectionVolumeSphere)collider.BoundingSphere)
+                ? colliders
+                : Array.Empty<ICollider>();
         }
         /// <inheritdoc/>
         public ICullingVolume GetBroadPhaseBounds()

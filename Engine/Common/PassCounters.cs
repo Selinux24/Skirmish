@@ -1,4 +1,5 @@
-﻿
+﻿using System.Text;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -246,17 +247,28 @@ namespace Engine.Common
             PrimitivesPerFrame = 0;
         }
 
-        /// <inheritdoc/>
-        public override string ToString()
+        /// <summary>
+        /// Appends to pass counters
+        /// </summary>
+        /// <param name="builder">String builder</param>
+        public void AppendTo(StringBuilder builder)
         {
             if (PassIndex < 0)
             {
-                return $"ExecuteCommandLists => {ExecuteCommandLists:00} Viewport/RenderTarget/DepthStencil => {ViewportsSets:00}/{RenderTargetSets + RenderTargetClears:00}/{DepthStencilClears + DepthStencilStateChanges:00} ### {Name}";
+                builder.Append($"ExecuteCommandLists => {ExecuteCommandLists:00} Viewport/RenderTarget/DepthStencil => {ViewportsSets:00}/{RenderTargetSets + RenderTargetClears:00}/{DepthStencilClears + DepthStencilStateChanges:00} ### {Name}");
             }
             else
             {
-                return $"DrawCalls/Instances/Triangles => {DrawCallsPerFrame:000}/{InstancesPerFrame:0000}/{PrimitivesPerFrame:000000000} Rasterizer/DepthStencil/Blend => {RasterizerStateChanges:00}/{DepthStencilClears + DepthStencilStateChanges:00}/{OMBlendStateChanges:00} ### {Name}";
+                builder.Append($"DrawCalls/Instances/Triangles => {DrawCallsPerFrame:000}/{InstancesPerFrame:0000}/{PrimitivesPerFrame:000000000} Rasterizer/DepthStencil/Blend => {RasterizerStateChanges:00}/{DepthStencilClears + DepthStencilStateChanges:00}/{OMBlendStateChanges:00} ### {Name}");
             }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder builder = new();
+            AppendTo(builder);
+            return builder.ToString();
         }
     }
 }

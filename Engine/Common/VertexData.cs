@@ -270,6 +270,11 @@ namespace Engine.Common
             return [Position.Value];
         }
         /// <inheritdoc/>
+        public readonly Vector3 GetVertex(int index)
+        {
+            return index != 0 ? throw new ArgumentOutOfRangeException(nameof(index)) : Position.Value;
+        }
+        /// <inheritdoc/>
         public readonly uint GetStride()
         {
             return 1;

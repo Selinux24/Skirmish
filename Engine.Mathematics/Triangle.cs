@@ -266,6 +266,17 @@ namespace Engine.Mathematics
             ];
         }
         /// <inheritdoc/>
+        public readonly Vector3 GetVertex(int index)
+        {
+            return index switch
+            {
+                0 => Point1,
+                1 => Point2,
+                2 => Point3,
+                _ => throw new ArgumentOutOfRangeException(nameof(index)),
+            };
+        }
+        /// <inheritdoc/>
         public readonly uint GetStride()
         {
             return 3;

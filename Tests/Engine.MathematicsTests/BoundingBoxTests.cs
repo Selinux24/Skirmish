@@ -58,5 +58,15 @@ namespace Engine.MathematicsTests
             var aabbFaces = aabb1.GetFaces();
             Assert.AreSequenceEqual(aabbFaces, faces);
         }
+        [TestMethod()]
+        public void SubdivideOctreeSpanTest()
+        {
+            BoundingBox box = new(new Vector3(-1), new Vector3(1));
+            Span<BoundingBox> subdivisions = stackalloc BoundingBox[8];
+
+            box.SubdivideOctree(subdivisions, 0.1f);
+
+            Assert.AreSequenceEqual(box.SubdivideOctree(0.1f), subdivisions.ToArray());
+        }
     }
 }

@@ -754,32 +754,34 @@ namespace Engine.Mathematics
         /// </remarks>
         public readonly BoundingBox[] SubdivideOctree(float separation = float.Epsilon)
         {
+            BoundingBox[] subdivisions = new BoundingBox[8];
+            SubdivideOctree(subdivisions, separation);
+            return subdivisions;
+        }
+        /// <summary>
+        /// Writes the eight boxes of an octree subdivision into a caller-provided span.
+        /// </summary>
+        /// <param name="subdivisions">A span with exactly eight elements to receive the boxes.</param>
+        /// <param name="separation">Boxes separation</param>
+        public readonly void SubdivideOctree(Span<BoundingBox> subdivisions, float separation = float.Epsilon)
+        {
+            if (subdivisions.Length != 8)
+            {
+                throw new ArgumentException("The span must have exactly 8 elements.", nameof(subdivisions));
+            }
+
             var m = Minimum;
             var M = Maximum;
             var c = Center;
 
-            return
-            [
-                //-1+0-1   +0+1+0 - Top Left Front
-                new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z)),
-                //-1+0+0   +0+1+1 - Top Left Back
-                new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z)),
-
-                //+0+0-1   +1+1+0 - Top Right Front
-                new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z)),
-                //+0+0+0   +1+1+1 - Top Right Back
-                new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z)),
-
-                //-1-1-1   +0+0+0 - Bottom Left Front
-                new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z)),
-                //-1-1+0   +0+0+1 - Bottom Left Back
-                new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z)),
-
-                //+0-1-1   +1+0+0 - Bottom Right Front
-                new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z)),
-                //+0-1+0   +1+0+1 - Bottom Right Back
-                new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z)),
-            ];
+            subdivisions[0] = new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            subdivisions[1] = new BoundingBox(new Vector3(m.X, c.Y, c.Z + separation), new Vector3(c.X, M.Y, M.Z));
+            subdivisions[2] = new BoundingBox(new Vector3(c.X + separation, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            subdivisions[3] = new BoundingBox(new Vector3(c.X + separation, c.Y, c.Z + separation), new Vector3(M.X, M.Y, M.Z));
+            subdivisions[4] = new BoundingBox(new Vector3(m.X, m.Y + separation, m.Z), new Vector3(c.X, c.Y + separation, c.Z));
+            subdivisions[5] = new BoundingBox(new Vector3(m.X, m.Y + separation, c.Z + separation), new Vector3(c.X, c.Y + separation, M.Z));
+            subdivisions[6] = new BoundingBox(new Vector3(c.X + separation, m.Y + separation, m.Z), new Vector3(M.X, c.Y + separation, c.Z));
+            subdivisions[7] = new BoundingBox(new Vector3(c.X + separation, m.Y + separation, c.Z + separation), new Vector3(M.X, c.Y + separation, M.Z));
         }
 
         /// <inheritdoc/>

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Engine.Helpers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Game counters
     /// </summary>
@@ -297,16 +296,14 @@ namespace Engine.Common
         private static void SetSummary()
         {
             sortedCounters.Clear();
-            foreach (var c in counters.Values)
-            {
-                sortedCounters.Add(c);
-            }
+            sortedCounters.AddRange(counters.Values);
             sortedCounters.Sort((a, b) => a.PassIndex.CompareTo(b.PassIndex));
 
             sb.Clear();
             foreach (var c in sortedCounters)
             {
-                sb.AppendLine(c.ToString());
+                c.AppendTo(sb);
+                sb.AppendLine();
             }
             Summary = sb.ToString();
         }
