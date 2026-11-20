@@ -614,7 +614,7 @@ namespace Engine.BuiltIn.Components.Models
         {
             distance = float.MaxValue;
 
-            if (instancesVisible?.Length == 0) return true;
+            if (instancesVisible == null || instancesVisible.Length == 0) return true;
 
             List<(ModelInstance Instance, float Distance)> cullItems = [];
             foreach (var instance in instancesVisible)
