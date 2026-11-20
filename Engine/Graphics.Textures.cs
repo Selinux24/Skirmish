@@ -17,10 +17,19 @@ namespace Engine
     /// </summary>
     public sealed partial class Graphics
     {
+        /// <summary>
+        /// Pinned resource data
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="handles">Handles array</param>
         sealed class PinnedSubresourceData(SubresourceData[] data, MemoryHandle[] handles) : IDisposable
         {
+            /// <summary>
+            /// Subresource data array
+            /// </summary>
             public SubresourceData[] Data { get; } = data;
 
+            /// <inheritdoc/>
             public void Dispose()
             {
                 foreach (var handle in handles)
@@ -565,8 +574,30 @@ namespace Engine
         private static unsafe TResource CreateWithSubresource<T, TResource>(IEnumerable<T> values, uint width, uint height, Format format, Func<SubresourceData, TResource> createResourceFunc)
             where T : unmanaged
         {
-            T[] array = new T[width * height];
-            Array.Copy(values.ToArray(), array, values.Count());
+            uint length = checked(width * height);
+            T[] array = new T[length];
+
+            if (values is T[] sourceArray)
+            {
+                sourceArray.CopyTo(array, 0);
+            }
+            else if (values is ICollection<T> sourceCollection)
+            {
+                sourceCollection.CopyTo(array, 0);
+            }
+            else
+            {
+                int index = 0;
+                foreach (T value in values)
+                {
+                    if (index >= array.Length)
+                    {
+                        throw new ArgumentException("Source array was larger than the destination array.", nameof(values));
+                    }
+
+                    array[index++] = value;
+                }
+            }
 
             uint bitsPerPixel = format.GetBitsPerPixel();
             uint bytesPerPixel = (bitsPerPixel + 7) / 8;

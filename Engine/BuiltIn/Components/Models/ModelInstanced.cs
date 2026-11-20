@@ -614,39 +614,30 @@ namespace Engine.BuiltIn.Components.Models
         {
             distance = float.MaxValue;
 
-            // Copy array
-            var tmp = instancesVisible?.ToArray() ?? [];
+            if (instancesVisible?.Length == 0) return true;
 
-            if (tmp.Length <= 0)
+            List<(ModelInstance Instance, float Distance)> cullItems = [];
+            foreach (var instance in instancesVisible)
             {
-                // Culled
-                return true;
-            }
+                if (!instance.Visible) continue;
 
-            var items = tmp
-                .Where(i => i.Visible)
-                .Select(i =>
+                if (!instance.Cull(cullIndex, volume, out float instanceDistance))
                 {
-                    var cull = i.Cull(cullIndex, volume, out float iDistance);
-
-                    return new { Instance = i, Cull = cull, Distance = iDistance };
-                })
-                .Where(i => !i.Cull)
-                .OrderBy(i => i.Distance)
-                .ToArray();
-
-            if (items.Length == 0)
-            {
-                // Culled
-                return true;
+                    cullItems.Add((instance, instanceDistance));
+                }
             }
 
-            // Store selection
-            var data = items.Select(i => i.Instance).ToArray();
-            cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
+            if (cullItems.Count == 0) return true;
 
-            // Visible
-            distance = items[0].Distance;
+            cullItems.Sort(static (left, right) => left.Distance.CompareTo(right.Distance));
+            var data = new ModelInstance[cullItems.Count];
+            for (int i = 0; i < cullItems.Count; i++)
+            {
+                data[i] = cullItems[i].Instance;
+            }
+
+            cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
+            distance = cullItems[0].Distance;
             return false;
         }
 

@@ -187,14 +187,14 @@ namespace TerrainSamples.SceneModularDungeon
                 var color = Color4.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
-                if (!res.TryGetValue(color, out var value))
+                if (res.TryGetValue(color, out var value))
                 {
-                    value = [.. tris];
-                    res.Add(color, value);
+                    ((List<Triangle>)value).AddRange(tris);
                 }
                 else
                 {
-                    ((List<Triangle>)value).AddRange(tris);
+                    var list = new List<Triangle>(tris);
+                    res.Add(color, list);
                 }
             }
 

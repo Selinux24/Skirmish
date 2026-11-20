@@ -36,7 +36,7 @@ namespace Engine.TextureReader
         /// <summary>
         /// Byte data
         /// </summary>
-        private byte[] data;
+        private ReadOnlyMemory<byte> data;
 
         /// <summary>
         /// Format
@@ -484,10 +484,7 @@ namespace Engine.TextureReader
                 IsCubeMap = isCubeMap;
                 MipMaps = header.MipMapCount == 0 ? 1 : header.MipMapCount;
 
-                var bytes = new byte[bitData.Length - offset];
-                Array.Copy(bitData, offset, bytes, 0, bytes.Length);
-
-                data = bytes;
+                data = bitData.AsMemory(checked((int)offset));
             }
             else
             {
@@ -517,7 +514,7 @@ namespace Engine.TextureReader
         {
             if (disposing)
             {
-                data = null;
+                data = ReadOnlyMemory<byte>.Empty;
             }
         }
 
@@ -555,7 +552,7 @@ namespace Engine.TextureReader
                     {
                         size = numBytes;
                         stride = rowBytes;
-                        return new ReadOnlyMemory<byte>(data, checked((int)offset), checked((int)size));
+                        return data.Slice(checked((int)offset), checked((int)size));
                     }
 
                     offset += numBytes * depth;
@@ -571,7 +568,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            return new ReadOnlyMemory<byte>(data, checked((int)offset), checked((int)size));
+            return data.Slice(checked((int)offset), checked((int)size));
         }
     }
 }

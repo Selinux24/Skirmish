@@ -64,21 +64,23 @@ namespace Engine.Common
                 return position;
             }
 
-            var boneIndices = vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices);
-            var boneWeights = vertex.GetChannelValue<float[]>(VertexDataChannels.Weights);
+            ISkinnedVertexData skinnedVertex = vertex as ISkinnedVertexData;
+            byte[] boneIndices = skinnedVertex == null ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : Array.Empty<byte>();
+            float[] boneWeights = skinnedVertex == null ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : Array.Empty<float>();
+            int influenceCount = skinnedVertex == null ? boneIndices.Length : 4;
 
             var t = Vector3.Zero;
 
-            for (int w = 0; w < boneIndices.Length; w++)
+            for (int w = 0; w < influenceCount; w++)
             {
                 var p = position;
-                var weight = boneWeights[w];
+                var weight = skinnedVertex == null ? boneWeights[w] : skinnedVertex.GetBoneWeight(w);
                 if (weight <= 0)
                 {
                     continue;
                 }
 
-                var index = boneIndices[w];
+                var index = skinnedVertex == null ? boneIndices[w] : skinnedVertex.GetBoneIndex(w);
                 var boneTransform = boneTransforms[index];
                 if (!boneTransform.IsIdentity)
                 {

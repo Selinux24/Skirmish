@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.Format
     /// Skinned position vertex format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexSkinnedPosition : IVertexData
+    public struct VertexSkinnedPosition : ISkinnedVertexData
     {
         /// <summary>
         /// Defined input colection
@@ -142,6 +142,25 @@ namespace Engine.BuiltIn.Format
             }
             else throw new EngineException($"Channel data not found: {channel}");
         }
+
+        /// <inheritdoc/>
+        public readonly float GetBoneWeight(int index) => index switch
+        {
+            0 => Weight1,
+            1 => Weight2,
+            2 => Weight3,
+            3 => 1.0f - Weight1 - Weight2 - Weight3,
+            _ => throw new ArgumentOutOfRangeException(nameof(index)),
+        };
+        /// <inheritdoc/>
+        public readonly byte GetBoneIndex(int index) => index switch
+        {
+            0 => BoneIndex1,
+            1 => BoneIndex2,
+            2 => BoneIndex3,
+            3 => BoneIndex4,
+            _ => throw new ArgumentOutOfRangeException(nameof(index)),
+        };
 
         /// <inheritdoc/>
         public readonly uint GetStride()
