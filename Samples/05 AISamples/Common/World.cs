@@ -677,11 +677,11 @@ namespace AISamples.Common
 
             drawer.AddPrimitives(tList);
         }
-        private static void DrawTrees(IEnumerable<Tree> trees, float baseScale, ModelInstanced drawer)
+        private static void DrawTrees(List<Tree> trees, float baseScale, ModelInstanced drawer)
         {
             for (int i = 0; i < drawer.InstanceCount; i++)
             {
-                var tree = trees.ElementAtOrDefault(i);
+                var tree = i < trees.Count ? trees[i] : null;
                 if (tree == null)
                 {
                     drawer[i].Manipulator.SetTransform(Matrix4x4.Identity);
@@ -765,13 +765,13 @@ namespace AISamples.Common
         }
         public (Vector2 start, Vector2 dir) GetRandomStart()
         {
-            var fStartList = markings.OfType<Start>();
-            if (!fStartList.Any())
+            Start[] fStartList = [.. markings.OfType<Start>()];
+            if (fStartList.Length == 0)
             {
                 return (Vector2.Zero, Vector2.UnitY);
             }
 
-            var fStart = fStartList.ElementAt(Helper.RandomGenerator.Next(0, fStartList.Count() - 1));
+            var fStart = fStartList[Helper.RandomGenerator.Next(0, fStartList.Length - 1)];
 
             return (fStart.Position, fStart.Direction);
         }

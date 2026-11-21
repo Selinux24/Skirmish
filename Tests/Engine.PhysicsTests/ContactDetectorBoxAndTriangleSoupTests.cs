@@ -637,9 +637,9 @@ namespace Engine.PhysicsTests
             }
 
             var contacts = data.GetContacts();
-            for (int i = 0; i < contacts.Count(); i++)
+            for (int i = 0; i < contacts.Length; i++)
             {
-                var contact = contacts.ElementAt(i);
+                var contact = contacts[i];
 
                 var expectedContact = testData.Contacts.FirstOrDefault(c => box.OrientedBoundingBox.GetVertex(c.Corner) == contact.Position);
                 if (expectedContact == null)

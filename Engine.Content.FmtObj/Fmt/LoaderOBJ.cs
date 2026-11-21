@@ -58,7 +58,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <param name="fileName">File name</param>
-        public static void Save(IEnumerable<Triangle> triangles, string fileName)
+        public static void Save(Triangle[] triangles, string fileName)
         {
             // Write the file
             using var wr = new StreamWriter(fileName, false, Encoding.Default);

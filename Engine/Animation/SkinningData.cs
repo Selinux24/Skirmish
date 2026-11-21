@@ -164,12 +164,12 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public uint GetClipOffset(int clipIndex)
         {
-            return (uint)offsets.ElementAtOrDefault(clipIndex);
+            return clipIndex < offsets.Count ? (uint)offsets[clipIndex] : default;
         }
         /// <inheritdoc/>
         public float GetClipDuration(int clipIndex)
         {
-            return animations.ElementAtOrDefault(clipIndex)?.Duration ?? 0;
+            return clipIndex < animations.Count ? animations[clipIndex]?.Duration ?? 0 : default;
         }
 
         /// <inheritdoc/>
@@ -259,9 +259,9 @@ namespace Engine.Animation
         public bool Equals(SkinningData other)
         {
             return
-                animations.CompareEnumerables(other.animations) &&
-                clips.CompareEnumerables(other.clips) &&
-                offsets.CompareEnumerables(other.offsets) &&
+                Helper.CompareLists(animations, other.animations) &&
+                Helper.CompareLists(clips, other.clips) &&
+                Helper.CompareLists(offsets, other.offsets) &&
                 skeleton.Equals(other.skeleton);
         }
         /// <inheritdoc/>

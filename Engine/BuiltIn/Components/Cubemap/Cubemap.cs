@@ -5,7 +5,6 @@ using Engine.Common;
 using Engine.Content;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Cubemap
@@ -142,7 +141,7 @@ namespace Engine.BuiltIn.Components.Cubemap
         /// Initialize texture array
         /// </summary>
         /// <param name="textureFileNames">Texture file names</param>
-        protected void InitializeTextureArray(IEnumerable<string> textureFileNames)
+        protected void InitializeTextureArray(string[] textureFileNames)
         {
             var image = new FileArrayImageContent(textureFileNames);
 

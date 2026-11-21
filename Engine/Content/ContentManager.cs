@@ -268,7 +268,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        public static IEnumerable<string> FindPaths(string contentSource, string resourcePath, bool throwException = true)
+        public static string[] FindPaths(string contentSource, string resourcePath, bool throwException = true)
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
@@ -325,16 +325,16 @@ namespace Engine.Content
         /// <remarks>
         /// Content source can be a folder or a zip file
         /// </remarks>
-        public static IEnumerable<string> FindPaths(string contentSource, IEnumerable<string> resourcePaths, bool throwException = true)
+        public static string[] FindPaths(string contentSource, string[] resourcePaths, bool throwException = true)
         {
             var res = new List<string>();
 
-            if (resourcePaths.Any())
+            if (resourcePaths.Length > 0)
             {
                 foreach (var resourcePath in resourcePaths)
                 {
                     var resourceRes = FindPaths(contentSource, resourcePath, throwException);
-                    if (resourceRes?.Any() == true)
+                    if (resourceRes.Length > 0)
                     {
                         res.AddRange(resourceRes);
                     }

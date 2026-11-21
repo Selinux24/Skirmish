@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using AISamples.Common.Persistence;
+using AISamples.Common.Primitives;
+using Engine;
+using Engine.BuiltIn.Format;
+using Engine.Common;
+using Engine.Mathematics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AISamples.Common.Items
 {
-    using AISamples.Common.Persistence;
-    using AISamples.Common.Primitives;
-    using Engine;
-    using Engine.BuiltIn.Format;
-    using Engine.Common;
-    using Engine.Mathematics;
-
     class Building(Polygon polygon, float height)
     {
         public Polygon Polygon { get; set; } = polygon;
@@ -63,10 +62,10 @@ namespace AISamples.Common.Items
             }
 
             var ceiling = GeometryUtil.CreatePolygon(Topology.TriangleList, points.Skip(vertexCount), false);
-            for (int i = 0; i < ceiling.Indices.Count(); i++)
+            for (int i = 0; i < ceiling.Indices.Length; i++)
             {
-                int index = (int)ceiling.Indices.ElementAt(i);
-                var p = ceiling.Vertices.ElementAt(index);
+                int index = (int)ceiling.Indices[i];
+                var p = ceiling.Vertices[index];
 
                 yield return new() { Position = p, Normal = Vector3.Up, Texture = uvC };
             }

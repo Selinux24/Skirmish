@@ -118,8 +118,8 @@ namespace Engine.Content.FmtCollada.Fmt
             {
                 var targetParts = channel.Target.Split("/".ToCharArray());
 
-                string jointName = targetParts.ElementAtOrDefault(0) ?? animationLibrary.Id ?? animationLibrary.Name;
-                string transformType = targetParts.ElementAtOrDefault(1) ?? "transform";
+                string jointName = (targetParts.Length > 0 ? targetParts[0] : default) ?? animationLibrary.Id ?? animationLibrary.Name ;
+                string transformType = (targetParts.Length > 1 ? targetParts[1] : default) ?? "transform";
 
                 foreach (var sampler in animationLibrary.Samplers)
                 {

@@ -1,11 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace EngineTests.Collections.Generic
 {
-    using Engine;
     using Engine.Collections.Generic;
     using Engine.Mathematics;
 
@@ -90,15 +88,15 @@ namespace EngineTests.Collections.Generic
 
             res = q.Query(b1);
             Assert.HasCount(1, res);
-            Assert.AreEqual(p1, res.ElementAt(0));
+            Assert.AreEqual(p1, res[0]);
 
             res = q.Query(b2);
             Assert.HasCount(1, res);
-            Assert.AreEqual(p2, res.ElementAt(0));
+            Assert.AreEqual(p2, res[0]);
 
             res = q.Query(b3);
             Assert.HasCount(1, res);
-            Assert.AreEqual(p3, res.ElementAt(0));
+            Assert.AreEqual(p3, res[0]);
 
             var d = (IntersectionVolumeAxisAlignedBox)BoundingBox.FromPoints([p1, p2]);
             res = q.Query(d);

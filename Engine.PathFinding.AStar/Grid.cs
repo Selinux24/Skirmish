@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Grid
     /// </summary>
@@ -121,19 +120,19 @@ namespace Engine.PathFinding.AStar
         /// Fill node connections
         /// </summary>
         /// <param name="nodes">Grid nodes</param>
-        private static void FillConnections(IEnumerable<GridNode> nodes)
+        private static void FillConnections(List<GridNode> nodes)
         {
-            for (int i = 0; i < nodes.Count(); i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
-                var nodeA = nodes.ElementAt(i);
+                var nodeA = nodes[i];
                 if (nodeA.FullConnected)
                 {
                     continue;
                 }
 
-                for (int n = i + 1; n < nodes.Count(); n++)
+                for (int n = i + 1; n < nodes.Count; n++)
                 {
-                    var nodeB = nodes.ElementAt(n);
+                    var nodeB = nodes[n];
                     if (nodeB.FullConnected)
                     {
                         continue;
@@ -179,11 +178,13 @@ namespace Engine.PathFinding.AStar
         /// Adds a list of nodes
         /// </summary>
         /// <param name="nodeList">Node list</param>
-        public void SetNodes(IEnumerable<GridNode> nodeList)
+        public void SetNodes(GridNode[] nodeList)
         {
+            ArgumentNullException.ThrowIfNull(nodeList);
+
             nodes.Clear();
 
-            if (nodeList?.Any() != true)
+            if (nodeList.Length == 0)
             {
                 return;
             }

@@ -142,8 +142,8 @@ namespace Engine.BuiltIn.UI
         /// <inheritdoc/>
         protected override void UpdateInternalState()
         {
-            var childs = Children.Where(c => c != background);
-            if (childs.Any())
+            IUIControl[] childs = [.. Children.Where(c => c != background)];
+            if (childs.Length > 0)
             {
                 gridLayout = GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
             }

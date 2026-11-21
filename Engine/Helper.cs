@@ -576,56 +576,46 @@ namespace Engine
             return value;
         }
         /// <summary>
-        /// Compares two enumerable lists, element by element
+        /// Compares two lists, element by element
         /// </summary>
         /// <typeparam name="T">Element type</typeparam>
         /// <param name="enum1">First enumerable list</param>
         /// <param name="enum2">Second enumerable list</param>
-        /// <returns>Returns true if both enumerables contains the same elements</returns>
-        public static bool CompareEnumerables<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        /// <returns>Returns true if both lists contains the same elements</returns>
+        public static bool CompareLists<T>(List<T> enum1, List<T> enum2)
         {
-            if (enum1 == null && enum2 == null)
-            {
-                return true;
-            }
+            if (ReferenceEquals(enum1, enum2)) return true;
+            if (enum1 is null || enum2 is null) return false;
+            if (enum1.Count != enum2.Count) return false;
 
-            if (!(enum1 != null && enum2 != null))
+            var comparer = EqualityComparer<T>.Default;
+            for (int i = 0; i < enum1.Count; i++)
             {
-                return false;
-            }
-
-            if (enum1.Count() != enum2.Count())
-            {
-                return false;
-            }
-
-            if (!CompareEnumerableElements(enum1, enum2))
-            {
-                return false;
+                if (!comparer.Equals(enum1[i], enum2[i]))
+                {
+                    return false;
+                }
             }
 
             return true;
         }
         /// <summary>
-        /// Compares two enumerables item by item
+        /// Compares two arrays, element by element
         /// </summary>
         /// <typeparam name="T">Element type</typeparam>
         /// <param name="enum1">First enumerable list</param>
         /// <param name="enum2">Second enumerable list</param>
-        /// <returns>Returns true if both enumerables contains the same elements</returns>
-        private static bool CompareEnumerableElements<T>(IEnumerable<T> enum1, IEnumerable<T> enum2)
+        /// <returns>Returns true if both arrays contains the same elements</returns>
+        public static bool CompareArrays<T>(T[] enum1, T[] enum2)
         {
-            for (int i = 0; i < enum1.Count(); i++)
+            if (ReferenceEquals(enum1, enum2)) return true;
+            if (enum1 is null || enum2 is null) return false;
+            if (enum1.Length != enum2.Length) return false;
+
+            var comparer = EqualityComparer<T>.Default;
+            for (int i = 0; i < enum1.Length; i++)
             {
-                var item1 = enum1.ElementAt(i);
-                var item2 = enum2.ElementAt(i);
-
-                if (Equals(item1, default(T)) && Equals(item2, default(T)))
-                {
-                    continue;
-                }
-
-                if (item1?.Equals(item2) != true)
+                if (!comparer.Equals(enum1[i], enum2[i]))
                 {
                     return false;
                 }

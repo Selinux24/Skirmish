@@ -46,7 +46,7 @@ namespace Engine.Animation
         {
             get
             {
-                return items.ElementAtOrDefault(currentItemIndex);
+                return currentItemIndex < items.Count ? items[currentItemIndex] : default;
             }
         }
         /// <summary>
@@ -477,10 +477,9 @@ namespace Engine.Animation
             Playing = animationPathState.Playing;
             PathElapsedTime = animationPathState.Time;
             PathItemInterpolationValue = animationPathState.TotalItemTime;
-            for (int i = 0; i < animationPathState.PathItems.Count(); i++)
+            for (int i = 0; i < animationPathState.PathItems.Length; i++)
             {
-                var itemState = animationPathState.PathItems.ElementAt(i);
-                items[i].SetState(itemState);
+                items[i].SetState(animationPathState.PathItems[i]);
             }
         }
 

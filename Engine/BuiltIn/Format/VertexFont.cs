@@ -36,16 +36,18 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="color">Color</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, Color4 color)
+        public static IEnumerable<VertexFont> Generate(Vector3[] vertices, Vector2[] uvs, Color4 color)
         {
-            if (!vertices.Any())
-            {
-                return [];
-            }
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(uvs);
 
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Length == 0) return [];
 
-            return [.. vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = color })];
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length", nameof(uvs));
+
+            var vFont = vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs[index], Color = color });
+
+            return [.. vFont];
         }
         /// <summary>
         /// Generates a vertex array from specified components
@@ -54,17 +56,19 @@ namespace Engine.BuiltIn.Format
         /// <param name="uvs">Uv texture coordinates</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexFont> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs, IEnumerable<Color4> colors)
+        public static VertexFont[] Generate(Vector3[] vertices, Vector2[] uvs, Color4[] colors)
         {
-            if (!vertices.Any())
-            {
-                return [];
-            }
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(uvs);
 
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
+            if (vertices.Length == 0) return [];
 
-            return [.. vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = colors.ElementAt(index) })];
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length", nameof(uvs));
+            if (vertices.Length != colors.Length) throw new ArgumentException("Vertices and colors must have the same length", nameof(colors));
+
+            var vFont = vertices.Select((v, index) => new VertexFont() { Position = v, Texture = uvs[index], Color = colors[index] });
+
+            return [.. vFont];
         }
 
         /// <summary>

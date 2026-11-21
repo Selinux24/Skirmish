@@ -4,7 +4,6 @@ using Engine.Mathematics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -706,26 +705,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefault2()
@@ -736,26 +735,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefault3()
@@ -766,26 +765,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse1()
@@ -851,26 +850,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverse2()
@@ -881,26 +880,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverse3()
@@ -911,26 +910,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad1Position, res[0].Position);
+            Assert.AreEqual(t1_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad1Position, res[1].Position);
+            Assert.AreEqual(t1_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad3Position, res[4].Position);
+            Assert.AreEqual(t3_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad3Position, res[5].Position);
+            Assert.AreEqual(t3_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverseReverse1()
@@ -941,26 +940,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad3Position, res[0].Position);
+            Assert.AreEqual(t3_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad3Position, res[1].Position);
+            Assert.AreEqual(t3_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad1Position, res[4].Position);
+            Assert.AreEqual(t1_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad1Position, res[5].Position);
+            Assert.AreEqual(t1_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverseReverse2()
@@ -971,26 +970,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad3Position, res[0].Position);
+            Assert.AreEqual(t3_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad3Position, res[1].Position);
+            Assert.AreEqual(t3_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad1Position, res[4].Position);
+            Assert.AreEqual(t1_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad1Position, res[5].Position);
+            Assert.AreEqual(t1_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverseReverse3()
@@ -1001,26 +1000,26 @@ namespace EngineTests
 
             Assert.HasCount(6, res);
 
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(1, res[0].Distance);
+            Assert.AreEqual(toQuad3Position, res[0].Position);
+            Assert.AreEqual(t3_1, res[0].Primitive);
+            Assert.AreEqual(1, res[1].Distance);
+            Assert.AreEqual(toQuad3Position, res[1].Position);
+            Assert.AreEqual(t3_2, res[1].Primitive);
 
-            Assert.AreEqual(2, res.ElementAt(2).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
-            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
-            Assert.AreEqual(2, res.ElementAt(3).Distance);
-            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
-            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+            Assert.AreEqual(2, res[2].Distance);
+            Assert.AreEqual(toQuad2Position, res[2].Position);
+            Assert.AreEqual(t2_1, res[2].Primitive);
+            Assert.AreEqual(2, res[3].Distance);
+            Assert.AreEqual(toQuad2Position, res[3].Position);
+            Assert.AreEqual(t2_2, res[3].Primitive);
 
-            Assert.AreEqual(3, res.ElementAt(4).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
-            Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
-            Assert.AreEqual(3, res.ElementAt(5).Distance);
-            Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
-            Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
+            Assert.AreEqual(3, res[4].Distance);
+            Assert.AreEqual(toQuad1Position, res[4].Position);
+            Assert.AreEqual(t1_1, res[4].Primitive);
+            Assert.AreEqual(3, res[5].Distance);
+            Assert.AreEqual(toQuad1Position, res[5].Position);
+            Assert.AreEqual(t1_2, res[5].Primitive);
         }
         [TestMethod()]
         public void PickAllTestReverseNoContact1()

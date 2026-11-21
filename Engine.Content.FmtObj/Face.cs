@@ -1,11 +1,9 @@
 ﻿using Engine.Common;
-using System.Collections.Generic;
-using System.Linq;
+using Engine.Mathematics;
+using System;
 
 namespace Engine.Content.FmtObj
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Face
     /// </summary>
@@ -65,17 +63,21 @@ namespace Engine.Content.FmtObj
         /// <param name="uvs">Uvs</param>
         /// <param name="normals">Normals</param>
         /// <param name="offset">Offset index</param>
-        public VertexData CreateVertex(int faceIndex, int vertexIndex, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, int offset)
+        public VertexData CreateVertex(int faceIndex, int vertexIndex, Vector3[] points, Vector2[] uvs, Vector3[] normals, int offset)
         {
+            ArgumentNullException.ThrowIfNull(points);
+            ArgumentNullException.ThrowIfNull(uvs);
+            ArgumentNullException.ThrowIfNull(normals);
+
             int vIndex = GetPositionIndex(offset);
             int? uvIndex = GetUVIndex(offset);
             int? nmIndex = GetNormalIndex(offset);
 
             return new VertexData
             {
-                Position = points.ElementAt(vIndex),
-                Texture = uvIndex >= 0 ? uvs.ElementAt(uvIndex.Value) : null,
-                Normal = nmIndex >= 0 ? normals.ElementAt(nmIndex.Value) : null,
+                Position = points[vIndex],
+                Texture = uvIndex >= 0 ? uvs[uvIndex.Value] : null,
+                Normal = nmIndex >= 0 ? normals[nmIndex.Value] : null,
                 FaceIndex = faceIndex,
                 VertexIndex = vertexIndex
             };

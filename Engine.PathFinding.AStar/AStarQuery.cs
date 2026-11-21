@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Path finder class
     /// </summary>
@@ -30,7 +28,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static IEnumerable<Vector3> FindPath(AgentType agent, Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static Vector3[] FindPath(AgentType agent, Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
             if (graph.FindNode(agent, startPosition) is not GridNode start || graph.FindNode(agent, endPosition) is not GridNode end)
             {
@@ -149,8 +147,8 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         private static void ProcessNeighbors(PriorityDictionary<GridNode, float> openPathsQueue, Dictionary<GridNode, AStarQueryData> nodesData, GridNode currentNode, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
-            var nodeConnections = currentNode?.GetNodeConnections();
-            if (nodeConnections?.Any() != true)
+            var nodeConnections = currentNode?.GetNodeConnections() ?? [];
+            if (nodeConnections.Length == 0)
             {
                 return;
             }
@@ -271,7 +269,7 @@ namespace Engine.PathFinding.AStar
             /// <summary>
             /// Path
             /// </summary>
-            public IEnumerable<Vector3> Path;
+            public Vector3[] Path;
         }
     }
 }

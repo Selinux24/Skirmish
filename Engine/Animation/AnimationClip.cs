@@ -46,7 +46,7 @@ namespace Engine.Animation
             return
                 Name == other.Name &&
                 MathUtils.NearEqual(Duration, other.Duration) &&
-                Helper.CompareEnumerables(Animations, other.Animations);
+                Helper.CompareArrays(Animations, other.Animations);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

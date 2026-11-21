@@ -296,7 +296,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         {
             shadowMapSize = mapSize;
 
-            if (shadowCascades.CompareEnumerables(cascades))
+            if (Helper.CompareArrays(shadowCascades, cascades))
             {
                 return;
             }

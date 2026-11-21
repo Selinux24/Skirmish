@@ -474,9 +474,9 @@ namespace Engine
         {
             if (result == SceneRendererResults.LightMap) return lightBuffer.Texture;
 
-            var colorMap = geometryBuffer.Textures.ElementAtOrDefault(0);
-            var normalMap = geometryBuffer.Textures.ElementAtOrDefault(1);
-            var depthMap = geometryBuffer.Textures.ElementAtOrDefault(2);
+            var colorMap = geometryBuffer.Textures.Length > 0 ? geometryBuffer.Textures[0] : default;
+            var normalMap = geometryBuffer.Textures.Length > 1 ? geometryBuffer.Textures[1] : default;
+            var depthMap = geometryBuffer.Textures.Length > 2 ? geometryBuffer.Textures[2] : default;
 
             if (result == SceneRendererResults.ColorMap) return colorMap;
             if (result == SceneRendererResults.NormalMap) return normalMap;
@@ -511,7 +511,7 @@ namespace Engine
 
             //Select visible components
             var visibleComponents = Scene.Components.Get<IDrawable>(c => c.Visible);
-            if (!visibleComponents.Any())
+            if (visibleComponents.Length == 0)
             {
                 return;
             }
@@ -855,7 +855,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            if (directionalLights.Any())
+            if (directionalLights.Length != 0)
             {
                 lightDrawer.BindGlobalLight(dc);
 
@@ -877,7 +877,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            if (pointLights.Any())
+            if (pointLights.Length != 0)
             {
                 lightDrawer.BindPoint(dc);
 
@@ -905,7 +905,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            if (spotLights.Any())
+            if (spotLights.Length != 0)
             {
                 lightDrawer.BindSpot(dc);
 
@@ -931,9 +931,9 @@ namespace Engine
             lightStats.Directional = swDirectional.ElapsedTicks;
             lightStats.Point = swPoint.ElapsedTicks;
             lightStats.Spot = swSpot.ElapsedTicks;
-            lightStats.DirectionalLights = directionalLights.Count();
-            lightStats.PointLights = pointLights.Count();
-            lightStats.SpotLights = spotLights.Count();
+            lightStats.DirectionalLights = directionalLights.Length;
+            lightStats.PointLights = pointLights.Length;
+            lightStats.SpotLights = spotLights.Length;
 
             lightStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif

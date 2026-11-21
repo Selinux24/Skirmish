@@ -1,9 +1,7 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Engine.Content
@@ -16,7 +14,7 @@ namespace Engine.Content
         /// <summary>
         /// Image array paths
         /// </summary>
-        private readonly IEnumerable<string> paths;
+        private readonly string[] paths;
         /// <summary>
         /// Crop rectangle
         /// </summary>
@@ -28,7 +26,7 @@ namespace Engine.Content
         {
             get
             {
-                return paths.Count();
+                return paths.Length;
             }
         }
 
@@ -48,7 +46,7 @@ namespace Engine.Content
             string fileName = Path.GetFileName(path);
 
             var p = ContentManager.FindPaths(directory, fileName);
-            if (!p.Any())
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified path has no results.", nameof(path));
             }
@@ -70,7 +68,7 @@ namespace Engine.Content
             }
 
             var p = ContentManager.FindPaths(contentFolder, contentFileName);
-            if (!p.Any())
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified content file name has no results.", nameof(contentFileName));
             }
@@ -83,12 +81,12 @@ namespace Engine.Content
         /// </summary>
         /// <param name="paths">Paths to images</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(IEnumerable<string> paths, RectI? cropRectangle = null)
+        public FileArrayImageContent(string[] paths, RectI? cropRectangle = null)
         {
             this.paths = paths ?? throw new ArgumentNullException(nameof(paths), "A path array must be specified.");
             this.cropRectangle = cropRectangle ?? RectI.Empty;
 
-            if (!paths.Any(s => s != null))
+            if (!Array.Exists(paths, s => s != null))
             {
                 throw new ArgumentOutOfRangeException(nameof(paths), $"At least, one path must be specified in the array.");
             }
@@ -99,22 +97,19 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentFileNames">Paths to images</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public FileArrayImageContent(string contentFolder, IEnumerable<string> contentFileNames, RectI? cropRectangle = null)
+        public FileArrayImageContent(string contentFolder, string[] contentFileNames, RectI? cropRectangle = null)
         {
-            if (contentFileNames == null)
-            {
-                throw new ArgumentNullException(nameof(contentFileNames), "A content file name list must be specified.");
-            }
+            ArgumentNullException.ThrowIfNull(contentFileNames);
 
-            if (!contentFileNames.Any(s => s != null))
+            if (!Array.Exists(contentFileNames, s => s != null))
             {
                 throw new ArgumentOutOfRangeException(nameof(contentFileNames), $"At least, one content file name must be specified in the array.");
             }
 
             var p = ContentManager.FindPaths(contentFolder, contentFileNames);
-            if (!p.Any())
+            if (p.Length == 0)
             {
-                throw new ArgumentException("The specified content file name list has no results.", nameof(contentFileNames));
+                throw new EngineException("The specified content file name list has no results.");
             }
 
             paths = p;
@@ -150,7 +145,7 @@ namespace Engine.Content
         public static bool operator ==(FileArrayImageContent left, FileArrayImageContent right)
         {
             return
-                Helper.CompareEnumerables(left.paths, right.paths) &&
+                Helper.CompareArrays(left.paths, right.paths) &&
                 left.cropRectangle == right.cropRectangle;
         }
         /// <inheritdoc/>
@@ -177,13 +172,13 @@ namespace Engine.Content
         public override string ToString()
         {
             int maxCount = 2;
-            int count = paths.Count();
+            int count = paths.Length;
 
             var sb = new StringBuilder();
 
             for (int i = 0; i < Math.Min(maxCount, count); i++)
             {
-                sb.AppendLine(paths.ElementAt(i));
+                sb.AppendLine(paths[i]);
             }
 
             if (count > maxCount)

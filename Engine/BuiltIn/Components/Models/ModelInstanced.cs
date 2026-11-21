@@ -5,7 +5,6 @@ using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -509,9 +508,11 @@ namespace Engine.BuiltIn.Components.Models
         /// Set instance positions
         /// </summary>
         /// <param name="positions">New positions</param>
-        public void SetPositions(IEnumerable<Vector3> positions)
+        public void SetPositions(Vector3[] positions)
         {
-            if ((positions?.Any()) != true || !(instancesAll?.Length > 0))
+            ArgumentNullException.ThrowIfNull(positions);
+
+            if (positions.Length == 0 || !(instancesAll?.Length > 0))
             {
                 return;
             }
@@ -520,9 +521,9 @@ namespace Engine.BuiltIn.Components.Models
             {
                 var instance = instancesAll[i];
 
-                if (i < positions.Count())
+                if (i < positions.Length)
                 {
-                    instance.Manipulator.SetPosition(positions.ElementAt(i));
+                    instance.Manipulator.SetPosition(positions[i]);
                     instance.Active = true;
                     instance.Visible = true;
                 }
@@ -537,9 +538,11 @@ namespace Engine.BuiltIn.Components.Models
         /// Sets instance transforms
         /// </summary>
         /// <param name="transforms">Transform matrix list</param>
-        public void SetTransforms(IEnumerable<Matrix4x4> transforms)
+        public void SetTransforms(Matrix4x4[] transforms)
         {
-            if ((transforms?.Any()) != true || !(instancesAll?.Length > 0))
+            ArgumentNullException.ThrowIfNull(transforms);
+
+            if (transforms.Length == 0 || !(instancesAll?.Length > 0))
             {
                 return;
             }
@@ -548,9 +551,9 @@ namespace Engine.BuiltIn.Components.Models
             {
                 var instance = instancesAll[i];
 
-                if (i < transforms.Count())
+                if (i < transforms.Length)
                 {
-                    instance.Manipulator.SetTransform(transforms.ElementAt(i));
+                    instance.Manipulator.SetTransform(transforms[i]);
                     instance.Active = true;
                     instance.Visible = true;
                 }
@@ -565,48 +568,63 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the instance list
         /// </summary>
         /// <returns>Returns an array with the instance list</returns>
-        public IEnumerable<ModelInstance> GetInstances()
+        public ModelInstance[] GetInstances()
         {
-            return new ReadOnlyCollection<ModelInstance>(instancesAll);
+            return [.. instancesAll];
         }
         /// <inheritdoc/>
-        public IEnumerable<T> GetComponents<T>()
+        public T[] GetComponents<T>()
         {
-            return new ReadOnlyCollection<T>([.. instancesAll.Where(i => i.Visible).OfType<T>()]);
+            return [.. instancesAll.Where(i => i.Visible).OfType<T>()];
         }
 
         /// <summary>
         /// Gets the instances bounding sphere list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<BoundingSphere> GetBoundingSpheres(bool refresh = false)
+        public BoundingSphere[] GetBoundingSpheres(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            BoundingSphere[] res = new BoundingSphere[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetBoundingSphere(refresh);
+                res[i] = instances[i].GetBoundingSphere(refresh);
             }
+            return res;
         }
         /// <summary>
         /// Gets the instances bounding box list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(bool refresh = false)
+        public BoundingBox[] GetBoundingBoxes(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            BoundingBox[] res = new BoundingBox[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetBoundingBox(refresh);
+                res[i] = instances[i].GetBoundingBox(refresh);
             }
+            return res;
         }
         /// <summary>
         /// Gets the instances oriented bounding box list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<OrientedBoundingBox> GetOrientedBoundingBoxes(bool refresh = false)
+        public OrientedBoundingBox[] GetOrientedBoundingBoxes(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            OrientedBoundingBox[] res = new OrientedBoundingBox[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetOrientedBoundingBox(refresh);
+                res[i] = instances[i].GetOrientedBoundingBox(refresh);
             }
+            return res;
         }
 
         /// <inheritdoc/>
@@ -672,10 +690,11 @@ namespace Engine.BuiltIn.Components.Models
             Layer = modelInstancedState.Layer;
             Owner = Scene.Components.ById(modelInstancedState.OwnerId);
             MaximumCount = modelInstancedState.MaximumCount;
-            for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
+
+            int idx = 0;
+            foreach (var instanceState in modelInstancedState.Instances)
             {
-                var instanceState = modelInstancedState.Instances.ElementAt(i);
-                instancesAll[i].SetState(instanceState);
+                instancesAll[idx++].SetState(instanceState);
             }
         }
     }

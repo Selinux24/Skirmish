@@ -266,6 +266,18 @@ namespace Engine.Common
             return Transform(this, transform);
         }
 
+        /// <summary>
+        /// Reverse Y and Z coordinates of each vertex
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        public static void ReverseNormals(VertexData[] vertices)
+        {
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                (vertices[i + 1], vertices[i + 2]) = (vertices[i + 2], vertices[i + 1]);
+            }
+        }
+
         /// <inheritdoc/>
         public readonly Vector3[] GetVertices()
         {

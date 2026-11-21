@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine
 {
     /// <summary>
@@ -16,6 +15,6 @@ namespace Engine
         /// Gets components
         /// </summary>
         /// <returns>Returns a collection of components of the specified type</returns>
-        IEnumerable<T> GetComponents<T>();
+        T[] GetComponents<T>();
     }
 }

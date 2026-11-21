@@ -110,7 +110,7 @@ namespace Engine.Content
         {
             return
                 left.path == right.path &&
-                Helper.CompareEnumerables(left.faces, right.faces);
+                Helper.CompareArrays(left.faces, right.faces);
         }
         /// <inheritdoc/>
         public bool Equals(FileCubicImageContent other)

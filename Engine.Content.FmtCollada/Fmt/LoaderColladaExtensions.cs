@@ -159,7 +159,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="array">Value array</param>
         /// <param name="length">Length</param>
         /// <param name="stride">Stride</param>
-        public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
+        public static T[] ReadArray<T>(T[] array, int length, int stride)
         {
             var n = new List<T>();
 
@@ -167,7 +167,7 @@ namespace Engine.Content.FmtCollada.Fmt
             {
                 for (int x = 0; x < stride; x++)
                 {
-                    T v = array.ElementAt(i + x);
+                    T v = array[i + x];
 
                     n.Add(v);
                 }

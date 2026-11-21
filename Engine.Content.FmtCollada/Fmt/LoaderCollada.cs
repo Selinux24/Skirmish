@@ -374,7 +374,7 @@ namespace Engine.Content.FmtCollada.Fmt
             foreach (var geometry in dae.LibraryGeometries)
             {
                 var subMeshes = ProcessGeometry(geometry, hulls);
-                if (subMeshes?.Any() != true)
+                if (subMeshes.Length == 0)
                 {
                     continue;
                 }
@@ -447,7 +447,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="geometry">Geometry info</param>
         /// <param name="hulls">Hull mesh names</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, string[] hulls)
+        private static SubMeshContent[] ProcessGeometry(Geometry geometry, string[] hulls)
         {
             bool isHull = IsHull(geometry.Name, hulls);
 
@@ -472,8 +472,13 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="mesh">Mesh</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessMesh(Mesh mesh, bool isHull)
+        private static SubMeshContent[] ProcessMesh(Mesh mesh, bool isHull)
         {
+            if (mesh.Sources == null || mesh.Sources.Length == 0)
+            {
+                return [];
+            }
+
             //Procesar por topología
             if ((mesh.Lines?.Length ?? 0) != 0)
             {
@@ -512,7 +517,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="mesh">Mesh</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessSpline(Spline spline, bool isHull)
+        private static SubMeshContent[] ProcessSpline(Spline spline, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -522,7 +527,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="mesh">Mesh</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessConvexMesh(ConvexMesh convexMesh, bool isHull)
+        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -533,7 +538,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessLines(IEnumerable<Lines> lines, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -544,7 +549,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessLineStrips(IEnumerable<LineStrips> lines, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -555,40 +560,29 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static List<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSources, bool isHull)
         {
-            if (triangles?.Any() != true)
-            {
-                return [];
-            }
-
             List<SubMeshContent> res = [];
 
             foreach (var triangle in triangles)
             {
                 var verts = ProcessTriangle(triangle, meshSources);
-                if (verts.Count == 0)
+                if (verts.Length == 0)
                 {
                     continue;
                 }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count];
-                for (int i = 0; i < data.Length; i += 3)
-                {
-                    data[i + 0] = verts[i + 0];
-                    data[i + 1] = verts[i + 2];
-                    data[i + 2] = verts[i + 1];
-                }
+                VertexData.ReverseNormals(verts);
 
                 SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull, Matrix4x4.Identity);
 
-                meshInfo.SetVertices(data);
+                meshInfo.SetVertices(verts);
 
                 res.Add(meshInfo);
             }
 
-            return res;
+            return [.. res];
         }
         /// <summary>
         /// Process a single triangle
@@ -596,7 +590,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="triangle">Triangle</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static List<VertexData> ProcessTriangle(Triangles triangle, IEnumerable<Source> meshSources)
+        private static VertexData[] ProcessTriangle(Triangles triangle, Source[] meshSources)
         {
             List<VertexData> verts = [];
 
@@ -604,9 +598,9 @@ namespace Engine.Content.FmtCollada.Fmt
             var normalInput = triangle[EnumSemantics.Normal];
             var texCoordInput = triangle[EnumSemantics.TexCoord];
 
-            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
-            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
+            var positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            var normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadUV() : null;
 
             int inputCount = triangle.Inputs.Length;
 
@@ -630,7 +624,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 }
             }
 
-            return verts;
+            return [.. verts];
         }
         /// <summary>
         /// Process triangle fans
@@ -639,7 +633,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriFans(IEnumerable<TriFans> triFans, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -650,7 +644,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriStrips(IEnumerable<TriStrips> triStrips, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -661,13 +655,8 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static List<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessPolyLists(PolyList[] polyLists, Source[] meshSources, bool isHull)
         {
-            if (polyLists?.Any() != true)
-            {
-                return [];
-            }
-
             List<SubMeshContent> res = [];
 
             foreach (var polyList in polyLists)
@@ -686,7 +675,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 res.Add(meshInfo);
             }
 
-            return res;
+            return [.. res];
         }
         /// <summary>
         /// Process polygon list
@@ -694,7 +683,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="polyList">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Return vertext data</returns>
-        private static void ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources, out List<VertexData> vertices, out List<uint> indices)
+        private static void ProcessPolyList(PolyList polyList, Source[] meshSources, out List<VertexData> vertices, out List<uint> indices)
         {
             List<VertexData> verts = [];
             List<uint> idx = [];
@@ -704,10 +693,10 @@ namespace Engine.Content.FmtCollada.Fmt
             var texCoordInput = polyList[EnumSemantics.TexCoord];
             var colorsInput = polyList[EnumSemantics.Color];
 
-            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
-            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
-            var colors = colorsInput != null ? meshSources.ElementAt(colorsInput.Offset).ReadColor3() : null;
+            var positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            var normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadUV() : null;
+            var colors = colorsInput != null ? meshSources[colorsInput.Offset].ReadColor3() : null;
 
             int index = 0;
             int inputCount = polyList.Inputs.Length;
@@ -781,25 +770,20 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static List<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isHull)
+        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, bool isHull)
         {
-            if (polygons?.Any() != true)
-            {
-                return [];
-            }
-
             List<SubMeshContent> res = [];
 
             foreach (var polygon in polygons)
             {
                 var verts = ProcessPolygon(polygon, meshSources);
-                if (verts.Count == 0)
+                if (verts.Length == 0)
                 {
                     continue;
                 }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count];
+                VertexData[] data = new VertexData[verts.Length];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts[i + 0];
@@ -814,7 +798,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 res.Add(meshInfo);
             }
 
-            return res;
+            return [.. res];
         }
         /// <summary>
         /// Process polygon
@@ -822,7 +806,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="polygon">Polygon</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static List<VertexData> ProcessPolygon(Polygons polygon, IEnumerable<Source> meshSources)
+        private static VertexData[] ProcessPolygon(Polygons polygon, Source[] meshSources)
         {
             List<VertexData> verts = [];
 
@@ -830,9 +814,9 @@ namespace Engine.Content.FmtCollada.Fmt
             var normalInput = polygon[EnumSemantics.Normal];
             var texCoordInput = polygon[EnumSemantics.TexCoord];
 
-            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
-            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
-            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadUV() : null;
+            var positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            var normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadUV() : null;
 
             int inputCount = polygon.Inputs.Length;
 
@@ -859,7 +843,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 }
             }
 
-            return verts;
+            return [.. verts];
         }
 
         #endregion
@@ -1066,8 +1050,14 @@ namespace Engine.Content.FmtCollada.Fmt
                 weights = skin[weightsInput.Source].ReadFloat();
             }
 
-            weightList = BuildVertexWeigths(skin, jointsOffset, joints, weightsOffset, weights);
-            inverseBindMatrixList = BuildInverseBindMatrixList(joints, mats);
+            weightList = BuildVertexWeigths(
+                skin,
+                jointsOffset, joints ?? [],
+                weightsOffset, weights ?? []);
+
+            inverseBindMatrixList = BuildInverseBindMatrixList(
+                joints ?? [],
+                mats ?? []);
         }
         /// <summary>
         /// Process vertext weight information
@@ -1087,24 +1077,24 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="weightsOffset">Weights offset</param>
         /// <param name="weights">Weight values list</param>
         /// <returns>Returns the weights list</returns>
-        private static List<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, IEnumerable<string> joints, int weightsOffset, IEnumerable<float> weights)
+        private static List<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, string[] joints, int weightsOffset, float[] weights)
         {
             if (skin?.VertexWeights == null || skin.VertexWeights.Count <= 0)
             {
                 return [];
             }
 
-            if (jointsOffset < 0 || joints?.Any() != true)
+            if (jointsOffset < 0 || joints.Length == 0)
             {
                 return [];
             }
 
-            if (weightsOffset < 0 || weights?.Any() != true)
+            if (weightsOffset < 0 || weights.Length == 0)
             {
                 return [];
             }
 
-            var wgList = new List<Weight>();
+            List<Weight> wgList = [];
 
             int index = 0;
             int sources = skin.VertexWeights.Inputs.Length;
@@ -1115,10 +1105,10 @@ namespace Engine.Content.FmtCollada.Fmt
 
                 for (int v = 0; v < n; v++)
                 {
-                    float weightValue = weights.ElementAt(skin.VertexWeights.V[index + weightsOffset]);
+                    float weightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
                     if (!MathUtils.IsZero(weightValue))
                     {
-                        string jointName = joints.ElementAt(skin.VertexWeights.V[index + jointsOffset]);
+                        string jointName = joints[skin.VertexWeights.V[index + jointsOffset]];
 
                         //Adds weight only if has value
                         var wg = new Weight()
@@ -1143,23 +1133,23 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="joints">Joint names list</param>
         /// <param name="mats">Inverse bind matrix list</param>
         /// <returns>Returns the inverse bind matrix by joint name dictionary</returns>
-        private static Dictionary<string, Matrix4x4> BuildInverseBindMatrixList(IEnumerable<string> joints, IEnumerable<Matrix4x4> mats)
+        private static Dictionary<string, Matrix4x4> BuildInverseBindMatrixList(string[] joints, Matrix4x4[] mats)
         {
-            if (mats?.Any() != true || joints?.Any() != true)
+            if (mats.Length == 0 || joints.Length == 0)
             {
                 return [];
             }
 
-            if (mats.Count() != joints.Count())
+            if (mats.Length != joints.Length)
             {
                 return [];
             }
 
             var ibmList = new Dictionary<string, Matrix4x4>();
 
-            for (int i = 0; i < joints.Count(); i++)
+            for (int i = 0; i < joints.Length; i++)
             {
-                ibmList.Add(joints.ElementAt(i), mats.ElementAt(i));
+                ibmList.Add(joints[i], mats[i]);
             }
 
             return ibmList;

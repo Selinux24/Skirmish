@@ -3,8 +3,6 @@ using Engine.BuiltIn.Drawers.Shadows;
 using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.BuiltIn.Components.ShadowMapping
 {
@@ -31,7 +29,7 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         /// <summary>
         /// Depth map
         /// </summary>
-        protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
+        protected EngineDepthStencilView[] DepthMap { get; set; }
 
         /// <inheritdoc/>
         public string Name { get; protected set; } = name;
@@ -66,11 +64,11 @@ namespace Engine.BuiltIn.Components.ShadowMapping
         {
             if (disposing)
             {
-                if (DepthMap?.Any() == true)
+                if (DepthMap != null && DepthMap.Length > 0)
                 {
-                    for (int i = 0; i < DepthMap.Count(); i++)
+                    foreach (var dm in DepthMap)
                     {
-                        DepthMap.ElementAt(i)?.Dispose();
+                        dm?.Dispose();
                     }
                 }
                 DepthMap = null;
@@ -87,9 +85,12 @@ namespace Engine.BuiltIn.Components.ShadowMapping
             dc.SetViewports(Viewports);
 
             //Set shadow map depth map without render target
+            int idx = LightSource?.ShadowMapIndex ?? -1;
+            var dm = idx >= 0 ? DepthMap[idx] : null;
+
             dc.SetRenderTargets(
                 null, false, Color.Transparent,
-                DepthMap.ElementAtOrDefault(LightSource?.ShadowMapIndex ?? -1), true, false,
+                dm, true, false,
                 true);
         }
 

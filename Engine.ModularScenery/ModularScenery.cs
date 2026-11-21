@@ -299,12 +299,11 @@ namespace Engine.Modular
                 model.Owner = this;
 
                 //Get the object list to process
-                var objList = level.Objects
-                    .Where(o => string.Equals(o.AssetName, objectName, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
+                ObjectReference[] objList = [.. level.Objects.Where(o => string.Equals(o.AssetName, objectName, StringComparison.OrdinalIgnoreCase))];
 
                 //Positioning
-                var transforms = objList.Select(o => Matrix4x4.Transformation(o.Position, o.Rotation, o.Scale));
+                Matrix4x4[] transforms = [.. objList.Select(o => Matrix4x4.Transformation(o.Position, o.Rotation, o.Scale))];
+
                 model.SetTransforms(transforms);
 
                 //Lights
@@ -494,7 +493,7 @@ namespace Engine.Modular
 
             foreach (var assetName in transforms.Keys)
             {
-                assets[assetName].SetTransforms(transforms[assetName]);
+                assets[assetName].SetTransforms([.. transforms[assetName]]);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -518,7 +517,7 @@ namespace Engine.Modular
                 Assets = [],
             };
 
-            var asset = assetMap.Assets.ElementAt(assetIndex);
+            var asset = assetMap.Assets[assetIndex];
             var assetTransforms = asset.GetInstanceTransforms();
 
             foreach (var basicAsset in assetTransforms.Keys)

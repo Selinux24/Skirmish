@@ -189,7 +189,7 @@ namespace Engine.Physics
                 }
 
                 var collidersOfObj1 = octree.Query(obj1.GetBroadPhaseBounds());
-                if (!collidersOfObj1.Any())
+                if (collidersOfObj1.Length == 0)
                 {
                     continue;
                 }
@@ -267,13 +267,13 @@ namespace Engine.Physics
         private void EvaluateContactPair(ContactPair contactPair)
         {
             var colliders1 = contactPair.Obj1.GetBroadPhaseColliders(contactPair.Obj2);
-            if (!colliders1.Any())
+            if (colliders1.Length == 0)
             {
                 return;
             }
 
             var colliders2 = contactPair.Obj2.GetBroadPhaseColliders(contactPair.Obj1);
-            if (!colliders2.Any())
+            if (colliders2.Length == 0)
             {
                 return;
             }

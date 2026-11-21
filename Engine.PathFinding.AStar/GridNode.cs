@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Grid node
     /// </summary>
@@ -76,7 +74,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="nodeSize">Node size</param>
         /// <param name="collisionValues">Collision values</param>
         /// <returns>Generates a grid node list</returns>
-        internal static IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
+        internal static GridNode[] GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
             var result = new List<GridNode>();
 
@@ -126,7 +124,7 @@ namespace Engine.PathFinding.AStar
                 }
             }
 
-            return result;
+            return [.. result];
         }
         /// <summary>
         /// Generates a node list from unique collision data
@@ -413,9 +411,9 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Gets the connected node list
         /// </summary>
-        public IEnumerable<GridNode> GetNodeConnections()
+        public GridNode[] GetNodeConnections()
         {
-            return ConnectedNodes.Where(n => n != null).AsEnumerable();
+            return [.. ConnectedNodes.FindAll(n => n != null)];
         }
 
         /// <inheritdoc/>

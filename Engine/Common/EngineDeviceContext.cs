@@ -204,7 +204,7 @@ namespace Engine.Common
         /// <summary>
         /// Current stream output bindings
         /// </summary>
-        private IEnumerable<EngineStreamOutputBufferBinding> currentStreamOutputBindings;
+        private EngineStreamOutputBufferBinding[] currentStreamOutputBindings;
 
         /// <summary>
         /// Current pixel shader
@@ -247,7 +247,7 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex buffer bindings
         /// </summary>
-        private IEnumerable<EngineVertexBufferBinding> currentVertexBufferBindings = null;
+        private EngineVertexBufferBinding[] currentVertexBufferBindings = null;
         /// <summary>
         /// Current index buffer reference
         /// </summary>
@@ -425,7 +425,7 @@ namespace Engine.Common
         /// <param name="viewports">Viewports</param>
         private void SetViewPorts(Viewport[] viewports)
         {
-            if (Helper.CompareEnumerables(currentViewports, viewports))
+            if (Helper.CompareArrays(currentViewports, viewports))
             {
                 return;
             }
@@ -555,7 +555,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vertexBufferBindings)
         {
-            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareArrays(currentVertexBufferBindings, vertexBufferBindings))
             {
                 ID3D11Buffer[] buffers = [.. vertexBufferBindings.Select(v => v.Buffer?.GetBuffer())];
                 uint[] strides = [.. vertexBufferBindings.Select(v => v.Stride)];
@@ -874,7 +874,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetGeometryShaderStreamOutputTargets(EngineStreamOutputBufferBinding[] streamOutBinding)
         {
-            if (Helper.CompareEnumerables(currentStreamOutputBindings, streamOutBinding))
+            if (Helper.CompareArrays(currentStreamOutputBindings, streamOutBinding))
             {
                 return;
             }

@@ -18,31 +18,26 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="transform">Transform to apply to all vertices</param>
         /// <param name="content">Result content</param>
         /// <param name="materials">Result materials</param>
-        public static void LoadObj(Stream stream, string folder, Matrix4x4 transform, out IEnumerable<SubMeshContent> content, out IEnumerable<Material> materials)
+        public static void LoadObj(Stream stream, string folder, Matrix4x4 transform, out SubMeshContent[] content, out Material[] materials)
         {
-            var models = new List<SubMeshContent>();
+            List<SubMeshContent> models = [];
 
-            var lines = ReadStreamLines(stream).ToList();
+            var lines = ReadStreamLines(stream);
 
             //Read all materials libs file names
-            var matLibFiles = new List<string>();
-            lines.ForEach(v => matLibFiles.AddRange(ReadMaterialFileName(folder, v, "mtllib")));
+            List<string> matLibFiles = [.. lines.SelectMany(v => ReadMaterialFileName(folder, v, "mtllib"))];
 
             //Read all materials
-            var matLibs = new List<Material>();
-            matLibs.AddRange(ReadMaterialsFromFile(matLibFiles));
+            List<Material> matLibs = ReadMaterialsFromFile(matLibFiles);
 
             //Read all points
-            var points = new List<Vector3>();
-            lines.ForEach(v => points.AddRange(ReadVector3(v, "v")));
+            List<Vector3> points = [.. lines.SelectMany(v => ReadVector3(v, "v"))];
 
             //Read all texture uvs
-            var uvs = new List<Vector2>();
-            lines.ForEach(v => uvs.AddRange(ReadVector2(v, "vt")));
+            List<Vector2> uvs = [.. lines.SelectMany(v => ReadVector2(v, "vt"))];
 
             //Read all normals
-            var normals = new List<Vector3>();
-            lines.ForEach(v => normals.AddRange(ReadVector3(v, "vn")));
+            List<Vector3> normals = [.. lines.SelectMany(v => ReadVector3(v, "vn"))];
 
             if (!transform.IsIdentity)
             {
@@ -50,7 +45,7 @@ namespace Engine.Content.FmtObj.Fmt
                 normals = TransformNormal(normals, transform);
             }
 
-            var useMatIndices = lines.FindAllIndexOf("usemtl");
+            var useMatIndices = FindAllIndexOf(lines, "usemtl");
             if (useMatIndices.Length != 0)
             {
                 for (int i = 0; i < useMatIndices.Length; i++)
@@ -60,7 +55,7 @@ namespace Engine.Content.FmtObj.Fmt
                         useMatIndices[i + 1] - useMatIndices[i];
 
                     // Take the mesh definition lines
-                    var submeshLines = lines.Skip(useMatIndices[i]).Take(size);
+                    var submeshLines = lines.Skip(useMatIndices[i]).Take(size).ToList();
 
                     var mesh = CreateMesh(submeshLines, points, uvs, normals);
                     if (mesh != null)
@@ -79,8 +74,8 @@ namespace Engine.Content.FmtObj.Fmt
                 }
             }
 
-            materials = matLibs;
-            content = models;
+            materials = [.. matLibs];
+            content = [.. models];
         }
         private static List<string> ReadStreamLines(Stream stream)
         {
@@ -100,18 +95,18 @@ namespace Engine.Content.FmtObj.Fmt
 
             return lines;
         }
-        private static int[] FindAllIndexOf(this IEnumerable<string> values, string val)
+        private static int[] FindAllIndexOf(IEnumerable<string> values, string val)
         {
             return [.. values.Select((b, i) => b.StartsWith(val, StringComparison.OrdinalIgnoreCase) ? i : -1).Where(i => i != -1)];
         }
-        private static SubMeshContent CreateMesh(IEnumerable<string> submeshLines, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals)
+        private static SubMeshContent CreateMesh(List<string> submeshLines, List<Vector3> points, List<Vector2> uvs, List<Vector3> normals)
         {
             // Get material name (if any)
-            string material = ReadUseMaterial(submeshLines.First());
+            string material = ReadUseMaterial(submeshLines[0]);
 
             // Read model faces
-            var faces = submeshLines.SelectMany(ReadFaces);
-            if (faces.Any())
+            Face[][] faces = [.. submeshLines.SelectMany(ReadFaces)];
+            if (faces.Length != 0)
             {
                 return CreateModel(material, points, uvs, normals, faces, 0);
             }
@@ -140,11 +135,13 @@ namespace Engine.Content.FmtObj.Fmt
 
         private static string ReadString(string line, int index)
         {
-            return line?.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ElementAtOrDefault(index);
+            string[] parts = line?.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries) ?? [];
+            return parts.Length > index ? parts[index] : default;
         }
         private static float ReadFloat(string line, int index, float defaultValue = 0)
         {
-            var tValue = line?.Split(" ".ToCharArray()).ElementAtOrDefault(index);
+            string[] parts = line?.Split(" ".ToCharArray()) ?? [];
+            var tValue = parts.Length > index ? parts[index] : default;
             if (float.TryParse(tValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float res))
             {
                 return res;
@@ -233,7 +230,8 @@ namespace Engine.Content.FmtObj.Fmt
         {
             if (strLine.StartsWith("usemtl ", StringComparison.OrdinalIgnoreCase))
             {
-                return strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
+                string[] parts = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+                return parts.Length > 1 ? parts[1] : default;
             }
 
             return ContentData.NoMaterial;
@@ -242,7 +240,8 @@ namespace Engine.Content.FmtObj.Fmt
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
-                string materialFile = strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
+                string[] parts = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+                string materialFile = parts.Length > 1 ? parts[1] : default;
                 if (string.IsNullOrWhiteSpace(materialFile))
                 {
                     return [];
@@ -265,7 +264,7 @@ namespace Engine.Content.FmtObj.Fmt
             {
                 string[] matLines = File.ReadAllLines(fileName);
 
-                var matIndices = matLines.FindAllIndexOf("newmtl");
+                var matIndices = FindAllIndexOf(matLines, "newmtl");
                 for (int i = 0; i < matIndices.Length; i++)
                 {
                     int size = i == matIndices.Length - 1 ?
@@ -308,10 +307,15 @@ namespace Engine.Content.FmtObj.Fmt
             };
         }
 
-        private static SubMeshContent CreateModel(string material, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, IEnumerable<Face[]> faces, int offset)
+        private static SubMeshContent CreateModel(string material, List<Vector3> points, List<Vector2> uvs, List<Vector3> normals, Face[][] faces, int offset)
         {
             var vertexList = new List<VertexData>();
             var indexList = new List<uint>();
+
+            //Copy arrays
+            Vector3[] pointsArray = [.. points];
+            Vector2[] uvsArray = [.. uvs];
+            Vector3[] normalsArray = [.. normals];
 
             int faceIndex = 0;
             foreach (var faceVertices in faces)
@@ -328,13 +332,13 @@ namespace Engine.Content.FmtObj.Fmt
                     indexList.AddRange(indices);
                 }
 
-                var vertices = faceVertices.Select((faceVertex, vertexIndex) => faceVertex.CreateVertex(faceIndex, vertexIndex, points, uvs, normals, offset));
+                var vertices = faceVertices.Select((faceVertex, vertexIndex) => faceVertex.CreateVertex(faceIndex, vertexIndex, pointsArray, uvsArray, normalsArray, offset));
                 vertexList.AddRange(vertices);
 
                 faceIndex++;
             }
 
-            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false, Matrix4x4.Identity);
+            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Count > 0, false, Matrix4x4.Identity);
 
             content.SetVertices([.. vertexList]);
             content.SetIndices([.. indexList]);

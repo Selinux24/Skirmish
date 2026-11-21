@@ -38,7 +38,7 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentPathIndex);
+                return CurrentPathIndex < animationPaths.Count ? animationPaths[CurrentPathIndex] : default;
             }
         }
         /// <summary>
@@ -48,7 +48,9 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentPathIndex + 1);
+                int idx = CurrentPathIndex + 1;
+
+                return idx < animationPaths.Count ? animationPaths[idx] : default;
             }
         }
         /// <summary>

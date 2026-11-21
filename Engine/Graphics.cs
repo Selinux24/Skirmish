@@ -2,7 +2,6 @@
 using Engine.Helpers;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -952,7 +951,7 @@ namespace Engine
         /// <param name="mapCount">Per stencil view map count</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, uint width, uint height, uint mapCount, uint arraySize)
+        public (EngineDepthStencilView[] DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, uint width, uint height, uint mapCount, uint arraySize)
         {
             var desc = new Texture2DDescription1()
             {
@@ -1072,7 +1071,7 @@ namespace Engine
         /// <param name="height">Face height</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, uint width, uint height, uint arraySize)
+        public (EngineDepthStencilView[] DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, uint width, uint height, uint arraySize)
         {
             var desc = new Texture2DDescription1()
             {

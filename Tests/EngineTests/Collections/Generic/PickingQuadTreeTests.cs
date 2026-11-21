@@ -4,7 +4,6 @@ using Engine.Common;
 using Engine.Mathematics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -530,12 +529,12 @@ namespace EngineTests.Collections.Generic
             Assert.IsTrue(picked);
             Assert.HasCount(2, tlist);
 
-            var t0 = tlist.ElementAt(0);
+            var t0 = tlist[0];
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
             Assert.AreEqual(t1PickingPoint0, t0.Position);
 
-            var t1 = tlist.ElementAt(1);
+            var t1 = tlist[1];
             Assert.AreEqual(t1PickingDistance1, t1.Distance, 0.0001f);
             Assert.AreEqual(t11, t1.Primitive);
             Assert.AreEqual(t1PickingPoint1, t1.Position);
@@ -552,7 +551,7 @@ namespace EngineTests.Collections.Generic
             Assert.HasCount(1, tlist);
             Assert.IsTrue(picked);
 
-            t0 = tlist.ElementAt(0);
+            t0 = tlist[0];
             Assert.AreEqual(t1PickingDistance0, t0.Distance, 0.0001f);
             Assert.AreEqual(t10, t0.Primitive);
             Assert.AreEqual(t1PickingPoint0, t0.Position);

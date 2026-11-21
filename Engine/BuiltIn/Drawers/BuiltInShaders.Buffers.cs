@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Drawers
@@ -49,7 +47,6 @@ namespace Engine.BuiltIn.Drawers
                 return (uint)Marshal.SizeOf<Global>();
             }
         }
-
 
 
         /// <summary>
@@ -150,7 +147,6 @@ namespace Engine.BuiltIn.Drawers
         }
 
 
-
         /// <summary>
         /// Hemispheric light buffer
         /// </summary>
@@ -222,7 +218,6 @@ namespace Engine.BuiltIn.Drawers
         }
 
 
-
         /// <summary>
         /// Directional light buffer
         /// </summary>
@@ -236,9 +231,11 @@ namespace Engine.BuiltIn.Drawers
             /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static IEnumerable<BufferLightDirectional> Build(IEnumerable<ISceneLightDirectional> lights, int maxLights, out int lightCount)
+            public static BufferLightDirectional[] Build(ISceneLightDirectional[] lights, int maxLights, out int lightCount)
             {
-                if (lights?.Any() != true)
+                ArgumentNullException.ThrowIfNull(lights);
+
+                if (lights.Length == 0)
                 {
                     lightCount = 0;
 
@@ -247,12 +244,12 @@ namespace Engine.BuiltIn.Drawers
 
                 var bDirLights = new BufferLightDirectional[maxLights];
 
-                for (int i = 0; i < Math.Min(lights.Count(), maxLights); i++)
+                for (int i = 0; i < Math.Min(lights.Length, maxLights); i++)
                 {
-                    bDirLights[i] = Build(lights.ElementAt(i));
+                    bDirLights[i] = Build(lights[i]);
                 }
 
-                lightCount = Math.Min(lights.Count(), maxLights);
+                lightCount = Math.Min(lights.Length, maxLights);
 
                 return bDirLights;
             }
@@ -351,12 +348,17 @@ namespace Engine.BuiltIn.Drawers
             /// <param name="context">Draw context</param>
             public static PSDirectional Build(DrawContext context)
             {
-                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
+                if (context.Lights == null)
+                {
+                    return new();
+                }
 
-                return new PSDirectional
+                var dirLights = BufferLightDirectional.Build(context.Lights.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
+
+                return new()
                 {
                     DirLightsCount = (uint)dirLength,
-                    DirLights = dirLights.ToArray(),
+                    DirLights = dirLights,
                 };
             }
 
@@ -379,7 +381,6 @@ namespace Engine.BuiltIn.Drawers
         }
 
 
-
         /// <summary>
         /// Spot light buffer
         /// </summary>
@@ -393,9 +394,11 @@ namespace Engine.BuiltIn.Drawers
             /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static IEnumerable<BufferLightSpot> Build(IEnumerable<ISceneLightSpot> lights, int maxLights, out int lightCount)
+            public static BufferLightSpot[] Build(ISceneLightSpot[] lights, int maxLights, out int lightCount)
             {
-                if (lights?.Any() != true)
+                ArgumentNullException.ThrowIfNull(lights);
+
+                if (lights.Length == 0)
                 {
                     lightCount = 0;
 
@@ -404,13 +407,12 @@ namespace Engine.BuiltIn.Drawers
 
                 var bSpotLights = new BufferLightSpot[maxLights];
 
-                var spots = lights.ToArray();
-                for (int i = 0; i < Math.Min(spots.Length, maxLights); i++)
+                for (int i = 0; i < Math.Min(lights.Length, maxLights); i++)
                 {
-                    bSpotLights[i] = Build(spots[i]);
+                    bSpotLights[i] = Build(lights[i]);
                 }
 
-                lightCount = Math.Min(spots.Length, maxLights);
+                lightCount = Math.Min(lights.Length, maxLights);
 
                 return bSpotLights;
             }
@@ -531,7 +533,7 @@ namespace Engine.BuiltIn.Drawers
                 return new PSSpots
                 {
                     SpotLightsCount = (uint)spotLength,
-                    SpotLights = spotLights.ToArray(),
+                    SpotLights = spotLights,
                 };
             }
 
@@ -554,7 +556,6 @@ namespace Engine.BuiltIn.Drawers
         }
 
 
-
         /// <summary>
         /// Point light buffer
         /// </summary>
@@ -568,9 +569,11 @@ namespace Engine.BuiltIn.Drawers
             /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static IEnumerable<BufferLightPoint> Build(IEnumerable<ISceneLightPoint> lights, int maxLights, out int lightCount)
+            public static BufferLightPoint[] Build(ISceneLightPoint[] lights, int maxLights, out int lightCount)
             {
-                if (lights?.Any() != true)
+                ArgumentNullException.ThrowIfNull(lights);
+
+                if (lights.Length == 0)
                 {
                     lightCount = 0;
 
@@ -579,13 +582,12 @@ namespace Engine.BuiltIn.Drawers
 
                 var bPointLights = new BufferLightPoint[maxLights];
 
-                var points = lights.ToArray();
-                for (int i = 0; i < Math.Min(points.Length, maxLights); i++)
+                for (int i = 0; i < Math.Min(lights.Length, maxLights); i++)
                 {
-                    bPointLights[i] = Build(points[i]);
+                    bPointLights[i] = Build(lights[i]);
                 }
 
-                lightCount = Math.Min(points.Length, maxLights);
+                lightCount = Math.Min(lights.Length, maxLights);
 
                 return bPointLights;
             }
@@ -690,7 +692,7 @@ namespace Engine.BuiltIn.Drawers
                 return new PSPoints
                 {
                     PointLightsCount = (uint)pointLength,
-                    PointLights = pointLights.ToArray(),
+                    PointLights = pointLights,
                 };
             }
 

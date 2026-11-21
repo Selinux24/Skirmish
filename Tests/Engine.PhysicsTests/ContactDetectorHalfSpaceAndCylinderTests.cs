@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Engine.PhysicsTests
 {
@@ -49,7 +48,7 @@ namespace Engine.PhysicsTests
             public Matrix4x4 PlaneTransform { get; set; } = Matrix4x4.Identity;
             public Matrix4x4 CylinderTransform { get; set; } = Matrix4x4.Identity;
             public bool IntersectionExpected { get; set; } = false;
-            public IEnumerable<HalfSpaceAndCylinderContactData> Contacts { get; set; }
+            public HalfSpaceAndCylinderContactData[] Contacts { get; set; }
 
             public HalfSpaceAndCylinderData()
             {
@@ -648,7 +647,7 @@ namespace Engine.PhysicsTests
                 return;
             }
 
-            int expectedCount = testData.Contacts.Count();
+            int expectedCount = testData.Contacts.Length;
 
             Assert.AreEqual(expectedCount, data.ContactCount, $"{expectedCount} contacts expected");
 
@@ -656,7 +655,7 @@ namespace Engine.PhysicsTests
             {
                 var contact = data.GetContact(i);
 
-                var expectedContact = testData.Contacts.ElementAt(i);
+                var expectedContact = testData.Contacts[i];
                 var expectedPenetration = expectedContact.Penetration;
                 var expectedPosition = expectedContact.Point;
                 var expectedNormal = expectedContact.Normal;

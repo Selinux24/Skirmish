@@ -1,7 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Animation
 {
@@ -28,7 +26,7 @@ namespace Engine.Animation
         /// <summary>
         /// Keyframe list
         /// </summary>
-        public readonly IReadOnlyCollection<Keyframe> Keyframes;
+        public readonly Keyframe[] Keyframes;
         /// <summary>
         /// Start time
         /// </summary>
@@ -51,11 +49,13 @@ namespace Engine.Animation
         /// <summary>
         /// Constructor
         /// </summary>
-        public JointAnimation(string jointName, IEnumerable<Keyframe> keyframes)
+        public JointAnimation(string jointName, Keyframe[] keyframes)
         {
+            ArgumentNullException.ThrowIfNull(keyframes);
+
             Joint = jointName;
 
-            if (keyframes?.Any() != true)
+            if (keyframes.Length == 0)
             {
                 Keyframes = [];
                 StartTime = 0;
@@ -104,7 +104,7 @@ namespace Engine.Animation
             rotation = Quaternion.Identity;
             scale = Vector3.One;
 
-            if (Keyframes.Count == 0)
+            if (Keyframes.Length == 0)
             {
                 return;
             }
@@ -116,10 +116,10 @@ namespace Engine.Animation
             }
 
             int currFrame = FindFrame(deltaTime);
-            int nextFrame = (currFrame + 1) % Keyframes.Count;
+            int nextFrame = (currFrame + 1) % Keyframes.Length;
 
-            var currKeyframe = Keyframes.ElementAt(currFrame);
-            var nextKeyframe = Keyframes.ElementAt(nextFrame);
+            var currKeyframe = Keyframes[currFrame];
+            var nextKeyframe = Keyframes[nextFrame];
 
             var diffTime = nextKeyframe.Time - currKeyframe.Time;
             if (diffTime < 0f)
@@ -150,23 +150,23 @@ namespace Engine.Animation
         /// <param name="keyTime">Key time</param>
         private int FindFrame(float keyTime)
         {
-            if (Keyframes.Count == 0)
+            if (Keyframes.Length == 0)
             {
                 return 0;
             }
 
             int frameIndex = 0;
 
-            while (frameIndex < Keyframes.Count - 1)
+            while (frameIndex < Keyframes.Length - 1)
             {
-                if (keyTime < Keyframes.ElementAt(frameIndex + 1).Time)
+                if (keyTime < Keyframes[frameIndex + 1].Time)
                 {
                     break;
                 }
                 frameIndex++;
             }
 
-            if (frameIndex >= Keyframes.Count)
+            if (frameIndex >= Keyframes.Length)
             {
                 frameIndex = 0;
             }
@@ -177,14 +177,14 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes?.Count ?? 0}";
+            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes?.Length ?? 0}";
         }
         /// <inheritdoc/>
         public bool Equals(JointAnimation other)
         {
             return
                 Joint == other.Joint &&
-                Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
+                Helper.CompareArrays(Keyframes, other.Keyframes) &&
                 MathUtils.NearEqual(StartTime, other.StartTime) &&
                 MathUtils.NearEqual(EndTime, other.EndTime);
         }
@@ -205,13 +205,13 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy()
         {
-            if (Keyframes.Count == 0)
+            if (Keyframes.Length == 0)
             {
                 return new JointAnimation(Joint, []);
             }
 
-            Keyframe[] kfs = new Keyframe[Keyframes.Count];
-            Array.Copy(Keyframes.ToArray(), kfs, kfs.Length);
+            Keyframe[] kfs = new Keyframe[Keyframes.Length];
+            Array.Copy(Keyframes, kfs, kfs.Length);
 
             return new JointAnimation(Joint, kfs);
         }
@@ -223,13 +223,13 @@ namespace Engine.Animation
         /// <returns>Returns a copy of the instance keyframes</returns>
         public JointAnimation Copy(int indexFrom, int indexTo)
         {
-            if (Keyframes.Count == 0)
+            if (Keyframes.Length == 0)
             {
                 return new JointAnimation(Joint, []);
             }
 
             Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];
-            Array.Copy(Keyframes.ToArray(), indexFrom, kfs, 0, kfs.Length);
+            Array.Copy(Keyframes, indexFrom, kfs, 0, kfs.Length);
 
             //Adjust copy time
             float dTime = kfs[0].Time;

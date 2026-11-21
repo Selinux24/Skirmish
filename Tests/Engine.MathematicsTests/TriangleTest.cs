@@ -190,9 +190,9 @@ namespace Engine.MathematicsTests
 
             var points = t1.GetVertices();
 
-            Assert.AreEqual(p1, points.ElementAt(0));
-            Assert.AreEqual(p2, points.ElementAt(1));
-            Assert.AreEqual(p3, points.ElementAt(2));
+            Assert.AreEqual(p1, points[0]);
+            Assert.AreEqual(p2, points[1]);
+            Assert.AreEqual(p3, points[2]);
         }
         [TestMethod()]
         public void EdgesTest()

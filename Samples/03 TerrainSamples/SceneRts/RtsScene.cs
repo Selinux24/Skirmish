@@ -2200,7 +2200,7 @@ namespace TerrainSamples.SceneRts
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
-        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color4 pathColor)
+        private void DEBUGDrawPath(Vector3[] path, Color4 pathColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2209,15 +2209,15 @@ namespace TerrainSamples.SceneRts
 
             terrainPointDrawer.Clear(pathColor);
 
-            if (path?.Any() == true)
+            if ((path?.Length ?? 0) > 0)
             {
-                int count = Math.Min(path.Count(), MaxPickingTest);
+                int count = Math.Min(path.Length, MaxPickingTest);
 
                 Line3D[] lines = new Line3D[count];
 
                 for (int i = 1; i < count; i++)
                 {
-                    lines[i] = new Line3D(path.ElementAt(i - 1), path.ElementAt(i));
+                    lines[i] = new Line3D(path[i - 1], path[i]);
                 }
 
                 terrainPointDrawer.SetPrimitives(pathColor, lines);

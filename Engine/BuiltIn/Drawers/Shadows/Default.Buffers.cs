@@ -34,7 +34,7 @@ namespace Engine.BuiltIn.Drawers.Shadows
             var m = new Matrix4x4[MaxCount];
             for (int i = 0; i < MaxCount; i++)
             {
-                m[i] = Matrix4x4.Transpose(viewProjection.ElementAtOrDefault(i));
+                m[i] = i < viewProjection.Length ? Matrix4x4.Transpose(viewProjection[i]) : Matrix4x4.Identity;
             }
 
             return new PerCastingLight

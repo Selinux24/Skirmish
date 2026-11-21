@@ -3,7 +3,6 @@ using Engine.Mathematics;
 using Engine.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.UI
@@ -275,7 +274,7 @@ namespace Engine.BuiltIn.UI
             {
                 base.Visible = value;
 
-                var selected = tabPanels.ElementAtOrDefault(selectedTabIndex);
+                var selected = selectedTabIndex < tabPanels.Count ? tabPanels[selectedTabIndex] : default;
                 if (selected != null)
                 {
                     tabPanels.ForEach(p => p.Visible = false);
@@ -355,7 +354,9 @@ namespace Engine.BuiltIn.UI
                 $"{Name}.Button_{i}",
                 buttonDesc);
 
-            button.Caption.Text = Description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
+            string caption = i < (Description.TabCaptions?.Length ?? 0) ? Description.TabCaptions[i] : $"Button_{i}";
+
+            button.Caption.Text = caption;
             button.Caption.Padding = tabButtonPadding;
             button.MousePressed += Button_Pressed;
             button.MouseJustPressed += Button_JustPressed;
@@ -562,8 +563,8 @@ namespace Engine.BuiltIn.UI
                 new UITabPanelEventArgs()
                 {
                     TabIndex = index,
-                    TabButton = tabButtons.ElementAtOrDefault(index),
-                    TabPanel = tabPanels.ElementAtOrDefault(index),
+                    TabButton = index < tabButtons.Count ? tabButtons[index] : default,
+                    TabPanel = index < tabPanels.Count ? tabPanels[index] : default,
                 });
         }
         /// <summary>
@@ -576,8 +577,8 @@ namespace Engine.BuiltIn.UI
                 new UITabPanelEventArgs()
                 {
                     TabIndex = index,
-                    TabButton = tabButtons.ElementAtOrDefault(index),
-                    TabPanel = tabPanels.ElementAtOrDefault(index),
+                    TabButton = index < tabButtons.Count ? tabButtons[index] : default,
+                    TabPanel = index < tabPanels.Count ? tabPanels[index] : default,
                 });
         }
         /// <summary>
@@ -590,8 +591,8 @@ namespace Engine.BuiltIn.UI
                 new UITabPanelEventArgs()
                 {
                     TabIndex = index,
-                    TabButton = tabButtons.ElementAtOrDefault(index),
-                    TabPanel = tabPanels.ElementAtOrDefault(index),
+                    TabButton = index < tabButtons.Count ? tabButtons[index] : default,
+                    TabPanel = index < tabPanels.Count ? tabPanels[index] : default,
                 });
         }
         /// <summary>
@@ -604,8 +605,8 @@ namespace Engine.BuiltIn.UI
                 new UITabPanelEventArgs()
                 {
                     TabIndex = index,
-                    TabButton = tabButtons.ElementAtOrDefault(index),
-                    TabPanel = tabPanels.ElementAtOrDefault(index),
+                    TabButton = index < tabButtons.Count ? tabButtons[index] : default,
+                    TabPanel = index < tabPanels.Count ? tabPanels[index] : default,
                 });
         }
     }

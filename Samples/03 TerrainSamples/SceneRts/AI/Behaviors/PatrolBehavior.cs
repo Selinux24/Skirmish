@@ -42,7 +42,7 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
         {
             get
             {
-                return checkPoints.ElementAtOrDefault(currentCheckPoint);
+                return currentCheckPoint < checkPoints.Length ? checkPoints[currentCheckPoint] : default;
             }
         }
 

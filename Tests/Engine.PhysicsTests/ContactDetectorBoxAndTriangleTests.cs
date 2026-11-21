@@ -93,9 +93,9 @@ namespace Engine.PhysicsTests
             var contactsPln = dataPln.GetContacts();
             var contactsTri = dataTri.GetContacts();
 
-            for (int i = 0; i < contactsPln.Count(); i++)
+            for (int i = 0; i < contactsPln.Length; i++)
             {
-                var contact = contactsPln.ElementAt(i);
+                var contact = contactsPln[i];
 
                 var expectedContact = contactsTri.FirstOrDefault(c => c.Position == contact.Position);
                 if (expectedContact == null)
