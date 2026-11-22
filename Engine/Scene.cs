@@ -781,21 +781,18 @@ namespace Engine
                 return false;
             }
 
-            if (res.Length == 1)
-            {
-                result = res[0].Nearest();
-                return true;
-            }
-
             PickingResult<T> nearest = default;
             float d = float.MaxValue;
             foreach (var pr in res)
             {
-                var curr = pr.Nearest();
-                if (curr.Distance < d)
+                foreach (var curr in pr.GetResults())
                 {
-                    nearest = curr;
-                    d = curr.Distance;
+                    float dsq = Vector3.DistanceSquared(from, curr.Position);
+                    if (dsq < d)
+                    {
+                        nearest = curr;
+                        d = dsq;
+                    }
                 }
             }
 
