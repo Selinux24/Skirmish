@@ -52,7 +52,8 @@ namespace Engine.Content
             {
                 if (string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) return c;
 
-                if (c.FilterMask(name) != null) return c;
+                var filtered = c.FilterMask(name);
+                if (filtered != null) return filtered;
             }
 
             return null;

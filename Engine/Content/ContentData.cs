@@ -1321,7 +1321,7 @@ namespace Engine.Content
             res.skinningContent.Add(armatureName, s);
 
             //Add animations
-            var animations = this.animationContent.Where(g =>
+            var animations = animationContent.Where(g =>
             {
                 return s.Skeleton.GetJointNames()
                     .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
@@ -1338,9 +1338,9 @@ namespace Engine.Content
             }
 
             var clips = animationDefinition.Clips
-                .Where(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
+                .FindAll(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
 
-            if (clips.Any())
+            if (clips.Count != 0)
             {
                 res.animationDefinition ??= new AnimationFile();
 

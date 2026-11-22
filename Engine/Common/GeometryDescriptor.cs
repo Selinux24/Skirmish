@@ -156,34 +156,34 @@ namespace Engine.Common
             {
                 indexOffset = (uint)(Vertices?.Length ?? 0);
 
-                Vertices = [.. Vertices, .. geom.Vertices ?? []];
+                Vertices = [.. Vertices ?? [], .. geom.Vertices ?? []];
             }
 
             if (geom.ContainsNormalData)
             {
-                Normals = [.. Normals, .. geom.Normals ?? []];
+                Normals = [.. Normals ?? [], .. geom.Normals ?? []];
             }
 
             if (geom.ContainsUvData)
             {
-                Uvs = [.. Uvs, .. geom.Uvs ?? []];
+                Uvs = [.. Uvs ?? [], .. geom.Uvs ?? []];
             }
 
             if (geom.ContainsTangentData)
             {
-                Tangents = [.. Tangents, .. geom.Tangents ?? []];
+                Tangents = [.. Tangents ?? [], .. geom.Tangents ?? []];
             }
 
             if (geom.ContainsBinormalData)
             {
-                Binormals = [.. Binormals, .. geom.Binormals ?? []];
+                Binormals = [.. Binormals ?? [], .. geom.Binormals ?? []];
             }
 
             if (geom.ContainsIndexData)
             {
                 uint[] idx = geom.Indices?.Select(i => i + indexOffset).ToArray() ?? [];
 
-                Indices = [.. Indices, .. idx];
+                Indices = [.. Indices ?? [], .. idx];
             }
 
             return true;
