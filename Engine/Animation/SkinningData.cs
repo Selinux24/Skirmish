@@ -89,13 +89,13 @@ namespace Engine.Animation
 
                 foreach (var key in dictAnimations.Keys)
                 {
-                    animations.Add(new AnimationClip(key, dictAnimations[key]));
+                    animations.Add(new(key, dictAnimations[key]));
                     clips.Add(key);
                 }
             }
             else
             {
-                animations.Add(new AnimationClip(DefaultClip, jointAnimations));
+                animations.Add(new(DefaultClip, jointAnimations));
                 clips.Add(DefaultClip);
             }
 

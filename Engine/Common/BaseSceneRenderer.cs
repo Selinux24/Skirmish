@@ -1515,6 +1515,13 @@ namespace Engine.Common
                 .Select(c => c.SkinningData)
                 .ToArray();
 
+            if (skData.Length == 0)
+            {
+                animationPalette = null;
+                animationPaletteWidth = uint.MaxValue;
+                return;
+            }
+
             List<ISkinningData> addedSks = [];
 
             List<Vector4> values = [];
@@ -1543,7 +1550,7 @@ namespace Engine.Common
 
             uint texWidth = GetTextureSize(values.Count);
 
-            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", [.. values], texWidth);
             animationPaletteWidth = texWidth;
         }
         /// <summary>

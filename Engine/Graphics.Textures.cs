@@ -3,7 +3,6 @@ using Engine.Mathematics;
 using Engine.TextureReader;
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;

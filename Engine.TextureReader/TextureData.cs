@@ -14,6 +14,8 @@ namespace Engine.TextureReader
     /// </summary>
     public class TextureData : IDisposable
     {
+        const string TextureCubicFacesStr = "A cubic texture must have 6 faces.";
+
         /// <summary>
         /// BitmapData
         /// </summary>
@@ -277,11 +279,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData[] ReadTextureCubic(string filename, RectI[] faces)
         {
-            ArgumentNullException.ThrowIfNull(faces);
-
-            if (faces.Length != 6)
+            if (faces != null && faces.Length != 6)
             {
-                throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
+                throw new ArgumentException(TextureCubicFacesStr, nameof(faces));
             }
 
             return ReadTextureArray(filename, faces);
@@ -294,11 +294,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData[] ReadTextureCubic(MemoryStream stream, RectI[] faces)
         {
-            ArgumentNullException.ThrowIfNull(faces);
-
-            if (faces.Length != 6)
+            if (faces != null && faces.Length != 6)
             {
-                throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
+                throw new ArgumentException(TextureCubicFacesStr, nameof(faces));
             }
 
             return ReadTextureArray(stream, faces);

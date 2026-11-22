@@ -345,7 +345,6 @@ namespace Engine
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length == 0) throw new ArgumentException("Must specify at least one value.", nameof(values));
             if (size == 0 || size == uint.MaxValue) throw new ArgumentException("The size must be greater than 0.", nameof(size));
 
             var resource = new GameResourceValueArray<T>(name, values, size, dynamic);
@@ -472,7 +471,6 @@ namespace Engine
         {
             if (identifier == Guid.Empty) throw new ArgumentException("Must specify a valid identifier.", nameof(identifier));
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length == 0) throw new ArgumentException("Must specify at least one value.", nameof(values));
             if (size == 0 || size == uint.MaxValue) throw new ArgumentException("The size must be greater than 0.", nameof(size));
 
             var (key, resource) = TryGetResource(identifier.ToByteArray().GetMd5Sum());

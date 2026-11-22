@@ -9,6 +9,8 @@ namespace Engine.Content
     /// </summary>
     public sealed class FileCubicImageContent : IImageContent, IEquatable<FileCubicImageContent>
     {
+        const string CubicFacesCountString = "A list of 6 faces must be specified, or not faces at all.";
+
         /// <summary>
         /// Image path
         /// </summary>
@@ -37,10 +39,9 @@ namespace Engine.Content
         public FileCubicImageContent(string path, RectI[] faces)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
-            ArgumentNullException.ThrowIfNull(faces);
-            if (faces.Length != 6)
+            if (faces != null && faces.Length != 0 && faces.Length != 6)
             {
-                throw new ArgumentException($"A list o 6 faces must be specified.", nameof(faces));
+                throw new ArgumentException(CubicFacesCountString, nameof(faces));
             }
 
             var p = ContentManager.FindPaths(path);
@@ -50,7 +51,7 @@ namespace Engine.Content
             }
 
             this.path = p[0];
-            this.faces = faces;
+            this.faces = faces ?? [];
         }
         /// <summary>
         /// Constructor
@@ -61,10 +62,9 @@ namespace Engine.Content
         public FileCubicImageContent(string contentFolder, string contentFileName, RectI[] faces = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(contentFileName);
-            ArgumentNullException.ThrowIfNull(faces);
-            if (faces.Length != 6)
+            if (faces != null && faces.Length != 0 && faces.Length != 6)
             {
-                throw new ArgumentException($"A list o 6 faces must be specified.", nameof(faces));
+                throw new ArgumentException(CubicFacesCountString, nameof(faces));
             }
 
             var p = ContentManager.FindPaths(contentFolder, contentFileName);
@@ -74,7 +74,7 @@ namespace Engine.Content
             }
 
             path = p[0];
-            this.faces = faces;
+            this.faces = faces ?? [];
         }
 
         /// <inheritdoc/>
