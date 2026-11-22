@@ -319,19 +319,19 @@ namespace Engine.BuiltIn.Components.Ground
             await base.ReadAssets(description);
 
             // Generate model content
-            var content = await Description.ReadContentData();
-            if (content.Length == 0)
+            var contentData = await Description.ReadContentData();
+            if (contentData.Length == 0)
             {
                 throw new ArgumentException("Must specify at least one content in the list.", nameof(description));
             }
 
-            this.content = content[0];
+            content = contentData[0];
 
             // Generate quadtree
-            GroundPickingQuadtree = Description.ReadQuadTree(this.content.GetTriangles());
+            GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
 
             // Retrieve lights from content
-            Lights = [.. this.content.CreateLights()];
+            Lights = [.. content.CreateLights()];
 
             await IntializePatches();
         }

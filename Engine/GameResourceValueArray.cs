@@ -21,7 +21,7 @@ namespace Engine
         /// <summary>
         /// Dynamic resource
         /// </summary>
-        private readonly bool Dynamic = dynamic;
+        private readonly bool dynamic = dynamic;
 
         /// <inheritdoc/>
         public string Name { get; private set; } = name;
@@ -31,7 +31,7 @@ namespace Engine
         /// <inheritdoc/>
         public void Create(Game game)
         {
-            var srv = game.Graphics.CreateValueArrayTexture(Name, size, values, Dynamic).GetResource();
+            var srv = game.Graphics.CreateValueArrayTexture(Name, size, values, dynamic).GetResource();
             ResourceView.SetResource(srv);
         }
     }

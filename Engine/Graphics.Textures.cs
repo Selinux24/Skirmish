@@ -575,28 +575,7 @@ namespace Engine
         {
             uint length = checked(width * height);
             T[] array = new T[length];
-
-            if (values is T[] sourceArray)
-            {
-                sourceArray.CopyTo(array, 0);
-            }
-            else if (values is ICollection<T> sourceCollection)
-            {
-                sourceCollection.CopyTo(array, 0);
-            }
-            else
-            {
-                int index = 0;
-                foreach (T value in values)
-                {
-                    if (index >= array.Length)
-                    {
-                        throw new ArgumentException("Source array was larger than the destination array.", nameof(values));
-                    }
-
-                    array[index++] = value;
-                }
-            }
+            values.CopyTo(array, 0);
 
             uint bitsPerPixel = format.GetBitsPerPixel();
             uint bytesPerPixel = (bitsPerPixel + 7) / 8;
@@ -932,6 +911,8 @@ namespace Engine
         /// <returns>Returns created texture</returns>
         public EngineShaderResourceView CreateValueArrayTexture<T>(string name, uint size, T[] values, bool dynamic) where T : unmanaged
         {
+            ArgumentNullException.ThrowIfNull(values);
+
             return new(name, Create2DTextureResourceView(name, size, values, dynamic));
         }
     }

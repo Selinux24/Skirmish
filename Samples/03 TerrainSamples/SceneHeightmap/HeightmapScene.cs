@@ -1124,7 +1124,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             if (FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
-                soldier.Manipulator.SetPosition(res.Last().Position);
+                soldier.Manipulator.SetPosition(res[^1].Position);
                 soldier.Manipulator.SetRotation(MathUtils.Pi, 0, 0);
             }
 
