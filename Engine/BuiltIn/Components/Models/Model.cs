@@ -3,7 +3,6 @@ using Engine.BuiltIn.Drawers;
 using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Models
@@ -96,7 +95,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> Lights { get; private set; } = [];
+        public ISceneLight[] Lights { get; private set; } = [];
         /// <inheritdoc/>
         public int ModelPartCount
         {
@@ -492,11 +491,7 @@ namespace Engine.BuiltIn.Components.Models
             var bsph = GetBoundingSphere();
             if (!bsph.Intersects(sphere))
             {
-                result = new PickingResult<Triangle>()
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<Triangle>.Empty;
                 return false;
             }
 

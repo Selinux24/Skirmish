@@ -67,7 +67,7 @@ namespace Engine.UI
 
             if (!Array.Exists(keys, c => c == defChar))
             {
-                defChar = keys.FirstOrDefault();
+                defChar = keys.Length > 0 ? keys[0] : default;
             }
 
             return defChar;

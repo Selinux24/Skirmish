@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using Engine.UI;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -42,7 +41,7 @@ namespace Engine
         /// <summary>
         /// Children collection
         /// </summary>
-        IEnumerable<IUIControl> Children { get; }
+        IUIControl[] Children { get; }
 
         /// <summary>
         /// Gets or sets the drawable height
@@ -180,7 +179,7 @@ namespace Engine
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = false);
+        bool AddChildren(IUIControl[] controls, bool fitToParent = false);
         /// <summary>
         /// Removes a child from the children collection
         /// </summary>
@@ -192,7 +191,7 @@ namespace Engine
         /// </summary>
         /// <param name="controls">Control list</param>
         /// <param name="dispose">Removes from collection and disposes</param>
-        bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
+        bool RemoveChildren(IUIControl[] controls, bool dispose = false);
         /// <summary>
         /// Inserts a child at the specified index
         /// </summary>
@@ -206,7 +205,7 @@ namespace Engine
         /// <param name="index">Index</param>
         /// <param name="controls">Control list</param>
         /// <param name="fitToParent">Fit control to parent</param>
-        bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = false);
+        bool InsertChildren(int index, IUIControl[] controls, bool fitToParent = false);
 
         /// <summary>
         /// Gets whether the control contains the point or not

@@ -1,14 +1,12 @@
 ﻿using Engine.Animation;
 using Engine.Content.FmtCollada.Types;
 using Engine.Content.Persistence;
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Content.FmtCollada.Fmt
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Animation loader
     /// </summary>
@@ -51,29 +49,25 @@ namespace Engine.Content.FmtCollada.Fmt
             string fileName = content.AnimationFileName;
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList?.Any() == true)
+            if (modelList.Length == 0)
             {
-                var res = new AnimationLibContentData();
-
-                foreach (var model in modelList)
-                {
-                    var dae = Collada.Load(model);
-
-                    //Animations
-                    var info = ProcessLibraryAnimations(dae);
-                    res.AddAnimation(info);
-
-                    //Release the stream
-                    model.Flush();
-                    model.Dispose();
-                }
-
-                return res;
+                throw new EngineException($"Model not found: {fileName}");
             }
-            else
+
+            AnimationLibContentData res = new();
+            foreach (var model in modelList)
             {
-                throw new EngineException(string.Format("Model not found: {0}", fileName));
+                var dae = Collada.Load(model);
+
+                //Animations
+                var info = ProcessLibraryAnimations(dae);
+                res.AddAnimation(info);
+
+                //Release the stream
+                model.Flush();
+                model.Dispose();
             }
+            return res;
         }
         /// <summary>
         /// Process animations
@@ -118,7 +112,7 @@ namespace Engine.Content.FmtCollada.Fmt
             {
                 var targetParts = channel.Target.Split("/".ToCharArray());
 
-                string jointName = (targetParts.Length > 0 ? targetParts[0] : default) ?? animationLibrary.Id ?? animationLibrary.Name ;
+                string jointName = (targetParts.Length > 0 ? targetParts[0] : default) ?? animationLibrary.Id ?? animationLibrary.Name;
                 string transformType = (targetParts.Length > 1 ? targetParts[1] : default) ?? "transform";
 
                 foreach (var sampler in animationLibrary.Samplers)

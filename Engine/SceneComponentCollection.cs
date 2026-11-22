@@ -365,7 +365,8 @@ namespace Engine
         {
             ArgumentNullException.ThrowIfNull(predicate);
 
-            return internalComponents.FirstOrDefault(predicate);
+            return internalComponents
+                .FirstOrDefault(predicate);
         }
         /// <summary>
         /// Gets the first component in the collection which has the specified usage flag
@@ -494,7 +495,7 @@ namespace Engine
             }
 
             return internalComponents
-                .FirstOrDefault(c => c.Name == name);
+                .FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
         }
         /// <summary>
         /// Gets the component list in the collection by owner

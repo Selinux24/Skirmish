@@ -575,7 +575,7 @@ namespace Engine
             }
 
             var boxes = GetBoundingBoxes(usage);
-            if (!boxes.Any())
+            if (boxes.Length == 0)
             {
                 return new BoundingBox(Vector3.One * -100f, Vector3.One * 100f);
             }
@@ -588,14 +588,15 @@ namespace Engine
         /// Gets the bounding box list
         /// </summary>
         /// <param name="usage">Object usage</param>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(SceneObjectUsages usage)
+        public BoundingBox[] GetBoundingBoxes(SceneObjectUsages usage)
         {
             var cmpList = Components.Get(usage);
             if (cmpList.Length == 0)
             {
-                yield break;
+                return [];
             }
 
+            List<BoundingBox> res = [];
             foreach (var obj in cmpList)
             {
                 if (obj is IComposed composed)
@@ -603,14 +604,15 @@ namespace Engine
                     var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
-                        yield return pickable.GetBoundingBox();
+                        res.Add(pickable.GetBoundingBox());
                     }
                 }
                 else if (obj is IRayPickable<Triangle> pickable)
                 {
-                    yield return pickable.GetBoundingBox();
+                    res.Add(pickable.GetBoundingBox());
                 }
             }
+            return [.. res];
         }
 
         /// <summary>
@@ -651,7 +653,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        public PickingRay GetTopDownRay(ref Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -661,7 +663,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        public PickingRay GetTopDownRay(ref Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -671,7 +673,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        public PickingRay GetTopDownRay(ref Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Z, pickingParams);
         }
@@ -702,19 +704,14 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickNearest<T>(ref ray, SceneObjectUsages.Ground, out var res))
+            if (!this.PickNearest<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
-                result = res.PickingResult;
-
-                return true;
+                result = PickingResult<T>.Empty;
+                return false;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue
-            };
-
-            return false;
+            result = res.PickingResult;
+            return true;
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -727,19 +724,14 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickFirst<T>(ref ray, SceneObjectUsages.Ground, out var res))
+            if (!this.PickFirst<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
-                result = res.PickingResult;
-
-                return true;
+                result = PickingResult<T>.Empty;
+                return false;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue
-            };
-
-            return false;
+            result = res.PickingResult;
+            return true;
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
@@ -748,20 +740,30 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition<T>(float x, float z, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        public bool FindAllGroundPosition<T>(float x, float z, out PickingResult<T>[] results) where T : IRayIntersectable
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var res))
+            if (!this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
-                results = res.SelectMany(r => r.PickingResults);
+                results = [];
+                return false;
+            }
 
+            if (res.Length == 1)
+            {
+                results = [.. res[0].GetResults()];
                 return true;
             }
 
-            results = [];
+            List<PickingResult<T>> picks = [];
+            for (int i = 0; i < res.Length; i++)
+            {
+                picks.AddRange(res[i].GetResults());
+            }
 
-            return false;
+            results = [.. picks];
+            return true;
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
@@ -773,23 +775,32 @@ namespace Engine
         {
             var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var pResults);
-            if (picked)
+            if (!this.PickAll<T>(ref ray, SceneObjectUsages.Ground, out var res))
             {
-                result = pResults
-                    .SelectMany(r => r.PickingResults)
-                    .OrderBy(r => Vector3.DistanceSquared(from, r.Position))
-                    .First();
+                result = PickingResult<T>.Empty;
+                return false;
+            }
 
+            if (res.Length == 1)
+            {
+                result = res[0].Nearest();
                 return true;
             }
 
-            result = new PickingResult<T>()
+            PickingResult<T> nearest = default;
+            float d = float.MaxValue;
+            foreach (var pr in res)
             {
-                Distance = float.MaxValue,
-            };
+                var curr = pr.Nearest();
+                if (curr.Distance < d)
+                {
+                    nearest = curr;
+                    d = curr.Distance;
+                }
+            }
 
-            return false;
+            result = nearest;
+            return true;
         }
 
         /// <inheritdoc/>

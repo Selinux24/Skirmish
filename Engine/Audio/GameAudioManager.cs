@@ -168,11 +168,10 @@ namespace Engine.Audio
         /// <param name="fileName">File name</param>
         public void LoadSound(string soundName, string contentFolder, string fileName, bool replaceIfExists = true)
         {
-            string path = ContentManager
-                .FindPaths(contentFolder, fileName)
-                .FirstOrDefault(p => File.Exists(p));
+            string[] paths = ContentManager.FindPaths(contentFolder, fileName);
+            string path = Array.Find(paths, p => File.Exists(p));
 
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrWhiteSpace(path))
             {
                 throw new EngineException($"The specified file not exists: [{contentFolder}][{fileName}]");
             }

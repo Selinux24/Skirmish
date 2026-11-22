@@ -45,11 +45,7 @@ namespace Engine
                     .Select(c => new ScenePickingResult<T>
                     {
                         SceneObject = c.SceneObject,
-                        PickingResult = new PickingResult<T>
-                        {
-                            Distance = c.Distance,
-                            Position = c.Position,
-                        },
+                        PickingResult = new PickingResult<T>(c.Position, c.Distance, default),
                     })
                     .First();
 
@@ -106,11 +102,7 @@ namespace Engine
                 return pickable.PickFirst(ref ray, out result);
             }
 
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<T>.Empty;
             return false;
         }
         /// <summary>
@@ -130,16 +122,11 @@ namespace Engine
                 if (pickable.PickFirst(ref ray, out var r))
                 {
                     result = r;
-
                     return true;
                 }
             }
 
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<T>.Empty;
             return false;
         }
 
@@ -171,17 +158,10 @@ namespace Engine
             if (ray.PickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 results = [.. coarseInt
-                    .Select(c => new ScenePickingResultMultiple<T>
+                    .Select(c =>
                     {
-                        SceneObject = c.SceneObject,
-                        PickingResults =
-                        [
-                            new ()
-                            {
-                                Distance = c.Distance,
-                                Position = c.Position,
-                            }
-                        ],
+                        PickingResult<T> pr = new(c.Position, c.Distance, default);
+                        return new ScenePickingResultMultiple<T>(c.SceneObject, [pr]);
                     })];
 
                 return true;
@@ -220,11 +200,7 @@ namespace Engine
                     return new
                     {
                         Picked = picked,
-                        Results = new ScenePickingResultMultiple<T>
-                        {
-                            SceneObject = obj,
-                            PickingResults = res,
-                        }
+                        Results = new ScenePickingResultMultiple<T>(obj, res)
                     };
                 })
                 .Where(r => r.Picked)
@@ -309,7 +285,7 @@ namespace Engine
 
             result = new()
             {
-                PickingResult = first.PickingResults[0],
+                PickingResult = first.Nearest(),
                 SceneObject = first.SceneObject,
             };
 

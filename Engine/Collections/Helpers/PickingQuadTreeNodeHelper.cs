@@ -24,11 +24,7 @@ namespace Engine.Collections.Helpers
             var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return false;
             }
 
@@ -53,20 +49,12 @@ namespace Engine.Collections.Helpers
             var boxHitsByDistance = FindContacts(node, ref ray);
             if (boxHitsByDistance.Count == 0)
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return false;
             }
 
             bool intersect = false;
-
-            PickingResult<T> bestHit = new()
-            {
-                Distance = float.MaxValue,
-            };
+            var bestHit = PickingResult<T>.Empty;
 
             foreach (var hitNode in boxHitsByDistance.Values)
             {
@@ -81,13 +69,11 @@ namespace Engine.Collections.Helpers
                 {
                     // if we have found a closer intersection store the new closest intersection
                     bestHit = thisHit;
-
                     intersect = true;
                 }
             }
 
             result = bestHit;
-
             return intersect;
         }
         /// <summary>
@@ -131,11 +117,7 @@ namespace Engine.Collections.Helpers
             var inBox = Collision.RayIntersectsBox(ref ray, ref bbox, out _);
             if (!inBox)
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return false;
             }
 
@@ -173,15 +155,10 @@ namespace Engine.Collections.Helpers
                 }
 
                 result = thisHit;
-
                 return true;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<T>.Empty;
             return false;
         }
 

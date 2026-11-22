@@ -418,7 +418,7 @@ namespace TerrainSamples.SceneNavMeshTest
             debugPanel.SetGridLayout(GridLayout.FixedRows(btnList.Count));
             debugPanel.Visible = false;
 
-            debugPanel.AddChildren(btnList);
+            debugPanel.AddChildren([.. btnList]);
         }
         private async Task InitializeAgentEditor()
         {
@@ -1081,7 +1081,8 @@ namespace TerrainSamples.SceneNavMeshTest
 
             DrawCircle(r.PickingResult.Position, radius, circleColor);
 
-            var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
+            var pPos = r.PickingResult.Position;
+            var pt = NavigationGraph.FindRandomPoint(agent, ref pPos, radius);
             if (!pt.HasValue)
             {
                 return;
@@ -1123,7 +1124,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             lastPosition = r.PickingResult.Position;
 
-            bool walkable = IsWalkable(agent, lastPosition, agent.MaxClimb, out var nearest);
+            bool walkable = IsWalkable(agent, ref lastPosition, agent.MaxClimb, out var nearest);
             var pColor = walkable ? walkableColor : unwalkableColor;
 
             if (nearest.HasValue)
@@ -1246,17 +1247,17 @@ namespace TerrainSamples.SceneNavMeshTest
 
             if (create)
             {
-                NavigationGraph.CreateAt(tilePosition, NavigationGraphUpdated);
+                NavigationGraph.CreateAt(ref tilePosition, NavigationGraphUpdated);
                 return;
             }
 
             if (remove)
             {
-                NavigationGraph.RemoveAt(tilePosition, NavigationGraphUpdated);
+                NavigationGraph.RemoveAt(ref tilePosition, NavigationGraphUpdated);
                 return;
             }
 
-            NavigationGraph.UpdateAt(tilePosition, NavigationGraphUpdated);
+            NavigationGraph.UpdateAt(ref tilePosition, NavigationGraphUpdated);
         }
         public void NavigationGraphUpdated(GraphUpdateStates state)
         {
@@ -1306,7 +1307,7 @@ namespace TerrainSamples.SceneNavMeshTest
             float h = 1f;
             var center = new Vector3(p.X, p.Y + (h * 0.5f), p.Z);
             var cy = new BoundingCylinder(center, 0.5f, h);
-            int id = NavigationGraph.AddObstacle(cy);
+            int id = NavigationGraph.AddObstacle(ref cy);
             obstacles.Add(new()
             {
                 Id = id,
@@ -1314,7 +1315,7 @@ namespace TerrainSamples.SceneNavMeshTest
             });
             DrawGraphObstaclesAreasAndConnections();
 
-            NavigationGraph.UpdateAt(p);
+            NavigationGraph.UpdateAt(ref p);
 
             stateManager.StartState(States.Default);
         }
@@ -1331,7 +1332,8 @@ namespace TerrainSamples.SceneNavMeshTest
                     obstacles.Remove(obs);
                     DrawGraphObstaclesAreasAndConnections();
 
-                    NavigationGraph.UpdateAt(obs.Obstacle.Center);
+                    var center = obs.Obstacle.Center;
+                    NavigationGraph.UpdateAt(ref center);
 
                     stateManager.StartState(States.Default);
                     break;
@@ -1539,7 +1541,9 @@ namespace TerrainSamples.SceneNavMeshTest
 
             if (start != null && end != null)
             {
-                var path = FindPath(agent, start.Value, end.Value, false);
+                var startP = start.Value;
+                var endP = end.Value;
+                var path = FindPath(agent, ref startP, ref endP, false);
                 DrawPath(path, pathFindingColorPath);
             }
         }
@@ -1634,12 +1638,12 @@ namespace TerrainSamples.SceneNavMeshTest
             var tri = Line3D.CreateTriangle(triangle);
             lineDrawer.AddPrimitives(color, tri);
         }
-        private void DrawPolygon(IEnumerable<Vector3> points, Color4 color)
+        private void DrawPolygon(Vector3[] points, Color4 color)
         {
             var poly = Line3D.CreatePolygon(points);
             lineDrawer.AddPrimitives(color, poly);
         }
-        private void DrawPolygonFill(IEnumerable<Vector3> points, Color4 color)
+        private void DrawPolygonFill(Vector3[] points, Color4 color)
         {
             var poly = GeometryUtil.CreatePolygon(Topology.TriangleList, points);
             triangleDrawer.AddPrimitives(color, GeometryUtil.ComputeTriangleList(poly.Vertices, poly.Indices));
@@ -1724,14 +1728,18 @@ namespace TerrainSamples.SceneNavMeshTest
                     h += delta;
                     var trn = Vector3.Up * h;
 
-                    var sourcePoly = division.SourcePoly.Select(sp => sp + trn).Reverse();
+                    Vector3[] sourcePoly = new Vector3[division.SourcePoly.Length];
+                    Vector3.Add(division.SourcePoly, ref trn, sourcePoly);
+
                     DrawPolygon(sourcePoly, srcColor);
 
                     foreach (var (p, poly) in division.DividedPolys.Where(dp => dp.Length >= 3).Select((dp, i) => (i, dp)))
                     {
+                        Vector3[] divPoly = new Vector3[poly.Length];
+                        Vector3.Add(poly, ref trn, divPoly);
+
                         var col = p % 2 == 0 ? div1Color : div2Color;
 
-                        var divPoly = poly.Select(dp => dp + trn).Reverse();
                         DrawPolygonFill(divPoly, col);
                     }
                 }
@@ -1869,7 +1877,7 @@ namespace TerrainSamples.SceneNavMeshTest
             string id = $"debugGeometry_{DateTime.Now.Ticks}";
             debugGeometry = await AddComponentEffect<Model, ModelDescription>(id, "debugGeometry", desc);
         }
-        private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Color4, IEnumerable<Vector3>> data)
+        private static SubMeshContent GenerateVertexData(Topology topology, string materialName, Dictionary<Color4, Vector3[]> data)
         {
             if (topology == Topology.TriangleList)
             {

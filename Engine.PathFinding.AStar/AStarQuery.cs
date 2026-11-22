@@ -30,7 +30,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the path from start to end</returns>
         public static Vector3[] FindPath(AgentType agent, Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
-            if (graph.FindNode(agent, startPosition) is not GridNode start || graph.FindNode(agent, endPosition) is not GridNode end)
+            if (graph.FindNode(agent, ref startPosition) is not GridNode start || graph.FindNode(agent, ref endPosition) is not GridNode end)
             {
                 return [];
             }

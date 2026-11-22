@@ -127,7 +127,8 @@ namespace TerrainSamples.SceneModularDungeon
 
             transform.Update(gameTime);
 
-            if (scene.Walk(player, prevPosition, transform.Position, true, out var walkerPos))
+            var p = transform.Position;
+            if (scene.Walk(player, ref prevPosition, ref p, true, out var walkerPos))
             {
                 transform.SetPosition(walkerPos);
             }

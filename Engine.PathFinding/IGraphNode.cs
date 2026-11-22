@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
 
 namespace Engine.PathFinding
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Graph node
     /// </summary>
@@ -23,11 +21,11 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
-        bool Contains(Vector3 point);
+        bool Contains(ref Vector3 point);
         /// <summary>
         /// Gets the point list of this node perimeter
         /// </summary>
         /// <returns>Returns the point list of this node perimeter</returns>
-        IEnumerable<Vector3> GetPoints();
+        Vector3[] GetPoints();
     }
 }

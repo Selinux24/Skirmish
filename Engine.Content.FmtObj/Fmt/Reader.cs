@@ -25,7 +25,7 @@ namespace Engine.Content.FmtObj.Fmt
             var lines = ReadStreamLines(stream);
 
             //Read all materials libs file names
-            List<string> matLibFiles = [.. lines.SelectMany(v => ReadMaterialFileName(folder, v, "mtllib"))];
+            string[] matLibFiles = [.. lines.SelectMany(v => ReadMaterialFileName(folder, v, "mtllib"))];
 
             //Read all materials
             List<Material> matLibs = ReadMaterialsFromFile(matLibFiles);
@@ -256,7 +256,7 @@ namespace Engine.Content.FmtObj.Fmt
 
             return [];
         }
-        private static List<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
+        private static List<Material> ReadMaterialsFromFile(string[] fileNames)
         {
             var materials = new List<Material>();
 
@@ -271,39 +271,39 @@ namespace Engine.Content.FmtObj.Fmt
                         matLines.Length - matIndices[i] :
                         matIndices[i + 1] - matIndices[i];
 
-                    var mat = ReadMaterial(matLines.Skip(matIndices[i]).Take(size));
+                    var mat = ReadMaterial([.. matLines.Skip(matIndices[i]).Take(size)]);
                     materials.Add(mat);
                 }
             }
 
             return materials;
         }
-        private static Material ReadMaterial(IEnumerable<string> lines)
+        private static Material ReadMaterial(string[] lines)
         {
             return new Material()
             {
-                Name = ReadString(lines.FirstOrDefault(l => l.StartsWith("newmtl ", StringComparison.OrdinalIgnoreCase)), 1),
-                ShaderProfile = ReadString(lines.FirstOrDefault(l => l.StartsWith("illum ", StringComparison.OrdinalIgnoreCase)), 1),
+                Name = ReadString(Array.Find(lines, l => l.StartsWith("newmtl ", StringComparison.OrdinalIgnoreCase)), 1),
+                ShaderProfile = ReadString(Array.Find(lines, l => l.StartsWith("illum ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                Ns = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("ns ", StringComparison.OrdinalIgnoreCase)), 1),
-                MapNs = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ns ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ns = ReadFloat(Array.Find(lines, l => l.StartsWith("ns ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapNs = ReadString(Array.Find(lines, l => l.StartsWith("map_ns ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                Ka = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ka ", StringComparison.OrdinalIgnoreCase)), 1),
-                MapKa = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ka ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ka = ReadColor3(Array.Find(lines, l => l.StartsWith("ka ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKa = ReadString(Array.Find(lines, l => l.StartsWith("map_ka ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                Kd = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("kd ", StringComparison.OrdinalIgnoreCase)), 1),
-                MapKd = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_kd ", StringComparison.OrdinalIgnoreCase)), 1),
+                Kd = ReadColor3(Array.Find(lines, l => l.StartsWith("kd ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKd = ReadString(Array.Find(lines, l => l.StartsWith("map_kd ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                Ks = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ks ", StringComparison.OrdinalIgnoreCase)), 1),
-                MapKs = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ks ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ks = ReadColor3(Array.Find(lines, l => l.StartsWith("ks ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKs = ReadString(Array.Find(lines, l => l.StartsWith("map_ks ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                Ke = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ke ", StringComparison.OrdinalIgnoreCase)), 1),
-                Ni = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("ni ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ke = ReadColor3(Array.Find(lines, l => l.StartsWith("ke ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ni = ReadFloat(Array.Find(lines, l => l.StartsWith("ni ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                D = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("d ", StringComparison.OrdinalIgnoreCase)), 1),
-                MapD = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_d ", StringComparison.OrdinalIgnoreCase)), 1),
+                D = ReadFloat(Array.Find(lines, l => l.StartsWith("d ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapD = ReadString(Array.Find(lines, l => l.StartsWith("map_d ", StringComparison.OrdinalIgnoreCase)), 1),
 
-                MapBump = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_bump ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapBump = ReadString(Array.Find(lines, l => l.StartsWith("map_bump ", StringComparison.OrdinalIgnoreCase)), 1),
             };
         }
 

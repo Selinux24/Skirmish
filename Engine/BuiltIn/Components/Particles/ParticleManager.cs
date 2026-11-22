@@ -238,14 +238,12 @@ namespace Engine.BuiltIn.Components.Particles
         /// <returns>Returns the particle system at specified name</returns>
         public IParticleSystem<ParticleEmitter, ParticleSystemParams> GetParticleSystem(string name)
         {
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                return particleSystems.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
-            }
-            else
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return null;
             }
+
+            return particleSystems.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
         }
         /// <summary>
         /// Clear the particle systems

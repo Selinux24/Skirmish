@@ -37,11 +37,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Assets map
         /// </summary>
-        public IEnumerable<AssetReference> Map { get; set; } = [];
+        public AssetReference[] Map { get; set; } = [];
         /// <summary>
         /// Map objects
         /// </summary>
-        public IEnumerable<ObjectReference> Objects { get; set; } = [];
+        public ObjectReference[] Objects { get; set; } = [];
 
         /// <summary>
         /// Gets the next Id
@@ -83,20 +83,29 @@ namespace Engine.Modular.Persistence
         /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
         /// <param name="mapAssetId">Asset id in the asset map reference list</param>
         /// <returns>Returns the asset reference</returns>
-        public AssetReference FindAssetReference(IEnumerable<Asset> assets, string levelAssetId, string mapAssetId)
+        public AssetReference FindAssetReference(Asset[] assets, string levelAssetId, string mapAssetId)
         {
-            var res = assets
+            foreach (var a in assets)
+            {
                 //Search any asset which contains a reference with the specified level, by asset name or by the level asset map id
-                .Where(a => Map.Any(r =>
+                if (!Array.Exists(Map, r =>
                     string.Equals(r.AssetName, a.Name, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(r.Id, levelAssetId, StringComparison.OrdinalIgnoreCase)));
-            var res2 = res
-                //Then, get the first reference which matching reference Id with the level asset id
-                .Select(a => a.References.FirstOrDefault(r => string.Equals(r.Id, mapAssetId, StringComparison.OrdinalIgnoreCase)));
-            var res3 = res2
-                .FirstOrDefault();
+                    string.Equals(r.Id, levelAssetId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
 
-            return res3;
+                //Then, get the first reference which matching reference Id with the level asset id
+                foreach (var r in a.References)
+                {
+                    if (string.Equals(r.Id, mapAssetId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return r;
+                    }
+                }
+            }
+
+            return null;
         }
         /// <summary>
         /// Gets the first index of the asset in the current configuration
@@ -106,15 +115,13 @@ namespace Engine.Modular.Persistence
         /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
         /// <param name="mapAssetId">Asset id in the asset map reference list</param>
         /// <returns>Returns the first index</returns>
-        public int GetMapInstanceIndex(IEnumerable<Asset> assets, string assetName, string levelAssetId, string mapAssetId)
+        public int GetMapInstanceIndex(Asset[] assets, string assetName, string levelAssetId, string mapAssetId)
         {
             int index = 0;
 
             foreach (var item in Map)
             {
-                var asset = assets
-                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
-
+                var asset = Array.Find(assets, a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
                 if (asset == null)
                 {
                     continue;
@@ -169,7 +176,7 @@ namespace Engine.Modular.Persistence
         /// </summary>
         /// <param name="assets">Asset list</param>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, InstanceInfo> GetMapInstanceCounters(IEnumerable<Asset> assets)
+        public Dictionary<string, InstanceInfo> GetMapInstanceCounters(Asset[] assets)
         {
             Dictionary<string, InstanceInfo> res = [];
 
@@ -208,7 +215,7 @@ namespace Engine.Modular.Persistence
         /// </summary>
         public void PopulateObjectIds()
         {
-            if (Objects?.Any() != true)
+            if (Objects == null || Objects.Length == 0)
             {
                 return;
             }
@@ -253,7 +260,7 @@ namespace Engine.Modular.Persistence
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Name}. {Map?.Count() ?? 0} rooms. {Objects?.Count() ?? 0} items. Start: {StartPosition} => {LookingVector}";
+            return $"{Name}. {Map?.Length ?? 0} rooms. {Objects?.Length ?? 0} items. Start: {StartPosition} => {LookingVector}";
         }
     }
 }

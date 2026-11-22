@@ -1328,22 +1328,20 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             var bsph = new BoundingSphere(position, MathF.Max(1f, CameraRadius));
             if (bsph.Intersects(sphere))
             {
                 float distance = Vector3.Distance(position, sphere.Position);
 
-                result.Distance = distance;
-                result.Position = Vector3.Normalize(position - sphere.Position) * distance * 0.5f;
+                result = new(
+                    Vector3.Normalize(position - sphere.Position) * distance * 0.5f,
+                    distance,
+                    default);
 
                 return true;
             }
 
+            result = PickingResult<Triangle>.Empty;
             return false;
         }
         /// <inheritdoc/>

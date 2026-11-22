@@ -398,6 +398,17 @@ namespace Engine.Mathematics
             Add(ref left, right, out var result);
             return result;
         }
+        public static void Add(Vector3[] source, ref Vector3 vector, Vector3[] destination)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(destination);
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                Add(ref source[i], ref vector, out destination[i]);
+            }
+        }
 
         /// <summary>
         /// Subtracts two vectors.

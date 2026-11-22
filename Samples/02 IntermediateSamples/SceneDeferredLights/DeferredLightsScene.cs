@@ -12,7 +12,6 @@ using Engine.Mathematics;
 using Engine.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
@@ -816,7 +815,7 @@ F7 to F10: Toggle object visibility.";
                 Lights.DirectionalLights.Length,
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
-                Lights.GetDirectionalShadowCastingLights(GameEnvironment).Count());
+                Lights.GetDirectionalShadowCastingLights(GameEnvironment).Length);
         }
 
         public override void GameGraphicsResized()

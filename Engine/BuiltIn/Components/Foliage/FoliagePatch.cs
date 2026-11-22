@@ -163,7 +163,7 @@ namespace Engine.BuiltIn.Components.Foliage
                     continue;
                 }
 
-                var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
+                var ray = scene.GetTopDownRay(ref pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
 
                 res.Add(ray);
             }

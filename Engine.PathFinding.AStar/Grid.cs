@@ -35,11 +35,11 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Graph node list
         /// </summary>
-        public IEnumerable<GridNode> Nodes
+        public GridNode[] Nodes
         {
             get
             {
-                return nodes.AsReadOnly();
+                return [.. nodes];
             }
         }
 
@@ -200,24 +200,29 @@ namespace Engine.PathFinding.AStar
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        public Vector3? FindRandomPoint(AgentType agent, ref Vector3 position, float radius)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             return [.. nodes.Cast<IGraphNode>()];
         }
         /// <inheritdoc/>
-        public IGraphNode FindNode(AgentType agent, Vector3 point)
+        public T[] GetNodes<T>(AgentType agent) where T : IGraphNode
+        {
+            return [.. nodes.Cast<T>()];
+        }
+        /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, ref Vector3 point)
         {
             float minDistance = float.MaxValue;
             IGraphNode bestNode = null;
 
             foreach (var node in nodes)
             {
-                if (!node.Contains(point))
+                if (!node.Contains(ref point))
                 {
                     continue;
                 }
@@ -234,22 +239,35 @@ namespace Engine.PathFinding.AStar
             return bestNode;
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
+        public T FindNode<T>(AgentType agent, ref Vector3 point) where T : IGraphNode
+        {
+            var node = FindNode(agent, ref point);
+            if (node == null) return default;
+            if (node is T gNode) return gNode;
+            return default;
+        }
+        /// <inheritdoc/>
+        public Vector3[] FindPath(AgentType agent, ref Vector3 from, ref Vector3 to)
         {
             return AStarQuery.FindPath(agent, this, from, to);
         }
         /// <inheritdoc/>
-        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            return await Task.Run(() => FindPath(agent, from, to));
+            return await Task.Run(() => FindPath(agent, ref from, ref to));
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
+        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold)
         {
-            return nodes.Exists(n => n.Contains(position));
+            foreach (var n in nodes)
+            {
+                if (n.Contains(ref position)) return true;
+            }
+
+            return false;
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             bool contains = false;
             nearest = null;
@@ -257,7 +275,7 @@ namespace Engine.PathFinding.AStar
 
             foreach (var node in nodes)
             {
-                if (!node.Contains(position))
+                if (!node.Contains(ref position))
                 {
                     continue;
                 }
@@ -277,63 +295,63 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
-        public int AddObstacle(BoundingCylinder cylinder)
+        public int AddObstacle(ref BoundingCylinder cylinder)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public int AddObstacle(BoundingBox bbox)
+        public int AddObstacle(ref BoundingBox bbox)
         {
             throw new NotImplementedException();
         }
         /// <inheritdoc/>
-        public int AddObstacle(OrientedBoundingBox obb)
+        public int AddObstacle(ref OrientedBoundingBox obb)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Content;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -6,9 +8,6 @@ using System.Linq;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Engine resource manager
     /// </summary>
@@ -33,7 +32,7 @@ namespace Engine
             T loader = Activator.CreateInstance<T>();
 
             var extensions = loader.GetExtensions();
-            if (!extensions.Any())
+            if (extensions.Length == 0)
             {
                 return false;
             }
@@ -325,14 +324,9 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
+        public EngineShaderResourceView CreateGlobalResource<T>(string name, T[] values, uint size, bool dynamic = false) where T : unmanaged
         {
-            var resource = new GameResourceValueArray<T>(name)
-            {
-                Values = values,
-                Size = size,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceValueArray<T>(name, values, size, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -443,7 +437,7 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, T[] values, uint size, bool dynamic = false) where T : unmanaged
         {
             var (key, resource) = TryGetResource(identifier);
             if (resource != null)
@@ -456,12 +450,7 @@ namespace Engine
                 return value.ResourceView;
             }
 
-            var request = new GameResourceValueArray<T>(identifier.ToString("B"))
-            {
-                Values = values,
-                Size = size,
-                Dynamic = dynamic,
-            };
+            var request = new GameResourceValueArray<T>(identifier.ToString("B"), values, size, dynamic);
 
             if (!requestedResources.TryAdd(key, request))
             {

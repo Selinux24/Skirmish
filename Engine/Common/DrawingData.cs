@@ -171,7 +171,7 @@ namespace Engine.Common
         private void ReadMaterials(ContentData modelContent)
         {
             var modelMaterials = modelContent.GetMaterialContent();
-            if (!modelMaterials.Any())
+            if (modelMaterials.Length == 0)
             {
                 return;
             }

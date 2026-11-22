@@ -30,12 +30,14 @@ namespace Engine.BuiltIn.Components.Ground
                 throw new EngineException("No heightmap found in description.");
             }
 
-            Stream heightMapData = ContentManager.FindContent(description.ContentPath, description.HeightmapFileName).FirstOrDefault();
+            var maps = ContentManager.FindContent(description.ContentPath, description.HeightmapFileName);
+            Stream heightMapData = maps.Length > 0 ? maps[0] : default;
 
             Stream colorMapData = null;
             if (!string.IsNullOrEmpty(description.ColormapFileName))
             {
-                colorMapData = ContentManager.FindContent(description.ContentPath, description.ColormapFileName).FirstOrDefault();
+                maps = ContentManager.FindContent(description.ContentPath, description.ColormapFileName);
+                colorMapData = maps.Length > 0 ? maps[0] : default;
             }
 
             return FromStream(heightMapData, colorMapData, description.UseFalloff, description.FalloffCurve.X, description.FalloffCurve.Y);

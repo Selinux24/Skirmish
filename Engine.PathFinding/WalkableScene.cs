@@ -67,7 +67,7 @@ namespace Engine.PathFinding
         /// <param name="position">Test position</param>
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private static Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
+        private static Vector3 GetPositionWalkable(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, ref Vector3 position, bool adjustHeight)
         {
             var finalPosition = position;
 
@@ -294,13 +294,13 @@ namespace Engine.PathFinding
                 return null;
             }
 
-            var (From, To) = LocatePathEndpoints(from, to, useGround);
+            var (From, To) = LocatePathEndpoints(ref from, ref to, useGround);
 
             var path = await NavigationGraph.FindPathAsync(agent, From, To);
 
-            Game.Logger.WriteTrace(this, $"FindPathAsync path result: {path.Count()} nodes.");
+            Game.Logger.WriteTrace(this, $"FindPathAsync path result: {path.Length} nodes.");
 
-            if (path.Count() <= 1)
+            if (path.Length <= 1)
             {
                 return new();
             }
@@ -315,20 +315,20 @@ namespace Engine.PathFinding
         /// <param name="to">End point</param>
         /// <param name="useGround">Find nearest real ground position for "from" and "to" parameters, and all path results</param>
         /// <returns>Return path if exists</returns>
-        public PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false)
+        public PathFindingPath FindPath(AgentType agent, ref Vector3 from, ref Vector3 to, bool useGround = false)
         {
             if (NavigationGraph?.Initialized != true)
             {
                 return null;
             }
 
-            var (From, To) = LocatePathEndpoints(from, to, useGround);
+            var (From, To) = LocatePathEndpoints(ref from, ref to, useGround);
 
-            var path = NavigationGraph.FindPath(agent, From, To);
+            var path = NavigationGraph.FindPath(agent, ref From, ref To);
 
-            Game.Logger.WriteTrace(this, $"FindPath path result: {path.Count()} nodes.");
+            Game.Logger.WriteTrace(this, $"FindPath path result: {path.Length} nodes.");
 
-            if (path.Count() <= 1)
+            if (path.Length <= 1)
             {
                 return null;
             }
@@ -342,7 +342,7 @@ namespace Engine.PathFinding
         /// <param name="to">To position</param>
         /// <param name="useGround">Find nearest real ground position for "from" and "to" parameters, and all path results</param>
         /// <returns>Returns the navigation end point positions</returns>
-        private (Vector3 From, Vector3 To) LocatePathEndpoints(Vector3 from, Vector3 to, bool useGround)
+        private (Vector3 From, Vector3 To) LocatePathEndpoints(ref Vector3 from, ref Vector3 to, bool useGround)
         {
             Vector3 groundFrom = from;
             Vector3 groundTo = to;
@@ -373,10 +373,10 @@ namespace Engine.PathFinding
         /// <param name="path">Path positions</param>
         /// <param name="useGround">Find nearest real ground position for "from" and "to" parameters, and all path results</param>
         /// <returns>Returns the path-finding path</returns>
-        private PathFindingPath ComputeGroundPositions(IEnumerable<Vector3> path, bool useGround)
+        private PathFindingPath ComputeGroundPositions(Vector3[] path, bool useGround)
         {
             List<Vector3> positions = [.. path];
-            List<Vector3> normals = [.. Helper.CreateArray(path.Count(), Vector3.Up)];
+            List<Vector3> normals = [.. Helper.CreateArray(path.Length, Vector3.Up)];
 
             if (useGround)
             {
@@ -405,7 +405,7 @@ namespace Engine.PathFinding
         /// <param name="distanceThreshold">Distance threshold</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             if (NavigationGraph == null)
             {
@@ -414,7 +414,7 @@ namespace Engine.PathFinding
                 return true;
             }
 
-            return NavigationGraph.IsWalkable(agent, position, distanceThreshold, out nearest);
+            return NavigationGraph.IsWalkable(agent, ref position, distanceThreshold, out nearest);
         }
         /// <summary>
         /// Gets final position for agents walking over the ground if exists
@@ -425,7 +425,7 @@ namespace Engine.PathFinding
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <param name="finalPosition">Returns the final position if exists</param>
         /// <returns>Returns true if final position found</returns>
-        public bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, bool adjustHeight, out Vector3 finalPosition)
+        public bool Walk(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, bool adjustHeight, out Vector3 finalPosition)
         {
             finalPosition = prevPosition;
 
@@ -455,18 +455,19 @@ namespace Engine.PathFinding
             var positions = results.Select(r => r.Position).ToArray();
             float threshold = Vector3.Distance(prevPosition, newPosition);
 
-            foreach (var position in positions)
+            for (int i = 0; i < positions.Length; i++)
             {
-                if (IsWalkable(agent, position, threshold, out var nearest))
+                if (IsWalkable(agent, ref positions[i], threshold, out var nearest))
                 {
-                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, position, adjustHeight);
+                    finalPosition = GetPositionWalkable(agent, ref prevPosition, ref newPosition, ref positions[i], adjustHeight);
 
                     return true;
                 }
                 else if (nearest.HasValue)
                 {
                     //Not walkable but nearest position found
-                    finalPosition = GetPositionNonWalkable(agent, prevPosition, newPosition, nearest.Value, adjustHeight);
+                    var nearestPosition = nearest.Value;
+                    finalPosition = GetPositionNonWalkable(agent, ref prevPosition, ref newPosition, ref nearestPosition, adjustHeight);
 
                     return true;
                 }
@@ -483,7 +484,7 @@ namespace Engine.PathFinding
         /// <param name="position">Test position</param>
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
+        private Vector3 GetPositionNonWalkable(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, ref Vector3 position, bool adjustHeight)
         {
             //Find nearest ground position
             Vector3 finalPosition;
@@ -519,27 +520,27 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="cylinder">Cylinder</param>
         /// <returns>Returns the obstacle Id</returns>
-        public int AddObstacle(BoundingCylinder cylinder)
+        public int AddObstacle(ref BoundingCylinder cylinder)
         {
-            return NavigationGraph?.AddObstacle(cylinder) ?? -1;
+            return NavigationGraph?.AddObstacle(ref cylinder) ?? -1;
         }
         /// <summary>
         /// Adds AABB obstacle
         /// </summary>
         /// <param name="bbox">AABB</param>
         /// <returns>Returns the obstacle Id</returns>
-        public int AddObstacle(BoundingBox bbox)
+        public int AddObstacle(ref BoundingBox bbox)
         {
-            return NavigationGraph?.AddObstacle(bbox) ?? -1;
+            return NavigationGraph?.AddObstacle(ref bbox) ?? -1;
         }
         /// <summary>
         /// Adds OBB obstacle
         /// </summary>
         /// <param name="obb">OBB</param>
         /// <returns>Returns the obstacle Id</returns>
-        public int AddObstacle(OrientedBoundingBox obb)
+        public int AddObstacle(ref OrientedBoundingBox obb)
         {
-            return NavigationGraph?.AddObstacle(obb) ?? -1;
+            return NavigationGraph?.AddObstacle(ref obb) ?? -1;
         }
         /// <summary>
         /// Removes obstable by id
@@ -566,16 +567,16 @@ namespace Engine.PathFinding
             await PathFinderDescription.RefreshAsync();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(position, callback);
+            NavigationGraph?.UpdateAt(ref position, callback);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
         /// </summary>
         /// <param name="positions">Positions list</param>
         /// <param name="callback">Updating callback</param>
-        public async Task UpdateGraphAsync(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public async Task UpdateGraphAsync(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
-            if (positions?.Any() != true)
+            if (positions == null || positions.Length == 0)
             {
                 return;
             }
@@ -596,22 +597,22 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="callback">Updating callback</param>
-        public void UpdateGraph(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void UpdateGraph(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             // Refresh source geometry
             PathFinderDescription?.Refresh();
 
             // Update navigation graph
-            NavigationGraph?.UpdateAt(position, callback);
+            NavigationGraph?.UpdateAt(ref position, callback);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
         /// </summary>
         /// <param name="positions">Positions list</param>
         /// <param name="callback">Updating callback</param>
-        public void UpdateGraph(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void UpdateGraph(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
-            if (positions?.Any() != true)
+            if (positions == null || positions.Length == 0)
             {
                 return;
             }
@@ -635,7 +636,7 @@ namespace Engine.PathFinding
             // Gets the complete ground bounds
             var bbox = GetBoundingBox(SceneObjectUsages.Ground);
 
-            if (GetRandomPoint(rnd, offset, bbox, out var p))
+            if (GetRandomPoint(rnd, offset, ref bbox, out var p))
             {
                 point = p;
 
@@ -654,7 +655,7 @@ namespace Engine.PathFinding
         /// <param name="bbox">Bounding box</param>
         /// <param name="point">Returns a position over the ground</param>
         /// <returns>Returns true if a position were found</returns>
-        public bool GetRandomPoint(Random rnd, Vector3 offset, BoundingBox bbox, out Vector3 point)
+        public bool GetRandomPoint(Random rnd, Vector3 offset, ref BoundingBox bbox, out Vector3 point)
         {
             if (bbox.Size == Vector3.Zero)
             {
@@ -687,7 +688,7 @@ namespace Engine.PathFinding
         /// <param name="bsph">Bounding sphere</param>
         /// <param name="point">Returns a position over the ground</param>
         /// <returns>Returns true if a position were found</returns>
-        public bool GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph, out Vector3 point)
+        public bool GetRandomPoint(Random rnd, Vector3 offset, ref BoundingSphere bsph, out Vector3 point)
         {
             if (MathUtils.IsZero(bsph.Radius))
             {

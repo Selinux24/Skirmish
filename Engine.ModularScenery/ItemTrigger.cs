@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
+﻿
 namespace Engine.Modular
 {
     /// <summary>
@@ -27,12 +25,12 @@ namespace Engine.Modular
         /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
-        public IEnumerable<ItemAction> Actions { get; set; } = [];
+        public ItemAction[] Actions { get; set; } = [];
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Name}. {StateFrom} => {StateTo}; Animation: {AnimationPlan}; {Actions?.Count() ?? 0} actions.";
+            return $"{Name}. {StateFrom} => {StateTo}; Animation: {AnimationPlan}; {Actions?.Length ?? 0} actions.";
         }
     }
 }

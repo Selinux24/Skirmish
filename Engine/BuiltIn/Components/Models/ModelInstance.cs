@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -401,16 +400,11 @@ namespace Engine.BuiltIn.Components.Models
                 if (Collision.SphereIntersectsMesh(ref sph, mesh, out var res))
                 {
                     result = res;
-
                     return true;
                 }
             }
 
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<Triangle>.Empty;
             return false;
         }
         /// <inheritdoc/>

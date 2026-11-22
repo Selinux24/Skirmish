@@ -1,16 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
-    using Engine.Mathematics;
-
+    /// <summary>
+    /// Steering agent interface
+    /// </summary>
     public interface ISteeringAgent
     {
+        /// <summary>
+        /// Position
+        /// </summary>
         Vector3 Position { get; set; }
+        /// <summary>
+        /// Velocity
+        /// </summary>
         Vector3 Velocity { get; }
+        /// <summary>
+        /// Maximum speed
+        /// </summary>
         float MaxSpeed { get; set; }
+        /// <summary>
+        /// Maximum force
+        /// </summary>
         float MaxForce { get; set; }
+        /// <summary>
+        /// Waiting time
+        /// </summary>
         float WaitTime { get; set; }
+        /// <summary>
+        /// Steering behavior
+        /// </summary>
         SteeringBehaviors Behavior { get; }
 
         void Seek(Vector3 target);
@@ -21,7 +40,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         void Arrival(ISteeringAgent agent, float arrivalRadius);
         void Pursue(ISteeringAgent agent);
         void Evade(ISteeringAgent agent);
-        void Follow(IEnumerable<Vector3> path, float pathRadius);
+        void Follow(Vector3[] path, float pathRadius);
 
         void Update(float elapsedTime);
     }

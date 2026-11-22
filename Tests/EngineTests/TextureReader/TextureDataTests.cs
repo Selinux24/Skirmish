@@ -18,7 +18,7 @@ namespace EngineTests.TextureReader
         {
             var path = Path.Combine(TestContext.DeploymentDirectory, "Resources", "Font.png");
 
-            using var texture = TextureData.ReadTexture(path, new RectI(0, 0, 1, 1));
+            using var texture = TextureData.ReadTexture(path, new(0, 0, 1, 1));
 
             Assert.IsNotNull(texture);
             Assert.AreEqual(1u, texture.Width);

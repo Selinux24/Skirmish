@@ -1,7 +1,6 @@
 ﻿using Engine.Collections.Generic;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -128,10 +127,7 @@ namespace Engine
                 return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
             }
 
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
+            result = PickingResult<Triangle>.Empty;
 
             // Use quadtree
             var nodes = GroundPickingQuadtree.FindNodesInVolume(sphere);
@@ -192,7 +188,7 @@ namespace Engine
             return null;
         }
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
             return GroundPickingQuadtree?.GetBoundingBoxes(level) ?? [];
         }

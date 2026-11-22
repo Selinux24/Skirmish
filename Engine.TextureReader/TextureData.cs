@@ -1,14 +1,14 @@
-﻿using Engine.TextureReader.DDS;
+﻿using Engine.Mathematics;
+using Engine.TextureReader.DDS;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Vortice.DXGI;
-using Vortice.Mathematics;
 using Vortice.WIC;
 
 namespace Engine.TextureReader
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// Texture data
     /// </summary>
@@ -74,7 +74,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            return ReadTextureArray(filename, []).FirstOrDefault();
+            var textures = ReadTextureArray(filename, []);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -84,7 +86,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename, RectI rectangle)
         {
-            return ReadTextureArray(filename, [rectangle]).FirstOrDefault();
+            var textures = ReadTextureArray(filename, [rectangle]);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -93,7 +97,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            return ReadTextureArray(stream, []).FirstOrDefault();
+            var textures = ReadTextureArray(stream, []);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a stream
@@ -103,7 +109,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream, RectI rectangle)
         {
-            return ReadTextureArray(stream, [rectangle]).FirstOrDefault();
+            var textures = ReadTextureArray(stream, [rectangle]);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data list from a file
@@ -111,9 +119,9 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(string filename, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(string filename, RectI[] rectangles)
         {
-            var result = new List<TextureData>();
+            List<TextureData> result = [];
 
             if (DdsHeader.GetInfo(filename, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer))
             {
@@ -128,7 +136,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            return result;
+            return [.. result];
         }
         /// <summary>
         /// Reads a texture data list from a stream
@@ -136,9 +144,9 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(MemoryStream stream, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(MemoryStream stream, RectI[] rectangles)
         {
-            var result = new List<TextureData>();
+            List<TextureData> result = [];
 
             if (DdsHeader.GetInfo(stream, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer))
             {
@@ -153,23 +161,23 @@ namespace Engine.TextureReader
                 }
             }
 
-            return result;
+            return [.. result];
         }
         /// <summary>
         /// Reads a texture data list from a file list
         /// </summary>
         /// <param name="filenames">File name list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames)
+        public static TextureData[] ReadTextureArray(string[] filenames)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
                 textureList.Add(ReadTexture(file));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a file list
@@ -177,16 +185,16 @@ namespace Engine.TextureReader
         /// <param name="filenames">File name list</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames, RectI rectangle)
+        public static TextureData[] ReadTextureArray(string[] filenames, RectI rectangle)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
                 textureList.Add(ReadTexture(file, rectangle));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a file list
@@ -194,9 +202,9 @@ namespace Engine.TextureReader
         /// <param name="filenames">File name list</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(string[] filenames, RectI[] rectangles)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
@@ -206,23 +214,23 @@ namespace Engine.TextureReader
                 }
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
                 textureList.Add(ReadTexture(stream));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
@@ -230,16 +238,16 @@ namespace Engine.TextureReader
         /// <param name="streams">Stream list</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams, RectI rectangle)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams, RectI rectangle)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
                 textureList.Add(ReadTexture(stream, rectangle));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
@@ -247,9 +255,9 @@ namespace Engine.TextureReader
         /// <param name="streams">Stream list</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams, RectI[] rectangles)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
@@ -259,7 +267,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a cube texture data from a file
@@ -267,11 +275,11 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="faces">Cube faces</param>
         /// <returns>Returns the texture data</returns>
-        public static IEnumerable<TextureData> ReadTextureCubic(string filename, IEnumerable<RectI> faces)
+        public static TextureData[] ReadTextureCubic(string filename, RectI[] faces)
         {
             ArgumentNullException.ThrowIfNull(faces);
 
-            if (faces.Count() != 6)
+            if (faces.Length != 6)
             {
                 throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
             }
@@ -284,11 +292,11 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="faces">Cube faces</param>
         /// <returns>Returns the texture data</returns>
-        public static IEnumerable<TextureData> ReadTextureCubic(MemoryStream stream, IEnumerable<RectI> faces)
+        public static TextureData[] ReadTextureCubic(MemoryStream stream, RectI[] faces)
         {
             ArgumentNullException.ThrowIfNull(faces);
 
-            if (faces.Count() != 6)
+            if (faces.Length != 6)
             {
                 throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
             }
@@ -302,7 +310,7 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static BitmapData[] ReadBitmap(string filename, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(string filename, RectI[] rectangles)
         {
             using var factory = new IWICImagingFactory2();
             using var bitmapDecoder = factory.CreateDecoderFromFileName(filename, FileAccess.Read, DecodeOptions.CacheOnLoad);
@@ -314,7 +322,7 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static BitmapData[] ReadBitmap(MemoryStream stream, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(MemoryStream stream, RectI[] rectangles)
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -330,10 +338,10 @@ namespace Engine.TextureReader
         /// <param name="format">Target format</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the readed bitmap data</returns>
-        private static BitmapData[] ReadBitmap(IWICImagingFactory factory, IWICBitmapDecoder bitmapDecoder, Guid format, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(IWICImagingFactory factory, IWICBitmapDecoder bitmapDecoder, Guid format, RectI[] rectangles)
         {
             var frame = bitmapDecoder.GetFrame(0);
-            var cropRectangles = rectangles?.ToArray();
+            var cropRectangles = rectangles;
 
             if (cropRectangles == null || cropRectangles.Length == 0)
             {
@@ -344,7 +352,7 @@ namespace Engine.TextureReader
             var result = new List<BitmapData>(cropRectangles.Length);
             foreach (var rectangle in cropRectangles)
             {
-                if (rectangle == Rect.Empty)
+                if (rectangle == RectI.Empty)
                 {
                     var bitmap = ReadBitmap(factory, frame, format);
                     if (!bitmap.HasValue)

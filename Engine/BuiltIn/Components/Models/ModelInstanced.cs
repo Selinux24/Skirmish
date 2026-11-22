@@ -86,18 +86,14 @@ namespace Engine.BuiltIn.Components.Models
         /// <returns>Returns the instancing data for the instancing buffer</returns>
         private static VertexInstancingData[] PrepareInstancingBuffer(ModelInstance[] instances, Vector3 pointOfView)
         {
-            if (instances.Length == 0)
-            {
-                return [];
-            }
+            if (instances == null) return [];
 
-            if (instances.Length > 1)
-            {
-                SortInstances(instances, pointOfView);
-            }
+            var iList = Array.FindAll(instances, i => i != null);
+            if (iList.Length == 0) return [];
 
-            return [.. instances
-                .Where(i => i != null)
+            SortInstances(instances, pointOfView);
+
+            return [.. iList
                 .Select(i => new VertexInstancingData
                 {
                     Local = i.Manipulator.GlobalTransform,
@@ -116,6 +112,8 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="pointOfView">Point of view</param>
         private static void SortInstances(ModelInstance[] instances, Vector3 pointOfView)
         {
+            if (instances.Length <= 1) return;
+
             //Sort by LOD, distance and id
             Array.Sort(instances, (i1, i2) =>
             {
@@ -197,11 +195,11 @@ namespace Engine.BuiltIn.Components.Models
             }
 
             // Store visible instances
-            instancesVisible = [.. instancesAll.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)];
+            instancesVisible = Array.FindAll(instancesAll, i => i.Visible && i.LevelOfDetail != LevelOfDetail.None);
 
             // Update each active instance
-            instancesAll
-                .Where(i => i.Active)
+            var activeInstances = Array.FindAll(instancesAll, i => i.Active) ?? [];
+            activeInstances
                 .AsParallel()
                 .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                 .ForAll(i => i.Update(context));
@@ -418,17 +416,17 @@ namespace Engine.BuiltIn.Components.Models
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = cullInstanceList.Where(i => i?.LevelOfDetail == lod);
-                if (!lodInstances.Any()) continue;
+                var lodInstances = Array.FindAll(cullInstanceList, i => i?.LevelOfDetail == lod);
+                if (lodInstances.Length == 0) continue;
 
                 var drawingData = GetDrawingData(lod);
                 if (drawingData == null) continue;
 
-                int idx = Array.IndexOf(cullInstanceList, lodInstances.First());
+                int idx = Array.IndexOf(cullInstanceList, lodInstances[0]);
                 if (idx < 0) continue;
 
                 uint startInstanceLocation = (uint)idx + InstancingBuffer.BufferOffset;
-                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Count());
+                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Length);
                 if (instancesToDraw <= 0)
                 {
                     continue;
@@ -575,7 +573,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <inheritdoc/>
         public T[] GetComponents<T>()
         {
-            return [.. instancesAll.Where(i => i.Visible).OfType<T>()];
+            return [.. Array.FindAll(instancesAll, i => i.Visible).OfType<T>()];
         }
 
         /// <summary>

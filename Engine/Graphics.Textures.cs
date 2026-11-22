@@ -5,7 +5,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -96,9 +95,9 @@ namespace Engine
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ID3D11ShaderResourceView1 CreateResourceView(string name, IEnumerable<TextureData> descriptions, bool tryMipAutogen, bool dynamic)
+        private ID3D11ShaderResourceView1 CreateResourceView(string name, TextureData[] descriptions, bool tryMipAutogen, bool dynamic)
         {
-            var description = descriptions.First();
+            var description = descriptions[0];
 
             bool mipAutogen = false;
             if (tryMipAutogen && description.MipMaps == 1)
@@ -173,9 +172,9 @@ namespace Engine
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ID3D11ShaderResourceView1 CreateCubicResourceView(string name, IEnumerable<TextureData> descriptions, bool tryMipAutogen, bool dynamic)
+        private ID3D11ShaderResourceView1 CreateCubicResourceView(string name, TextureData[] descriptions, bool tryMipAutogen, bool dynamic)
         {
-            var description = descriptions.First();
+            var description = descriptions[0];
 
             bool mipAutogen = false;
             if (tryMipAutogen && description.MipMaps == 1)
@@ -214,7 +213,7 @@ namespace Engine
         /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        private ID3D11ShaderResourceView1 Create1DTextureResourceView<T>(string name, uint size, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        private ID3D11ShaderResourceView1 Create1DTextureResourceView<T>(string name, uint size, T[] values, bool dynamic) where T : unmanaged
         {
             using var texture = CreateTexture1D(name, size, values, dynamic);
             var srv = device.CreateShaderResourceView1(texture);
@@ -230,7 +229,7 @@ namespace Engine
         /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        private ID3D11ShaderResourceView1 Create2DTextureResourceView<T>(string name, uint size, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        private ID3D11ShaderResourceView1 Create2DTextureResourceView<T>(string name, uint size, T[] values, bool dynamic) where T : unmanaged
         {
             return Create2DTextureResourceView(name, size, size, values, dynamic);
         }
@@ -244,7 +243,7 @@ namespace Engine
         /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        private ID3D11ShaderResourceView1 Create2DTextureResourceView<T>(string name, uint width, uint height, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        private ID3D11ShaderResourceView1 Create2DTextureResourceView<T>(string name, uint width, uint height, T[] values, bool dynamic) where T : unmanaged
         {
             using var texture = CreateTexture2D(name, width, height, values, dynamic);
             var srv = device.CreateShaderResourceView1(texture);
@@ -260,7 +259,7 @@ namespace Engine
         /// <param name="size">Texture size</param>
         /// <param name="values">Initial values</param>
         /// <param name="dynamic">Dynamic</param>
-        private ID3D11Texture1D CreateTexture1D<T>(string name, uint size, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        private ID3D11Texture1D CreateTexture1D<T>(string name, uint size, T[] values, bool dynamic) where T : unmanaged
         {
             FrameCounters.Textures++;
 
@@ -294,7 +293,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="values">Initial values</param>
         /// <param name="dynamic">Dynamic</param>
-        private ID3D11Texture2D1 CreateTexture2D<T>(string name, uint width, uint height, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        private ID3D11Texture2D1 CreateTexture2D<T>(string name, uint width, uint height, T[] values, bool dynamic) where T : unmanaged
         {
             FrameCounters.Textures++;
 
@@ -386,17 +385,17 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2D</returns>
-        private unsafe ID3D11Texture2D1 CreateTexture2D(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2D(string name, TextureData[] descriptions, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
-            var description = descriptions.First();
+            var description = descriptions[0];
 
             uint width = description.Width;
             uint height = description.Height;
             var format = description.Format;
             uint mipMaps = description.MipMaps;
-            uint arraySize = (uint)descriptions.Count();
+            uint arraySize = (uint)descriptions.Length;
 
             var desc = new Texture2DDescription1()
             {
@@ -506,17 +505,17 @@ namespace Engine
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private unsafe ID3D11Texture2D1 CreateTexture2DCube(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
+        private unsafe ID3D11Texture2D1 CreateTexture2DCube(string name, TextureData[] descriptions, bool generateMips, bool dynamic)
         {
             FrameCounters.Textures++;
 
-            var description = descriptions.First();
+            var description = descriptions[0];
 
             var width = description.Width;
             var height = description.Height;
             var format = description.Format;
             var mipMaps = description.MipMaps;
-            uint arraySize = (uint)descriptions.Count();
+            uint arraySize = (uint)descriptions.Length;
 
             var desc = new Texture2DDescription1()
             {
@@ -571,7 +570,7 @@ namespace Engine
         /// <param name="height">Texture height</param>
         /// <param name="format">Format</param>
         /// <returns>Returns the data structure</returns>
-        private static unsafe TResource CreateWithSubresource<T, TResource>(IEnumerable<T> values, uint width, uint height, Format format, Func<SubresourceData, TResource> createResourceFunc)
+        private static unsafe TResource CreateWithSubresource<T, TResource>(T[] values, uint width, uint height, Format format, Func<SubresourceData, TResource> createResourceFunc)
             where T : unmanaged
         {
             uint length = checked(width * height);
@@ -613,13 +612,13 @@ namespace Engine
         /// Gets the subresource data array from the texture data
         /// </summary>
         /// <param name="textures">Texture list</param>
-        private static unsafe PinnedSubresourceData GetSubresourceData(IEnumerable<TextureData> textures)
+        private static unsafe PinnedSubresourceData GetSubresourceData(TextureData[] textures)
         {
             ArgumentNullException.ThrowIfNull(textures);
 
-            if (!textures.Any())
+            if (textures.Length == 0)
             {
-                return new(Array.Empty<SubresourceData>(), Array.Empty<MemoryHandle>());
+                return new([], []);
             }
 
             uint count = 0;
@@ -713,7 +712,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTexture(string name, string filename, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            using var resource = TextureData.ReadTexture(filename, rectangle.ToRectI());
+            using var resource = TextureData.ReadTexture(filename, rectangle);
 
             return new EngineShaderResourceView(name, CreateResourceView(name, resource, mipAutogen, dynamic));
         }
@@ -728,7 +727,7 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         public EngineShaderResourceView LoadTexture(string name, MemoryStream stream, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            using var resource = TextureData.ReadTexture(stream, rectangle.ToRectI());
+            using var resource = TextureData.ReadTexture(stream, rectangle);
 
             return new EngineShaderResourceView(name, CreateResourceView(name, resource, mipAutogen, dynamic));
         }
@@ -741,13 +740,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, string filename, IEnumerable<RectI> rectangles, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, string filename, RectI[] rectangles, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(filename, rectangles.Select(r => r.ToRectI()));
+            var textureList = TextureData.ReadTextureArray(filename, rectangles);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -760,13 +759,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, MemoryStream stream, IEnumerable<RectI> rectangles, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, MemoryStream stream, RectI[] rectangles, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(stream, rectangles.Select(r => r.ToRectI()));
+            var textureList = TextureData.ReadTextureArray(stream, rectangles);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -778,13 +777,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<string> filenames, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, string[] filenames, bool mipAutogen, bool dynamic)
         {
             var textureList = TextureData.ReadTextureArray(filenames);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -796,13 +795,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<MemoryStream> streams, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, MemoryStream[] streams, bool mipAutogen, bool dynamic)
         {
             var textureList = TextureData.ReadTextureArray(streams);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -815,13 +814,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<string> filenames, RectI rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, string[] filenames, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(filenames, rectangle.ToRectI());
+            var textureList = TextureData.ReadTextureArray(filenames, rectangle);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -834,13 +833,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<MemoryStream> streams, RectI rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, MemoryStream[] streams, RectI rectangle, bool mipAutogen, bool dynamic)
         {
-            var textureList = TextureData.ReadTextureArray(streams, rectangle.ToRectI());
+            var textureList = TextureData.ReadTextureArray(streams, rectangle);
 
             var srv = new EngineShaderResourceView(name, CreateResourceView(name, textureList, mipAutogen, dynamic));
 
-            textureList.ToList().ForEach(t => t.Dispose());
+            Array.ForEach(textureList, t => t.Dispose());
 
             return srv;
         }
@@ -853,21 +852,21 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureCubic(string name, string filename, IEnumerable<RectI> faces, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureCubic(string name, string filename, RectI[] faces, bool mipAutogen, bool dynamic)
         {
-            if (faces?.Count() == 6)
+            if (faces != null && faces.Length == 6)
             {
-                var resources = TextureData.ReadTextureCubic(filename, faces.Select(r => r.ToRectI()));
+                var resources = TextureData.ReadTextureCubic(filename, faces);
 
                 var srv = new EngineShaderResourceView(name, CreateCubicResourceView(name, resources, mipAutogen, dynamic));
 
-                resources.ToList().ForEach(t => t.Dispose());
+                Array.ForEach(resources, t => t.Dispose());
 
                 return srv;
             }
             else
             {
-                using var resource = TextureData.ReadTexture(filename, Vortice.Mathematics.RectI.Empty);
+                using var resource = TextureData.ReadTexture(filename, RectI.Empty);
 
                 return new EngineShaderResourceView(name, CreateCubicResourceView(name, resource, mipAutogen, dynamic));
             }
@@ -881,21 +880,21 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        public EngineShaderResourceView LoadTextureCubic(string name, MemoryStream stream, IEnumerable<RectI> faces, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureCubic(string name, MemoryStream stream, RectI[] faces, bool mipAutogen, bool dynamic)
         {
-            if (faces?.Count() == 6)
+            if (faces != null && faces.Length == 6)
             {
-                var resources = TextureData.ReadTextureCubic(stream, faces.Select(r => r.ToRectI()));
+                var resources = TextureData.ReadTextureCubic(stream, faces);
 
                 var srv = new EngineShaderResourceView(name, CreateCubicResourceView(name, resources, mipAutogen, dynamic));
 
-                resources.ToList().ForEach(t => t.Dispose());
+                Array.ForEach(resources, t => t.Dispose());
 
                 return srv;
             }
             else
             {
-                using var resource = TextureData.ReadTexture(stream, Vortice.Mathematics.RectI.Empty);
+                using var resource = TextureData.ReadTexture(stream, RectI.Empty);
 
                 return new EngineShaderResourceView(name, CreateCubicResourceView(name, resource, mipAutogen, dynamic));
             }
@@ -914,13 +913,13 @@ namespace Engine
         {
             var rnd = Helper.NewGenerator(seed);
 
-            var randomValues = new List<Vector4>();
+            Vector4[] randomValues = new Vector4[size];
             for (int i = 0; i < size; i++)
             {
-                randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
+                randomValues[i] = rnd.NextVector4(new(min), new(max));
             }
 
-            return new EngineShaderResourceView(name, Create1DTextureResourceView(name, size, randomValues, dynamic));
+            return new(name, Create1DTextureResourceView(name, size, randomValues, dynamic));
         }
         /// <summary>
         /// Creates a value array texture
@@ -931,9 +930,9 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="dynamic">Dynamic resource</param>
         /// <returns>Returns created texture</returns>
-        public EngineShaderResourceView CreateValueArrayTexture<T>(string name, uint size, IEnumerable<T> values, bool dynamic) where T : unmanaged
+        public EngineShaderResourceView CreateValueArrayTexture<T>(string name, uint size, T[] values, bool dynamic) where T : unmanaged
         {
-            return new EngineShaderResourceView(name, Create2DTextureResourceView(name, size, values, dynamic));
+            return new(name, Create2DTextureResourceView(name, size, values, dynamic));
         }
     }
 }

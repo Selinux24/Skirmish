@@ -151,7 +151,7 @@ namespace Engine.Content.OnePageDungeon
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                List<AssetReference> roomAssets =
+                AssetReference[] roomAssets =
                 [
                     .. CreateRoom(rect, walls, configuration),
                     .. CreateColumns(rect, dungeon, configuration),
@@ -282,7 +282,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="rect">Room rectangle</param>
         /// <param name="dungeon">Dungeon</param>
         /// <param name="configuration">Asset configuration</param>
-        private static IEnumerable<AssetConnection> CreateConnections(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static AssetConnection[] CreateConnections(Chamber rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
             var roomRect = rect.GetRectangle();
             roomRect.Inflate(1, 1);
@@ -305,7 +305,7 @@ namespace Engine.Content.OnePageDungeon
             }
 
             // Create connection between the room and the neighbors
-            return neis.SelectMany(nei => CreateConnection(rect, nei, configuration));
+            return [.. neis.SelectMany(nei => CreateConnection(rect, nei, configuration))];
         }
         /// <summary>
         /// Creates a connection list between rooms

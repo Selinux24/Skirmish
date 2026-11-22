@@ -127,8 +127,8 @@ namespace Engine.BuiltIn.UI
                 selectors.Add(await CreateSelectorSprite(i, description.SelectorColors[i], description.SelectorWidth, description.SelectorHeight));
             }
 
-            AddChildren(bars, false);
-            AddChildren(selectors, false);
+            AddChildren([.. bars], false);
+            AddChildren([.. selectors], false);
         }
         private async Task<Sprite> CreateBarSprite(int index, Color4 barColor, float height)
         {

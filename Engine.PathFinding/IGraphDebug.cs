@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.PathFinding
 {
     using Engine.Mathematics;
@@ -21,7 +20,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets the available debug information
         /// </summary>
-        IEnumerable<(int Id, string Information)> GetAvailableDebugInformation();
+        (int Id, string Information)[] GetAvailableDebugInformation();
         /// <summary>
         /// Gets the debug information specified by id
         /// </summary>

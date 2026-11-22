@@ -1,7 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.IO;
 using System.Text;
 
 namespace Engine.Content
@@ -37,15 +36,9 @@ namespace Engine.Content
         /// <param name="cropRectangle">Crop rectangle</param>
         public FileArrayImageContent(string path, RectI? cropRectangle = null)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path), "A path must be specified.");
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-            string directory = Path.GetDirectoryName(path);
-            string fileName = Path.GetFileName(path);
-
-            var p = ContentManager.FindPaths(directory, fileName);
+            var p = ContentManager.FindPaths(path);
             if (p.Length == 0)
             {
                 throw new ArgumentException("The specified path has no results.", nameof(path));
@@ -62,10 +55,7 @@ namespace Engine.Content
         /// <param name="cropRectangle">Crop rectangle</param>
         public FileArrayImageContent(string contentFolder, string contentFileName, RectI? cropRectangle = null)
         {
-            if (contentFileName == null)
-            {
-                throw new ArgumentNullException(nameof(contentFileName), "A content file name must be specified.");
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(contentFileName);
 
             var p = ContentManager.FindPaths(contentFolder, contentFileName);
             if (p.Length == 0)
@@ -100,11 +90,6 @@ namespace Engine.Content
         public FileArrayImageContent(string contentFolder, string[] contentFileNames, RectI? cropRectangle = null)
         {
             ArgumentNullException.ThrowIfNull(contentFileNames);
-
-            if (!Array.Exists(contentFileNames, s => s != null))
-            {
-                throw new ArgumentOutOfRangeException(nameof(contentFileNames), $"At least, one content file name must be specified in the array.");
-            }
 
             var p = ContentManager.FindPaths(contentFolder, contentFileNames);
             if (p.Length == 0)

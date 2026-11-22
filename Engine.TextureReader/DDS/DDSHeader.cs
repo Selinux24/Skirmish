@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Vortice.DXGI;
 
 namespace Engine.TextureReader.DDS
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// DDS Header
     /// </summary>

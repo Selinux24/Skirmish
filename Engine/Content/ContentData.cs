@@ -307,17 +307,17 @@ namespace Engine.Content
         /// <summary>
         /// Gets material content
         /// </summary>
-        public IEnumerable<(string Name, IMaterialContent Content)> GetMaterialContent()
+        public (string Name, IMaterialContent Content)[] GetMaterialContent()
         {
-            if (materialContent.Count == 0)
-            {
-                yield break;
-            }
+            if (materialContent.Count == 0) return [];
 
+            int idx = 0;
+            var res = new (string Name, IMaterialContent Content)[materialContent.Count];
             foreach (var mat in materialContent)
             {
-                yield return (mat.Key, mat.Value);
+                res[idx++] = (mat.Key, mat.Value);
             }
+            return res;
         }
         /// <summary>
         /// Gets material content by name

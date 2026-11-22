@@ -850,7 +850,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             for (int i = 0; i < rocks.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     continue;
                 }
@@ -878,7 +878,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     trees[i].Visible = false;
 
@@ -900,7 +900,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees2.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     trees2[i].Visible = false;
 
@@ -1275,7 +1275,7 @@ namespace TerrainSamples.SceneHeightmap
 
             Vector3 extent = Vector3.One * 20f;
             var bbox = new BoundingBox(position - extent, position + extent);
-            NavigationGraph.UpdateAt(bbox, (updateState) =>
+            NavigationGraph.UpdateAt(ref bbox, (updateState) =>
             {
                 if (updateState == GraphUpdateStates.Updated)
                 {
@@ -1370,7 +1370,8 @@ namespace TerrainSamples.SceneHeightmap
                 soldier.Manipulator.MoveBackward(gameTime, delta);
             }
 
-            if (Walk(agent, prevPosition, soldier.Manipulator.Position, false, out var finalPosition))
+            var soldierPos = soldier.Manipulator.Position;
+            if (Walk(agent, ref prevPosition, ref soldierPos, false, out var finalPosition))
             {
                 soldier.Manipulator.SetPosition(finalPosition);
             }
@@ -1416,7 +1417,7 @@ namespace TerrainSamples.SceneHeightmap
                     var center = t.Manipulator.Position + (Vector3.Up * bbox.Height * 0.5f);
                     var bc = new BoundingCylinder(center, 1.5f, bbox.Height);
 
-                    NavigationGraph.AddObstacle(bc);
+                    NavigationGraph.AddObstacle(ref bc);
                 }
             }
         }
@@ -1668,7 +1669,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void GenerateDust(Random rnd, BoundingSphere bsph)
         {
-            if (!GetRandomPoint(rnd, Vector3.Zero, bsph, out var pos))
+            if (!GetRandomPoint(rnd, Vector3.Zero, ref bsph, out var pos))
             {
                 return;
             }

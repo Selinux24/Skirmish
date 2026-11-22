@@ -118,9 +118,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
@@ -140,9 +140,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
@@ -162,9 +162,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
@@ -184,9 +184,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
@@ -206,9 +206,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentInclined]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentInclined, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentInclined, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentInclined, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentInclined, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentInclined, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentInclined, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph, "Graph is null");
             Assert.IsTrue(walkable1, "Point zero spected to be walkable.");

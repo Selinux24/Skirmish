@@ -47,11 +47,11 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Asset definition file names
         /// </summary>
-        public IEnumerable<string> AssetFiles { get; set; } = [];
+        public string[] AssetFiles { get; set; } = [];
         /// <summary>
         /// Asset definitions
         /// </summary>
-        public IEnumerable<ContentDataFile> Assets { get; set; } = [];
+        public ContentDataFile[] Assets { get; set; } = [];
         /// <summary>
         /// Asset block size
         /// </summary>
@@ -73,23 +73,23 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Hull names - geometry used for navigation mapping and coarse collision detection
         /// </summary>
-        public IEnumerable<string> Hulls { get; set; } = ["volume", "_volume", "_volume", "_volumes"];
+        public string[] Hulls { get; set; } = ["volume", "_volume", "_volume", "_volumes"];
         /// <summary>
         /// Floor names
         /// </summary>
-        public IEnumerable<DungeonProp> Floors { get; set; } = [];
+        public DungeonProp[] Floors { get; set; } = [];
         /// <summary>
         /// Wall names
         /// </summary>
-        public IEnumerable<DungeonProp> Walls { get; set; } = [];
+        public DungeonProp[] Walls { get; set; } = [];
         /// <summary>
         /// Ceiling names
         /// </summary>
-        public IEnumerable<DungeonProp> Ceilings { get; set; } = [];
+        public DungeonProp[] Ceilings { get; set; } = [];
         /// <summary>
         /// Column names
         /// </summary>
-        public IEnumerable<DungeonProp> Columns { get; set; } = [];
+        public DungeonProp[] Columns { get; set; } = [];
         /// <summary>
         /// Door names dictionary by door type
         /// </summary>
@@ -97,15 +97,15 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Door animations
         /// </summary>
-        public IEnumerable<ObjectAnimationPlan> DoorAnimationPlans { get; set; }
+        public ObjectAnimationPlan[] DoorAnimationPlans { get; set; }
         /// <summary>
         /// Door actions
         /// </summary>
-        public IEnumerable<ObjectAction> DoorActions { get; set; }
+        public ObjectAction[] DoorActions { get; set; }
         /// <summary>
         /// Door states
         /// </summary>
-        public IEnumerable<ObjectState> DoorStates { get; set; }
+        public ObjectState[] DoorStates { get; set; }
         /// <summary>
         /// Random seed
         /// </summary>
@@ -131,16 +131,16 @@ namespace Engine.Content.OnePageDungeon
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
         /// <param name="list">List of values</param>
-        private DungeonProp GetRandom(IEnumerable<DungeonProp> list)
+        private DungeonProp GetRandom(DungeonProp[] list)
         {
-            if (list?.Any() != true)
+            if (list == null || list.Length == 0)
             {
                 return default;
             }
 
-            if (list.Count() == 1)
+            if (list.Length == 1)
             {
-                return list.First();
+                return list[0];
             }
 
             float weight = GetGenerator().NextSingle(0, 1);

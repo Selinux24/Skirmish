@@ -787,7 +787,8 @@ namespace TerrainSamples.SceneGrid
                         throw new GameLogicException("Bad position");
                     }
 
-                    var node = NavigationGraph.FindNode(soldierAgent, r.Position);
+                    var p = r.Position;
+                    var node = NavigationGraph.FindNode(soldierAgent, ref p);
 
                     soldier.Manipulator.SetPosition(node?.Center ?? r.Position);
 
@@ -1191,7 +1192,7 @@ namespace TerrainSamples.SceneGrid
 
         private SegmentPath SetPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
         {
-            var path = FindPath(agentType, origin, destination);
+            var path = FindPath(agentType, ref origin, ref destination);
             if (path != null)
             {
                 return new SegmentPath(origin, path.Positions);

@@ -641,7 +641,7 @@ namespace Engine.PhysicsTests
             {
                 var contact = contacts[i];
 
-                var expectedContact = testData.Contacts.FirstOrDefault(c => box.OrientedBoundingBox.GetVertex(c.Corner) == contact.Position);
+                var expectedContact = Array.Find(testData.Contacts, c => box.OrientedBoundingBox.GetVertex(c.Corner) == contact.Position);
                 if (expectedContact == null)
                 {
                     continue;

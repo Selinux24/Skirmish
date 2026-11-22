@@ -173,10 +173,10 @@ namespace Engine.PathFinding.AStar
             minZ = MathF.Min(minZ, p2.Z);
             minZ = MathF.Min(minZ, p3.Z);
 
-            var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
-            var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3) ?? Vector3.Zero;
-            var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
-            var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3) ?? Vector3.Zero;
+            var ne = GetNorthEast(maxX, maxZ, ref p0, ref p1, ref p2, ref p3) ?? Vector3.Zero;
+            var nw = GetNorthWest(minX, maxZ, ref p0, ref p1, ref p2, ref p3) ?? Vector3.Zero;
+            var sw = GetSouthWest(minX, minZ, ref p0, ref p1, ref p2, ref p3) ?? Vector3.Zero;
+            var se = GetSouthEast(maxX, minZ, ref p0, ref p1, ref p2, ref p3) ?? Vector3.Zero;
 
             var c = (p0 + p1 + p2 + p3) / 4f;
 
@@ -227,7 +227,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the north east position</returns>
-        private static Vector3? GetNorthEast(float maxX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetNorthEast(float maxX, float maxZ, ref Vector3 p0, ref Vector3 p1, ref Vector3 p2, ref Vector3 p3)
         {
             if (MathUtils.NearEqual(p0.X, maxX) && MathUtils.NearEqual(p0.Z, maxZ)) return p0;
             else if (MathUtils.NearEqual(p1.X, maxX) && MathUtils.NearEqual(p1.Z, maxZ)) return p1;
@@ -246,7 +246,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the north west position</returns>
-        private static Vector3? GetNorthWest(float minX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetNorthWest(float minX, float maxZ, ref Vector3 p0, ref Vector3 p1, ref Vector3 p2, ref Vector3 p3)
         {
             if (MathUtils.NearEqual(p0.X, minX) && MathUtils.NearEqual(p0.Z, maxZ)) return p0;
             else if (MathUtils.NearEqual(p1.X, minX) && MathUtils.NearEqual(p1.Z, maxZ)) return p1;
@@ -265,7 +265,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the south west position</returns>
-        private static Vector3? GetSouthWest(float minX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetSouthWest(float minX, float minZ, ref Vector3 p0, ref Vector3 p1, ref Vector3 p2, ref Vector3 p3)
         {
             if (MathUtils.NearEqual(p0.X, minX) && MathUtils.NearEqual(p0.Z, minZ)) return p0;
             else if (MathUtils.NearEqual(p1.X, minX) && MathUtils.NearEqual(p1.Z, minZ)) return p1;
@@ -284,7 +284,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the south east position</returns>
-        private static Vector3? GetSouthEast(float maxX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetSouthEast(float maxX, float minZ, ref Vector3 p0, ref Vector3 p1, ref Vector3 p2, ref Vector3 p3)
         {
             if (MathUtils.NearEqual(p0.X, maxX) && MathUtils.NearEqual(p0.Z, minZ)) return p0;
             else if (MathUtils.NearEqual(p1.X, maxX) && MathUtils.NearEqual(p1.Z, minZ)) return p1;
@@ -417,7 +417,7 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public bool Contains(Vector3 point)
+        public bool Contains(ref Vector3 point)
         {
             if (point.X >= SouthWest.X && point.Z >= SouthWest.Z &&
                 point.X <= NorthEast.X && point.Z <= NorthEast.Z)
@@ -428,7 +428,7 @@ namespace Engine.PathFinding.AStar
             return false;
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints()
+        public Vector3[] GetPoints()
         {
             return
             [

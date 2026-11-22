@@ -59,9 +59,9 @@ namespace Engine.Content.FmtCollada.Fmt
 #endif
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList?.Any() != true)
+            if (modelList.Length == 0)
             {
-                throw new EngineException(string.Format("Model not found: {0}", fileName));
+                throw new EngineException($"Model not found: {fileName}");
             }
 
             var taskList = modelList
@@ -735,7 +735,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="vertCount">Vertex count</param>
         /// <param name="startIndex">Start index</param>
         /// <returns>Returns a face index list</returns>
-        private static IEnumerable<uint> BuildFace(int vertCount, int startIndex)
+        private static uint[] BuildFace(int vertCount, int startIndex)
         {
             if (vertCount == 3)
             {
@@ -850,9 +850,9 @@ namespace Engine.Content.FmtCollada.Fmt
 
         #region Materials
 
-        private static string FindMaterialTarget(string material, IEnumerable<VisualScene> libraryVisualScenes)
+        private static string FindMaterialTarget(string material, VisualScene[] libraryVisualScenes)
         {
-            if (libraryVisualScenes?.Any() != true)
+            if (libraryVisualScenes == null || libraryVisualScenes.Length == 0)
             {
                 return material;
             }
@@ -868,12 +868,11 @@ namespace Engine.Content.FmtCollada.Fmt
             return material;
         }
 
-        private static bool FindMaterialTarget(string material, IEnumerable<Node> nodes, out string target)
+        private static bool FindMaterialTarget(string material, Node[] nodes, out string target)
         {
-            target = null;
-
-            if (nodes?.Any() != true)
+            if (nodes == null || nodes.Length == 0)
             {
+                target = null;
                 return false;
             }
 
@@ -882,11 +881,11 @@ namespace Engine.Content.FmtCollada.Fmt
                 if (FindMaterialTarget(material, node, out var nodeTarget))
                 {
                     target = nodeTarget;
-
                     return true;
                 }
             }
 
+            target = null;
             return false;
         }
 
@@ -896,7 +895,6 @@ namespace Engine.Content.FmtCollada.Fmt
             if (FindMaterialTarget(material, node.InstanceGeometry, out var geomTarget))
             {
                 target = geomTarget;
-
                 return true;
             }
 
@@ -904,7 +902,6 @@ namespace Engine.Content.FmtCollada.Fmt
             if (FindMaterialTarget(material, node.InstanceController, out var instanceTarget))
             {
                 target = instanceTarget;
-
                 return true;
             }
 
@@ -912,39 +909,65 @@ namespace Engine.Content.FmtCollada.Fmt
             if (FindMaterialTarget(material, node.Nodes, out var nodesTarget))
             {
                 target = nodesTarget;
-
                 return true;
             }
 
             target = null;
-
             return false;
         }
 
-        private static bool FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances, out string target)
+        private static bool FindMaterialTarget(string material, InstanceGeometry[] instances, out string target)
         {
-            var mat = instances?
-                .Where(i => (i.BindMaterial?.TechniqueCommon?.Length ?? 0) != 0)
-                .SelectMany(i => i.BindMaterial.TechniqueCommon)
-                .SelectMany(t => t.InstanceMaterial)
-                .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
+            if (instances == null || instances.Length == 0)
+            {
+                target = null;
+                return false;
+            }
 
-            target = mat?.Target?.Replace("#", "");
+            foreach (var mat in instances)
+            {
+                foreach (var technique in mat.BindMaterial?.TechniqueCommon ?? [])
+                {
+                    foreach (var instanceMat in technique.InstanceMaterial ?? [])
+                    {
+                        if (string.Equals(material, instanceMat.Symbol, StringComparison.OrdinalIgnoreCase))
+                        {
+                            target = instanceMat.Target?.Replace("#", "");
+                            return target != null;
+                        }
+                    }
+                }
+            }
 
-            return target != null;
+            target = null;
+            return false;
         }
 
-        private static bool FindMaterialTarget(string material, IEnumerable<InstanceController> instances, out string target)
+        private static bool FindMaterialTarget(string material, InstanceController[] instances, out string target)
         {
-            var mat = instances?
-                .Where(i => (i.BindMaterial?.TechniqueCommon?.Length ?? 0) != 0)
-                .SelectMany(i => i.BindMaterial.TechniqueCommon)
-                .SelectMany(t => t.InstanceMaterial)
-                .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
+            if (instances == null || instances.Length == 0)
+            {
+                target = null;
+                return false;
+            }
 
-            target = mat?.Target?.Replace("#", "");
+            foreach (var mat in instances)
+            {
+                foreach (var technique in mat.BindMaterial?.TechniqueCommon ?? [])
+                {
+                    foreach (var instanceMat in technique.InstanceMaterial ?? [])
+                    {
+                        if (string.Equals(material, instanceMat.Symbol, StringComparison.OrdinalIgnoreCase))
+                        {
+                            target = instanceMat.Target?.Replace("#", "");
+                            return target != null;
+                        }
+                    }
+                }
+            }
 
-            return target != null;
+            target = null;
+            return false;
         }
 
         #endregion
@@ -1013,7 +1036,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="skin">Skin information</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix4x4> inverseBindMatrixList, out IEnumerable<Weight> weightList)
+        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix4x4> inverseBindMatrixList, out Weight[] weightList)
         {
             //Joints & matrices
             int jointsOffset = -1;
@@ -1064,7 +1087,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// </summary>
         /// <param name="morph">Morph information</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Morph morph, out IEnumerable<Weight> weightList)
+        private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
         {
             throw new NotImplementedException();
         }
@@ -1077,7 +1100,7 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="weightsOffset">Weights offset</param>
         /// <param name="weights">Weight values list</param>
         /// <returns>Returns the weights list</returns>
-        private static List<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, string[] joints, int weightsOffset, float[] weights)
+        private static Weight[] BuildVertexWeigths(Skin skin, int jointsOffset, string[] joints, int weightsOffset, float[] weights)
         {
             if (skin?.VertexWeights == null || skin.VertexWeights.Count <= 0)
             {
@@ -1125,7 +1148,7 @@ namespace Engine.Content.FmtCollada.Fmt
                 }
             }
 
-            return wgList;
+            return [.. wgList];
         }
         /// <summary>
         /// Creates the inverse bind matrix dictionary
@@ -1407,7 +1430,7 @@ namespace Engine.Content.FmtCollada.Fmt
             }
 
             ProcessSceneNodesSkeleton(vScene.Nodes, out var skeletons);
-            if (skeletons.Count != 0)
+            if (skeletons.Length != 0)
             {
                 ProcessVisualSceneSkins(vScene, modelContent, skeletons);
             }
@@ -1426,15 +1449,20 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="vScene">Visual scene node</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="skeletons">Skeleton list</param>
-        private static void ProcessVisualSceneSkins(VisualScene vScene, ContentData modelContent, IEnumerable<Skeleton> skeletons)
+        private static void ProcessVisualSceneSkins(VisualScene vScene, ContentData modelContent, Skeleton[] skeletons)
         {
             ProcessSceneNodesInstanceController(vScene.Nodes, out var instanceControllers);
 
             foreach (var skeleton in skeletons)
             {
                 //Find controlles for the current skeleton
-                var skeletonControllers = instanceControllers.Where(ic => string.Equals(ic.Skeleton.FirstOrDefault()?.Replace("#", ""), skeleton.Name));
-                if (!skeletonControllers.Any())
+                var skeletonControllers = Array.FindAll(instanceControllers, ic =>
+                {
+                    if (ic.Skeleton.Length == 0 || string.IsNullOrWhiteSpace(ic.Skeleton[0])) return false;
+
+                    return string.Equals(ic.Skeleton[0].Replace("#", ""), skeleton.Name);
+                });
+                if (skeletonControllers.Length == 0)
                 {
                     continue;
                 }
@@ -1464,9 +1492,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix4x4 transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
+        private static void ProcessSceneNodes(Node[] nodes, Matrix4x4 transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
         {
-            if (nodes?.Any() != true)
+            if (nodes == null || nodes.Length == 0)
             {
                 return;
             }
@@ -1508,9 +1536,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="nodes">Node list</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesDefault(Matrix4x4 trn, IEnumerable<Node> nodes, ContentData modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesDefault(Matrix4x4 trn, Node[] nodes, ContentData modelContent, bool bakeTransforms)
         {
-            if (nodes?.Any() != true)
+            if (nodes == null || nodes.Length == 0)
             {
                 return;
             }
@@ -1526,9 +1554,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="trn">Transform</param>
         /// <param name="lights">Light nodes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodesLight(Matrix4x4 trn, IEnumerable<InstanceWithExtra> lights, ContentData modelContent)
+        private static void ProcessSceneNodesLight(Matrix4x4 trn, InstanceWithExtra[] lights, ContentData modelContent)
         {
-            if (lights?.Any() != true)
+            if (lights == null || lights.Length == 0)
             {
                 return;
             }
@@ -1553,9 +1581,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// <param name="geometry">Geometry nodes</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesGeometry(Matrix4x4 trn, IEnumerable<InstanceGeometry> geometry, ContentData modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesGeometry(Matrix4x4 trn, InstanceGeometry[] geometry, ContentData modelContent, bool bakeTransforms)
         {
-            if (geometry?.Any() != true)
+            if (geometry == null || geometry.Length == 0)
             {
                 return;
             }
@@ -1588,9 +1616,9 @@ namespace Engine.Content.FmtCollada.Fmt
         /// </summary>
         /// <param name="nodes">Node list to process</param>
         /// <param name="skeletons">Returns a skeleton list, if any</param>
-        private static void ProcessSceneNodesSkeleton(IEnumerable<Node> nodes, out List<Skeleton> skeletons)
+        private static void ProcessSceneNodesSkeleton(Node[] nodes, out Skeleton[] skeletons)
         {
-            if (nodes?.Any() != true)
+            if (nodes == null || nodes.Length == 0)
             {
                 //No child nodes
                 skeletons = [];
@@ -1603,33 +1631,32 @@ namespace Engine.Content.FmtCollada.Fmt
             foreach (var node in nodes)
             {
                 ProcessSceneNodeSkeleton(node, out var nodeSkeletons);
-                if (nodeSkeletons.Count != 0)
+                if (nodeSkeletons.Length != 0)
                 {
                     res.AddRange(nodeSkeletons);
                 }
             }
 
-            skeletons = res;
+            skeletons = [.. res];
         }
         /// <summary>
         /// Process the specified node, lookgin for a skeleton
         /// </summary>
         /// <param name="node">Node to process</param>
         /// <param name="skeletons">Returns a skeleton list, if any</param>
-        private static void ProcessSceneNodeSkeleton(Node node, out List<Skeleton> skeletons)
+        private static void ProcessSceneNodeSkeleton(Node node, out Skeleton[] skeletons)
         {
             if (!node.IsArmature)
             {
                 List<Skeleton> res = [];
 
                 ProcessSceneNodesSkeleton(node.Nodes, out var childSkeletons);
-                if (childSkeletons.Count != 0)
+                if (childSkeletons.Length != 0)
                 {
                     res.AddRange(childSkeletons);
                 }
 
-                skeletons = res;
-
+                skeletons = [.. res];
                 return;
             }
 
@@ -1640,13 +1667,12 @@ namespace Engine.Content.FmtCollada.Fmt
         /// </summary>
         /// <param name="nodes">Node list to process</param>
         /// <param name="instanceControllers">Returns a instance controller list, if any</param>
-        private static void ProcessSceneNodesInstanceController(IEnumerable<Node> nodes, out List<InstanceController> instanceControllers)
+        private static void ProcessSceneNodesInstanceController(Node[] nodes, out InstanceController[] instanceControllers)
         {
-            if (nodes?.Any() != true)
+            if (nodes == null || nodes.Length == 0)
             {
                 //No child nodes
                 instanceControllers = [];
-
                 return;
             }
 
@@ -1655,33 +1681,32 @@ namespace Engine.Content.FmtCollada.Fmt
             foreach (var node in nodes)
             {
                 ProcessSceneNodeInstanceController(node, out var nodeInstanceControllers);
-                if (nodeInstanceControllers.Count != 0)
+                if (nodeInstanceControllers.Length != 0)
                 {
                     res.AddRange(nodeInstanceControllers);
                 }
             }
 
-            instanceControllers = res;
+            instanceControllers = [.. res];
         }
         /// <summary>
         /// Process the specified node, lookgin for a instance controller
         /// </summary>
         /// <param name="node">Node to process</param>
         /// <param name="instanceControllers">Returns a instance controller list, if any</param>
-        private static void ProcessSceneNodeInstanceController(Node node, out List<InstanceController> instanceControllers)
+        private static void ProcessSceneNodeInstanceController(Node node, out InstanceController[] instanceControllers)
         {
             if (!node.HasController)
             {
                 List<InstanceController> res = [];
 
                 ProcessSceneNodesInstanceController(node.Nodes, out var childInstanceControllers);
-                if (childInstanceControllers.Count != 0)
+                if (childInstanceControllers.Length != 0)
                 {
                     res.AddRange(childInstanceControllers);
                 }
 
-                instanceControllers = res;
-
+                instanceControllers = [.. res];
                 return;
             }
 

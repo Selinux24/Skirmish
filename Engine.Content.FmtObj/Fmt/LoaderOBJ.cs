@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,15 +30,15 @@ namespace Engine.Content.FmtObj.Fmt
         private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix4x4 transform, out List<Material> materials)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (!modelList.Any())
+            if (modelList.Length == 0)
             {
-                throw new EngineException(string.Format("Model not found: {0}", fileName));
+                throw new EngineException($"Model not found: {fileName}");
             }
 
             string materialsFolder = Path.Combine(contentFolder, Path.GetDirectoryName(fileName));
 
-            var matList = new List<Material>();
-            var res = new List<SubMeshContent>();
+            List<Material> matList = [];
+            List<SubMeshContent> res = [];
 
             foreach (var model in modelList)
             {

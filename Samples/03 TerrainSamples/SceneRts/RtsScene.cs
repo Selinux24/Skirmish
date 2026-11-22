@@ -1041,9 +1041,9 @@ namespace TerrainSamples.SceneRts
             }
             obelisk.Visible = true;
         }
-        private void PrepareLights(IEnumerable<ISceneLight> lights)
+        private void PrepareLights(ISceneLight[] lights)
         {
-            if (!lights.Any())
+            if (lights.Length == 0)
             {
                 return;
             }
@@ -1096,7 +1096,8 @@ namespace TerrainSamples.SceneRts
             var sceneryUsage = SceneObjectUsages.Ground;
 
             // Set position
-            var ray = GetTopDownRay(heliport.Manipulator.Position, PickingHullTypes.Geometry);
+            var pos = heliport.Manipulator.Position;
+            var ray = GetTopDownRay(ref pos, PickingHullTypes.Geometry);
             if (this.PickNearest(ref ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
@@ -1301,7 +1302,7 @@ namespace TerrainSamples.SceneRts
         }
         private void BeginToggleGarageLights()
         {
-            var light = garage.Lights.FirstOrDefault();
+            var light = garage.Lights.Length > 0 ? garage.Lights[0] : default;
             if (light == null)
             {
                 return;
@@ -1438,7 +1439,9 @@ namespace TerrainSamples.SceneRts
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (Walk(walkerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
+            var pos = Camera.Position;
+            var posNext = Camera.GetNextPosition();
+            if (Walk(walkerAgentType, ref pos, ref posNext, true, out var walkerPos))
             {
                 Camera.Goto(walkerPos);
             }
@@ -1782,7 +1785,8 @@ namespace TerrainSamples.SceneRts
             {
                 var t1Position = tankP1.Manipulator.Position;
 
-                var result = FindPath(tankAgentType, t1Position, r.PickingResult.Position);
+                var pPos = r.PickingResult.Position;
+                var result = FindPath(tankAgentType, ref t1Position, ref pPos);
                 if (result != null)
                 {
                     DEBUGDrawPath(result.Positions, Color.Red);

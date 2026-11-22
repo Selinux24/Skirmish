@@ -2429,21 +2429,11 @@ namespace Engine.Mathematics
 
             if (distance <= sphere.Radius)
             {
-                result = new PickingResult<Triangle>
-                {
-                    Primitive = triangle,
-                    Distance = distance,
-                    Position = point,
-                };
-
+                result = new PickingResult<Triangle>(point, distance, triangle);
                 return true;
             }
 
-            result = new PickingResult<Triangle>
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<Triangle>.Empty;
             return false;
         }
         /// <summary>
@@ -2501,21 +2491,11 @@ namespace Engine.Mathematics
 
             if (distance <= sphere.Radius)
             {
-                result = new PickingResult<Triangle>
-                {
-                    Primitive = triangle,
-                    Distance = distance,
-                    Position = point,
-                };
-
+                result = new PickingResult<Triangle>(point, distance, triangle);
                 return true;
             }
 
-            result = new PickingResult<Triangle>
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<Triangle>.Empty;
             return false;
         }
         /// <summary>
@@ -2537,12 +2517,11 @@ namespace Engine.Mathematics
                 if (dist <= sphere.Radius)
                 {
                     // Store intersection data
-                    picks.Add(new PickingResult<Triangle> { Primitive = mesh[i], Position = closestToTri, Distance = dist });
+                    picks.Add(new PickingResult<Triangle>(closestToTri, dist, mesh[i]));
                 }
             }
 
             results = [.. picks];
-
             return picks.Count != 0;
         }
 

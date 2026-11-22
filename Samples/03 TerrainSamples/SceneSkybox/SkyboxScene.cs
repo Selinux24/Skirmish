@@ -580,7 +580,9 @@ namespace TerrainSamples.SceneSkybox
         }
         private void UpdateInputPlayer()
         {
-            if (Walk(walker, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
+            var camPos = Camera.Position;
+            var camPosNext = Camera.GetNextPosition();
+            if (Walk(walker, ref camPos, ref camPosNext, true, out var walkerPos))
             {
                 Camera.Goto(walkerPos);
             }

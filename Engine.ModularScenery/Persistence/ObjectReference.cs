@@ -4,7 +4,6 @@ using Engine.Mathematics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
@@ -13,6 +12,8 @@ namespace Engine.Modular.Persistence
     /// </summary>
     public class ObjectReference
     {
+        const string DefaultStr = "default";
+
         /// <summary>
         /// Asset map id
         /// </summary>
@@ -52,15 +53,15 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Animation plan list
         /// </summary>
-        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = [];
+        public ObjectAnimationPlan[] AnimationPlans { get; set; } = [];
         /// <summary>
         /// Action list
         /// </summary>
-        public IEnumerable<ObjectAction> Actions { get; set; } = [];
+        public ObjectAction[] Actions { get; set; } = [];
         /// <summary>
         /// States list
         /// </summary>
-        public IEnumerable<ObjectState> States { get; set; } = [];
+        public ObjectState[] States { get; set; } = [];
         /// <summary>
         /// Next level
         /// </summary>
@@ -94,12 +95,14 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Gets the animation plan list
         /// </summary>
-        public IEnumerable<(string Name, AnimationPlan Plan)> GetAnimations()
+        public (string Name, AnimationPlan Plan)[] GetAnimations()
         {
-            if ((AnimationPlans?.Any()) != true)
+            if (AnimationPlans == null || AnimationPlans.Length == 0)
             {
-                yield break;
+                return [];
             }
+
+            List<(string Name, AnimationPlan Plan)> res = [];
 
             foreach (var dPlan in AnimationPlans)
             {
@@ -113,37 +116,67 @@ namespace Engine.Modular.Persistence
                     plan.AddItem(path);
                 }
 
-                yield return (dPlan.Name, plan);
+                res.Add((dPlan.Name, plan));
             }
+
+            return [.. res];
         }
         /// <summary>
         /// Gets the default animation plan name
         /// </summary>
         public string GetDefaultAnimationPlanName()
         {
-            return AnimationPlans?.FirstOrDefault(a => a.Default)?.Name ?? "default";
+            if (AnimationPlans == null || AnimationPlans.Length == 0)
+            {
+                return DefaultStr;
+            }
+
+            foreach (var a in AnimationPlans)
+            {
+                if (a != null && a.Default)
+                {
+                    return a.Name;
+                }
+            }
+
+            return DefaultStr;
         }
         /// <summary>
         /// Gets the object trigger list
         /// </summary>
-        public IEnumerable<ItemTrigger> GetTriggers()
+        public ItemTrigger[] GetTriggers()
         {
-            if ((Actions?.Any()) != true)
+            if (Actions == null || Actions.Length == 0)
             {
-                yield break;
+                return [];
             }
+
+            List<ItemTrigger> res = [];
 
             foreach (var action in Actions)
             {
-                yield return new()
+                ItemAction[] acItems = null;
+                if ((action.Items?.Length ?? 0) > 0)
+                {
+                    acItems = new ItemAction[action.Items.Length];
+                    for (int i = 0; i < action.Items.Length; i++)
+                    {
+                        var acItem = action.Items[i];
+                        acItems[i] = new ItemAction { Id = acItem.Id, Action = acItem.Action };
+                    }
+                }
+
+                res.Add(new()
                 {
                     Name = action.Name,
                     StateFrom = action.StateFrom,
                     StateTo = action.StateTo,
                     AnimationPlan = action.AnimationPlan,
-                    Actions = action.Items.Select(i => new ItemAction { Id = i.Id, Action = i.Action }),
-                };
+                    Actions = acItems ?? [],
+                });
             }
+
+            return [.. res];
         }
 
         /// <inheritdoc/>

@@ -46,7 +46,7 @@ namespace Engine.Modular
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, IEnumerable<ItemTrigger>> triggers = [];
+        private readonly Dictionary<ModelInstance, ItemTrigger[]> triggers = [];
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
@@ -83,7 +83,7 @@ namespace Engine.Modular
         {
             get
             {
-                return levelMap.Levels.FirstOrDefault();
+                return levelMap.Levels.Length > 0 ? levelMap.Levels[0] : default;
             }
         }
         /// <summary>
@@ -105,8 +105,10 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="instances">Instances dictionary</param>
         /// <param name="refresh">Refresh internal item cache</param>
-        private static IEnumerable<BoundingSphere> GetSceneAssetSpheres(Dictionary<string, ModelInstanced> instances, bool refresh)
+        private static BoundingSphere[] GetSceneAssetSpheres(Dictionary<string, ModelInstanced> instances, bool refresh)
         {
+            List<BoundingSphere> res = [];
+
             foreach (var item in instances.Keys)
             {
                 var model = instances[item];
@@ -117,17 +119,21 @@ namespace Engine.Modular
 
                 for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    yield return model[i].GetBoundingSphere(refresh);
+                    res.Add(model[i].GetBoundingSphere(refresh));
                 }
             }
+
+            return [.. res];
         }
         /// <summary>
         /// Gets the bounding box list of all items in the specified dictionary
         /// </summary>
         /// <param name="instances">Instances dictionary</param>
         /// <param name="refresh">Refresh internal item cache</param>
-        private static IEnumerable<BoundingBox> GetSceneAssetBoxes(Dictionary<string, ModelInstanced> instances, bool refresh)
+        private static BoundingBox[] GetSceneAssetBoxes(Dictionary<string, ModelInstanced> instances, bool refresh)
         {
+            List<BoundingBox> res = [];
+
             foreach (var item in instances.Keys)
             {
                 var model = instances[item];
@@ -138,9 +144,11 @@ namespace Engine.Modular
 
                 for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    yield return model[i].GetBoundingBox(refresh);
+                    res.Add(model[i].GetBoundingBox(refresh));
                 }
             }
+
+            return [.. res];
         }
 
         /// <inheritdoc/>
@@ -175,7 +183,7 @@ namespace Engine.Modular
             }
 
             //Find the level
-            var level = levelMap.Levels.FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
+            var level = Array.Find(levelMap.Levels, l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
                 //Load the level
@@ -387,7 +395,7 @@ namespace Engine.Modular
         {
             //Plans
             var animationPlans = obj.GetAnimations();
-            if (animationPlans.Any())
+            if (animationPlans.Length != 0)
             {
                 var animationDict = animationPlans.ToDictionary(a => a.Name, e => e.Plan);
                 animations.Add(instance, animationDict);
@@ -399,7 +407,7 @@ namespace Engine.Modular
             }
 
             var instanceTriggers = obj.GetTriggers();
-            if (instanceTriggers.Any())
+            if (instanceTriggers.Length != 0)
             {
                 triggers.Add(instance, instanceTriggers);
             }
@@ -411,14 +419,14 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void InitializeEntities(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            if (level?.Objects?.Any() != true)
+            if (level?.Objects == null || level.Objects.Length == 0)
             {
                 progress?.Report(new LoadResourceProgress { Progress = 1 });
 
                 return;
             }
 
-            float total = level.Objects.Count();
+            float total = level.Objects.Length;
             int current = 0;
 
             foreach (var obj in level.Objects)
@@ -447,7 +455,8 @@ namespace Engine.Modular
                             .ToArray();
 
                         //Find first state
-                        var defaultState = obj.States?.FirstOrDefault()?.Name;
+                        var states = obj.States ?? [];
+                        var defaultState = states.Length > 0 ? states[0]?.Name : default;
 
                         entities.Add(new Item(obj, instance, emitters, defaultState));
                     }
@@ -472,7 +481,7 @@ namespace Engine.Modular
         {
             var transforms = new Dictionary<string, List<Matrix4x4>>();
 
-            float total = level.Map.Count() + transforms.Keys.Count;
+            float total = level.Map.Length + transforms.Keys.Count;
             int current = 0;
 
             var vAssets = assetMap.Assets.ToArray();
@@ -636,7 +645,7 @@ namespace Engine.Modular
                 {
                     StarterTrigger = c.Trigger,
                     StarterItem = c.Item,
-                    Items = c.Items,
+                    Items = [.. c.Items],
                 });
             });
 
@@ -753,7 +762,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="name">Object name</param>
         /// <returns>Returns a list of objects by name</returns>
-        public IEnumerable<Item> GetObjectsByName(string name)
+        public Item[] GetObjectsByName(string name)
         {
             var res = entities
                 .Where(o => string.Equals(o.Object.AssetName, name, StringComparison.OrdinalIgnoreCase));
@@ -765,7 +774,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="objectType">Object type</param>
         /// <returns>Returns a list of objects of the specified type</returns>
-        public IEnumerable<Item> GetObjectsByType(ObjectTypes objectType)
+        public Item[] GetObjectsByType(ObjectTypes objectType)
         {
             var res = entities
                 .Where(o => objectType.HasFlag(o.Object.Type));
@@ -780,7 +789,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, null, useSphere, sortByDistance);
         }
@@ -792,7 +801,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, ObjectTypes filter, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingBox bbox, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, filter, useSphere, sortByDistance);
         }
@@ -803,7 +812,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, null, useSphere, sortByDistance);
         }
@@ -815,7 +824,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, ObjectTypes filter, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingSphere sphere, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, filter, useSphere, sortByDistance);
         }
@@ -826,7 +835,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, null, useSphere, sortByDistance);
         }
@@ -838,7 +847,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, ObjectTypes filter, bool useSphere, bool sortByDistance)
+        public Item[] GetObjectsInVolume(BoundingFrustum frustum, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, filter, useSphere, sortByDistance);
         }
@@ -850,11 +859,11 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private List<Item> GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private Item[] GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
-                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
-                .Where(e =>
+                .FindAll(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .FindAll(e =>
                 {
                     if (useSphere)
                     {
@@ -864,8 +873,7 @@ namespace Engine.Modular
                     {
                         return bbox.Contains(e.Instance.GetBoundingBox()) != ContainmentType.Disjoint;
                     }
-                })
-                .ToList();
+                });
 
             if (sortByDistance)
             {
@@ -880,7 +888,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res;
+            return [.. res];
         }
         /// <summary>
         /// Gets objects into the specified volume
@@ -890,11 +898,11 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private List<Item> GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private Item[] GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
-                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
-                .Where(e =>
+                .FindAll(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .FindAll(e =>
                 {
                     if (useSphere)
                     {
@@ -908,8 +916,7 @@ namespace Engine.Modular
 
                         return sphere.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
-                })
-                .ToList();
+                });
 
             if (sortByDistance)
             {
@@ -924,7 +931,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res;
+            return [.. res];
         }
         /// <summary>
         /// Gets objects into the specified volume
@@ -934,11 +941,11 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets whether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private List<Item> GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private Item[] GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
-                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
-                .Where(e =>
+                .FindAll(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .FindAll(e =>
                 {
                     if (useSphere)
                     {
@@ -952,8 +959,7 @@ namespace Engine.Modular
 
                         return frustum.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
-                })
-                .ToList();
+                });
 
             if (sortByDistance)
             {
@@ -968,7 +974,7 @@ namespace Engine.Modular
                 });
             }
 
-            return res;
+            return [.. res];
         }
 
         /// <summary>
@@ -976,7 +982,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="item">Scenery item</param>
         /// <returns>Returns a list of triggers</returns>
-        public IEnumerable<ItemTrigger> GetTriggersByObject(Item item)
+        public ItemTrigger[] GetTriggersByObject(Item item)
         {
             if (!triggers.TryGetValue(item.Instance, out var triggerValue))
             {
@@ -1001,7 +1007,7 @@ namespace Engine.Modular
             {
                 StarterTrigger = starterTrigger,
                 StarterItem = staterItem,
-                Items = callback.Items,
+                Items = [.. callback.Items],
             });
 
             activeCallbacks.Add(callback);
@@ -1050,7 +1056,7 @@ namespace Engine.Modular
                 }
 
                 //Find trigger
-                var refTrigger = triggers[refItem.Instance].FirstOrDefault(t => string.Equals(t.Name, action.Action, StringComparison.OrdinalIgnoreCase));
+                var refTrigger = Array.Find(triggers[refItem.Instance], t => string.Equals(t.Name, action.Action, StringComparison.OrdinalIgnoreCase));
                 if (refTrigger == null)
                 {
                     continue;

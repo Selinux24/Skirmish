@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -63,11 +62,7 @@ namespace Engine.Common
             bool intersects = Test(obj, ref ray);
             if (!intersects || !testGeom)
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return intersects;
             }
 
@@ -113,20 +108,18 @@ namespace Engine.Common
         {
             if (!PickAll(obj, ref ray, out var results))
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return false;
             }
 
-            //Returns the first result of the results list
-            result = results.FirstOrDefault(new PickingResult<T>
+            if (results.Length == 0)
             {
-                Distance = float.MaxValue,
-            });
+                result = PickingResult<T>.Empty;
+                return true;
+            }
 
+            //Returns the first result of the results list
+            result = results[0];
             return true;
         }
 
@@ -147,21 +140,11 @@ namespace Engine.Common
                     continue;
                 }
 
-                result = new PickingResult<T>
-                {
-                    Position = pos,
-                    Primitive = intersectable,
-                    Distance = d,
-                };
-
+                result = new PickingResult<T>(pos, d, intersectable);
                 return true;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<T>.Empty;
             return false;
         }
         /// <summary>
@@ -201,18 +184,10 @@ namespace Engine.Common
                     k += 0.0001f;
                 }
 
-                PickingResult<T> pick = new()
-                {
-                    Position = pos,
-                    Primitive = intersectable,
-                    Distance = d,
-                };
-
-                pickList.Add(k, pick);
+                pickList.Add(k, new(pos, d, intersectable));
             }
 
             results = [.. pickList.Values];
-
             return results.Length != 0;
         }
         /// <summary>
@@ -227,17 +202,12 @@ namespace Engine.Common
         {
             if (!PickAllFromlist(collection, ref ray, out var results))
             {
-                result = new PickingResult<T>
-                {
-                    Distance = float.MaxValue,
-                };
-
+                result = PickingResult<T>.Empty;
                 return false;
             }
 
             //Returns the first result of the results list
             result = results[0];
-
             return true;
         }
     }

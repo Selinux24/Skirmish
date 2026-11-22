@@ -97,7 +97,7 @@ namespace Engine.PhysicsTests
             {
                 var contact = contactsPln[i];
 
-                var expectedContact = contactsTri.FirstOrDefault(c => c.Position == contact.Position);
+                var expectedContact = Array.Find(contactsTri, c => c.Position == contact.Position);
                 if (expectedContact == null)
                 {
                     continue;

@@ -319,19 +319,19 @@ namespace Engine.BuiltIn.Components.Ground
             await base.ReadAssets(description);
 
             // Generate model content
-            var contentList = await Description.ReadContentData();
-            if (!contentList.Any())
+            var content = await Description.ReadContentData();
+            if (content.Length == 0)
             {
-                throw new ArgumentNullException(nameof(description));
+                throw new ArgumentException("Must specify at least one content in the list.", nameof(description));
             }
 
-            content = contentList.First();
+            this.content = content[0];
 
             // Generate quadtree
-            GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
+            GroundPickingQuadtree = Description.ReadQuadTree(this.content.GetTriangles());
 
             // Retrieve lights from content
-            Lights = [.. content.CreateLights()];
+            Lights = [.. this.content.CreateLights()];
 
             await IntializePatches();
         }
@@ -380,7 +380,7 @@ namespace Engine.BuiltIn.Components.Ground
                 return true;
             }
 
-            var nodes = GroundPickingQuadtree.FindNodesInVolume(volume).ToArray();
+            var nodes = GroundPickingQuadtree.FindNodesInVolume(volume);
             if (nodes.Length == 0)
             {
                 return true;

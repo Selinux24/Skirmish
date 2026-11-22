@@ -116,7 +116,7 @@ namespace Engine.Content.FmtColladaTests
             var sph = model[0].GetBoundingSphere(true);
 
             var content = await tDesc.Content.ReadContentData();
-            var res = await content.First().CreateGeometry(true, true, null);
+            var res = await content[0].CreateGeometry(true, true, null);
             var points1 = res[treeMeshName][treeBarkName].GetPoints();
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = [.. points1, .. points2];

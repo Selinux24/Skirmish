@@ -72,7 +72,7 @@ namespace Engine.Animation
         {
             foreach (var candidate in animations)
             {
-                if (candidate.Joint == jointName)
+                if (candidate.JointName == jointName)
                 {
                     animation = candidate;
                     return true;
