@@ -1439,9 +1439,7 @@ namespace TerrainSamples.SceneRts
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            var pos = Camera.Position;
-            var posNext = Camera.GetNextPosition();
-            if (Walk(walkerAgentType, ref pos, ref posNext, true, out var walkerPos))
+            if (Walk(walkerAgentType, Camera.Position, Camera.GetNextPosition(), true, out var walkerPos))
             {
                 Camera.Goto(walkerPos);
             }

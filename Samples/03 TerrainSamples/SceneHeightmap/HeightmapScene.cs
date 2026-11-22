@@ -1370,8 +1370,7 @@ namespace TerrainSamples.SceneHeightmap
                 soldier.Manipulator.MoveBackward(gameTime, delta);
             }
 
-            var soldierPos = soldier.Manipulator.Position;
-            if (Walk(agent, ref prevPosition, ref soldierPos, false, out var finalPosition))
+            if (Walk(agent, prevPosition, soldier.Manipulator.Position, false, out var finalPosition))
             {
                 soldier.Manipulator.SetPosition(finalPosition);
             }

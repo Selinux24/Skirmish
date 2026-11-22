@@ -1124,7 +1124,7 @@ namespace TerrainSamples.SceneNavMeshTest
 
             lastPosition = r.PickingResult.Position;
 
-            bool walkable = IsWalkable(agent, ref lastPosition, agent.MaxClimb, out var nearest);
+            bool walkable = IsWalkable(agent, lastPosition, agent.MaxClimb, out var nearest);
             var pColor = walkable ? walkableColor : unwalkableColor;
 
             if (nearest.HasValue)

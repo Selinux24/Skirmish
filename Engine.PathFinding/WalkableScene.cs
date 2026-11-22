@@ -67,7 +67,7 @@ namespace Engine.PathFinding
         /// <param name="position">Test position</param>
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private static Vector3 GetPositionWalkable(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, ref Vector3 position, bool adjustHeight)
+        private static Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
         {
             var finalPosition = position;
 
@@ -405,7 +405,7 @@ namespace Engine.PathFinding
         /// <param name="distanceThreshold">Distance threshold</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             if (NavigationGraph == null)
             {
@@ -425,7 +425,7 @@ namespace Engine.PathFinding
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <param name="finalPosition">Returns the final position if exists</param>
         /// <returns>Returns true if final position found</returns>
-        public bool Walk(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, bool adjustHeight, out Vector3 finalPosition)
+        public bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, bool adjustHeight, out Vector3 finalPosition)
         {
             finalPosition = prevPosition;
 
@@ -447,9 +447,8 @@ namespace Engine.PathFinding
                 float offset = agent.Height;
                 newFeetPosition.Y -= offset;
 
-                results = [.. results
-                    .Where(r => Vector3.Distance(r.Position, newFeetPosition) < offset)
-                    .OrderBy(r => r.Distance)];
+                results = Array.FindAll(results, r => Vector3.Distance(r.Position, newFeetPosition) < offset);
+                if (results.Length > 1) Array.Sort(results, (r1, r2) => r1.Distance.CompareTo(r2.Distance));
             }
 
             var positions = results.Select(r => r.Position).ToArray();
@@ -457,17 +456,16 @@ namespace Engine.PathFinding
 
             for (int i = 0; i < positions.Length; i++)
             {
-                if (IsWalkable(agent, ref positions[i], threshold, out var nearest))
+                if (IsWalkable(agent, positions[i], threshold, out var nearest))
                 {
-                    finalPosition = GetPositionWalkable(agent, ref prevPosition, ref newPosition, ref positions[i], adjustHeight);
+                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, positions[i], adjustHeight);
 
                     return true;
                 }
                 else if (nearest.HasValue)
                 {
                     //Not walkable but nearest position found
-                    var nearestPosition = nearest.Value;
-                    finalPosition = GetPositionNonWalkable(agent, ref prevPosition, ref newPosition, ref nearestPosition, adjustHeight);
+                    finalPosition = GetPositionNonWalkable(agent, prevPosition, newPosition, nearest.Value, adjustHeight);
 
                     return true;
                 }
@@ -484,7 +482,7 @@ namespace Engine.PathFinding
         /// <param name="position">Test position</param>
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionNonWalkable(AgentType agent, ref Vector3 prevPosition, ref Vector3 newPosition, ref Vector3 position, bool adjustHeight)
+        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
         {
             //Find nearest ground position
             Vector3 finalPosition;
