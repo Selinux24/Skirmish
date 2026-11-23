@@ -67,10 +67,8 @@ namespace Engine.Common
         /// <returns>Returns the new registerd descriptor</returns>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
-            uint offset;
-
             //Store current data index as descriptor offset
-            offset = (uint)data.Count;
+            uint offset = (uint)data.Count;
 
             //Add items to data list
             data.AddRange(indices);

@@ -128,10 +128,8 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<T> vertices)
         {
-            uint offset;
-
             //Store current data index as descriptor offset
-            offset = (uint)data.Count;
+            uint offset = (uint)data.Count;
             //Add items to data list
             data.AddRange(vertices);
 
