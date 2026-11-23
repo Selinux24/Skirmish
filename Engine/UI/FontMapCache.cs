@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Engine.Mathematics;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Engine.UI
@@ -28,7 +29,8 @@ namespace Engine.UI
         /// <returns>Returns the font map</returns>
         public static FontMap<T> Get(string fontName)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontName));
+            return gCache
+                .FirstOrDefault(f => f != null && string.Equals(f.FontName, fontName));
         }
         /// <summary>
         /// Gets a font map by family, size and style
@@ -39,7 +41,8 @@ namespace Engine.UI
         /// <returns>Returns the font map</returns>
         public static FontMap<T> Get(string fontFamily, float size, FontMapStyles style)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && Helper.NearEqual(f.FontSize, size) && f.FontStyle == style);
+            return gCache
+                .FirstOrDefault(f => f != null && string.Equals(f.FontName, fontFamily) && MathUtils.NearEqual(f.FontSize, size) && f.FontStyle == style);
         }
 
         /// <summary>

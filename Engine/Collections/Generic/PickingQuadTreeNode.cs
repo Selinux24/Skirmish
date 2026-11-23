@@ -194,13 +194,13 @@ namespace Engine.Collections.Generic
         /// <inheritdoc/>
         public Vector3 Center { get => BoundingBox.Center; }
         /// <inheritdoc/>
-        public IEnumerable<PickingQuadTreeNode<T>> Children { get => children.AsReadOnly(); }
+        public PickingQuadTreeNode<T>[] Children { get => [.. children.AsReadOnly()]; }
         /// <inheritdoc/>
         public bool IsLeaf { get => children.Count == 0; }
         /// <summary>
         /// Node item collection
         /// </summary>
-        public IEnumerable<T> Items { get => items.AsReadOnly(); }
+        public T[] Items { get => [.. items.AsReadOnly()]; }
 
         /// <inheritdoc/>
         public override string ToString()

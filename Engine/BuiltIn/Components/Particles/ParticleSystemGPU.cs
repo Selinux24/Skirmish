@@ -171,7 +171,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <remarks>The maximum length of the buffer is 5000</remarks>
         protected uint GetBufferLength()
         {
-            uint length = (uint)(MaxConcurrentParticles * (Helper.IsZero(Emitter.Duration) ? 60 : Emitter.Duration));
+            uint length = (uint)(MaxConcurrentParticles * (MathUtils.IsZero(Emitter.Duration) ? 60 : Emitter.Duration));
 
             return Math.Min(length, 5000);
         }

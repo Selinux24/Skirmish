@@ -2,8 +2,6 @@
 using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.BuiltIn.Components.Models
 {
@@ -93,7 +91,7 @@ namespace Engine.BuiltIn.Components.Models
         /// <summary>
         /// Gets the current instance lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> Lights { get; private set; } = [];
+        public ISceneLight[] Lights { get; private set; } = [];
         /// <inheritdoc/>
         public int ModelPartCount
         {
@@ -304,19 +302,19 @@ namespace Engine.BuiltIn.Components.Models
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickNearest(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return RayPickingHelper.PickNearest(this, ray, out result);
+            return RayPickingHelper.PickNearest(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickFirst(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return RayPickingHelper.PickFirst(this, ray, out result);
+            return RayPickingHelper.PickFirst(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
+        public bool PickAll(ref PickingRay ray, out PickingResult<Triangle>[] results)
         {
-            return RayPickingHelper.PickAll(this, ray, out results);
+            return RayPickingHelper.PickAll(this, ref ray, out results);
         }
 
         /// <inheritdoc/>
@@ -336,7 +334,7 @@ namespace Engine.BuiltIn.Components.Models
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public Vector3[] GetPoints(bool refresh = false)
         {
             return geometryHelper.GetPoints(
                 model.GetDrawingData(model.GetLODMinimum()),
@@ -345,7 +343,7 @@ namespace Engine.BuiltIn.Components.Models
                 refresh);
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetGeometry(bool refresh = false)
+        public Triangle[] GetGeometry(bool refresh = false)
         {
             return geometryHelper.GetTriangles(
                 model.GetDrawingData(model.GetLODMinimum()),
@@ -354,7 +352,7 @@ namespace Engine.BuiltIn.Components.Models
                 refresh);
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
@@ -365,18 +363,21 @@ namespace Engine.BuiltIn.Components.Models
 
             if (hull.HasFlag(PickingHullTypes.Coarse))
             {
-                return Triangle.ComputeTriangleList(boundsHelper.GetOrientedBoundingBox(Manipulator));
+                return GeometryUtil.ComputeTriangleList(boundsHelper.GetOrientedBoundingBox(Manipulator));
             }
 
             if (hull.HasFlag(PickingHullTypes.Hull))
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
-                if (drawingData?.HullMesh?.Any() ?? false)
+                int length = drawingData?.HullMesh?.Length ?? 0;
+                if (length > 0)
                 {
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
-
-                return GetGeometry(refresh);
+                else
+                {
+                    return GetGeometry(refresh);
+                }
             }
 
             if (hull.HasFlag(PickingHullTypes.Geometry))
@@ -399,16 +400,11 @@ namespace Engine.BuiltIn.Components.Models
                 if (Collision.SphereIntersectsMesh(ref sph, mesh, out var res))
                 {
                     result = res;
-
                     return true;
                 }
             }
 
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
+            result = PickingResult<Triangle>.Empty;
             return false;
         }
         /// <inheritdoc/>
@@ -434,7 +430,7 @@ namespace Engine.BuiltIn.Components.Models
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
 
-            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
+            return new IntersectionVolumeMesh([.. GetGeometry(GeometryTypes.Picking)]);
         }
 
         /// <inheritdoc/>

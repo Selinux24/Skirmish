@@ -90,7 +90,7 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         public void UpdateInputEditor(IGameTime gameTime)
         {
             var pRay = scene.GetPickingRay(PickingHullTypes.Geometry);
-            if (!scene.PickFirst<Triangle>(pRay, SceneObjectUsages.Ground, out var hit))
+            if (!scene.PickFirst<Triangle>(ref pRay, SceneObjectUsages.Ground, out var hit))
             {
                 return;
             }
@@ -233,12 +233,12 @@ namespace AISamples.SceneCWRVirtualWorld.Editors
         {
             var tp = new Vector3(point.X, height + hDelta, point.Y);
             var t = GeometryUtil.CreateCircle(Topology.TriangleList, tp, strokeSize, 32);
-            drawer.AddPrimitives(tColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(tColor, GeometryUtil.ComputeTriangleList(t));
         }
         private static void DrawSegment(Segment2 segment, float height, float lineThickness, GeometryColorDrawer<Triangle> drawer, Color4 lineColor)
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, segment.P1, segment.P2, lineThickness, height + hDelta);
-            drawer.AddPrimitives(lineColor, Triangle.ComputeTriangleList(t));
+            drawer.AddPrimitives(lineColor, GeometryUtil.ComputeTriangleList(t));
         }
     }
 }

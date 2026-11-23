@@ -1,5 +1,4 @@
 ﻿using Engine.Mathematics;
-using System.Collections.Generic;
 
 namespace Engine.Collections
 {
@@ -23,12 +22,12 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0);
+        BoundingBox[] GetBoundingBoxes(int maxDepth = 0);
         /// <summary>
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodel</returns>
-        IEnumerable<T> GetLeafNodes();
+        T[] GetLeafNodes();
 
         /// <summary>
         /// Gets the closest node to the specified position
@@ -41,6 +40,6 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="volume">Bounding volume</param>
         /// <returns>Returns the nodes contained into the volume</returns>
-        IEnumerable<T> FindNodesInVolume(ICullingVolume volume);
+        T[] FindNodesInVolume(ICullingVolume volume);
     }
 }

@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Engine.Mathematics;
 
 namespace IntermediateSamples.SceneSmoothTransitions
 {
-    using Engine.Mathematics;
-
     class SteeringAgent : ISteeringAgent
     {
-        private Vector3 acceleration;
+        private Vector3 acceleration = Vector3.Zero;
+        private Vector3[] path = [];
 
         public Vector3 Position { get; set; }
         public Vector3 Velocity { get; private set; }
@@ -21,7 +19,6 @@ namespace IntermediateSamples.SceneSmoothTransitions
         public ISteeringAgent Target { get; private set; }
         public float ArrivalRadius { get; private set; }
 
-        public IEnumerable<Vector3> Path { get; private set; }
         public float PathRadius { get; private set; }
 
         private Vector3 DoSeek(Vector3 target, bool arrival = false)
@@ -57,7 +54,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
         {
             return DoPursue(target) * -1f;
         }
-        private Vector3 DoFollow(IEnumerable<Vector3> path, float pathRadius)
+        private Vector3 DoFollow(Vector3[] path, float pathRadius)
         {
             // Step 1 calculate future position
             var future = Velocity;
@@ -65,7 +62,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
             future += Position;
 
             // Step 2 Is future on path?
-            var target = FindProjection(path.First(), future, path.Last());
+            var target = FindProjection(path[0], future, path[^1]);
 
             var d = Vector3.Distance(future, target);
             if (d > pathRadius)
@@ -151,14 +148,14 @@ namespace IntermediateSamples.SceneSmoothTransitions
             Target = agent;
             Behavior = SteeringBehaviors.Evade;
         }
-        public void Follow(IEnumerable<Vector3> path, float pathRadius)
+        public void Follow(Vector3[] path, float pathRadius)
         {
-            if ((path?.Count() ?? 0) < 2)
+            if (path == null || path.Length < 2)
             {
                 return;
             }
 
-            Path = path;
+            this.path = path;
             PathRadius = pathRadius;
             Behavior = SteeringBehaviors.FollowPath;
         }
@@ -178,7 +175,7 @@ namespace IntermediateSamples.SceneSmoothTransitions
                 SteeringBehaviors.Pursue => DoPursue(Target),
                 SteeringBehaviors.Evade => DoEvade(Target),
                 SteeringBehaviors.Arrival => DoSeek(Target.Position, true),
-                SteeringBehaviors.FollowPath => DoFollow(Path, PathRadius),
+                SteeringBehaviors.FollowPath => DoFollow(path, PathRadius),
                 _ => DoSeek(Target.Position),
             };
             acceleration += force;

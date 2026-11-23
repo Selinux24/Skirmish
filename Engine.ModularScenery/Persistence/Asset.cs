@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
-    using Engine.Common;
-    using Engine.Mathematics;
-
     /// <summary>
     /// Asset map class
     /// </summary>
@@ -22,11 +20,11 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Assets list
         /// </summary>
-        public IEnumerable<AssetReference> References { get; set; } = [];
+        public AssetReference[] References { get; set; } = [];
         /// <summary>
         /// Connections list
         /// </summary>
-        public IEnumerable<AssetConnection> Connections { get; set; } = [];
+        public AssetConnection[] Connections { get; set; } = [];
 
         /// <summary>
         /// Gets the instance transforms dictionary
@@ -40,10 +38,12 @@ namespace Engine.Modular.Persistence
 
             foreach (var assetName in assetNames)
             {
-                var transforms = References
-                    .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                    .Select(a => GeometryUtil.Transformation(a.Position, a.Rotation, a.Scale))
-                    .ToArray();
+                var refs = Array.FindAll(References, a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                if (refs.Length == 0) continue;
+
+                var transforms = new Matrix4x4[refs.Length];
+                int idx = 0;
+                Array.ForEach(refs, a => transforms[idx++] = Matrix4x4.Transformation(a.Position, a.Rotation, a.Scale));
 
                 res.Add(assetName, transforms);
             }
@@ -54,7 +54,7 @@ namespace Engine.Modular.Persistence
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Name}. {References?.Count() ?? 0} parts. {Connections?.Count() ?? 0} connections.";
+            return $"{Name}. {References?.Length ?? 0} parts. {Connections?.Length ?? 0} connections.";
         }
     }
 }

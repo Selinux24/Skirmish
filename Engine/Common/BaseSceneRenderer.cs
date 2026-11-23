@@ -528,7 +528,7 @@ namespace Engine.Common
 
             //Update active components
             var updatables = Scene.Components.Get<IUpdatable>(c => c.Active);
-            if (updatables.Any())
+            if (updatables.Length != 0)
             {
                 updatables
                     .AsParallel()
@@ -1326,8 +1326,8 @@ namespace Engine.Common
         /// <param name="passIndex">Pass index</param>
         protected void DoPostProcessing(RenderTargetParameters renderTarget, RenderPass renderPass, int passIndex)
         {
-            var passEffects = postProcessingEffects.Where(ppe => ppe.RenderPass == renderPass);
-            if (!passEffects.Any())
+            var passEffects = postProcessingEffects.FindAll(ppe => ppe.RenderPass == renderPass);
+            if (passEffects.Count == 0)
             {
                 return;
             }
@@ -1341,7 +1341,7 @@ namespace Engine.Common
                 return;
             }
 
-            DrawPostProcessing(dc, renderTarget, passEffects.First());
+            DrawPostProcessing(dc, renderTarget, passEffects[0]);
 
             QueueCommand(dc.FinishCommandList($"{nameof(DoPostProcessing)} {renderPass}"), passIndex);
         }
@@ -1372,7 +1372,8 @@ namespace Engine.Common
             }
 
             //Gets the last used target as source texture for the post-processing shader
-            var source = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
+            var textures = GetTargetTextures(renderTarget.Target);
+            var source = textures.Length > 0 ? textures[0] : default;
 
             var graphics = Scene.Game.Graphics;
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
@@ -1498,7 +1499,7 @@ namespace Engine.Common
 
             uint texWidth = GetTextureSize(values.Count);
 
-            materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
+            materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", [.. values], texWidth);
             materialPaletteWidth = texWidth;
         }
         /// <summary>
@@ -1514,6 +1515,13 @@ namespace Engine.Common
                 .Select(c => c.SkinningData)
                 .ToArray();
 
+            if (skData.Length == 0)
+            {
+                animationPalette = null;
+                animationPaletteWidth = uint.MaxValue;
+                return;
+            }
+
             List<ISkinningData> addedSks = [];
 
             List<Vector4> values = [];
@@ -1526,7 +1534,7 @@ namespace Engine.Common
                 {
                     var skV = sk.Pack();
 
-                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
+                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Length);
 
                     values.AddRange(skV);
 
@@ -1542,7 +1550,7 @@ namespace Engine.Common
 
             uint texWidth = GetTextureSize(values.Count);
 
-            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", [.. values], texWidth);
             animationPaletteWidth = texWidth;
         }
         /// <summary>
@@ -1587,7 +1595,7 @@ namespace Engine.Common
         private void AssignLightShadowMapsPoint()
         {
             var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (!pointLights.Any())
+            if (pointLights.Length == 0)
             {
                 return;
             }
@@ -1613,7 +1621,7 @@ namespace Engine.Common
         private void AssignLightShadowMapsSpot()
         {
             var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (!spotLights.Any())
+            if (spotLights.Length == 0)
             {
                 return;
             }
@@ -1717,15 +1725,15 @@ namespace Engine.Common
                 return;
             }
 
-            var passEffects = postProcessingEffects.Where(ppe => ppe.RenderPass == RenderPass.Final);
-            if (passEffects.Any())
+            var passEffects = postProcessingEffects.FindAll(ppe => ppe.RenderPass == RenderPass.Final);
+            if (passEffects.Count != 0)
             {
                 //Final post-processing in the result target
                 var rtpp = new RenderTargetParameters
                 {
                     Target = source,
                 };
-                DrawPostProcessing(dc, rtpp, passEffects.First());
+                DrawPostProcessing(dc, rtpp, passEffects[0]);
             }
 
             //Draw from source target to screen
@@ -1750,8 +1758,11 @@ namespace Engine.Common
             dc.SetRasterizerState(graphics.GetRasterizerDefault());
             dc.SetBlendState(graphics.GetBlendDefault());
 
-            var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
-            var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
+            var textures1 = GetTargetTextures(target1);
+            var textures2 = GetTargetTextures(target2);
+
+            var texture1 = textures1.Length > 0 ? textures1[0] : default;
+            var texture2 = textures2.Length > 0 ? textures2[0] : default;
 
             processingDrawerFinal.Combine(dc, texture1, texture2);
         }
@@ -1774,7 +1785,8 @@ namespace Engine.Common
             dc.SetRasterizerState(graphics.GetRasterizerDefault());
             dc.SetBlendState(graphics.GetBlendDefault());
 
-            var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
+            var textures = GetTargetTextures(sourceTarget);
+            var texture = textures.Length > 0 ? textures[0] : default;
 
             processingDrawerFinal.Draw(dc, texture, 0, null);
         }

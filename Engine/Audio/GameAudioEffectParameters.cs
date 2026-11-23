@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Audio
 {
@@ -68,7 +69,7 @@ namespace Engine.Audio
         /// Gets or sets the emitter inner radius angle
         /// </summary>
         /// <remarks>From 0 to PI/4. PI/4 by default</remarks>
-        public float EmitterInnerRadiusAngle { get; set; } = Helper.PiOver4;
+        public float EmitterInnerRadiusAngle { get; set; } = MathUtils.PiOver4;
         /// <summary>
         /// Gets or sets the emitter volume curve
         /// </summary>

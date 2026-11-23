@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Engine.Mathematics;
+using System;
 using System.Linq;
 
 namespace Engine.Animation
@@ -20,19 +20,21 @@ namespace Engine.Animation
         /// <summary>
         /// Animation collection
         /// </summary>
-        public IEnumerable<JointAnimation> Animations { get; private set; }
+        public JointAnimation[] Animations { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Clip name</param>
         /// <param name="animations">Animation list</param>
-        public AnimationClip(string name, IEnumerable<JointAnimation> animations)
+        public AnimationClip(string name, JointAnimation[] animations)
         {
+            ArgumentNullException.ThrowIfNull(animations);
+
             Name = name;
             Animations = animations;
 
-            if (animations?.Any() == true)
+            if (animations.Length != 0)
             {
                 Duration = animations.Max(a => a.Duration);
             }
@@ -43,8 +45,8 @@ namespace Engine.Animation
         {
             return
                 Name == other.Name &&
-                Helper.NearEqual(Duration, other.Duration) &&
-                Helper.CompareEnumerables(Animations, other.Animations);
+                MathUtils.NearEqual(Duration, other.Duration) &&
+                Helper.CompareArrays(Animations, other.Animations);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

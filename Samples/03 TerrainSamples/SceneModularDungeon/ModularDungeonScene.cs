@@ -184,7 +184,7 @@ namespace TerrainSamples.SceneModularDungeon
                 var from = rat.Manipulator.Position;
                 var to = ratController.Last;
 
-                CalcPath(ratAgentType, from, to);
+                CalcPath(ratAgentType, ref from, ref to);
             }
 
             debugDrawers.DrawGraph();
@@ -462,9 +462,9 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesLocalFolder, dungeonConfigFile));
 
-            List<ContentData> contentData = [.. await ReadAssetFiles(config.AssetFiles), .. await ReadAssets(config.Assets)];
+            ContentData[] contentData = [.. await ReadAssetFiles(config.AssetFiles), .. await ReadAssets(config.Assets)];
 
-            var content = contentData.Select(c => new ContentDescription { ContentData = c });
+            ContentDescription[] content = [.. contentData.Select(c => new ContentDescription { ContentData = c })];
 
             var dn = Dungeon.Load(dungeonFileName);
             var assetsMap = DungeonCreator.CreateAssets(dn, config);
@@ -480,27 +480,27 @@ namespace TerrainSamples.SceneModularDungeon
                 Levels = levelsMap,
             };
         }
-        private static async Task<IEnumerable<ContentData>> ReadAssetFiles(IEnumerable<string> assets)
+        private static async Task<ContentData[]> ReadAssetFiles(string[] assets)
         {
-            if (assets?.Any() != true)
+            if (assets == null || assets.Length == 0)
             {
                 return [];
             }
 
             var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesLocalFolder, a)));
 
-            return contentData.SelectMany(c => c);
+            return [.. contentData.SelectMany(c => c)];
         }
-        private static async Task<IEnumerable<ContentData>> ReadAssets(IEnumerable<ContentDataFile> assets)
+        private static async Task<ContentData[]> ReadAssets(ContentDataFile[] assets)
         {
-            if (assets?.Any() != true)
+            if (assets == null || assets.Length == 0)
             {
                 return [];
             }
 
             var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesLocalFolder, a)));
 
-            return contentData.SelectMany(c => c);
+            return [.. contentData.SelectMany(c => c)];
         }
         private async Task InitializeNPCs()
         {
@@ -645,7 +645,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private void TriggerEnds(object sender, TriggerEventArgs e)
         {
-            if (!e.Items.Any())
+            if (e.Items.Length == 0)
             {
                 return;
             }
@@ -666,7 +666,7 @@ namespace TerrainSamples.SceneModularDungeon
                     if (item.CurrentState == "close")
                     {
                         var obb = o.Item.GetOrientedBoundingBox();
-                        o.Index = AddObstacle(obb);
+                        o.Index = AddObstacle(ref obb);
                         o.Bounds = obb;
                     }
                 }
@@ -801,12 +801,12 @@ namespace TerrainSamples.SceneModularDungeon
             }
 
             var tris = selectedItem.Instance.GetGeometry();
-            if (tris.Any())
+            if (tris.Length != 0)
             {
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
 
-                Game.Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
+                Game.Logger.WriteDebug(this, $"Processing {tris.Length} triangles in the selected item drawer");
 
                 selectedItemDrawer.SetPrimitives(sItemColor, tris);
                 selectedItemDrawer.Visible = true;
@@ -847,7 +847,7 @@ namespace TerrainSamples.SceneModularDungeon
 
                 rat.Manipulator.SetPosition(from);
 
-                if (CalcPath(ratAgentType, from, to))
+                if (CalcPath(ratAgentType, ref from, ref to))
                 {
                     ratController.UpdateManipulator(gameTime, rat.Manipulator);
 
@@ -861,9 +861,9 @@ namespace TerrainSamples.SceneModularDungeon
                 debugDrawers.DrawModel(rat);
             }
         }
-        private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)
+        private bool CalcPath(AgentType agent, ref Vector3 from, ref Vector3 to)
         {
-            var path = FindPath(agent, from, to);
+            var path = FindPath(agent, ref from, ref to);
             if (!(path?.Count > 0))
             {
                 return false;
@@ -908,7 +908,7 @@ namespace TerrainSamples.SceneModularDungeon
                 })
                 .Where(i =>
                 {
-                    if (i.Instance.PickNearest(ray, out _))
+                    if (i.Instance.PickNearest(ref ray, out _))
                     {
                         return true;
                     }
@@ -946,7 +946,7 @@ namespace TerrainSamples.SceneModularDungeon
         }
         private static float CalcItemPickingDistance(PickingRay ray, Item item)
         {
-            if (item.Instance.PickNearest(ray, out var res))
+            if (item.Instance.PickNearest(ref ray, out var res))
             {
                 return res.Distance;
             }
@@ -1004,7 +1004,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
-                .Where(t => t.Actions.Any())
+                .Where(t => t.Actions.Length != 0)
                 .ToArray();
 
             if (triggers.Length != 0)
@@ -1018,9 +1018,9 @@ namespace TerrainSamples.SceneModularDungeon
         private void SetSelectedItemLight(Item item)
         {
             var lights = item.Instance.Lights;
-            if (lights.Any())
+            if (lights.Length != 0)
             {
-                var msg = string.Format("Press space to {0} the light...", lights.First().Enabled ? "turn off" : "turn on");
+                var msg = $"Press space to {(lights[0].Enabled ? "turn off" : "turn on")} the light...";
 
                 PrepareMessage(true, msg);
             }
@@ -1066,7 +1066,7 @@ namespace TerrainSamples.SceneModularDungeon
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
-                .Where(t => t.Actions.Any())
+                .Where(t => t.Actions.Length != 0)
                 .ToArray();
 
             if (triggers.Length == 0)
@@ -1088,9 +1088,9 @@ namespace TerrainSamples.SceneModularDungeon
                 bool enabled = false;
 
                 var lights = item.Instance.Lights;
-                if (lights.Any())
+                if (lights.Length != 0)
                 {
-                    enabled = !lights.First().Enabled;
+                    enabled = !lights[0].Enabled;
 
                     foreach (var light in lights)
                     {
@@ -1348,7 +1348,7 @@ namespace TerrainSamples.SceneModularDungeon
             for (int i = 0; i < human.InstanceCount; i++)
             {
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29);
-                human[i].Manipulator.SetRotation(-Helper.PiOver2, 0, 0);
+                human[i].Manipulator.SetRotation(-MathUtils.PiOver2, 0, 0);
 
                 human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
@@ -1398,7 +1398,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 var obb = item.GetOrientedBoundingBox();
 
-                int index = AddObstacle(obb);
+                int index = AddObstacle(ref obb);
                 if (index >= 0)
                 {
                     obstacles.Add(new ObstacleInfo { Index = index, Item = item, Bounds = obb });
@@ -1413,7 +1413,7 @@ namespace TerrainSamples.SceneModularDungeon
                 var center = human[i].Manipulator.Position + (Vector3.Up * h * 0.5f);
                 var bc = new BoundingCylinder(center, r, h);
 
-                int index = AddObstacle(bc);
+                int index = AddObstacle(ref bc);
                 if (index >= 0)
                 {
                     obstacles.Add(new ObstacleInfo { Index = index, Item = human[i], Bounds = bc });

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -245,7 +244,7 @@ namespace Logger
         /// Reads a list of entries from the log
         /// </summary>
         /// <param name="count">Number of entries, from the last one</param>
-        public IEnumerable<LogEntry> Read(int count = 0)
+        public LogEntry[] Read(int count = 0)
         {
             return Read(DefaultFilter, count);
         }
@@ -254,7 +253,7 @@ namespace Logger
         /// </summary>
         /// <param name="logLevel">Log level</param>
         /// <param name="count">Number of entries, from the last one</param>
-        public IEnumerable<LogEntry> Read(LogLevel logLevel, int count = 0)
+        public LogEntry[] Read(LogLevel logLevel, int count = 0)
         {
             return Read(l => l.LogLevel >= logLevel, count);
         }
@@ -263,21 +262,19 @@ namespace Logger
         /// </summary>
         /// <param name="predicate">Filter predicate function</param>
         /// <param name="count">Number of entries, from the last one</param>
-        public IEnumerable<LogEntry> Read(Func<LogEntry, bool> predicate, int count = 0)
+        public LogEntry[] Read(Func<LogEntry, bool> predicate, int count = 0)
         {
-            var logCopy = log.ToArray();
-            logCopy = logCopy
-                .Skip(logIndex).Take(logStackSize - logIndex)
-                .Concat(logCopy.Take(logIndex))
-                .Where(l => l != null)
-                .ToArray();
+            var logEntries = log
+                .Skip(logIndex)
+                .Take(logStackSize - logIndex)
+                .Concat(log.Take(logIndex))
+                .Where(l => l != null && (predicate?.Invoke(l) ?? true));
 
-            var logEntries = predicate == null ? logCopy : logCopy.Where(predicate).ToArray();
+            int entryCount = logEntries.Count();
+            int take = count <= 0 ? entryCount : Math.Min(count, entryCount);
+            int skip = Math.Max(0, entryCount - take);
 
-            int take = count <= 0 ? logEntries.Length : Math.Min(count, logEntries.Length);
-            int skip = Math.Max(0, logEntries.Length - take);
-
-            return logEntries.Skip(skip).Take(take).ToArray();
+            return [.. logEntries.Skip(skip).Take(take)];
         }
         /// <summary>
         /// Gets the last maxLines lines of the log
@@ -316,26 +313,26 @@ namespace Logger
         /// <param name="fncFormat">Log line format function</param>
         /// <param name="maxLines">Maximum number of lines</param>
         /// <param name="reverse">Reverse entry order</param>
-        private string ReadText(IEnumerable<LogEntry> logEntries, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
+        private string ReadText(LogEntry[] logEntries, Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
         {
-            if (logEntries?.Any() != true)
+            if (logEntries.Length == 0)
             {
                 return string.Empty;
             }
 
             if (reverse)
             {
-                logEntries = logEntries.Reverse();
+                Array.Reverse(logEntries);
             }
 
             var fmt = fncFormat ?? DefaultFormatter;
 
             StringBuilder logText = new();
-            int lineCount = logEntries.Count();
+            int lineCount = logEntries.Length;
             lineCount = maxLines > 0 ? Math.Min(lineCount, maxLines) : lineCount;
             for (int i = 0; i < lineCount; i++)
             {
-                logText.Append(fmt(logEntries.ElementAt(i)));
+                logText.Append(fmt(logEntries[i]));
             }
 
             return logText.ToString();

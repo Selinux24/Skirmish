@@ -1,5 +1,4 @@
 ﻿using Engine.Content;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Ground
@@ -69,7 +68,7 @@ namespace Engine.BuiltIn.Components.Ground
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<ContentData>> ReadContentData()
+        public override async Task<ContentData[]> ReadContentData()
         {
             if (Heightmap != null)
             {

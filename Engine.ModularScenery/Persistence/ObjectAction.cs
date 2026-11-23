@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine.Modular.Persistence
 {
     /// <summary>
@@ -26,6 +25,6 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Triggered item list
         /// </summary>
-        public IEnumerable<ObjectActionItem> Items { get; set; } = [];
+        public ObjectActionItem[] Items { get; set; } = [];
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Tween
 {
@@ -27,8 +28,8 @@ namespace Engine.Tween
     /// </remarks>
     public static class ScaleFuncs
     {
-        private const float Pi = Helper.Pi;
-        private const float PiOver2 = Helper.PiOver2;
+        private const float Pi = MathUtils.Pi;
+        private const float PiOver2 = MathUtils.PiOver2;
 
         /// <summary>
         /// A linear progress scale function.

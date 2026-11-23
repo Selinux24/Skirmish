@@ -16,7 +16,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="mesh">Navigation mesh</param>
         /// <returns>Returns a list of graph nodes</returns>
-        public static List<GraphNode> FindAll(NavMesh mesh)
+        public static GraphNode[] FindAll(NavMesh mesh)
         {
             List<GraphNode> nodes = [];
 
@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return nodes;
+            return [.. nodes];
         }
         /// <summary>
         /// Gets a graph nodes from tile
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="mesh">Navigation mesh</param>
         /// <param name="tile">Tile</param>
         /// <returns>Returns a list of graph nodes</returns>
-        private static List<GraphNode> FindAllNodes(NavMesh mesh, MeshTile tile)
+        private static GraphNode[] FindAllNodes(NavMesh mesh, MeshTile tile)
         {
             List<GraphNode> nodes = [];
 
@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation
                 TotalCost = 1,
             });
 
-            return nodes;
+            return [.. nodes];
         }
         /// <summary>
         /// Finds the graph node which contains the specified point, from a navigation mesh
@@ -163,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation
             return new()
             {
                 Id = tileNum,
-                Triangles = tris,
+                Triangles = [.. tris],
                 TotalCost = 1,
             };
         }
@@ -184,23 +184,23 @@ namespace Engine.PathFinding.RecastNavigation
                     center += pos;
                 }
 
-                return center / Math.Max(1, Triangles.Count());
+                return center / Math.Max(1, Triangles.Length);
             }
         }
         /// <summary>
         /// Node triangle list
         /// </summary>
-        public IEnumerable<Triangle> Triangles { get; private set; }
+        public Triangle[] Triangles { get; private set; }
 
         /// <inheritdoc/>
-        public bool Contains(Vector3 point)
+        public bool Contains(ref Vector3 point)
         {
             return Collision.MeshIntersectsPoint(Triangles, ref point);
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints()
+        public Vector3[] GetPoints()
         {
-            return Triangles.SelectMany(t => t.GetVertices());
+            return [.. Triangles.SelectMany(t => t.GetVertices())];
         }
 
         /// <inheritdoc/>

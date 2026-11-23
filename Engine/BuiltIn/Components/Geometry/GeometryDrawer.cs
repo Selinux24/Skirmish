@@ -388,9 +388,9 @@ namespace Engine.BuiltIn.Components.Geometry
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
-            yield return material;
+            return [material];
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)

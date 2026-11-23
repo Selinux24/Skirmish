@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Engine.Common
 {
@@ -11,23 +10,20 @@ namespace Engine.Common
         /// <summary>
         /// Gets the material list
         /// </summary>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
-            return GetValues().Select(v => v.Material).ToArray();
+            return [.. GetValues().Select(v => v.Material)];
         }
         /// <summary>
         /// Gets the material list by name
         /// </summary>
         /// <param name="name">Mesh material name</param>
-        public IEnumerable<IMeshMaterial> GetMaterials(string name)
+        public IMeshMaterial[] GetMaterials(string name)
         {
             var value = GetValue(name);
-            if (value == null)
-            {
-                yield break;
-            }
+            if (value == null) return [];
 
-            yield return value.Material;
+            return [value.Material];
         }
         /// <summary>
         /// Gets the first material by name

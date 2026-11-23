@@ -18,7 +18,7 @@ namespace AISamples.Common
             var d = s2.P2;
 
             float bot = (d.Y - c.Y) * (b.X - a.X) - (d.X - c.X) * (b.Y - a.Y);
-            if (Helper.IsZero(bot))
+            if (MathUtils.IsZero(bot))
             {
                 position = Vector3.Zero;
                 distance = float.MaxValue;

@@ -5,7 +5,6 @@ using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -87,18 +86,14 @@ namespace Engine.BuiltIn.Components.Models
         /// <returns>Returns the instancing data for the instancing buffer</returns>
         private static VertexInstancingData[] PrepareInstancingBuffer(ModelInstance[] instances, Vector3 pointOfView)
         {
-            if (instances.Length == 0)
-            {
-                return [];
-            }
+            if (instances == null) return [];
 
-            if (instances.Length > 1)
-            {
-                SortInstances(instances, pointOfView);
-            }
+            var iList = Array.FindAll(instances, i => i != null);
+            if (iList.Length == 0) return [];
 
-            return [.. instances
-                .Where(i => i != null)
+            SortInstances(instances, pointOfView);
+
+            return [.. iList
                 .Select(i => new VertexInstancingData
                 {
                     Local = i.Manipulator.GlobalTransform,
@@ -117,6 +112,8 @@ namespace Engine.BuiltIn.Components.Models
         /// <param name="pointOfView">Point of view</param>
         private static void SortInstances(ModelInstance[] instances, Vector3 pointOfView)
         {
+            if (instances.Length <= 1) return;
+
             //Sort by LOD, distance and id
             Array.Sort(instances, (i1, i2) =>
             {
@@ -198,11 +195,11 @@ namespace Engine.BuiltIn.Components.Models
             }
 
             // Store visible instances
-            instancesVisible = [.. instancesAll.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)];
+            instancesVisible = Array.FindAll(instancesAll, i => i.Visible && i.LevelOfDetail != LevelOfDetail.None);
 
             // Update each active instance
-            instancesAll
-                .Where(i => i.Active)
+            var activeInstances = Array.FindAll(instancesAll, i => i.Active) ?? [];
+            activeInstances
                 .AsParallel()
                 .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                 .ForAll(i => i.Update(context));
@@ -419,17 +416,17 @@ namespace Engine.BuiltIn.Components.Models
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = cullInstanceList.Where(i => i?.LevelOfDetail == lod);
-                if (!lodInstances.Any()) continue;
+                var lodInstances = Array.FindAll(cullInstanceList, i => i?.LevelOfDetail == lod);
+                if (lodInstances.Length == 0) continue;
 
                 var drawingData = GetDrawingData(lod);
                 if (drawingData == null) continue;
 
-                int idx = Array.IndexOf(cullInstanceList, lodInstances.First());
+                int idx = Array.IndexOf(cullInstanceList, lodInstances[0]);
                 if (idx < 0) continue;
 
                 uint startInstanceLocation = (uint)idx + InstancingBuffer.BufferOffset;
-                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Count());
+                uint instancesToDraw = Math.Min(maxCount, (uint)lodInstances.Length);
                 if (instancesToDraw <= 0)
                 {
                     continue;
@@ -509,9 +506,11 @@ namespace Engine.BuiltIn.Components.Models
         /// Set instance positions
         /// </summary>
         /// <param name="positions">New positions</param>
-        public void SetPositions(IEnumerable<Vector3> positions)
+        public void SetPositions(Vector3[] positions)
         {
-            if ((positions?.Any()) != true || !(instancesAll?.Length > 0))
+            ArgumentNullException.ThrowIfNull(positions);
+
+            if (positions.Length == 0 || !(instancesAll?.Length > 0))
             {
                 return;
             }
@@ -520,9 +519,9 @@ namespace Engine.BuiltIn.Components.Models
             {
                 var instance = instancesAll[i];
 
-                if (i < positions.Count())
+                if (i < positions.Length)
                 {
-                    instance.Manipulator.SetPosition(positions.ElementAt(i));
+                    instance.Manipulator.SetPosition(positions[i]);
                     instance.Active = true;
                     instance.Visible = true;
                 }
@@ -537,9 +536,11 @@ namespace Engine.BuiltIn.Components.Models
         /// Sets instance transforms
         /// </summary>
         /// <param name="transforms">Transform matrix list</param>
-        public void SetTransforms(IEnumerable<Matrix4x4> transforms)
+        public void SetTransforms(Matrix4x4[] transforms)
         {
-            if ((transforms?.Any()) != true || !(instancesAll?.Length > 0))
+            ArgumentNullException.ThrowIfNull(transforms);
+
+            if (transforms.Length == 0 || !(instancesAll?.Length > 0))
             {
                 return;
             }
@@ -548,9 +549,9 @@ namespace Engine.BuiltIn.Components.Models
             {
                 var instance = instancesAll[i];
 
-                if (i < transforms.Count())
+                if (i < transforms.Length)
                 {
-                    instance.Manipulator.SetTransform(transforms.ElementAt(i));
+                    instance.Manipulator.SetTransform(transforms[i]);
                     instance.Active = true;
                     instance.Visible = true;
                 }
@@ -565,48 +566,63 @@ namespace Engine.BuiltIn.Components.Models
         /// Gets the instance list
         /// </summary>
         /// <returns>Returns an array with the instance list</returns>
-        public IEnumerable<ModelInstance> GetInstances()
+        public ModelInstance[] GetInstances()
         {
-            return new ReadOnlyCollection<ModelInstance>(instancesAll);
+            return [.. instancesAll];
         }
         /// <inheritdoc/>
-        public IEnumerable<T> GetComponents<T>()
+        public T[] GetComponents<T>()
         {
-            return new ReadOnlyCollection<T>([.. instancesAll.Where(i => i.Visible).OfType<T>()]);
+            return [.. Array.FindAll(instancesAll, i => i.Visible).OfType<T>()];
         }
 
         /// <summary>
         /// Gets the instances bounding sphere list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<BoundingSphere> GetBoundingSpheres(bool refresh = false)
+        public BoundingSphere[] GetBoundingSpheres(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            BoundingSphere[] res = new BoundingSphere[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetBoundingSphere(refresh);
+                res[i] = instances[i].GetBoundingSphere(refresh);
             }
+            return res;
         }
         /// <summary>
         /// Gets the instances bounding box list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(bool refresh = false)
+        public BoundingBox[] GetBoundingBoxes(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            BoundingBox[] res = new BoundingBox[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetBoundingBox(refresh);
+                res[i] = instances[i].GetBoundingBox(refresh);
             }
+            return res;
         }
         /// <summary>
         /// Gets the instances oriented bounding box list
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        public IEnumerable<OrientedBoundingBox> GetOrientedBoundingBoxes(bool refresh = false)
+        public OrientedBoundingBox[] GetOrientedBoundingBoxes(bool refresh = false)
         {
-            foreach (var instance in GetInstances())
+            var instances = GetInstances();
+            if (instances.Length == 0) return [];
+
+            OrientedBoundingBox[] res = new OrientedBoundingBox[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
             {
-                yield return instance.GetOrientedBoundingBox(refresh);
+                res[i] = instances[i].GetOrientedBoundingBox(refresh);
             }
+            return res;
         }
 
         /// <inheritdoc/>
@@ -614,39 +630,30 @@ namespace Engine.BuiltIn.Components.Models
         {
             distance = float.MaxValue;
 
-            // Copy array
-            var tmp = instancesVisible?.ToArray() ?? [];
+            if (instancesVisible == null || instancesVisible.Length == 0) return true;
 
-            if (tmp.Length <= 0)
+            List<(ModelInstance Instance, float Distance)> cullItems = [];
+            foreach (var instance in instancesVisible)
             {
-                // Culled
-                return true;
-            }
+                if (!instance.Visible) continue;
 
-            var items = tmp
-                .Where(i => i.Visible)
-                .Select(i =>
+                if (!instance.Cull(cullIndex, volume, out float instanceDistance))
                 {
-                    var cull = i.Cull(cullIndex, volume, out float iDistance);
-
-                    return new { Instance = i, Cull = cull, Distance = iDistance };
-                })
-                .Where(i => !i.Cull)
-                .OrderBy(i => i.Distance)
-                .ToArray();
-
-            if (items.Length == 0)
-            {
-                // Culled
-                return true;
+                    cullItems.Add((instance, instanceDistance));
+                }
             }
 
-            // Store selection
-            var data = items.Select(i => i.Instance).ToArray();
-            cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
+            if (cullItems.Count == 0) return true;
 
-            // Visible
-            distance = items[0].Distance;
+            cullItems.Sort(static (left, right) => left.Distance.CompareTo(right.Distance));
+            var data = new ModelInstance[cullItems.Count];
+            for (int i = 0; i < cullItems.Count; i++)
+            {
+                data[i] = cullItems[i].Instance;
+            }
+
+            cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
+            distance = cullItems[0].Distance;
             return false;
         }
 
@@ -681,10 +688,11 @@ namespace Engine.BuiltIn.Components.Models
             Layer = modelInstancedState.Layer;
             Owner = Scene.Components.ById(modelInstancedState.OwnerId);
             MaximumCount = modelInstancedState.MaximumCount;
-            for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
+
+            int idx = 0;
+            foreach (var instanceState in modelInstancedState.Instances)
             {
-                var instanceState = modelInstancedState.Instances.ElementAt(i);
-                instancesAll[i].SetState(instanceState);
+                instancesAll[idx++].SetState(instanceState);
             }
         }
     }

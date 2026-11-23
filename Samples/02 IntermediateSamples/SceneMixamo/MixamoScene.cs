@@ -190,7 +190,7 @@ namespace IntermediateSamples.SceneMixamo
                     StartsVisible = false,
                 });
 
-            model.Manipulator.SetTransform(modelInitPosition, 0, Helper.DegreesToRadians(-90), 0, 0.1f);
+            model.Manipulator.SetTransform(modelInitPosition, 0, MathUtils.DegreesToRadians(-90), 0, 0.1f);
 
             var pDefault = new AnimationPath();
             pDefault.AddLoop("rumba");

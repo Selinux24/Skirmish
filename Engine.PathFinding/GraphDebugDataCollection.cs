@@ -10,7 +10,7 @@ namespace Engine.PathFinding
     /// <param name="topology">Topology</param>
     /// <param name="data">Data</param>
     /// <param name="trace">Trace text</param>
-    public struct GraphDebugDataCollection(string name, Topology topology, Dictionary<Color4, IEnumerable<Vector3>> data, string trace = null)
+    public struct GraphDebugDataCollection(string name, Topology topology, Dictionary<Color4, Vector3[]> data, string trace = null)
     {
         /// <summary>
         /// Name
@@ -23,7 +23,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Data
         /// </summary>
-        public Dictionary<Color4, IEnumerable<Vector3>> Data { get; set; } = data;
+        public Dictionary<Color4, Vector3[]> Data { get; set; } = data;
         /// <summary>
         /// Trace text
         /// </summary>

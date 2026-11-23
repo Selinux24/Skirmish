@@ -2,7 +2,6 @@
 using Engine.Content;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,12 +30,14 @@ namespace Engine.BuiltIn.Components.Ground
                 throw new EngineException("No heightmap found in description.");
             }
 
-            Stream heightMapData = ContentManager.FindContent(description.ContentPath, description.HeightmapFileName).FirstOrDefault();
+            var maps = ContentManager.FindContent(description.ContentPath, description.HeightmapFileName);
+            Stream heightMapData = maps.Length > 0 ? maps[0] : default;
 
             Stream colorMapData = null;
             if (!string.IsNullOrEmpty(description.ColormapFileName))
             {
-                colorMapData = ContentManager.FindContent(description.ContentPath, description.ColormapFileName).FirstOrDefault();
+                maps = ContentManager.FindContent(description.ContentPath, description.ColormapFileName);
+                colorMapData = maps.Length > 0 ? maps[0] : default;
             }
 
             return FromStream(heightMapData, colorMapData, description.UseFalloff, description.FalloffCurve.X, description.FalloffCurve.Y);
@@ -372,7 +373,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <param name="textureScale">Texture scale</param>
         /// <param name="textureDisplacement">Texture displacement</param>
         /// <returns>Returns a vertex list, and a index list</returns>
-        public async Task<(IEnumerable<VertexData> Vertices, IEnumerable<uint> Indices)> BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
+        public async Task<(VertexData[] Vertices, uint[] Indices)> BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
         {
             var vertTask = Task.Run(() =>
             {

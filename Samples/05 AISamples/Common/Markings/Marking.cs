@@ -65,10 +65,10 @@ namespace AISamples.Common.Markings
         protected static VertexPositionTexture[] CreateQuadFromSupport(float width, float height, Segment2 support, Vector2[] uvs, float scale)
         {
             var t = GeometryUtil.CreateLine2D(Topology.TriangleList, support.P1, support.P2, width, height);
-            var tris = Triangle.ComputeTriangleList(t);
+            var tris = GeometryUtil.ComputeTriangleList(t);
 
             Vector3[] allPoints = [.. tris.SelectMany(t => new Vector3[] { t.Point3, t.Point2, t.Point1 })];
-            if (!Helper.IsOne(scale))
+            if (!MathUtils.IsOne(scale))
             {
                 allPoints = Utils.ScaleFromCenter(allPoints, scale);
             }

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,15 +30,15 @@ namespace Engine.Content.FmtObj.Fmt
         private static List<SubMeshContent> Load(string contentFolder, string fileName, Matrix4x4 transform, out List<Material> materials)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (!modelList.Any())
+            if (modelList.Length == 0)
             {
-                throw new EngineException(string.Format("Model not found: {0}", fileName));
+                throw new EngineException($"Model not found: {fileName}");
             }
 
             string materialsFolder = Path.Combine(contentFolder, Path.GetDirectoryName(fileName));
 
-            var matList = new List<Material>();
-            var res = new List<SubMeshContent>();
+            List<Material> matList = [];
+            List<SubMeshContent> res = [];
 
             foreach (var model in modelList)
             {
@@ -58,7 +57,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <param name="fileName">File name</param>
-        public static void Save(IEnumerable<Triangle> triangles, string fileName)
+        public static void Save(Triangle[] triangles, string fileName)
         {
             // Write the file
             using var wr = new StreamWriter(fileName, false, Encoding.Default);
@@ -107,7 +106,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// Gets the extensions list which this loader is valid
         /// </summary>
         /// <returns>Returns a extension array list</returns>
-        public IEnumerable<string> GetExtensions()
+        public string[] GetExtensions()
         {
             return [".obj"];
         }
@@ -118,7 +117,7 @@ namespace Engine.Content.FmtObj.Fmt
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
+        public async Task<ContentData[]> Load(string contentFolder, ContentDataFile content)
         {
             var transform = content.GetTransform();
 

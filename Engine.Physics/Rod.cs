@@ -59,7 +59,7 @@ namespace Engine.Physics
             var positionTwoWorld = Two.PositionWorld;
 
             float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (Helper.NearEqual(Length - distance, Tolerance))
+            if (MathUtils.NearEqual(Length - distance, Tolerance))
             {
                 // Valid rod
                 return false;

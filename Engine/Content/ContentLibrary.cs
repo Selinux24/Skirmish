@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Engine.Content
 {
@@ -13,7 +11,7 @@ namespace Engine.Content
         /// <summary>
         /// Content data list
         /// </summary>
-        private readonly IEnumerable<ContentData> contentDataList;
+        private readonly ContentData[] contentDataList;
 
         /// <summary>
         /// Reads the content library from disk
@@ -37,7 +35,7 @@ namespace Engine.Content
         /// <summary>
         /// Constructor
         /// </summary>
-        public ContentLibrary(IEnumerable<ContentData> contentDataList)
+        public ContentLibrary(ContentData[] contentDataList)
         {
             this.contentDataList = contentDataList ?? throw new ArgumentNullException(nameof(contentDataList));
         }
@@ -48,9 +46,17 @@ namespace Engine.Content
         /// <param name="name">Name</param>
         public ContentData GetContentDataByName(string name)
         {
-            return
-                contentDataList.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) ??
-                contentDataList.Select(c => c.FilterMask(name)).FirstOrDefault();
+            if (contentDataList == null || contentDataList.Length == 0) return null;
+
+            foreach (var c in contentDataList)
+            {
+                if (string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) return c;
+
+                var filtered = c.FilterMask(name);
+                if (filtered != null) return filtered;
+            }
+
+            return null;
         }
     }
 }

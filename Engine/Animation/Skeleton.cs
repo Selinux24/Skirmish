@@ -1,7 +1,6 @@
 ﻿using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Animation
 {
@@ -69,19 +68,34 @@ namespace Engine.Animation
         /// <param name="joint">Joint</param>
         /// <param name="time">Time</param>
         /// <param name="animations">Animation list</param>
-        private static void BuildTransforms(Joint joint, float time, IEnumerable<JointAnimation> animations)
+        private static bool TryFindAnimation(JointAnimation[] animations, string jointName, out JointAnimation animation)
         {
-            if (joint == null)
+            foreach (var candidate in animations)
+            {
+                if (candidate.JointName == jointName)
+                {
+                    animation = candidate;
+                    return true;
+                }
+            }
+
+            animation = default;
+            return false;
+        }
+        /// <summary>
+        /// Built skeleton transforms interpolated between two times with specified factor
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        /// <param name="time">Time</param>
+        /// <param name="animations">Animation list</param>
+        private static void BuildTransforms(Joint joint, float time, JointAnimation[] animations)
+        {
+            if (joint == null || !TryFindAnimation(animations, joint.Name, out var animation))
             {
                 return;
             }
 
-            if (!animations.Any(a => a.Joint == joint.Name))
-            {
-                return;
-            }
-
-            joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
+            joint.LocalTransform = animation.Interpolate(time);
 
             if ((joint.Childs?.Length ?? 0) == 0)
             {
@@ -102,15 +116,21 @@ namespace Engine.Animation
         /// <param name="time2">Time 2</param>
         /// <param name="animations2">Animation list 2</param>
         /// <param name="factor">Interpolation factor</param>
-        private static void BuildTransforms(Joint joint, float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor)
+        private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
         {
             if (joint == null)
             {
                 return;
             }
 
-            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
-            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
+            if (!TryFindAnimation(animations1, joint.Name, out var animation1) ||
+                !TryFindAnimation(animations2, joint.Name, out var animation2))
+            {
+                throw new InvalidOperationException("Sequence contains no matching element");
+            }
+
+            animation1.Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
+            animation2.Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
             Vector3 translation = Vector3.Lerp(pos1, pos2, factor);
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
@@ -189,7 +209,7 @@ namespace Engine.Animation
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
         /// <returns>Returns the transforms list of the pose at specified time</returns>
-        public IEnumerable<Matrix4x4> GetPoseAtTime(float time, IEnumerable<JointAnimation> animations)
+        public Matrix4x4[] GetPoseAtTime(float time, JointAnimation[] animations)
         {
             Matrix4x4[] transforms = new Matrix4x4[JointCount];
 
@@ -210,7 +230,7 @@ namespace Engine.Animation
         /// <param name="animations2">Second joint animation set</param>
         /// <param name="factor">Interpolation factor</param>
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor, ref Matrix4x4[] transforms)
+        public void GetPoseAtTime(float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor, ref Matrix4x4[] transforms)
         {
             BuildTransforms(Root, time1, animations1, time2, animations2, factor);
 
@@ -242,7 +262,7 @@ namespace Engine.Animation
         /// Gets the joint names list
         /// </summary>
         /// <returns>Returns the joint names list</returns>
-        public IEnumerable<string> GetJointNames()
+        public string[] GetJointNames()
         {
             return [.. jointNames];
         }
@@ -250,7 +270,7 @@ namespace Engine.Animation
         /// Gets the bone names list
         /// </summary>
         /// <returns>Returns the bone names list</returns>
-        public IEnumerable<string> GetBoneNames()
+        public string[] GetBoneNames()
         {
             return [.. boneNames];
         }
@@ -259,8 +279,8 @@ namespace Engine.Animation
         public bool Equals(Skeleton other)
         {
             return
-                Helper.CompareEnumerables(jointNames, other.jointNames) &&
-                Helper.CompareEnumerables(boneNames, other.boneNames) &&
+                Helper.CompareLists(jointNames, other.jointNames) &&
+                Helper.CompareLists(boneNames, other.boneNames) &&
                 Name == other.Name &&
                 Root == other.Root;
         }

@@ -10,6 +10,8 @@ namespace Engine.Content
     /// </summary>
     public sealed class MemoryCubicImageContent : IImageContent, IEquatable<MemoryCubicImageContent>
     {
+        const string CubicTextureFacesStr = "A list of 6 faces must be specified, or not faces at all.";
+
         /// <summary>
         /// Image data in stream
         /// </summary>
@@ -36,13 +38,14 @@ namespace Engine.Content
         /// <param name="faces">Texture faces</param>
         public MemoryCubicImageContent(MemoryStream stream, RectI[] faces = null)
         {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream), "A stream must be specified.");
-            this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");
-
-            if (faces.Length != 0 && faces.Length != 6)
+            ArgumentNullException.ThrowIfNull(stream);
+            if (faces != null && faces.Length != 0 && faces.Length != 6)
             {
-                throw new ArgumentOutOfRangeException(nameof(faces), $"A list o 6 faces must be specified.");
+                throw new ArgumentException(CubicTextureFacesStr, nameof(faces));
             }
+
+            this.stream = stream;
+            this.faces = faces ?? [];
         }
 
         /// <inheritdoc/>
@@ -68,7 +71,7 @@ namespace Engine.Content
         {
             return
                 left.stream == right.stream &&
-                Helper.CompareEnumerables(left.faces, right.faces);
+                Helper.CompareArrays(left.faces, right.faces);
         }
         /// <inheritdoc/>
         public bool Equals(MemoryCubicImageContent other)

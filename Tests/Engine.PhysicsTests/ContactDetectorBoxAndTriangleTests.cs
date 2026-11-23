@@ -15,7 +15,7 @@ namespace Engine.PhysicsTests
     {
         public TestContext TestContext { get; set; }
 
-        static readonly float Epsilon = Helper.ZeroTolerance;
+        static readonly float Epsilon = MathUtils.ZeroTolerance;
 
         static BoxCollider FromAABB(Vector3 extents, Matrix4x4 transform)
         {
@@ -93,11 +93,11 @@ namespace Engine.PhysicsTests
             var contactsPln = dataPln.GetContacts();
             var contactsTri = dataTri.GetContacts();
 
-            for (int i = 0; i < contactsPln.Count(); i++)
+            for (int i = 0; i < contactsPln.Length; i++)
             {
-                var contact = contactsPln.ElementAt(i);
+                var contact = contactsPln[i];
 
-                var expectedContact = contactsTri.FirstOrDefault(c => c.Position == contact.Position);
+                var expectedContact = Array.Find(contactsTri, c => c.Position == contact.Position);
                 if (expectedContact == null)
                 {
                     continue;
@@ -107,7 +107,7 @@ namespace Engine.PhysicsTests
                 var expectedPosition = expectedContact.Position;
                 var expectedNormal = Vector3.Up;
 
-                Assert.IsTrue(Helper.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
+                Assert.IsTrue(MathUtils.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
                 Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
                 Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
             }

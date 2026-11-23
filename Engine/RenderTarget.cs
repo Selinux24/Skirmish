@@ -40,7 +40,7 @@ namespace Engine
         /// Buffer texture
         /// </summary>
         /// <remarks>Returns the first target texture, if any</remarks>
-        public EngineShaderResourceView Texture { get => Textures?.FirstOrDefault(); }
+        public EngineShaderResourceView Texture { get => Textures != null && Textures.Length > 0 ? Textures[0] : default; }
         /// <summary>
         /// Render targets
         /// </summary>

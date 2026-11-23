@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,7 +46,7 @@ namespace Engine.Animation
         {
             get
             {
-                return items.ElementAtOrDefault(currentItemIndex);
+                return currentItemIndex < items.Count ? items[currentItemIndex] : default;
             }
         }
         /// <summary>
@@ -227,7 +228,7 @@ namespace Engine.Animation
 
             UpdateItems(skData);
 
-            if (Helper.IsZero(elapsedSeconds))
+            if (MathUtils.IsZero(elapsedSeconds))
             {
                 return false;
             }
@@ -285,7 +286,7 @@ namespace Engine.Animation
         private static TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
         {
             var itemTotalDuration = item.TotalDuration * item.TimeDelta;
-            if (Helper.IsZero(itemTotalDuration))
+            if (MathUtils.IsZero(itemTotalDuration))
             {
                 return new TimeInItemData
                 {
@@ -460,7 +461,7 @@ namespace Engine.Animation
                 Playing = Playing,
                 Time = PathElapsedTime,
                 TotalItemTime = PathItemInterpolationValue,
-                PathItems = items.Select(i => i.GetState()).ToArray(),
+                PathItems = [.. items.Select(i => i.GetState())],
             };
         }
         /// <inheritdoc/>
@@ -476,10 +477,9 @@ namespace Engine.Animation
             Playing = animationPathState.Playing;
             PathElapsedTime = animationPathState.Time;
             PathItemInterpolationValue = animationPathState.TotalItemTime;
-            for (int i = 0; i < animationPathState.PathItems.Count(); i++)
+            for (int i = 0; i < animationPathState.PathItems.Length; i++)
             {
-                var itemState = animationPathState.PathItems.ElementAt(i);
-                items[i].SetState(itemState);
+                items[i].SetState(animationPathState.PathItems[i]);
             }
         }
 

@@ -7,7 +7,7 @@ namespace Engine.Content.FmtObj.Fmt
 {
     static class Writer
     {
-        public static void WriteObj(StreamWriter wr, IEnumerable<Triangle> triangles)
+        public static void WriteObj(StreamWriter wr, Triangle[] triangles)
         {
             var points = new List<Vector3>();
             triangles.ToList().ForEach(t => points.AddRange([t.Point1, t.Point2, t.Point3]));
@@ -87,13 +87,13 @@ namespace Engine.Content.FmtObj.Fmt
             return hasData;
         }
 
-        private static void WriteData(StreamWriter wr, string dataType, IEnumerable<uint> indices, bool useUV, bool useNm)
+        private static void WriteData(StreamWriter wr, string dataType, uint[] indices, bool useUV, bool useNm)
         {
-            for (int i = 0; i < indices.Count(); i += 3)
+            for (int i = 0; i < indices.Length; i += 3)
             {
-                string i1 = FormatFace(indices.ElementAt(i + 0) + 1, useUV, useNm);
-                string i2 = FormatFace(indices.ElementAt(i + 1) + 1, useUV, useNm);
-                string i3 = FormatFace(indices.ElementAt(i + 2) + 1, useUV, useNm);
+                string i1 = FormatFace(indices[i + 0] + 1, useUV, useNm);
+                string i2 = FormatFace(indices[i + 1] + 1, useUV, useNm);
+                string i3 = FormatFace(indices[i + 2] + 1, useUV, useNm);
 
                 wr.WriteLine(string.Format(LoaderObj.Locale, "{0} {1} {2} {3}", dataType, i1, i2, i3));
             }

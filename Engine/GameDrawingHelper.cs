@@ -1,4 +1,5 @@
-﻿using Engine.Common;
+﻿using System;
+using Engine.Common;
 
 namespace Engine
 {
@@ -166,6 +167,24 @@ namespace Engine
             return game.WriteDiscardBuffer(dc, descriptor, data, descriptors, vertexBuffers, discard);
         }
         /// <summary>
+        /// Writes vertex data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="dc">Device context</param>
+        /// <param name="descriptor">Buffer descriptor</param>
+        /// <param name="data">Data to write</param>
+        /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
+        public static bool WriteVertexBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, ReadOnlySpan<T> data, bool discard = true)
+            where T : unmanaged
+        {
+            var bufferManager = game.BufferManager;
+
+            var descriptors = bufferManager.GetVertexBufferDescriptors();
+            var vertexBuffers = bufferManager.GetVertexBuffers();
+
+            return game.WriteDiscardBuffer(dc, descriptor, data, descriptors, vertexBuffers, discard);
+        }
+        /// <summary>
         /// Writes index data into buffer
         /// </summary>
         /// <param name="dc">Device context</param>
@@ -192,7 +211,7 @@ namespace Engine
         /// <param name="bufferDescriptors">Buffer descriptors</param>
         /// <param name="buffers">Buffer list</param>
         /// <param name="discard">Discards buffer content, no overwrite otherwise</param>
-        private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, T[] data, IEngineDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
+        private static bool WriteDiscardBuffer<T>(this Game game, IEngineDeviceContext dc, BufferDescriptor descriptor, ReadOnlySpan<T> data, IEngineDescriptor[] bufferDescriptors, EngineBuffer[] buffers, bool discard)
             where T : unmanaged
         {
             if (!game.ValidateWriteBuffer(dc, descriptor, bufferDescriptors, buffers, out var buffer))

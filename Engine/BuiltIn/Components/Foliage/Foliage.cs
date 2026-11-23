@@ -182,9 +182,10 @@ namespace Engine.BuiltIn.Components.Foliage
             //Read foliage textures
             string contentPath = Description.ContentPath;
 
-            if (!string.IsNullOrEmpty(Description.VegetationMap))
+            if (!string.IsNullOrWhiteSpace(Description.VegetationMap))
             {
-                var foliageMapData = ContentManager.FindContent(contentPath, Description.VegetationMap).FirstOrDefault();
+                var maps = ContentManager.FindContent(contentPath, Description.VegetationMap);
+                var foliageMapData = maps.Length > 0 ? maps[0] : default;
                 foliageMap = FoliageMap.FromStream(foliageMapData);
             }
 
@@ -380,7 +381,7 @@ namespace Engine.BuiltIn.Components.Foliage
         private QuadTreeNode[] GetVisibleNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
             var nodes = foliageQuadtree.FindNodesInVolume((IntersectionVolumeSphere)sph);
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return [];
             }
@@ -432,11 +433,10 @@ namespace Engine.BuiltIn.Components.Foliage
         private FoliagePatch GetFreeFarestPatch(Vector3 eyePosition)
         {
             //Try to find not visible & fartest from position
-            var notVisible = foliagePatches
+            return foliagePatches
                 .FindAll(p => p.Buffer != null && !Array.Exists(visibleNodes, n => n == p.Node))
-                .OrderByDescending(p => Vector3.DistanceSquared(p.Node.Center, eyePosition));
-
-            return notVisible.FirstOrDefault();
+                .OrderByDescending(p => Vector3.DistanceSquared(p.Node.Center, eyePosition))
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -666,7 +666,7 @@ namespace Engine.BuiltIn.Components.Foliage
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return foliageMaterial != null ? [foliageMaterial] : [];
         }

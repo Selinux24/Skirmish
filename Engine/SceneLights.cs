@@ -193,12 +193,12 @@ namespace Engine
             [
                 .. new[]
                 {
-                    new Tuple<float, Color3>(Helper.Pi * -1.00f, Color.Black),
-                    new Tuple<float, Color3>(Helper.Pi * 0.02f, Color.Orange),
-                    new Tuple<float, Color3>(Helper.Pi * 0.20f, Color.White),
-                    new Tuple<float, Color3>(Helper.Pi * 0.70f, Color.White),
-                    new Tuple<float, Color3>(Helper.Pi * 0.98f, Color.Orange),
-                    new Tuple<float, Color3>(Helper.Pi * 2.00f, Color.Black),
+                    new Tuple<float, Color3>(MathUtils.Pi * -1.00f, Color.Black),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.02f, Color.Orange),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.20f, Color.White),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.70f, Color.White),
+                    new Tuple<float, Color3>(MathUtils.Pi * 0.98f, Color.Orange),
+                    new Tuple<float, Color3>(MathUtils.Pi * 2.00f, Color.Black),
                 },
             ];
         /// <summary>
@@ -395,8 +395,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (MathUtils.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtils.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -433,8 +433,8 @@ namespace Engine
                     float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
                     float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / (Helper.IsZero(d1) ? 1f : d1);
-                    float f2 = l2.Radius / (Helper.IsZero(d2) ? 1f : d2);
+                    float f1 = l1.Radius / (MathUtils.IsZero(d1) ? 1f : d1);
+                    float f2 = l2.Radius / (MathUtils.IsZero(d2) ? 1f : d2);
 
                     return -f1.CompareTo(f2);
                 });
@@ -454,7 +454,7 @@ namespace Engine
         /// Gets the visible directional lights
         /// </summary>
         /// <returns>Returns the visible directional lights array</returns>
-        public IEnumerable<ISceneLightDirectional> GetVisibleDirectionalLights()
+        public ISceneLightDirectional[] GetVisibleDirectionalLights()
         {
             return [.. visibleLights.OfType<ISceneLightDirectional>()];
         }
@@ -462,7 +462,7 @@ namespace Engine
         /// Gets the visible point lights
         /// </summary>
         /// <returns>Returns the visible point lights array</returns>
-        public IEnumerable<ISceneLightPoint> GetVisiblePointLights()
+        public ISceneLightPoint[] GetVisiblePointLights()
         {
             return [.. visibleLights.OfType<ISceneLightPoint>()];
         }
@@ -470,7 +470,7 @@ namespace Engine
         /// Gets the visible spot lights
         /// </summary>
         /// <returns>Returns the visible spot lights array</returns>
-        public IEnumerable<ISceneLightSpot> GetVisibleSpotLights()
+        public ISceneLightSpot[] GetVisibleSpotLights()
         {
             return [.. visibleLights.OfType<ISceneLightSpot>()];
         }
@@ -480,7 +480,7 @@ namespace Engine
         /// </summary>
         /// <param name="environment">Game environment</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment)
+        public ISceneLightDirectional[] GetDirectionalShadowCastingLights(GameEnvironment environment)
         {
             return [.. visibleLights
                 .OfType<ISceneLightDirectional>()
@@ -492,7 +492,7 @@ namespace Engine
         /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
+        public ISceneLightPoint[] GetPointShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             var scLights = visibleLights
                 .OfType<ISceneLightPoint>()
@@ -507,7 +507,7 @@ namespace Engine
         /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
+        public ISceneLightSpot[] GetSpotShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             var scLights = visibleLights
                 .OfType<ISceneLightSpot>()
@@ -580,7 +580,7 @@ namespace Engine
         /// <returns>Returns the color base on time of day meridian angle</returns>
         private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
-            float angle = Math.Clamp(timeOfDay.MeridianAngle - Helper.PiOver2, 0, Helper.Pi);
+            float angle = Math.Clamp(timeOfDay.MeridianAngle - MathUtils.PiOver2, 0, MathUtils.Pi);
 
             for (int i = 0; i < SunColorPalette.Count; i++)
             {
@@ -644,22 +644,22 @@ namespace Engine
                 return;
             }
 
-            for (int i = 0; i < sceneLightsState.DirectionalLights.Count(); i++)
+            int idx = 0;
+            foreach (var lightState in sceneLightsState.DirectionalLights)
             {
-                var lightState = sceneLightsState.DirectionalLights.ElementAt(i);
-                directionalLights[i].SetState(lightState);
+                directionalLights[idx++].SetState(lightState);
             }
 
-            for (int i = 0; i < sceneLightsState.PointLights.Count(); i++)
+            idx = 0;
+            foreach (var lightState in sceneLightsState.PointLights)
             {
-                var lightState = sceneLightsState.PointLights.ElementAt(i);
-                PointLights[i].SetState(lightState);
+                pointLights[idx++].SetState(lightState);
             }
 
-            for (int i = 0; i < sceneLightsState.SpotLights.Count(); i++)
+            idx = 0;
+            foreach (var lightState in sceneLightsState.SpotLights)
             {
-                var lightState = sceneLightsState.SpotLights.ElementAt(i);
-                spotLights[i].SetState(lightState);
+                spotLights[idx++].SetState(lightState);
             }
 
             HemisphericLigth.SetState(sceneLightsState.HemisphericLigth);

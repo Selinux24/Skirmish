@@ -18,7 +18,7 @@ namespace Engine.Content.FmtColladaTests
     {
         public TestContext TestContext { get; set; }
 
-        private const float tolerance = Helper.ZeroTolerance;
+        private const float tolerance = MathUtils.ZeroTolerance;
 
         private const string resourceTree = "Resources/Tree";
         private const string tree = "tree1.json";
@@ -116,7 +116,7 @@ namespace Engine.Content.FmtColladaTests
             var sph = model[0].GetBoundingSphere(true);
 
             var content = await tDesc.Content.ReadContentData();
-            var res = await content.First().CreateGeometry(true, true, null);
+            var res = await content[0].CreateGeometry(true, true, null);
             var points1 = res[treeMeshName][treeBarkName].GetPoints();
             var points2 = res[treeMeshName][treeTreeName].GetPoints();
             List<Vector3> points = [.. points1, .. points2];
@@ -154,8 +154,8 @@ namespace Engine.Content.FmtColladaTests
             //Sets the transform of the current instance
             Matrix4x4 instanceTrn = Matrix4x4.Translation(Vector3.One);
             Matrix4x4 hullTrn = Matrix4x4.Identity;
-            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, Helper.PiOver2));
-            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, Helper.PiOver4));
+            Matrix4x4 turretTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Up, MathUtils.PiOver2));
+            Matrix4x4 barrelTrn = Matrix4x4.RotationQuaternion(Quaternion.RotationAxis(Vector3.Left, MathUtils.PiOver4));
 
             model[0].Manipulator.SetTransform(instanceTrn);
             model[0].GetModelPartByName(tankHullPart).Manipulator.SetTransform(hullTrn);

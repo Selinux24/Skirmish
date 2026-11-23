@@ -435,7 +435,7 @@ namespace BasicSamples.SceneTest
                 });
 
             buildingObelisk.Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
-            buildingObelisk.Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
+            buildingObelisk.Manipulator.SetRotation(MathUtils.PiOver2 * 1, 0, 0);
             buildingObelisk.Manipulator.SetScaling(10);
 
             buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + baseDelta.X, baseHeight + baseDelta.Y, 0 + baseDelta.Z);
@@ -443,10 +443,10 @@ namespace BasicSamples.SceneTest
             buildingObeliskI[2].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2) + baseDelta.Z);
             buildingObeliskI[3].Manipulator.SetPosition(0 + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2) + baseDelta.Z);
 
-            buildingObeliskI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
-            buildingObeliskI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
-            buildingObeliskI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
-            buildingObeliskI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
+            buildingObeliskI[0].Manipulator.SetRotation(MathUtils.PiOver2 * 0, 0, 0);
+            buildingObeliskI[1].Manipulator.SetRotation(MathUtils.PiOver2 * 1, 0, 0);
+            buildingObeliskI[2].Manipulator.SetRotation(MathUtils.PiOver2 * 2, 0, 0);
+            buildingObeliskI[3].Manipulator.SetRotation(MathUtils.PiOver2 * 3, 0, 0);
 
             buildingObeliskI[0].Manipulator.SetScaling(10);
             buildingObeliskI[1].Manipulator.SetScaling(10);
@@ -482,7 +482,7 @@ namespace BasicSamples.SceneTest
             animations.Add(DefaultString, new AnimationPlan(p1));
 
             characterSoldier.Manipulator.SetPosition((+s - 10) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
-            characterSoldier.Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
+            characterSoldier.Manipulator.SetRotation(MathUtils.PiOver2 * 1, 0, 0);
             characterSoldier.AnimationController.Start(animations[DefaultString]);
 
             characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + baseDelta.X, baseHeight + baseDelta.Y, -s + baseDelta.Z);
@@ -490,10 +490,10 @@ namespace BasicSamples.SceneTest
             characterSoldierI[2].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (-spaceSize * 2 - s) + baseDelta.Z);
             characterSoldierI[3].Manipulator.SetPosition(+s + baseDelta.X, baseHeight + baseDelta.Y, (+spaceSize * 2 - s) + baseDelta.Z);
 
-            characterSoldierI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
-            characterSoldierI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
-            characterSoldierI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
-            characterSoldierI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
+            characterSoldierI[0].Manipulator.SetRotation(MathUtils.PiOver2 * 0, 0, 0);
+            characterSoldierI[1].Manipulator.SetRotation(MathUtils.PiOver2 * 1, 0, 0);
+            characterSoldierI[2].Manipulator.SetRotation(MathUtils.PiOver2 * 2, 0, 0);
+            characterSoldierI[3].Manipulator.SetRotation(MathUtils.PiOver2 * 3, 0, 0);
 
             characterSoldierI[0].AnimationController.Start(animations[DefaultString], 1);
             characterSoldierI[1].AnimationController.Start(animations[DefaultString], 2);
@@ -526,17 +526,17 @@ namespace BasicSamples.SceneTest
             float s = -spaceSize / 2f;
 
             vehicle.Manipulator.SetPosition(s + baseDelta.X, baseHeight + baseDelta.Y, -10 + baseDelta.Z);
-            vehicle.Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
+            vehicle.Manipulator.SetRotation(MathUtils.PiOver2 * 2, 0, 0);
 
             vehicleI[0].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
             vehicleI[1].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2 + baseDelta.Z);
             vehicleI[2].Manipulator.SetPosition(-spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
             vehicleI[3].Manipulator.SetPosition(+spaceSize * 2 + baseDelta.X, baseHeight + baseDelta.Y, +spaceSize * 2 + baseDelta.Z);
 
-            vehicleI[0].Manipulator.SetRotation(Helper.PiOver2 * 0, 0, 0);
-            vehicleI[1].Manipulator.SetRotation(Helper.PiOver2 * 1, 0, 0);
-            vehicleI[2].Manipulator.SetRotation(Helper.PiOver2 * 2, 0, 0);
-            vehicleI[3].Manipulator.SetRotation(Helper.PiOver2 * 3, 0, 0);
+            vehicleI[0].Manipulator.SetRotation(MathUtils.PiOver2 * 0, 0, 0);
+            vehicleI[1].Manipulator.SetRotation(MathUtils.PiOver2 * 1, 0, 0);
+            vehicleI[2].Manipulator.SetRotation(MathUtils.PiOver2 * 2, 0, 0);
+            vehicleI[3].Manipulator.SetRotation(MathUtils.PiOver2 * 3, 0, 0);
 
             List<ISceneLight> lights = [.. vehicle.Lights];
 
@@ -571,7 +571,7 @@ namespace BasicSamples.SceneTest
                 });
 
             float dist = 0.23f;
-            float pitch = Helper.DegreesToRadians(165) * -1;
+            float pitch = MathUtils.DegreesToRadians(165) * -1;
 
             lamp.Manipulator.SetPosition(0 + baseDelta.X, spaceSize + baseDelta.Y, (-spaceSize * dist) + baseDelta.Z);
             lamp.Manipulator.SetRotation(0, pitch, 0);
@@ -583,8 +583,8 @@ namespace BasicSamples.SceneTest
 
             lampI[0].Manipulator.SetRotation(0, pitch, 0);
             lampI[1].Manipulator.SetRotation(0, pitch, 0);
-            lampI[2].Manipulator.SetRotation(Helper.PiOver2, pitch, 0);
-            lampI[3].Manipulator.SetRotation(Helper.PiOver2, pitch, 0);
+            lampI[2].Manipulator.SetRotation(MathUtils.PiOver2, pitch, 0);
+            lampI[3].Manipulator.SetRotation(MathUtils.PiOver2, pitch, 0);
 
             List<ISceneLight> lights = [.. lamp.Lights];
 
@@ -631,11 +631,11 @@ namespace BasicSamples.SceneTest
             streetlampI[7].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 1f + baseDelta.Z);
             streetlampI[8].Manipulator.SetPosition(+spaceSize + baseDelta.X, baseHeight + baseDelta.Y, -spaceSize * 2f + baseDelta.Z);
 
-            streetlampI[4].Manipulator.SetRotation(Helper.Pi, 0, 0);
-            streetlampI[5].Manipulator.SetRotation(Helper.Pi, 0, 0);
-            streetlampI[6].Manipulator.SetRotation(Helper.Pi, 0, 0);
-            streetlampI[7].Manipulator.SetRotation(Helper.Pi, 0, 0);
-            streetlampI[8].Manipulator.SetRotation(Helper.Pi, 0, 0);
+            streetlampI[4].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
+            streetlampI[5].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
+            streetlampI[6].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
+            streetlampI[7].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
+            streetlampI[8].Manipulator.SetRotation(MathUtils.Pi, 0, 0);
 
             List<ISceneLight> lights = [.. streetlamp.Lights];
 
@@ -681,7 +681,7 @@ namespace BasicSamples.SceneTest
             container.Manipulator.SetScaling(scale);
             var scaledOnlyBbox = container.GetBoundingBox(true);
             container.Manipulator.SetPosition(s + 12 + baseDelta.X, baseHeight + baseDelta.Y, 30 + baseDelta.Z);
-            container.Manipulator.SetRotation(Helper.PiOver2 * 2.1f, 0, 0);
+            container.Manipulator.SetRotation(MathUtils.PiOver2 * 2.1f, 0, 0);
 
             var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
                 "ContainerI",
@@ -725,7 +725,7 @@ namespace BasicSamples.SceneTest
             float size = 1f;
             float half = size * 0.5f;
             var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
-            var cubeTris = Triangle.ComputeTriangleList(bbox);
+            var cubeTris = GeometryUtil.ComputeTriangleList(bbox).ToArray();
             cubeTris = Triangle.Transform(cubeTris, Matrix4x4.Translation(30 + baseDelta.X, half + baseDelta.Y, 0 + baseDelta.Z));
 
             var desc = new GeometryColorDrawerDescription<Triangle>()
@@ -771,7 +771,7 @@ namespace BasicSamples.SceneTest
             ];
 
             var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
-            var cubeTris = Triangle.ComputeTriangleList(bbox);
+            var cubeTris = GeometryUtil.ComputeTriangleList(bbox).ToArray();
 
             particlePlumes = new IParticleSystem<ParticleEmitter, ParticleSystemParams>[positions.Length];
             List<Triangle> markers = [];
@@ -817,7 +817,7 @@ namespace BasicSamples.SceneTest
 
             var topDownRay = new PickingRay(new Ray(new Vector3(350, 1000, 350), Vector3.Down));
 
-            scenery.PickFirst(topDownRay, out var treePos);
+            scenery.PickFirst(ref topDownRay, out var treePos);
 
             tree.Manipulator.SetPosition(treePos.Position + delta);
             tree.Manipulator.SetScaling(2);
@@ -826,13 +826,13 @@ namespace BasicSamples.SceneTest
             {
                 float px = Helper.RandomGenerator.NextSingle(400, 600);
                 float pz = Helper.RandomGenerator.NextSingle(400, 600);
-                float r = Helper.RandomGenerator.NextSingle(0, Helper.TwoPi);
-                float y = Helper.RandomGenerator.NextSingle(0, Helper.Pi / 16f);
+                float r = Helper.RandomGenerator.NextSingle(0, MathUtils.TwoPi);
+                float y = Helper.RandomGenerator.NextSingle(0, MathUtils.Pi / 16f);
                 float s = Helper.RandomGenerator.NextSingle(1.8f, 3.5f);
 
-                topDownRay.Start = new Vector3(px, 1000, pz);
+                topDownRay.Position = new Vector3(px, 1000, pz);
                 topDownRay.Direction = Vector3.Down;
-                scenery.PickFirst(topDownRay, out var treeIPos);
+                scenery.PickFirst(ref topDownRay, out var treeIPos);
 
                 t.SetPosition(treeIPos.Position + delta);
                 t.SetRotation(r, y, y);
@@ -1165,7 +1165,7 @@ namespace BasicSamples.SceneTest
         private void GameStatusCollected(object sender, GameStatusCollectedEventArgs e)
         {
             var lines = e.Trace.ReadStatus();
-            if (lines.Any())
+            if (lines.Count != 0)
             {
                 var file = $"frame.{Game.GameTime.Ticks}.txt";
 

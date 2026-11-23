@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Engine.Modular
 {
@@ -19,6 +18,6 @@ namespace Engine.Modular
         /// <summary>
         /// Affected items by the trigger
         /// </summary>
-        public IEnumerable<Item> Items { get; set; }
+        public Item[] Items { get; set; }
     }
 }

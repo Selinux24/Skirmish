@@ -1,4 +1,5 @@
-﻿
+﻿using Engine.Mathematics;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>

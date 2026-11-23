@@ -2,7 +2,7 @@
 
 namespace Engine.TextureReader.DDS
 {
-    using Vortice.DXGI;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// DDS Header DXT10

@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Contact resolver
     /// </summary>
@@ -31,7 +30,7 @@ namespace Engine.Physics
         {
             get
             {
-                return contacts[currentContactIndex];
+                return contacts[currentContactIndex] ??= new Contact();
             }
         }
         /// <summary> 
@@ -76,11 +75,6 @@ namespace Engine.Physics
             this.settings = settings;
 
             contacts = new Contact[settings.MaxContacts];
-
-            for (int i = 0; i < contacts.Length; i++)
-            {
-                contacts[i] = new Contact();
-            }
         }
 
         /// <summary>
@@ -150,14 +144,14 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the contact list
         /// </summary>
-        public IEnumerable<Contact> GetContacts()
+        public Contact[] GetContacts()
         {
             if (ContactCount <= 0)
             {
                 return [];
             }
 
-            return contacts.Take(ContactCount).ToArray();
+            return [.. contacts.Take(ContactCount)];
         }
 
         /// <summary>
@@ -219,11 +213,31 @@ namespace Engine.Physics
                 contact.MatchAwakeState();
 
                 // Solve penetration
-                contact.ApplyPositionChange(max, out var linearChange, out var angularChange);
+                contact.ApplyPositionChange(max, out var linearChange1, out var linearChange2, out var angularChange1, out var angularChange2);
 
-                foreach (var c in EnumerateContactsWithContact(contact, linearChange, angularChange))
+                for (int i = 0; i < ContactCount; i++)
                 {
-                    c.contact.AdjustPosition(c.delta, c.penetrationDirection);
+                    var other = contacts[i];
+
+                    for (int o = 0; o < 2; o++)
+                    {
+                        var otherBody = other.GetBody(o);
+
+                        for (int c = 0; c < 2; c++)
+                        {
+                            if (contact.GetBody(c) != otherBody)
+                            {
+                                continue;
+                            }
+
+                            var relativeContactPosition = other.GetRelativeContactPosition(o);
+                            int direction = o != 0 ? 1 : -1;
+                            var linearChange = c == 0 ? linearChange1 : linearChange2;
+                            var angularChange = c == 0 ? angularChange1 : angularChange2;
+                            var delta = linearChange + Vector3.Cross(angularChange, relativeContactPosition);
+                            other.AdjustPosition(delta, direction);
+                        }
+                    }
                 }
 
                 positionIterationsUsed++;
@@ -279,12 +293,32 @@ namespace Engine.Physics
                 contact.MatchAwakeState();
 
                 // Resolve contact
-                contact.ApplyVelocityChange(out var linearChange, out var angularChange);
+                contact.ApplyVelocityChange(out var linearChange1, out var linearChange2, out var angularChange1, out var angularChange2);
 
-                foreach (var c in EnumerateContactsWithContact(contact, linearChange, angularChange))
+                for (int i = 0; i < ContactCount; i++)
                 {
-                    c.contact.AdjustVelocities(c.delta, c.penetrationDirection);
-                    c.contact.CalculateDesiredDeltaVelocity(time);
+                    var other = contacts[i];
+
+                    for (int o = 0; o < 2; o++)
+                    {
+                        var otherBody = other.GetBody(o);
+
+                        for (int c = 0; c < 2; c++)
+                        {
+                            if (contact.GetBody(c) != otherBody)
+                            {
+                                continue;
+                            }
+
+                            var relativeContactPosition = other.GetRelativeContactPosition(o);
+                            int direction = o != 0 ? 1 : -1;
+                            var linearChange = c == 0 ? linearChange1 : linearChange2;
+                            var angularChange = c == 0 ? angularChange1 : angularChange2;
+                            var delta = linearChange + Vector3.Cross(angularChange, relativeContactPosition);
+                            other.AdjustVelocities(delta, direction);
+                            other.CalculateDesiredDeltaVelocity(time);
+                        }
+                    }
                 }
 
                 velocityIterationsUsed++;
@@ -315,43 +349,6 @@ namespace Engine.Physics
             }
 
             return found;
-        }
-
-        /// <summary>
-        /// Enumerate multi-collision contacts
-        /// </summary>
-        /// <param name="contact">Contact</param>
-        /// <param name="linearChanges">Linear velocity changes</param>
-        /// <param name="angularChanges">Angular velocity changes</param>
-        private IEnumerable<(Contact contact, int penetrationDirection, Vector3 delta)> EnumerateContactsWithContact(Contact contact, IEnumerable<Vector3> linearChanges, IEnumerable<Vector3> angularChanges)
-        {
-            for (int i = 0; i < ContactCount; i++)
-            {
-                var other = contacts[i];
-
-                for (int o = 0; o < 2; o++)
-                {
-                    var otherBody = other.GetBody(o);
-
-                    for (int c = 0; c < 2; c++)
-                    {
-                        var contactBody = contact.GetBody(c);
-                        if (contactBody != otherBody)
-                        {
-                            continue;
-                        }
-
-                        var relativeContactPosition = other.GetRelativeContactPosition(o);
-                        int direction = o != 0 ? 1 : -1;
-
-                        var linearChange = linearChanges.ElementAt(c);
-                        var angularChange = angularChanges.ElementAt(c);
-                        var delta = linearChange + Vector3.Cross(angularChange, relativeContactPosition);
-
-                        yield return (other, direction, delta);
-                    }
-                }
-            }
         }
     }
 }

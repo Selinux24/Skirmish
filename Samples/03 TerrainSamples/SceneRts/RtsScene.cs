@@ -938,7 +938,7 @@ namespace TerrainSamples.SceneRts
 
                 rocks[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi),
+                    posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(0, MathUtils.TwoPi),
                     scale);
             }
             rocks.Visible = true;
@@ -961,7 +961,7 @@ namespace TerrainSamples.SceneRts
 
                 tree1[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0, MathUtils.TwoPi), 0, 0,
                     posRnd.NextSingle(0.25f, 0.75f));
             }
             tree1.Visible = true;
@@ -982,7 +982,7 @@ namespace TerrainSamples.SceneRts
 
                 tree2[i].Manipulator.SetTransform(
                     r.Position,
-                    posRnd.NextSingle(0, Helper.TwoPi), 0, 0,
+                    posRnd.NextSingle(0, MathUtils.TwoPi), 0, 0,
                     posRnd.NextSingle(0.25f, 0.75f));
             }
             tree2.Visible = true;
@@ -1001,7 +1001,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
             {
                 garage.Manipulator.SetPosition(r.Position);
-                garage.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
+                garage.Manipulator.SetRotation(MathUtils.PiOver4 * 0.5f + MathUtils.Pi, 0, 0);
             }
             garage.Visible = true;
             garage.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1011,7 +1011,7 @@ namespace TerrainSamples.SceneRts
             if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
             {
                 building.Manipulator.SetPosition(r.Position);
-                building.Manipulator.SetRotation(Helper.PiOver4 * 0.5f + Helper.Pi, 0, 0);
+                building.Manipulator.SetRotation(MathUtils.PiOver4 * 0.5f + MathUtils.Pi, 0, 0);
             }
             building.Visible = true;
             building.Lights.ToList().ForEach(l => l.Enabled = true);
@@ -1037,13 +1037,13 @@ namespace TerrainSamples.SceneRts
 
                 obeliskInstance.Manipulator.SetPosition(r.Position);
                 obeliskInstance.Manipulator.SetScaling(1.5f);
-                obeliskInstance.Manipulator.SetTransform(r.Position, Helper.PiOver4, 0, 0, 1.5f);
+                obeliskInstance.Manipulator.SetTransform(r.Position, MathUtils.PiOver4, 0, 0, 1.5f);
             }
             obelisk.Visible = true;
         }
-        private void PrepareLights(IEnumerable<ISceneLight> lights)
+        private void PrepareLights(ISceneLight[] lights)
         {
-            if (!lights.Any())
+            if (lights.Length == 0)
             {
                 return;
             }
@@ -1096,8 +1096,9 @@ namespace TerrainSamples.SceneRts
             var sceneryUsage = SceneObjectUsages.Ground;
 
             // Set position
-            var ray = GetTopDownRay(heliport.Manipulator.Position, PickingHullTypes.Geometry);
-            if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
+            var pos = heliport.Manipulator.Position;
+            var ray = GetTopDownRay(ref pos, PickingHullTypes.Geometry);
+            if (this.PickNearest(ref ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
                 helicopter.Manipulator.SetNormal(r.PickingResult.Primitive.Normal);
@@ -1165,13 +1166,15 @@ namespace TerrainSamples.SceneRts
         }
         private void StartTanks()
         {
-            if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r1))
+            var ray1 = GetTopDownRay(-60, -60, PickingHullTypes.Geometry);
+            if (this.PickNearest(ref ray1, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70, PickingHullTypes.Geometry), SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r2))
+            var ray2 = GetTopDownRay(-70, 70, PickingHullTypes.Geometry);
+            if (this.PickNearest(ref ray2, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
@@ -1232,7 +1235,7 @@ namespace TerrainSamples.SceneRts
             //Adjust check-points
             for (int i = 0; i < t1CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
+                if (FindNearestGroundPosition(ref t1CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t1CheckPoints[i] = r.Position;
                 }
@@ -1240,7 +1243,7 @@ namespace TerrainSamples.SceneRts
 
             for (int i = 0; i < t2CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
+                if (FindNearestGroundPosition(ref t2CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t2CheckPoints[i] = r.Position;
                 }
@@ -1299,7 +1302,7 @@ namespace TerrainSamples.SceneRts
         }
         private void BeginToggleGarageLights()
         {
-            var light = garage.Lights.FirstOrDefault();
+            var light = garage.Lights.Length > 0 ? garage.Lights[0] : default;
             if (light == null)
             {
                 return;
@@ -1470,7 +1473,7 @@ namespace TerrainSamples.SceneRts
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                bool picked = this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.Agent, out var agent);
+                bool picked = this.PickNearest<Triangle>(ref pickingRay, SceneObjectUsages.Agent, out var agent);
                 if (picked)
                 {
                     followTarget = agent.SceneObject;
@@ -1535,7 +1538,7 @@ namespace TerrainSamples.SceneRts
             {
                 terrainPointDrawer.Clear();
 
-                if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+                if (this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
                     DEBUGPickingPosition(r.PickingResult.Position);
                 }
@@ -1666,7 +1669,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateCursor(PickingRay pickingRay)
         {
-            if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
+            if (!walkMode && terrain.PickNearest(ref pickingRay, out PickingResult<Triangle> r))
             {
                 cursor3D.Manipulator.SetPosition(r.Position);
             }
@@ -1775,12 +1778,13 @@ namespace TerrainSamples.SceneRts
         }
         private void DrawTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 var t1Position = tankP1.Manipulator.Position;
 
-                var result = FindPath(tankAgentType, t1Position, r.PickingResult.Position);
+                var pPos = r.PickingResult.Position;
+                var result = FindPath(tankAgentType, ref t1Position, ref pPos);
                 if (result != null)
                 {
                     DEBUGDrawPath(result.Positions, Color.Red);
@@ -1789,7 +1793,7 @@ namespace TerrainSamples.SceneRts
         }
         private void UpdateTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(ref pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>
@@ -2198,7 +2202,7 @@ namespace TerrainSamples.SceneRts
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
-        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color4 pathColor)
+        private void DEBUGDrawPath(Vector3[] path, Color4 pathColor)
         {
             if (!terrainPointDrawer.Visible)
             {
@@ -2207,15 +2211,15 @@ namespace TerrainSamples.SceneRts
 
             terrainPointDrawer.Clear(pathColor);
 
-            if (path?.Any() == true)
+            if ((path?.Length ?? 0) > 0)
             {
-                int count = Math.Min(path.Count(), MaxPickingTest);
+                int count = Math.Min(path.Length, MaxPickingTest);
 
                 Line3D[] lines = new Line3D[count];
 
                 for (int i = 1; i < count; i++)
                 {
-                    lines[i] = new Line3D(path.ElementAt(i - 1), path.ElementAt(i));
+                    lines[i] = new Line3D(path[i - 1], path[i]);
                 }
 
                 terrainPointDrawer.SetPrimitives(pathColor, lines);

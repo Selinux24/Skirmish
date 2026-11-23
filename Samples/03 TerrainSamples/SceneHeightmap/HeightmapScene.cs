@@ -850,7 +850,7 @@ namespace TerrainSamples.SceneHeightmap
         {
             for (int i = 0; i < rocks.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     continue;
                 }
@@ -865,7 +865,7 @@ namespace TerrainSamples.SceneHeightmap
                     };
 
                     rocks[i].Manipulator.SetPosition(r.Position);
-                    rocks[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(0, Helper.TwoPi));
+                    rocks[i].Manipulator.SetRotation(posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(0, MathUtils.TwoPi));
                     rocks[i].Manipulator.SetScaling(scale);
                 }
             }
@@ -878,7 +878,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     trees[i].Visible = false;
 
@@ -891,7 +891,7 @@ namespace TerrainSamples.SceneHeightmap
                     treePosition.Y -= posRnd.NextSingle(1f, 5f);
 
                     trees[i].Manipulator.SetPosition(treePosition);
-                    trees[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(-Helper.PiOver4 * 0.5f, Helper.PiOver4 * 0.5f), 0);
+                    trees[i].Manipulator.SetRotation(posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(-MathUtils.PiOver4 * 0.5f, MathUtils.PiOver4 * 0.5f), 0);
                     trees[i].Manipulator.SetScaling(posRnd.NextSingle(1.5f, 2.5f));
                 }
             }
@@ -900,7 +900,7 @@ namespace TerrainSamples.SceneHeightmap
 
             for (int i = 0; i < trees2.InstanceCount; i++)
             {
-                if (!GetRandomPoint(posRnd, Vector3.Zero, bbox, out var pos))
+                if (!GetRandomPoint(posRnd, Vector3.Zero, ref bbox, out var pos))
                 {
                     trees2[i].Visible = false;
 
@@ -913,7 +913,7 @@ namespace TerrainSamples.SceneHeightmap
                     treePosition.Y -= posRnd.NextSingle(0f, 2f);
 
                     trees2[i].Manipulator.SetPosition(treePosition);
-                    trees2[i].Manipulator.SetRotation(posRnd.NextSingle(0, Helper.TwoPi), posRnd.NextSingle(-Helper.PiOver4 * 0.15f, Helper.PiOver4 * 0.15f), 0);
+                    trees2[i].Manipulator.SetRotation(posRnd.NextSingle(0, MathUtils.TwoPi), posRnd.NextSingle(-MathUtils.PiOver4 * 0.15f, MathUtils.PiOver4 * 0.15f), 0);
                     trees2[i].Manipulator.SetScaling(posRnd.NextSingle(1.5f, 2.5f));
                 }
             }
@@ -925,7 +925,7 @@ namespace TerrainSamples.SceneHeightmap
             if (FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
                 watchTower.Manipulator.SetPosition(r.Position);
-                watchTower.Manipulator.SetRotation(Helper.Pi / 3f, 0, 0);
+                watchTower.Manipulator.SetRotation(MathUtils.Pi / 3f, 0, 0);
                 watchTower.Manipulator.SetScaling(1.5f);
             }
 
@@ -953,7 +953,7 @@ namespace TerrainSamples.SceneHeightmap
 
                     containers[i].Manipulator.SetScaling(5);
                     containers[i].Manipulator.SetPosition(pos);
-                    containers[i].Manipulator.SetRotation(Helper.Pi / 16f * (i - 2), 0, 0);
+                    containers[i].Manipulator.SetRotation(MathUtils.Pi / 16f * (i - 2), 0, 0);
                     containers[i].Manipulator.SetNormal(res.Primitive.Normal);
                     containers[i].Manipulator.UpdateInternals(true);
                 }
@@ -1037,8 +1037,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             var hPositions = new[]
             {
-                new Vector3(-120, -10, Helper.Pi * 0.1f),
-                new Vector3(-220, -8, Helper.Pi * 0.15f),
+                new Vector3(-120, -10, MathUtils.Pi * 0.1f),
+                new Vector3(-220, -8, MathUtils.Pi * 0.15f),
                 new Vector3(-320, -10, 0),
             };
 
@@ -1067,11 +1067,11 @@ namespace TerrainSamples.SceneHeightmap
         {
             var bPositions = new[]
             {
-                new Vector3(-100, 220, Helper.Pi * +0.3f),
-                new Vector3(-50, 210, Helper.Pi * +0.15f),
-                new Vector3(0, 200, Helper.Pi * 0),
-                new Vector3(50, 210, Helper.Pi * -0.15f),
-                new Vector3(100, 220, Helper.Pi * -0.3f),
+                new Vector3(-100, 220, MathUtils.Pi * +0.3f),
+                new Vector3(-50, 210, MathUtils.Pi * +0.15f),
+                new Vector3(0, 200, MathUtils.Pi * 0),
+                new Vector3(50, 210, MathUtils.Pi * -0.15f),
+                new Vector3(100, 220, MathUtils.Pi * -0.3f),
             };
 
             for (int i = 0; i < bPositions.Length; i++)
@@ -1096,11 +1096,11 @@ namespace TerrainSamples.SceneHeightmap
         {
             var bPositions = new[]
             {
-                new Vector3(-160, -190, Helper.Pi),
-                new Vector3(-080, -190, Helper.Pi),
-                new Vector3(+000, -190, Helper.Pi),
-                new Vector3(+080, -190, Helper.Pi),
-                new Vector3(+160, -190, Helper.Pi),
+                new Vector3(-160, -190, MathUtils.Pi),
+                new Vector3(-080, -190, MathUtils.Pi),
+                new Vector3(+000, -190, MathUtils.Pi),
+                new Vector3(+080, -190, MathUtils.Pi),
+                new Vector3(+160, -190, MathUtils.Pi),
             };
 
             for (int i = 0; i < bPositions.Length; i++)
@@ -1124,8 +1124,8 @@ namespace TerrainSamples.SceneHeightmap
         {
             if (FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
-                soldier.Manipulator.SetPosition(res.Last().Position);
-                soldier.Manipulator.SetRotation(Helper.Pi, 0, 0);
+                soldier.Manipulator.SetPosition(res[^1].Position);
+                soldier.Manipulator.SetRotation(MathUtils.Pi, 0, 0);
             }
 
             soldier.AnimationController.Start(animations["soldier_idle"]);
@@ -1136,10 +1136,10 @@ namespace TerrainSamples.SceneHeightmap
         {
             Vector3[] iPos =
             [
-                new (4, -2, Helper.PiOver4),
-                new (5, -5, Helper.PiOver2),
-                new (-4, -2, -Helper.PiOver4),
-                new (-5, -5, -Helper.PiOver2),
+                new (4, -2, MathUtils.PiOver4),
+                new (5, -5, MathUtils.PiOver2),
+                new (-4, -2, -MathUtils.PiOver4),
+                new (-5, -5, -MathUtils.PiOver2),
             ];
 
             for (int i = 0; i < 4; i++)
@@ -1275,7 +1275,7 @@ namespace TerrainSamples.SceneHeightmap
 
             Vector3 extent = Vector3.One * 20f;
             var bbox = new BoundingBox(position - extent, position + extent);
-            NavigationGraph.UpdateAt(bbox, (updateState) =>
+            NavigationGraph.UpdateAt(ref bbox, (updateState) =>
             {
                 if (updateState == GraphUpdateStates.Updated)
                 {
@@ -1416,7 +1416,7 @@ namespace TerrainSamples.SceneHeightmap
                     var center = t.Manipulator.Position + (Vector3.Up * bbox.Height * 0.5f);
                     var bc = new BoundingCylinder(center, 1.5f, bbox.Height);
 
-                    NavigationGraph.AddObstacle(bc);
+                    NavigationGraph.AddObstacle(ref bc);
                 }
             }
         }
@@ -1668,7 +1668,7 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void GenerateDust(Random rnd, BoundingSphere bsph)
         {
-            if (!GetRandomPoint(rnd, Vector3.Zero, bsph, out var pos))
+            if (!GetRandomPoint(rnd, Vector3.Zero, ref bsph, out var pos))
             {
                 return;
             }
@@ -1689,8 +1689,8 @@ namespace TerrainSamples.SceneHeightmap
         }
         private void ToggleFog()
         {
-            Lights.FogStart = Helper.IsZero(Lights.FogStart) ? fogStart : 0f;
-            Lights.FogRange = Helper.IsZero(Lights.FogRange) ? fogRange : 0f;
+            Lights.FogStart = MathUtils.IsZero(Lights.FogStart) ? fogStart : 0f;
+            Lights.FogRange = MathUtils.IsZero(Lights.FogRange) ? fogRange : 0f;
         }
         private void UpdateDrawers()
         {
@@ -1755,7 +1755,7 @@ namespace TerrainSamples.SceneHeightmap
             var tris = GeometryUtil.CreateFrustum(Topology.TriangleList, cameraFrustum);
 
             bboxesDrawer.SetPrimitives(lColor, lines);
-            bboxesTriDrawer.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+            bboxesTriDrawer.SetPrimitives(tColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
         private void UpdateDebugGardeners()
         {
@@ -1780,7 +1780,7 @@ namespace TerrainSamples.SceneHeightmap
             {
                 //Adjust box
                 var box = nodes[i].BoundingBox;
-                var vedges = box.GetEdges().Skip(8).ToArray();
+                var vedges = box.GetEdgesVertical();
                 if (!FindTopGroundPosition<Triangle>(vedges[0].Point1.X, vedges[0].Point1.Z, out var p0)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[1].Point1.X, vedges[1].Point1.Z, out var p1)) continue;
                 if (!FindTopGroundPosition<Triangle>(vedges[2].Point1.X, vedges[2].Point1.Z, out var p2)) continue;
@@ -1793,7 +1793,7 @@ namespace TerrainSamples.SceneHeightmap
                 var lines = Line3D.CreateBox(abox);
                 bboxesDrawer.AddPrimitives(colL, lines);
 
-                var tris = Triangle.ComputeTriangleList(abox);
+                var tris = GeometryUtil.ComputeTriangleList(abox).ToArray();
                 bboxesTriDrawer.AddPrimitives(colT, tris);
                 bboxesTriDrawer.AddPrimitives(colT, Triangle.ReverseNormal(tris));
 

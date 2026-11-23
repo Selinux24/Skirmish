@@ -140,7 +140,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public bool IsRoot { get { return Root == null; } }
         /// <inheritdoc/>
-        public IEnumerable<IUIControl> Children
+        public IUIControl[] Children
         {
             get
             {
@@ -201,7 +201,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(width, value))
+                if (!MathUtils.NearEqual(width, value))
                 {
                     width = value;
 
@@ -218,7 +218,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(height, value))
+                if (!MathUtils.NearEqual(height, value))
                 {
                     height = value;
 
@@ -236,7 +236,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(scale, value))
+                if (!MathUtils.NearEqual(scale, value))
                 {
                     scale = value;
 
@@ -261,8 +261,8 @@ namespace Engine.UI
             }
             set
             {
-                float v = value % Helper.TwoPi;
-                if (!Helper.NearEqual(rotation, v))
+                float v = value % MathUtils.TwoPi;
+                if (!MathUtils.NearEqual(rotation, v))
                 {
                     rotation = v;
 
@@ -305,7 +305,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(left, value))
+                if (!MathUtils.NearEqual(left, value))
                 {
                     left = value;
 
@@ -330,7 +330,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(top, value))
+                if (!MathUtils.NearEqual(top, value))
                 {
                     top = value;
 
@@ -530,7 +530,7 @@ namespace Engine.UI
             }
             set
             {
-                if (!Helper.NearEqual(alpha, value))
+                if (!MathUtils.NearEqual(alpha, value))
                 {
                     alpha = value;
                 }
@@ -927,14 +927,14 @@ namespace Engine.UI
         /// Validates the control list for adding to the children list
         /// </summary>
         /// <param name="controls">Control list</param>
-        private bool ValidateAddChildren(IEnumerable<IUIControl> controls)
+        private bool ValidateAddChildren(IUIControl[] controls)
         {
-            if (!controls.Any())
+            if (controls.Length == 0)
             {
                 return false;
             }
 
-            if (controls.Any(ctrl => !ValidateAddChild(ctrl)))
+            if (Array.Exists(controls, ctrl => !ValidateAddChild(ctrl)))
             {
                 return false;
             }
@@ -963,14 +963,14 @@ namespace Engine.UI
         /// Validates the control list for removing from the children list
         /// </summary>
         /// <param name="controls">Control list</param>
-        private bool ValidateRemoveChildren(IEnumerable<IUIControl> controls)
+        private bool ValidateRemoveChildren(IUIControl[] controls)
         {
-            if (!controls.Any())
+            if (controls.Length == 0)
             {
                 return false;
             }
 
-            if (controls.Any(ctrl => !ValidateRemoveChild(ctrl)))
+            if (Array.Exists(controls, ctrl => !ValidateRemoveChild(ctrl)))
             {
                 return false;
             }
@@ -1038,7 +1038,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = false)
+        public bool AddChildren(IUIControl[] controls, bool fitToParent = false)
         {
             if (!ValidateAddChildren(controls))
             {
@@ -1069,7 +1069,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
+        public bool RemoveChildren(IUIControl[] controls, bool dispose = false)
         {
             if (!ValidateRemoveChildren(controls))
             {
@@ -1105,7 +1105,7 @@ namespace Engine.UI
             return true;
         }
         /// <inheritdoc/>
-        public bool InsertChildren(int index, IEnumerable<IUIControl> controls, bool fitToParent = false)
+        public bool InsertChildren(int index, IUIControl[] controls, bool fitToParent = false)
         {
             if (index < 0 || index >= children.Count)
             {
@@ -1251,7 +1251,7 @@ namespace Engine.UI
                 PressedState = MouseButtons.None;
             }
 
-            if (!Children.Any())
+            if (Children.Length == 0)
             {
                 return;
             }
@@ -1282,7 +1282,7 @@ namespace Engine.UI
                 }
 
                 //Get the new evaluable top most control in the children list
-                topControl = topControl.Children.LastOrDefault(c => c.IsEvaluable() && c.IsMouseOver);
+                topControl = Array.FindLast(topControl.Children, c => c.IsEvaluable() && c.IsMouseOver);
             }
         }
         /// <inheritdoc/>

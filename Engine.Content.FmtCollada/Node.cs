@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Xml.Serialization;
 
 namespace Engine.Content.FmtCollada
@@ -73,7 +72,10 @@ namespace Engine.Content.FmtCollada
         {
             get
             {
-                return InstanceController?.FirstOrDefault()?.Skeleton?.FirstOrDefault();
+                if (InstanceController == null || InstanceController.Length == 0) return null;
+                if (InstanceController[0].Skeleton == null || InstanceController[0].Skeleton.Length == 0) return null;
+
+                return InstanceController[0].Skeleton[0];
             }
         }
         [XmlIgnore]

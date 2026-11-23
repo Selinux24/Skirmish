@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Engine.BuiltIn.Components.Ground;
+using Engine.Collections.Generic;
+using Engine.Mathematics;
+using Engine.Physics;
+using Engine.Physics.Colliders;
+using System;
 
 namespace PhysicsSamples.ScenePhysics
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Ground;
-    using Engine.Collections.Generic;
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.Physics.Colliders;
-
     /// <summary>
     /// Terrain
     /// </summary>
@@ -24,7 +20,7 @@ namespace PhysicsSamples.ScenePhysics
         /// <inheritdoc/>
         public IRigidBody RigidBody { get; private set; }
         /// <inheritdoc/>
-        public IEnumerable<ICollider> Colliders { get; private set; }
+        public ICollider[] Colliders { get; private set; }
         /// <summary>
         /// Terrain
         /// </summary>
@@ -42,12 +38,10 @@ namespace PhysicsSamples.ScenePhysics
             octree = new OcTree<ICollider>(bbox, 50);
 
             var tris = model.GetGeometry(true);
-            var colliders = new ICollider[tris.Count()];
-            for (int i = 0; i < tris.Count(); i++)
+            var colliders = new ICollider[tris.Length];
+            for (int i = 0; i < tris.Length; i++)
             {
-                var tri = tris.ElementAt(i);
-
-                colliders[i] = new TriangleCollider(tri);
+                colliders[i] = new TriangleCollider(tris[i]);
                 colliders[i].Attach(body);
 
                 var colliderBox = colliders[i].BoundingBox;
@@ -76,7 +70,7 @@ namespace PhysicsSamples.ScenePhysics
             return intersects;
         }
         /// <inheritdoc/>
-        public IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj)
+        public ICollider[] GetBroadPhaseColliders(IPhysicsObject obj)
         {
             var cullingVolume = obj.GetBroadPhaseBounds();
 

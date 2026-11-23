@@ -131,7 +131,7 @@ namespace Engine.UI
 
             for (int i = 0; i < VertexCount; i += 4)
             {
-                if (i == 0 || !Helper.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
+                if (i == 0 || !MathUtils.IsZero(Vertices[i].GetChannelValue<Vector3>(Common.VertexDataChannels.Position).X))
                 {
                     //Skip until the first character
                     continue;
@@ -165,7 +165,7 @@ namespace Engine.UI
             float diffX = GetDeltaX(horizontalAlign, rect.Width, lineSize.X);
             float diffY = GetDeltaY(verticalAlign, rect.Height, textSize.Y);
 
-            if (Helper.IsZero(diffX) && Helper.IsZero(diffY))
+            if (MathUtils.IsZero(diffX) && MathUtils.IsZero(diffY))
             {
                 //No changes, add the line and skip the update
                 return;

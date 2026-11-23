@@ -39,7 +39,6 @@ namespace TerrainSamples.SceneRts.AI.Behaviors
                 if (!randomTarget.HasValue)
                 {
                     Agent.Parent.Scene.GetRandomPoint(Helper.RandomGenerator, Vector3.One * 5f, out var p);
-
                     randomTarget = p;
                 }
 

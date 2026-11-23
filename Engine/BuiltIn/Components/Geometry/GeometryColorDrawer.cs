@@ -3,9 +3,11 @@ using Engine.BuiltIn.Drawers.Forward;
 using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Mathematics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Engine.BuiltIn.Components.Geometry
@@ -52,6 +54,19 @@ namespace Engine.BuiltIn.Components.Geometry
         /// Buffer exchange data list
         /// </summary>
         private List<VertexPositionColor> bufferData = [];
+        /// <summary>
+        /// Primitives to draw
+        /// </summary>
+        private readonly List<DrawPrimitive> drawPrimitives = [];
+
+        /// <summary>
+        /// Primitive to draw record
+        /// </summary>
+        /// <param name="Color">Color</param>
+        /// <param name="Primitive">Primitive</param>
+        /// <param name="Distance">Distance</param>
+        /// <param name="Order">Order</param>
+        private readonly record struct DrawPrimitive(Color4 Color, T Primitive, float Distance, int Order);
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -96,7 +111,7 @@ namespace Engine.BuiltIn.Components.Geometry
 
             T tmp = default;
             stride = tmp.GetStride();
-            topology = tmp.GetTopology();
+            topology = stride == 2 ? Topology.LineList : Topology.TriangleList;
 
             uint count;
             if (Description.Primitives?.Length > 0)
@@ -247,7 +262,10 @@ namespace Engine.BuiltIn.Components.Geometry
         /// </summary>
         public void Clear()
         {
-            dictionary.Clear();
+            foreach (var pair in dictionary)
+            {
+                pair.Value.Clear();
+            }
 
             dictionaryChanged = true;
         }
@@ -319,7 +337,7 @@ namespace Engine.BuiltIn.Components.Geometry
         {
             UpdateBufferData(eyePosition);
 
-            if (!Game.WriteVertexBuffer(dc, vertexBuffer, [.. bufferData]))
+            if (!Game.WriteVertexBuffer(dc, vertexBuffer, CollectionsMarshal.AsSpan(bufferData)))
             {
                 return;
             }
@@ -341,23 +359,43 @@ namespace Engine.BuiltIn.Components.Geometry
             bufferData.Clear();
 
             var copy = dictionary.ToArray();
+            drawPrimitives.Clear();
+            int order = 0;
 
-            //Sort each primitive list by distance to eye
-            var l = copy
-                .SelectMany(p => p.Value.Select(v => new { Color = p.Key, Vertices = v.GetVertices().ToArray() }))
-                .OrderByDescending(p => p.Vertices.Max(v => Vector3.Distance(v, eyePosition)));
-
-            foreach (var item in l)
+            foreach (var pair in copy)
             {
-                var color = item.Color;
-                var primitives = item.Vertices;
+                foreach (var primitive in pair.Value)
+                {
+                    uint vertexCount = primitive.GetStride();
+                    if (vertexCount == 0)
+                    {
+                        throw new InvalidOperationException("Sequence contains no elements");
+                    }
 
-                for (int i = 0; i < primitives.Length; i++)
+                    float maxDistance = float.NegativeInfinity;
+                    for (int i = 0; i < vertexCount; i++)
+                    {
+                        maxDistance = MathF.Max(maxDistance, Vector3.Distance(primitive.GetVertex(i), eyePosition));
+                    }
+
+                    drawPrimitives.Add(new(pair.Key, primitive, maxDistance, order++));
+                }
+            }
+
+            drawPrimitives.Sort(static (left, right) =>
+            {
+                int distanceOrder = right.Distance.CompareTo(left.Distance);
+                return distanceOrder != 0 ? distanceOrder : left.Order.CompareTo(right.Order);
+            });
+
+            foreach (var item in drawPrimitives)
+            {
+                for (int i = 0; i < item.Primitive.GetStride(); i++)
                 {
                     bufferData.Add(new()
                     {
-                        Position = primitives[i],
-                        Color = color
+                        Position = item.Primitive.GetVertex(i),
+                        Color = item.Color
                     });
                 }
             }

@@ -280,10 +280,31 @@ namespace Engine
             Func<BufferDescription, SubresourceData, TResource> createResourceFunc)
             where T : unmanaged
         {
-            uint length = (uint)values.Count();
+            uint length;
+            T[] array;
 
-            T[] array = new T[length];
-            Array.Copy(values.ToArray(), array, length);
+            if (values is T[] sourceArray)
+            {
+                length = checked((uint)sourceArray.Length);
+                array = sourceArray;
+            }
+            else if (values is ICollection<T> collection)
+            {
+                length = checked((uint)collection.Count);
+                array = new T[length];
+                collection.CopyTo(array, 0);
+            }
+            else
+            {
+                length = checked((uint)values.Count());
+                array = new T[length];
+
+                int index = 0;
+                foreach (T value in values)
+                {
+                    array[index++] = value;
+                }
+            }
 
             uint bytesPerPixel = (uint)Marshal.SizeOf<T>() * length;
             uint rowPitch = length * bytesPerPixel;

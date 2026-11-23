@@ -197,7 +197,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int nd = Math.Clamp(ndivs, 1, DT_MAX_PATTERN_DIVS);
             int nr = Math.Clamp(nrings, 1, DT_MAX_PATTERN_RINGS);
-            float da = 1.0f / nd * Helper.TwoPi;
+            float da = 1.0f / nd * MathUtils.TwoPi;
             float ca = MathF.Cos(da);
             float sa = MathF.Sin(da);
 

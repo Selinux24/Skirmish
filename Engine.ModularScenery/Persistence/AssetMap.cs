@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
 namespace Engine.Modular.Persistence
 {
@@ -25,7 +24,7 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Complex assets configuration
         /// </summary>
-        public IEnumerable<Asset> Assets { get; set; } = [];
+        public Asset[] Assets { get; set; } = [];
         /// <summary>
         /// Maintain texture direction for ceilings and floors, avoiding asset map rotations
         /// </summary>

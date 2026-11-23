@@ -1,12 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Common;
+using Engine.Mathematics;
+using Engine.Physics;
+using Engine.Physics.Colliders;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Engine.PhysicsTests
 {
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.Physics.Colliders;
     using Solver = Engine.Physics.GJK.Solver;
 
     [ExcludeFromCodeCoverage]
@@ -33,7 +34,7 @@ namespace Engine.PhysicsTests
         }
         static ConvexMeshCollider MeshFromExtents(Vector3 extents, Matrix4x4 transform)
         {
-            var triangles = Triangle.ComputeTriangleList(new BoundingBox(-extents, extents));
+            var triangles = GeometryUtil.ComputeTriangleList(new BoundingBox(-extents, extents));
             var collider = new ConvexMeshCollider(triangles);
             var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             collider.Attach(body);

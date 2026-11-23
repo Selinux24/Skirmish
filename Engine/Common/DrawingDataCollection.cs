@@ -87,14 +87,14 @@ namespace Engine.Common
         /// </summary>
         public string[] GetNames()
         {
-            return list.Select(m => m.Name).ToArray();
+            return [.. list.Select(m => m.Name)];
         }
         /// <summary>
         /// Gets the internal value list
         /// </summary>
         public IEnumerable<T> GetValues()
         {
-            return list.Select(m => m.Value).ToArray();
+            return [.. list.Select(m => m.Value)];
         }
         /// <summary>
         /// Clears the collection

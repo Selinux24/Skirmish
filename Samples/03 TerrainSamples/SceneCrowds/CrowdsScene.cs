@@ -441,7 +441,7 @@ namespace TerrainSamples.SceneCrowds
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
+            if (!this.PickNearest<Triangle>(ref pRay, SceneObjectUsages.None, out var r))
             {
                 return;
             }

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.PathFinding.RecastNavigation.Detour;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Input geometry
     /// </summary>
@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Constructor
     /// </remarks>
     /// <param name="fnc">Triangle function</param>
-    public class InputGeometry(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
+    public class InputGeometry(Func<Triangle[]> fnc) : PathFinderInput(fnc)
     {
         /// <summary>
         /// Chunky mesh

@@ -18,8 +18,23 @@ namespace Engine.PathFinding.RecastNavigation
     /// <param name="agent">Agent</param>
     public struct GraphDebug(Graph graph, AgentType agent) : IGraphDebug
     {
-        private static readonly Color4 DefaultNodeColor = new Color(255, 255, 255, 32);
-        private static readonly Color4 DefaultPrimitiveColor = new Color(0, 192, 255, 128);
+        private static readonly Color4 DefaultNodeColor = new(255, 255, 255, 32);
+        private static readonly Color4 DefaultPrimitiveColor = new(0, 192, 255, 128);
+
+        private static readonly (int Id, string Information)[] graphDebugTypes = InitializeGraphDebugTypes();
+        private static (int Id, string Information)[] InitializeGraphDebugTypes()
+        {
+            GraphDebugTypes[] values = Enum.GetValues<GraphDebugTypes>();
+
+            List<(int Id, string Information)> res = [];
+            foreach (var v in values)
+            {
+                if (v == GraphDebugTypes.None) continue;
+
+                res.Add(((int)v, v.ToString()));
+            }
+            return [.. res];
+        }
 
         /// <summary>
         /// Internal graph
@@ -32,12 +47,9 @@ namespace Engine.PathFinding.RecastNavigation
         public AgentType Agent { get; private set; } = agent ?? throw new ArgumentNullException(nameof(agent));
 
         /// <inheritdoc/>
-        public readonly IEnumerable<(int Id, string Information)> GetAvailableDebugInformation()
+        public readonly (int Id, string Information)[] GetAvailableDebugInformation()
         {
-            return Enum
-                .GetValues<GraphDebugTypes>()
-                .Except([GraphDebugTypes.None])
-                .Select(v => ((int)v, v.ToString()));
+            return graphDebugTypes;
         }
         /// <inheritdoc/>
         public readonly IGraphDebugData GetInfo(int id, Vector3 point)
@@ -70,15 +82,15 @@ namespace Engine.PathFinding.RecastNavigation
                 GraphDebugTypes.NavMesh => GetNodes(false, false),
                 GraphDebugTypes.Nodes => GetNodes(true, false),
                 GraphDebugTypes.NodesWithLinks => GetNodes(true, true),
-                GraphDebugTypes.Heightfield => GetHeightfield(buildData.Heightfield, false),
-                GraphDebugTypes.WalkableHeightfield => GetHeightfield(buildData.Heightfield, true),
-                GraphDebugTypes.RawContours => GetContours(buildData.ContourSet, true),
-                GraphDebugTypes.Contours => GetContours(buildData.ContourSet, false),
+                GraphDebugTypes.Heightfield => [.. GetHeightfield(buildData.Heightfield, false)],
+                GraphDebugTypes.WalkableHeightfield => [.. GetHeightfield(buildData.Heightfield, true)],
+                GraphDebugTypes.RawContours => [.. GetContours(buildData.ContourSet, true)],
+                GraphDebugTypes.Contours => [.. GetContours(buildData.ContourSet, false)],
                 GraphDebugTypes.PolyMesh => GetPolyMesh(buildData.PolyMesh),
                 GraphDebugTypes.DetailMesh => GetDetailMesh(buildData.PolyMeshDetail),
-                GraphDebugTypes.TileCacheLayersAreas => GetTileCacheLayer(buildData.TileCacheLayer, buildData.CellSize, buildData.CellHeight, true, false),
-                GraphDebugTypes.TileCacheLayersRegions => GetTileCacheLayer(buildData.TileCacheLayer, buildData.CellSize, buildData.CellHeight, false, true),
-                GraphDebugTypes.TileCacheContours => GetTileCacheContours(buildData.TileCacheContourSet, buildData.Origin, buildData.CellSize, buildData.CellHeight),
+                GraphDebugTypes.TileCacheLayersAreas => [.. GetTileCacheLayer(buildData.TileCacheLayer, buildData.CellSize, buildData.CellHeight, true, false)],
+                GraphDebugTypes.TileCacheLayersRegions => [.. GetTileCacheLayer(buildData.TileCacheLayer, buildData.CellSize, buildData.CellHeight, false, true)],
+                GraphDebugTypes.TileCacheContours => [.. GetTileCacheContours(buildData.TileCacheContourSet, buildData.Origin, buildData.CellSize, buildData.CellHeight)],
                 GraphDebugTypes.TileCachePolyMesh => GetTileCachePolyMesh(buildData.TileCachePolyMesh, buildData.Origin, buildData.CellSize, buildData.CellHeight),
                 _ => []
             };
@@ -90,38 +102,36 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="separateNodes">Separate nodes</param>
         /// <param name="showTriangles">Show triangles</param>
-        private readonly IEnumerable<GraphDebugDataCollection> GetNodes(bool separateNodes, bool showTriangles)
+        private readonly GraphDebugDataCollection[] GetNodes(bool separateNodes, bool showTriangles)
         {
-            var nodes = graph.GetNodes(Agent).OfType<GraphNode>();
-            if (!nodes.Any())
+            var nodes = graph.GetNodes<GraphNode>(Agent);
+            if (nodes.Length == 0)
             {
                 return [];
             }
-
-            Color4 color = DefaultNodeColor;
 
             if (showTriangles)
             {
                 return
                 [
-                    .. GetBounds(graph.Bounds, color),
-                    .. GetNodeTris(nodes, separateNodes),
-                    .. GetNodeLines(nodes, separateNodes),
+                    GetBounds(graph.Bounds, DefaultNodeColor),
+                    GetNodeTris(nodes, separateNodes),
+                    GetNodeLines(nodes, separateNodes),
                 ];
             }
             else
             {
                 return
                 [
-                    .. GetBounds(graph.Bounds, color),
-                    .. GetNodeTris(nodes, separateNodes),
+                    GetBounds(graph.Bounds, DefaultNodeColor),
+                    GetNodeTris(nodes, separateNodes),
                 ];
             }
         }
         /// <summary>
         /// Gets the node triangles debug information
         /// </summary>
-        private static IEnumerable<GraphDebugDataCollection> GetNodeTris(IEnumerable<GraphNode> nodes, bool separateNodes)
+        private static GraphDebugDataCollection GetNodeTris(GraphNode[] nodes, bool separateNodes)
         {
             string nameTris = $"{GraphDebugTypes.Nodes}_Tris";
 
@@ -129,26 +139,26 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (separateNodes)
             {
-                var tris = nodes
+                Dictionary<Color4, Vector3[]> tris = nodes
                     .GroupBy(n => Color4.IntToCol(n.Id, 128))
                     .ToDictionary(
                         keySelector => keySelector.Key,
-                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY));
+                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY).ToArray());
 
-                yield return new(nameTris, Topology.TriangleList, tris);
+                return new(nameTris, Topology.TriangleList, tris);
             }
             else
             {
                 Color4 colorTris = DefaultPrimitiveColor;
-                Dictionary<Color4, IEnumerable<Vector3>> tris = new([new(colorTris, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY))]);
+                Dictionary<Color4, Vector3[]> tris = new([new(colorTris, [.. nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetVertices())).Select(v => v + deltaY)])]);
 
-                yield return new(nameTris, Topology.TriangleList, tris);
+                return new(nameTris, Topology.TriangleList, tris);
             }
         }
         /// <summary>
         /// Gets the node lines debug information
         /// </summary>
-        private static IEnumerable<GraphDebugDataCollection> GetNodeLines(IEnumerable<GraphNode> nodes, bool separateNodes)
+        private static GraphDebugDataCollection GetNodeLines(GraphNode[] nodes, bool separateNodes)
         {
             string nameLines = $"{GraphDebugTypes.Nodes}_Lines";
 
@@ -156,20 +166,20 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (separateNodes)
             {
-                var lines = nodes
+                Dictionary<Color4, Vector3[]> lines = nodes
                     .GroupBy(n => Color4.IntToCol(n.Id, 128))
                     .ToDictionary(
                         keySelector => keySelector.Key,
-                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable());
+                        elementSelector => elementSelector.SelectMany(gn => gn.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).ToArray());
 
-                yield return new(nameLines, Topology.LineList, lines);
+                return new(nameLines, Topology.LineList, lines);
             }
             else
             {
                 Color4 colorLines = DefaultPrimitiveColor;
-                Dictionary<Color4, IEnumerable<Vector3>> lines = new([new(colorLines, nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY }))).AsEnumerable())]);
+                Dictionary<Color4, Vector3[]> lines = new([new(colorLines, [.. nodes.SelectMany(n => n.Triangles.SelectMany(t => t.GetEdgeSegments().SelectMany(s => new Vector3[] { s.Point1 + deltaY, s.Point2 + deltaY })))])]);
 
-                yield return new(nameLines, Topology.LineList, lines);
+                return new(nameLines, Topology.LineList, lines);
             }
         }
 
@@ -230,12 +240,20 @@ namespace Engine.PathFinding.RecastNavigation
                 Color4 nullColor = new Color(64, 64, 64, 255);
                 Color4 multiColor = new Color(0, 192, 255, 255);
 
-                Dictionary<Color4, IEnumerable<Vector3>> data = new()
+                Vector3[] wTriangles = [.. walkableTriangles.FindAll(t => t.Normal == Vector3.Up).SelectMany(t => t.GetVertices())];
+                Vector3[] nTriangles = [.. nullTriangles.FindAll(t => t.Normal == Vector3.Up).SelectMany(t => t.GetVertices())];
+                Vector3[] mTriangles = [.. multiTriangles.FindAll(t => t.Normal == Vector3.Up).SelectMany(t => t.GetVertices())];
+
+                Vector3[] wNTriangles = [.. walkableTriangles.FindAll(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())];
+                Vector3[] nNTriangles = [.. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())];
+                Vector3[] mNTriangles = [.. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())];
+
+                Dictionary<Color4, Vector3[]> data = new()
                 {
-                    { walkableColor, walkableTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
-                    { nullColor, nullTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
-                    { multiColor, multiTriangles.Where(t => t.Normal == Vector3.Up).SelectMany(t=>t.GetVertices()) },
-                    { Color4.White, [.. walkableTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. nullTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices()), .. multiTriangles.Where(t => t.Normal != Vector3.Up).SelectMany(t => t.GetVertices())] },
+                    { walkableColor, wTriangles },
+                    { nullColor, nTriangles },
+                    { multiColor, mTriangles },
+                    { Color4.White, [.. wNTriangles, .. nNTriangles, .. mNTriangles] },
                 };
                 return [new(name, Topology.TriangleList, data)];
             }
@@ -245,7 +263,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var nullVerts = nullTriangles.SelectMany(t => t.GetVertices());
                 var multiVerts = multiTriangles.SelectMany(t => t.GetVertices());
 
-                Dictionary<Color4, IEnumerable<Vector3>> data = new()
+                Dictionary<Color4, Vector3[]> data = new()
                 {
                     { Color4.White, [.. walkableVerts, .. nullVerts, .. multiVerts] },
                 };
@@ -269,12 +287,10 @@ namespace Engine.PathFinding.RecastNavigation
             float cs = cset.CellSize;
             float ch = cset.CellHeight;
 
-            Color4 color = DefaultNodeColor;
-
             List<GraphDebugDataCollection> res =
             [
-                .. GetBounds(graph.Bounds, color),
-                .. GetContoursRegions(cset, orig, cs, ch),
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetContoursRegions(cset, orig, cs, ch),
             ];
 
             if (drawRaw)
@@ -292,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the contour lines debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<GraphDebugDataCollection> GetContourRawLines(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
+        private static GraphDebugDataCollection GetContourRawLines(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
 
@@ -333,17 +349,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (empty)
             {
-                yield break;
+                return default;
             }
 
-            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.Contours}_RawLines", Topology.LineList, dict);
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.Contours}_RawLines", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the contour borders debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<GraphDebugDataCollection> GetContourBorders(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
+        private static GraphDebugDataCollection GetContourBorders(ContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
             Color4 bseColor = new Color(255, 255, 255, a);
@@ -364,8 +380,8 @@ namespace Engine.PathFinding.RecastNavigation
                 foreach (var (va, vb) in c.IterateSegments())
                 {
                     var col = Contour.IsAreaBorder(va.Flag) ? regColor : bColor;
-                    var cva = ReadContourVertex(va, orig, cs, ch);
-                    var cvb = ReadContourVertex(vb, orig, cs, ch);
+                    var cva = ReadContourVertex(va, ref orig, cs, ch);
+                    var cvb = ReadContourVertex(vb, ref orig, cs, ch);
 
                     lines.TryAdd(col, []);
                     lines[col].AddRange([cva, cvb]);
@@ -376,17 +392,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (empty)
             {
-                yield break;
+                return default;
             }
 
-            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the contour regions debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<GraphDebugDataCollection> GetContoursRegions(ContourSet cset, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetContoursRegions(ContourSet cset, Vector3 orig, float cs, float ch)
         {
             List<Vector3> lines = [];
 
@@ -418,52 +434,49 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (lines.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            Color4 color = new Color(32, 128, 128, 196);
-
-            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            Dictionary<Color4, Vector3[]> dict = new()
             {
-                { color, lines }
+                { new(32, 128, 128, 196), [..lines] }
             };
-            yield return new($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
+            return new($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
         }
 
         /// <summary>
         /// Gets the polygon mesh debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private readonly IEnumerable<GraphDebugDataCollection> GetPolyMesh(PolyMesh pm)
+        private readonly GraphDebugDataCollection[] GetPolyMesh(PolyMesh pm)
         {
             if (pm == null)
             {
                 return [];
             }
 
-            Color4 color = DefaultNodeColor;
             float cs = pm.CellSize;
             float ch = pm.CellHeight;
             var orig = pm.Bounds.Minimum;
 
             return
-                     [
-                .. GetBounds(graph.Bounds, color),
-                .. GetPolyMeshTris(pm, orig, cs, ch),
-                .. GetPolyEdges(pm, orig, cs, ch),
-                .. GetPolyBoundaries(pm, orig, cs, ch),
+            [
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetPolyMeshTris(pm, orig, cs, ch),
+                GetPolyEdges(pm, orig, cs, ch),
+                GetPolyBoundaries(pm, orig, cs, ch),
             ];
         }
         /// <summary>
         /// Gets the polygon mesh triangles debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetPolyMeshTris(PolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetPolyMeshTris(PolyMesh pm, Vector3 orig, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> tris = [];
             foreach (var (_, t, _, _, area) in pm.IteratePolyTriangles())
             {
-                foreach (var (col, v) in ReadTris(t, area, orig, cs, ch))
+                foreach (var (col, v) in ReadTris(t, area, ref orig, cs, ch))
                 {
                     tris.TryAdd(col, []);
 
@@ -473,17 +486,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (tris.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
+            var dict = tris.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh edges debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetPolyEdges(PolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetPolyEdges(PolyMesh pm, Vector3 orig, float cs, float ch)
         {
             List<Vector3> points = [];
 
@@ -507,22 +520,20 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (points.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            Color4 color = new Color(0, 48, 64, 255);
-
-            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            Dictionary<Color4, Vector3[]> dict = new()
             {
-                { color, points }
+                { new(0, 48, 64, 255), points.ToArray() }
             };
-            yield return new($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
+            return new($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh boundaries debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetPolyBoundaries(PolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetPolyBoundaries(PolyMesh pm, Vector3 orig, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> edges = [];
 
@@ -554,38 +565,36 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (edges.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
+            var dict = edges.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
         }
 
         /// <summary>
         /// Gets the polygon detail mesh debug information
         /// </summary>
         /// <param name="dm">Detail mesh</param>
-        private readonly IEnumerable<GraphDebugDataCollection> GetDetailMesh(PolyMeshDetail dm)
+        private readonly GraphDebugDataCollection[] GetDetailMesh(PolyMeshDetail dm)
         {
             if (dm == null)
             {
                 return [];
             }
 
-            Color4 color = DefaultNodeColor;
-
             return
             [
-                .. GetBounds(graph.Bounds, color),
-                .. GetDetailMeshTris(dm),
-                .. GetDetailMeshEdges(dm),
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetDetailMeshTris(dm),
+                GetDetailMeshEdges(dm),
             ];
         }
         /// <summary>
         /// Gets the polygon detail mesh triangles debug information
         /// </summary>
         /// <param name="dm">Detail mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetDetailMeshTris(PolyMeshDetail dm)
+        private static GraphDebugDataCollection GetDetailMeshTris(PolyMeshDetail dm)
         {
             Dictionary<Color4, List<Vector3>> res = [];
 
@@ -599,17 +608,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (res.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.DetailMesh}_Tris", Topology.TriangleList, dict);
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.DetailMesh}_Tris", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the polygon detail mesh edges debug information
         /// </summary>
         /// <param name="dm">Detail mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetDetailMeshEdges(PolyMeshDetail dm)
+        private static GraphDebugDataCollection GetDetailMeshEdges(PolyMeshDetail dm)
         {
             Vector3 delta = Vector3.Up * 0.001f;
 
@@ -641,11 +650,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (res.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.DetailMesh}_Edges", Topology.LineList, dict);
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.DetailMesh}_Edges", Topology.LineList, dict);
         }
 
         /// <summary>
@@ -658,13 +667,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="dRegions">Draw regions</param>
         private readonly List<GraphDebugDataCollection> GetTileCacheLayer(TileCacheLayer layer, float cs, float ch, bool dAreas, bool dRegions)
         {
-            Color4 color = DefaultNodeColor;
-
             List<GraphDebugDataCollection> res =
             [
-                .. GetBounds(graph.Bounds, color),
-                .. GetTileCacheLayerBounds(layer, cs),
-                .. GetTileCacheLayerPortals(layer, cs, ch),
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetTileCacheLayerBounds(layer, cs),
+                GetTileCacheLayerPortals(layer, cs, ch),
             ];
 
             if (dAreas)
@@ -684,7 +691,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="layer">Tile cache layer</param>
         /// <param name="cs">Cell size</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheLayerBounds(TileCacheLayer layer, float cs)
+        private static GraphDebugDataCollection GetTileCacheLayerBounds(TileCacheLayer layer, float cs)
         {
             int idx = layer.Header.TLayer;
 
@@ -711,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="layer">Tile cache layer</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheLayerAreas(TileCacheLayer layer, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCacheLayerAreas(TileCacheLayer layer, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> res = [];
 
@@ -756,11 +763,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (res.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.TileCacheLayersAreas}", Topology.TriangleList, dict);
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.TileCacheLayersAreas}", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the tile cache layer regions
@@ -768,7 +775,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="layer">Tile cache layer</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheLayerRegions(TileCacheLayer layer, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCacheLayerRegions(TileCacheLayer layer, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> res = [];
 
@@ -802,11 +809,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (res.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.TileCacheLayersRegions}", Topology.TriangleList, dict);
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.TileCacheLayersRegions}", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the tile cache layer portals
@@ -814,7 +821,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="layer">Tile cache layer</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheLayerPortals(TileCacheLayer layer, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCacheLayerPortals(TileCacheLayer layer, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> res = [];
 
@@ -857,11 +864,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (res.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = res.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{nameof(GetTileCacheLayerPortals)}", Topology.LineList, dict);
+            var dict = res.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{nameof(GetTileCacheLayerPortals)}", Topology.LineList, dict);
         }
 
         /// <summary>
@@ -871,20 +878,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="drawRaw">Draw raw contour set</param>
         private readonly List<GraphDebugDataCollection> GetTileCacheContours(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
         {
-            Color4 color = DefaultNodeColor;
-
             return
             [
-                .. GetBounds(graph.Bounds, color),
-                .. GetTileCacheContoursRegions(cset, orig, cs, ch),
-                .. GetTileCacheContourBorders(cset, orig, cs, ch, 0.75f),
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetTileCacheContoursRegions(cset, orig, cs, ch),
+                GetTileCacheContourBorders(cset, orig, cs, ch, 0.75f),
             ];
         }
         /// <summary>
         /// Gets the contour borders debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheContourBorders(TileCacheContourSet cset, Vector3 orig, float cs, float ch, float alpha)
+        private static GraphDebugDataCollection GetTileCacheContourBorders(TileCacheContourSet cset, Vector3 orig, float cs, float ch, float alpha)
         {
             int a = (int)(alpha * 255.0f);
             Color4 bseColor = new Color(255, 255, 255, a);
@@ -905,8 +910,8 @@ namespace Engine.PathFinding.RecastNavigation
                 foreach (var (va, vb) in c.IterateSegments())
                 {
                     var col = Contour.IsAreaBorder(va.Flag) ? regColor : bColor;
-                    var cva = ReadContourVertex(va, orig, cs, ch);
-                    var cvb = ReadContourVertex(vb, orig, cs, ch);
+                    var cva = ReadContourVertex(va, ref orig, cs, ch);
+                    var cvb = ReadContourVertex(vb, ref orig, cs, ch);
 
                     lines.TryAdd(col, []);
                     lines[col].AddRange([cva, cvb]);
@@ -917,17 +922,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (empty)
             {
-                yield break;
+                return default;
             }
 
-            var dict = lines.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
+            var dict = lines.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.Contours}_Borders", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the contour regions debug information
         /// </summary>
         /// <param name="cset">Contour set</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCacheContoursRegions(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCacheContoursRegions(TileCacheContourSet cset, Vector3 orig, float cs, float ch)
         {
             List<Vector3> lines = [];
 
@@ -959,44 +964,40 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (lines.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            Color4 color = new Color(32, 128, 128, 196);
-
-            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            Dictionary<Color4, Vector3[]> dict = new()
             {
-                { color, lines }
+                { new(32, 128, 128, 196), lines.ToArray() }
             };
-            yield return new($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
+            return new($"{GraphDebugTypes.Contours}_RegionConnections", Topology.LineList, dict);
         }
 
         /// <summary>
         /// Gets the polygon mesh debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private readonly IEnumerable<GraphDebugDataCollection> GetTileCachePolyMesh(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        private readonly GraphDebugDataCollection[] GetTileCachePolyMesh(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
         {
-            Color4 color = DefaultNodeColor;
-
             return
             [
-                .. GetBounds(graph.Bounds, color),
-                .. GetTileCachePolyMeshTris(pm, orig, cs, ch),
-                .. GetTileCachePolyEdges(pm, orig, cs, ch),
-                .. GetTileCachePolyBoundaries(pm, orig, cs, ch),
+                GetBounds(graph.Bounds, DefaultNodeColor),
+                GetTileCachePolyMeshTris(pm, orig, cs, ch),
+                GetTileCachePolyEdges(pm, orig, cs, ch),
+                GetTileCachePolyBoundaries(pm, orig, cs, ch),
             ];
         }
         /// <summary>
         /// Gets the polygon mesh triangles debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCachePolyMeshTris(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCachePolyMeshTris(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> tris = [];
             foreach (var (_, t, _, area) in pm.IteratePolyTriangles())
             {
-                foreach (var (col, v) in ReadTris(t, area, orig, cs, ch))
+                foreach (var (col, v) in ReadTris(t, area, ref orig, cs, ch))
                 {
                     tris.TryAdd(col, []);
 
@@ -1006,17 +1007,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (tris.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = tris.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
+            var dict = tris.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.PolyMesh}_Tris", Topology.TriangleList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh edges debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCachePolyEdges(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCachePolyEdges(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
         {
             List<Vector3> points = [];
 
@@ -1040,22 +1041,20 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (points.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            Color4 color = new Color(0, 48, 64, 255);
-
-            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            Dictionary<Color4, Vector3[]> dict = new()
             {
-                { color, points }
+                { new (0, 48, 64, 255), points.ToArray() }
             };
-            yield return new($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
+            return new($"{GraphDebugTypes.PolyMesh}_Edges", Topology.LineList, dict);
         }
         /// <summary>
         /// Gets the polygon mesh boundaries debug information
         /// </summary>
         /// <param name="pm">Polygon mesh</param>
-        private static IEnumerable<GraphDebugDataCollection> GetTileCachePolyBoundaries(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
+        private static GraphDebugDataCollection GetTileCachePolyBoundaries(TileCachePolyMesh pm, Vector3 orig, float cs, float ch)
         {
             Dictionary<Color4, List<Vector3>> edges = [];
 
@@ -1087,25 +1086,25 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (edges.Count <= 0)
             {
-                yield break;
+                return default;
             }
 
-            var dict = edges.ToDictionary(k => k.Key, v => v.Value.AsEnumerable());
-            yield return new($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
+            var dict = edges.ToDictionary(k => k.Key, v => v.Value.ToArray());
+            return new($"{GraphDebugTypes.PolyMesh}_BEdges", Topology.LineList, dict);
         }
 
         /// <summary>
         /// Gets the graph bounds
         /// </summary>
-        private static IEnumerable<GraphDebugDataCollection> GetBounds(BoundingBox bounds, Color4 color)
+        private static GraphDebugDataCollection GetBounds(BoundingBox bounds, Color4 color)
         {
             var points = Line3D.CreateBox(bounds).SelectMany(a => new[] { a.Point1, a.Point2 });
 
-            var dict = new Dictionary<Color4, IEnumerable<Vector3>>
+            Dictionary<Color4, Vector3[]> dict = new()
             {
-                { color, points }
+                { color, points.ToArray() }
             };
-            yield return new($"{GetBounds}", Topology.LineList, dict);
+            return new($"{GetBounds}", Topology.LineList, dict);
         }
 
         /// <summary>
@@ -1114,7 +1113,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="min">Box minimum point</param>
         /// <param name="max">Box maximum point</param>
         /// <param name="scale">Scale</param>
-        private static IEnumerable<Triangle> TriangulateBox(Vector3 min, Vector3 max, float scale = 1f)
+        private static Triangle[] TriangulateBox(Vector3 min, Vector3 max, float scale = 1f)
         {
             var extents = (max - min) * 0.5f * (1f - scale);
             min += extents;
@@ -1142,7 +1141,9 @@ namespace Engine.PathFinding.RecastNavigation
                 0, 4, 5, 1,
             ];
 
+            var res = new Triangle[12];
             int vIndex = 0;
+            int tIndex = 0;
             for (int i = 0; i < 6; i++)
             {
                 //Quad
@@ -1152,9 +1153,10 @@ namespace Engine.PathFinding.RecastNavigation
                 var v3 = boxVertices[boxIndices[vIndex++]];
 
                 //Triangles
-                yield return new(v0, v1, v2);
-                yield return new(v0, v2, v3);
+                res[tIndex++] = new(v0, v1, v2);
+                res[tIndex++] = new(v0, v2, v3);
             }
+            return res;
         }
         /// <summary>
         /// Reads a vertex from a contour vertex
@@ -1163,7 +1165,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static Vector3 ReadContourVertex(ContourVertex v, Vector3 orig, float cs, float ch)
+        private static Vector3 ReadContourVertex(ContourVertex v, ref Vector3 orig, float cs, float ch)
         {
             float fx = orig.X + v.X * cs;
             float fy = orig.Y + v.Y * ch;
@@ -1179,7 +1181,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<(Color4, Vector3)> ReadTris(Vector3I[] t, int area, Vector3 orig, float cs, float ch)
+        private static (Color4, Vector3)[] ReadTris(Vector3I[] t, int area, ref Vector3 orig, float cs, float ch)
         {
             Color4 col;
             if (area == 0)
@@ -1191,14 +1193,16 @@ namespace Engine.PathFinding.RecastNavigation
                 col = AreaToCol(area, 128);
             }
 
-            for (int k = 0; k < t.Length; ++k)
+            var res = new (Color4, Vector3)[t.Length];
+            for (int k = 0; k < t.Length; k++)
             {
                 float x = orig.X + t[k].X * cs;
                 float y = orig.Y + (t[k].Y + 1) * ch;
                 float z = orig.Z + t[k].Z * cs;
 
-                yield return (col, new(x, y, z));
+                res[k] = (col, new(x, y, z));
             }
+            return res;
         }
         /// <summary>
         /// Reads a list of vertices from a indexed segment definition
@@ -1209,19 +1213,21 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="orig">Origin</param>
         /// <param name="cs">Cell size</param>
         /// <param name="ch">Cell height</param>
-        private static IEnumerable<Vector3> ReadSegment(int p0, int p1, Vector3I[] verts, Vector3 orig, float cs, float ch)
+        private static Vector3[] ReadSegment(int p0, int p1, Vector3I[] verts, Vector3 orig, float cs, float ch)
         {
             int[] vi = [p0, p1];
 
-            for (int k = 0; k < vi.Length; ++k)
+            var res = new Vector3[vi.Length];
+            for (int i = 0; i < vi.Length; i++)
             {
-                var v = verts[vi[k]];
+                ref var v = ref verts[vi[i]];
                 float x = orig.X + v.X * cs;
                 float y = orig.Y + (v.Y + 1) * ch + 0.1f;
                 float z = orig.Z + v.Z * cs;
 
-                yield return new(x, y, z);
+                res[i] = new(x, y, z);
             }
+            return res;
         }
 
         /// <summary>
@@ -1234,7 +1240,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (area == 0)
             {
                 // Treat zero area type as default.
-                return new Color(0, 192, 255, alpha);
+                return new(0, 192, 255, alpha);
             }
             else
             {

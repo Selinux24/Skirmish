@@ -108,7 +108,7 @@ namespace AISamples.Common.Primitives
                         segs1[i].P1, segs1[i].P2,
                         segs2[j].P1, segs2[j].P2);
 
-                    if (!exists || Helper.IsZero(offset) || Helper.IsOne(offset))
+                    if (!exists || MathUtils.IsZero(offset) || MathUtils.IsOne(offset))
                     {
                         continue;
                     }
@@ -191,7 +191,7 @@ namespace AISamples.Common.Primitives
         private static (bool Exists, float Offset, Vector2 Point) GetIntersection(Vector2 s1p1, Vector2 s1p2, Vector2 s2p1, Vector2 s2p2)
         {
             var bottom = (s2p2.Y - s2p1.Y) * (s1p2.X - s1p1.X) - (s2p2.X - s2p1.X) * (s1p2.Y - s1p1.Y);
-            if (!Helper.WithinEpsilon(0f, bottom, 0.01f))
+            if (!MathUtils.WithinEpsilon(0f, bottom, 0.01f))
             {
                 var tTop = (s2p2.X - s2p1.X) * (s1p1.Y - s2p1.Y) - (s2p2.Y - s2p1.Y) * (s1p1.X - s2p1.X);
                 var uTop = (s2p1.Y - s1p1.Y) * (s1p1.X - s1p2.X) - (s2p1.X - s1p1.X) * (s1p1.Y - s1p2.Y);

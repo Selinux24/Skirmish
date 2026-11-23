@@ -56,7 +56,7 @@ namespace AISamples.Common.Agents
 
             if (controlType != AgentControlTypes.Dummy)
             {
-                Sensor = new(this, 5, 50, Helper.PiOver2);
+                Sensor = new(this, 5, 50, MathUtils.PiOver2);
                 Brain = new([Sensor.GetRayCount(), 6, AgentControls.InputCount]);
             }
         }
@@ -226,7 +226,7 @@ namespace AISamples.Common.Agents
         }
         public void SetDirection(Vector2 direction)
         {
-            angle = -Utils.Angle(direction.Y, direction.X) + Helper.PiOver2;
+            angle = -Utils.Angle(direction.Y, direction.X) + MathUtils.PiOver2;
         }
         public void SetScale(float scale)
         {

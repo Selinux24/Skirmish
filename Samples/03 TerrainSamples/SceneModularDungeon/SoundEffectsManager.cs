@@ -68,8 +68,7 @@ namespace TerrainSamples.SceneModularDungeon
         /// <param name="resourceFolder">Base resource folder</param>
         public void InitializeAudio(string resourceFolder)
         {
-            audioManager.UseMasteringLimiter = true;
-            audioManager.SetMasteringLimit(15, 1500);
+            audioManager.EnableMasteringLimiter(15, 1500);
 
             //Sounds
             soundDoor = "door";

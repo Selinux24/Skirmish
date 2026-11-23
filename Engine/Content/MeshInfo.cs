@@ -1,8 +1,6 @@
 ﻿using Engine.BuiltIn.Format;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Content
@@ -38,13 +36,13 @@ namespace Engine.Content
             //Process the vertex data
             bool useNormals = loadNormalMaps && meshMaterial?.NormalMapTexture != null;
             var (vertices, indices) = await geometry.ProcessVertexData(useNormals, constraint);
-            if (vertices?.Any() != true)
+            if (vertices.Length == 0)
             {
                 return null;
             }
 
-            IEnumerable<Weight> weights = [];
-            IEnumerable<string> bones = [];
+            Weight[] weights = [];
+            string[] bones = [];
             bool useSkinning = skinningInfo.HasValue;
             if (useSkinning)
             {
@@ -88,7 +86,7 @@ namespace Engine.Content
         /// <param name="Weights">Weight data</param>
         /// <param name="BoneNames">Bone names</param>
         /// <param name="Indices">Indices</param>
-        record MeshCreateParams(string Name, Topology Topology, Matrix4x4 Transform, IEnumerable<VertexData> Vertices, IEnumerable<Weight> Weights, IEnumerable<string> BoneNames, IEnumerable<uint> Indices);
+        record MeshCreateParams(string Name, Topology Topology, Matrix4x4 Transform, VertexData[] Vertices, Weight[] Weights, string[] BoneNames, uint[] Indices);
 
         /// <summary>
         /// Try to create a new mesh
@@ -99,7 +97,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> TryCreateMesh(MeshCreateParams createParams, bool preferTextured, bool useNormalMapping, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
             if (!v.Position.HasValue)
             {
                 return null;
@@ -121,7 +119,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> GetPositionOnlyVariant(MeshCreateParams createParams, bool preferTextured, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
             if (preferTextured && v.Texture.HasValue)
             {
                 return await GetPositionTextureVariant(createParams, useSkinning);
@@ -178,7 +176,7 @@ namespace Engine.Content
         /// <param name="useSkinning">Use skinning info</param>
         private static async Task<IMesh> GetPositionNormalVariant(MeshCreateParams createParams, bool preferTextured, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
 
             if (preferTextured && v.Texture.HasValue)
             {
@@ -202,7 +200,7 @@ namespace Engine.Content
         }
         private static async Task<IMesh> GetPositionNormalTangentVariant(MeshCreateParams createParams, bool useSkinning)
         {
-            var v = createParams.Vertices.First();
+            var v = createParams.Vertices[0];
 
             if (useSkinning)
             {
@@ -236,7 +234,7 @@ namespace Engine.Content
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="createParams">Creation parameters</param>
         /// <param name="vertices">Formatted vertices</param>
-        private static Mesh<T> CreateMesh<T>(MeshCreateParams createParams, IEnumerable<T> vertices)
+        private static Mesh<T> CreateMesh<T>(MeshCreateParams createParams, T[] vertices)
             where T : unmanaged, IVertexData
         {
             return new Mesh<T>(

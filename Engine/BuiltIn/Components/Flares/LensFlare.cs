@@ -227,14 +227,14 @@ namespace Engine.BuiltIn.Components.Flares
 
                 var coarseRay = new PickingRay(ray, PickingHullTypes.Coarse);
 
-                if (!Scene.PickNearest<Triangle>(coarseRay, SceneObjectUsages.None, out _))
+                if (!Scene.PickNearest<Triangle>(ref coarseRay, SceneObjectUsages.None, out _))
                 {
                     return true;
                 }
 
                 var perfectRay = new PickingRay(ray, PickingHullTypes.Geometry);
 
-                if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
+                if (Scene.PickNearest<Triangle>(ref perfectRay, SceneObjectUsages.None, out var result) &&
                     Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)
                 {
                     return false;

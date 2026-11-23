@@ -113,7 +113,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var rayList = CalculatePickingRays(scene, map, description, gbbox, nbbox, rnd);
 
-            return scene.PickFirstAsync<Triangle>(rayList, SceneObjectUsages.Ground, (res) =>
+            return scene.PickFirstAsync(rayList, SceneObjectUsages.Ground, ((bool, ScenePickingResult<Triangle>)[] res) =>
             {
                 foreach (var (found, r) in res)
                 {
@@ -150,8 +150,10 @@ namespace Engine.BuiltIn.Components.Foliage
         /// <param name="gbbox">Global bounding box</param>
         /// <param name="nbbox">Node bounding box</param>
         /// <param name="rnd">Randomizer</param>
-        private static IEnumerable<PickingRay> CalculatePickingRays(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd)
+        private static PickingRay[] CalculatePickingRays(Scene scene, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, BoundingBox nbbox, Random rnd)
         {
+            List<PickingRay> res = [];
+
             int count = (int)MathF.Min(MAX, MAX * description.Density);
 
             for (int i = 0; i < count; i++)
@@ -161,10 +163,12 @@ namespace Engine.BuiltIn.Components.Foliage
                     continue;
                 }
 
-                var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
+                var ray = scene.GetTopDownRay(ref pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
 
-                yield return ray;
+                res.Add(ray);
             }
+
+            return [.. res];
         }
         /// <summary>
         /// Calculates a point

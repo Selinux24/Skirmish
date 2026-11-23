@@ -1,5 +1,4 @@
 ﻿using Engine.Mathematics;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -15,7 +14,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="filename">File name</param>
-        public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, string filename)
+        public static async Task<ContentData[]> ReadContentData(string contentFolder, string filename)
         {
             string resourceFile = Path.GetFileName(filename);
             string resourceFolder = Path.Combine(contentFolder ?? string.Empty, Path.GetDirectoryName(filename));
@@ -42,7 +41,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="contentData">Content data file descriptor</param>
-        public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, ContentDataFile contentData)
+        public static async Task<ContentData[]> ReadContentData(string contentFolder, ContentDataFile contentData)
         {
             var loader = GameResourceManager.GetLoaderForFile(contentData.ModelFileName);
             return loader == null

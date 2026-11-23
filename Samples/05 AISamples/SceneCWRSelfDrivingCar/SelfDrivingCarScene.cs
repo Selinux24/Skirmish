@@ -153,7 +153,7 @@ ESC - EXIT";
             float h = 0f;
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
-            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * 5f)];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceTerrainDiffuse;
@@ -624,7 +624,7 @@ ESC - EXIT";
                 var gTris = GeometryUtil.CreatePolygonTriangleList(rect, false);
                 var gLines = GeometryUtil.CreatePolygonLineList(rect);
 
-                var tris = Triangle.ComputeTriangleList(gTris);
+                var tris = GeometryUtil.ComputeTriangleList(gTris);
                 var lines = Line3D.CreateFromVertices(gLines);
 
                 roadDrawer.AddPrimitives(roadColor, tris);

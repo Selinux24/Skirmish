@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.UI
 {
@@ -51,8 +52,8 @@ namespace Engine.UI
         public readonly bool Equals(Spacing other)
         {
             return
-                Helper.NearEqual(other.Horizontal, Horizontal) &&
-                Helper.NearEqual(other.Vertical, Vertical);
+                MathUtils.NearEqual(other.Horizontal, Horizontal) &&
+                MathUtils.NearEqual(other.Vertical, Vertical);
         }
         /// <inheritdoc/>
         public override readonly bool Equals(object obj)

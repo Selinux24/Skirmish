@@ -31,7 +31,9 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node items array
         /// </summary>
-        private readonly (ICullingVolume volume, T item)[] items = root ? [] : new (ICullingVolume, T)[itemsPerNode];
+        private readonly (ICullingVolume volume, T item)[] items = root || itemsPerNode == 0 ?
+            Array.Empty<(ICullingVolume volume, T item)>() :
+            new (ICullingVolume, T)[itemsPerNode];
         /// <summary>
         /// Number of stored items in the array
         /// </summary>
@@ -89,12 +91,12 @@ namespace Engine.Collections.Generic
                 return;
             }
 
-            int index = -1;
+            Span<BoundingBox> childBoundaries = stackalloc BoundingBox[8];
+            Boundary.SubdivideOctree(childBoundaries);
 
-            foreach (var childBoundary in Boundary.SubdivideOctree())
+            for (int index = 0; index < childBoundaries.Length; index++)
             {
-                index++;
-
+                var childBoundary = childBoundaries[index];
                 var child = GetNode(index);
                 if (child == null)
                 {

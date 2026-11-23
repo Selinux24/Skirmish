@@ -10,7 +10,7 @@ namespace Engine.Content.Persistence
         /// <summary>
         /// Clips
         /// </summary>
-        public List<AnimationClipFile> Clips { get; set; } = [];
+        public List<AnimationClipFile> Clips { get; } = [];
         /// <summary>
         /// Time step
         /// </summary>
@@ -24,12 +24,7 @@ namespace Engine.Content.Persistence
         /// <param name="endTime">End time</param>
         public void AddClip(string clipName, int startTime, int endTime)
         {
-            Clips.Add(new AnimationClipFile()
-            {
-                Name = clipName,
-                From = startTime,
-                To = endTime,
-            });
+            Clips.Add(new(clipName, startTime, endTime));
         }
     }
 }

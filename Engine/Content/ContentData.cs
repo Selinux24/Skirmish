@@ -84,7 +84,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -97,7 +97,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, uint[] indices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -110,7 +110,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
+        public static ContentData GenerateTriangleList(VertexData[] vertices, uint[] indices, IMaterialContent[] materials)
         {
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -133,7 +133,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IMaterialContent[] materials)
         {
             var vertices = VertexData.FromDescriptor(geometry);
 
@@ -145,7 +145,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateLineList(IEnumerable<VertexData> vertices, IMaterialContent material = null)
+        public static ContentData GenerateLineList(VertexData[] vertices, IMaterialContent material = null)
         {
             var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
@@ -159,16 +159,16 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
+        private static ContentData Generate(Topology topology, VertexData[] vertices, uint[] indices, IMaterialContent[] materials)
         {
             ContentData modelContent = new();
             string materialName;
             bool textured;
 
-            int materialCount = materials.Count();
+            int materialCount = materials.Length;
             if (materialCount == 1)
             {
-                var material = materials.First();
+                var material = materials[0];
                 materialName = DefaultMaterial;
                 textured = material.Textured;
 
@@ -178,12 +178,12 @@ namespace Engine.Content
             else if (materialCount > 1)
             {
                 materialName = DefaultMaterial;
-                textured = materials.First().Textured;
+                textured = materials[0].Textured;
 
                 for (int i = 0; i < materialCount; i++)
                 {
                     string name = i == 0 ? materialName : $"{materialName}_{i}";
-                    var material = materials.ElementAt(i);
+                    var material = materials[i];
 
                     modelContent.ImportTextures(ref material);
                     modelContent.AddMaterialContent(name, material);
@@ -307,17 +307,17 @@ namespace Engine.Content
         /// <summary>
         /// Gets material content
         /// </summary>
-        public IEnumerable<(string Name, IMaterialContent Content)> GetMaterialContent()
+        public (string Name, IMaterialContent Content)[] GetMaterialContent()
         {
-            if (materialContent.Count == 0)
-            {
-                yield break;
-            }
+            if (materialContent.Count == 0) return [];
 
+            int idx = 0;
+            var res = new (string Name, IMaterialContent Content)[materialContent.Count];
             foreach (var mat in materialContent)
             {
-                yield return (mat.Key, mat.Value);
+                res[idx++] = (mat.Key, mat.Value);
             }
+            return res;
         }
         /// <summary>
         /// Gets material content by name
@@ -787,7 +787,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="joint">Joint to initialize</param>
         /// <param name="skinController">Skin controller</param>
-        private IEnumerable<JointAnimation> InitializeJoints(Joint joint, IEnumerable<string> skinController)
+        private JointAnimation[] InitializeJoints(Joint joint, string[] skinController)
         {
             var animations = new List<JointAnimation>();
 
@@ -1016,17 +1016,19 @@ namespace Engine.Content
                 }
 
                 string firstMesh = null;
-                List<SubMeshContent> subMeshList = [];
+                SubMeshContent[] subMeshList = new SubMeshContent[meshes.Count];
 
-                foreach (var (meshName, subMesh) in meshes)
+                for (int i = 0; i < meshes.Count; i++)
                 {
+                    var (meshName, subMesh) = meshes[i];
+
                     //Group using the first mesh name
                     firstMesh ??= $"opt_{idx++}.{meshName}";
-                    subMeshList.Add(subMesh);
+                    subMeshList[i] = subMesh;
                 }
 
                 var gmesh = subMeshList[0];
-                if (subMeshList.Count > 1)
+                if (subMeshList.Length > 1)
                 {
                     SubMeshContent.OptimizeMeshes(subMeshList, out gmesh);
                 }
@@ -1075,7 +1077,7 @@ namespace Engine.Content
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles()
+        public Triangle[] GetTriangles()
         {
             return [.. geometryContent.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles()))];
         }
@@ -1248,7 +1250,7 @@ namespace Engine.Content
         /// <param name="res">Model content</param>
         private bool FilterMaskByController(string mask, ref ContentData res)
         {
-            var controllers = this.controllerContent.Where(g =>
+            var controllers = controllerContent.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-skin", StringComparison.OrdinalIgnoreCase));
 
@@ -1319,7 +1321,7 @@ namespace Engine.Content
             res.skinningContent.Add(armatureName, s);
 
             //Add animations
-            var animations = this.animationContent.Where(g =>
+            var animations = animationContent.Where(g =>
             {
                 return s.Skeleton.GetJointNames()
                     .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
@@ -1336,9 +1338,9 @@ namespace Engine.Content
             }
 
             var clips = animationDefinition.Clips
-                .Where(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
+                .FindAll(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
 
-            if (clips.Any())
+            if (clips.Count != 0)
             {
                 res.animationDefinition ??= new AnimationFile();
 

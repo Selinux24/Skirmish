@@ -1,20 +1,21 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using Engine.TextureReader.DDS;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Vortice.DXGI;
-using Vortice.Mathematics;
 using Vortice.WIC;
 
 namespace Engine.TextureReader
 {
-    using Engine.TextureReader.DDS;
+    using Format = Vortice.DXGI.Format;
 
     /// <summary>
     /// Texture data
     /// </summary>
     public class TextureData : IDisposable
     {
+        const string TextureCubicFacesStr = "A cubic texture must have 6 faces.";
+
         /// <summary>
         /// BitmapData
         /// </summary>
@@ -23,21 +24,21 @@ namespace Engine.TextureReader
             /// <summary>
             /// Bitmap width
             /// </summary>
-            public uint Width { get; set; }
+            public uint Width;
             /// <summary>
             /// Bitmap height
             /// </summary>
-            public uint Height { get; set; }
+            public uint Height;
             /// <summary>
             /// Buffer
             /// </summary>
-            public byte[] Buffer { get; set; }
+            public byte[] Buffer;
         }
 
         /// <summary>
         /// Byte data
         /// </summary>
-        private byte[] data;
+        private ReadOnlyMemory<byte> data;
 
         /// <summary>
         /// Format
@@ -75,7 +76,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            return ReadTextureArray(filename, []).FirstOrDefault();
+            var textures = ReadTextureArray(filename, []);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -85,7 +88,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename, RectI rectangle)
         {
-            return ReadTextureArray(filename, [rectangle]).FirstOrDefault();
+            var textures = ReadTextureArray(filename, [rectangle]);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -94,7 +99,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            return ReadTextureArray(stream, []).FirstOrDefault();
+            var textures = ReadTextureArray(stream, []);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data from a stream
@@ -104,7 +111,9 @@ namespace Engine.TextureReader
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream, RectI rectangle)
         {
-            return ReadTextureArray(stream, [rectangle]).FirstOrDefault();
+            var textures = ReadTextureArray(stream, [rectangle]);
+
+            return textures.Length > 0 ? textures[0] : default;
         }
         /// <summary>
         /// Reads a texture data list from a file
@@ -112,9 +121,9 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(string filename, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(string filename, RectI[] rectangles)
         {
-            var result = new List<TextureData>();
+            List<TextureData> result = [];
 
             if (DdsHeader.GetInfo(filename, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer))
             {
@@ -129,7 +138,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            return result;
+            return [.. result];
         }
         /// <summary>
         /// Reads a texture data list from a stream
@@ -137,9 +146,9 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(MemoryStream stream, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(MemoryStream stream, RectI[] rectangles)
         {
-            var result = new List<TextureData>();
+            List<TextureData> result = [];
 
             if (DdsHeader.GetInfo(stream, out DdsHeader header, out DdsHeaderDX10? header10, out uint offset, out byte[] buffer))
             {
@@ -154,23 +163,23 @@ namespace Engine.TextureReader
                 }
             }
 
-            return result;
+            return [.. result];
         }
         /// <summary>
         /// Reads a texture data list from a file list
         /// </summary>
         /// <param name="filenames">File name list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames)
+        public static TextureData[] ReadTextureArray(string[] filenames)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
                 textureList.Add(ReadTexture(file));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a file list
@@ -178,16 +187,16 @@ namespace Engine.TextureReader
         /// <param name="filenames">File name list</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames, RectI rectangle)
+        public static TextureData[] ReadTextureArray(string[] filenames, RectI rectangle)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
                 textureList.Add(ReadTexture(file, rectangle));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a file list
@@ -195,9 +204,9 @@ namespace Engine.TextureReader
         /// <param name="filenames">File name list</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(string[] filenames, RectI[] rectangles)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var file in filenames)
             {
@@ -207,23 +216,23 @@ namespace Engine.TextureReader
                 }
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
                 textureList.Add(ReadTexture(stream));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
@@ -231,16 +240,16 @@ namespace Engine.TextureReader
         /// <param name="streams">Stream list</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams, RectI rectangle)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams, RectI rectangle)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
                 textureList.Add(ReadTexture(stream, rectangle));
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a texture data list from a stream list
@@ -248,9 +257,9 @@ namespace Engine.TextureReader
         /// <param name="streams">Stream list</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <returns>Returns the texture data list</returns>
-        public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams, IEnumerable<RectI> rectangles)
+        public static TextureData[] ReadTextureArray(MemoryStream[] streams, RectI[] rectangles)
         {
-            var textureList = new List<TextureData>();
+            List<TextureData> textureList = [];
 
             foreach (var stream in streams)
             {
@@ -260,7 +269,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            return textureList;
+            return [.. textureList];
         }
         /// <summary>
         /// Reads a cube texture data from a file
@@ -268,13 +277,11 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="faces">Cube faces</param>
         /// <returns>Returns the texture data</returns>
-        public static IEnumerable<TextureData> ReadTextureCubic(string filename, IEnumerable<RectI> faces)
+        public static TextureData[] ReadTextureCubic(string filename, RectI[] faces)
         {
-            ArgumentNullException.ThrowIfNull(faces);
-
-            if (faces.Count() != 6)
+            if (faces != null && faces.Length != 6)
             {
-                throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
+                throw new ArgumentException(TextureCubicFacesStr, nameof(faces));
             }
 
             return ReadTextureArray(filename, faces);
@@ -285,13 +292,11 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="faces">Cube faces</param>
         /// <returns>Returns the texture data</returns>
-        public static IEnumerable<TextureData> ReadTextureCubic(MemoryStream stream, IEnumerable<RectI> faces)
+        public static TextureData[] ReadTextureCubic(MemoryStream stream, RectI[] faces)
         {
-            ArgumentNullException.ThrowIfNull(faces);
-
-            if (faces.Count() != 6)
+            if (faces != null && faces.Length != 6)
             {
-                throw new ArgumentException("A cubic texture must have 6 faces.", nameof(faces));
+                throw new ArgumentException(TextureCubicFacesStr, nameof(faces));
             }
 
             return ReadTextureArray(stream, faces);
@@ -303,7 +308,7 @@ namespace Engine.TextureReader
         /// <param name="filename">File name</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static BitmapData[] ReadBitmap(string filename, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(string filename, RectI[] rectangles)
         {
             using var factory = new IWICImagingFactory2();
             using var bitmapDecoder = factory.CreateDecoderFromFileName(filename, FileAccess.Read, DecodeOptions.CacheOnLoad);
@@ -315,7 +320,7 @@ namespace Engine.TextureReader
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns a bitmap data list</returns>
-        private static BitmapData[] ReadBitmap(MemoryStream stream, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(MemoryStream stream, RectI[] rectangles)
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -331,142 +336,95 @@ namespace Engine.TextureReader
         /// <param name="format">Target format</param>
         /// <param name="rectangles">Crop rectangles</param>
         /// <returns>Returns the readed bitmap data</returns>
-        private static BitmapData[] ReadBitmap(IWICImagingFactory factory, IWICBitmapDecoder bitmapDecoder, Guid format, IEnumerable<RectI> rectangles)
+        private static BitmapData[] ReadBitmap(IWICImagingFactory factory, IWICBitmapDecoder bitmapDecoder, Guid format, RectI[] rectangles)
         {
-            var result = new List<BitmapData>();
-
             var frame = bitmapDecoder.GetFrame(0);
+            var cropRectangles = rectangles;
 
-            if (frame.PixelFormat == format)
+            if (cropRectangles == null || cropRectangles.Length == 0)
             {
-                uint rowStride = PixelFormat.GetStride(frame.PixelFormat, (uint)frame.Size.Width);
-
-                // Allocate DataStream to receive the WIC image pixels
-                byte[] dataBuffer = new byte[frame.Size.Height * rowStride];
-                // Copy the content of the WIC to the buffer
-                frame.CopyPixels(rowStride, dataBuffer);
-
-                if (rectangles?.Any() != true)
-                {
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)frame.Size.Width,
-                        Height = (uint)frame.Size.Height,
-                        Buffer = dataBuffer,
-                    });
-                }
-                else
-                {
-                    var bitmaps = CropBuffer(dataBuffer, (uint)frame.Size.Width, (uint)frame.Size.Height, rowStride, rectangles);
-                    result.AddRange(bitmaps);
-                }
+                var bitmap = ReadBitmap(factory, frame, format);
+                return bitmap.HasValue ? [bitmap.Value] : [];
             }
-            else
+
+            var result = new List<BitmapData>(cropRectangles.Length);
+            foreach (var rectangle in cropRectangles)
             {
-                using var formatConverter = factory.CreateFormatConverter();
-                if (!formatConverter.CanConvert(frame.PixelFormat, format))
+                if (rectangle == RectI.Empty)
+                {
+                    var bitmap = ReadBitmap(factory, frame, format);
+                    if (!bitmap.HasValue)
+                    {
+                        return [];
+                    }
+
+                    result.Add(bitmap.Value);
+                    continue;
+                }
+
+                using var croppedFrame = factory.CreateBitmapFromSourceRect(
+                    frame,
+                    checked((uint)rectangle.X),
+                    checked((uint)rectangle.Y),
+                    checked((uint)rectangle.Width),
+                    checked((uint)rectangle.Height));
+                var croppedBitmap = ReadBitmap(factory, croppedFrame, format);
+                if (!croppedBitmap.HasValue)
                 {
                     return [];
                 }
 
-                formatConverter.Initialize(
-                    frame,
-                    format,
-                    BitmapDitherType.ErrorDiffusion,
-                    null,
-                    0.0,
-                    BitmapPaletteType.MedianCut);
-
-
-                // Allocate DataStream to receive the WIC image pixels
-                uint rowStride = PixelFormat.GetStride(formatConverter.PixelFormat, (uint)formatConverter.Size.Width);
-                byte[] dataBuffer = new byte[formatConverter.Size.Height * rowStride];
-
-                // Copy the content of the WIC to the buffer
-                formatConverter.CopyPixels(rowStride, dataBuffer);
-
-                if (rectangles?.Any() != true)
-                {
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)formatConverter.Size.Width,
-                        Height = (uint)formatConverter.Size.Height,
-                        Buffer = dataBuffer,
-                    });
-                }
-                else
-                {
-                    var bitmaps = CropBuffer(dataBuffer, (uint)formatConverter.Size.Width, (uint)formatConverter.Size.Height, rowStride, rectangles);
-                    result.AddRange(bitmaps);
-                }
+                result.Add(croppedBitmap.Value);
             }
 
             return [.. result];
         }
 
-        /// <summary>
-        /// Reads the specified crop rectangle list from a data buffer
-        /// </summary>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="sourceWidth">Source width</param>
-        /// <param name="sourceHeight">Source height</param>
-        /// <param name="sourceRowStride">Row stride in bytes</param>
-        /// <param name="rectangles">Crop rectangle list</param>
-        /// <returns>Returns the readed bitmap data</returns>
-        private static BitmapData[] CropBuffer(byte[] buffer, uint sourceWidth, uint sourceHeight, uint sourceRowStride, IEnumerable<RectI> rectangles)
+        private static BitmapData? ReadBitmap(IWICImagingFactory factory, IWICBitmapSource source, Guid format)
         {
-            var result = new List<BitmapData>();
+            uint width = (uint)source.Size.Width;
+            uint height = (uint)source.Size.Height;
 
-            foreach (var rectangle in rectangles)
+            if (source.PixelFormat == format)
             {
-                if (rectangle == Rect.Empty)
+                uint rowStride = PixelFormat.GetStride(source.PixelFormat, width);
+                byte[] dataBuffer = new byte[height * rowStride];
+                source.CopyPixels(rowStride, dataBuffer);
+
+                return new BitmapData
                 {
-                    result.Add(new BitmapData
-                    {
-                        Width = sourceWidth,
-                        Height = sourceHeight,
-                        Buffer = buffer,
-                    });
-                }
-                else
-                {
-                    var rectBuffer = CropBuffer(buffer, sourceWidth, sourceRowStride, rectangle);
-                    result.Add(new BitmapData
-                    {
-                        Width = (uint)rectangle.Width,
-                        Height = (uint)rectangle.Height,
-                        Buffer = rectBuffer,
-                    });
-                }
+                    Width = width,
+                    Height = height,
+                    Buffer = dataBuffer,
+                };
             }
 
-            return [.. result];
-        }
-        /// <summary>
-        /// Reads a rectangle from a image byte buffer
-        /// </summary>
-        /// <param name="buffer">Image buffer</param>
-        /// <param name="sourceWidth">Source width</param>
-        /// <param name="sourceRowStride">Source row stride</param>
-        /// <param name="rectangle">Crop rectangle</param>
-        /// <returns>Returns a new buffer</returns>
-        private static byte[] CropBuffer(byte[] buffer, uint sourceWidth, uint sourceRowStride, RectI rectangle)
-        {
-            uint stride = sourceRowStride / sourceWidth;
-
-            uint dstRowStride = (uint)rectangle.Width * stride;
-            byte[] dstBuffer = new byte[rectangle.Height * dstRowStride];
-
-            uint dstOffset = 0;
-            for (uint i = 0; i < rectangle.Height; i++)
+            using var formatConverter = factory.CreateFormatConverter();
+            if (!formatConverter.CanConvert(source.PixelFormat, format))
             {
-                uint offset = (((uint)rectangle.Y + i) * sourceRowStride) + ((uint)rectangle.X * stride);
-
-                Buffer.BlockCopy(buffer, (int)offset, dstBuffer, (int)dstOffset, (int)dstRowStride);
-                dstOffset += dstRowStride;
+                return null;
             }
 
-            return dstBuffer;
+            formatConverter.Initialize(
+                source,
+                format,
+                BitmapDitherType.ErrorDiffusion,
+                null,
+                0.0,
+                BitmapPaletteType.MedianCut);
+
+            uint convertedWidth = (uint)formatConverter.Size.Width;
+            uint convertedHeight = (uint)formatConverter.Size.Height;
+            uint convertedRowStride = PixelFormat.GetStride(formatConverter.PixelFormat, convertedWidth);
+            byte[] convertedBuffer = new byte[convertedHeight * convertedRowStride];
+            formatConverter.CopyPixels(convertedRowStride, convertedBuffer);
+
+            return new BitmapData
+            {
+                Width = convertedWidth,
+                Height = convertedHeight,
+                Buffer = convertedBuffer,
+            };
         }
 
         /// <summary>
@@ -532,10 +490,7 @@ namespace Engine.TextureReader
                 IsCubeMap = isCubeMap;
                 MipMaps = header.MipMapCount == 0 ? 1 : header.MipMapCount;
 
-                var bytes = new byte[bitData.Length - offset];
-                Array.Copy(bitData, offset, bytes, 0, bytes.Length);
-
-                data = bytes;
+                data = bitData.AsMemory(checked((int)offset));
             }
             else
             {
@@ -565,19 +520,18 @@ namespace Engine.TextureReader
         {
             if (disposing)
             {
-                data = null;
+                data = ReadOnlyMemory<byte>.Empty;
             }
         }
 
         /// <summary>
-        /// Get data offset for the specifies slice and mip index
+        /// Gets the data memory for the specified slice and mip index
         /// </summary>
         /// <param name="slice">Array slice</param>
         /// <param name="mip">Mip index</param>
-        /// <param name="bytes">Returns the data bytes</param>
         /// <param name="stride">Returns the slice and mip stride</param>
-        /// <returns>Returns true if the slice and mip were located</returns>
-        public void GetDataOffset(uint slice, uint mip, out byte[] bytes, out uint stride)
+        /// <returns>Returns a view of the slice and mip data</returns>
+        public ReadOnlyMemory<byte> GetDataOffset(uint slice, uint mip, out uint stride)
         {
             uint offset = 0;
             uint size = 0;
@@ -604,10 +558,7 @@ namespace Engine.TextureReader
                     {
                         size = numBytes;
                         stride = rowBytes;
-                        bytes = new byte[size];
-                        Array.Copy(data, offset, bytes, 0, size);
-
-                        return;
+                        return data.Slice(checked((int)offset), checked((int)size));
                     }
 
                     offset += numBytes * depth;
@@ -623,8 +574,7 @@ namespace Engine.TextureReader
                 }
             }
 
-            bytes = new byte[size];
-            Array.Copy(data, offset, bytes, 0, size);
+            return data.Slice(checked((int)offset), checked((int)size));
         }
     }
 }

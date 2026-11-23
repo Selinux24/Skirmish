@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.IO;
-using System.Linq;
 
 namespace Engine.Content
 {
@@ -11,6 +9,8 @@ namespace Engine.Content
     /// </summary>
     public sealed class FileCubicImageContent : IImageContent, IEquatable<FileCubicImageContent>
     {
+        const string CubicFacesCountString = "A list of 6 faces must be specified, or not faces at all.";
+
         /// <summary>
         /// Image path
         /// </summary>
@@ -19,6 +19,7 @@ namespace Engine.Content
         /// Texture faces
         /// </summary>
         private readonly RectI[] faces;
+
         /// <inheritdoc/>
         public string Name { get; private set; }
         /// <inheritdoc/>
@@ -35,29 +36,22 @@ namespace Engine.Content
         /// </summary>
         /// <param name="path">Path to image</param>
         /// <param name="faces">Cube faces</param>
-        public FileCubicImageContent(string path, RectI[] faces = null)
+        public FileCubicImageContent(string path, RectI[] faces)
         {
-            if (path == null)
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+            if (faces != null && faces.Length != 0 && faces.Length != 6)
             {
-                throw new ArgumentNullException(nameof(path), "A path must be specified.");
+                throw new ArgumentException(CubicFacesCountString, nameof(faces));
             }
 
-            string directory = Path.GetDirectoryName(path);
-            string fileName = Path.GetFileName(path);
-
-            var p = ContentManager.FindPaths(directory, fileName);
-            if (!p.Any())
+            var p = ContentManager.FindPaths(path);
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified path has no results.", nameof(path));
             }
 
-            this.path = p.First();
-            this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");
-
-            if (faces.Length != 0 && faces.Length != 6)
-            {
-                throw new ArgumentOutOfRangeException(nameof(faces), $"A list o 6 faces must be specified.");
-            }
+            this.path = p[0];
+            this.faces = faces ?? [];
         }
         /// <summary>
         /// Constructor
@@ -67,24 +61,20 @@ namespace Engine.Content
         /// <param name="faces">Cube faces</param>
         public FileCubicImageContent(string contentFolder, string contentFileName, RectI[] faces = null)
         {
-            if (contentFileName == null)
+            ArgumentException.ThrowIfNullOrWhiteSpace(contentFileName);
+            if (faces != null && faces.Length != 0 && faces.Length != 6)
             {
-                throw new ArgumentNullException(nameof(contentFileName), "A content file name must be specified.");
+                throw new ArgumentException(CubicFacesCountString, nameof(faces));
             }
 
             var p = ContentManager.FindPaths(contentFolder, contentFileName);
-            if (!p.Any())
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified content file name has no results.", nameof(contentFileName));
             }
 
-            path = p.First();
-            this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");
-
-            if (faces.Length != 0 && faces.Length != 6)
-            {
-                throw new ArgumentOutOfRangeException(nameof(faces), $"A list o 6 faces must be specified.");
-            }
+            path = p[0];
+            this.faces = faces ?? [];
         }
 
         /// <inheritdoc/>
@@ -110,7 +100,7 @@ namespace Engine.Content
         {
             return
                 left.path == right.path &&
-                Helper.CompareEnumerables(left.faces, right.faces);
+                Helper.CompareArrays(left.faces, right.faces);
         }
         /// <inheritdoc/>
         public bool Equals(FileCubicImageContent other)
@@ -127,11 +117,13 @@ namespace Engine.Content
 
             return false;
         }
+
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return path.GetHashCode() ^ faces.GetHashCode();
+            return HashCode.Combine(path, faces);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

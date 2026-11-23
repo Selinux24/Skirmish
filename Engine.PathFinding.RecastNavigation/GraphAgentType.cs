@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -59,9 +60,9 @@ namespace Engine.PathFinding.RecastNavigation
             if (obj is GraphAgentType other)
             {
                 return
-                    Helper.NearEqual(other.Radius, Radius) &&
-                    Helper.NearEqual(other.MaxClimb, MaxClimb) &&
-                    Helper.NearEqual(other.MaxSlope, MaxSlope);
+                    MathUtils.NearEqual(other.Radius, Radius) &&
+                    MathUtils.NearEqual(other.MaxClimb, MaxClimb) &&
+                    MathUtils.NearEqual(other.MaxSlope, MaxSlope);
             }
 
             return false;

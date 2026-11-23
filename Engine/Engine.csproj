@@ -58,6 +58,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Logger\Logger.csproj" />
     <ProjectReference Include="..\Engine.TextureReader\Engine.TextureReader.csproj" />
+    <ProjectReference Include="..\Engine.Mathematics\Engine.Mathematics.csproj" />
     <ProjectReference Include="..\Engine.Shaders\Engine.Shaders.csproj" />
   </ItemGroup>
 

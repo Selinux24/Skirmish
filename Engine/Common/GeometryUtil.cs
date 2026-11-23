@@ -251,6 +251,7 @@ namespace Engine.Common
                 ];
             }
         }
+
         /// <summary>
         /// Toggle coordinates from left-handed to right-handed and vice versa
         /// </summary>
@@ -272,20 +273,7 @@ namespace Engine.Common
 
             return res;
         }
-        /// <summary>
-        /// Gets the asset transform
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="rotation">Rotation</param>
-        /// <param name="scale">Scale</param>
-        /// <returns>Returns a matrix with the reference transform</returns>
-        public static Matrix4x4 Transformation(Vector3 position, Quaternion rotation, Vector3 scale)
-        {
-            return Matrix4x4.Transformation(
-                Vector3.Zero, Quaternion.Identity, scale,
-                Vector3.Zero, rotation,
-                position);
-        }
+
         /// <summary>
         /// Generate normals for a triangle list topology geometry
         /// </summary>
@@ -316,6 +304,7 @@ namespace Engine.Common
 
             return normals;
         }
+
         /// <summary>
         /// Creates a new UV map from parameters
         /// </summary>
@@ -329,12 +318,12 @@ namespace Engine.Common
         public static Vector4 CreateUVMap(float width, float height, float texU, float texV, float texWidth, float texHeight)
         {
             //Texture map
-            float u0 = texWidth > 0 ? (texU) / texWidth : 0;
-            float v0 = texHeight > 0 ? (texV) / texHeight : 0;
+            float u0 = texWidth > 0 ? texU / texWidth : 0;
+            float v0 = texHeight > 0 ? texV / texHeight : 0;
             float u1 = texWidth > 0 ? (texU + width) / texWidth : 1;
             float v1 = texHeight > 0 ? (texV + height) / texHeight : 1;
 
-            return new Vector4(u0, v0, u1, v1);
+            return new(u0, v0, u1, v1);
         }
 
         /// <summary>
@@ -577,8 +566,8 @@ namespace Engine.Common
             //North pole
             vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
 
-            float phiStep = Helper.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * Helper.Pi / sliceCount;
+            float phiStep = MathUtils.Pi / (stackCount + 1);
+            float thetaStep = 2.0f * MathUtils.Pi / sliceCount;
 
             //Compute vertices for each stack ring (do not count the poles as rings).
             for (int st = 1; st < (stackCount + 1); ++st)
@@ -631,8 +620,8 @@ namespace Engine.Common
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 0.0f));
 
-            float phiStep = Helper.Pi / stackCount;
-            float thetaStep = 2.0f * Helper.Pi / sliceCount;
+            float phiStep = MathUtils.Pi / stackCount;
+            float thetaStep = 2.0f * MathUtils.Pi / sliceCount;
 
             for (int st = 1; st <= stackCount - 1; ++st)
             {
@@ -655,8 +644,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / Helper.Pi * 2f;
-                    float v = phi / Helper.Pi;
+                    float u = theta / MathUtils.Pi * 2f;
+                    float v = phi / MathUtils.Pi;
 
                     var texture = new Vector2(u, v);
 
@@ -827,8 +816,8 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = Helper.PiOver2 / stackCount;
-            float thetaStep = Helper.TwoPi / sliceCount;
+            float phiStep = MathUtils.PiOver2 / stackCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -873,9 +862,9 @@ namespace Engine.Common
             sliceCount--;
             stackCount++;
 
-            float phiStep = Helper.PiOver2 / stackCount;
-            float thetaStep = Helper.TwoPi / sliceCount;
-            float halfStep = thetaStep / Helper.TwoPi / 2f;
+            float phiStep = MathUtils.PiOver2 / stackCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
+            float halfStep = thetaStep / MathUtils.TwoPi / 2f;
 
             for (int st = 0; st <= stackCount; st++)
             {
@@ -903,8 +892,8 @@ namespace Engine.Common
                     var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
                     var binormal = Vector3.Cross(normal, tangent);
 
-                    float u = theta / Helper.TwoPi;
-                    float v = phi / Helper.PiOver2;
+                    float u = theta / MathUtils.TwoPi;
+                    float v = phi / MathUtils.PiOver2;
 
                     if (st == 0)
                     {
@@ -999,7 +988,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
 
@@ -1296,16 +1285,16 @@ namespace Engine.Common
             vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
             vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
-            float thetaStep = Helper.TwoPi / sliceCount;
+            float thetaStep = MathUtils.TwoPi / sliceCount;
 
             for (int sl = 0; sl < sliceCount; sl++)
             {
                 float theta = sl * thetaStep;
 
                 var position = new Vector3(
-                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Cos(theta),
+                    baseRadius * MathF.Sin(MathUtils.PiOver2) * MathF.Cos(theta),
                     -height,
-                    baseRadius * MathF.Sin(Helper.PiOver2) * MathF.Sin(theta));
+                    baseRadius * MathF.Sin(MathUtils.PiOver2) * MathF.Sin(theta));
 
                 vertList.Add(position);
             }
@@ -1341,7 +1330,7 @@ namespace Engine.Common
             {
                 Vertices = vertices,
                 Normals = normals,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
         /// <summary>
@@ -1371,7 +1360,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
 
@@ -2247,7 +2236,7 @@ namespace Engine.Common
             {
                 for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = j / (float)sliceCount * 2 * Helper.Pi;
+                    float theta = j / (float)sliceCount * 2 * MathUtils.Pi;
                     float st = MathF.Sin(theta), ct = MathF.Cos(theta);
                     var v = new Vector3(radius * st, height * i, radius * ct);
                     verts.Add(Vector3.TransformCoordinate(v, trn));
@@ -2483,11 +2472,11 @@ namespace Engine.Common
             ];
 
             //Base (reverse faces)
-            for (uint i = 0; i < hemispheric.Indices.Count(); i += 3)
+            for (uint i = 0; i < hemispheric.Indices.Length; i += 3)
             {
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 0) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 2) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 1) + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 0] + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 2] + offset);
+                indexList.Add(hemispheric.Indices[(int)i + 1] + offset);
             }
 
             //Add the side faces
@@ -2508,9 +2497,9 @@ namespace Engine.Common
 
             return new GeometryDescriptor()
             {
-                Vertices = verts,
+                Vertices = [.. verts],
                 Normals = norms,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
         /// <summary>
@@ -2544,7 +2533,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
 
@@ -2616,7 +2605,7 @@ namespace Engine.Common
 
             for (int i = 0; i < stackCount; i++)
             {
-                float a = i / (float)stackCount * Helper.TwoPi;
+                float a = i / (float)stackCount * MathUtils.TwoPi;
                 float x = MathF.Cos(a) * radius;
                 float z = MathF.Sin(a) * radius;
                 Vector3 v = new(x, 0, z);
@@ -2625,7 +2614,7 @@ namespace Engine.Common
                 {
                     var axis = Vector3.Cross(up, Vector3.Up);
 
-                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, Helper.PiOver2));
+                    v = Vector3.TransformNormal(v, Matrix4x4.RotationAxis(axis, MathUtils.PiOver2));
                 }
 
                 verts.Add(v + center);
@@ -2660,7 +2649,7 @@ namespace Engine.Common
             {
                 Vertices = verts,
                 Normals = normals,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
         /// <summary>
@@ -2686,7 +2675,7 @@ namespace Engine.Common
             return new GeometryDescriptor()
             {
                 Vertices = verts,
-                Indices = indexList,
+                Indices = [.. indexList],
             };
         }
 
@@ -2735,7 +2724,7 @@ namespace Engine.Common
 
             return new GeometryDescriptor()
             {
-                Vertices = vertices,
+                Vertices = [.. vertices],
                 Normals = normals,
                 Indices = indices,
             };
@@ -2749,7 +2738,7 @@ namespace Engine.Common
         {
             return new GeometryDescriptor()
             {
-                Vertices = vertices,
+                Vertices = [.. vertices],
                 Indices = CreateIndexesForLineList(vertices.Count()),
             };
         }
@@ -2884,7 +2873,7 @@ namespace Engine.Common
             float angle = Vector3.AngleSigned(Vector3.Up, rotNormal);
 
             Vector3 axis;
-            if (Helper.NearEqual(angle, Helper.Pi))
+            if (MathUtils.NearEqual(angle, MathUtils.Pi))
             {
                 //Parallel negative axis: Vector3.Down
                 axis = Vector3.Left;
@@ -3082,10 +3071,10 @@ namespace Engine.Common
 
             return new GeometryDescriptor()
             {
-                Vertices = vertices,
-                Normals = normals,
-                Uvs = uvs,
-                Indices = indices,
+                Vertices = [.. vertices],
+                Normals = [.. normals],
+                Uvs = [.. uvs],
+                Indices = [.. indices],
             };
         }
 
@@ -3164,9 +3153,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex item list</param>
         /// <returns>Returns the minimum bounding box that contains all the specified vertex item list</returns>
-        public static BoundingBox CreateBoundingBox<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        public static BoundingBox CreateBoundingBox<T>(T[] vertexListItems) where T : IVertexList
         {
-            if (!vertexListItems.Any())
+            if (vertexListItems.Length == 0)
             {
                 return new BoundingBox();
             }
@@ -3180,9 +3169,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex item list</param>
         /// <returns>Returns the minimum bounding sphere that contains all the specified vertex item list</returns>
-        public static BoundingSphere CreateBoundingSphere<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        public static BoundingSphere CreateBoundingSphere<T>(T[] vertexListItems) where T : IVertexList
         {
-            if (!vertexListItems.Any())
+            if (vertexListItems.Length == 0)
             {
                 return new BoundingSphere();
             }
@@ -3196,9 +3185,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex item list</param>
         /// <returns>Returns the minimum bounding cylinder that contains all the specified vertex item list</returns>
-        public static BoundingCylinder CreateBoundingCylinder<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        public static BoundingCylinder CreateBoundingCylinder<T>(T[] vertexListItems) where T : IVertexList
         {
-            if (!vertexListItems.Any())
+            if (vertexListItems.Length == 0)
             {
                 return new BoundingCylinder();
             }
@@ -3212,9 +3201,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex item list</param>
         /// <returns>Returns the minimum bounding capsule that contains all the specified vertex item list</returns>
-        public static BoundingCapsule CreateBoundingCapsule<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        public static BoundingCapsule CreateBoundingCapsule<T>(T[] vertexListItems) where T : IVertexList
         {
-            if (!vertexListItems.Any())
+            if (vertexListItems.Length == 0)
             {
                 return new BoundingCapsule();
             }
@@ -3230,23 +3219,23 @@ namespace Engine.Common
         /// <param name="constraint">Constraint</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="res">Resulting vertices</param>
-        public static void ConstraintVertices(BoundingBox constraint, IEnumerable<VertexData> vertices, out IEnumerable<VertexData> res)
+        public static void ConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
         {
             var tmpVertices = new List<VertexData>();
 
-            for (int i = 0; i < vertices.Count(); i += 3)
+            for (int i = 0; i < vertices.Length; i += 3)
             {
-                if (constraint.Contains(vertices.ElementAt(i + 0).Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices.ElementAt(i + 1).Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices.ElementAt(i + 2).Position.Value) != ContainmentType.Disjoint)
+                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
                 {
-                    tmpVertices.Add(vertices.ElementAt(i + 0));
-                    tmpVertices.Add(vertices.ElementAt(i + 1));
-                    tmpVertices.Add(vertices.ElementAt(i + 2));
+                    tmpVertices.Add(vertices[i + 0]);
+                    tmpVertices.Add(vertices[i + 1]);
+                    tmpVertices.Add(vertices[i + 2]);
                 }
             }
 
-            res = tmpVertices;
+            res = [.. tmpVertices];
         }
         /// <summary>
         /// Computes constraints into vertices
@@ -3254,7 +3243,7 @@ namespace Engine.Common
         /// <param name="constraint">Constraint</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Resulting vertices</returns>
-        public static async Task<IEnumerable<VertexData>> ConstraintVerticesAsync(BoundingBox constraint, IEnumerable<VertexData> vertices)
+        public static async Task<VertexData[]> ConstraintVerticesAsync(BoundingBox constraint, VertexData[] vertices)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -3272,20 +3261,20 @@ namespace Engine.Common
         /// <param name="indices">Indices</param>
         /// <param name="resVertices">Resulting vertices</param>
         /// <param name="resIndices">Resulting indices</param>
-        public static void ConstraintIndices(BoundingBox constraint, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, out IEnumerable<VertexData> resVertices, out IEnumerable<uint> resIndices)
+        public static void ConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
         {
             var tmpIndices = new List<uint>();
 
             // Gets all triangle indices into the constraint
-            for (int i = 0; i < indices.Count(); i += 3)
+            for (int i = 0; i < indices.Length; i += 3)
             {
-                var i0 = indices.ElementAt(i + 0);
-                var i1 = indices.ElementAt(i + 1);
-                var i2 = indices.ElementAt(i + 2);
+                var i0 = indices[i + 0];
+                var i1 = indices[i + 1];
+                var i2 = indices[i + 2];
 
-                var v0 = vertices.ElementAt((int)i0);
-                var v1 = vertices.ElementAt((int)i1);
-                var v2 = vertices.ElementAt((int)i2);
+                var v0 = vertices[(int)i0];
+                var v1 = vertices[(int)i1];
+                var v2 = vertices[(int)i2];
 
                 if (constraint.Contains(v0.Position.Value) != ContainmentType.Disjoint ||
                     constraint.Contains(v1.Position.Value) != ContainmentType.Disjoint ||
@@ -3298,25 +3287,23 @@ namespace Engine.Common
             }
 
             var tmpVertices = new List<VertexData>();
-            var dict = new List<Tuple<uint, uint>>();
+            var indexMap = new Dictionary<uint, uint>(tmpIndices.Count);
 
             // Adds all the selected vertices for each unique index, and create a index translator for the new vertex list
             foreach (uint index in tmpIndices.Distinct())
             {
-                tmpVertices.Add(vertices.ElementAt((int)index));
-                dict.Add(new Tuple<uint, uint>(index, (uint)tmpVertices.Count - 1));
+                tmpVertices.Add(vertices[index]);
+                indexMap[index] = (uint)tmpVertices.Count - 1;
             }
 
             // Set the new index values
             for (int i = 0; i < tmpIndices.Count; i++)
             {
-                uint newIndex = dict.Find(d => d.Item1 == tmpIndices[i]).Item2;
-
-                tmpIndices[i] = newIndex;
+                tmpIndices[i] = indexMap[tmpIndices[i]];
             }
 
-            resVertices = tmpVertices;
-            resIndices = tmpIndices;
+            resVertices = [.. tmpVertices];
+            resIndices = [.. tmpIndices];
         }
         /// <summary>
         /// Computes constraints into vertices and indices
@@ -3325,7 +3312,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Resulting vertices and indices</returns>
-        public static async Task<(IEnumerable<VertexData> Vertices, IEnumerable<uint> Indices)> ConstraintIndicesAsync(BoundingBox constraint, IEnumerable<VertexData> vertices, IEnumerable<uint> indices)
+        public static async Task<(VertexData[] Vertices, uint[] Indices)> ConstraintIndicesAsync(BoundingBox constraint, VertexData[] vertices, uint[] indices)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -3352,7 +3339,7 @@ namespace Engine.Common
             float angle = MathF.Acos(Vector3.Dot(dir, Vector3.Up));
 
             Matrix4x4 matrix = Matrix4x4.Translation(-vBase);
-            if (!Helper.IsZero(angle))
+            if (!MathUtils.IsZero(angle))
             {
                 //Find rotation axis
                 var axis = Vector3.Cross(dir, Vector3.Up);
@@ -3363,6 +3350,154 @@ namespace Engine.Common
             }
 
             return Matrix4x4.Invert(matrix);
+        }
+
+        /// <summary>
+        /// Generate a triangle list from geometry
+        /// </summary>
+        /// <param name="geometry">Geometry descriptot</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(GeometryDescriptor geometry)
+        {
+            if (geometry == null)
+            {
+                return [];
+            }
+
+            return ComputeTriangleList(geometry.Vertices, geometry.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from vertices
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(Vector3[] vertices)
+        {
+            ArgumentNullException.ThrowIfNull(vertices);
+
+            if (vertices.Length % 3 != 0)
+            {
+                throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
+            }
+
+            if (vertices.Length == 0) return [];
+
+            Triangle[] triangles = new Triangle[vertices.Length / 3];
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                triangles[i / 3] = new(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
+            }
+            return triangles;
+        }
+        /// <summary>
+        /// Generate a triangle list from vertices and indices
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(Vector3[] vertices, uint[] indices)
+        {
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(indices);
+
+            if (vertices.Length == 0 || indices.Length == 0) return [];
+
+            if (indices.Length % 3 != 0)
+            {
+                throw new ArgumentException("The index list must be divisible by three.", nameof(vertices));
+            }
+
+            Triangle[] triangles = new Triangle[indices.Length / 3];
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                triangles[i / 3] = new(
+                    vertices[indices[i + 0]],
+                    vertices[indices[i + 1]],
+                    vertices[indices[i + 2]]);
+            }
+            return triangles;
+        }
+        /// <summary>
+        /// Generate a triangle list from AABB
+        /// </summary>
+        /// <param name="bbox">AABB</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(BoundingBox bbox)
+        {
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, bbox);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from OBB
+        /// </summary>
+        /// <param name="obb">OBB</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(OrientedBoundingBox obb)
+        {
+            var geom = GeometryUtil.CreateBox(Topology.TriangleList, obb);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from sphere
+        /// </summary>
+        /// <param name="sph">Sphere</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(BoundingSphere sph, int sliceCount, int stackCount)
+        {
+            var geom = GeometryUtil.CreateSphere(Topology.TriangleList, sph, sliceCount, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from cylinder
+        /// </summary>
+        /// <param name="cylinder">Cylinder</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(BoundingCylinder cylinder, int stackCount)
+        {
+            var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, cylinder, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from capsule
+        /// </summary>
+        /// <param name="capsule">Capsule</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(BoundingCapsule capsule, int sliceCount, int stackCount)
+        {
+            var geom = GeometryUtil.CreateCapsule(Topology.TriangleList, capsule, sliceCount, stackCount);
+
+            return ComputeTriangleList(geom.Vertices, geom.Indices);
+        }
+
+        /// <summary>
+        /// Gets the cylinder vertices
+        /// </summary>
+        /// <param name="sliceCount">Slice count</param>
+        /// <returns>Returns a point array of vertices</returns>
+        public static Vector3[] GetVertices(BoundingCylinder bc, int sliceCount)
+        {
+            var geom = CreateCylinder(Topology.TriangleList, bc.Center, bc.Radius, bc.Height, sliceCount);
+
+            return [.. geom.Vertices];
+        }
+        /// <summary>
+        /// Gets the capsule segment vertices
+        /// </summary>
+        /// <returns>Returns a two point array of vertices, representing the capsule axis segment</returns>
+        public static Vector3[] GetVertices(BoundingCapsule bc, int sliceCount, int stackCount)
+        {
+            var geom = CreateCapsule(Topology.TriangleList, bc.Center, bc.Radius, bc.Height, sliceCount, stackCount);
+
+            return [.. geom.Vertices];
         }
     }
 }

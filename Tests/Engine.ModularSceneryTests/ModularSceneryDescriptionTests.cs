@@ -4,7 +4,6 @@ using Engine.Modular;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.ModularSceneryTests
@@ -41,7 +40,7 @@ namespace Engine.ModularSceneryTests
             var levelMap = desc.GetLevelMap();
             Assert.IsNotNull(levelMap);
 
-            var level = levelMap.Levels.First();
+            var level = levelMap.Levels[0];
             var contentLibrary = await desc.ReadContentLibrary();
 
             var particles = desc.GetLevelParticleSystems();

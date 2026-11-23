@@ -302,8 +302,25 @@ namespace Engine.Physics
             linearChange = new Vector3[2];
             angularChange = new Vector3[2];
 
+            ApplyPositionChange(penetration, out linearChange[0], out linearChange[1], out angularChange[0], out angularChange[1]);
+        }
+        /// <summary>
+        /// Performs contact penetration resolution based on inertia.
+        /// </summary>
+        /// <param name="penetration">Penetration</param>
+        /// <param name="linearChange1">Linear change 1</param>
+        /// <param name="linearChange2">Linear change 2</param>
+        /// <param name="angularChange1">Angular change 1</param>
+        /// <param name="angularChange2">Angular change 2</param>
+        public void ApplyPositionChange(float penetration, out Vector3 linearChange1, out Vector3 linearChange2, out Vector3 angularChange1, out Vector3 angularChange2)
+        {
+            linearChange1 = default;
+            linearChange2 = default;
+            angularChange1 = default;
+            angularChange2 = default;
+
             // We have to work with the inertia of each body in the direction of the contact normal, and the angular inertia.
-            ApplyInertia(out var totalInertia, out var linearInertia, out var angularInertia);
+            ApplyInertia(out var totalInertia, out var linearInertia1, out var linearInertia2, out var angularInertia1, out var angularInertia2);
 
             // Iterate again calculating the changes and applying them
             float angularLimit = 0.2f;
@@ -317,8 +334,10 @@ namespace Engine.Physics
 
                 // The angular and linear movements are proportional to the two inverse inertias.
                 float sign = (i == 0) ? 1 : -1;
-                float angularMove = sign * penetration * (angularInertia[i] / totalInertia);
-                float linearMove = sign * penetration * (linearInertia[i] / totalInertia);
+                float angularInertia = i == 0 ? angularInertia1 : angularInertia2;
+                float linearInertia = i == 0 ? linearInertia1 : linearInertia2;
+                float angularMove = sign * penetration * (angularInertia / totalInertia);
+                float linearMove = sign * penetration * (linearInertia / totalInertia);
 
                 // To avoid too large angular projections, the angular movement is limited.
                 var relativeContactPosition = GetRelativeContactPosition(i);
@@ -342,10 +361,11 @@ namespace Engine.Physics
 
                 // We have the linear amount of motion required to rotate the body.
                 // Now you have to calculate the desired rotation to make it rotate.
-                if (Helper.IsZero(angularMove))
+                Vector3 angularChange;
+                if (MathUtils.IsZero(angularMove))
                 {
                     // There is no angular movement. No rotation.
-                    angularChange[i] = Vector3.Zero;
+                    angularChange = Vector3.Zero;
                 }
                 else
                 {
@@ -354,18 +374,28 @@ namespace Engine.Physics
 
                     var inverseInertiaTensor = body.InverseInertiaTensorWorld;
 
-                    angularChange[i] = inverseInertiaTensor.Transform(targetAngularDirection) * (angularMove / angularInertia[i]);
+                    angularChange = inverseInertiaTensor.Transform(targetAngularDirection) * (angularMove / angularInertia);
                 }
 
                 // Velocity variation: linear movement on the normal of contact.
-                linearChange[i] = Normal * linearMove;
+                var linearChange = Normal * linearMove;
+                if (i == 0)
+                {
+                    linearChange1 = linearChange;
+                    angularChange1 = angularChange;
+                }
+                else
+                {
+                    linearChange2 = linearChange;
+                    angularChange2 = angularChange;
+                }
 
                 // Apply linear motion
                 var positionChange = Vector3.Multiply(Normal, linearMove);
                 body.AddPosition(positionChange);
 
                 // Apply the change in orientation
-                var orientationChange = new Quaternion(angularChange[i], 0f) * body.Rotation * Constants.OrientationContactFactor;
+                var orientationChange = new Quaternion(angularChange, 0f) * body.Rotation * Constants.OrientationContactFactor;
                 body.AddOrientation(orientationChange);
 
                 // You have to update each body that is active, so that the changes are reflected in the body.
@@ -382,11 +412,13 @@ namespace Engine.Physics
         /// <param name="totalInertia">Total inertia value</param>
         /// <param name="linearInertia">Linear inertia of each body</param>
         /// <param name="angularInertia">Angular inertia of each body</param>
-        private void ApplyInertia(out float totalInertia, out float[] linearInertia, out float[] angularInertia)
+        private void ApplyInertia(out float totalInertia, out float linearInertia1, out float linearInertia2, out float angularInertia1, out float angularInertia2)
         {
             totalInertia = 0f;
-            linearInertia = new float[2];
-            angularInertia = new float[2];
+            linearInertia1 = 0f;
+            linearInertia2 = 0f;
+            angularInertia1 = 0f;
+            angularInertia2 = 0f;
 
             for (int i = 0; i < 2; i++)
             {
@@ -403,13 +435,21 @@ namespace Engine.Physics
                 var angularInertiaWorld = Vector3.Cross(relativeContactPosition, Normal);
                 angularInertiaWorld = inverseInertiaTensor.Transform(angularInertiaWorld);
                 angularInertiaWorld = Vector3.Cross(angularInertiaWorld, relativeContactPosition);
-                angularInertia[i] = Vector3.Dot(angularInertiaWorld, Normal);
-
-                // The linear component is the inverse of the mass
-                linearInertia[i] = body.InverseMass;
+                float angularInertia = Vector3.Dot(angularInertiaWorld, Normal);
+                float linearInertia = body.InverseMass;
+                if (i == 0)
+                {
+                    angularInertia1 = angularInertia;
+                    linearInertia1 = linearInertia;
+                }
+                else
+                {
+                    angularInertia2 = angularInertia;
+                    linearInertia2 = linearInertia;
+                }
 
                 // Get the total inertia of all components
-                totalInertia += linearInertia[i] + angularInertia[i];
+                totalInertia += linearInertia + angularInertia;
             }
         }
         /// <summary>
@@ -432,25 +472,41 @@ namespace Engine.Physics
             velocityChange = new Vector3[2];
             rotationChange = new Vector3[2];
 
-            // Storing inverse masses and inverse inertia tensors in world coordinates.
-            Matrix3x3[] inverseInertiaTensor = new Matrix3x3[2];
-            inverseInertiaTensor[0] = body1.InverseInertiaTensorWorld;
+            ApplyVelocityChange(out velocityChange[0], out velocityChange[1], out rotationChange[0], out rotationChange[1]);
+        }
+        /// <summary>
+        /// Performs contact resolution based on the momentum obtained from inertia.
+        /// </summary>
+        /// <param name="velocityChange1">Speed change 1</param>
+        /// <param name="velocityChange2">Speed change 2</param>
+        /// <param name="rotationChange1">Rotation change 1</param>
+        /// <param name="rotationChange2">Rotation change 2</param>
+        public void ApplyVelocityChange(out Vector3 velocityChange1, out Vector3 velocityChange2, out Vector3 rotationChange1, out Vector3 rotationChange2)
+        {
+            velocityChange1 = default;
+            velocityChange2 = default;
+            rotationChange1 = default;
+            rotationChange2 = default;
+
+            // Storing inverse inertia tensors in world coordinates.
+            Matrix3x3 inverseInertiaTensor1 = body1.InverseInertiaTensorWorld;
+            Matrix3x3 inverseInertiaTensor2 = default;
             if (body2.HasFiniteMass())
             {
-                inverseInertiaTensor[1] = body2.InverseInertiaTensorWorld;
+                inverseInertiaTensor2 = body2.InverseInertiaTensorWorld;
             }
 
             // Calculate the impulse on each contact axis
             Vector3 impulseContact;
-            if (Helper.IsZero(friction))
+            if (MathUtils.IsZero(friction))
             {
                 // Frictionless impulse
-                impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);
+                impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor1, inverseInertiaTensor2);
             }
             else
             {
                 // Friction impulse
-                impulseContact = CalculateFrictionImpulse(inverseInertiaTensor);
+                impulseContact = CalculateFrictionImpulse(inverseInertiaTensor1, inverseInertiaTensor2);
             }
 
             // Convert momentum to world coordinates
@@ -458,25 +514,23 @@ namespace Engine.Physics
 
             // Divide the impulse into linear components and rotations
             Vector3 impulsiveTorque = Vector3.Cross(relativeContactPositionsWorld1, impulse);
-            rotationChange[0] = inverseInertiaTensor[0].Transform(impulsiveTorque);
-            velocityChange[0] = Vector3.Zero;
-            velocityChange[0] += Vector3.Multiply(impulse, body1.InverseMass);
+            rotationChange1 = inverseInertiaTensor1.Transform(impulsiveTorque);
+            velocityChange1 = Vector3.Multiply(impulse, body1.InverseMass);
 
             // Apply the changes to the body
-            body1.AddLinearVelocity(velocityChange[0]);
-            body1.AddAngularVelocity(rotationChange[0]);
+            body1.AddLinearVelocity(velocityChange1);
+            body1.AddAngularVelocity(rotationChange1);
 
             if (body2.HasFiniteMass())
             {
                 // Obtain linear and rotational impulses for the second body
                 impulsiveTorque = Vector3.Cross(impulse, relativeContactPositionsWorld2);
-                rotationChange[1] = inverseInertiaTensor[1].Transform(impulsiveTorque);
-                velocityChange[1] = Vector3.Zero;
-                velocityChange[1] += Vector3.Multiply(impulse, -body2.InverseMass);
+                rotationChange2 = inverseInertiaTensor2.Transform(impulsiveTorque);
+                velocityChange2 = Vector3.Multiply(impulse, -body2.InverseMass);
 
                 // Apply the changes.
-                body2.AddLinearVelocity(velocityChange[1]);
-                body2.AddAngularVelocity(rotationChange[1]);
+                body2.AddLinearVelocity(velocityChange2);
+                body2.AddAngularVelocity(rotationChange2);
             }
         }
         /// <summary>
@@ -486,13 +540,13 @@ namespace Engine.Physics
         /// <remarks>
         /// The two inertia tensors, one for each body of the contact, are necessary to save calculations.
         /// </remarks>
-        private Vector3 CalculateFrictionlessImpulse(Matrix3x3[] inverseInertiaTensor)
+        private Vector3 CalculateFrictionlessImpulse(Matrix3x3 inverseInertiaTensor1, Matrix3x3 inverseInertiaTensor2)
         {
             Vector3 impulseContact;
 
             // Calculate a vector showing the change in velocity in world coordinates, for a unit impulse in the direction of the contact normal.
             Vector3 deltaVelWorld = Vector3.Cross(relativeContactPositionsWorld1, Normal);
-            deltaVelWorld = inverseInertiaTensor[0].Transform(deltaVelWorld);
+            deltaVelWorld = inverseInertiaTensor1.Transform(deltaVelWorld);
             deltaVelWorld = Vector3.Cross(deltaVelWorld, relativeContactPositionsWorld1);
 
             // Obtain the variation of the velocity in contact coordinates.
@@ -504,7 +558,7 @@ namespace Engine.Physics
             if (body2.HasFiniteMass())
             {
                 deltaVelWorld = Vector3.Cross(relativeContactPositionsWorld2, Normal);
-                deltaVelWorld = inverseInertiaTensor[1].Transform(deltaVelWorld);
+                deltaVelWorld = inverseInertiaTensor2.Transform(deltaVelWorld);
                 deltaVelWorld = Vector3.Cross(deltaVelWorld, relativeContactPositionsWorld2);
 
                 deltaVelocity += Vector3.Dot(deltaVelWorld, Normal);
@@ -526,7 +580,7 @@ namespace Engine.Physics
         /// <remarks>
         /// The two inertia tensors, one for each body of the contact, are necessary to save calculations.
         /// </remarks>
-        private Vector3 CalculateFrictionImpulse(Matrix3x3[] inverseInertiaTensor)
+        private Vector3 CalculateFrictionImpulse(Matrix3x3 inverseInertiaTensor1, Matrix3x3 inverseInertiaTensor2)
         {
             float inverseMass = body1.InverseMass;
 
@@ -536,7 +590,7 @@ namespace Engine.Physics
 
             // Get the matrix to convert contact impulse to velocity variation in world coordinates.
             var deltaVelWorld = impulseToTorque;
-            deltaVelWorld *= inverseInertiaTensor[0];
+            deltaVelWorld *= inverseInertiaTensor1;
             deltaVelWorld *= impulseToTorque;
             deltaVelWorld *= -1;
 
@@ -546,7 +600,7 @@ namespace Engine.Physics
 
                 // Calculate the velocity modification matrix
                 var deltaVelWorld2 = impulseToTorque;
-                deltaVelWorld2 *= inverseInertiaTensor[1];
+                deltaVelWorld2 *= inverseInertiaTensor2;
                 deltaVelWorld2 *= impulseToTorque;
                 deltaVelWorld2 *= -1;
 

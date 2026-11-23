@@ -101,9 +101,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the agent list
         /// </summary>
-        public IEnumerable<(GraphAgentType Agent, NavMesh NavMesh)> GetAgents()
+        public (GraphAgentType Agent, NavMesh NavMesh)[] GetAgents()
         {
-            return agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh)).ToArray();
+            return [.. agentQuerieFactories.Select(agentQ => (agentQ.Agent, agentQ.NavMesh))];
         }
         /// <summary>
         /// Gets a query for the specified agent
@@ -128,7 +128,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a list of tiles</returns>
-        private List<(int x, int y)> LookupTiles(BoundingBox bbox)
+        private List<(int x, int y)> LookupTiles(ref BoundingBox bbox)
         {
             var points = bbox.GetVertices();
 
@@ -157,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="positions">Position list</param>
         /// <returns>Returns a list of tiles</returns>
-        private List<(int x, int y)> LookupTiles(IEnumerable<Vector3> positions)
+        private List<(int x, int y)> LookupTiles(Vector3[] positions)
         {
             List<(int x, int y)> tiles = [];
 
@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="agentQ">Agent query</param>
         /// <param name="updateTiles">Tile list</param>
         /// <param name="create">If true, creates the tile if not exists. If false, updates the tile if exists</param>
-        private void BuildTiles(GraphAgentQueryFactory agentQ, IEnumerable<(int x, int y)> updateTiles, bool create)
+        private void BuildTiles(GraphAgentQueryFactory agentQ, List<(int x, int y)> updateTiles, bool create)
         {
             foreach (var (x, y) in updateTiles)
             {
@@ -240,7 +240,7 @@ namespace Engine.PathFinding.RecastNavigation
             return null;
         }
         /// <inheritdoc/>
-        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        public Vector3? FindRandomPoint(AgentType agent, ref Vector3 position, float radius)
         {
             var query = CreateAgentQuery(agent);
             if (query == null)
@@ -266,7 +266,7 @@ namespace Engine.PathFinding.RecastNavigation
             return pt;
         }
         /// <inheritdoc/>
-        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             var graphQuery = GetAgentQueryFactory(agent);
             if (graphQuery == null)
@@ -274,10 +274,15 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            return GraphNode.FindAll(graphQuery.NavMesh);
+            return GraphNode.FindAll(graphQuery.NavMesh) ?? [];
         }
         /// <inheritdoc/>
-        public IGraphNode FindNode(AgentType agent, Vector3 point)
+        public T[] GetNodes<T>(AgentType agent) where T : IGraphNode
+        {
+            return [.. GetNodes(agent).OfType<T>()];
+        }
+        /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, ref Vector3 point)
         {
             var graphQuery = GetAgentQueryFactory(agent);
             if (graphQuery == null)
@@ -288,7 +293,18 @@ namespace Engine.PathFinding.RecastNavigation
             return GraphNode.FindNode(graphQuery.NavMesh, point);
         }
         /// <inheritdoc/>
-        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
+        public T FindNode<T>(AgentType agent, ref Vector3 point) where T : IGraphNode
+        {
+            var node = FindNode(agent, ref point);
+            if (node is T gNode)
+            {
+                return gNode;
+            }
+
+            return default;
+        }
+        /// <inheritdoc/>
+        public Vector3[] FindPath(AgentType agent, ref Vector3 from, ref Vector3 to)
         {
             var query = CreateAgentQuery(agent);
             if (query == null)
@@ -305,20 +321,20 @@ namespace Engine.PathFinding.RecastNavigation
                 return [];
             }
 
-            return result;
+            return [.. result];
         }
         /// <inheritdoc/>
-        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            return await Task.Run(() => FindPath(agent, from, to));
+            return await Task.Run(() => FindPath(agent, ref from, ref to));
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
+        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold)
         {
-            return IsWalkable(agent, position, distanceThreshold, out _);
+            return IsWalkable(agent, ref position, distanceThreshold, out _);
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, ref Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             nearest = null;
 
@@ -347,17 +363,17 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public void CreateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             CreateAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public void CreateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            CreateAt(LookupTiles(bbox), callback);
+            CreateAt(LookupTiles(ref bbox), callback);
         }
         /// <inheritdoc/>
-        public void CreateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void CreateAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             CreateAt(LookupTiles(positions), callback);
         }
@@ -384,17 +400,17 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public void UpdateAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             UpdateAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public void UpdateAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            UpdateAt(LookupTiles(bbox), callback);
+            UpdateAt(LookupTiles(ref bbox), callback);
         }
         /// <inheritdoc/>
-        public void UpdateAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void UpdateAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             UpdateAt(LookupTiles(positions), callback);
         }
@@ -421,17 +437,17 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public void RemoveAt(Vector3 position, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(ref Vector3 position, Action<GraphUpdateStates> callback = null)
         {
             RemoveAt(LookupTiles([position]), callback);
         }
         /// <inheritdoc/>
-        public void RemoveAt(BoundingBox bbox, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(ref BoundingBox bbox, Action<GraphUpdateStates> callback = null)
         {
-            RemoveAt(LookupTiles(bbox), callback);
+            RemoveAt(LookupTiles(ref bbox), callback);
         }
         /// <inheritdoc/>
-        public void RemoveAt(IEnumerable<Vector3> positions, Action<GraphUpdateStates> callback = null)
+        public void RemoveAt(Vector3[] positions, Action<GraphUpdateStates> callback = null)
         {
             RemoveAt(LookupTiles(positions), callback);
         }
@@ -487,17 +503,17 @@ namespace Engine.PathFinding.RecastNavigation
             return o.Id;
         }
         /// <inheritdoc/>
-        public int AddObstacle(BoundingCylinder cylinder)
+        public int AddObstacle(ref BoundingCylinder cylinder)
         {
             return AddObstacle(new ObstacleCylinder(cylinder));
         }
         /// <inheritdoc/>
-        public int AddObstacle(BoundingBox bbox)
+        public int AddObstacle(ref BoundingBox bbox)
         {
             return AddObstacle(new ObstacleBox(bbox));
         }
         /// <inheritdoc/>
-        public int AddObstacle(OrientedBoundingBox obb)
+        public int AddObstacle(ref OrientedBoundingBox obb)
         {
             return AddObstacle(new ObstacleOrientedBox(obb));
         }

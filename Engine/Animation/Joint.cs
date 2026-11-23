@@ -86,7 +86,7 @@ namespace Engine.Animation
                 Name == other.Name &&
                 Bone == other.Bone &&
                 Parent == other.Parent &&
-                Helper.CompareEnumerables(Childs, other.Childs) &&
+                Helper.CompareArrays(Childs, other.Childs) &&
                 Offset == other.Offset &&
                 LocalTransform == other.LocalTransform &&
                 GlobalTransform == other.GlobalTransform;

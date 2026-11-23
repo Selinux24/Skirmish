@@ -106,7 +106,7 @@ namespace Engine.Common
         /// <returns>Returns the internal render target</returns>
         internal RenderTargetView1 GetRenderTarget()
         {
-            return rtvList.FirstOrDefault();
+            return rtvList.Count > 0 ? rtvList[0] : default;
         }
         /// <summary>
         /// Gets the render targets

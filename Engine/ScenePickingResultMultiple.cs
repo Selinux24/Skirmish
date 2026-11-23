@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Engine.Mathematics;
+using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -7,49 +8,58 @@ namespace Engine
     /// Scene pinking results
     /// </summary>
     /// <typeparam name="T"><see cref="IRayIntersectable"/> item type</typeparam>
-    public struct ScenePickingResultMultiple<T> where T : IRayIntersectable
+    public readonly struct ScenePickingResultMultiple<T> where T : IRayIntersectable
     {
-        /// <summary>
-        /// Scene object
-        /// </summary>
-        public ISceneObject SceneObject { get; set; }
         /// <summary>
         /// Picking results
         /// </summary>
-        public IEnumerable<PickingResult<T>> PickingResults { get; set; }
+        private readonly PickingResult<T>[] pickingResults;
 
         /// <summary>
-        /// Gets the first result
+        /// Scene object
         /// </summary>
-        public readonly PickingResult<T> First()
-        {
-            return PickingResults.FirstOrDefault();
-        }
+        public ISceneObject SceneObject { get; }
+
         /// <summary>
-        /// Gets the las result
+        /// Constructor
         /// </summary>
-        /// <returns></returns>
-        public readonly PickingResult<T> Last()
+        /// <param name="sceneObject">Scene object</param>
+        /// <param name="pickingResults">Picking results</param>
+        public ScenePickingResultMultiple(ISceneObject sceneObject, PickingResult<T>[] pickingResults)
         {
-            return PickingResults.LastOrDefault();
+            SceneObject = sceneObject;
+            this.pickingResults = pickingResults ?? [];
+
+            if (this.pickingResults.Length > 1)
+            {
+                Array.Sort(this.pickingResults, (p1, p2) =>
+                {
+                    return p1.Distance.CompareTo(p2.Distance);
+                });
+            }
         }
+
+        /// <summary>
+        /// Get picking results
+        /// </summary>
+        public IReadOnlyCollection<PickingResult<T>> GetResults()
+        {
+            return pickingResults;
+        }
+
         /// <summary>
         /// Gets the nearest result to the picking origin
         /// </summary>
         public readonly PickingResult<T> Nearest()
         {
-            return PickingResults
-                .OrderBy(p => p.Distance)
-                .FirstOrDefault();
+            return pickingResults.Length > 0 ? pickingResults[0] : default;
         }
         /// <summary>
         /// Gets the fartest result to the picking origin
         /// </summary>
         public readonly PickingResult<T> Fartest()
         {
-            return PickingResults
-                .OrderByDescending(p => p.Distance)
-                .FirstOrDefault();
+            return pickingResults.Length > 0 ? pickingResults[^1] : default;
         }
 
         /// <summary>
@@ -57,14 +67,14 @@ namespace Engine
         /// </summary>
         public readonly float GetMinimumDistance()
         {
-            return PickingResults.Min(p => p.Distance);
+            return pickingResults.Length > 0 ? pickingResults[0].Distance : default;
         }
         /// <summary>
         /// Gets the maximum distance valur to the picking origin
         /// </summary>
         public readonly float GetMaximumDistance()
         {
-            return PickingResults.Max(p => p.Distance);
+            return pickingResults.Length > 0 ? pickingResults[^1].Distance : default;
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Vortice.DXGI;
 
 namespace Engine.TextureReader.DDS
 {
+    using Format = Vortice.DXGI.Format;
+
     /// <summary>
     /// DDS Pixel Format
     /// </summary>

@@ -1,4 +1,5 @@
-﻿using Engine.Tween;
+﻿using Engine.Mathematics;
+using Engine.Tween;
 
 namespace Engine.Audio.Tween
 {
@@ -118,7 +119,7 @@ namespace Engine.Audio.Tween
 
                 effect.SetVolume(ftVolume.CurrentValue);
 
-                if (Helper.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
+                if (MathUtils.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     return true;
                 }
@@ -141,7 +142,7 @@ namespace Engine.Audio.Tween
 
                 effect.SetVolume(ftVolume.CurrentValue);
 
-                if (Helper.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
+                if (MathUtils.NearEqual(ftVolume.CurrentValue, ftVolume.EndValue))
                 {
                     var newStart = ftVolume.EndValue;
                     var newEnd = ftVolume.StartValue;

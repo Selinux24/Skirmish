@@ -1,7 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.IO;
 using System.Linq;
 
 namespace Engine.Content
@@ -37,21 +36,15 @@ namespace Engine.Content
         /// <param name="cropRectangle">Crop rectangle</param>
         public FileImageContent(string path, RectI? cropRectangle = null)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path), "A path must be specified.");
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-            string directory = Path.GetDirectoryName(path);
-            string fileName = Path.GetFileName(path);
-
-            var p = ContentManager.FindPaths(directory, fileName);
-            if (!p.Any())
+            var p = ContentManager.FindPaths(path);
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified path has no results.", nameof(path));
             }
 
-            this.path = p.First();
+            this.path = p[0];
             this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
         /// <summary>
@@ -62,18 +55,15 @@ namespace Engine.Content
         /// <param name="cropRectangle">Crop rectangle</param>
         public FileImageContent(string contentFolder, string contentFileName, RectI? cropRectangle = null)
         {
-            if (contentFileName == null)
-            {
-                throw new ArgumentNullException(nameof(contentFileName), "A content file name must be specified.");
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(contentFileName);
 
             var p = ContentManager.FindPaths(contentFolder, contentFileName);
-            if (!p.Any())
+            if (p.Length == 0)
             {
                 throw new ArgumentException("The specified content file name has no results.", nameof(contentFileName));
             }
 
-            path = p.First();
+            path = p[0];
             this.cropRectangle = cropRectangle ?? RectI.Empty;
         }
 

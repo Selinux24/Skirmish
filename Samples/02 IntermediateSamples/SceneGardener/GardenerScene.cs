@@ -487,7 +487,7 @@ TAB - Change control between Camera and Agent
             }
 
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
-            if (!this.PickNearest<Triangle>(pRay, SceneObjectUsages.Ground, out var r))
+            if (!this.PickNearest<Triangle>(ref pRay, SceneObjectUsages.Ground, out var r))
             {
                 return;
             }
@@ -541,7 +541,7 @@ TAB - Change control between Camera and Agent
             var tris = GeometryUtil.CreatePolygon(Topology.TriangleList, topQuad);
 
             itemLines.SetPrimitives(lColor, lines);
-            itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+            itemTris.SetPrimitives(tColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
         private void DrawCircle(Vector3 position, float r, Color4 lColor, Color4 tColor)
         {
@@ -556,7 +556,7 @@ TAB - Change control between Camera and Agent
             var tris = GeometryUtil.CreateCircle(Topology.TriangleList, position, r, 32);
 
             itemLines.SetPrimitives(lColor, lines);
-            itemTris.SetPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+            itemTris.SetPrimitives(tColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
         }
         private void DrawGardenerNodes(Color4 lColor, Color4 tColor, Color4 fColor, Color4 empColor, Color4 errColor)
         {
@@ -588,19 +588,19 @@ TAB - Change control between Camera and Agent
 
                 if (isVisible && allOk)
                 {
-                    itemTris.AddPrimitives(fColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    itemTris.AddPrimitives(fColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
                 else if (isVisible && anyError)
                 {
-                    itemTris.AddPrimitives(errColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    itemTris.AddPrimitives(errColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
                 else if (allOk)
                 {
-                    itemTris.AddPrimitives(empColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    itemTris.AddPrimitives(empColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
                 else if (isVisible)
                 {
-                    itemTris.AddPrimitives(tColor, Triangle.ComputeTriangleList(tris.Vertices, tris.Indices));
+                    itemTris.AddPrimitives(tColor, GeometryUtil.ComputeTriangleList(tris.Vertices, tris.Indices));
                 }
             }
         }

@@ -10,6 +10,8 @@ namespace Engine.Animation
     /// </summary>
     public class AnimationPlan
     {
+        const string PathCountError = "Must specify one animation path at least.";
+
         private readonly List<AnimationPath> animationPaths = [];
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentPathIndex);
+                return CurrentPathIndex < animationPaths.Count ? animationPaths[CurrentPathIndex] : default;
             }
         }
         /// <summary>
@@ -46,7 +48,9 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentPathIndex + 1);
+                int idx = CurrentPathIndex + 1;
+
+                return idx < animationPaths.Count ? animationPaths[idx] : default;
             }
         }
         /// <summary>
@@ -136,22 +140,19 @@ namespace Engine.Animation
         /// <param name="path">Animation path</param>
         public AnimationPlan(AnimationPath path)
         {
+            ArgumentNullException.ThrowIfNull(path);
+
             animationPaths.Add(path);
         }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="paths">Animation path list</param>
-        public AnimationPlan(params AnimationPath[] paths)
+        public AnimationPlan(AnimationPath[] paths)
         {
-            animationPaths.AddRange(paths);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="paths">Animation path list</param>
-        public AnimationPlan(IEnumerable<AnimationPath> paths)
-        {
+            ArgumentNullException.ThrowIfNull(paths);
+            if (paths.Length == 0) throw new ArgumentException(PathCountError, nameof(paths));
+
             animationPaths.AddRange(paths);
         }
 
@@ -198,7 +199,7 @@ namespace Engine.Animation
         /// Adds a new path list to the plan
         /// </summary>
         /// <param name="paths">Animation paths</param>
-        public void AddItemRange(IEnumerable<AnimationPath> paths)
+        public void AddItemRange(AnimationPath[] paths)
         {
             animationPaths.AddRange(paths);
         }
@@ -273,7 +274,7 @@ namespace Engine.Animation
         /// Gets the transformation matrix list at current time
         /// </summary>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public IEnumerable<Matrix4x4> GetCurrentPose(ISkinningData skinningData)
+        public Matrix4x4[] GetCurrentPose(ISkinningData skinningData)
         {
             if (skinningData == null)
             {
@@ -404,26 +405,31 @@ namespace Engine.Animation
         /// </summary>
         public AnimationPlan Clone()
         {
-            return new AnimationPlan(animationPaths.Select(p => p.Clone()).ToArray());
+            AnimationPath[] cloned = [.. animationPaths.Select(p => p.Clone())];
+
+            return new(cloned);
         }
 
         /// <summary>
         /// Gets the plan state for persistence
         /// </summary>
-        public IEnumerable<IGameState> GetState()
+        public IGameState[] GetState()
         {
-            return animationPaths.Select(a => a.GetState()).ToArray();
+            return [.. animationPaths.Select(a => a.GetState())];
         }
         /// <summary>
         /// Sets the plan stat from persistence
         /// </summary>
-        public void SetState(IEnumerable<IGameState> state)
+        public void SetState(IGameState[] state)
         {
-            for (int i = 0; i < state.Count(); i++)
+            for (int i = 0; i < state.Length; i++)
             {
-                var pathState = state.ElementAt(i);
+                var pathState = state[i];
 
-                animationPaths.ElementAtOrDefault(i)?.SetState(pathState);
+                if (animationPaths.Count < i)
+                {
+                    animationPaths[i]?.SetState(pathState);
+                }
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Engine.Mathematics;
-using System.Collections.Generic;
 
 namespace Engine.Collections
 {
@@ -82,7 +81,7 @@ namespace Engine.Collections
         /// <summary>
         /// Children list
         /// </summary>
-        IEnumerable<T> Children { get; }
+        T[] Children { get; }
         /// <summary>
         /// Gets whether the node is a leaf node
         /// </summary>

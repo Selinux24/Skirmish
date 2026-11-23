@@ -13,18 +13,16 @@ namespace Engine.AudioTests
     [OSCondition(OperatingSystems.Windows)]
     public class GameAudioTests
     {
-        private IGameAudio _gameAudio;
-
         [TestInitialize]
         public void Setup()
         {
-            _gameAudio = new GameAudioLoader().GetDelegate(48000)();
         }
 
         [TestCleanup]
         public void Teardown()
         {
             // Ensure resources are cleaned up after each test.
+            var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             _gameAudio?.Dispose();
             _gameAudio = null;
             Assert.IsNull(_gameAudio, "GameAudio instance should be null after disposal.");
@@ -34,6 +32,7 @@ namespace Engine.AudioTests
         public void Constructor_InitializesDefaultValuesCorrectly()
         {
             // Check default values (e.g., MasterVolume should be 1f initially)
+            var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             Assert.AreEqual(1.0f, _gameAudio.MasterVolume, "Master volume should initialize to 1.0.");
             Assert.IsFalse(_gameAudio.UseMasteringLimiter, "Mastering limiter should start disabled.");
         }
@@ -41,6 +40,7 @@ namespace Engine.AudioTests
         [TestMethod]
         public void AudioProperties_ExposeRequestedConfiguration()
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             Assert.AreEqual(48000u, _gameAudio.InputSampleRate);
             Assert.AreEqual(2u, _gameAudio.InputChannelCount);
             Assert.IsFalse(_gameAudio.UseRedirectToLFE);
@@ -50,6 +50,7 @@ namespace Engine.AudioTests
         [TestMethod]
         public void StartAndStop_CallsEngineMethods()
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             _gameAudio.Start();
             Assert.IsTrue(_gameAudio.Running);
             _gameAudio.Stop();
@@ -61,6 +62,7 @@ namespace Engine.AudioTests
         {
             var fileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.wav");
 
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             try
             {
                 WriteWaveFile(fileName);
@@ -91,6 +93,7 @@ namespace Engine.AudioTests
         {
             var missingFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.wav");
 
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             Assert.Throws<FileNotFoundException>(
                 () => _gameAudio.CreateEffect(missingFile, new GameAudioEffectParameters()));
         }
@@ -125,6 +128,8 @@ namespace Engine.AudioTests
         [TestMethod]
         public void MasterVolume_SetAndGetCorrectlyClampsValue()
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
+
             // 1. Set volume to a valid value
             float expectedVolume = 0.5f;
             _gameAudio.MasterVolume = expectedVolume;
@@ -142,15 +147,17 @@ namespace Engine.AudioTests
         [TestMethod]
         public void UseMasteringLimiter_TogglingChangesStateAndCallsAPI()
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
+
             // Test initial state check (already covered in Setup, but good practice)
             Assert.IsFalse(_gameAudio.UseMasteringLimiter, "Initial limiter state must be false.");
 
             // 1. Enable Limiter: Should set the internal flag and call 'EnableMasteringLimiter()'
-            _gameAudio.UseMasteringLimiter = true;
+            _gameAudio.EnableMasteringLimiter(1, 1);
             Assert.IsTrue(_gameAudio.UseMasteringLimiter, "UseMasteringLimiter flag must be true after setting.");
 
             // 2. Disable Limiter: Should set the internal flag and call 'DisableMasteringLimiter()'
-            _gameAudio.UseMasteringLimiter = false;
+            _gameAudio.DisableMasteringLimiter();
             Assert.IsFalse(_gameAudio.UseMasteringLimiter, "UseMasteringLimiter flag must be false after resetting.");
 
             // Note: Assertions regarding API calls (SetEffectChain/DisableEffect) are placeholders 
@@ -160,6 +167,8 @@ namespace Engine.AudioTests
         [TestMethod]
         public void StartOperationSet_CommitOperation_TracksActiveOperationSet()
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
+
             _gameAudio.CommitOperation(XAudio2.CommitNow);
             Assert.AreEqual((uint)XAudio2.CommitNow, _gameAudio.OperationSet);
 
@@ -180,7 +189,11 @@ namespace Engine.AudioTests
         [DataRow((uint)XAPO.MaxRelease, (uint)XAPO.MaxLoudness)]
         public void SetMasteringLimit_ValidParameters_DoesNotThrow(uint release, uint loudness)
         {
-            _gameAudio.SetMasteringLimit(release, loudness);
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
+            _gameAudio.EnableMasteringLimiter(release, loudness);
+            Assert.IsTrue(_gameAudio.UseMasteringLimiter);
+            Assert.AreEqual(_gameAudio.ReleaseLimit, release);
+            Assert.AreEqual(_gameAudio.LoudnessLimit, loudness);
         }
 
         [TestMethod]
@@ -188,8 +201,9 @@ namespace Engine.AudioTests
         [DataRow(XAPO.MaxRelease + 1u, 50u)]
         public void SetMasteringLimit_InvalidRelease_ThrowsArgumentOutOfRangeException(uint invalidRelease, uint validLoudness)
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => _gameAudio.SetMasteringLimit(invalidRelease, validLoudness));
+                () => _gameAudio.EnableMasteringLimiter(invalidRelease, validLoudness));
         }
 
         [TestMethod]
@@ -197,8 +211,9 @@ namespace Engine.AudioTests
         [DataRow(10u, XAPO.MaxLoudness + 1u)]
         public void SetMasteringLimit_InvalidLoudness_ThrowsArgumentOutOfRangeException(uint validRelease, uint invalidLoudness)
         {
+            using var _gameAudio = new GameAudioLoader().GetDelegate(48000)();
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => _gameAudio.SetMasteringLimit(validRelease, invalidLoudness));
+                () => _gameAudio.EnableMasteringLimiter(validRelease, invalidLoudness));
         }
     }
 }

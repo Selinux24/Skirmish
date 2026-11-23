@@ -210,7 +210,7 @@ namespace Engine.BuiltIn.Components.Ground
             /// Gets all the used materials
             /// </summary>
             /// <returns>Returns the used materials array</returns>
-            public IEnumerable<IMeshMaterial> GetMaterials()
+            public IMeshMaterial[] GetMaterials()
             {
                 return DrawingData.GetMaterials();
             }
@@ -287,7 +287,7 @@ namespace Engine.BuiltIn.Components.Ground
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<SceneLight> Lights { get; private set; }
+        public SceneLight[] Lights { get; private set; }
 
         /// <summary>
         /// Destructor
@@ -319,13 +319,13 @@ namespace Engine.BuiltIn.Components.Ground
             await base.ReadAssets(description);
 
             // Generate model content
-            var contentList = await Description.ReadContentData();
-            if (!contentList.Any())
+            var contentData = await Description.ReadContentData();
+            if (contentData.Length == 0)
             {
-                throw new ArgumentNullException(nameof(description));
+                throw new ArgumentException("Must specify at least one content in the list.", nameof(description));
             }
 
-            content = contentList.First();
+            content = contentData[0];
 
             // Generate quadtree
             GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
@@ -345,7 +345,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             // Generate initial patches
             var nodes = GroundPickingQuadtree.GetLeafNodes();
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return;
             }
@@ -367,7 +367,7 @@ namespace Engine.BuiltIn.Components.Ground
 
             var taskDuration = TimeSpan.FromMilliseconds(taskResults.Sum(p => p.Duration.TotalMilliseconds));
             var maxTaskDuration = TimeSpan.FromMilliseconds(taskResults.Max(p => p.Duration.TotalMilliseconds));
-            Game.Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Count()} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
+            Game.Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Length} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
         }
 
         /// <inheritdoc/>
@@ -380,7 +380,7 @@ namespace Engine.BuiltIn.Components.Ground
                 return true;
             }
 
-            var nodes = GroundPickingQuadtree.FindNodesInVolume(volume).ToArray();
+            var nodes = GroundPickingQuadtree.FindNodesInVolume(volume);
             if (nodes.Length == 0)
             {
                 return true;
@@ -436,7 +436,7 @@ namespace Engine.BuiltIn.Components.Ground
             }
 
             // Launch creation tasks
-            LoadPatches(taskList);
+            LoadPatches([.. taskList]);
         }
 
         /// <inheritdoc/>
@@ -496,17 +496,14 @@ namespace Engine.BuiltIn.Components.Ground
         /// Launch an async resource load with the task list
         /// </summary>
         /// <param name="taskList">Task list to launch</param>
-        private void LoadPatches(IEnumerable<Func<Task<SceneryPatchTask>>> taskList)
+        private void LoadPatches(Func<Task<SceneryPatchTask>>[] taskList)
         {
-            if (!taskList.Any())
-            {
-                return;
-            }
+            if (taskList.Length == 0) return;
 
             const string loadTaskName = nameof(LoadPatches);
 
             // Fire and forget
-            Game.Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Count()} tasks.");
+            Game.Logger.WriteTrace(this, $"{loadTaskName} Init: {taskList.Length} tasks.");
 
             var loadGroup = LoadResourceGroup<SceneryPatchTask>.FromTasks(taskList, LoadPatchesCompleted, null, $"{loadTaskName}");
 
@@ -540,7 +537,7 @@ namespace Engine.BuiltIn.Components.Ground
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             return [.. patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? [])];
         }

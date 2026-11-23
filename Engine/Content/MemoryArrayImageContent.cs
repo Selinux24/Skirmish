@@ -1,9 +1,7 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Engine.Content
 {
@@ -15,7 +13,7 @@ namespace Engine.Content
         /// <summary>
         /// Image array streams
         /// </summary>
-        private readonly IEnumerable<MemoryStream> streams;
+        private readonly MemoryStream[] streams;
         /// <summary>
         /// Crop rectangle
         /// </summary>
@@ -27,7 +25,7 @@ namespace Engine.Content
         {
             get
             {
-                return streams.Count();
+                return streams.Length;
             }
         }
 
@@ -36,12 +34,12 @@ namespace Engine.Content
         /// </summary>
         /// <param name="streams">Texture streams</param>
         /// <param name="cropRectangle">Crop rectangle</param>
-        public MemoryArrayImageContent(IEnumerable<MemoryStream> streams, RectI? cropRectangle = null)
+        public MemoryArrayImageContent(MemoryStream[] streams, RectI? cropRectangle = null)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams), "A stream array must be specified.");
             this.cropRectangle = cropRectangle ?? RectI.Empty;
 
-            if (!streams.Any(s => s != null))
+            if (!Array.Exists(streams, s => s != null))
             {
                 throw new ArgumentOutOfRangeException(nameof(streams), $"At least, one stream must be specified in the array.");
             }
@@ -76,7 +74,7 @@ namespace Engine.Content
         public static bool operator ==(MemoryArrayImageContent left, MemoryArrayImageContent right)
         {
             return
-                Helper.CompareEnumerables(left.streams, right.streams) &&
+                Helper.CompareArrays(left.streams, right.streams) &&
                 left.cropRectangle == right.cropRectangle;
         }
         /// <inheritdoc/>
@@ -102,7 +100,7 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Stream array: {streams.Count()} elements;";
+            return $"Stream array: {streams.Length} elements;";
         }
     }
 }

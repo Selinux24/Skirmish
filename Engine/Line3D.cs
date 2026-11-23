@@ -243,7 +243,7 @@ namespace Engine
 
             for (int i = 0; i < segments; ++i)
             {
-                float a = i / (float)segments * Helper.TwoPi;
+                float a = i / (float)segments * MathUtils.TwoPi;
                 dir[i * 2 + 0] = MathF.Cos(a);
                 dir[i * 2 + 1] = MathF.Sin(a);
             }
@@ -495,20 +495,24 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Vector3> GetVertices()
+        public readonly Vector3[] GetVertices()
         {
-            yield return Point1;
-            yield return Point2;
+            return [Point1, Point2];
+        }
+        /// <inheritdoc/>
+        public readonly Vector3 GetVertex(int index)
+        {
+            return index switch
+            {
+                0 => Point1,
+                1 => Point2,
+                _ => throw new ArgumentOutOfRangeException(nameof(index)),
+            };
         }
         /// <inheritdoc/>
         public readonly uint GetStride()
         {
             return 2;
-        }
-        /// <inheritdoc/>
-        public readonly Topology GetTopology()
-        {
-            return Topology.LineList;
         }
 
         /// <inheritdoc/>

@@ -1,13 +1,12 @@
-﻿
+﻿using Engine;
+using Engine.BuiltIn.Components.Models;
+using Engine.Mathematics;
+using Engine.PathFinding;
+using TerrainSamples.SceneRts.AI.Behaviors;
+using TerrainSamples.SceneRts.Controllers;
+
 namespace TerrainSamples.SceneRts.AI.Agents
 {
-    using Engine;
-    using Engine.BuiltIn.Components.Models;
-    using Engine.Mathematics;
-    using Engine.PathFinding;
-    using TerrainSamples.SceneRts.AI.Behaviors;
-    using TerrainSamples.SceneRts.Controllers;
-
     /// <summary>
     /// Helicopter agent
     /// </summary>
@@ -88,7 +87,8 @@ namespace TerrainSamples.SceneRts.AI.Agents
             var model = SceneObject;
 
             //Find nearest ground position
-            if (Parent.Scene.FindNearestGroundPosition<Triangle>(Manipulator.Position, out var r))
+            var position = Manipulator.Position;
+            if (Parent.Scene.FindNearestGroundPosition<Triangle>(ref position, out var r))
             {
                 SetRouteToPoint(r.Position, 15f, false);
                 model?.AnimationController.Stop();

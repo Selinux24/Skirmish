@@ -1,8 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -39,27 +37,27 @@ namespace Engine.BuiltIn.Format
         /// <param name="tangents">Tangents</param>
         /// <param name="uvs">UV coordinates</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static IEnumerable<VertexPositionNormalTextureTangent> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector2> uvs, IEnumerable<Vector3> tangents)
+        public static VertexPositionNormalTextureTangent[] Generate(Vector3[] vertices, Vector3[] normals, Vector2[] uvs, Vector3[] tangents)
         {
-            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
-            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
-            if (vertices.Count() != tangents.Count()) throw new ArgumentException("Vertices and tangents must have the same length");
+            ArgumentNullException.ThrowIfNull(vertices);
+            ArgumentNullException.ThrowIfNull(normals);
+            ArgumentNullException.ThrowIfNull(uvs);
+            ArgumentNullException.ThrowIfNull(tangents);
 
-            var vArray = vertices.ToArray();
-            var nArray = normals.ToArray();
-            var tArray = tangents.ToArray();
-            var uvArray = uvs.ToArray();
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Length != normals.Length) throw new ArgumentException("Vertices and normals must have the same length");
+            if (vertices.Length != tangents.Length) throw new ArgumentException("Vertices and tangents must have the same length");
 
-            VertexPositionNormalTextureTangent[] res = new VertexPositionNormalTextureTangent[vArray.Length];
+            VertexPositionNormalTextureTangent[] res = new VertexPositionNormalTextureTangent[vertices.Length];
 
-            for (int i = 0; i < vArray.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
                 res[i] = new VertexPositionNormalTextureTangent()
                 {
-                    Position = vArray[i],
-                    Normal = nArray[i],
-                    Tangent = tArray[i],
-                    Texture = uvArray[i]
+                    Position = vertices[i],
+                    Normal = normals[i],
+                    Tangent = tangents[i],
+                    Texture = uvs[i]
                 };
             }
 
@@ -69,15 +67,15 @@ namespace Engine.BuiltIn.Format
         /// Converts a vertex data list to a vertex array
         /// </summary>
         /// <param name="vertices">Vertices list</param>
-        public static async Task<IEnumerable<VertexPositionNormalTextureTangent>> Convert(IEnumerable<VertexData> vertices)
+        public static async Task<VertexPositionNormalTextureTangent[]> Convert(VertexData[] vertices)
         {
-            var vArray = vertices.ToArray();
+            ArgumentNullException.ThrowIfNull(vertices);
 
-            var res = new VertexPositionNormalTextureTangent[vArray.Length];
+            var res = new VertexPositionNormalTextureTangent[vertices.Length];
 
-            Parallel.For(0, vArray.Length, (index) =>
+            Parallel.For(0, vertices.Length, (index) =>
             {
-                var v = vArray[index];
+                var v = vertices[index];
 
                 res[index] = new VertexPositionNormalTextureTangent
                 {

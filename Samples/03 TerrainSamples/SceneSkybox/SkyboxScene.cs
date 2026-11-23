@@ -70,7 +70,7 @@ namespace TerrainSamples.SceneSkybox
         ];
         private readonly Quaternion[] obeliskRotations =
         [
-            Quaternion.RotationYawPitchRoll(-Helper.PiOver2 * 0.75f, Helper.PiOver2 * 1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(-MathUtils.PiOver2 * 0.75f, MathUtils.PiOver2 * 1.03f, 0.45f),
             Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
@@ -519,7 +519,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 var pRay = GetPickingRay();
 
-                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (ruins.PickNearest(ref pRay, out PickingResult<Triangle> r))
                 {
                     var tri = Line3D.CreateTriangle(r.Primitive);
                     var cross = Line3D.CreateCross(r.Position, 0.1f);
@@ -533,7 +533,7 @@ namespace TerrainSamples.SceneSkybox
             {
                 var pRay = GetPickingRay();
 
-                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (ruins.PickNearest(ref pRay, out PickingResult<Triangle> r))
                 {
                     decalEmitter.AddDecal(
                         r.Position,

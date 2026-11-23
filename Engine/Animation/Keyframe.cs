@@ -91,8 +91,8 @@ namespace Engine.Animation
         public readonly bool Equals(Keyframe other)
         {
             return
-                Helper.NearEqual(Time, other.Time) &&
-                Helper.NearEqual(Position, other.Position) &&
+                MathUtils.NearEqual(Time, other.Time) &&
+                MathUtils.NearEqual(Position, other.Position) &&
                 Translation == other.Translation &&
                 Rotation == other.Rotation &&
                 Scale == other.Scale &&

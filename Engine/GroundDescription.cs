@@ -1,7 +1,7 @@
 ﻿using Engine.Collections;
 using Engine.Collections.Generic;
 using Engine.Content;
-using System.Collections.Generic;
+using Engine.Mathematics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Content list
         /// </summary>
-        public IEnumerable<ContentDescription> ContentList { get; set; }
+        public ContentDescription[] ContentList { get; set; }
         /// <summary>
         /// Quadtree
         /// </summary>
@@ -42,20 +42,20 @@ namespace Engine
         /// <summary>
         /// Reads the content data from description
         /// </summary>
-        public virtual async Task<IEnumerable<ContentData>> ReadContentData()
+        public virtual async Task<ContentData[]> ReadContentData()
         {
             // Read model content
             if (Content != null)
             {
                 return await Content.ReadContentData();
             }
-            else if (ContentList?.Any() == true)
+            else if (ContentList != null && ContentList.Length > 0)
             {
                 var tasks = ContentList.Select(c => c.ReadContentData());
 
                 var res = await Task.WhenAll(tasks);
 
-                return res.SelectMany(r => r);
+                return [.. res.SelectMany(r => r)];
             }
             else
             {
@@ -74,7 +74,7 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Quadtree item type</typeparam>
         /// <param name="items">Quadtree items</param>
-        public virtual PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
+        public virtual PickingQuadTree<T> ReadQuadTree<T>(T[] items) where T : IVertexList, IRayIntersectable
         {
             if (Quadtree != null)
             {

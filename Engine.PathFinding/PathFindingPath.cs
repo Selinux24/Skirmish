@@ -22,7 +22,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets the position control points
         /// </summary>
-        public IEnumerable<Vector3> Positions
+        public Vector3[] Positions
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets the normal control points
         /// </summary>
-        public IEnumerable<Vector3> Normals
+        public Vector3[] Normals
         {
             get
             {

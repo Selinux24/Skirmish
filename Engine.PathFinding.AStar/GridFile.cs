@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -97,7 +98,7 @@ namespace Engine.PathFinding.AStar
 
             await Task.Run(() =>
             {
-                var nodes = file.Nodes.Select(GridNodeFile.FromFile);
+                var nodes = file.Nodes.Select(GridNodeFile.FromFile).ToArray();
 
                 var grid = new Grid(file.Settings, input);
                 grid.SetNodes(nodes);
@@ -114,7 +115,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the graph</returns>
         public static Grid FromGraphFile(GridFile file, GridInput input)
         {
-            var nodes = file.Nodes.Select(GridNodeFile.FromFile);
+            var nodes = file.Nodes.Select(GridNodeFile.FromFile).ToArray();
 
             var grid = new Grid(file.Settings, input);
             grid.SetNodes(nodes);

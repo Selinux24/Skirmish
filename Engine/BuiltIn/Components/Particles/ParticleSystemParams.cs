@@ -15,7 +15,7 @@ namespace Engine.BuiltIn.Components.Particles
         /// <returns>Returns a new particle system parameters set scaled to the specified value</returns>
         public static ParticleSystemParams operator *(ParticleSystemParams p, float scale)
         {
-            if (Helper.IsOne(scale))
+            if (MathUtils.IsOne(scale))
             {
                 return p;
             }

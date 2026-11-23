@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Engine.PathFinding.AStar
     /// Constructor
     /// </remarks>
     /// <param name="fnc">Get triangles function</param>
-    public class GridInput(Func<IEnumerable<Triangle>> fnc) : PathFinderInput(fnc)
+    public class GridInput(Func<Triangle[]> fnc) : PathFinderInput(fnc)
     {
         /// <inheritdoc/>
         public override async Task<IGraph> CreateGraphAsync(PathFinderSettings settings, AgentType[] agentTypes, Action<float> progressCallback = null)

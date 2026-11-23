@@ -94,7 +94,7 @@ namespace Engine.Physics.GJK
             B = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(B.Point, SearchDir);
-            if (!Helper.IsZero(d) && d < 0)
+            if (!MathUtils.IsZero(d) && d < 0)
             {
                 // We didn't reach the origin, won't enclose it
                 return false;
@@ -131,7 +131,7 @@ namespace Engine.Physics.GJK
             A = new SupportPoint(coll1, coll2, SearchDir);
 
             float d = Vector3.Dot(A.Point, SearchDir);
-            if (!Helper.IsZero(d) && d < 0)
+            if (!MathUtils.IsZero(d) && d < 0)
             {
                 return false;
             }

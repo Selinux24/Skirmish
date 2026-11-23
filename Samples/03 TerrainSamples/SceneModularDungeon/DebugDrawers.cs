@@ -34,7 +34,7 @@ namespace TerrainSamples.SceneModularDungeon
             {
                 Count = 50000,
             };
-            graphDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await base.Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
@@ -58,7 +58,7 @@ namespace TerrainSamples.SceneModularDungeon
                 DepthEnabled = false,
                 Count = 10000,
             };
-            obstacleDrawer = await Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
+            obstacleDrawer = await base.Scene.AddComponentUI<GeometryColorDrawer<Triangle>, GeometryColorDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
             obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new GeometryColorDrawerDescription<Line3D>()
@@ -123,15 +123,15 @@ namespace TerrainSamples.SceneModularDungeon
 
                 if (obstacle is BoundingCylinder bc)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(bc, 32);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(bc, 32);
                 }
                 else if (obstacle is BoundingBox bbox)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(bbox);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(bbox);
                 }
                 else if (obstacle is OrientedBoundingBox obb)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(obb);
+                    obstacleTris = GeometryUtil.ComputeTriangleList(obb);
                 }
                 else
                 {
@@ -187,14 +187,14 @@ namespace TerrainSamples.SceneModularDungeon
                 var color = Color4.IntToCol(node.Id, 128);
                 var tris = node.Triangles;
 
-                if (!res.TryGetValue(color, out var value))
+                if (res.TryGetValue(color, out var value))
                 {
-                    value = new List<Triangle>(tris);
-                    res.Add(color, value);
+                    ((List<Triangle>)value).AddRange(tris);
                 }
                 else
                 {
-                    ((List<Triangle>)value).AddRange(tris);
+                    var list = new List<Triangle>(tris);
+                    res.Add(color, list);
                 }
             }
 

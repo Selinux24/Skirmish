@@ -37,13 +37,13 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="queryBoundary">Boundary to query</param>
         /// <returns>Returns a list of items</returns>
-        public IEnumerable<T> Query(ICullingVolume queryBoundary)
+        public T[] Query(ICullingVolume queryBoundary)
         {
             results.Clear();
 
             OcTreeNode<T>.Query(root, queryBoundary, results);
 
-            return results.AsReadOnly();
+            return [.. results.AsReadOnly()];
         }
         /// <summary>
         /// Clears the OcTree

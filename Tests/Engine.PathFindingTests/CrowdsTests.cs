@@ -25,7 +25,7 @@ namespace Engine.PathFindingTests
         static readonly float rDefault = 0.5f;
         static readonly int maxAgents = 3;
 
-        static IEnumerable<Triangle> zeroPlaneTris;
+        static Triangle[] zeroPlaneTris;
         static Graph graph;
         static GraphAgentType agentDefault;
 
@@ -40,7 +40,7 @@ namespace Engine.PathFindingTests
             Console.WriteLine($"TestContext.TestName='{TestContext.TestName}'");
 
             var pZero = GeometryUtil.CreateXZPlane(20, 20, hZero);
-            zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
+            zeroPlaneTris = GeometryUtil.ComputeTriangleList(pZero.Vertices, pZero.Indices);
 
             agentDefault = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f };
 

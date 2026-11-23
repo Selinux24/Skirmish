@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+using Engine.Content;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -6,9 +8,6 @@ using System.Linq;
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Content;
-
     /// <summary>
     /// Engine resource manager
     /// </summary>
@@ -33,7 +32,7 @@ namespace Engine
             T loader = Activator.CreateInstance<T>();
 
             var extensions = loader.GetExtensions();
-            if (!extensions.Any())
+            if (extensions.Length == 0)
             {
                 return false;
             }
@@ -51,6 +50,9 @@ namespace Engine
         /// <returns>Returns true if the extension was registered</returns>
         public static bool RegisterLoaderForFile(string extension, Func<ILoader> loaderDelegate)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(extension);
+            ArgumentNullException.ThrowIfNull(loaderDelegate);
+
             if (contentLoaders.ContainsKey(extension))
             {
                 Game.Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is currently registered.");
@@ -72,7 +74,14 @@ namespace Engine
         /// <returns>Returns a loader, or null if not exists</returns>
         public static ILoader GetLoaderForFile(string fileName)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+
             string extension = Path.GetExtension(fileName);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                Game.Logger.WriteWarning(nameof(GameResourceManager), $"The file name {fileName} has no extension.");
+                return null;
+            }
 
             if (!contentLoaders.ContainsKey(extension))
             {
@@ -205,14 +214,14 @@ namespace Engine
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="pendingRequests">Pending request list</param>
-        private void ProcessPendingRequests(string id, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests, IProgress<LoadResourceProgress> progress = null)
+        private void ProcessPendingRequests(string id, KeyValuePair<string, IGameResourceRequest>[] pendingRequests, IProgress<LoadResourceProgress> progress = null)
         {
             // Get pending requests
-            float total = pendingRequests.Count() + 1;
+            float total = pendingRequests.Length + 1;
             float current = 0;
 
             // Process requests
-            var toRemove = new List<string>();
+            List<string> toRemove = [];
             try
             {
                 foreach (var resource in pendingRequests)
@@ -233,7 +242,7 @@ namespace Engine
                     // Adds the key to the processed key list
                     toRemove.Add(resource.Key);
 
-                    progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
+                    progress?.Report(new() { Id = id, Progress = ++current / total });
                 }
             }
             finally
@@ -248,11 +257,9 @@ namespace Engine
         /// Removes the specified requests keys
         /// </summary>
         /// <param name="requestKeys">Request keys list</param>
-        private void RemoveRequests(IEnumerable<string> requestKeys)
+        private void RemoveRequests(List<string> toRemove)
         {
-            var toRemove = requestKeys.ToList();
-
-            while (toRemove.Count != 0)
+            while (toRemove.Count > 0)
             {
                 if (!requestedResources.ContainsKey(toRemove[0]))
                 {
@@ -278,6 +285,9 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(imageContent);
+
             var resource = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
 
             resource.Create(game);
@@ -294,6 +304,9 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true, bool dynamic = false)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
             var resource = new GameResourceImageContent(new FileImageContent(path), mipAutogen, dynamic);
 
             resource.Create(game);
@@ -310,6 +323,9 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(stream);
+
             var resource = new GameResourceImageContent(new MemoryImageContent(stream), mipAutogen, dynamic);
 
             resource.Create(game);
@@ -325,14 +341,13 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
+        public EngineShaderResourceView CreateGlobalResource<T>(string name, T[] values, uint size, bool dynamic = false) where T : unmanaged
         {
-            var resource = new GameResourceValueArray<T>(name)
-            {
-                Values = values,
-                Size = size,
-                Dynamic = dynamic,
-            };
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNull(values);
+            if (size == 0 || size == uint.MaxValue) throw new ArgumentException("The size must be greater than 0.", nameof(size));
+
+            var resource = new GameResourceValueArray<T>(name, values, size, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -350,6 +365,9 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, uint size, float min, float max, int seed = 0, bool dynamic = false)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            if (size == 0 || size == uint.MaxValue) throw new ArgumentException($"The size must be greater than 0.", nameof(size));
+
             var resource = new GameResourceRandomTexture(name)
             {
                 Size = size,
@@ -392,7 +410,9 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            var (key, resource) = TryGetResource(imageContent);
+            ArgumentNullException.ThrowIfNull(imageContent);
+
+            var (key, resource) = TryGetResource(imageContent.GetResourceKey());
             if (resource != null)
             {
                 return resource;
@@ -421,6 +441,8 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
             return RequestResource(new FileImageContent(path), mipAutogen, dynamic);
         }
         /// <summary>
@@ -432,6 +454,8 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
+            ArgumentNullException.ThrowIfNull(stream);
+
             return RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
         }
         /// <summary>
@@ -443,9 +467,13 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, uint size, bool dynamic = false) where T : unmanaged
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, T[] values, uint size, bool dynamic = false) where T : unmanaged
         {
-            var (key, resource) = TryGetResource(identifier);
+            if (identifier == Guid.Empty) throw new ArgumentException("Must specify a valid identifier.", nameof(identifier));
+            ArgumentNullException.ThrowIfNull(values);
+            if (size == 0 || size == uint.MaxValue) throw new ArgumentException("The size must be greater than 0.", nameof(size));
+
+            var (key, resource) = TryGetResource(identifier.ToByteArray().GetMd5Sum());
             if (resource != null)
             {
                 return resource;
@@ -456,12 +484,7 @@ namespace Engine
                 return value.ResourceView;
             }
 
-            var request = new GameResourceValueArray<T>(identifier.ToString("B"))
-            {
-                Values = values,
-                Size = size,
-                Dynamic = dynamic,
-            };
+            var request = new GameResourceValueArray<T>(identifier.ToString("B"), values, size, dynamic);
 
             if (!requestedResources.TryAdd(key, request))
             {
@@ -482,7 +505,10 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(Guid identifier, uint size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            var (key, resource) = TryGetResource(identifier);
+            if (identifier == Guid.Empty) throw new ArgumentException("Must specify a valid identifier.", nameof(identifier));
+            if (size == 0 || size == uint.MaxValue) throw new ArgumentException("The size must be greater than 0.", nameof(size));
+
+            var (key, resource) = TryGetResource(identifier.ToByteArray().GetMd5Sum());
             if (resource != null)
             {
                 return resource;
@@ -509,37 +535,14 @@ namespace Engine
 
             return request.ResourceView;
         }
-
         /// <summary>
-        /// Trys to get a resource by content
+        /// Trys to get a resource by key
         /// </summary>
-        /// <param name="imageContent">Image content</param>
         /// <param name="key">Resource key</param>
         /// <returns>Returns the resource if exists</returns>
-        private (string Key, EngineShaderResourceView Resource) TryGetResource(IImageContent imageContent)
+        private (string Key, EngineShaderResourceView Resource) TryGetResource(string key)
         {
-            string key = imageContent?.GetResourceKey();
-            if (key == null)
-            {
-                return (key, null);
-            }
-
-            if (!resources.TryGetValue(key, out var resource))
-            {
-                return (key, null);
-            }
-
-            return (key, resource);
-        }
-        /// <summary>
-        /// Trys to get a resource by identifier
-        /// </summary>
-        /// <param name="identifier">Identifier</param>
-        /// <returns>Returns the resource if exists</returns>
-        private (string Key, EngineShaderResourceView Resource) TryGetResource(Guid identifier)
-        {
-            string key = identifier.ToByteArray().GetMd5Sum();
-            if (key == null)
+            if (string.IsNullOrWhiteSpace(key))
             {
                 return (key, null);
             }

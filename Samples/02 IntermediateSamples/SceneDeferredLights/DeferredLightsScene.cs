@@ -12,7 +12,6 @@ using Engine.Mathematics;
 using Engine.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntermediateSamples.SceneDeferredLights
@@ -479,8 +478,8 @@ F7 to F10: Toggle object visibility.";
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 Lights.BaseFogColor = new Color(54, 56, 68);
-                Lights.FogStart = Helper.IsZero(Lights.FogStart) ? far * fogStart : 0f;
-                Lights.FogRange = Helper.IsZero(Lights.FogRange) ? far * fogRange : 0f;
+                Lights.FogStart = MathUtils.IsZero(Lights.FogStart) ? far * fogStart : 0f;
+                Lights.FogRange = MathUtils.IsZero(Lights.FogRange) ? far * fogRange : 0f;
             }
 
             if (Game.Input.KeyJustReleased(Keys.G))
@@ -816,7 +815,7 @@ F7 to F10: Toggle object visibility.";
                 Lights.DirectionalLights.Length,
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
-                Lights.GetDirectionalShadowCastingLights(GameEnvironment).Count());
+                Lights.GetDirectionalShadowCastingLights(GameEnvironment).Length);
         }
 
         public override void GameGraphicsResized()

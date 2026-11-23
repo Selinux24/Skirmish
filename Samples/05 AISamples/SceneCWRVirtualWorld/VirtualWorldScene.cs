@@ -275,7 +275,7 @@ ESC - EXIT";
             float imgScale = 500f;
 
             var geo = GeometryUtil.CreateXZGrid(l, l, p, p, h, imgScale);
-            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * 5f)];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = Constants.TerrainDiffuseTexture;

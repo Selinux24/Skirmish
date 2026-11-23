@@ -55,7 +55,7 @@ namespace Engine.Audio
         {
             value = Math.Clamp(value, -1.0f, 1.0f);
 
-            if (Helper.NearEqual(pan, value))
+            if (MathUtils.NearEqual(pan, value))
             {
                 return;
             }
@@ -69,7 +69,7 @@ namespace Engine.Audio
         {
             value = Math.Clamp(value, -1.0f, 1.0f);
 
-            if (Helper.NearEqual(pitch, value))
+            if (MathUtils.NearEqual(pitch, value))
             {
                 return;
             }
@@ -684,7 +684,7 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * MathF.Sin(Helper.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(MathUtils.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
                 },
                 operationSet);
@@ -710,7 +710,7 @@ namespace Engine.Audio
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * MathF.Sin(Helper.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                    Frequency = 2.0f * MathF.Sin(MathUtils.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
                     OneOverQ = 1.0f
                 },
                 operationSet);

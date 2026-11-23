@@ -497,6 +497,14 @@ namespace Engine.Common
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
         bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged;
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data) where T : unmanaged;
 
         /// <summary>
         /// Writes data into buffer
@@ -513,6 +521,14 @@ namespace Engine.Common
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
         bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged;
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data) where T : unmanaged;
 
         /// <summary>
         /// Draw

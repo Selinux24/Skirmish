@@ -15,9 +15,9 @@ namespace EngineTests.Content
     {
         public TestContext TestContext { get; set; }
 
-        static Quaternion rotarion0 = Quaternion.RotationAxis(Vector3.Up, Helper.DegreesToRadians(0));
-        static Quaternion rotarion33 = Quaternion.RotationAxis(Vector3.Up, Helper.DegreesToRadians(33));
-        static Quaternion rotarion90 = Quaternion.RotationAxis(Vector3.Up, Helper.DegreesToRadians(90));
+        static Quaternion rotarion0 = Quaternion.RotationAxis(Vector3.Up, MathUtils.DegreesToRadians(0));
+        static Quaternion rotarion33 = Quaternion.RotationAxis(Vector3.Up, MathUtils.DegreesToRadians(33));
+        static Quaternion rotarion90 = Quaternion.RotationAxis(Vector3.Up, MathUtils.DegreesToRadians(90));
 
         static readonly string rotationString = string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", 0.1f, 0.2f, 0.3f, 0.4f);
 

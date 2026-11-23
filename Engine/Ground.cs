@@ -1,7 +1,6 @@
 ﻿using Engine.Collections.Generic;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -53,19 +52,19 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickNearest(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return GroundPickingQuadtree?.PickNearest(ray, out result) ?? RayPickingHelper.PickNearest(this, ray, out result);
+            return GroundPickingQuadtree?.PickNearest(ref ray, out result) ?? RayPickingHelper.PickNearest(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
+        public bool PickFirst(ref PickingRay ray, out PickingResult<Triangle> result)
         {
-            return GroundPickingQuadtree?.PickFirst(ray, out result) ?? RayPickingHelper.PickFirst(this, ray, out result);
+            return GroundPickingQuadtree?.PickFirst(ref ray, out result) ?? RayPickingHelper.PickFirst(this, ref ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
+        public bool PickAll(ref PickingRay ray, out PickingResult<Triangle>[] results)
         {
-            return GroundPickingQuadtree?.PickAll(ray, out results) ?? RayPickingHelper.PickAll(this, ray, out results);
+            return GroundPickingQuadtree?.PickAll(ref ray, out results) ?? RayPickingHelper.PickAll(this, ref ray, out results);
         }
 
         /// <inheritdoc/>
@@ -84,7 +83,7 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public virtual Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
@@ -106,16 +105,14 @@ namespace Engine
             return [];
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetGeometry(bool refresh = false)
+        public virtual Triangle[] GetGeometry(bool refresh = false)
         {
-            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? [];
+            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).ToArray() ?? [];
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public virtual Vector3[] GetPoints(bool refresh = false)
         {
-            return GetGeometry(refresh)
-                .SelectMany(t => t.GetVertices())
-                .AsEnumerable();
+            return [.. GetGeometry(refresh).SelectMany(t => t.GetVertices())];
         }
 
         /// <inheritdoc/>
@@ -130,14 +127,11 @@ namespace Engine
                 return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
             }
 
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
+            result = PickingResult<Triangle>.Empty;
 
             // Use quadtree
             var nodes = GroundPickingQuadtree.FindNodesInVolume(sphere);
-            if (!nodes.Any())
+            if (nodes.Length == 0)
             {
                 return false;
             }
@@ -185,7 +179,7 @@ namespace Engine
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
 
-            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
+            return new IntersectionVolumeMesh([.. GetGeometry(GeometryTypes.Picking)]);
         }
 
         /// <inheritdoc/>
@@ -194,7 +188,7 @@ namespace Engine
             return null;
         }
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
             return GroundPickingQuadtree?.GetBoundingBoxes(level) ?? [];
         }

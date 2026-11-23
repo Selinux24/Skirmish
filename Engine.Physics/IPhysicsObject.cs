@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Physics object interface
     /// </summary>
@@ -16,7 +14,7 @@ namespace Engine.Physics
         /// <summary>
         /// Collider list
         /// </summary>
-        IEnumerable<ICollider> Colliders { get; }
+        ICollider[] Colliders { get; }
 
         /// <summary>
         /// Gets whether the specified object is close enough to the current object that a possible collision exists 
@@ -31,7 +29,7 @@ namespace Engine.Physics
         /// Gets the candidate collider list for the specified object
         /// </summary>
         /// <param name="obj">Physics object</param>
-        IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj);
+        ICollider[] GetBroadPhaseColliders(IPhysicsObject obj);
 
         /// <summary>
         /// Updates the object state

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Engine.Content;
+using Engine.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Content;
-
     /// <summary>
     /// Model basic implementation
     /// </summary>
@@ -97,7 +97,7 @@ namespace Engine.Common
         private async Task InitializeGeometryInternal(T description)
         {
             var geo = await description.Content.ReadContentData();
-            if (!geo.Any())
+            if (geo.Length == 0)
             {
                 throw new EngineException("Bad content description file. The resource file does not generate any geometry.");
             }
@@ -111,9 +111,9 @@ namespace Engine.Common
                 DynamicBuffers = description.Dynamic,
             };
 
-            if (geo.Count() == 1)
+            if (geo.Length == 1)
             {
-                var iGeo = geo.First();
+                var iGeo = geo[0];
 
                 if (description.Optimize) iGeo.Optimize();
 
@@ -270,13 +270,13 @@ namespace Engine.Common
         /// <summary>
         /// Gets the drawing data object collection
         /// </summary>
-        public IEnumerable<DrawingData> GetDrawingDataCollection()
+        public DrawingData[] GetDrawingDataCollection()
         {
-            return meshesByLOD.Values.AsEnumerable();
+            return [.. meshesByLOD.Values];
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IMeshMaterial> GetMaterials()
+        public IMeshMaterial[] GetMaterials()
         {
             var drawingData = GetDrawingData(LevelOfDetail.High);
 

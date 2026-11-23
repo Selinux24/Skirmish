@@ -22,11 +22,11 @@ namespace Engine.PathFindingTests
         static GraphAgentType agentDefault;
         static GraphAgentType agentInclined;
 
-        static IEnumerable<Triangle> zeroPlaneTris;
-        static IEnumerable<Triangle> hOnePlaneTris;
-        static IEnumerable<Triangle> hTwoPlaneTris;
-        static IEnumerable<Triangle> sceneryTris;
-        static IEnumerable<Triangle> inclinedPlaneTris;
+        static Triangle[] zeroPlaneTris;
+        static Triangle[] hOnePlaneTris;
+        static Triangle[] hTwoPlaneTris;
+        static Triangle[] sceneryTris;
+        static Triangle[] inclinedPlaneTris;
 
         static Vector3 pointZero;
         static Vector3 pointOne;
@@ -45,21 +45,21 @@ namespace Engine.PathFindingTests
             agentInclined = new GraphAgentType() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
 
             var pZero = GeometryUtil.CreateXZPlane(10, 10, hZero);
-            zeroPlaneTris = Triangle.ComputeTriangleList(pZero.Vertices, pZero.Indices);
+            zeroPlaneTris = GeometryUtil.ComputeTriangleList(pZero.Vertices, pZero.Indices);
             pointZero = Vector3.Up * hZero;
 
             var pOne = GeometryUtil.CreateXZPlane(10, 10, hOne);
-            hOnePlaneTris = Triangle.ComputeTriangleList(pOne.Vertices, pOne.Indices);
+            hOnePlaneTris = GeometryUtil.ComputeTriangleList(pOne.Vertices, pOne.Indices);
             pointOne = Vector3.Up * hOne;
 
             var pTwo = GeometryUtil.CreateXZPlane(10, 10, hTwo);
-            hTwoPlaneTris = Triangle.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
+            hTwoPlaneTris = GeometryUtil.ComputeTriangleList(pTwo.Vertices, pTwo.Indices);
             pointTwo = Vector3.Up * hTwo;
 
-            sceneryTris = (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t);
+            sceneryTris = [.. (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t)];
 
             var pInclined = GeometryUtil.CreatePlane(10, 0, Vector3.Normalize(new Vector3(1, 1, 0)));
-            inclinedPlaneTris = Triangle.ComputeTriangleList(pInclined.Vertices, pInclined.Indices);
+            inclinedPlaneTris = GeometryUtil.ComputeTriangleList(pInclined.Vertices, pInclined.Indices);
         }
 
         [TestInitialize]
@@ -118,9 +118,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
@@ -140,9 +140,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
@@ -162,9 +162,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsFalse(walkable1);
@@ -184,9 +184,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentDefault]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentDefault, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentDefault, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentDefault, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentDefault, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentDefault, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentDefault, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph);
             Assert.IsTrue(walkable1);
@@ -206,9 +206,9 @@ namespace Engine.PathFindingTests
             var pfDesc = new PathFinderDescription(settings, input, [agentInclined]);
             var graph = pfDesc.BuildAsync().GetAwaiter().GetResult();
 
-            var walkable1 = graph.IsWalkable(agentInclined, pointZero, 0.5f, out var n1);
-            var walkable2 = graph.IsWalkable(agentInclined, pointOne, 0.5f, out var n2);
-            var walkable3 = graph.IsWalkable(agentInclined, pointTwo, 0.5f, out var n3);
+            var walkable1 = graph.IsWalkable(agentInclined, ref pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentInclined, ref pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentInclined, ref pointTwo, 0.5f, out var n3);
 
             Assert.IsNotNull(graph, "Graph is null");
             Assert.IsTrue(walkable1, "Point zero spected to be walkable.");

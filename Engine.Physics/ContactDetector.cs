@@ -150,7 +150,7 @@ namespace Engine.Physics
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;
-            if (penetration > 0f && !Helper.IsZero(penetration))
+            if (penetration > 0f && !MathUtils.IsZero(penetration))
             {
                 return false;
             }
@@ -181,7 +181,7 @@ namespace Engine.Physics
             foreach (var point in points)
             {
                 float penetration = d + Vector3.Dot(point, normal);
-                if (penetration > 0f && !Helper.IsZero(penetration))
+                if (penetration > 0f && !MathUtils.IsZero(penetration))
                 {
                     continue;
                 }
@@ -259,7 +259,7 @@ namespace Engine.Physics
             {
                 // Distance to plane
                 float penetration = d + Vector3.Dot(point, normal);
-                if (penetration > 0f && !Helper.IsZero(penetration))
+                if (penetration > 0f && !MathUtils.IsZero(penetration))
                 {
                     continue;
                 }

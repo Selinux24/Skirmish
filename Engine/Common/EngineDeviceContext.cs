@@ -204,7 +204,7 @@ namespace Engine.Common
         /// <summary>
         /// Current stream output bindings
         /// </summary>
-        private IEnumerable<EngineStreamOutputBufferBinding> currentStreamOutputBindings;
+        private EngineStreamOutputBufferBinding[] currentStreamOutputBindings;
 
         /// <summary>
         /// Current pixel shader
@@ -247,7 +247,7 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex buffer bindings
         /// </summary>
-        private IEnumerable<EngineVertexBufferBinding> currentVertexBufferBindings = null;
+        private EngineVertexBufferBinding[] currentVertexBufferBindings = null;
         /// <summary>
         /// Current index buffer reference
         /// </summary>
@@ -425,7 +425,7 @@ namespace Engine.Common
         /// <param name="viewports">Viewports</param>
         private void SetViewPorts(Viewport[] viewports)
         {
-            if (Helper.CompareEnumerables(currentViewports, viewports))
+            if (Helper.CompareArrays(currentViewports, viewports))
             {
                 return;
             }
@@ -465,7 +465,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor.ToColor4());
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -489,7 +489,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor.ToColor4());
                     frameCounters.RenderTargetClears++;
                 }
             }
@@ -546,7 +546,7 @@ namespace Engine.Common
                 return;
             }
 
-            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+            deviceContext.OMSetBlendState(state.GetBlendState(), state.BlendFactor.ToColor4(), state.SampleMask);
             frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;
@@ -555,7 +555,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void IASetVertexBuffers(uint firstSlot, EngineVertexBufferBinding[] vertexBufferBindings)
         {
-            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareArrays(currentVertexBufferBindings, vertexBufferBindings))
             {
                 ID3D11Buffer[] buffers = [.. vertexBufferBindings.Select(v => v.Buffer?.GetBuffer())];
                 uint[] strides = [.. vertexBufferBindings.Select(v => v.Stride)];
@@ -874,7 +874,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetGeometryShaderStreamOutputTargets(EngineStreamOutputBufferBinding[] streamOutBinding)
         {
-            if (Helper.CompareEnumerables(currentStreamOutputBindings, streamOutBinding))
+            if (Helper.CompareArrays(currentStreamOutputBindings, streamOutBinding))
             {
                 return;
             }
@@ -1138,7 +1138,14 @@ namespace Engine.Common
             return WriteDiscardBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, T[] data)
+            where T : unmanaged
+        {
+            return WriteDiscardBuffer(buffer, offset, (ReadOnlySpan<T>)data);
+        }
+        /// <inheritdoc/>
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data) 
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1146,7 +1153,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data.Length <= 0)
+            if (data.IsEmpty)
             {
                 return true;
             }
@@ -1155,7 +1162,11 @@ namespace Engine.Common
             frameCounters.SubresourceMaps++;
 
             nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
-            UnsafeUtilities.Write(position, data);
+            var bytes = MemoryMarshal.AsBytes(data);
+            unsafe
+            {
+                bytes.CopyTo(new Span<byte>((void*)position, bytes.Length));
+            }
 
             deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
@@ -1166,12 +1177,20 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data) where T : unmanaged
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, T[] data)
+            where T : unmanaged
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <inheritdoc/>
-        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data) where T : unmanaged
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, T[] data)
+            where T : unmanaged
+        {
+            return WriteNoOverwriteBuffer(buffer, offset, (ReadOnlySpan<T>)data);
+        }
+        /// <inheritdoc/>
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, ReadOnlySpan<T> data)
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)
@@ -1179,7 +1198,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data.Length <= 0)
+            if (data.IsEmpty)
             {
                 return true;
             }
@@ -1188,7 +1207,11 @@ namespace Engine.Common
             frameCounters.SubresourceMaps++;
 
             nint position = msr.DataPointer + Marshal.SizeOf(default(T)) * (nint)offset;
-            UnsafeUtilities.Write(position, data);
+            var bytes = MemoryMarshal.AsBytes(data);
+            unsafe
+            {
+                bytes.CopyTo(new Span<byte>((void*)position, bytes.Length));
+            }
 
             deviceContext.Unmap(b, 0);
             frameCounters.SubresourceUnmaps++;
@@ -1199,12 +1222,14 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, int length) where T : unmanaged
+        public T[] ReadBuffer<T>(EngineBuffer buffer, int length)
+            where T : unmanaged
         {
             return ReadBuffer<T>(buffer, 0, length);
         }
         /// <inheritdoc/>
-        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length) where T : unmanaged
+        public T[] ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
+            where T : unmanaged
         {
             var b = buffer?.GetBuffer();
             if (b == null)

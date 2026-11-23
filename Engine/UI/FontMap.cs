@@ -28,22 +28,22 @@ namespace Engine.UI
         /// Creates a font map of the specified font file and size
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="contentPath">Content path</param>
+        /// <param name="contentFolder">Content path</param>
         /// <param name="generator">Keycode generator</param>
         /// <param name="fontFileName">Font file name</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap<T> FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
+        public static FontMap<T> FromFile(Game game, string contentFolder, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
         {
-            var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
-            if (!fileNames.Any())
+            var p = ContentManager.FindPaths(contentFolder, fontFileName);
+            if (p.Length == 0)
             {
                 Game.Logger.WriteWarning(nameof(FontMap<>), $"Font resource not found: {fontFileName}");
                 return null;
             }
 
-            var fileName = fileNames.First();
+            var fileName = p[0];
             var fontName = Game.Fonts.GetFromFileFontName(fileName);
 
             var fMap = FontMapCache<T>.Get(fontName, size, style);
@@ -347,7 +347,7 @@ namespace Engine.UI
 
             if (!Array.Exists(keys, c => c == sampleChar))
             {
-                return keys.FirstOrDefault();
+                return keys.Length > 0 ? keys[0] : default;
             }
 
             return sampleChar;

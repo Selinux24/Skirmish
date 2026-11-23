@@ -81,7 +81,7 @@ namespace BasicSamples.SceneStencilPass
             float h = 0f;
 
             var geo = GeometryUtil.CreatePlane(l, h, Vector3.Up);
-            geo.Uvs = geo.Uvs.Select(uv => uv * 5f);
+            geo.Uvs = [.. geo.Uvs.Select(uv => uv * 5f)];
 
             var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = resourceFloorDiffuse;

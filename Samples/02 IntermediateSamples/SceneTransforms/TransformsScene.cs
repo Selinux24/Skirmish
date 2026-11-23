@@ -286,7 +286,7 @@ namespace IntermediateSamples.SceneTransforms
         {
             var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
-            if (!this.PickNearest(pRay, SceneObjectUsages.Object | SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r))
+            if (!this.PickNearest(ref pRay, SceneObjectUsages.Object | SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r))
             {
                 return;
             }
