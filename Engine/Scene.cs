@@ -771,7 +771,7 @@ namespace Engine
         /// <param name="from">Position from</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition<T>(Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
+        public bool FindNearestGroundPosition<T>(ref Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
         {
             var ray = GetTopDownRay(from.X, from.Z);
 

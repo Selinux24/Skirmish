@@ -1235,7 +1235,7 @@ namespace TerrainSamples.SceneRts
             //Adjust check-points
             for (int i = 0; i < t1CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
+                if (FindNearestGroundPosition(ref t1CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t1CheckPoints[i] = r.Position;
                 }
@@ -1243,7 +1243,7 @@ namespace TerrainSamples.SceneRts
 
             for (int i = 0; i < t2CheckPoints.Length; i++)
             {
-                if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
+                if (FindNearestGroundPosition(ref t2CheckPoints[i], out PickingResult<Triangle> r))
                 {
                     t2CheckPoints[i] = r.Position;
                 }

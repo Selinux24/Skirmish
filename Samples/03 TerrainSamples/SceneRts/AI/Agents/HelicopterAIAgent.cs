@@ -87,7 +87,8 @@ namespace TerrainSamples.SceneRts.AI.Agents
             var model = SceneObject;
 
             //Find nearest ground position
-            if (Parent.Scene.FindNearestGroundPosition<Triangle>(Manipulator.Position, out var r))
+            var position = Manipulator.Position;
+            if (Parent.Scene.FindNearestGroundPosition<Triangle>(ref position, out var r))
             {
                 SetRouteToPoint(r.Position, 15f, false);
                 model?.AnimationController.Stop();

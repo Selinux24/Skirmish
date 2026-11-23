@@ -62,25 +62,64 @@ namespace Engine.PathFinding
         /// Gets the new agent position when target position is walkable
         /// </summary>
         /// <param name="agent">Agent</param>
-        /// <param name="prevPosition">Previous position</param>
+        /// <param name="position">Current position</param>
         /// <param name="newPosition">New position</param>
-        /// <param name="position">Test position</param>
+        /// <param name="targetPosition">Target position</param>
         /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private static Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
+        private static Vector3 GetPositionWalkable(AgentType agent, Vector3 position, Vector3 newPosition, Vector3 targetPosition, bool adjustHeight)
         {
-            var finalPosition = position;
+            var finalPosition = targetPosition;
 
             if (adjustHeight)
             {
                 finalPosition.Y += agent.Height;
             }
 
-            var moveP = newPosition - prevPosition;
-            var moveV = finalPosition - prevPosition;
+            var moveP = newPosition - position;
+            var moveV = finalPosition - position;
             if (moveV.LengthSquared() > moveP.LengthSquared())
             {
-                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                finalPosition = position + (Vector3.Normalize(moveV) * moveP.Length());
+            }
+
+            return finalPosition;
+        }
+        /// <summary>
+        /// Gets the new agent position when target position is not walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="targetPosition">Test position</param>
+        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
+        /// <returns>Returns the new agent position</returns>
+        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 position, Vector3 newPosition, Vector3 targetPosition, bool adjustHeight)
+        {
+            //Find nearest ground position
+            Vector3 finalPosition;
+            if (FindNearestGroundPosition(ref targetPosition, out PickingResult<Triangle> nearestResult))
+            {
+                //Use nearest ground position found
+                finalPosition = nearestResult.Position;
+            }
+            else
+            {
+                //Use nearest position provided by path finding graph
+                finalPosition = targetPosition;
+            }
+
+            if (adjustHeight)
+            {
+                //Adjust height
+                finalPosition.Y += agent.Height;
+            }
+
+            var moveP = newPosition - position;
+            var moveV = finalPosition - position;
+            if (moveV.LengthSquared() > moveP.LengthSquared())
+            {
+                finalPosition = position + (Vector3.Normalize(moveV) * moveP.Length());
             }
 
             return finalPosition;
@@ -354,11 +393,11 @@ namespace Engine.PathFinding
 
             Game.Logger.WriteTrace(this, $"FindPathAsync looking for nearest ground end-point positions {from} -> {to}.");
 
-            if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
+            if (FindNearestGroundPosition(ref from, out PickingResult<Triangle> rFrom))
             {
                 groundFrom = rFrom.Position;
             }
-            if (FindNearestGroundPosition(to, out PickingResult<Triangle> rTo))
+            if (FindNearestGroundPosition(ref to, out PickingResult<Triangle> rTo))
             {
                 groundTo = rTo.Position;
             }
@@ -375,16 +414,16 @@ namespace Engine.PathFinding
         /// <returns>Returns the path-finding path</returns>
         private PathFindingPath ComputeGroundPositions(Vector3[] path, bool useGround)
         {
-            List<Vector3> positions = [.. path];
-            List<Vector3> normals = [.. Helper.CreateArray(path.Length, Vector3.Up)];
+            Vector3[] positions = [.. path];
+            Vector3[] normals = Helper.CreateArray(path.Length, Vector3.Up);
 
             if (useGround)
             {
                 Game.Logger.WriteTrace(this, "FindPath compute ground positions.");
 
-                for (int i = 0; i < positions.Count; i++)
+                for (int i = 0; i < positions.Length; i++)
                 {
-                    if (FindNearestGroundPosition<Triangle>(positions[i], out var r))
+                    if (FindNearestGroundPosition<Triangle>(ref positions[i], out var r))
                     {
                         positions[i] = r.Position;
                         normals[i] = r.Primitive.Normal;
@@ -472,45 +511,6 @@ namespace Engine.PathFinding
             }
 
             return false;
-        }
-        /// <summary>
-        /// Gets the new agent position when target position is not walkable
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="prevPosition">Previous position</param>
-        /// <param name="newPosition">New position</param>
-        /// <param name="position">Test position</param>
-        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
-        /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
-        {
-            //Find nearest ground position
-            Vector3 finalPosition;
-            if (FindNearestGroundPosition(position, out PickingResult<Triangle> nearestResult))
-            {
-                //Use nearest ground position found
-                finalPosition = nearestResult.Position;
-            }
-            else
-            {
-                //Use nearest position provided by path finding graph
-                finalPosition = position;
-            }
-
-            if (adjustHeight)
-            {
-                //Adjust height
-                finalPosition.Y += agent.Height;
-            }
-
-            var moveP = newPosition - prevPosition;
-            var moveV = finalPosition - prevPosition;
-            if (moveV.LengthSquared() > moveP.LengthSquared())
-            {
-                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-            }
-
-            return finalPosition;
         }
 
         /// <summary>
