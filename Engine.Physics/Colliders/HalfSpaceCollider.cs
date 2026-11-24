@@ -31,8 +31,8 @@ namespace Engine.Physics.Colliders
         /// Constructor
         /// </summary>
         /// <param name="normal">Plate normal</param>
-        /// <param name="d">Plane distance</param>
-        public HalfSpaceCollider(Vector3 normal, float d) : this(new Plane(normal, d))
+        /// <param name="distance">Plane distance</param>
+        public HalfSpaceCollider(Vector3 normal, float distance) : this(new Plane(normal, distance))
         {
 
         }

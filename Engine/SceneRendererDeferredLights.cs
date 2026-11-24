@@ -4,7 +4,6 @@ using Engine.BuiltIn.Format;
 using Engine.Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -216,9 +215,9 @@ namespace Engine
             var screen = GeometryUtil.CreateScreen(width, height);
 
             screenGeometry.Offset = (uint)lightGeometryIndices.Count;
-            screenGeometry.IndexCount = (uint)screen.Indices.Count();
+            screenGeometry.IndexCount = (uint)screen.Indices.Length;
 
-            screen.Indices.ToList().ForEach(i =>
+            Array.ForEach(screen.Indices, i =>
             {
                 //Sum offsets
                 lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);
@@ -234,9 +233,9 @@ namespace Engine
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
             pointLightGeometry.Offset = (uint)lightGeometryIndices.Count;
-            pointLightGeometry.IndexCount = (uint)sphere.Indices.Count();
+            pointLightGeometry.IndexCount = (uint)sphere.Indices.Length;
 
-            sphere.Indices.ToList().ForEach(i =>
+            Array.ForEach(sphere.Indices, i =>
             {
                 //Sum offsets
                 lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);
@@ -252,9 +251,9 @@ namespace Engine
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
             spotLightGeometry.Offset = (uint)lightGeometryIndices.Count;
-            spotLightGeometry.IndexCount = (uint)sphere.Indices.Count();
+            spotLightGeometry.IndexCount = (uint)sphere.Indices.Length;
 
-            sphere.Indices.ToList().ForEach(i =>
+            Array.ForEach(sphere.Indices, i =>
             {
                 //Sum offsets
                 lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);

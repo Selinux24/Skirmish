@@ -139,12 +139,12 @@ namespace Engine.Mathematics
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.
         /// </summary>
-        /// <param name="value">The normal of the plane.</param>
-        /// <param name="d">The distance of the plane along its normal from the origin</param>
-        public Plane(Vector3 value, float d)
+        /// <param name="normal">The normal of the plane.</param>
+        /// <param name="distance">The distance of the plane along its normal from the origin</param>
+        public Plane(Vector3 normal, float distance)
         {
-            Normal = value;
-            D = d;
+            Normal = normal;
+            D = -distance;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.

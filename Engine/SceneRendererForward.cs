@@ -6,7 +6,6 @@ using Engine.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -200,7 +199,7 @@ namespace Engine
 
             //Select visible components
             var visibleComponents = Scene.Components.Get<IDrawable>(c => c.Visible);
-            if (!visibleComponents.Any())
+            if (visibleComponents.Length == 0)
             {
                 return;
             }
@@ -216,10 +215,10 @@ namespace Engine
             QueueAction(DoShadowMapping);
 
             //Draw objects
-            bool hasObjects = DrawObjects(visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
+            bool hasObjects = DrawObjects(Array.FindAll(visibleComponents, c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Draw UI
-            bool hasUI = DrawUI(visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
+            bool hasUI = DrawUI(Array.FindAll(visibleComponents, c => c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Merge to screen
             QueueAction(() => MergeSceneToScreen(hasObjects, hasUI));
@@ -236,9 +235,9 @@ namespace Engine
         /// Draws the specified object collection
         /// </summary>
         /// <param name="objectComponents">Object collection</param>
-        private bool DrawObjects(IEnumerable<IDrawable> objectComponents)
+        private bool DrawObjects(IDrawable[] objectComponents)
         {
-            if (!objectComponents.Any())
+            if (objectComponents.Length == 0)
             {
                 return false;
             }
@@ -273,9 +272,9 @@ namespace Engine
         /// Draws the specified UI components collection
         /// </summary>
         /// <param name="uiComponents">UI components collection</param>
-        private bool DrawUI(IEnumerable<IDrawable> uiComponents)
+        private bool DrawUI(IDrawable[] uiComponents)
         {
-            if (!uiComponents.Any())
+            if (uiComponents.Length == 0)
             {
                 return false;
             }
@@ -311,9 +310,9 @@ namespace Engine
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoRender(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoRender(RenderTargetParameters renderTarget, IDrawable[] components, int cullIndex, int passIndex)
         {
-            if (!components.Any())
+            if (components.Length == 0)
             {
                 return;
             }
@@ -363,7 +362,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="cullIndex">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
+        private void DrawResultComponents(DrawContext context, int cullIndex, IDrawable[] components)
         {
             //Save current drawer mode
             var mode = context.DrawerMode;
@@ -393,7 +392,7 @@ namespace Engine
         /// <param name="components">Component list</param>
         /// <param name="get">Function to get the drawable component list</param>
         /// <param name="sort">Function to sort the drawable component list</param>
-        private void DrawComponents(DrawContext context, DrawerModes mode, int cullIndex, IEnumerable<IDrawable> components, Func<int, IEnumerable<IDrawable>, List<IDrawable>> get, Func<int, IDrawable, IDrawable, int> sort)
+        private void DrawComponents(DrawContext context, DrawerModes mode, int cullIndex, IDrawable[] components, Func<int, IDrawable[], List<IDrawable>> get, Func<int, IDrawable, IDrawable, int> sort)
         {
 #if DEBUG
             var sw = Stopwatch.StartNew();

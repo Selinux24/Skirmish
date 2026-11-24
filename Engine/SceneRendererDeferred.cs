@@ -5,8 +5,7 @@ using Engine.BuiltIn.Drawers;
 using Engine.BuiltIn.Drawers.Deferred;
 using Engine.Common;
 using Engine.Mathematics;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 
 namespace Engine
 {
@@ -528,11 +527,11 @@ namespace Engine
 
             //Draw objects
             bool hasObjects = DrawObjects(
-                visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)),
-                visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)));
+                Array.FindAll(visibleComponents, c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)),
+                Array.FindAll(visibleComponents, c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Draw UI (ignoring DeferredEnabled flag)
-            bool hasUI = DrawUI(visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
+            bool hasUI = DrawUI(Array.FindAll(visibleComponents, c => c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Merge to result
             QueueAction(() => MergeSceneToScreen(hasObjects, hasUI));
@@ -550,10 +549,10 @@ namespace Engine
         /// </summary>
         /// <param name="deferredEnabledComponents">Deferred enabled components</param>
         /// <param name="deferredDisabledComponents">Deferred disabled components</param>
-        private bool DrawObjects(IEnumerable<IDrawable> deferredEnabledComponents, IEnumerable<IDrawable> deferredDisabledComponents)
+        private bool DrawObjects(IDrawable[] deferredEnabledComponents, IDrawable[] deferredDisabledComponents)
         {
-            bool anyDeferred = deferredEnabledComponents.Any();
-            bool anyForward = deferredDisabledComponents.Any();
+            bool anyDeferred = deferredEnabledComponents.Length != 0;
+            bool anyForward = deferredDisabledComponents.Length != 0;
             bool hasObjects = anyForward || anyDeferred;
 
             if (!hasObjects)
@@ -605,9 +604,9 @@ namespace Engine
         /// Draws the specified UI components collection
         /// </summary>
         /// <param name="uiComponents">UI components collection</param>
-        private bool DrawUI(IEnumerable<IDrawable> uiComponents)
+        private bool DrawUI(IDrawable[] uiComponents)
         {
-            if (!uiComponents.Any())
+            if (uiComponents.Length == 0)
             {
                 return false;
             }
@@ -643,9 +642,9 @@ namespace Engine
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoDeferred(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoDeferred(RenderTargetParameters renderTarget, IDrawable[] components, int cullIndex, int passIndex)
         {
-            if (!components.Any())
+            if (components.Length == 0)
             {
                 return;
             }
@@ -731,9 +730,9 @@ namespace Engine
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoForward(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoForward(RenderTargetParameters renderTarget, IDrawable[] components, int cullIndex, int passIndex)
         {
-            if (!components.Any())
+            if (components.Length == 0)
             {
                 return;
             }
@@ -996,7 +995,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
+        private void DrawResultComponents(DrawContext context, int cullIndex, IDrawable[] components)
         {
             //Save current drawing mode
             var mode = context.DrawerMode;

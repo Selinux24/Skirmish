@@ -398,6 +398,14 @@ namespace Engine.Mathematics
             Add(ref left, right, out var result);
             return result;
         }
+        /// <summary>
+        /// Perform a component-wise addition
+        /// </summary>
+        /// <param name="source">The array of vectors to transform.</param>
+        /// <param name="vector">The vector to add.</param>
+        /// <param name="destination">The array for which the transformed vectors are stored.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> or <paramref name="destination"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="destination"/> is shorter in length than <paramref name="source"/>.</exception>
         public static void Add(Vector3[] source, ref Vector3 vector, Vector3[] destination)
         {
             ArgumentNullException.ThrowIfNull(source);
@@ -473,6 +481,25 @@ namespace Engine.Mathematics
             Subtract(left, ref right, out var result);
             return result;
         }
+        /// <summary>
+        /// Perform a component-wise subtraction
+        /// </summary>
+        /// <param name="source">The array of vectors to transform.</param>
+        /// <param name="vector">The vector to subtract.</param>
+        /// <param name="destination">The array for which the transformed vectors are stored.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> or <paramref name="destination"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="destination"/> is shorter in length than <paramref name="source"/>.</exception>
+        public static void Subtract(Vector3[] source, ref Vector3 vector, Vector3[] destination)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(destination);
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                Subtract(ref source[i], ref vector, out destination[i]);
+            }
+        }
 
         /// <summary>
         /// Scales a vector by the given value.
@@ -515,6 +542,25 @@ namespace Engine.Mathematics
         {
             Multiply(ref left, ref right, out var result);
             return result;
+        }
+        /// <summary>
+        /// Multiply a vector with another by performing component-wise multiplication
+        /// </summary>
+        /// <param name="source">The array of vectors to transform.</param>
+        /// <param name="vector">The vector to multiply.</param>
+        /// <param name="destination">The array for which the transformed vectors are stored.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> or <paramref name="destination"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="destination"/> is shorter in length than <paramref name="source"/>.</exception>
+        public static void Multiply(Vector3[] source, ref Vector3 vector, Vector3[] destination)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(destination);
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                Multiply(ref source[i], ref vector, out destination[i]);
+            }
         }
 
         /// <summary>
@@ -579,6 +625,25 @@ namespace Engine.Mathematics
         {
             Divide(ref value, ref scale, out var result);
             return result;
+        }
+        /// <summary>
+        /// Scales a vector by the given value
+        /// </summary>
+        /// <param name="source">The array of vectors to transform.</param>
+        /// <param name="vector">The vector to divide.</param>
+        /// <param name="destination">The array for which the transformed vectors are stored.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> or <paramref name="destination"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="destination"/> is shorter in length than <paramref name="source"/>.</exception>
+        public static void Divide(Vector3[] source, ref Vector3 vector, Vector3[] destination)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(destination);
+            if (destination.Length < source.Length) throw new ArgumentOutOfRangeException(nameof(destination), ArrayValidationMessage);
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                Divide(ref source[i], ref vector, out destination[i]);
+            }
         }
 
         /// <summary>

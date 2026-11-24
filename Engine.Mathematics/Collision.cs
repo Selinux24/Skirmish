@@ -983,7 +983,7 @@ namespace Engine.Mathematics
 
             if (MathUtils.IsZero(direction))
             {
-                distance = 0f;
+                distance = float.MaxValue;
                 return false;
             }
 
@@ -992,7 +992,7 @@ namespace Engine.Mathematics
 
             if (distance < 0f)
             {
-                distance = 0f;
+                distance = float.MaxValue;
                 return false;
             }
 
@@ -1043,21 +1043,6 @@ namespace Engine.Mathematics
         public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out float distance, out Vector3 point)
         {
             return RayIntersectsPlane(ref ray.Position, ref ray.Direction, ref plane, out distance, out point);
-        }
-
-        /// <summary>
-        /// Determine whether the specified direction vector is oriented against the triangle's normal.
-        /// </summary>
-        /// <param name="v">Direction vector</param>
-        /// <param name="t1">Triangle point 1</param>
-        /// <param name="t2">Triangle point 2</param>
-        /// <param name="t3">Triangle point 3</param>
-        /// <returns>Returns true if the specified direction vector is oriented against the triangle's normal.</returns>
-        static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 t1, ref Vector3 t2, ref Vector3 t3)
-        {
-            MathUtils.CalculateTriPointNormalLH(ref t1, ref t2, ref t3, out var normal);
-            Vector3.Dot(ref v, ref normal, out float l);
-            return l < 0f;
         }
 
         /// <summary>
@@ -3389,12 +3374,6 @@ namespace Engine.Mathematics
             return ContainmentType.Contains;
         }
 
-
-        static Vector3[] GetVerticesFromMesh(Triangle[] mesh)
-        {
-            return [.. mesh.SelectMany(t => t.GetVertices()).Distinct()];
-        }
-
         /// <summary>
         /// Determines whether a Triangle mesh contains a BoundingSphere.
         /// </summary>
@@ -3466,6 +3445,26 @@ namespace Engine.Mathematics
 
             // If no intersection found, must be a containment result
             return ContainmentType.Contains;
+        }
+
+        /// <summary>
+        /// Determine whether the specified direction vector is oriented against the triangle's normal.
+        /// </summary>
+        /// <param name="v">Direction vector</param>
+        /// <param name="t1">Triangle point 1</param>
+        /// <param name="t2">Triangle point 2</param>
+        /// <param name="t3">Triangle point 3</param>
+        /// <returns>Returns true if the specified direction vector is oriented against the triangle's normal.</returns>
+        private static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 t1, ref Vector3 t2, ref Vector3 t3)
+        {
+            MathUtils.CalculateTriPointNormalLH(ref t1, ref t2, ref t3, out var normal);
+            Vector3.Dot(ref v, ref normal, out float l);
+            return l < 0f;
+        }
+
+        private static Vector3[] GetVerticesFromMesh(Triangle[] mesh)
+        {
+            return [.. mesh.SelectMany(t => t.GetVertices()).Distinct()];
         }
 
         private static bool AxisTestX01(ref Vector3 extents, ref Triangle tri, float a, float b, float fa, float fb)
