@@ -20,7 +20,17 @@ namespace Engine.MathematicsTests
 
         [TestMethod] public void ConstructorAndStateTest() { var s = new BoundingSphere(new Vector3(2, -3, 4), 5f); AssertVector(new Vector3(2, -3, 4), s.Center); Assert.AreEqual(5f, s.Radius, 1e-6f); s.Center = Vector3.One; s.Radius = 7f; AssertVector(Vector3.One, s.Center); Assert.AreEqual(7f, s.Radius, 1e-6f); BoundingSphere d = default; AssertVector(Vector3.Zero, d.Center); Assert.AreEqual(0f, d.Radius); }
         [TestMethod] public void RayIntersectsTest() { var s = new BoundingSphere(Vector3.Zero, 1f); Ray outward = new(new Vector3(-3, 0, 0), Vector3.UnitX); Assert.IsTrue(s.Intersects(ref outward)); Assert.IsTrue(s.Intersects(ref outward, out float d)); Assert.AreEqual(2f, d, 1e-5f); Assert.IsTrue(s.Intersects(ref outward, out _, out Vector3 p)); AssertVector(new Vector3(-1, 0, 0), p); Ray miss = new(new Vector3(0, 2, 0), Vector3.UnitX); Assert.IsFalse(s.Intersects(ref miss)); Assert.IsFalse(s.Intersects(ref miss, out d)); Assert.AreEqual(0f, d); Assert.IsFalse(s.Intersects(ref miss, out _, out p)); AssertVector(Vector3.Zero, p); Ray inside = new(Vector3.Zero, Vector3.UnitX); Assert.IsTrue(s.Intersects(ref inside, out d, out p)); Assert.AreEqual(0f, d, 1e-5f); AssertVector(Vector3.Zero, p); }
-        [TestMethod] public void PlaneIntersectsTest() { var s = new BoundingSphere(Vector3.Zero, 1f); Plane behind = new(Vector3.UnitX, -2f); Assert.AreEqual(PlaneIntersectionType.Back, s.Intersects(ref behind)); Plane front = new(Vector3.UnitX, 2f); Assert.AreEqual(PlaneIntersectionType.Front, s.Intersects(ref front)); Plane back = new(-Vector3.UnitX, 2f); Assert.AreEqual(PlaneIntersectionType.Front, s.Intersects(ref back)); }
+        [TestMethod]
+        public void PlaneIntersectsTest()
+        {
+            var s = new BoundingSphere(Vector3.Zero, 1f);
+            Plane behind = new(Vector3.UnitX, -2f);
+            Assert.AreEqual(PlaneIntersectionType.Front, s.Intersects(ref behind));
+            Plane front = new(Vector3.UnitX, 2f);
+            Assert.AreEqual(PlaneIntersectionType.Back, s.Intersects(ref front));
+            Plane back = new(-Vector3.UnitX, 2f);
+            Assert.AreEqual(PlaneIntersectionType.Back, s.Intersects(ref back));
+        }
         [TestMethod] public void TriangleIntersectsTest() { var s = new BoundingSphere(Vector3.Zero, 1f); var a = new Vector3(-2, -2, 0); var b = new Vector3(2, -2, 0); var c = new Vector3(0, 2, 0); Assert.IsTrue(s.Intersects(ref a, ref b, ref c)); var far1 = new Vector3(3, 0, 0); var far2 = new Vector3(4, 1, 0); var far3 = new Vector3(4, -1, 0); Assert.IsFalse(s.Intersects(ref far1, ref far2, ref far3)); var deg1 = Vector3.Zero; var deg2 = Vector3.UnitX; Assert.IsTrue(s.Intersects(ref deg1, ref deg2, ref deg1)); }
         [TestMethod] public void BoxIntersectsTest() { var s = new BoundingSphere(Vector3.Zero, 1f); var box = new BoundingBox(new Vector3(-.5f), new Vector3(.5f)); Assert.IsTrue(s.Intersects(box)); Assert.IsTrue(s.Intersects(ref box)); var disjoint = new BoundingBox(new Vector3(3), new Vector3(4)); Assert.IsFalse(s.Intersects(disjoint)); Assert.IsFalse(s.Intersects(ref disjoint)); var tangent = new BoundingBox(new Vector3(1, -1, -1), new Vector3(2, 1, 1)); Assert.IsTrue(s.Intersects(tangent)); }
         [TestMethod] public void SphereIntersectsTest() { var s = new BoundingSphere(Vector3.Zero, 1f); var overlap = new BoundingSphere(new Vector3(1.5f, 0, 0), 1f); Assert.IsTrue(s.Intersects(overlap)); Assert.IsTrue(s.Intersects(ref overlap)); var disjoint = new BoundingSphere(new Vector3(3, 0, 0), 1f); Assert.IsFalse(s.Intersects(disjoint)); Assert.AreEqual(ContainmentType.Disjoint, s.Contains(ref disjoint)); var inside = new BoundingSphere(Vector3.Zero, .25f); Assert.IsTrue(s.Intersects(inside)); }

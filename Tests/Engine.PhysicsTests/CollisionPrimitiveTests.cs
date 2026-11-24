@@ -30,7 +30,7 @@ namespace Engine.PhysicsTests
 
             var plane = new HalfSpaceCollider(sourcePlane);
             Assert.AreEqual(plane.Normal, normal);
-            Assert.AreEqual(plane.D, distance);
+            Assert.AreEqual(plane.D, -distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
@@ -38,7 +38,7 @@ namespace Engine.PhysicsTests
 
             plane = new HalfSpaceCollider(normal, distance);
             Assert.AreEqual(plane.Normal, normal);
-            Assert.AreEqual(plane.D, distance);
+            Assert.AreEqual(plane.D, -distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
@@ -47,7 +47,7 @@ namespace Engine.PhysicsTests
             var rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             plane.Attach(rbody);
             Assert.AreEqual(plane.Normal, normal);
-            Assert.AreEqual(plane.D, distance);
+            Assert.AreEqual(plane.D, -distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
@@ -58,7 +58,7 @@ namespace Engine.PhysicsTests
 
             plane.Attach(rbody);
             Assert.AreEqual(plane.Normal, normal);
-            Assert.AreEqual(plane.D, distance);
+            Assert.AreEqual(plane.D, -distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
             Assert.AreEqual(plane.BoundingBox, new BoundingBox());
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());

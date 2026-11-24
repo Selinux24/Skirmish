@@ -750,20 +750,50 @@ namespace Engine.MathematicsTests
         [TestMethod]
         public void CollisionRayFamilies_PointSegmentPlaneAndSphere()
         {
-            var ray = new Ray(Vector3.Zero, Vector3.UnitX); var point = new Vector3(2f, 0f, 0f); Assert.IsTrue(Collision.RayIntersectsPoint(ref ray, ref point));
-            var segment = new Segment(new Vector3(2f, -1f, 0f), new Vector3(2f, 1f, 0f)); Assert.IsTrue(Collision.RayIntersectsSegment(ref ray, ref segment, out float sd, out var sp)); Assert.AreEqual(2f, sd, 0.0001f); Assert.AreEqual(new Vector3(2f, 0f, 0f), sp);
-            var plane = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float pd, out var pp)); Assert.AreEqual(2f, pd, 0.0001f); Assert.AreEqual(new Vector3(2f, 0f, 0f), pp);
-            var sphere = new BoundingSphere(new Vector3(4f, 0f, 0f), 1f); Assert.IsTrue(Collision.RayIntersectsSphere(ref ray, ref sphere, out float sphd, out var sphp)); Assert.AreEqual(3f, sphd, 0.0001f); Assert.AreEqual(new Vector3(3f, 0f, 0f), sphp);
+            var ray = new Ray(Vector3.Zero, Vector3.UnitX);
+            var point = new Vector3(2f, 0f, 0f);
+            Assert.IsTrue(Collision.RayIntersectsPoint(ref ray, ref point));
+
+            var segment = new Segment(new Vector3(2f, -1f, 0f), new Vector3(2f, 1f, 0f));
+            Assert.IsTrue(Collision.RayIntersectsSegment(ref ray, ref segment, out float sd, out var sp));
+            Assert.AreEqual(2f, sd, 0.0001f);
+            Assert.AreEqual(new Vector3(2f, 0f, 0f), sp);
+
+            var plane = new Plane(Vector3.UnitX, 2f);
+            Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float pd, out var pp));
+            Assert.AreEqual(2f, pd, 0.0001f);
+            Assert.AreEqual(new Vector3(2f, 0f, 0f), pp);
+
+            plane = new Plane(Vector3.UnitX, -2f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref plane, out pd, out pp));
+            Assert.AreEqual(float.MaxValue, pd, 0.0001f);
+            Assert.AreEqual(new Vector3(0f, 0f, 0f), pp);
+
+            var sphere = new BoundingSphere(new Vector3(4f, 0f, 0f), 1f);
+            Assert.IsTrue(Collision.RayIntersectsSphere(ref ray, ref sphere, out float sphd, out var sphp));
+            Assert.AreEqual(3f, sphd, 0.0001f);
+            Assert.AreEqual(new Vector3(3f, 0f, 0f), sphp);
         }
 
         [TestMethod]
         public void CollisionRayFamilies_TriangleBoxAndCircle()
         {
-            var tri = new Triangle(new Vector3(-1f, -1f, 0f), new Vector3(1f, -1f, 0f), new Vector3(0f, 1f, 0f)); var ray = new Ray(new Vector3(0f, 0f, -1f), Vector3.UnitZ);
-            Assert.IsTrue(Collision.RayIntersectsTriangle(ref ray, ref tri, out float td, out var tp)); Assert.AreEqual(1f, td, 0.0001f); Assert.AreEqual(Vector3.Zero, tp);
-            var box = new BoundingBox(new Vector3(-1f), new Vector3(1f)); Assert.IsTrue(Collision.RayIntersectsBox(ref ray, ref box, out float bd, out var bp)); Assert.AreEqual(0f, bd, 0.0001f); Assert.AreEqual(new Vector3(0f, 0f, -1f), bp);
-            var circleCenter = Vector3.Zero; var circleNormal = Vector3.UnitZ;
-            Assert.IsTrue(Collision.RayIntersectsCircle3D(ref ray, ref circleCenter, ref circleNormal, 1f, out float cd, out var cp)); Assert.AreEqual(1f, cd, 0.0001f); Assert.AreEqual(Vector3.Zero, cp);
+            var tri = new Triangle(new Vector3(-1f, -1f, 0f), new Vector3(1f, -1f, 0f), new Vector3(0f, 1f, 0f));
+            var ray = new Ray(new Vector3(0f, 0f, -1f), Vector3.UnitZ);
+            Assert.IsTrue(Collision.RayIntersectsTriangle(ref ray, ref tri, out float td, out var tp));
+            Assert.AreEqual(1f, td, 0.0001f);
+            Assert.AreEqual(Vector3.Zero, tp);
+
+            var box = new BoundingBox(new Vector3(-1f), new Vector3(1f));
+            Assert.IsTrue(Collision.RayIntersectsBox(ref ray, ref box, out float bd, out var bp));
+            Assert.AreEqual(0f, bd, 0.0001f);
+            Assert.AreEqual(new Vector3(0f, 0f, -1f), bp);
+
+            var circleCenter = Vector3.Zero;
+            var circleNormal = Vector3.UnitZ;
+            Assert.IsTrue(Collision.RayIntersectsCircle3D(ref ray, ref circleCenter, ref circleNormal, 1f, out float cd, out var cp));
+            Assert.AreEqual(1f, cd, 0.0001f);
+            Assert.AreEqual(Vector3.Zero, cp);
         }
 
         [TestMethod]
@@ -783,7 +813,16 @@ namespace Engine.MathematicsTests
         [TestMethod] public void Collision_Overload_009_ClosestPointInRay() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var p = new Vector3(0.5f, 2f, 0f); Collision.ClosestPointInRay(ref ray, ref p, out var q); AssertVector(new Vector3(0.5f, 0f, 0f), q); }
         [TestMethod] public void Collision_Overload_010_ClosestPointInRay() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var p = new Vector3(0.5f, 2f, 0f); Collision.ClosestPointInRay(ref ray, ref p, out float d, out var q); Assert.AreEqual(2f, d, 1e-5f); AssertVector(new Vector3(0.5f, 0f, 0f), q); }
         [TestMethod] public void Collision_Overload_011_ClosestPointInSegment() { var a = new Vector3(-1f, 0f, 0f); var b = Vector3.UnitX; var p = new Vector3(0f, 2f, 0f); Collision.ClosestPointInSegment(ref a, ref b, ref p, out var q); AssertVector(Vector3.Zero, q); }
-        [TestMethod] public void Collision_Overload_012_ClosestPointInSegment() { var a = new Vector3(-1f, 0f, 0f); var b = Vector3.UnitX; var p = new Vector3(0f, 2f, 0f); Collision.ClosestPointInSegment(ref a, ref b, ref p, out float t, out var q); Assert.AreEqual(0.5f, t, 1e-5f); AssertVector(Vector3.Zero, q); }
+        [TestMethod]
+        public void Collision_Overload_012_ClosestPointInSegment()
+        {
+            var a = new Vector3(-1f, 0f, 0f);
+            var b = Vector3.UnitX;
+            var p = new Vector3(0f, 2f, 0f);
+            Collision.ClosestPointInSegment(ref a, ref b, ref p, out float t, out var q);
+            Assert.AreEqual(0.5f, t, 1e-5f);
+            AssertVector(Vector3.Zero, q);
+        }
         [TestMethod] public void Collision_Overload_013_ClosestPointInSegment() { var segment = new Segment(new Vector3(-1f, 0f, 0f), Vector3.UnitX); var p = new Vector3(0f, 2f, 0f); Collision.ClosestPointInSegment(ref segment, ref p, out var q); AssertVector(Vector3.Zero, q); }
         [TestMethod] public void Collision_Overload_014_ClosestPointInSegment() { var segment = new Segment(new Vector3(-1f, 0f, 0f), Vector3.UnitX); var p = new Vector3(0f, 2f, 0f); Collision.ClosestPointInSegment(ref segment, ref p, out float t, out var q); Assert.AreEqual(0.5f, t, 1e-5f); AssertVector(Vector3.Zero, q); }
         [TestMethod] public void Collision_Overload_015_ClosestPointInBox() { var box = CoverageBox(); var p = new Vector3(2f, 0f, 0f); Collision.ClosestPointInBox(ref p, ref box, out var q); AssertVector(Vector3.UnitX, q); }
@@ -799,7 +838,16 @@ namespace Engine.MathematicsTests
         [TestMethod] public void Collision_Overload_025_DistanceSpherePoint() { var sphere = new BoundingSphere(Vector3.Zero, 1f); var p = new Vector3(3f, 0f, 0f); Assert.AreEqual(2f, Collision.DistanceSpherePoint(ref sphere, ref p), 1e-5f); }
         [TestMethod] public void Collision_Overload_026_DistanceSphereSphere() { var a = new BoundingSphere(Vector3.Zero, 1f); var b = new BoundingSphere(new Vector3(4f, 0f, 0f), 1f); Assert.AreEqual(2f, Collision.DistanceSphereSphere(ref a, ref b), 1e-5f); }
 
-        [TestMethod] public void Collision_Overload_027_RayIntersectsPoint() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var hit = new Vector3(2f, 0f, 0f); var miss = new Vector3(0f, 2f, 0f); Assert.IsTrue(Collision.RayIntersectsPoint(ref ray, ref hit)); Assert.IsFalse(Collision.RayIntersectsPoint(ref ray, ref miss)); AssertNegativeRayOverloads(); }
+        [TestMethod]
+        public void Collision_Overload_027_RayIntersectsPoint()
+        {
+            var ray = new Ray(Vector3.Zero, Vector3.UnitX);
+            var hit = new Vector3(2f, 0f, 0f);
+            var miss = new Vector3(0f, 2f, 0f);
+            Assert.IsTrue(Collision.RayIntersectsPoint(ref ray, ref hit));
+            Assert.IsFalse(Collision.RayIntersectsPoint(ref ray, ref miss));
+            AssertNegativeRayOverloads();
+        }
         [TestMethod] public void Collision_Overload_028_RayIntersectsRay() { var a = new Ray(Vector3.Zero, Vector3.UnitX); var b = new Ray(Vector3.Zero, Vector3.UnitY); Assert.IsTrue(Collision.RayIntersectsRay(ref a, ref b, out var p)); AssertVector(Vector3.Zero, p); }
         [TestMethod] public void Collision_Overload_029_RayIntersectsRay() { var p1 = Vector3.Zero; var d1 = Vector3.UnitX; var p2 = Vector3.Zero; var d2 = Vector3.UnitY; Assert.IsTrue(Collision.RayIntersectsRay(ref p1, ref d1, ref p2, ref d2, out var p)); AssertVector(Vector3.Zero, p); }
         [TestMethod] public void Collision_Overload_030_RayIntersectsSegment() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var segment = new Segment(new Vector3(2f, -1f, 0f), new Vector3(2f, 1f, 0f)); Assert.IsTrue(Collision.RayIntersectsSegment(ref ray, ref segment, out var p)); AssertVector(new Vector3(2f, 0f, 0f), p); }
@@ -807,10 +855,60 @@ namespace Engine.MathematicsTests
         [TestMethod] public void Collision_Overload_032_RayIntersectsSegment() { var rp = Vector3.Zero; var rd = Vector3.UnitX; var sp = new Vector3(2f, -1f, 0f); var sd = new Vector3(0f, 2f, 0f); var len = 2f; Assert.IsTrue(Collision.RayIntersectsSegment(ref rp, ref rd, ref sp, ref sd, ref len, out float d, out var p)); Assert.AreEqual(2f, d, 1e-5f); AssertVector(new Vector3(2f, 0f, 0f), p); }
         [TestMethod] public void Collision_Overload_033_RayIntersectsSegment() { var ray = new PickingRay(new Ray(Vector3.Zero, Vector3.UnitX)); var segment = new Segment(new Vector3(2f, -1f, 0f), new Vector3(2f, 1f, 0f)); Assert.IsTrue(Collision.RayIntersectsSegment(ref ray, ref segment, out var p)); AssertVector(new Vector3(2f, 0f, 0f), p); }
         [TestMethod] public void Collision_Overload_034_RayIntersectsSegment() { var ray = new PickingRay(new Ray(Vector3.Zero, Vector3.UnitX)); var segment = new Segment(new Vector3(2f, -1f, 0f), new Vector3(2f, 1f, 0f)); Assert.IsTrue(Collision.RayIntersectsSegment(ref ray, ref segment, out float d, out var p)); Assert.AreEqual(2f, d, 1e-5f); AssertVector(new Vector3(2f, 0f, 0f), p); }
-        [TestMethod] public void Collision_Overload_035_RayIntersectsPlane() { var p = Vector3.Zero; var d = Vector3.UnitX; var plane = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out float t)); Assert.AreEqual(2f, t, 1e-5f); }
-        [TestMethod] public void Collision_Overload_036_RayIntersectsPlane() { var p = Vector3.Zero; var d = Vector3.UnitX; var plane = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out float t, out var hit)); Assert.AreEqual(2f, t, 1e-5f); AssertVector(new Vector3(2f, 0f, 0f), hit); }
-        [TestMethod] public void Collision_Overload_037_RayIntersectsPlane() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var plane = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float t)); Assert.AreEqual(2f, t, 1e-5f); }
-        [TestMethod] public void Collision_Overload_038_RayIntersectsPlane() { var ray = new Ray(Vector3.Zero, Vector3.UnitX); var plane = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float t, out var hit)); Assert.AreEqual(2f, t, 1e-5f); AssertVector(new Vector3(2f, 0f, 0f), hit); }
+        [TestMethod]
+        public void Collision_Overload_035_RayIntersectsPlane()
+        {
+            var p = Vector3.Zero;
+            var d = Vector3.UnitX;
+            var plane = new Plane(Vector3.UnitX, 2f);
+            Assert.IsTrue(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out float t));
+            Assert.AreEqual(2f, t, 1e-5f);
+
+            plane = new Plane(Vector3.UnitX, -2f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out t));
+            Assert.AreEqual(float.MaxValue, t, 1e-5f);
+        }
+        [TestMethod]
+        public void Collision_Overload_036_RayIntersectsPlane()
+        {
+            var p = Vector3.Zero;
+            var d = Vector3.UnitX;
+            var plane = new Plane(Vector3.UnitX, 2f);
+            Assert.IsTrue(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out float t, out var hit));
+            Assert.AreEqual(2f, t, 1e-5f);
+            AssertVector(new Vector3(2f, 0f, 0f), hit);
+
+            plane = new Plane(Vector3.UnitX, -2f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref p, ref d, ref plane, out t, out hit));
+            Assert.AreEqual(float.MaxValue, t, 1e-5f);
+            AssertVector(new Vector3(0f, 0f, 0f), hit);
+        }
+        [TestMethod]
+        public void Collision_Overload_037_RayIntersectsPlane()
+        {
+            var ray = new Ray(Vector3.Zero, Vector3.UnitX);
+            var plane = new Plane(Vector3.UnitX, 2f);
+            Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float t));
+            Assert.AreEqual(2f, t, 1e-5f);
+
+            plane = new Plane(Vector3.UnitX, -2f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref plane, out t));
+            Assert.AreEqual(float.MaxValue, t, 1e-5f);
+        }
+        [TestMethod]
+        public void Collision_Overload_038_RayIntersectsPlane()
+        {
+            var ray = new Ray(Vector3.Zero, Vector3.UnitX);
+            var plane = new Plane(Vector3.UnitX, 2f);
+            Assert.IsTrue(Collision.RayIntersectsPlane(ref ray, ref plane, out float t, out var hit));
+            Assert.AreEqual(2f, t, 1e-5f);
+            AssertVector(new Vector3(2f, 0f, 0f), hit);
+
+            plane = new Plane(Vector3.UnitX, -2f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref plane, out t, out hit));
+            Assert.AreEqual(float.MaxValue, t, 1e-5f);
+            AssertVector(new Vector3(0f, 0f, 0f), hit);
+        }
 
         [TestMethod] public void Collision_Overload_039_RayIntersectsTriangle() { var rp = new Vector3(0.5f, 0.5f, 2f); var rd = -Vector3.UnitZ; var a = Vector3.Zero; var b = new Vector3(2f, 0f, 0f); var c = new Vector3(0f, 2f, 0f); Assert.IsTrue(Collision.RayIntersectsTriangle(ref rp, ref rd, ref a, ref b, ref c, out float d)); Assert.AreEqual(2f, d, 1e-5f); }
         [TestMethod] public void Collision_Overload_040_RayIntersectsTriangle() { var rp = new Vector3(0.5f, 0.5f, 2f); var rd = -Vector3.UnitZ; var a = Vector3.Zero; var b = new Vector3(2f, 0f, 0f); var c = new Vector3(0f, 2f, 0f); Assert.IsTrue(Collision.RayIntersectsTriangle(ref rp, ref rd, ref a, ref b, ref c, out float d, out var p)); Assert.AreEqual(2f, d, 1e-5f); AssertVector(new Vector3(0.5f, 0.5f, 0f), p); }
@@ -839,7 +937,14 @@ namespace Engine.MathematicsTests
         [TestMethod] public void Collision_Overload_062_RayIntersectsFrustum() { var ray = new Ray(new Vector3(-2f, 0f, 0f), Vector3.UnitX); var f = CoverageFrustum(); Assert.IsTrue(Collision.RayIntersectsFrustum(ref ray, ref f, out float? entering, out float? exiting)); Assert.IsTrue(entering.HasValue); Assert.IsTrue(exiting.HasValue); Assert.AreEqual(1f, entering.Value, 1e-4f); Assert.AreEqual(3f, exiting.Value, 1e-4f); }
         [TestMethod] public void Collision_Overload_063_RayIntersectsCircle3D() { var ray = new Ray(new Vector3(0f, 0f, -2f), Vector3.UnitZ); var center = Vector3.Zero; var normal = Vector3.UnitZ; Assert.IsTrue(Collision.RayIntersectsCircle3D(ref ray, ref center, ref normal, 3f, out float d, out var p)); Assert.AreEqual(2f, d, 1e-5f); AssertVector(Vector3.Zero, p); }
 
-        [TestMethod] public void Collision_Overload_064_SegmentIntersectsBox() { var box = CoverageBox(); var segment = new Segment(new Vector3(-2f, 0f, 0f), new Vector3(2f, 0f, 0f)); Assert.IsTrue(Collision.SegmentIntersectsBox(ref segment, ref box, out float d)); Assert.AreEqual(1f, d, 1e-5f); }
+        [TestMethod]
+        public void Collision_Overload_064_SegmentIntersectsBox()
+        {
+            var box = CoverageBox();
+            var segment = new Segment(new Vector3(-2f, 0f, 0f), new Vector3(2f, 0f, 0f));
+            Assert.IsTrue(Collision.SegmentIntersectsBox(ref segment, ref box, out float d));
+            Assert.AreEqual(1f, d, 1e-5f);
+        }
         [TestMethod] public void Collision_Overload_065_SegmentIntersectsBox() { var box = CoverageBox(); var segment = new Segment(new Vector3(-2f, 0f, 0f), new Vector3(2f, 0f, 0f)); Assert.IsTrue(Collision.SegmentIntersectsBox(ref segment, ref box, out float d, out var p)); Assert.AreEqual(1f, d, 1e-5f); AssertVector(new Vector3(-1f, 0f, 0f), p); }
         [TestMethod] public void Collision_Overload_066_SegmentIntersectsTriangle() { var tri = CoverageTriangle(); var segment = new Segment(new Vector3(0.5f, 0.5f, 2f), new Vector3(0.5f, 0.5f, -2f)); Assert.IsTrue(Collision.SegmentIntersectsTriangle(ref segment, ref tri, out float d)); Assert.AreEqual(2f, d, 1e-5f); }
         [TestMethod] public void Collision_Overload_067_SegmentIntersectsTriangle() { var tri = CoverageTriangle(); var segment = new Segment(new Vector3(0.5f, 0.5f, 2f), new Vector3(0.5f, 0.5f, -2f)); Assert.IsTrue(Collision.SegmentIntersectsTriangle(ref segment, ref tri, out float d, out var p)); Assert.AreEqual(2f, d, 1e-5f); AssertVector(new Vector3(0.5f, 0.5f, 0f), p); }
@@ -847,13 +952,37 @@ namespace Engine.MathematicsTests
         [TestMethod] public void Collision_Overload_073_PlaneIntersectsPoint() { var plane = new Plane(Vector3.UnitY, 0f); var front = new Vector3(0f, 2f, 0f); var back = new Vector3(0f, -2f, 0f); var on = Vector3.Zero; Assert.AreEqual(PlaneIntersectionType.Front, Collision.PlaneIntersectsPoint(ref plane, ref front)); Assert.AreEqual(PlaneIntersectionType.Back, Collision.PlaneIntersectsPoint(ref plane, ref back)); Assert.AreEqual(PlaneIntersectionType.Intersecting, Collision.PlaneIntersectsPoint(ref plane, ref on)); }
         [TestMethod] public void Collision_Overload_074_PlaneIntersectsPoints() { var plane = new Plane(Vector3.UnitY, 0f); Assert.AreEqual(PlaneIntersectionType.Front, Collision.PlaneIntersectsPoints(ref plane, [new Vector3(0f, 1f, 0f), new Vector3(0f, 2f, 0f)])); Assert.AreEqual(PlaneIntersectionType.Intersecting, Collision.PlaneIntersectsPoints(ref plane, [new Vector3(0f, -1f, 0f), new Vector3(0f, 1f, 0f)])); }
         [TestMethod] public void Collision_Overload_075_PlaneIntersectsPlane() { var x = new Plane(Vector3.UnitX, 0f); var y = new Plane(Vector3.UnitY, 0f); var parallel = new Plane(Vector3.UnitX, -2f); Assert.IsTrue(Collision.PlaneIntersectsPlane(ref x, ref y)); Assert.IsFalse(Collision.PlaneIntersectsPlane(ref x, ref parallel)); }
-        [TestMethod] public void Collision_Overload_076_PlaneIntersectsPlane() { var x = new Plane(Vector3.UnitX, 0f); var y = new Plane(Vector3.UnitY, 0f); Assert.IsTrue(Collision.PlaneIntersectsPlane(ref x, ref y, out var line)); AssertVector(Vector3.Zero, line.Position); Assert.AreEqual(1f, line.Direction.Length(), 1e-5f); }
+        [TestMethod]
+        public void Collision_Overload_076_PlaneIntersectsPlane()
+        {
+            var x = new Plane(Vector3.UnitX, 0f);
+            var y = new Plane(Vector3.UnitY, 0f);
+            Assert.IsTrue(Collision.PlaneIntersectsPlane(ref x, ref y, out var line));
+            AssertVector(Vector3.Zero, line.Position);
+            Assert.AreEqual(1f, line.Direction.Length(), 1e-5f);
+        }
         [TestMethod] public void Collision_Overload_077_PlaneIntersectsTriangle() { var plane = new Plane(Vector3.UnitY, 0f); var a = new Vector3(0f, 1f, 0f); var b = new Vector3(2f, 1f, 0f); var c = new Vector3(0f, 2f, 0f); Assert.AreEqual(PlaneIntersectionType.Front, Collision.PlaneIntersectsTriangle(ref plane, ref a, ref b, ref c)); var tri = CoverageTriangle(); Assert.AreEqual(PlaneIntersectionType.Intersecting, Collision.PlaneIntersectsTriangle(ref plane, ref tri.Point1, ref tri.Point2, ref tri.Point3)); }
         [TestMethod] public void Collision_Overload_078_PlaneIntersectsBox() { var plane = new Plane(Vector3.UnitX, 0f); var box = CoverageBox(); Assert.AreEqual(PlaneIntersectionType.Intersecting, Collision.PlaneIntersectsBox(ref plane, ref box)); }
         [TestMethod] public void Collision_Overload_079_PlaneIntersectsSphere() { var plane = new Plane(Vector3.UnitY, 0f); var sphere = new BoundingSphere(Vector3.Zero, 1f); Assert.AreEqual(PlaneIntersectionType.Intersecting, Collision.PlaneIntersectsSphere(ref plane, ref sphere)); }
         [TestMethod] public void Collision_Overload_080_PlaneIntersectsCylinder() { var cylinder = new BoundingCylinder(Vector3.Zero, 0.5f, 2f); var plane = new Plane(Vector3.UnitY, 0f); Assert.IsTrue(Collision.PlaneIntersectsCylinder(ref cylinder, ref plane)); }
         [TestMethod] public void Collision_Overload_081_PlaneIntersectsCapsule() { var capsule = new BoundingCapsule(Vector3.Zero, 0.5f, 2f); var plane = new Plane(Vector3.UnitY, 0f); Assert.IsTrue(Collision.PlaneIntersectsCapsule(ref capsule, ref plane)); }
-        [TestMethod] public void Collision_Overload_082_PlanesIntersectsPoint() { var x = new Plane(Vector3.UnitX, -1f); var y = new Plane(Vector3.UnitY, -2f); var z = new Plane(Vector3.UnitZ, -3f); Collision.PlanesIntersectsPoint(ref x, ref y, ref z, out var p); AssertVector(new Vector3(1f, 2f, 3f), p); }
+        [TestMethod]
+        public void Collision_Overload_082_PlanesIntersectsPoint()
+        {
+            var x = new Plane(Vector3.UnitX, -1f);
+            var y = new Plane(Vector3.UnitY, -2f);
+            var z = new Plane(Vector3.UnitZ, -3f);
+
+            Collision.PlanesIntersectsPoint(ref x, ref y, ref z, out var p);
+            AssertVector(new Vector3(-1f, -2f, -3f), p);
+
+            x = new Plane(Vector3.UnitX, 1f);
+            y = new Plane(Vector3.UnitY, 2f);
+            z = new Plane(Vector3.UnitZ, 3f);
+
+            Collision.PlanesIntersectsPoint(ref x, ref y, ref z, out p);
+            AssertVector(new Vector3(1f, 2f, 3f), p);
+        }
 
 
         [TestMethod] public void Collision_Overload_001_Intersects() { Assert.IsTrue(Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i2.Object, IntersectDetectionMode.Sphere)); Assert.IsFalse(Collision.Intersects(i1.Object, IntersectDetectionMode.Sphere, i3.Object, IntersectDetectionMode.Sphere)); Assert.IsTrue(Collision.Intersects(i1.Object, IntersectDetectionMode.Box, i2.Object, IntersectDetectionMode.Box)); AssertNegativeShapeResultOverloads(); }
@@ -3524,70 +3653,150 @@ namespace Engine.MathematicsTests
         {
             var ray = new Ray(Vector3.Zero, Vector3.UnitX);
             var parallelRay = new Ray(new Vector3(0f, -1f, 1f), Vector3.UnitY);
-            Assert.IsFalse(Collision.RayIntersectsRay(ref ray, ref parallelRay, out var rayHit)); AssertVector(Vector3.Zero, rayHit);
-            var rp1 = Vector3.Zero; var rd1 = Vector3.UnitX; var rp2 = new Vector3(0f, -1f, 1f); var rd2 = Vector3.UnitY;
-            Assert.IsFalse(Collision.RayIntersectsRay(ref rp1, ref rd1, ref rp2, ref rd2, out rayHit)); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsRay(ref ray, ref parallelRay, out var rayHit));
+            AssertVector(Vector3.Zero, rayHit);
+            var rp1 = Vector3.Zero;
+            var rd1 = Vector3.UnitX;
+            var rp2 = new Vector3(0f, -1f, 1f);
+            var rd2 = Vector3.UnitY;
+            Assert.IsFalse(Collision.RayIntersectsRay(ref rp1, ref rd1, ref rp2, ref rd2, out rayHit));
+            AssertVector(Vector3.Zero, rayHit);
 
             var segmentMiss = new Segment(new Vector3(2f, 2f, 0f), new Vector3(2f, 3f, 0f));
-            Assert.IsFalse(Collision.RayIntersectsSegment(ref ray, ref segmentMiss, out rayHit)); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsSegment(ref ray, ref segmentMiss, out float segmentDistance, out rayHit)); Assert.AreEqual(float.MaxValue, segmentDistance); AssertVector(Vector3.Zero, rayHit);
-            var rawSegmentStart = new Vector3(2f, 2f, 0f); var rawSegmentDirection = Vector3.UnitY; var rawSegmentLength = 1f;
-            Assert.IsFalse(Collision.RayIntersectsSegment(ref rp1, ref rd1, ref rawSegmentStart, ref rawSegmentDirection, ref rawSegmentLength, out segmentDistance, out rayHit)); Assert.AreEqual(float.MaxValue, segmentDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSegment(ref ray, ref segmentMiss, out rayHit));
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSegment(ref ray, ref segmentMiss, out float segmentDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, segmentDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            var rawSegmentStart = new Vector3(2f, 2f, 0f);
+            var rawSegmentDirection = Vector3.UnitY;
+            var rawSegmentLength = 1f;
+            Assert.IsFalse(Collision.RayIntersectsSegment(ref rp1, ref rd1, ref rawSegmentStart, ref rawSegmentDirection, ref rawSegmentLength, out segmentDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, segmentDistance);
+            AssertVector(Vector3.Zero, rayHit);
             var picking = new PickingRay(ray);
-            Assert.IsFalse(Collision.RayIntersectsSegment(ref picking, ref segmentMiss, out rayHit)); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsSegment(ref picking, ref segmentMiss, out segmentDistance, out rayHit)); Assert.AreEqual(float.MaxValue, segmentDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSegment(ref picking, ref segmentMiss, out rayHit));
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSegment(ref picking, ref segmentMiss, out segmentDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, segmentDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
             var parallelPlane = new Plane(Vector3.UnitY, -2f);
-            Assert.IsFalse(Collision.RayIntersectsPlane(ref rp1, ref rd1, ref parallelPlane, out float planeDistance)); Assert.AreEqual(0f, planeDistance, 1e-5f);
-            Assert.IsFalse(Collision.RayIntersectsPlane(ref rp1, ref rd1, ref parallelPlane, out planeDistance, out rayHit)); Assert.AreEqual(float.MaxValue, planeDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref parallelPlane, out planeDistance)); Assert.AreEqual(0f, planeDistance, 1e-5f);
-            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref parallelPlane, out planeDistance, out rayHit)); Assert.AreEqual(float.MaxValue, planeDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref rp1, ref rd1, ref parallelPlane, out float planeDistance));
+            Assert.AreEqual(float.MaxValue, planeDistance, 1e-5f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref rp1, ref rd1, ref parallelPlane, out planeDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, planeDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref parallelPlane, out planeDistance));
+            Assert.AreEqual(float.MaxValue, planeDistance, 1e-5f);
+            Assert.IsFalse(Collision.RayIntersectsPlane(ref ray, ref parallelPlane, out planeDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, planeDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
-            var tri = CoverageTriangle(); var triMissRay = new Ray(new Vector3(3f, 3f, 2f), -Vector3.UnitZ);
-            var triPos = triMissRay.Position; var triDir = triMissRay.Direction; var a = tri.Point1; var b = tri.Point2; var c = tri.Point3;
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triPos, ref triDir, ref a, ref b, ref c, out float triDistance)); Assert.AreEqual(float.MaxValue, triDistance);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triPos, ref triDir, ref a, ref b, ref c, out triDistance, out rayHit)); Assert.AreEqual(float.MaxValue, triDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref a, ref b, ref c, out triDistance)); Assert.AreEqual(float.MaxValue, triDistance);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref a, ref b, ref c, out triDistance, out rayHit)); Assert.AreEqual(float.MaxValue, triDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref tri, out triDistance)); Assert.AreEqual(float.MaxValue, triDistance);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref tri, out triDistance, out rayHit)); Assert.AreEqual(float.MaxValue, triDistance); AssertVector(Vector3.Zero, rayHit);
+            var tri = CoverageTriangle();
+            var triMissRay = new Ray(new Vector3(3f, 3f, 2f), -Vector3.UnitZ);
+            var triPos = triMissRay.Position;
+            var triDir = triMissRay.Direction;
+            var a = tri.Point1;
+            var b = tri.Point2;
+            var c = tri.Point3;
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triPos, ref triDir, ref a, ref b, ref c, out float triDistance));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triPos, ref triDir, ref a, ref b, ref c, out triDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref a, ref b, ref c, out triDistance));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref a, ref b, ref c, out triDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref tri, out triDistance));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref triMissRay, ref tri, out triDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            AssertVector(Vector3.Zero, rayHit);
             var pickTriRay = new PickingRay(triMissRay);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref a, ref b, ref c, out triDistance)); Assert.AreEqual(float.MaxValue, triDistance);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref a, ref b, ref c, out triDistance, out rayHit)); Assert.AreEqual(float.MaxValue, triDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref tri, out triDistance)); Assert.AreEqual(float.MaxValue, triDistance);
-            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref tri, out triDistance, out rayHit)); Assert.AreEqual(float.MaxValue, triDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref a, ref b, ref c, out triDistance));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref a, ref b, ref c, out triDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref tri, out triDistance));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            Assert.IsFalse(Collision.RayIntersectsTriangle(ref pickTriRay, ref tri, out triDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, triDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
-            var box = CoverageBox(); var boxMissRay = new Ray(new Vector3(-2f, 3f, 0f), Vector3.UnitX); var boxPos = boxMissRay.Position; var boxDir = boxMissRay.Direction;
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPos, ref boxDir, ref box, out float boxDistance)); Assert.AreEqual(float.MaxValue, boxDistance);
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPos, ref boxDir, ref box, out boxDistance, out rayHit)); Assert.AreEqual(float.MaxValue, boxDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxMissRay, ref box, out boxDistance)); Assert.AreEqual(float.MaxValue, boxDistance);
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxMissRay, ref box, out boxDistance, out rayHit)); Assert.AreEqual(float.MaxValue, boxDistance); AssertVector(Vector3.Zero, rayHit);
+            var box = CoverageBox();
+            var boxMissRay = new Ray(new Vector3(-2f, 3f, 0f), Vector3.UnitX);
+            var boxPos = boxMissRay.Position;
+            var boxDir = boxMissRay.Direction;
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPos, ref boxDir, ref box, out float boxDistance));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPos, ref boxDir, ref box, out boxDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxMissRay, ref box, out boxDistance));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxMissRay, ref box, out boxDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            AssertVector(Vector3.Zero, rayHit);
             var boxPickRay = new PickingRay(boxMissRay);
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPickRay, ref box, out boxDistance)); Assert.AreEqual(float.MaxValue, boxDistance);
-            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPickRay, ref box, out boxDistance, out rayHit)); Assert.AreEqual(float.MaxValue, boxDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPickRay, ref box, out boxDistance));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            Assert.IsFalse(Collision.RayIntersectsBox(ref boxPickRay, ref box, out boxDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, boxDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
-            var sphere = new BoundingSphere(Vector3.Zero, 1f); var spherePos = boxMissRay.Position; var sphereDir = boxMissRay.Direction;
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePos, ref sphereDir, ref sphere, out float sphereDistance)); Assert.AreEqual(0f, sphereDistance, 1e-5f);
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePos, ref sphereDir, ref sphere, out sphereDistance, out rayHit)); Assert.AreEqual(float.MaxValue, sphereDistance); AssertVector(Vector3.Zero, rayHit);
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref boxMissRay, ref sphere, out sphereDistance)); Assert.AreEqual(0f, sphereDistance, 1e-5f);
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref boxMissRay, ref sphere, out sphereDistance, out rayHit)); Assert.AreEqual(float.MaxValue, sphereDistance); AssertVector(Vector3.Zero, rayHit);
+            var sphere = new BoundingSphere(Vector3.Zero, 1f);
+            var spherePos = boxMissRay.Position;
+            var sphereDir = boxMissRay.Direction;
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePos, ref sphereDir, ref sphere, out float sphereDistance));
+            Assert.AreEqual(0f, sphereDistance, 1e-5f);
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePos, ref sphereDir, ref sphere, out sphereDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, sphereDistance);
+            AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref boxMissRay, ref sphere, out sphereDistance));
+            Assert.AreEqual(0f, sphereDistance, 1e-5f);
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref boxMissRay, ref sphere, out sphereDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, sphereDistance);
+            AssertVector(Vector3.Zero, rayHit);
             var spherePickRay = new PickingRay(boxMissRay);
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePickRay, ref sphere, out sphereDistance)); Assert.AreEqual(float.MaxValue, sphereDistance);
-            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePickRay, ref sphere, out sphereDistance, out rayHit)); Assert.AreEqual(float.MaxValue, sphereDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePickRay, ref sphere, out sphereDistance));
+            Assert.AreEqual(float.MaxValue, sphereDistance);
+            Assert.IsFalse(Collision.RayIntersectsSphere(ref spherePickRay, ref sphere, out sphereDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, sphereDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
-            var frustum = CoverageFrustum(); var frustumPos = new Vector3(-2f, 3f, 0f); var frustumDir = Vector3.UnitX;
-            Assert.IsFalse(Collision.RayIntersectsFrustum(ref frustumPos, ref frustumDir, ref frustum, out float? enter, out float? exit)); Assert.IsFalse(enter.HasValue); Assert.IsFalse(exit.HasValue);
+            var frustum = CoverageFrustum();
+            var frustumPos = new Vector3(-2f, 3f, 0f);
+            var frustumDir = Vector3.UnitX;
+            Assert.IsFalse(Collision.RayIntersectsFrustum(ref frustumPos, ref frustumDir, ref frustum, out float? enter, out float? exit));
+            Assert.IsFalse(enter.HasValue);
+            Assert.IsFalse(exit.HasValue);
             var frustumRay = new Ray(frustumPos, frustumDir);
-            Assert.IsFalse(Collision.RayIntersectsFrustum(ref frustumRay, ref frustum, out enter, out exit)); Assert.IsFalse(enter.HasValue); Assert.IsFalse(exit.HasValue);
-            var circleRay = new Ray(new Vector3(0f, 0f, -2f), Vector3.UnitZ); var circleCenter = new Vector3(3f, 0f, 0f); var circleNormal = Vector3.UnitZ;
-            Assert.IsFalse(Collision.RayIntersectsCircle3D(ref circleRay, ref circleCenter, ref circleNormal, 1f, out float circleDistance, out rayHit)); Assert.AreEqual(float.MaxValue, circleDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.RayIntersectsFrustum(ref frustumRay, ref frustum, out enter, out exit));
+            Assert.IsFalse(enter.HasValue);
+            Assert.IsFalse(exit.HasValue);
+            var circleRay = new Ray(new Vector3(0f, 0f, -2f), Vector3.UnitZ);
+            var circleCenter = new Vector3(3f, 0f, 0f);
+            var circleNormal = Vector3.UnitZ;
+            Assert.IsFalse(Collision.RayIntersectsCircle3D(ref circleRay, ref circleCenter, ref circleNormal, 1f, out float circleDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, circleDistance);
+            AssertVector(Vector3.Zero, rayHit);
 
             var shortBoxSegment = new Segment(new Vector3(-2f, 0f, 0f), new Vector3(-1.5f, 0f, 0f));
-            Assert.IsFalse(Collision.SegmentIntersectsBox(ref shortBoxSegment, ref box, out float shortDistance)); Assert.AreEqual(float.MaxValue, shortDistance);
-            Assert.IsFalse(Collision.SegmentIntersectsBox(ref shortBoxSegment, ref box, out shortDistance, out rayHit)); Assert.AreEqual(float.MaxValue, shortDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.SegmentIntersectsBox(ref shortBoxSegment, ref box, out float shortDistance));
+            Assert.AreEqual(float.MaxValue, shortDistance);
+            Assert.IsFalse(Collision.SegmentIntersectsBox(ref shortBoxSegment, ref box, out shortDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, shortDistance);
+            AssertVector(Vector3.Zero, rayHit);
             var shortTriSegment = new Segment(new Vector3(0.5f, 0.5f, 2f), new Vector3(0.5f, 0.5f, 1f));
-            Assert.IsFalse(Collision.SegmentIntersectsTriangle(ref shortTriSegment, ref tri, out float shortTriDistance)); Assert.AreEqual(float.MaxValue, shortTriDistance);
-            Assert.IsFalse(Collision.SegmentIntersectsTriangle(ref shortTriSegment, ref tri, out shortTriDistance, out rayHit)); Assert.AreEqual(float.MaxValue, shortTriDistance); AssertVector(Vector3.Zero, rayHit);
+            Assert.IsFalse(Collision.SegmentIntersectsTriangle(ref shortTriSegment, ref tri, out float shortTriDistance));
+            Assert.AreEqual(float.MaxValue, shortTriDistance);
+            Assert.IsFalse(Collision.SegmentIntersectsTriangle(ref shortTriSegment, ref tri, out shortTriDistance, out rayHit));
+            Assert.AreEqual(float.MaxValue, shortTriDistance);
+            AssertVector(Vector3.Zero, rayHit);
         }
 
         private static void AssertNegativeShapeResultOverloads()

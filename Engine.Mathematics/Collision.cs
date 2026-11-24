@@ -983,7 +983,7 @@ namespace Engine.Mathematics
 
             if (MathUtils.IsZero(direction))
             {
-                distance = 0f;
+                distance = float.MaxValue;
                 return false;
             }
 
@@ -992,7 +992,7 @@ namespace Engine.Mathematics
 
             if (distance < 0f)
             {
-                distance = 0f;
+                distance = float.MaxValue;
                 return false;
             }
 
