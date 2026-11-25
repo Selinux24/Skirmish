@@ -168,7 +168,7 @@ namespace Engine.Common
             distance = float.MaxValue;
 
             var sphere = GetBoundingSphere(manipulator);
-            var contains = volume.Contains(sphere);
+            var contains = volume.Contains(ref sphere);
 
             bool cull = contains == ContainmentType.Disjoint;
             if (!cull)
@@ -192,7 +192,7 @@ namespace Engine.Common
             distance = float.MaxValue;
 
             var box = GetBoundingBox(manipulator);
-            var contains = volume.Contains(box);
+            var contains = volume.Contains(ref box);
 
             bool cull = contains == ContainmentType.Disjoint;
             if (!cull)

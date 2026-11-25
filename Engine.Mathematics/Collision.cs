@@ -75,22 +75,22 @@ namespace Engine.Mathematics
 
             if (two is IntersectionVolumeSphere twoSph)
             {
-                return one.Contains(twoSph) != ContainmentType.Disjoint;
+                return one.Contains(ref twoSph) != ContainmentType.Disjoint;
             }
 
             if (two is IntersectionVolumeAxisAlignedBox twoBox)
             {
-                return one.Contains(twoBox) != ContainmentType.Disjoint;
+                return one.Contains(ref twoBox) != ContainmentType.Disjoint;
             }
 
             if (two is IntersectionVolumeFrustum twoFrustum)
             {
-                return one.Contains(twoFrustum) != ContainmentType.Disjoint;
+                return one.Contains(ref twoFrustum) != ContainmentType.Disjoint;
             }
 
             if (two is IntersectionVolumeMesh twoMesh)
             {
-                return one.Contains(twoMesh.GetTriangles()) != ContainmentType.Disjoint;
+                return one.Contains(twoMesh.Mesh) != ContainmentType.Disjoint;
             }
 
             return false;

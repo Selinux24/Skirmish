@@ -16,13 +16,31 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref BoundingSphere sphere);
+        /// <summary>
+        /// Gets if the current volume contains the bounding sphere
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <returns>Returns the containment type</returns>
         ContainmentType Contains(BoundingSphere sphere);
         /// <summary>
         /// Gets if the current volume contains the bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref BoundingBox bbox);
+        /// <summary>
+        /// Gets if the current volume contains the bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the containment type</returns>
         ContainmentType Contains(BoundingBox bbox);
+        /// <summary>
+        /// Gets if the current volume contains the bounding frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref BoundingFrustum frustum);
         /// <summary>
         /// Gets if the current volume contains the bounding frustum
         /// </summary>
@@ -35,5 +53,54 @@ namespace Engine.Mathematics
         /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
         ContainmentType Contains(Triangle[] mesh);
+
+        /// <summary>
+        /// Gets if the current volume contains the bounding sphere
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref IntersectionVolumeSphere sphere);
+        /// <summary>
+        /// Gets if the current volume contains the bounding sphere
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(IntersectionVolumeSphere sphere);
+        /// <summary>
+        /// Gets if the current volume contains the bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref IntersectionVolumeAxisAlignedBox bbox);
+        /// <summary>
+        /// Gets if the current volume contains the bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(IntersectionVolumeAxisAlignedBox bbox);
+        /// <summary>
+        /// Gets if the current volume contains the bounding frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref IntersectionVolumeFrustum frustum);
+        /// <summary>
+        /// Gets if the current volume contains the bounding frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(IntersectionVolumeFrustum frustum);
+        /// <summary>
+        /// Gets if the current volume contains the mesh
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(ref IntersectionVolumeMesh mesh);
+        /// <summary>
+        /// Gets if the current volume contains the mesh
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <returns>Returns the containment type</returns>
+        ContainmentType Contains(IntersectionVolumeMesh mesh);
     }
 }

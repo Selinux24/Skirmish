@@ -189,7 +189,7 @@ namespace Engine.BuiltIn.Components.Decals
                 return true;
             }
 
-            var inside = volume.Contains(boundingVolume) != ContainmentType.Disjoint;
+            var inside = volume.Contains(ref boundingVolume) != ContainmentType.Disjoint;
             if (inside)
             {
                 distance = Vector3.DistanceSquared(volume.Position, boundingVolume.Center);

@@ -13,8 +13,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Internal volume
         /// </summary>
-        private BoundingFrustum frustum = frustum;
-
+        public BoundingFrustum Frustum = frustum;
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = frustum.GetCameraParams().Position;
         /// <summary>
@@ -32,31 +31,82 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingSphere sphere)
+        {
+            return Collision.FrustumContainsSphere(ref Frustum, ref sphere);
+        }
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Collision.FrustumContainsSphere(ref frustum, ref sphere);
+            return Contains(ref sphere);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingBox bbox)
+        {
+            return Collision.FrustumContainsBox(ref Frustum, ref bbox);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return Collision.FrustumContainsBox(ref frustum, ref bbox);
+            return Contains(ref bbox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingFrustum frustum)
+        {
+            return Collision.FrustumContainsFrustum(ref Frustum, ref frustum);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Collision.FrustumContainsFrustum(ref this.frustum, ref frustum);
+            return Contains(ref frustum);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(Triangle[] mesh)
         {
-            return Collision.FrustumContainsMesh(ref frustum, mesh);
+            return Collision.FrustumContainsMesh(ref Frustum, mesh);
         }
 
         /// <inheritdoc/>
-        public static implicit operator BoundingFrustum(IntersectionVolumeFrustum value)
+        public ContainmentType Contains(ref IntersectionVolumeSphere sphere)
         {
-            return value.frustum;
+            return Contains(ref sphere.Sphere);
         }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeSphere sphere)
+        {
+            return Contains(ref sphere.Sphere);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeAxisAlignedBox bbox)
+        {
+            return Contains(ref bbox.BBox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeAxisAlignedBox bbox)
+        {
+            return Contains(ref bbox.BBox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeFrustum frustum)
+        {
+            return Contains(ref frustum.Frustum);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeFrustum frustum)
+        {
+            return Contains(ref frustum.Frustum);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeMesh mesh)
+        {
+            return Contains(mesh.Mesh);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeMesh mesh)
+        {
+            return Contains(mesh.Mesh);
+        }
+
         /// <inheritdoc/>
         public static implicit operator IntersectionVolumeFrustum(BoundingFrustum value)
         {

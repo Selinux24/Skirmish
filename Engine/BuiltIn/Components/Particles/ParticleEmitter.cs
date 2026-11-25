@@ -322,7 +322,7 @@ namespace Engine.BuiltIn.Components.Particles
 
             var bbox = GetBoundingBox();
 
-            var inside = volume.Contains(bbox) != ContainmentType.Disjoint;
+            var inside = volume.Contains(ref bbox) != ContainmentType.Disjoint;
             if (inside)
             {
                 distance = Vector3.DistanceSquared(volume.Position, Position);

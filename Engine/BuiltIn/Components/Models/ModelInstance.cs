@@ -392,12 +392,11 @@ namespace Engine.BuiltIn.Components.Models
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             var bsph = GetBoundingSphere();
-            if (bsph.Intersects(sphere))
+            if (bsph.Intersects(ref sphere.Sphere))
             {
                 var mesh = GetGeometry(GeometryTypes.Picking);
 
-                BoundingSphere sph = sphere;
-                if (Collision.SphereIntersectsMesh(ref sph, mesh, out var res))
+                if (Collision.SphereIntersectsMesh(ref sphere.Sphere, mesh, out var res))
                 {
                     result = res;
                     return true;

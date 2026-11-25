@@ -1329,7 +1329,7 @@ namespace Engine
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             var bsph = new BoundingSphere(position, MathF.Max(1f, CameraRadius));
-            if (bsph.Intersects(sphere))
+            if (bsph.Intersects(ref sphere.Sphere))
             {
                 float distance = Vector3.Distance(position, sphere.Position);
 

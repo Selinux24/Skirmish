@@ -123,8 +123,7 @@ namespace Engine
                 // Brute force
                 var mesh = GetGeometry(GeometryTypes.Picking);
 
-                BoundingSphere sph = sphere;
-                return Collision.SphereIntersectsMesh(ref sph, mesh, out result);
+                return Collision.SphereIntersectsMesh(ref sphere.Sphere, mesh, out result);
             }
 
             result = PickingResult<Triangle>.Empty;
@@ -140,8 +139,7 @@ namespace Engine
             float minDistance = float.MaxValue;
             foreach (var node in nodes)
             {
-                BoundingSphere sph = sphere;
-                if (Collision.SphereIntersectsMesh(ref sph, node.Items, out var res))
+                if (Collision.SphereIntersectsMesh(ref sphere.Sphere, node.Items, out var res))
                 {
                     intersects = true;
 

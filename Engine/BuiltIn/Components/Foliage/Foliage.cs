@@ -388,7 +388,7 @@ namespace Engine.BuiltIn.Components.Foliage
 
             var volume = (IntersectionVolumeFrustum)frustum;
 
-            return [.. nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint)];
+            return Array.FindAll(nodes, n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
         }
 
         /// <summary>

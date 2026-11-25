@@ -13,10 +13,9 @@ namespace Engine.Mathematics
         /// <summary>
         /// Bounding sphere
         /// </summary>
-        private BoundingSphere sphere = sphere;
-
+        public BoundingSphere Sphere = sphere;
         /// <inheritdoc/>
-        public Vector3 Position { get; private set; } = sphere.Center;
+        public Vector3 Position { get; } = sphere.Center;
 
         /// <summary>
         /// Constructor
@@ -29,31 +28,82 @@ namespace Engine.Mathematics
         }
 
         /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingSphere sphere)
+        {
+            return Collision.SphereContainsSphere(ref Sphere, ref sphere);
+        }
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Collision.SphereContainsSphere(ref this.sphere, ref sphere);
+            return Contains(ref sphere);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingBox bbox)
+        {
+            return Collision.SphereContainsBox(ref Sphere, ref bbox);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return Collision.SphereContainsBox(ref sphere, ref bbox);
+            return Contains(ref bbox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref BoundingFrustum frustum)
+        {
+            return Collision.SphereContainsFrustum(ref Sphere, ref frustum);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Collision.SphereContainsFrustum(ref sphere, ref frustum);
+            return Contains(ref frustum);
         }
         /// <inheritdoc/>
         public ContainmentType Contains(Triangle[] mesh)
         {
-            return Collision.SphereContainsMesh(ref sphere, mesh);
+            return Collision.SphereContainsMesh(ref Sphere, mesh);
         }
 
         /// <inheritdoc/>
-        public static implicit operator BoundingSphere(IntersectionVolumeSphere value)
+        public ContainmentType Contains(ref IntersectionVolumeSphere sphere)
         {
-            return value.sphere;
+            return Contains(ref sphere.Sphere);
         }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeSphere sphere)
+        {
+            return Contains(ref sphere.Sphere);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeAxisAlignedBox bbox)
+        {
+            return Contains(ref bbox.BBox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeAxisAlignedBox bbox)
+        {
+            return Contains(ref bbox.BBox);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeFrustum frustum)
+        {
+            return Contains(ref frustum.Frustum);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeFrustum frustum)
+        {
+            return Contains(ref frustum.Frustum);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(ref IntersectionVolumeMesh mesh)
+        {
+            return Contains(mesh.Mesh);
+        }
+        /// <inheritdoc/>
+        public ContainmentType Contains(IntersectionVolumeMesh mesh)
+        {
+            return Contains(mesh.Mesh);
+        }
+
         /// <inheritdoc/>
         public static implicit operator IntersectionVolumeSphere(BoundingSphere value)
         {

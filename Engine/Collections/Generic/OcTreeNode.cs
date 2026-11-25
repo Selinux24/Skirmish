@@ -31,9 +31,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node items array
         /// </summary>
-        private readonly (ICullingVolume volume, T item)[] items = root || itemsPerNode == 0 ?
-            Array.Empty<(ICullingVolume volume, T item)>() :
-            new (ICullingVolume, T)[itemsPerNode];
+        private readonly (ICullingVolume volume, T item)[] items = root || itemsPerNode == 0 ? [] : new (ICullingVolume, T)[itemsPerNode];
         /// <summary>
         /// Number of stored items in the array
         /// </summary>
@@ -96,11 +94,11 @@ namespace Engine.Collections.Generic
 
             for (int index = 0; index < childBoundaries.Length; index++)
             {
-                var childBoundary = childBoundaries[index];
+                ref var childBoundary = ref childBoundaries[index];
                 var child = GetNode(index);
                 if (child == null)
                 {
-                    if (itemBoundary.Contains(childBoundary) == ContainmentType.Disjoint)
+                    if (itemBoundary.Contains(ref childBoundary) == ContainmentType.Disjoint)
                     {
                         continue;
                     }
