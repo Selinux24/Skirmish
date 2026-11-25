@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0-windows</TargetFrameworks>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Engine.MathematicsTests.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
