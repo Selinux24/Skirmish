@@ -61,15 +61,17 @@ namespace Engine.Mathematics
         private const float FloatToInt = 255f;
         private const float IntToFloat = 1f / FloatToInt;
         private const string Color3Str = "Red:{0} Green:{1} Blue:{2}";
+        private const string ComponentColorStr = "There must be three and only three input values for Color3.";
+        private const string IndexRangeStr = "Indices for Color3 run from 0 to 2, inclusive.";
 
         /// <summary>
         /// The Black color (0, 0, 0).
         /// </summary>
-        public static readonly Color3 Black = new(0.0f, 0.0f, 0.0f);
+        public static readonly Color3 Black = new(0f, 0f, 0f);
         /// <summary>
         /// The White color (1, 1, 1, 1).
         /// </summary>
-        public static readonly Color3 White = new(1.0f, 1.0f, 1.0f);
+        public static readonly Color3 White = new(1f, 1f, 1f);
 
         /// <summary>
         /// The red component of the color.
@@ -101,7 +103,7 @@ namespace Engine.Mathematics
                 0 => Red,
                 1 => Green,
                 2 => Blue,
-                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color3 run from 0 to 2, inclusive."),
+                _ => throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr),
             };
 
             set
@@ -111,7 +113,7 @@ namespace Engine.Mathematics
                     case 0: Red = value; break;
                     case 1: Green = value; break;
                     case 2: Blue = value; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color3 run from 0 to 2, inclusive.");
+                    default: throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr);
                 }
             }
         }
@@ -205,7 +207,7 @@ namespace Engine.Mathematics
         public Color3(byte[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -220,7 +222,7 @@ namespace Engine.Mathematics
         public Color3(int[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -235,7 +237,7 @@ namespace Engine.Mathematics
         public Color3(uint[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -250,7 +252,7 @@ namespace Engine.Mathematics
         public Color3(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0];
             Green = values[1];
@@ -360,9 +362,9 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the negated color.</param>
         public static void Negate(ref Color3 value, out Color3 result)
         {
-            result.Red = 1.0f - value.Red;
-            result.Green = 1.0f - value.Green;
-            result.Blue = 1.0f - value.Blue;
+            result.Red = 1f - value.Red;
+            result.Green = 1f - value.Green;
+            result.Blue = 1f - value.Blue;
         }
         /// <summary>
         /// Negates a color.
@@ -805,9 +807,9 @@ namespace Engine.Mathematics
         /// <returns>A packed integer containing all three color components.
         public readonly uint ToRgb()
         {
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = b;
             value |= g << 8;
@@ -821,9 +823,9 @@ namespace Engine.Mathematics
         /// <returns>A packed integer containing all three color components.
         public readonly uint ToBgr()
         {
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = r;
             value |= g << 8;
@@ -839,9 +841,9 @@ namespace Engine.Mathematics
         public readonly uint ToRgba()
         {
             uint a = 255;
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = a;
             value |= b << 8;
@@ -858,9 +860,9 @@ namespace Engine.Mathematics
         public readonly uint ToBgra()
         {
             uint a = 255;
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = a;
             value |= r << 8;

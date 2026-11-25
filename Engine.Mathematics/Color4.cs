@@ -61,19 +61,21 @@ namespace Engine.Mathematics
         private const float FloatToInt = 255f;
         private const float IntToFloat = 1f / FloatToInt;
         private const string Color4Str = "Alpha:{0} Red:{1} Green:{2} Blue:{3}";
+        private const string ComponentColorStr = "There must be four and only four input values for Color4.";
+        private const string IndexRangeStr = "Indices for Color4 run from 0 to 3, inclusive.";
 
         /// <summary>
         /// The Transparent color (0, 0, 0, 0).
         /// </summary>
-        public static readonly Color4 Transparent = new(0.0f, 0.0f, 0.0f, 0.0f);
+        public static readonly Color4 Transparent = new(0f, 0f, 0f, 0f);
         /// <summary>
         /// The Black color (0, 0, 0, 1).
         /// </summary>
-        public static readonly Color4 Black = new(0.0f, 0.0f, 0.0f, 1.0f);
+        public static readonly Color4 Black = new(0f, 0f, 0f, 1f);
         /// <summary>
         /// The White color (1, 1, 1, 1).
         /// </summary>
-        public static readonly Color4 White = new(1.0f, 1.0f, 1.0f, 1.0f);
+        public static readonly Color4 White = new(1f, 1f, 1f, 1f);
 
         /// <summary>
         /// The red component of the color.
@@ -111,7 +113,7 @@ namespace Engine.Mathematics
                 1 => Green,
                 2 => Blue,
                 3 => Alpha,
-                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive."),
+                _ => throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr),
             };
 
             set
@@ -122,7 +124,7 @@ namespace Engine.Mathematics
                     case 1: Green = value; break;
                     case 2: Blue = value; break;
                     case 3: Alpha = value; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color4 run from 0 to 3, inclusive.");
+                    default: throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr);
                 }
             }
         }
@@ -269,7 +271,7 @@ namespace Engine.Mathematics
         public Color4(byte[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -285,7 +287,7 @@ namespace Engine.Mathematics
         public Color4(int[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -301,7 +303,7 @@ namespace Engine.Mathematics
         public Color4(uint[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0] * IntToFloat;
             Green = values[1] * IntToFloat;
@@ -317,7 +319,7 @@ namespace Engine.Mathematics
         public Color4(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentColorStr);
 
             Red = values[0];
             Green = values[1];
@@ -432,10 +434,10 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the negated color.</param>
         public static void Negate(ref Color4 value, out Color4 result)
         {
-            result.Alpha = 1.0f - value.Alpha;
-            result.Red = 1.0f - value.Red;
-            result.Green = 1.0f - value.Green;
-            result.Blue = 1.0f - value.Blue;
+            result.Alpha = 1f - value.Alpha;
+            result.Red = 1f - value.Red;
+            result.Green = 1f - value.Green;
+            result.Blue = 1f - value.Blue;
         }
         /// <summary>
         /// Negates a color.
@@ -889,10 +891,10 @@ namespace Engine.Mathematics
         /// <returns>A packed integer containing all four color components.</returns>
         public readonly uint ToBgra()
         {
-            uint a = (uint)(Alpha * 255.0f) & 255;
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint a = (uint)(Alpha * 255f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = a;
             value |= r << 8;
@@ -907,10 +909,10 @@ namespace Engine.Mathematics
         /// <returns>A packed integer containing all four color components.</returns>
         public readonly uint ToRgba()
         {
-            uint a = (uint)(Alpha * 255.0f) & 255;
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
+            uint a = (uint)(Alpha * 255f) & 255;
+            uint r = (uint)(Red * 255f) & 255;
+            uint g = (uint)(Green * 255f) & 255;
+            uint b = (uint)(Blue * 255f) & 255;
 
             uint value = a;
             value |= b << 8;

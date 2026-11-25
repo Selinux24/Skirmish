@@ -33,13 +33,17 @@ namespace Engine.Mathematics
     [JsonObject(MemberSerialization.OptIn)]
     public partial struct Color : IEquatable<Color>, IFormattable
     {
+        private const float FloatToInt = 255f;
+        private const float IntToFloat = 1f / FloatToInt;
         private const string ColorStr = "A:{0} R:{1} G:{2} B:{3}";
+        private const string ComponentsColorStr = "There must be four and only four input values for Color.";
+        private const string IndexRangeStr = "Indices for Color run from 0 to 3, inclusive.";
 
         private static byte FloatToByte(float component)
         {
-            return IntToByte((uint)(component * 255f));
+            return UIntToByte((uint)(component * 255f));
         }
-        private static byte IntToByte(uint value)
+        private static byte UIntToByte(uint value)
         {
             if (value < 0) return 0;
 
@@ -82,7 +86,7 @@ namespace Engine.Mathematics
                 1 => G,
                 2 => B,
                 3 => A,
-                _ => throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color run from 0 to 3, inclusive."),
+                _ => throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr),
             };
             set
             {
@@ -92,7 +96,7 @@ namespace Engine.Mathematics
                     case 1: G = value; break;
                     case 2: B = value; break;
                     case 3: A = value; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), "Indices for Color run from 0 to 3, inclusive.");
+                    default: throw new ArgumentOutOfRangeException(nameof(index), IndexRangeStr);
                 }
             }
         }
@@ -180,10 +184,10 @@ namespace Engine.Mathematics
         /// <param name="alpha">The alpha component of the color</param>
         public Color(uint red, uint green, uint blue, uint alpha)
         {
-            R = IntToByte(red);
-            G = IntToByte(green);
-            B = IntToByte(blue);
-            A = IntToByte(alpha);
+            R = UIntToByte(red);
+            G = UIntToByte(green);
+            B = UIntToByte(blue);
+            A = UIntToByte(alpha);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.
@@ -235,7 +239,7 @@ namespace Engine.Mathematics
         public Color(byte[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentsColorStr);
 
             R = values[0];
             G = values[1];
@@ -251,12 +255,12 @@ namespace Engine.Mathematics
         public Color(int[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentsColorStr);
 
-            R = IntToByte((uint)values[0]);
-            G = IntToByte((uint)values[1]);
-            B = IntToByte((uint)values[2]);
-            A = IntToByte((uint)values[3]);
+            R = UIntToByte((uint)values[0]);
+            G = UIntToByte((uint)values[1]);
+            B = UIntToByte((uint)values[2]);
+            A = UIntToByte((uint)values[3]);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
@@ -267,12 +271,12 @@ namespace Engine.Mathematics
         public Color(uint[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentsColorStr);
 
-            R = IntToByte(values[0]);
-            G = IntToByte(values[1]);
-            B = IntToByte(values[2]);
-            A = IntToByte(values[3]);
+            R = UIntToByte(values[0]);
+            G = UIntToByte(values[1]);
+            B = UIntToByte(values[2]);
+            A = UIntToByte(values[3]);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
@@ -283,7 +287,7 @@ namespace Engine.Mathematics
         public Color(float[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
-            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), ComponentsColorStr);
 
             R = FloatToByte(values[0]);
             G = FloatToByte(values[1]);
@@ -297,13 +301,12 @@ namespace Engine.Mathematics
         /// <returns>The Hue-Saturation-Brightness (HSB) brightness for this <see cref="Color"/></returns>
         public readonly float GetBrightness()
         {
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            float r = R * IntToFloat;
+            float g = G * IntToFloat;
+            float b = B * IntToFloat;
 
-            float max, min;
-
-            max = r; min = r;
+            float max = r;
+            float min = r;
 
             if (g > max) max = g;
             if (b > max) max = b;
@@ -311,7 +314,7 @@ namespace Engine.Mathematics
             if (g < min) min = g;
             if (b < min) min = b;
 
-            return (max + min) / 2;
+            return (max + min) * 0.5f;
         }
         /// <summary>
         /// Gets the hue.
@@ -321,15 +324,12 @@ namespace Engine.Mathematics
         {
             if (R == G && G == B) return 0; // 0 makes as good an UNDEFINED value as any
 
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            float r = R * IntToFloat;
+            float g = G * IntToFloat;
+            float b = B * IntToFloat;
 
-            float max, min;
-            float delta;
-            float hue = 0.0f;
-
-            max = r; min = r;
+            float max = r;
+            float min = r;
 
             if (g > max) max = g;
             if (b > max) max = b;
@@ -337,25 +337,26 @@ namespace Engine.Mathematics
             if (g < min) min = g;
             if (b < min) min = b;
 
-            delta = max - min;
+            float delta = 1f / (max - min);
 
+            float hue = 0f;
             if (MathUtils.NearEqual(r, max))
             {
-                hue = (g - b) / delta;
+                hue = (g - b) * delta;
             }
             else if (MathUtils.NearEqual(g, max))
             {
-                hue = 2 + (b - r) / delta;
+                hue = 2 + (b - r) * delta;
             }
             else if (MathUtils.NearEqual(b, max))
             {
-                hue = 4 + (r - g) / delta;
+                hue = 4 + (r - g) * delta;
             }
-            hue *= 60;
+            hue *= 60f;
 
-            if (hue < 0.0f)
+            if (hue < 0f)
             {
-                hue += 360.0f;
+                hue += 360f;
             }
             return hue;
         }
@@ -365,14 +366,12 @@ namespace Engine.Mathematics
         /// <returns>The Hue-Saturation-Brightness (HSB) saturation for this <see cref="Color"/></returns>
         public readonly float GetSaturation()
         {
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            float r = R * IntToFloat;
+            float g = G * IntToFloat;
+            float b = B * IntToFloat;
 
-            float max, min;
-            float l, s = 0;
-
-            max = r; min = r;
+            float max = r;
+            float min = r;
 
             if (g > max) max = g;
             if (b > max) max = b;
@@ -381,9 +380,10 @@ namespace Engine.Mathematics
             if (b < min) min = b;
 
             // if max == min, then there is no color and the saturation is zero.
+            float s = 0;
             if (!MathUtils.NearEqual(max, min))
             {
-                l = (max + min) / 2;
+                float l = (max + min) / 2;
 
                 if (l <= .5)
                 {
@@ -455,10 +455,10 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the modulated color.</param>
         public static void Modulate(ref Color left, ref Color right, out Color result)
         {
-            result.A = (byte)(left.A * right.A / 255f);
-            result.R = (byte)(left.R * right.R / 255f);
-            result.G = (byte)(left.G * right.G / 255f);
-            result.B = (byte)(left.B * right.B / 255f);
+            result.A = (byte)(left.A * right.A * IntToFloat);
+            result.R = (byte)(left.R * right.R * IntToFloat);
+            result.G = (byte)(left.G * right.G * IntToFloat);
+            result.B = (byte)(left.B * right.B * IntToFloat);
         }
         /// <summary>
         /// Modulates two colors.
@@ -737,9 +737,9 @@ namespace Engine.Mathematics
         public static void AdjustContrast(ref Color value, float contrast, out Color result)
         {
             result.A = value.A;
-            result.R = FloatToByte(0.5f + contrast * (value.R / 255.0f - 0.5f));
-            result.G = FloatToByte(0.5f + contrast * (value.G / 255.0f - 0.5f));
-            result.B = FloatToByte(0.5f + contrast * (value.B / 255.0f - 0.5f));
+            result.R = FloatToByte(0.5f + contrast * (value.R * IntToFloat - 0.5f));
+            result.G = FloatToByte(0.5f + contrast * (value.G * IntToFloat - 0.5f));
+            result.B = FloatToByte(0.5f + contrast * (value.B * IntToFloat - 0.5f));
         }
         /// <summary>
         /// Adjusts the contrast of a color.
@@ -761,12 +761,15 @@ namespace Engine.Mathematics
         /// <param name="result">When the method completes, contains the adjusted color.</param>
         public static void AdjustSaturation(ref Color value, float saturation, out Color result)
         {
-            float grey = value.R / 255.0f * 0.2125f + value.G / 255.0f * 0.7154f + value.B / 255.0f * 0.0721f;
+            float grey =
+                value.R * IntToFloat * 0.2125f +
+                value.G * IntToFloat * 0.7154f +
+                value.B * IntToFloat * 0.0721f;
 
             result.A = value.A;
-            result.R = FloatToByte(grey + saturation * (value.R / 255.0f - grey));
-            result.G = FloatToByte(grey + saturation * (value.G / 255.0f - grey));
-            result.B = FloatToByte(grey + saturation * (value.B / 255.0f - grey));
+            result.R = FloatToByte(grey + saturation * (value.R * IntToFloat - grey));
+            result.G = FloatToByte(grey + saturation * (value.G * IntToFloat - grey));
+            result.B = FloatToByte(grey + saturation * (value.B * IntToFloat - grey));
         }
         /// <summary>
         /// Adjusts the saturation of a color.
@@ -876,7 +879,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Color(Vector3 value)
         {
-            return new(value.X, value.Y, value.Z, 1.0f);
+            return new(value.X, value.Y, value.Z, 1f);
         }
         /// <inheritdoc/>
         public static implicit operator Color3(Color value)
@@ -886,7 +889,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public static explicit operator Color(Color3 value)
         {
-            return new(value.Red, value.Green, value.Blue, 1.0f);
+            return new(value.Red, value.Green, value.Blue, 1f);
         }
 
         /// <inheritdoc/>
@@ -988,12 +991,12 @@ namespace Engine.Mathematics
         /// Converts the color into a packed integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public readonly int ToBgra()
+        public readonly uint ToBgra()
         {
-            int value = B;
-            value |= G << 8;
-            value |= R << 16;
-            value |= A << 24;
+            uint value = A;
+            value |= (uint)R << 8;
+            value |= (uint)G << 16;
+            value |= (uint)B << 24;
 
             return value;
         }
@@ -1001,12 +1004,12 @@ namespace Engine.Mathematics
         /// Converts the color into a packed integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public readonly int ToRgba()
+        public readonly uint ToRgba()
         {
-            int value = R;
-            value |= G << 8;
-            value |= B << 16;
-            value |= A << 24;
+            uint value = A;
+            value |= (uint)B << 8;
+            value |= (uint)G << 16;
+            value |= (uint)R << 24;
 
             return value;
         }
@@ -1014,12 +1017,12 @@ namespace Engine.Mathematics
         /// Converts the color into a packed integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public readonly int ToAbgr()
+        public readonly uint ToAbgr()
         {
-            int value = A;
-            value |= B << 8;
-            value |= G << 16;
-            value |= R << 24;
+            uint value = R;
+            value |= (uint)G << 8;
+            value |= (uint)B << 16;
+            value |= (uint)A << 24;
 
             return value;
         }
@@ -1030,9 +1033,9 @@ namespace Engine.Mathematics
         public readonly Vector3 ToVector3()
         {
             return new(
-                R / 255.0f,
-                G / 255.0f,
-                B / 255.0f);
+                R * IntToFloat,
+                G * IntToFloat,
+                B * IntToFloat);
         }
         /// <summary>
         /// Converts the color into a three component color.
@@ -1041,9 +1044,9 @@ namespace Engine.Mathematics
         public readonly Color3 ToColor3()
         {
             return new(
-                R / 255.0f,
-                G / 255.0f,
-                B / 255.0f);
+                R * IntToFloat,
+                G * IntToFloat,
+                B * IntToFloat);
         }
         /// <summary>
         /// Converts the color into a four component vector.
@@ -1052,10 +1055,10 @@ namespace Engine.Mathematics
         public readonly Vector4 ToVector4()
         {
             return new(
-                R / 255.0f,
-                G / 255.0f,
-                B / 255.0f,
-                A / 255.0f);
+                R * IntToFloat,
+                G * IntToFloat,
+                B * IntToFloat,
+                A * IntToFloat);
         }
         /// <summary>
         /// Convert this instance to a <see cref="Color4"/>
@@ -1063,7 +1066,11 @@ namespace Engine.Mathematics
         /// <returns>The result of the conversion.</returns>
         public readonly Color4 ToColor4()
         {
-            return new(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f);
+            return new(
+                R * IntToFloat,
+                G * IntToFloat,
+                B * IntToFloat,
+                A * IntToFloat);
         }
         /// <summary>
         /// Creates an array containing the elements of the color.
