@@ -58,6 +58,8 @@ namespace Engine.Mathematics
     [JsonObject(MemberSerialization.OptIn)]
     public struct Color3 : IEquatable<Color3>, IFormattable
     {
+        private const float FloatToInt = 255f;
+        private const float IntToFloat = 1f / FloatToInt;
         private const string Color3Str = "Red:{0} Green:{1} Blue:{2}";
 
         /// <summary>
@@ -119,17 +121,6 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="rgb">A packed integer containing all three color components in RGB order.
         /// The alpha component is ignored.</param>
-        public Color3(byte rgb)
-        {
-            Blue = ((rgb >> 16) & 255) / 255f;
-            Green = ((rgb >> 8) & 255) / 255f;
-            Red = (rgb & 255) / 255f;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color3"/> struct.
-        /// </summary>
-        /// <param name="rgb">A packed integer containing all three color components in RGB order.
-        /// The alpha component is ignored.</param>
         public Color3(int rgb)
             : this((uint)rgb) { }
         /// <summary>
@@ -139,9 +130,9 @@ namespace Engine.Mathematics
         /// The alpha component is ignored.</param>
         public Color3(uint rgb)
         {
-            Blue = ((rgb >> 16) & 255) / 255f;
-            Green = ((rgb >> 8) & 255) / 255f;
-            Red = (rgb & 255) / 255f;
+            Red = ((rgb >> 16) & 255) * IntToFloat;
+            Green = ((rgb >> 8) & 255) * IntToFloat;
+            Blue = (rgb & 255) * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -159,9 +150,9 @@ namespace Engine.Mathematics
         /// <param name="blue">The blue component of the color.</param>
         public Color3(byte red, byte green, byte blue)
         {
-            Red = red / 255f;
-            Green = green / 255f;
-            Blue = blue / 255f;
+            Red = red * IntToFloat;
+            Green = green * IntToFloat;
+            Blue = blue * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -170,10 +161,18 @@ namespace Engine.Mathematics
         /// <param name="green">The green component of the color.</param>
         /// <param name="blue">The blue component of the color.</param>
         public Color3(int red, int green, int blue)
+            : this((uint)red, (uint)green, (uint)blue) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
+        /// <param name="red">The red component of the color.</param>
+        /// <param name="green">The green component of the color.</param>
+        /// <param name="blue">The blue component of the color.</param>
+        public Color3(uint red, uint green, uint blue)
         {
-            Red = red / 255f;
-            Green = green / 255f;
-            Blue = blue / 255f;
+            Red = red * IntToFloat;
+            Green = green * IntToFloat;
+            Blue = blue * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -208,9 +207,9 @@ namespace Engine.Mathematics
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
 
-            Red = values[0] / 255f;
-            Green = values[1] / 255f;
-            Blue = values[2] / 255f;
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -223,9 +222,24 @@ namespace Engine.Mathematics
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
 
-            Red = values[0] / 255f;
-            Green = values[1] / 255f;
-            Blue = values[2] / 255f;
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color3"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the red, green, and blue components of the color. This must be an array with three elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color3(uint[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 3) throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Color3.");
+
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color3"/> struct.
@@ -577,6 +591,34 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Converts an integer value to Vector4
+        /// </summary>
+        /// <param name="value">Integer value</param>
+        /// <param name="alpha">Alpha value from 0 to 255</param>
+        /// <returns>Returns the Vector4 value</returns>
+        public static Color3 IntToCol(int value)
+        {
+            int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;
+            int g = Bit(value, 1) + Bit(value, 4) * 2 + 1;
+            int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
+
+            return new(
+                1f - r * 63 * IntToFloat,
+                1f - g * 63 * IntToFloat,
+                1f - b * 63 * IntToFloat);
+        }
+        /// <summary>
+        /// Bitwise secret wisdoms
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        private static int Bit(int a, int b)
+        {
+            return (a & (1 << b)) >> b;
+        }
+
+        /// <summary>
         /// Adds two colors.
         /// </summary>
         /// <param name="left">The first color to add.</param>
@@ -761,29 +803,8 @@ namespace Engine.Mathematics
         /// Converts the color into a packed integer.
         /// </summary>
         /// <returns>A packed integer containing all three color components.
-        /// The alpha channel is set to 255.</returns>
-        public readonly int ToRgba()
+        public readonly uint ToRgb()
         {
-            uint a = 255;
-            uint r = (uint)(Red * 255.0f) & 255;
-            uint g = (uint)(Green * 255.0f) & 255;
-            uint b = (uint)(Blue * 255.0f) & 255;
-
-            uint value = r;
-            value |= g << 8;
-            value |= b << 16;
-            value |= a << 24;
-
-            return (int)value;
-        }
-        /// <summary>
-        /// Converts the color into a packed integer.
-        /// </summary>
-        /// <returns>A packed integer containing all three color components.
-        /// The alpha channel is set to 255.</returns>
-        public readonly int ToBgra()
-        {
-            uint a = 255;
             uint r = (uint)(Red * 255.0f) & 255;
             uint g = (uint)(Green * 255.0f) & 255;
             uint b = (uint)(Blue * 255.0f) & 255;
@@ -791,9 +812,62 @@ namespace Engine.Mathematics
             uint value = b;
             value |= g << 8;
             value |= r << 16;
-            value |= a << 24;
 
-            return (int)value;
+            return value;
+        }
+        /// <summary>
+        /// Converts the color into a packed integer.
+        /// </summary>
+        /// <returns>A packed integer containing all three color components.
+        public readonly uint ToBgr()
+        {
+            uint r = (uint)(Red * 255.0f) & 255;
+            uint g = (uint)(Green * 255.0f) & 255;
+            uint b = (uint)(Blue * 255.0f) & 255;
+
+            uint value = r;
+            value |= g << 8;
+            value |= b << 16;
+
+            return value;
+        }
+        /// <summary>
+        /// Converts the color into a packed integer.
+        /// </summary>
+        /// <returns>A packed integer containing all three color components.
+        /// The alpha channel is set to 255.</returns>
+        public readonly uint ToRgba()
+        {
+            uint a = 255;
+            uint r = (uint)(Red * 255.0f) & 255;
+            uint g = (uint)(Green * 255.0f) & 255;
+            uint b = (uint)(Blue * 255.0f) & 255;
+
+            uint value = a;
+            value |= b << 8;
+            value |= g << 16;
+            value |= r << 24;
+
+            return value;
+        }
+        /// <summary>
+        /// Converts the color into a packed integer.
+        /// </summary>
+        /// <returns>A packed integer containing all three color components.
+        /// The alpha channel is set to 255.</returns>
+        public readonly uint ToBgra()
+        {
+            uint a = 255;
+            uint r = (uint)(Red * 255.0f) & 255;
+            uint g = (uint)(Green * 255.0f) & 255;
+            uint b = (uint)(Blue * 255.0f) & 255;
+
+            uint value = a;
+            value |= r << 8;
+            value |= g << 16;
+            value |= b << 24;
+
+            return value;
         }
         /// <summary>
         /// Converts the color into a four component color.

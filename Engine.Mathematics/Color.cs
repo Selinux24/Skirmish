@@ -37,11 +37,11 @@ namespace Engine.Mathematics
 
         private static byte FloatToByte(float component)
         {
-            return IntToByte((int)(component * 255.0f));
+            return IntToByte((uint)(component * 255f));
         }
-        private static byte IntToByte(int value)
+        private static byte IntToByte(uint value)
         {
-            if(value < 0) return 0;
+            if (value < 0) return 0;
 
             return (byte)Math.Min(value, 255);
         }
@@ -109,18 +109,12 @@ namespace Engine.Mathematics
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
         /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color(int rgba)
-            : this((uint)rgba) { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.
-        /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
         public Color(uint rgba)
         {
-            A = (byte)((rgba >> 24) & 255);
-            B = (byte)((rgba >> 16) & 255);
-            G = (byte)((rgba >> 8) & 255);
-            R = (byte)(rgba & 255);
+            R = (byte)((rgba >> 24) & 255);
+            G = (byte)((rgba >> 16) & 255);
+            B = (byte)((rgba >> 8) & 255);
+            A = (byte)(rgba & 255);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
@@ -130,6 +124,14 @@ namespace Engine.Mathematics
         {
             A = R = G = B = FloatToByte(value);
         }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.
+        /// </summary>
+        /// <param name="red">The red component of the color.</param>
+        /// <param name="green">The green component of the color.</param>
+        /// <param name="blue">The blue component of the color.</param>
+        public Color(byte red, byte green, byte blue)
+            : this(red, green, blue, (byte)255) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
@@ -145,13 +147,13 @@ namespace Engine.Mathematics
             A = alpha;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.
+        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.  Passed values are clamped within byte range.
         /// </summary>
         /// <param name="red">The red component of the color.</param>
         /// <param name="green">The green component of the color.</param>
         /// <param name="blue">The blue component of the color.</param>
-        public Color(byte red, byte green, byte blue)
-            : this(red, green, blue, (byte)255) { }
+        public Color(int red, int green, int blue)
+            : this((uint)red, (uint)green, (uint)blue, 255u) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.  Passed values are clamped within byte range.
         /// </summary>
@@ -160,6 +162,23 @@ namespace Engine.Mathematics
         /// <param name="blue">The blue component of the color.</param>
         /// <param name="alpha">The alpha component of the color</param>
         public Color(int red, int green, int blue, int alpha)
+            : this((uint)red, (uint)green, (uint)blue, (uint)alpha) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.  Passed values are clamped within byte range.
+        /// </summary>
+        /// <param name="red">The red component of the color.</param>
+        /// <param name="green">The green component of the color.</param>
+        /// <param name="blue">The blue component of the color.</param>
+        public Color(uint red, uint green, uint blue)
+            : this(red, green, blue, 255u) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.  Passed values are clamped within byte range.
+        /// </summary>
+        /// <param name="red">The red component of the color.</param>
+        /// <param name="green">The green component of the color.</param>
+        /// <param name="blue">The blue component of the color.</param>
+        /// <param name="alpha">The alpha component of the color</param>
+        public Color(uint red, uint green, uint blue, uint alpha)
         {
             R = IntToByte(red);
             G = IntToByte(green);
@@ -167,13 +186,13 @@ namespace Engine.Mathematics
             A = IntToByte(alpha);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.  Passed values are clamped within byte range.
+        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.
         /// </summary>
         /// <param name="red">The red component of the color.</param>
         /// <param name="green">The green component of the color.</param>
         /// <param name="blue">The blue component of the color.</param>
-        public Color(int red, int green, int blue)
-            : this(red, green, blue, 255) { }
+        public Color(float red, float green, float blue)
+            : this(red, green, blue, 1f) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
@@ -189,42 +208,24 @@ namespace Engine.Mathematics
             A = FloatToByte(alpha);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Color"/> struct.  Alpha is set to 255.
-        /// </summary>
-        /// <param name="red">The red component of the color.</param>
-        /// <param name="green">The green component of the color.</param>
-        /// <param name="blue">The blue component of the color.</param>
-        public Color(float red, float green, float blue)
-            : this(red, green, blue, 1.0f) { }
-        /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
         /// <param name="value">The red, green, blue, and alpha components of the color.</param>
         public Color(Vector4 value)
-        {
-            R = FloatToByte(value.X);
-            G = FloatToByte(value.Y);
-            B = FloatToByte(value.Z);
-            A = FloatToByte(value.W);
-        }
+            : this(value.X, value.Y, value.Z, value.W) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
         /// <param name="alpha">The alpha component of the color.</param>
         public Color(Vector3 value, float alpha)
-        {
-            R = FloatToByte(value.X);
-            G = FloatToByte(value.Y);
-            B = FloatToByte(value.Z);
-            A = FloatToByte(alpha);
-        }
+            : this(value.X, value.Y, value.Z, alpha) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct. Alpha is set to 255.
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
         public Color(Vector3 value)
-            : this(value, 1.0f) { }
+            : this(value.X, value.Y, value.Z, 1f) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color"/> struct.
         /// </summary>
@@ -248,6 +249,22 @@ namespace Engine.Mathematics
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
         public Color(int[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
+
+            R = IntToByte((uint)values[0]);
+            G = IntToByte((uint)values[1]);
+            B = IntToByte((uint)values[2]);
+            A = IntToByte((uint)values[3]);
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the alpha, red, green, and blue components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color(uint[] values)
         {
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color.");
@@ -572,36 +589,13 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="color">A packed integer containing all four color components in BGRA order</param>
         /// <returns>A color.</returns>
-        public static Color FromBgra(int color)
-        {
-            return new(
-                (byte)((color >> 16) & 255),
-                (byte)((color >> 8) & 255),
-                (byte)(color & 255),
-                (byte)((color >> 24) & 255));
-        }
-        /// <summary>
-        /// Converts the color from a packed BGRA integer.
-        /// </summary>
-        /// <param name="color">A packed integer containing all four color components in BGRA order</param>
-        /// <returns>A color.</returns>
         public static Color FromBgra(uint color)
         {
-            return FromBgra(unchecked((int)color));
-        }
-
-        /// <summary>
-        /// Converts the color from a packed ABGR integer.
-        /// </summary>
-        /// <param name="color">A packed integer containing all four color components in ABGR order</param>
-        /// <returns>A color.</returns>
-        public static Color FromAbgr(int color)
-        {
             return new(
-                (byte)(color >> 24),
-                (byte)(color >> 16),
-                (byte)(color >> 8),
-                (byte)color);
+                (byte)((color >> 8) & 255), //B
+                (byte)((color >> 16) & 255), //G
+                (byte)((color >> 24) & 255), //R
+                (byte)(color & 255)); //A
         }
         /// <summary>
         /// Converts the color from a packed ABGR integer.
@@ -610,17 +604,11 @@ namespace Engine.Mathematics
         /// <returns>A color.</returns>
         public static Color FromAbgr(uint color)
         {
-            return FromAbgr(unchecked((int)color));
-        }
-
-        /// <summary>
-        /// Converts the color from a packed BGRA integer.
-        /// </summary>
-        /// <param name="color">A packed integer containing all four color components in RGBA order</param>
-        /// <returns>A color.</returns>
-        public static Color FromRgba(int color)
-        {
-            return new(color);
+            return new(
+                (byte)(color & 255), //A
+                (byte)((color >> 8) & 255), //B
+                (byte)((color >> 16) & 255), //G
+                (byte)((color >> 24) & 255)); //R
         }
         /// <summary>
         /// Converts the color from a packed BGRA integer.

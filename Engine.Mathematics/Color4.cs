@@ -58,6 +58,8 @@ namespace Engine.Mathematics
     [JsonObject(MemberSerialization.OptIn)]
     public struct Color4 : IEquatable<Color4>, IFormattable
     {
+        private const float FloatToInt = 255f;
+        private const float IntToFloat = 1f / FloatToInt;
         private const string Color4Str = "Alpha:{0} Red:{1} Green:{2} Blue:{3}";
 
         /// <summary>
@@ -129,17 +131,6 @@ namespace Engine.Mathematics
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
-        public Color4(byte rgba)
-        {
-            Alpha = ((rgba >> 24) & 255) / 255f;
-            Blue = ((rgba >> 16) & 255) / 255f;
-            Green = ((rgba >> 8) & 255) / 255f;
-            Red = (rgba & 255) / 255f;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Color4"/> struct.
-        /// </summary>
-        /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
         public Color4(int rgba)
             : this((uint)rgba) { }
         /// <summary>
@@ -148,10 +139,10 @@ namespace Engine.Mathematics
         /// <param name="rgba">A packed integer containing all four color components in RGBA order.</param>
         public Color4(uint rgba)
         {
-            Alpha = ((rgba >> 24) & 255) / 255f;
-            Blue = ((rgba >> 16) & 255) / 255f;
-            Green = ((rgba >> 8) & 255) / 255f;
-            Red = (rgba & 255) / 255f;
+            Red = ((rgba >> 24) & 255) * IntToFloat;
+            Green = ((rgba >> 16) & 255) * IntToFloat;
+            Blue = ((rgba >> 8) & 255) * IntToFloat;
+            Alpha = (rgba & 255) * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -170,10 +161,10 @@ namespace Engine.Mathematics
         /// <param name="alpha">The alpha component of the color.</param>
         public Color4(byte red, byte green, byte blue, byte alpha)
         {
-            Red = red / 255f;
-            Green = green / 255f;
-            Blue = blue / 255f;
-            Alpha = alpha / 255f;
+            Red = red * IntToFloat;
+            Green = green * IntToFloat;
+            Blue = blue * IntToFloat;
+            Alpha = alpha * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -183,11 +174,20 @@ namespace Engine.Mathematics
         /// <param name="blue">The blue component of the color.</param>
         /// <param name="alpha">The alpha component of the color.</param>
         public Color4(int red, int green, int blue, int alpha)
+            : this((uint)red, (uint)green, (uint)blue, (uint)alpha) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="red">The red component of the color.</param>
+        /// <param name="green">The green component of the color.</param>
+        /// <param name="blue">The blue component of the color.</param>
+        /// <param name="alpha">The alpha component of the color.</param>
+        public Color4(uint red, uint green, uint blue, uint alpha)
         {
-            Red = red / 255f;
-            Green = green / 255f;
-            Blue = blue / 255f;
-            Alpha = alpha / 255f;
+            Red = red * IntToFloat;
+            Green = green * IntToFloat;
+            Blue = blue * IntToFloat;
+            Alpha = alpha * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -271,10 +271,10 @@ namespace Engine.Mathematics
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
 
-            Red = values[0] / 255f;
-            Green = values[1] / 255f;
-            Blue = values[2] / 255f;
-            Alpha = values[3] / 255f;
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
+            Alpha = values[3] * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -287,10 +287,26 @@ namespace Engine.Mathematics
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
 
-            Red = values[0] / 255f;
-            Green = values[1] / 255f;
-            Blue = values[2] / 255f;
-            Alpha = values[3] / 255f;
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
+            Alpha = values[3] * IntToFloat;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
+        /// </summary>
+        /// <param name="values">The values to assign to the red, green, blue, and alpha components of the color. This must be an array with four elements.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
+        public Color4(uint[] values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+            if (values.Length != 4) throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for Color4.");
+
+            Red = values[0] * IntToFloat;
+            Green = values[1] * IntToFloat;
+            Blue = values[2] * IntToFloat;
+            Alpha = values[3] * IntToFloat;
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Color4"/> struct.
@@ -668,10 +684,10 @@ namespace Engine.Mathematics
             int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
 
             return new(
-                1 - r * 63f / 255f,
-                1 - g * 63f / 255f,
-                1 - b * 63f / 255f,
-                alpha / 255f);
+                1f - r * 63 * IntToFloat,
+                1f - g * 63 * IntToFloat,
+                1f - b * 63 * IntToFloat,
+                alpha * IntToFloat);
         }
         /// <summary>
         /// Bitwise secret wisdoms
@@ -878,10 +894,10 @@ namespace Engine.Mathematics
             uint g = (uint)(Green * 255.0f) & 255;
             uint b = (uint)(Blue * 255.0f) & 255;
 
-            uint value = b;
-            value |= g << 8;
-            value |= r << 16;
-            value |= a << 24;
+            uint value = a;
+            value |= r << 8;
+            value |= g << 16;
+            value |= b << 24;
 
             return value;
         }
@@ -896,10 +912,10 @@ namespace Engine.Mathematics
             uint g = (uint)(Green * 255.0f) & 255;
             uint b = (uint)(Blue * 255.0f) & 255;
 
-            uint value = r;
-            value |= g << 8;
-            value |= b << 16;
-            value |= a << 24;
+            uint value = a;
+            value |= b << 8;
+            value |= g << 16;
+            value |= r << 24;
 
             return value;
         }
