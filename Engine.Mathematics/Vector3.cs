@@ -1771,6 +1771,84 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
+        /// Calculate the normal of the three points
+        /// </summary>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        /// <param name="normal">Gets the Normal</param>
+        /// <remarks>Uses the left handed coordinate system</remarks>
+        public static void CalculateNormalLH(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3, out Vector3 normal)
+        {
+            float x1 = point2.X - point1.X;
+            float y1 = point2.Y - point1.Y;
+            float z1 = point2.Z - point1.Z;
+            float x2 = point3.X - point1.X;
+            float y2 = point3.Y - point1.Y;
+            float z2 = point3.Z - point1.Z;
+            float yz = (y1 * z2) - (z1 * y2);
+            float xz = (z1 * x2) - (x1 * z2);
+            float xy = (x1 * y2) - (y1 * x2);
+            float invPyth = 1f / MathF.Sqrt((yz * yz) + (xz * xz) + (xy * xy));
+
+            normal.X = yz * invPyth;
+            normal.Y = xz * invPyth;
+            normal.Z = xy * invPyth;
+        }
+        /// <summary>
+        /// Calculate the normal of the three points
+        /// </summary>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        /// <returns>Returns the normal</returns>
+        /// <remarks>Uses the left handed coordinate system</remarks>
+        public static Vector3 CalculateNormalLH(Vector3 point1, Vector3 point2, Vector3 point3)
+        {
+            CalculateNormalLH(ref point1, ref point2, ref point3, out var normal);
+            return normal;
+        }
+
+        /// <summary>
+        /// Calculate the normal of the three points
+        /// </summary>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        /// <param name="normal">Gets the Normal</param>
+        /// <remarks>Uses the right handed coordinate system</remarks>
+        public static void CalculateNormalRH(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3, out Vector3 normal)
+        {
+            float x1 = point3.X - point1.X;
+            float y1 = point3.Y - point1.Y;
+            float z1 = point3.Z - point1.Z;
+            float x2 = point2.X - point1.X;
+            float y2 = point2.Y - point1.Y;
+            float z2 = point2.Z - point1.Z;
+            float yz = (y1 * z2) - (z1 * y2);
+            float xz = (z1 * x2) - (x1 * z2);
+            float xy = (x1 * y2) - (y1 * x2);
+            float invPyth = 1f / MathF.Sqrt((yz * yz) + (xz * xz) + (xy * xy));
+
+            normal.X = yz * invPyth;
+            normal.Y = xz * invPyth;
+            normal.Z = xy * invPyth;
+        }
+        /// <summary>
+        /// Calculate the normal of the three points
+        /// </summary>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
+        /// <returns>Returns the normal</returns>
+        /// <remarks>Uses the right handed coordinate system</remarks>
+        public static Vector3 CalculateNormalRH(Vector3 point1, Vector3 point2, Vector3 point3)
+        {
+            CalculateNormalRH(ref point1, ref point2, ref point3, out var normal);
+            return normal;
+        }
+
+        /// <summary>
         /// Adds two vectors.
         /// </summary>
         /// <param name="left">The first vector to add.</param>

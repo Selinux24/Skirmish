@@ -2317,21 +2317,21 @@ namespace Engine.Mathematics
             if (!AxisTestZ12(ref boxExtents, ref origTri, edge3.Y, edge3.X, fey, fex)) return false;
 
             // Test X direction
-            MathUtils.MinMax(origTri.Point1.X, origTri.Point2.X, origTri.Point3.X, out float min, out float max);
+            MathUtils.MinMax(ref origTri.Point1.X, ref origTri.Point2.X, ref origTri.Point3.X, out float min, out float max);
             if (min > boxExtents.X || max < -boxExtents.X)
             {
                 return false;
             }
 
             // Test Y direction
-            MathUtils.MinMax(origTri.Point1.Y, origTri.Point2.Y, origTri.Point3.Y, out min, out max);
+            MathUtils.MinMax(ref origTri.Point1.Y, ref origTri.Point2.Y, ref origTri.Point3.Y, out min, out max);
             if (min > boxExtents.Y || max < -boxExtents.Y)
             {
                 return false;
             }
 
             // Test Z direction
-            MathUtils.MinMax(origTri.Point1.Z, origTri.Point2.Z, origTri.Point3.Z, out min, out max);
+            MathUtils.MinMax(ref origTri.Point1.Z, ref origTri.Point2.Z, ref origTri.Point3.Z, out min, out max);
             if (min > boxExtents.Z || max < -boxExtents.Z)
             {
                 return false;
@@ -3457,7 +3457,7 @@ namespace Engine.Mathematics
         /// <returns>Returns true if the specified direction vector is oriented against the triangle's normal.</returns>
         private static bool VectorFacingTriangle(ref Vector3 v, ref Vector3 t1, ref Vector3 t2, ref Vector3 t3)
         {
-            MathUtils.CalculateTriPointNormalLH(ref t1, ref t2, ref t3, out var normal);
+            Vector3.CalculateNormalLH(ref t1, ref t2, ref t3, out var normal);
             Vector3.Dot(ref v, ref normal, out float l);
             return l < 0f;
         }
@@ -3471,7 +3471,7 @@ namespace Engine.Mathematics
         {
             float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
             float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
-            MathUtils.MinMax(p0, p1, out float min, out float max);
+            MathUtils.MinMax(ref p0, ref p1, out float min, out float max);
 
             float rad = fa * extents.Y + fb * extents.Z;
             if (min > rad || max < -rad)
@@ -3485,7 +3485,7 @@ namespace Engine.Mathematics
         {
             float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
             float p2 = a * tri.Point3.Y - b * tri.Point3.Z;
-            MathUtils.MinMax(p0, p2, out float min, out float max);
+            MathUtils.MinMax(ref p0, ref p2, out float min, out float max);
 
             float rad = fa * extents.Y + fb * extents.Z;
             if (min > rad || max < -rad)
@@ -3499,7 +3499,7 @@ namespace Engine.Mathematics
         {
             float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
             float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
-            MathUtils.MinMax(p0, p1, out float min, out float max);
+            MathUtils.MinMax(ref p0, ref p1, out float min, out float max);
 
             float rad = fa * extents.X + fb * extents.Z;
             if (min > rad || max < -rad)
@@ -3513,7 +3513,7 @@ namespace Engine.Mathematics
         {
             float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
             float p2 = -a * tri.Point3.X + b * tri.Point3.Z;
-            MathUtils.MinMax(p0, p2, out float min, out float max);
+            MathUtils.MinMax(ref p0, ref p2, out float min, out float max);
 
             float rad = fa * extents.X + fb * extents.Z;
             if (min > rad || max < -rad)
@@ -3527,7 +3527,7 @@ namespace Engine.Mathematics
         {
             float p0 = a * tri.Point1.X - b * tri.Point1.Y;
             float p1 = a * tri.Point2.X - b * tri.Point2.Y;
-            MathUtils.MinMax(p0, p1, out float min, out float max);
+            MathUtils.MinMax(ref p0, ref p1, out float min, out float max);
 
             float rad = fa * extents.X + fb * extents.Y;
             if (min > rad || max < -rad)
@@ -3541,7 +3541,7 @@ namespace Engine.Mathematics
         {
             float p1 = a * tri.Point2.X - b * tri.Point2.Y;
             float p2 = a * tri.Point3.X - b * tri.Point3.Y;
-            MathUtils.MinMax(p1, p2, out float min, out float max);
+            MathUtils.MinMax(ref p1, ref p2, out float min, out float max);
 
             float rad = fa * extents.X + fb * extents.Y;
             if (min > rad || max < -rad)

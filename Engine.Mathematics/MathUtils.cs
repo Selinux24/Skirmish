@@ -11,18 +11,6 @@ namespace Engine.Mathematics
         /// Zero tolerance value
         /// </summary>
         public const float ZeroTolerance = 1e-6f;
-        /// <summary>
-        /// Zero tolerance vector
-        /// </summary>
-        public static readonly Vector2 ZeroToleranceVector2 = new(ZeroTolerance);
-        /// <summary>
-        /// Zero tolerance vector
-        /// </summary>
-        public static readonly Vector3 ZeroToleranceVector3 = new(ZeroTolerance);
-        /// <summary>
-        /// Zero tolerance vector
-        /// </summary>
-        public static readonly Vector4 ZeroToleranceVector4 = new(ZeroTolerance);
 
         /// <summary>
         /// Pi number
@@ -169,7 +157,7 @@ namespace Engine.Mathematics
         /// <param name="value2">Value 2</param>
         /// <param name="min">Returns the minimum value</param>
         /// <param name="max">Returns the maximum value</param>
-        public static void MinMax(float value1, float value2, out float min, out float max)
+        public static void MinMax(ref float value1, ref float value2, out float min, out float max)
         {
             if (value1 < value2)
             {
@@ -187,10 +175,21 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="value1">Value 1</param>
         /// <param name="value2">Value 2</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, out float min, out float max)
+        {
+            MinMax(ref value1, ref value2, out min, out max);
+        }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
         /// <param name="value3">Value 3</param>
         /// <param name="min">Returns the minimum value</param>
         /// <param name="max">Returns the maximum value</param>
-        public static void MinMax(float value1, float value2, float value3, out float min, out float max)
+        public static void MinMax(ref float value1, ref float value2, ref float value3, out float min, out float max)
         {
             min = value1;
             if (value2 < min) min = value2;
@@ -200,42 +199,17 @@ namespace Engine.Mathematics
             if (value2 > max) max = value2;
             if (value3 > max) max = value3;
         }
-
         /// <summary>
-        /// Calculate the normal of the three points
+        /// Gets the minimum and maximum values
         /// </summary>
-        /// <param name="point1">Point 1</param>
-        /// <param name="point2">Point 2</param>
-        /// <param name="point3">Point 3</param>
-        /// <param name="normal">Gets the Normal</param>
-        public static void CalculateTriPointNormalLH(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3, out Vector3 normal)
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="value3">Value 3</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, float value3, out float min, out float max)
         {
-            float x1 = point2.X - point1.X;
-            float y1 = point2.Y - point1.Y;
-            float z1 = point2.Z - point1.Z;
-            float x2 = point3.X - point1.X;
-            float y2 = point3.Y - point1.Y;
-            float z2 = point3.Z - point1.Z;
-            float yz = (y1 * z2) - (z1 * y2);
-            float xz = (z1 * x2) - (x1 * z2);
-            float xy = (x1 * y2) - (y1 * x2);
-            float invPyth = 1f / MathF.Sqrt((yz * yz) + (xz * xz) + (xy * xy));
-
-            normal.X = yz * invPyth;
-            normal.Y = xz * invPyth;
-            normal.Z = xy * invPyth;
-        }
-        /// <summary>
-        /// Calculate the normal of the three points
-        /// </summary>
-        /// <param name="point1">Point 1</param>
-        /// <param name="point2">Point 2</param>
-        /// <param name="point3">Point 3</param>
-        /// <returns>Returns the normal</returns>
-        public static Vector3 CalculateTriPointNormalLH(Vector3 point1, Vector3 point2, Vector3 point3)
-        {
-            CalculateTriPointNormalLH(ref point1, ref point2, ref point3, out var normal);
-            return normal;
+            MinMax(ref value1, ref value2, ref value3, out min, out max);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Engine.Mathematics
         /// <param name="geometryType">Geometry type</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns the geometry of the instance</returns>
-        T[] GetGeometry(GeometryTypes geometryType, bool refresh = false);
+        T[] GetGeometry(PickingMode geometryType, bool refresh = false);
         /// <summary>
         /// Gets primitive list
         /// </summary>
@@ -75,24 +75,5 @@ namespace Engine.Mathematics
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns></returns>
         Vector3[] GetPoints(bool refresh = false);
-    }
-
-    /// <summary>
-    /// Geometry types
-    /// </summary>
-    public enum GeometryTypes
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Picking
-        /// </summary>
-        Picking = 1,
-        /// <summary>
-        /// Path finding
-        /// </summary>
-        PathFinding = 2,
     }
 }

@@ -56,7 +56,7 @@ namespace Engine.PathFinding
                 transformable.Manipulator.UpdateInternals(true);
             }
 
-            return pickable.GetGeometry(GeometryTypes.PathFinding);
+            return pickable.GetGeometry(PickingMode.PathFinding);
         }
         /// <summary>
         /// Gets the new agent position when target position is walkable

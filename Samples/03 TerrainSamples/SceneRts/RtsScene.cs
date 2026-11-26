@@ -2353,8 +2353,8 @@ namespace TerrainSamples.SceneRts
 
             List<Triangle> tris =
             [
-                .. tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),
-                .. tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)),
+                .. tree1.GetInstances().SelectMany(i => i.GetGeometry(PickingMode.PathFinding)),
+                .. tree2.GetInstances().SelectMany(i => i.GetGeometry(PickingMode.PathFinding)),
             ];
 
             List<Line3D> lines =

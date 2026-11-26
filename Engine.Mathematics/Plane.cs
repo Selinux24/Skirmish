@@ -154,7 +154,7 @@ namespace Engine.Mathematics
         /// <param name="point3">Third point of a triangle defining the plane.</param>
         public Plane(Vector3 point1, Vector3 point2, Vector3 point3)
         {
-            MathUtils.CalculateTriPointNormalLH(ref point1, ref point2, ref point3, out var normal);
+            Vector3.CalculateNormalLH(ref point1, ref point2, ref point3, out var normal);
 
             Normal = normal;
             D = -((normal.X * point1.X) + (normal.Y * point1.Y) + (normal.Z * point1.Z));

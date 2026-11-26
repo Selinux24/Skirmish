@@ -352,12 +352,12 @@ namespace Engine.BuiltIn.Components.Models
                 refresh);
         }
         /// <inheritdoc/>
-        public Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public Triangle[] GetGeometry(PickingMode geometryType, bool refresh = false)
         {
             var hull = geometryType switch
             {
-                GeometryTypes.Picking => PickingHull,
-                GeometryTypes.PathFinding => PathFindingHull,
+                PickingMode.Picking => PickingHull,
+                PickingMode.PathFinding => PathFindingHull,
                 _ => PickingHullTypes.None,
             };
 
@@ -394,7 +394,7 @@ namespace Engine.BuiltIn.Components.Models
             var bsph = GetBoundingSphere();
             if (bsph.Intersects(ref sphere.Sphere))
             {
-                var mesh = GetGeometry(GeometryTypes.Picking);
+                var mesh = GetGeometry(PickingMode.Picking);
 
                 if (Collision.SphereIntersectsMesh(ref sphere.Sphere, mesh, out var res))
                 {
@@ -429,7 +429,7 @@ namespace Engine.BuiltIn.Components.Models
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
 
-            return new IntersectionVolumeMesh([.. GetGeometry(GeometryTypes.Picking)]);
+            return new IntersectionVolumeMesh([.. GetGeometry(PickingMode.Picking)]);
         }
 
         /// <inheritdoc/>

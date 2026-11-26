@@ -66,7 +66,7 @@ namespace Engine.Common
                 return intersects;
             }
 
-            var triangles = obj.GetGeometry(GeometryTypes.Picking);
+            var triangles = obj.GetGeometry(PickingMode.Picking);
 
             return PickFirstFromList(triangles, ref ray, out result);
         }
@@ -91,7 +91,7 @@ namespace Engine.Common
                 return intersects;
             }
 
-            var triangles = obj.GetGeometry(GeometryTypes.Picking);
+            var triangles = obj.GetGeometry(PickingMode.Picking);
 
             return PickAllFromlist(triangles, ref ray, out results);
         }

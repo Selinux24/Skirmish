@@ -35,13 +35,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Gets the triangle normal
         /// </summary>
-        public readonly Vector3 Normal
-        {
-            get
-            {
-                return MathUtils.CalculateTriPointNormalLH(Point1, Point2, Point3);
-            }
-        }
+        public readonly Vector3 Normal => Vector3.CalculateNormalLH(Point1, Point2, Point3);
 
         /// <summary>
         /// Returns the triangle vertex by index

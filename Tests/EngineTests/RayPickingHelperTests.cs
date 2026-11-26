@@ -112,8 +112,8 @@ namespace EngineTests
         private static void Setup(Mock<IRayPickable<Triangle>> pickableMock, BoundingSphere sphere, Triangle[] boxTris, Triangle[] mesh)
         {
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
-            pickableMock.Setup(o => o.GetGeometry(GeometryTypes.Picking, It.IsAny<bool>())).Returns(mesh);
-            pickableMock.Setup(o => o.GetGeometry(GeometryTypes.PathFinding, It.IsAny<bool>())).Returns(boxTris);
+            pickableMock.Setup(o => o.GetGeometry(PickingMode.Picking, It.IsAny<bool>())).Returns(mesh);
+            pickableMock.Setup(o => o.GetGeometry(PickingMode.PathFinding, It.IsAny<bool>())).Returns(boxTris);
             pickableMock.As<ISceneObject>().SetupAllProperties();
         }
 

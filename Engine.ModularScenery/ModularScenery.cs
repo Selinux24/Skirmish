@@ -224,7 +224,7 @@ namespace Engine.Modular
             InitializeEntities(level, progress);
 
             // Initialize quad-tree for ray picking
-            GroundPickingQuadtree = Description.ReadQuadTree(GetGeometry(GeometryTypes.Picking));
+            GroundPickingQuadtree = Description.ReadQuadTree(GetGeometry(PickingMode.Picking));
         }
         /// <summary>
         /// Initialize the particle system and the particle descriptions
@@ -721,7 +721,7 @@ namespace Engine.Modular
             return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
-        public override Triangle[] GetGeometry(GeometryTypes geometryType, bool refresh = false)
+        public override Triangle[] GetGeometry(PickingMode geometryType, bool refresh = false)
         {
             if (sceneTriangles != null)
             {

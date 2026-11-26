@@ -468,5 +468,85 @@ namespace Engine.MathematicsTests
             Assert.IsTrue(new Vector3(float.PositiveInfinity, 0f, 0f).IsInfinity);
             Assert.IsTrue(new Vector3(float.NaN, 0f, 0f).IsNaN);
         }
+
+        [TestMethod]
+        public void CalculateNormalLH_TriangleInXYPlane_ReturnsPositiveZ()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 0, 0);
+            var p3 = new Vector3(0, 1, 0);
+
+            Vector3.CalculateNormalLH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            Assert.IsTrue(Vector3.NearEqual(normal, Vector3.ForwardLH), $"Expected ({Vector3.ForwardLH}), got ({normal})");
+        }
+        [TestMethod]
+        public void CalculateNormalLH_ArbitraryTriangle_ReturnsCorrectNormal()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 1, 0);
+            var p3 = new Vector3(0, 1, 1);
+
+            Vector3.CalculateNormalLH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            var expected = new Vector3(1, -1, 1);
+            expected.Normalize();
+
+            Assert.IsTrue(Vector3.NearEqual(normal, expected), $"Expected ({expected}), got ({normal})");
+        }
+
+        [TestMethod]
+        public void CalculateNormalRH_TriangleInXYPlane_ReturnsNegativeZ()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 0, 0);
+            var p3 = new Vector3(0, 1, 0);
+
+            Vector3.CalculateNormalRH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            Assert.IsTrue(Vector3.NearEqual(normal, Vector3.BackwardLH), $"Expected ({Vector3.BackwardLH}), got ({normal})");
+        }
+        [TestMethod]
+        public void CalculateNormalRH_ArbitraryTriangle_ReturnsCorrectNormal()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 1, 0);
+            var p3 = new Vector3(0, 1, 1);
+
+            Vector3.CalculateNormalRH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            var expected = new Vector3(-1, 1, -1);
+            expected.Normalize();
+
+            Assert.IsTrue(Vector3.NearEqual(normal, expected), $"Expected ({expected}), got ({normal})");
+        }
+
+        [TestMethod]
+        public void CalculateNormalLH_CollinearPoints_ReturnsNaN()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 1, 1);
+            var p3 = new Vector3(2, 2, 2);
+
+            Vector3.CalculateNormalLH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            // La implementación actual no valida longitud cero antes de normalizar, 
+            // por lo que devuelve NaN. Esta prueba documenta dicho comportamiento.
+            Assert.IsTrue(float.IsNaN(normal.X) && float.IsNaN(normal.Y) && float.IsNaN(normal.Z),
+                "NaN was expected for collinear points due to division by zero during normalization.");
+        }
+
+        [TestMethod]
+        public void CalculateNormalRH_CollinearPoints_ReturnsNaN()
+        {
+            var p1 = new Vector3(0, 0, 0);
+            var p2 = new Vector3(1, 1, 1);
+            var p3 = new Vector3(2, 2, 2);
+
+            Vector3.CalculateNormalRH(ref p1, ref p2, ref p3, out Vector3 normal);
+
+            Assert.IsTrue(float.IsNaN(normal.X) && float.IsNaN(normal.Y) && float.IsNaN(normal.Z),
+                "NaN was expected for collinear points due to division by zero during normalization.");
+        }
     }
 }
