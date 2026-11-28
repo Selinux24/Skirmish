@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Engine.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Cylinder collider
     /// </summary>
@@ -49,7 +47,7 @@ namespace Engine.Physics.Colliders
         /// </summary>
         /// <param name="normal">Projection normal</param>
         /// <param name="transform">Use rigid body transform matrix</param>
-        public IEnumerable<Vector3> GetProjectionPoints(Vector3 normal, bool transform = false)
+        public Vector3[] GetProjectionPoints(Vector3 normal, bool transform = false)
         {
             var bse = new Vector3(0, BaseHeight, 0);
             var cap = new Vector3(0, CapHeight, 0);

@@ -644,6 +644,89 @@ namespace Engine
 
             return [.. array.Take(count)];
         }
+        /// <summary>
+        /// Returns a distinct array from the input array.
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Array</param>
+        /// <returns>Returns a new array, with the distinct values</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static T[] SortDistinct<T>(T[] array)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            if (array.Length == 0) return [];
+
+            if (array.Length == 1) return [array[0]];
+
+            T[] cpy = new T[array.Length];
+            Array.Copy(array, cpy, array.Length);
+            Array.Sort(cpy);
+
+            List<T> distinctElements = [cpy[0]];
+            for (int i = 1; i < cpy.Length; i++)
+            {
+                if (!cpy[i].Equals(cpy[i - 1]))
+                {
+                    distinctElements.Add(cpy[i]);
+                }
+            }
+
+            T[] result = new T[distinctElements.Count];
+            distinctElements.CopyTo(result, 0);
+            return result;
+        }
+        /// <summary>
+        /// Returns a distinct array from the input array.
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Array</param>
+        /// <returns>Returns a new array, with the distinct values</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static T[] Distinct<T>(T[] array)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            if (array.Length == 0) return [];
+
+            if (array.Length == 1) return [array[0]];
+
+            List<T> distinctElements = [];
+            HashSet<T> seen = [];
+            foreach (T item in array)
+            {
+                if (seen.Contains(item))
+                {
+                    continue;
+                }
+
+                seen.Add(item);
+                distinctElements.Add(item);
+            }
+
+            T[] result = new T[distinctElements.Count];
+            distinctElements.CopyTo(result, 0);
+            return result;
+        }
+        /// <summary>
+        /// Returns a new array that contains the specified number of elements from the start of the input array.
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Array</param>
+        /// <param name="count">Count</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static T[] Take<T>(T[] array, int count)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Count must be non-negative.");
+
+            if (count > array.Length) count = array.Length;
+
+            T[] result = new T[count];
+            Array.Copy(array, result, count);
+            return result;
+        }
 
         #endregion
 

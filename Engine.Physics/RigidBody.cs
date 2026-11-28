@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// A rigid body is the basic simulation object in the physics core.
     ///
@@ -274,7 +273,7 @@ namespace Engine.Physics
             }
 
             // Calculate the angular acceleration from the torques
-            Vector3 angularAcceleration = InverseInertiaTensorWorld.Transform(torqueAccum);
+            InverseInertiaTensorWorld.Transform(ref torqueAccum, out Vector3 angularAcceleration);
 
             // Update linear velocity using linear acceleration
             LinearVelocity += Vector3.Multiply(LastFrameAcceleration, time);

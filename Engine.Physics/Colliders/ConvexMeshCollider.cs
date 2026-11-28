@@ -1,11 +1,9 @@
+using Engine.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Physics.Colliders
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Convex mesh collider
     /// </summary>
@@ -24,16 +22,23 @@ namespace Engine.Physics.Colliders
         /// Constructor
         /// </summary>
         /// <param name="triangles">Triangle list</param>
-        public ConvexMeshCollider(IEnumerable<Triangle> triangles) : base()
+        public ConvexMeshCollider(Triangle[] triangles) : base()
         {
-            if (triangles?.Any() != true)
+            ArgumentNullException.ThrowIfNull(triangles);
+            if (triangles.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(ConvexMeshCollider)} must have one triangle at least.");
             }
 
-            this.triangles = [.. triangles.Distinct()];
+            this.triangles = Helper.Distinct(triangles);
 
-            vertices = [.. triangles.SelectMany(t => t.GetVertices()).Distinct()];
+            List<Vector3> vertList = [];
+            Array.ForEach(this.triangles, t => vertList.AddRange(t.GetVertices()));
+
+            vertices = new Vector3[vertList.Count];
+            vertList.CopyTo(vertices);
+
+            vertices = Helper.Distinct(vertices);
 
             boundingBox = BoundingBox.FromPoints(vertices);
             boundingSphere = BoundingSphere.FromPoints(vertices);
@@ -44,7 +49,7 @@ namespace Engine.Physics.Colliders
         /// Gets the triangle list
         /// </summary>
         /// <param name="transform">Use rigid body transform matrix</param>
-        public IEnumerable<Triangle> GetTriangles(bool transform = false)
+        public Triangle[] GetTriangles(bool transform = false)
         {
             if (!transform || !HasTransform)
             {
@@ -57,7 +62,7 @@ namespace Engine.Physics.Colliders
         /// Gets the vertex list
         /// </summary>
         /// <param name="transform">Use rigid body transform matrix</param>
-        public IEnumerable<Vector3> GetVertices(bool transform = false)
+        public Vector3[] GetVertices(bool transform = false)
         {
             if (!transform || !HasTransform)
             {
@@ -65,8 +70,8 @@ namespace Engine.Physics.Colliders
             }
 
             var trn = RigidBody.Transform;
-            var verts = vertices.ToArray();
-            Vector3.TransformCoordinate(verts, ref trn, verts);
+            var verts = new Vector3[vertices.Length];
+            Vector3.TransformCoordinate(vertices, ref trn, verts);
             return verts;
         }
 

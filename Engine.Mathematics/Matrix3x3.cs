@@ -1519,7 +1519,6 @@ namespace Engine.Mathematics
             result.M22 = y;
             result.M33 = z;
         }
-
         /// <summary>
         /// Creates a Matrix3x3 that scales along the x-axis, y-axis, and y-axis.
         /// </summary>
@@ -1744,21 +1743,31 @@ namespace Engine.Mathematics
         /// <summary>
         /// Transform a vector with the given matrix
         /// </summary>
-        /// <param name="matrix">Matrix</param>
         /// <param name="vector">Vector</param>
+        /// <param name="result">Contains the transformed vector</param>
+        public readonly void Transform(ref Vector3 vector, out Vector3 result)
+        {
+            result.X = vector.X * M11 + vector.Y * M12 + vector.Z * M13;
+            result.Y = vector.X * M21 + vector.Y * M22 + vector.Z * M23;
+            result.Z = vector.X * M31 + vector.Y * M32 + vector.Z * M33;
+        }
+        /// <summary>
+        /// Transform a vector with the given matrix
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns the transformed vector</returns>
         public readonly Vector3 Transform(Vector3 vector)
         {
-            return new Vector3(
-                vector.X * M11 + vector.Y * M12 + vector.Z * M13,
-                vector.X * M21 + vector.Y * M22 + vector.Z * M23,
-                vector.X * M31 + vector.Y * M32 + vector.Z * M33);
+            Transform(ref vector, out var res);
+            return res;
         }
         /// <summary>
         /// Applies the given 4x4 matrix transformation to the current 3x3 matrix
         /// </summary>
         /// <param name="matrix">3x3 matrix</param>
         /// <param name="transform">4x4 transform matrix</param>
-        public static Matrix3x3 Transform(Matrix3x3 matrix, Matrix4x4 transform)
+        /// <param name="result">Contains the transformation matrix</param>
+        public static void Transform(ref Matrix3x3 matrix, ref Matrix4x4 transform, out Matrix3x3 result)
         {
             var trn = new Matrix3x3()
             {
@@ -1775,16 +1784,24 @@ namespace Engine.Mathematics
 
             trn = matrix * trn;
 
-            Matrix3x3 res = default;
-            res.M11 = trn.M11 * transform.M11 + trn.M12 * transform.M12 + trn.M13 * transform.M13;
-            res.M12 = trn.M11 * transform.M21 + trn.M12 * transform.M22 + trn.M13 * transform.M23;
-            res.M13 = trn.M11 * transform.M31 + trn.M12 * transform.M32 + trn.M13 * transform.M33;
-            res.M21 = trn.M21 * transform.M11 + trn.M22 * transform.M12 + trn.M23 * transform.M13;
-            res.M22 = trn.M21 * transform.M21 + trn.M22 * transform.M22 + trn.M23 * transform.M23;
-            res.M23 = trn.M21 * transform.M31 + trn.M22 * transform.M32 + trn.M23 * transform.M33;
-            res.M31 = trn.M31 * transform.M11 + trn.M32 * transform.M12 + trn.M33 * transform.M13;
-            res.M32 = trn.M31 * transform.M21 + trn.M32 * transform.M22 + trn.M33 * transform.M23;
-            res.M33 = trn.M31 * transform.M31 + trn.M32 * transform.M32 + trn.M33 * transform.M33;
+            result.M11 = trn.M11 * transform.M11 + trn.M12 * transform.M12 + trn.M13 * transform.M13;
+            result.M12 = trn.M11 * transform.M21 + trn.M12 * transform.M22 + trn.M13 * transform.M23;
+            result.M13 = trn.M11 * transform.M31 + trn.M12 * transform.M32 + trn.M13 * transform.M33;
+            result.M21 = trn.M21 * transform.M11 + trn.M22 * transform.M12 + trn.M23 * transform.M13;
+            result.M22 = trn.M21 * transform.M21 + trn.M22 * transform.M22 + trn.M23 * transform.M23;
+            result.M23 = trn.M21 * transform.M31 + trn.M22 * transform.M32 + trn.M23 * transform.M33;
+            result.M31 = trn.M31 * transform.M11 + trn.M32 * transform.M12 + trn.M33 * transform.M13;
+            result.M32 = trn.M31 * transform.M21 + trn.M32 * transform.M22 + trn.M33 * transform.M23;
+            result.M33 = trn.M31 * transform.M31 + trn.M32 * transform.M32 + trn.M33 * transform.M33;
+        }
+        /// <summary>
+        /// Applies the given 4x4 matrix transformation to the current 3x3 matrix
+        /// </summary>
+        /// <param name="matrix">3x3 matrix</param>
+        /// <param name="transform">4x4 transform matrix</param>
+        public static Matrix3x3 Transform(Matrix3x3 matrix, Matrix4x4 transform)
+        {
+            Transform(ref matrix, ref transform, out var res);
             return res;
         }
 
@@ -1793,9 +1810,32 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
+        public readonly Vector3 TransformTranspose(ref Vector3 vector)
+        {
+            var trn = this;
+            TransformTranspose(ref trn, ref vector, out var res);
+            return res;
+        }
+        /// <summary>
+        /// Transforms the vector to the space that represents the transpose of the matrix
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
         public readonly Vector3 TransformTranspose(Vector3 vector)
         {
-            return TransformTranspose(this, vector);
+            return TransformTranspose(ref vector);
+        }
+        /// <summary>
+        /// Transforms the vector to the space that represents the transpose of the matrix
+        /// </summary>
+        /// <param name="transform">Matrix</param>
+        /// <param name="vector">Vector</param>
+        /// <param name="result">Contains the vector in the space represented by the transpose of the matrix</param>
+        public static void TransformTranspose(ref Matrix3x3 transform, ref Vector3 vector, out Vector3 result)
+        {
+            result.X = vector.X * transform.M11 + vector.Y * transform.M21 + vector.Z * transform.M31;
+            result.Y = vector.X * transform.M12 + vector.Y * transform.M22 + vector.Z * transform.M32;
+            result.Z = vector.X * transform.M13 + vector.Y * transform.M23 + vector.Z * transform.M33;
         }
         /// <summary>
         /// Transforms the vector to the space that represents the transpose of the matrix
@@ -1805,11 +1845,8 @@ namespace Engine.Mathematics
         /// <returns>Returns the vector in the space represented by the transpose of the matrix</returns>
         public static Vector3 TransformTranspose(Matrix3x3 transform, Vector3 vector)
         {
-            Vector3 result;
-            result.X = vector.X * transform.M11 + vector.Y * transform.M21 + vector.Z * transform.M31;
-            result.Y = vector.X * transform.M12 + vector.Y * transform.M22 + vector.Z * transform.M32;
-            result.Z = vector.X * transform.M13 + vector.Y * transform.M23 + vector.Z * transform.M33;
-            return result;
+            TransformTranspose(ref transform, ref vector, out var res);
+            return res;
         }
 
         /// <summary>
@@ -1975,23 +2012,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return string.Format(
-                CultureInfo.CurrentCulture,
-                Matrix3x3Str,
-                M11, M12, M13, M21, M22, M23, M31, M32, M33);
-        }
-        /// <inheritdoc/>
-        public readonly string ToString(string format)
-        {
-            if (format == null) return ToString();
-
-            return string.Format(
-                format,
-                CultureInfo.CurrentCulture,
-                Matrix3x3Str,
-                M11.ToString(format, CultureInfo.CurrentCulture), M12.ToString(format, CultureInfo.CurrentCulture), M13.ToString(format, CultureInfo.CurrentCulture),
-                M21.ToString(format, CultureInfo.CurrentCulture), M22.ToString(format, CultureInfo.CurrentCulture), M23.ToString(format, CultureInfo.CurrentCulture),
-                M31.ToString(format, CultureInfo.CurrentCulture), M32.ToString(format, CultureInfo.CurrentCulture), M33.ToString(format, CultureInfo.CurrentCulture));
+            return ToString(CultureInfo.CurrentCulture);
         }
         /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
@@ -2004,12 +2025,16 @@ namespace Engine.Mathematics
                 M31.ToString(formatProvider), M32.ToString(formatProvider), M33.ToString(formatProvider));
         }
         /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            return ToString(format, CultureInfo.CurrentCulture);
+        }
+        /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)
         {
             if (format == null) return ToString(formatProvider);
 
             return string.Format(
-                format,
                 formatProvider,
                 Matrix3x3Str,
                 M11.ToString(format, formatProvider), M12.ToString(format, formatProvider), M13.ToString(format, formatProvider),

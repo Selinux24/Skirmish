@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Engine.Mathematics;
+using System;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Rod between two bodies
     /// </summary>
@@ -77,7 +76,7 @@ namespace Engine.Physics
                 penetration = -penetration;
             }
 
-            contactData.AddContact(One.Body, Two.Body, point, normal, penetration, 0f, 1f);
+            contactData.AddContact(One.Body, Two.Body, ref point, ref normal, penetration, 0f, 1f);
 
             return true;
         }

@@ -1,10 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
+using Engine.Mathematics;
 
 namespace Engine.Physics.Colliders
 {
-    using Engine.Mathematics;
-
     /// <summary>
     /// Triangle collider
     /// </summary>
@@ -27,6 +24,7 @@ namespace Engine.Physics.Colliders
         {
             this.triangle = triangle;
 
+            //Copy
             vertices = [.. triangle.GetVertices()];
 
             boundingBox = BoundingBox.FromPoints(vertices);
@@ -51,7 +49,7 @@ namespace Engine.Physics.Colliders
         /// Gets the vertex list
         /// </summary>
         /// <param name="transform">Use rigid body transform matrix</param>
-        public IEnumerable<Vector3> GetVertices(bool transform = false)
+        public Vector3[] GetVertices(bool transform = false)
         {
             if (!transform || !HasTransform)
             {
@@ -59,8 +57,8 @@ namespace Engine.Physics.Colliders
             }
 
             var trn = RigidBody.Transform;
-            var verts = vertices.ToArray();
-            Vector3.TransformCoordinate(verts, ref trn, verts);
+            var verts = new Vector3[vertices.Length];
+            Vector3.TransformCoordinate(vertices, ref trn, verts);
             return verts;
         }
 

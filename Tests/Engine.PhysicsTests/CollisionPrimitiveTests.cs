@@ -177,7 +177,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(null));
+            Assert.Throws<ArgumentNullException>(() => new ConvexMeshCollider(null));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ConvexMeshCollider([]));
         }
 

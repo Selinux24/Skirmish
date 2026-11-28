@@ -552,24 +552,33 @@ namespace Engine.Mathematics
         /// <param name="position">The position vector.</param>
         /// <param name="forward">The forward direction vector.</param>
         /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
-        /// <returns>The world Matrix4x4</returns>
-        public static Matrix4x4 CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
+        /// <param name="result">Contains the world Matrix4x4</param>
+        public static void CreateWorld(ref Vector3 position, ref Vector3 forward, ref Vector3 up, out Matrix4x4 result)
         {
-            var result = new Matrix4x4();
-
             var z = Vector3.Normalize(forward);
             var x = Vector3.Cross(forward, up);
             var y = Vector3.Cross(x, forward);
             x = Vector3.Normalize(x);
             y = Vector3.Normalize(y);
 
+            result = Identity;
             result.Right = x;
             result.Up = y;
             result.Forward = z;
             result.TranslationVector = position;
             result.M44 = 1f;
-
-            return result;
+        }
+        /// <summary>
+        /// Creates a new world Matrix4x4
+        /// </summary>
+        /// <param name="position">The position vector.</param>
+        /// <param name="forward">The forward direction vector.</param>
+        /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
+        /// <returns>The world Matrix4x4</returns>
+        public static Matrix4x4 CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
+        {
+            CreateWorld(ref position, ref forward, ref up, out var res);
+            return res;
         }
 
         /// <summary>
@@ -1718,6 +1727,7 @@ namespace Engine.Mathematics
             RowEchelonForm(ref value, out var result);
             return result;
         }
+
         /// <summary>
         /// Brings the matrix into reduced row echelon form using elementary row operations.
         /// </summary>
@@ -1839,6 +1849,27 @@ namespace Engine.Mathematics
             augmentResult.Y = matrix[1, 4];
             augmentResult.Z = matrix[2, 4];
             augmentResult.W = matrix[3, 4];
+        }
+        /// <summary>
+        /// Brings the matrix into reduced row echelon form using elementary row operations.
+        /// </summary>
+        /// <param name="value">The matrix to put into reduced row echelon form.</param>
+        /// <param name="augment">The fifth column of the matrix.</param>
+        /// <param name="result">When the method completes, contains the resultant matrix after the operation.</param>
+        /// <param name="augmentResult">When the method completes, contains the resultant fifth column of the matrix.</param>
+        /// <remarks>
+        /// <para>The fifth column is often called the augmented part of the matrix. This is because the fifth
+        /// column is really just an extension of the matrix so that there is a place to put all of the
+        /// non-zero components after the operation is complete.</para>
+        /// <para>Often times the resultant matrix will the identity matrix or a matrix similar to the identity
+        /// matrix. Sometimes, however, that is not possible and numbers other than zero and one may appear.</para>
+        /// <para>This method can be used to solve systems of linear equations. Upon completion of this method,
+        /// the <paramref name="augmentResult"/> will contain the solution for the system. It is up to the user
+        /// to analyze both the input and the result to determine if a solution really exists.</para>
+        /// </remarks>
+        public static void ReducedRowEchelonForm(Matrix4x4 value, Vector4 augment, out Matrix4x4 result, out Vector4 augmentResult)
+        {
+            ReducedRowEchelonForm(ref value, ref augment, out result, out augmentResult);
         }
 
         /// <summary>
@@ -2709,6 +2740,20 @@ namespace Engine.Mathematics
             matrix.M32 = d * e1[2] * e0[1];
             matrix.M33 = d * e1[2] * e0[2] + 1.0f;
         }
+        /// <summary>
+        /// Creates a skew/shear matrix by means of a translation vector, a rotation vector, and a rotation angle.
+        /// shearing is performed in the direction of translation vector, where translation vector and rotation vector define the shearing plane.
+        /// The effect is such that the skewed rotation vector has the specified angle with rotation itself.
+        /// </summary>
+        /// <param name="angle">The rotation angle.</param>
+        /// <param name="rotationVec">The rotation vector</param>
+        /// <param name="transVec">The translation vector</param>
+        /// <returns>Returns the created skew/shear matrix. </returns>
+        public static Matrix4x4 Skew(float angle, Vector3 rotationVec, Vector3 transVec)
+        {
+            Skew(angle, ref rotationVec, ref transVec, out var res);
+            return res;
+        }
 
         /// <summary>
         /// Creates a 3D affine transformation matrix.
@@ -2860,6 +2905,23 @@ namespace Engine.Mathematics
         {
             Transformation(ref scalingCenter, ref scalingRotation, ref scaling, ref rotationCenter, ref rotation, ref translation, out var result);
             return result;
+        }
+        /// <summary>
+        /// Creates a transformation matrix.
+        /// </summary>
+        /// <param name="translation">The translation factor of the transformation.</param>
+        /// <param name="rotation">The rotation of the transformation.</param>
+        /// <param name="scaling">Scaling factor.</param>
+        /// <param name="result">Contains the created transformation matrix.</param>
+        public static void Transformation(ref Vector3 translation, ref Quaternion rotation, ref Vector3 scaling, out Matrix4x4 result)
+        {
+            var v0 = Vector3.Zero;
+            var qI = Quaternion.Identity;
+            Transformation(
+                ref v0, ref qI, ref scaling,
+                ref v0, ref rotation,
+                ref translation,
+                out result);
         }
         /// <summary>
         /// Creates a transformation matrix.
@@ -3050,24 +3112,7 @@ namespace Engine.Mathematics
         /// <inheritdoc/>
         public override readonly string ToString()
         {
-            return string.Format(
-                CultureInfo.CurrentCulture,
-                Matrix4x4Str,
-                M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44);
-        }
-        /// <inheritdoc/>
-        public readonly string ToString(string format)
-        {
-            if (format == null) return ToString();
-
-            return string.Format(
-                format,
-                CultureInfo.CurrentCulture,
-                Matrix4x4Str,
-                M11.ToString(format, CultureInfo.CurrentCulture), M12.ToString(format, CultureInfo.CurrentCulture), M13.ToString(format, CultureInfo.CurrentCulture), M14.ToString(format, CultureInfo.CurrentCulture),
-                M21.ToString(format, CultureInfo.CurrentCulture), M22.ToString(format, CultureInfo.CurrentCulture), M23.ToString(format, CultureInfo.CurrentCulture), M24.ToString(format, CultureInfo.CurrentCulture),
-                M31.ToString(format, CultureInfo.CurrentCulture), M32.ToString(format, CultureInfo.CurrentCulture), M33.ToString(format, CultureInfo.CurrentCulture), M34.ToString(format, CultureInfo.CurrentCulture),
-                M41.ToString(format, CultureInfo.CurrentCulture), M42.ToString(format, CultureInfo.CurrentCulture), M43.ToString(format, CultureInfo.CurrentCulture), M44.ToString(format, CultureInfo.CurrentCulture));
+            return ToString(CultureInfo.CurrentCulture);
         }
         /// <inheritdoc/>
         public readonly string ToString(IFormatProvider formatProvider)
@@ -3079,6 +3124,11 @@ namespace Engine.Mathematics
                 M21.ToString(formatProvider), M22.ToString(formatProvider), M23.ToString(formatProvider), M24.ToString(formatProvider),
                 M31.ToString(formatProvider), M32.ToString(formatProvider), M33.ToString(formatProvider), M34.ToString(formatProvider),
                 M41.ToString(formatProvider), M42.ToString(formatProvider), M43.ToString(formatProvider), M44.ToString(formatProvider));
+        }
+        /// <inheritdoc/>
+        public readonly string ToString(string format)
+        {
+            return ToString(format, CultureInfo.CurrentCulture);
         }
         /// <inheritdoc/>
         public readonly string ToString(string format, IFormatProvider formatProvider)

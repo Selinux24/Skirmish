@@ -1,14 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Engine.Mathematics;
+using Engine.Physics;
+using Engine.Physics.Colliders;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Engine.PhysicsTests
 {
-    using Engine.Mathematics;
-    using Engine.Physics;
-    using Engine.Physics.Colliders;
-
     [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ContactDetectorSphereTests
@@ -34,7 +32,7 @@ namespace Engine.PhysicsTests
 
             return c;
         }
-        static ConvexMeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix4x4 transform)
+        static ConvexMeshCollider FromTriangles(Triangle[] tris, Matrix4x4 transform)
         {
             var c = new ConvexMeshCollider(tris);
             var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });

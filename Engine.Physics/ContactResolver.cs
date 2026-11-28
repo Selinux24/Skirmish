@@ -1,6 +1,5 @@
 ﻿using Engine.Mathematics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
@@ -99,12 +98,12 @@ namespace Engine.Physics
         /// <param name="position">Contact position</param>
         /// <param name="normal">Contact normal</param>
         /// <param name="penetration">Contact penetration</param>
-        public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration)
+        public void AddContact(IRigidBody one, IRigidBody two, ref Vector3 position, ref Vector3 normal, float penetration)
         {
             float restitution = (one?.Restitution ?? 1f + two?.Restitution ?? 1f) * 0.5f;
             float friction = MathF.Max(one?.Friction ?? 0f, two?.Friction ?? 0f);
 
-            AddContact(one, two, position, normal, penetration, restitution, friction);
+            AddContact(one, two, ref position, ref normal, penetration, restitution, friction);
         }
         /// <summary>
         /// Notifies the instance that a contact has been added.
@@ -116,14 +115,14 @@ namespace Engine.Physics
         /// <param name="penetration">Contact penetration</param>
         /// <param name="restitution">Restitution</param>
         /// <param name="friction">Friction</param>
-        public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration, float restitution, float friction)
+        public void AddContact(IRigidBody one, IRigidBody two, ref Vector3 position, ref Vector3 normal, float penetration, float restitution, float friction)
         {
             if (!HasFreeContacts())
             {
                 return;
             }
 
-            if (CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
+            if (CurrentContact?.SetContactData(one, two, ref position, ref normal, penetration, restitution, friction) == true)
             {
                 currentContactIndex++;
             }
@@ -151,7 +150,7 @@ namespace Engine.Physics
                 return [];
             }
 
-            return [.. contacts.Take(ContactCount)];
+            return Helper.Take(contacts, ContactCount);
         }
 
         /// <summary>
@@ -186,8 +185,8 @@ namespace Engine.Physics
         /// </remarks>
         private void Prepare(float time)
         {
-            contacts
-                .Take(ContactCount)
+            var contactList = Helper.Take(contacts, ContactCount);
+            contactList
                 .AsParallel()
                 .ForAll(c => c.CalculateInternals(time));
         }

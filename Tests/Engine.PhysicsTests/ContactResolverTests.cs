@@ -40,7 +40,8 @@ namespace Engine.PhysicsTests
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
-            resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
+            var v0 = Vector3.Zero;
+            resolver.AddContact(r1, r2, ref v0, ref v0, 0);
             Assert.AreEqual(count + 1, resolver.ContactCount);
             Assert.AreEqual(left - 1, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
@@ -56,7 +57,8 @@ namespace Engine.PhysicsTests
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
-            resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
+            var v0 = Vector3.Zero;
+            resolver.AddContact(r1, r2, ref v0, ref v0, 0);
             Assert.AreEqual(count + 1, resolver.ContactCount);
             Assert.AreEqual(left - 1, resolver.ContactsLeft);
             Assert.IsTrue(resolver.HasFreeContacts());
@@ -75,10 +77,11 @@ namespace Engine.PhysicsTests
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix4x4.Identity });
 
+            var v0 = Vector3.Zero;
             int left = resolver.ContactsLeft;
             for (int i = 0; i < left; i++)
             {
-                resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
+                resolver.AddContact(r1, r2, ref v0, ref v0, 0);
             }
             Assert.AreEqual(left, resolver.ContactCount);
             Assert.AreEqual(0, resolver.ContactsLeft);
@@ -103,7 +106,7 @@ namespace Engine.PhysicsTests
             var norm = new Vector3(4, 5, 6);
             float pen = 7;
 
-            resolver.AddContact(r1, r2, pos, norm, pen);
+            resolver.AddContact(r1, r2, ref pos, ref norm, pen);
             Assert.AreEqual(curr.GetBody(0), r1);
             Assert.AreEqual(curr.GetBody(1), r2);
             Assert.AreEqual(curr.Position, pos);
@@ -129,7 +132,7 @@ namespace Engine.PhysicsTests
             var norm = new Vector3(0, -1, 0);
             float pen = 0.5f;
 
-            resolver.AddContact(r1, r2, pos, norm, pen);
+            resolver.AddContact(r1, r2, ref pos, ref norm, pen);
             resolver.Resolve(time);
 
             Assert.IsLessThan(0, r1.Position.Y);

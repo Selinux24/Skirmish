@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
+using Engine.Mathematics;
+using Engine.Physics.Colliders;
 
 namespace Engine.Physics
 {
-    using Engine.Mathematics;
-    using Engine.Physics.Colliders;
     using EPAFace = EPA.Face;
     using EPASolver = EPA.Solver;
     using GJKSolver = GJK.Solver;
@@ -59,7 +57,7 @@ namespace Engine.Physics
                 var mtv = normal * penetration;
                 var position = ComputeContactPoint(face, mtv);
 
-                data.AddContact(primitive1.RigidBody, primitive2.RigidBody, position, normal, penetration);
+                data.AddContact(primitive1.RigidBody, primitive2.RigidBody, ref position, ref normal, penetration);
 
                 return true;
             }
@@ -157,7 +155,7 @@ namespace Engine.Physics
 
             // Create the contact. It has a normal in the direction of the plane.
             var position = sphere.RigidBody.Position - normal * centerToPlane;
-            data.AddContact(sphere.RigidBody, halfSpace.RigidBody, position, normal, -penetration);
+            data.AddContact(sphere.RigidBody, halfSpace.RigidBody, ref position, ref normal, -penetration);
 
             return true;
         }
@@ -178,9 +176,12 @@ namespace Engine.Physics
 
             // Gets cylinder test points based on the plane normal projection
             var points = cylinder.GetProjectionPoints(normal, true);
-            foreach (var point in points)
+            for (int i = 0; i < points.Length; i++)
             {
-                float penetration = d + Vector3.Dot(point, normal);
+                ref var point = ref points[i];
+
+                Vector3.Dot(ref point, ref normal, out float pn);
+                float penetration = d + pn;
                 if (penetration > 0f && !MathUtils.IsZero(penetration))
                 {
                     continue;
@@ -188,7 +189,7 @@ namespace Engine.Physics
 
                 intersectionExists = true;
 
-                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, point, normal, -penetration);
+                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, ref point, ref normal, -penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;
@@ -226,7 +227,7 @@ namespace Engine.Physics
 
                 var contactPoint = p - (normal * capsule.Radius);
                 float penetration = capsule.Radius - d;
-                data.AddContact(capsule.RigidBody, halfSpace.RigidBody, contactPoint, normal, penetration);
+                data.AddContact(capsule.RigidBody, halfSpace.RigidBody, ref contactPoint, ref normal, penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;
@@ -242,9 +243,9 @@ namespace Engine.Physics
         /// <param name="points">Point list</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool HalfSpaceAndPointList(HalfSpaceCollider halfSpace, IEnumerable<Vector3> points, IRigidBody rigidBody, ContactResolver data)
+        private static bool HalfSpaceAndPointList(HalfSpaceCollider halfSpace, Vector3[] points, IRigidBody rigidBody, ContactResolver data)
         {
-            if (!points.Any())
+            if (points.Length == 0)
             {
                 return false;
             }
@@ -255,10 +256,13 @@ namespace Engine.Physics
 
             bool intersectionExists = false;
 
-            foreach (var point in points)
+            for (int i = 0; i < points.Length; i++)
             {
+                ref var point = ref points[i];
+
                 // Distance to plane
-                float penetration = d + Vector3.Dot(point, normal);
+                Vector3.Dot(ref point, ref normal, out float pn);
+                float penetration = d + pn;
                 if (penetration > 0f && !MathUtils.IsZero(penetration))
                 {
                     continue;
@@ -266,7 +270,7 @@ namespace Engine.Physics
 
                 intersectionExists = true;
 
-                data.AddContact(rigidBody, halfSpace.RigidBody, point, normal, -penetration);
+                data.AddContact(rigidBody, halfSpace.RigidBody, ref point, ref normal, -penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;
@@ -300,7 +304,7 @@ namespace Engine.Physics
             var normal = Vector3.Normalize(midline);
             var position = positionOne - (normal * one.Radius);
             var penetration = one.Radius + two.Radius - size;
-            data.AddContact(one.RigidBody, two.RigidBody, position, normal, penetration);
+            data.AddContact(one.RigidBody, two.RigidBody, ref position, ref normal, penetration);
 
             return true;
         }
